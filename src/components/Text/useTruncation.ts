@@ -36,7 +36,6 @@ function getContentHeight(element: HTMLElement): number {
     const range = document.createRange();
     range.selectNodeContents(element);
     const height = range.getBoundingClientRect().height;
-    range.detach();
     return height;
   } catch {
     return element.scrollHeight;

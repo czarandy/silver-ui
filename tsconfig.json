@@ -13,7 +13,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "rootDir": ".",
-    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "styled-system/*": ["./styled-system/*"]
     }

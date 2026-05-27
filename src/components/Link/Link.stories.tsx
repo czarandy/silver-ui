@@ -21,7 +21,14 @@ const meta: Meta<typeof Link> = {
   argTypes: {
     color: {
       control: {type: 'select'},
-      options: ['active', 'primary', 'secondary', 'inherit'],
+      options: [
+        'primary',
+        'secondary',
+        'disabled',
+        'placeholder',
+        'active',
+        'inherit',
+      ],
     },
     hasUnderline: {control: 'boolean'},
     isDisabled: {control: 'boolean'},
@@ -42,8 +49,24 @@ export const Active: Story = {
   args: {color: 'active'},
 };
 
+export const Primary: Story = {
+  args: {color: 'primary'},
+};
+
 export const Secondary: Story = {
   args: {color: 'secondary'},
+};
+
+export const Disabled: Story = {
+  args: {color: 'disabled'},
+};
+
+export const Placeholder: Story = {
+  args: {color: 'placeholder'},
+};
+
+export const Inherit: Story = {
+  args: {color: 'inherit'},
 };
 
 export const Underlined: Story = {
@@ -64,4 +87,34 @@ export const ProviderOverride: Story = {
       <Link href="/provider">Provider link</Link>
     </LinkProvider>
   ),
+};
+
+export const IsDisabled: Story = {
+  args: {
+    children: 'Disabled link',
+    isDisabled: true,
+  },
+};
+
+export const WithTooltip: Story = {
+  args: {
+    children: 'Hover me',
+    tooltip: 'Go to documentation',
+  },
+};
+
+export const IconOnly: Story = {
+  args: {
+    children: '⚙',
+    label: 'Settings',
+  },
+};
+
+export const DisabledExternal: Story = {
+  args: {
+    children: 'Disabled external',
+    href: 'https://example.com',
+    isExternalLink: true,
+    isDisabled: true,
+  },
 };

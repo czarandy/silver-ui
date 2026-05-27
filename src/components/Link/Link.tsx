@@ -1,22 +1,24 @@
+/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
+
 import {ExternalLink} from 'lucide-react';
 import {
-  createElement,
   type CSSProperties,
   type MouseEventHandler,
   type ReactNode,
   type Ref,
+  useMemo,
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../lib/cx';
+import type {TextColor} from '../Text';
 import {Tooltip} from '../Tooltip';
-import {linkRecipe, type LinkVariants} from './Link.recipe';
+import {linkRecipe} from './Link.recipe';
 import type {LinkComponent} from './types';
 import {useLinkComponent} from './useLinkComponent';
 
-type LinkRecipeVariants = NonNullable<LinkVariants>;
-
-export interface LinkProps extends LinkRecipeVariants {
+export interface LinkProps {
   as?: LinkComponent;
+  color?: TextColor;
   label?: string;
   hasUnderline?: boolean;
   isDisabled?: boolean;
@@ -49,9 +51,10 @@ export function Link({
   children,
   onClick,
 }: LinkProps): React.JSX.Element {
-  const LinkComponent = useLinkComponent(as);
+  const Component = useLinkComponent(as);
   const target = isExternalLink ? '_blank' : targetFromProps;
-  const rel = getRel({isExternalLink, target, rel: relFromProps});
+  const rel = useRel({isExternalLink, target, rel: relFromProps});
+
   const handleClick: MouseEventHandler<HTMLAnchorElement> = event => {
     if (isDisabled) {
       event.preventDefault();
@@ -61,34 +64,26 @@ export function Link({
     onClick?.(event);
   };
 
-  const element = createElement(
-    LinkComponent,
-    {
-      ref,
-      href,
-      to: LinkComponent === 'a' ? undefined : href,
-      target,
-      rel,
-      'aria-label': label,
-      'aria-disabled': isDisabled || undefined,
-      tabIndex: isDisabled ? -1 : undefined,
-      className: cx(linkRecipe({color, hasUnderline}), className),
-      style,
-      onClick: handleClick,
-    },
-    children,
-    isExternalLink ? (
-      <span
-        className={css({
-          display: 'inline-flex',
-          flexShrink: 0,
-          fontSize: '0.875em',
-          lineHeight: 1,
-        })}
-        aria-hidden="true">
-        <ExternalLink size="1em" strokeWidth={2} />
-      </span>
-    ) : null,
+  const element = (
+    <Component
+      ref={ref}
+      href={href}
+      to={Component === 'a' ? undefined : href}
+      target={target}
+      rel={rel}
+      aria-label={getAriaLabel(label, isExternalLink)}
+      aria-disabled={isDisabled || undefined}
+      tabIndex={isDisabled ? -1 : undefined}
+      className={cx(linkRecipe({color, hasUnderline}), className)}
+      style={style}
+      onClick={handleClick}>
+      {children}
+      {isExternalLink ? (
+        <span className={styles.externalLink} aria-hidden="true">
+          <ExternalLink size="1em" strokeWidth={2} />
+        </span>
+      ) : null}
+    </Component>
   );
 
   if (tooltip != null) {
@@ -100,7 +95,28 @@ export function Link({
 
 Link.displayName = 'Link';
 
-function getRel({
+const styles = {
+  externalLink: css({
+    display: 'inline-flex',
+    flexShrink: 0,
+    fontSize: '0.875em',
+    lineHeight: 1,
+  }),
+};
+
+function getAriaLabel(
+  label: string | undefined,
+  isExternalLink: boolean,
+): string | undefined {
+  if (!isExternalLink) {
+    return label;
+  }
+
+  const suffix = '(opens in new tab)';
+  return label != null ? `${label} ${suffix}` : suffix;
+}
+
+function useRel({
   isExternalLink,
   target,
   rel,
@@ -109,13 +125,15 @@ function getRel({
   target?: string;
   rel?: string;
 }): string | undefined {
-  if (!isExternalLink && target !== '_blank') {
-    return rel;
-  }
+  return useMemo(() => {
+    if (!isExternalLink && target !== '_blank') {
+      return rel;
+    }
 
-  const relValues = new Set((rel ?? '').split(/\s+/).filter(Boolean));
-  relValues.add('noopener');
-  relValues.add('noreferrer');
+    const relValues = new Set((rel ?? '').split(/\s+/).filter(Boolean));
+    relValues.add('noopener');
+    relValues.add('noreferrer');
 
-  return Array.from(relValues).join(' ');
+    return Array.from(relValues).join(' ');
+  }, [isExternalLink, target, rel]);
 }

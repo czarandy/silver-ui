@@ -2,7 +2,8 @@ import {RuleTester} from 'eslint';
 import tseslint from 'typescript-eslint';
 import plugin from './silver-ui-plugin.js';
 
-const rule = plugin.rules['require-component-props'];
+const requireComponentPropsRule = plugin.rules['require-component-props'];
+const booleanPropNamingRule = plugin.rules['boolean-prop-naming'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -12,7 +13,7 @@ const tester = new RuleTester({
   },
 });
 
-tester.run('require-component-props', rule, {
+tester.run('require-component-props', requireComponentPropsRule, {
   valid: [
     {
       name: 'function declaration with all required props',
@@ -114,6 +115,91 @@ tester.run('require-component-props', rule, {
         {
           messageId: 'missingPropDestructure',
           data: {name: 'Card', prop: 'ref'},
+        },
+      ],
+    },
+  ],
+});
+
+tester.run('boolean-prop-naming', booleanPropNamingRule, {
+  valid: [
+    {
+      name: 'allows is and has boolean prop prefixes',
+      code: `
+        interface ButtonProps {
+          isDisabled?: boolean;
+          hasIcon?: boolean;
+          label: string;
+        }
+      `,
+    },
+    {
+      name: 'allows boolean unions with is and has prefixes',
+      code: `
+        type TooltipProps = {
+          isOpen?: boolean | undefined;
+          hasHoverIndication?: 'auto' | boolean;
+        };
+      `,
+    },
+    {
+      name: 'ignores non-Props type names',
+      code: `
+        interface TruncationState {
+          truncated: boolean;
+        }
+      `,
+    },
+    {
+      name: 'ignores non-boolean props',
+      code: `
+        interface LinkProps {
+          target?: string;
+          label: string;
+        }
+      `,
+    },
+  ],
+  invalid: [
+    {
+      name: 'reports boolean interface props without is or has',
+      code: `
+        interface ButtonProps {
+          disabled?: boolean;
+        }
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanProp',
+          data: {name: 'disabled'},
+        },
+      ],
+    },
+    {
+      name: 'reports boolean type literal props without is or has',
+      code: `
+        type LinkProps = {
+          external?: boolean | undefined;
+        };
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanProp',
+          data: {name: 'external'},
+        },
+      ],
+    },
+    {
+      name: 'reports boolean literal unions without is or has',
+      code: `
+        interface ToggleProps {
+          selected?: true | false;
+        }
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanProp',
+          data: {name: 'selected'},
         },
       ],
     },

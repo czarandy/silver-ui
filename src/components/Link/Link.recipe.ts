@@ -30,14 +30,20 @@ export const linkRecipe = cva({
   },
   variants: {
     color: {
-      active: {
-        color: 'primary',
-      },
       primary: {
         color: 'fg',
       },
       secondary: {
         color: 'fg.muted',
+      },
+      disabled: {
+        color: 'silver-neutral.400',
+      },
+      placeholder: {
+        color: 'fg.muted',
+      },
+      active: {
+        color: 'primary',
       },
       inherit: {
         color: 'inherit',

@@ -10,12 +10,19 @@ const showPopoverMock = vi.fn(function (this: HTMLElement) {
 const hidePopoverMock = vi.fn(function (this: HTMLElement) {
   popoverOpenState.set(this, false);
 });
+const originalMatchesDescriptor = Object.getOwnPropertyDescriptor(
+  HTMLElement.prototype,
+  'matches',
+);
 
 beforeAll(() => {
   HTMLElement.prototype.showPopover = showPopoverMock;
   HTMLElement.prototype.hidePopover = hidePopoverMock;
 
-  HTMLElement.prototype.matches = function (selector: string): boolean {
+  HTMLElement.prototype.matches = function (
+    this: HTMLElement,
+    selector: string,
+  ): boolean {
     if (selector === ':popover-open') {
       return popoverOpenState.get(this) ?? false;
     }
@@ -25,11 +32,20 @@ beforeAll(() => {
     }
 
     return Element.prototype.matches.call(this, selector);
-  };
+  } as typeof HTMLElement.prototype.matches;
 });
 
 afterAll(() => {
-  Reflect.deleteProperty(HTMLElement.prototype, 'matches');
+  if (originalMatchesDescriptor != null) {
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'matches',
+      originalMatchesDescriptor,
+    );
+  } else {
+    Reflect.deleteProperty(HTMLElement.prototype, 'matches');
+  }
+
   Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
   Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
 });

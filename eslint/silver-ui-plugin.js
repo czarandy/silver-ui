@@ -3,6 +3,7 @@
  *
  * Rules:
  * - silver-ui/require-component-props: Components must accept className, style, and ref
+ * - silver-ui/boolean-prop-naming: Boolean props must start with is or has
  */
 
 const requireComponentProps = {
@@ -89,12 +90,109 @@ const requireComponentProps = {
   },
 };
 
+function getPropertyName(node) {
+  if (node.key.type === 'Identifier') {
+    return node.key.name;
+  }
+
+  if (node.key.type === 'Literal' && typeof node.key.value === 'string') {
+    return node.key.value;
+  }
+
+  return null;
+}
+
+function includesBooleanType(typeAnnotation) {
+  if (!typeAnnotation) {
+    return false;
+  }
+
+  const typeNode =
+    typeAnnotation.type === 'TSTypeAnnotation'
+      ? typeAnnotation.typeAnnotation
+      : typeAnnotation;
+
+  if (typeNode.type === 'TSBooleanKeyword') {
+    return true;
+  }
+
+  if (typeNode.type === 'TSUnionType') {
+    return typeNode.types.some(includesBooleanType);
+  }
+
+  if (
+    typeNode.type === 'TSLiteralType' &&
+    typeof typeNode.literal.value === 'boolean'
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function parentTypeName(node) {
+  const parent = node.parent;
+
+  if (parent?.type === 'TSInterfaceBody') {
+    return parent.parent?.id?.name ?? null;
+  }
+
+  if (
+    parent?.type === 'TSTypeLiteral' &&
+    parent.parent?.type === 'TSTypeAliasDeclaration'
+  ) {
+    return parent.parent.id.name;
+  }
+
+  return null;
+}
+
+const booleanPropNaming = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description: 'Require boolean props to start with is or has',
+    },
+    messages: {
+      invalidBooleanProp:
+        'Boolean prop "{{name}}" must start with "is" or "has".',
+    },
+    schema: [],
+  },
+  create(context) {
+    return {
+      TSPropertySignature(node) {
+        const typeName = parentTypeName(node);
+        if (typeName == null || !typeName.endsWith('Props')) {
+          return;
+        }
+
+        const name = getPropertyName(node);
+        if (
+          name == null ||
+          !includesBooleanType(node.typeAnnotation) ||
+          /^(is|has)[A-Z]/.test(name)
+        ) {
+          return;
+        }
+
+        context.report({
+          node: node.key,
+          messageId: 'invalidBooleanProp',
+          data: {name},
+        });
+      },
+    };
+  },
+};
+
 const plugin = {
   meta: {
     name: 'eslint-plugin-silver-ui',
     version: '0.1.0',
   },
   rules: {
+    'boolean-prop-naming': booleanPropNaming,
     'require-component-props': requireComponentProps,
   },
 };

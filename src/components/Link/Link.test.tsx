@@ -119,7 +119,7 @@ describe('Link', () => {
       </Link>,
     );
 
-    const link = screen.getByRole('link', {name: 'External Link'});
+    const link = screen.getByRole('link', {name: '(opens in new tab)'});
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'sponsored noopener noreferrer');
   });
@@ -211,6 +211,80 @@ describe('Link', () => {
     const link = screen.getByRole('link', {name: 'Override Link'});
     expect(link).toHaveAttribute('data-custom-link');
     expect(link).not.toHaveAttribute('data-another-link');
+  });
+
+  it('applies custom className', () => {
+    render(
+      <Link href="/test" className="custom-class">
+        Test
+      </Link>,
+    );
+
+    expect(screen.getByRole('link')).toHaveClass('custom-class');
+  });
+
+  it('applies custom style', () => {
+    render(
+      <Link href="/test" style={{color: 'red'}}>
+        Test
+      </Link>,
+    );
+
+    expect(screen.getByRole('link')).toHaveStyle({color: 'rgb(255, 0, 0)'});
+  });
+
+  it('does not navigate on Enter when disabled', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <Link href="/test" isDisabled onClick={onClick}>
+        Disabled
+      </Link>,
+    );
+
+    const link = screen.getByRole('link', {name: 'Disabled'});
+    link.focus();
+    await user.keyboard('{Enter}');
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('renders external link icon', () => {
+    render(
+      <Link href="https://example.com" isExternalLink>
+        Docs
+      </Link>,
+    );
+
+    const link = screen.getByRole('link');
+    // eslint-disable-next-line testing-library/no-node-access -- no testing-library query for SVG icons
+    expect(link.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('sets aria-label with opens in new tab for external links', () => {
+    render(
+      <Link href="https://example.com" isExternalLink label="Docs">
+        Docs
+      </Link>,
+    );
+
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'aria-label',
+      'Docs (opens in new tab)',
+    );
+  });
+
+  it('sets aria-label without label for external links', () => {
+    render(
+      <Link href="https://example.com" isExternalLink>
+        Docs
+      </Link>,
+    );
+
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'aria-label',
+      '(opens in new tab)',
+    );
   });
 });
 
