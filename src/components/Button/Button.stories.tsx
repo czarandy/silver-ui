@@ -1,4 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {Inbox, Plus, Settings} from 'lucide-react';
 import {Button} from './Button';
 
 const meta: Meta<typeof Button> = {
@@ -55,17 +56,71 @@ export const Sizes: Story = {
 export const WithContent: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-      <Button icon={<span aria-hidden="true">+</span>} label="Add" />
-      <Button
-        endContent={<span aria-hidden="true">3</span>}
-        label="Inbox"
-        variant="secondary"
-      />
-      <Button
-        icon={<span aria-hidden="true">S</span>}
-        isIconOnly
-        label="Settings"
-      />
+      <Button icon={<Plus />} label="Add" />
+      <Button endContent={<Inbox />} label="Inbox" variant="secondary" />
+      <Button icon={<Settings />} isIconOnly label="Settings" />
     </div>
   ),
+};
+
+export const IconSizes: Story = {
+  render: () => (
+    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+      <Button icon={<Plus />} label="Small" size="sm" />
+      <Button icon={<Plus />} label="Medium" size="md" />
+      <Button icon={<Plus />} label="Large" size="lg" />
+    </div>
+  ),
+};
+
+export const Disabled: Story = {
+  args: {
+    isDisabled: true,
+    label: 'Disabled',
+    tooltip: 'This action is currently unavailable.',
+  },
+};
+
+export const Loading: Story = {
+  render: () => (
+    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+      <Button isLoading label="Small" size="sm" variant="primary" />
+      <Button isLoading label="Medium" size="md" variant="primary" />
+      <Button isLoading label="Large" size="lg" variant="primary" />
+    </div>
+  ),
+};
+
+export const LoadingWithEndContent: Story = {
+  render: () => (
+    <Button
+      endContent={<Inbox />}
+      isLoading
+      label="Sync inbox"
+      variant="primary"
+    />
+  ),
+};
+
+export const LinkButton: Story = {
+  args: {
+    href: '/docs',
+    label: 'Open docs',
+    variant: 'primary',
+  },
+};
+
+export const WithTooltip: Story = {
+  args: {
+    label: 'Hover me',
+    tooltip: 'Helpful context for this action.',
+  },
+};
+
+export const DisabledWithTooltip: Story = {
+  args: {
+    isDisabled: true,
+    label: 'Unavailable',
+    tooltip: 'This action is not available for your current role.',
+  },
 };

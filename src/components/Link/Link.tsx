@@ -1,18 +1,13 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
 import {ExternalLink} from 'lucide-react';
-import {
-  type CSSProperties,
-  type MouseEventHandler,
-  type ReactNode,
-  type Ref,
-  useMemo,
-} from 'react';
+import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../lib/cx';
 import type {TextColor} from '../Text';
 import {Tooltip} from '../Tooltip';
 import {VisuallyHidden} from '../internal';
+import {getAriaLabel, useRel} from '../internal/linkAccessibility';
 import {linkRecipe} from './Link.recipe';
 import type {LinkComponent} from './types';
 import {useLinkComponent} from './useLinkComponent';
@@ -177,36 +172,3 @@ const styles = {
     lineHeight: 1,
   }),
 };
-
-function getAriaLabel(
-  label: string | undefined,
-  opensInNewTab: boolean,
-): string | undefined {
-  if (!opensInNewTab) {
-    return label;
-  }
-
-  return label != null ? `${label} (opens in new tab)` : undefined;
-}
-
-function useRel({
-  isExternalLink,
-  target,
-  rel,
-}: {
-  isExternalLink: boolean;
-  target?: string;
-  rel?: string;
-}): string | undefined {
-  return useMemo(() => {
-    if (!isExternalLink && target !== '_blank') {
-      return rel;
-    }
-
-    const relValues = new Set((rel ?? '').split(/\s+/).filter(Boolean));
-    relValues.add('noopener');
-    relValues.add('noreferrer');
-
-    return Array.from(relValues).join(' ');
-  }, [isExternalLink, target, rel]);
-}

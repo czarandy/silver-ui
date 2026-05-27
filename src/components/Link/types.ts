@@ -1,6 +1,7 @@
 import type {
   AriaAttributes,
   CSSProperties,
+  KeyboardEventHandler,
   MouseEventHandler,
   ReactNode,
   Ref,
@@ -14,6 +15,7 @@ export interface LinkComponentProps {
   'data-testid'?: string;
   href?: string;
   onClick?: MouseEventHandler<HTMLAnchorElement>;
+  onKeyDown?: KeyboardEventHandler<HTMLAnchorElement>;
   ref?: Ref<HTMLAnchorElement>;
   rel?: string;
   style?: CSSProperties;

@@ -1,14 +1,13 @@
-import {
-  createElement,
-  useRef,
-  useTransition,
-  type ComponentPropsWithRef,
-  type JSX,
-  type KeyboardEvent,
-  type MouseEventHandler,
-  type MouseEvent,
-  type ReactNode,
-  type Ref,
+/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
+
+import type {
+  CSSProperties,
+  JSX,
+  KeyboardEvent,
+  MouseEvent,
+  MouseEventHandler,
+  ReactNode,
+  Ref,
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../lib/cx';
@@ -16,29 +15,121 @@ import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Spinner} from '../Spinner';
 import {Tooltip} from '../Tooltip';
+import {getAriaLabel, useRel} from '../internal/linkAccessibility';
 import {buttonRecipe, type ButtonVariants} from './Button.recipe';
 
-type ButtonRecipeVariants = Omit<NonNullable<ButtonVariants>, 'iconOnly'>;
-type NativeButtonProps = Omit<
-  ComponentPropsWithRef<'button'>,
-  'aria-disabled' | 'children' | 'disabled' | 'onClick'
->;
+type ButtonSize = NonNullable<ButtonVariants>['size'];
+type ButtonVariant = NonNullable<ButtonVariants>['variant'];
 
-export interface ButtonProps extends NativeButtonProps, ButtonRecipeVariants {
+/**
+ * A versatile action element that renders as a `<button>` or a link depending
+ * on whether `href` is provided. Supports explicit loading states, icon-only
+ * modes, link buttons, and tooltips.
+ */
+export interface ButtonProps {
+  /**
+   * Custom link component to render when `href` is set. Falls back to the
+   * component provided by `LinkProvider`, or a plain `<a>` tag.
+   */
   as?: LinkComponent;
-  clickAction?: (event: MouseEvent<HTMLElement>) => void | Promise<void>;
+  /**
+   * Additional CSS class names applied to the root element.
+   */
+  className?: string;
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
+  /**
+   * Content rendered after the label, such as a badge or count. Hidden in
+   * icon-only mode.
+   */
   endContent?: ReactNode;
+  /**
+   * HTML `form` attribute associating the button with a `<form>` by ID.
+   */
+  form?: string;
+  /**
+   * URL to navigate to. When set and the button is not disabled, the component
+   * renders as a link element.
+   */
   href?: string;
+  /**
+   * Icon element rendered before the label.
+   */
   icon?: ReactNode;
+  /**
+   * Whether the button is disabled. Prevents interaction and applies disabled
+   * styling.
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label, showing only the icon. The `label`
+   * prop is still required and used as `aria-label`.
+   */
   isIconOnly?: boolean;
+  /**
+   * Whether the button is in a loading state. Shows a spinner overlay,
+   * disables interaction, and announces "Loading" to assistive technologies.
+   */
   isLoading?: boolean;
+  /**
+   * Text label for the button. Always required for accessibility even when
+   * `isIconOnly` is true.
+   */
   label: string;
+  /**
+   * HTML `name` attribute for form submission.
+   */
+  name?: string;
+  /**
+   * Click event handler.
+   */
   onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Keyboard event handler for the root element.
+   */
+  onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
+  /**
+   * Ref forwarded to the root element.
+   */
+  ref?: Ref<HTMLElement>;
+  /**
+   * Link `rel` attribute (e.g., `"noopener"`). Only applies when rendering
+   * as a link.
+   */
   rel?: string;
+  /**
+   * Visual size of the button.
+   */
+  size?: ButtonSize;
+  /**
+   * Inline styles applied to the root element.
+   */
+  style?: CSSProperties;
+  /**
+   * Link `target` attribute (e.g., `"_blank"`). Only applies when rendering
+   * as a link.
+   */
   target?: string;
+  /**
+   * Tooltip text shown on hover. When set on a disabled button,
+   * `aria-disabled` is used instead of the `disabled` attribute so the
+   * tooltip remains accessible.
+   */
   tooltip?: string;
+  /**
+   * HTML button `type` attribute.
+   */
+  type?: 'button' | 'submit' | 'reset';
+  /**
+   * HTML `value` attribute for form submission.
+   */
+  value?: string;
+  /**
+   * Visual style variant.
+   */
+  variant?: ButtonVariant;
 }
 
 const styles = {
@@ -55,6 +146,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    fontSize: 'var(--button-icon-size)',
     '& > svg': {
       w: '1em',
       h: '1em',
@@ -64,16 +156,15 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     color: 'inherit',
+    '& > svg': {
+      w: 'var(--button-icon-size)',
+      h: 'var(--button-icon-size)',
+    },
   }),
-  loading: css({
-    color: 'transparent',
-  }),
-  spinnerOverlay: css({
-    position: 'absolute',
-    inset: 0,
-    display: 'flex',
+  loadingIndicator: css({
+    display: 'inline-flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    color: 'inherit',
   }),
   visuallyHidden: css({
     position: 'absolute',
@@ -87,9 +178,9 @@ const styles = {
     borderWidth: 0,
   }),
   iconSize: {
-    sm: css({fontSize: 'icon.sm'}),
-    md: css({fontSize: 'icon.md'}),
-    lg: css({fontSize: 'icon.lg'}),
+    sm: css({'--button-icon-size': 'var(--silver-sizes-icon-sm)'}),
+    md: css({'--button-icon-size': 'var(--silver-sizes-icon-md)'}),
+    lg: css({'--button-icon-size': 'var(--silver-sizes-icon-lg)'}),
   },
 } as const;
 
@@ -108,49 +199,46 @@ export function Button({
   ref,
   isDisabled = false,
   isLoading = false,
-  clickAction,
   icon,
   isIconOnly = false,
   endContent,
   tooltip,
   onClick,
   onKeyDown,
-  ...rest
+  form,
+  name,
+  value,
 }: ButtonProps): JSX.Element {
   const LinkComponent = useLinkComponent(as);
-  const [isPending, startTransition] = useTransition();
-  const actionInFlightRef = useRef(false);
   const size = sizeProp ?? 'md';
-  const isLoadingState = isLoading || isPending;
-  const buttonDisabled = isDisabled || isLoadingState;
+  const buttonDisabled = isDisabled || isLoading;
   const useAriaDisabled = tooltip != null && buttonDisabled;
-  const ariaLabel =
-    isIconOnly || isLoadingState || endContent != null ? label : undefined;
   const renderAsLink = href != null && !buttonDisabled;
+  const opensInNewTab = renderAsLink && target === '_blank';
+  const ariaLabel = getAriaLabel(
+    isIconOnly || isLoading || endContent != null || opensInNewTab
+      ? label
+      : undefined,
+    opensInNewTab,
+  );
+  const linkRel = useRel({target, rel});
   const spinnerVariant =
     variant === 'primary' || variant === 'destructive' ? 'onMedia' : 'default';
 
-  const handleClick = (event: MouseEvent<HTMLElement>) => {
-    if (buttonDisabled || actionInFlightRef.current) {
+  const handleButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
+    if (buttonDisabled) {
       event.preventDefault();
       return;
     }
 
     onClick?.(event);
-
-    if (clickAction != null && !event.defaultPrevented) {
-      actionInFlightRef.current = true;
-      startTransition(async () => {
-        try {
-          await clickAction(event);
-        } finally {
-          actionInFlightRef.current = false;
-        }
-      });
-    }
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+  const handleLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    onClick?.(event);
+  };
+
+  const handleButtonKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (useAriaDisabled && (event.key === 'Enter' || event.key === ' ')) {
       event.preventDefault();
       return;
@@ -159,20 +247,15 @@ export function Button({
     onKeyDown?.(event);
   };
 
+  const handleLinkKeyDown = (event: KeyboardEvent<HTMLAnchorElement>) => {
+    onKeyDown?.(event);
+  };
+
   const buttonContent = (
     <>
-      {isLoadingState && (
-        <span aria-hidden="true" className={styles.spinnerOverlay}>
-          <Spinner size={size} variant={spinnerVariant} />
-        </span>
-      )}
-      <span
-        aria-hidden={isLoadingState || undefined}
-        className={styles.content}>
+      <span aria-hidden={isLoading || undefined} className={styles.content}>
         {icon != null ? (
-          <span
-            aria-hidden="true"
-            className={cx(styles.icon, styles.iconSize[size])}>
+          <span aria-hidden="true" className={styles.icon}>
             {icon}
           </span>
         ) : null}
@@ -180,50 +263,55 @@ export function Button({
         {!isIconOnly && endContent != null ? (
           <span className={styles.endContent}>{endContent}</span>
         ) : null}
+        {!isIconOnly && isLoading ? (
+          <span aria-hidden="true" className={styles.loadingIndicator}>
+            <Spinner size={size} variant={spinnerVariant} />
+          </span>
+        ) : null}
       </span>
       <span aria-live="polite" className={styles.visuallyHidden} role="status">
-        {isLoadingState ? 'Loading' : ''}
+        {isLoading ? 'Loading' : ''}
       </span>
     </>
   );
 
   const rootClassName = cx(
     buttonRecipe({variant, size, iconOnly: isIconOnly}),
-    isLoadingState && styles.loading,
+    styles.iconSize[size],
     className,
   );
 
   const element = renderAsLink ? (
-    createElement(
-      LinkComponent,
-      {
-        ...(rest as ComponentPropsWithRef<'a'>),
-        ref: ref as Ref<HTMLAnchorElement> | undefined,
-        href,
-        target,
-        rel,
-        className: rootClassName,
-        'data-testid': dataTestId,
-        style,
-        'aria-label': ariaLabel,
-        onClick: handleClick,
-      },
-      buttonContent,
-    )
+    <LinkComponent
+      aria-label={ariaLabel}
+      className={rootClassName}
+      data-testid={dataTestId}
+      href={href}
+      onClick={handleLinkClick}
+      onKeyDown={handleLinkKeyDown}
+      ref={ref as Ref<HTMLAnchorElement>}
+      rel={linkRel}
+      style={style}
+      target={target}
+      to={LinkComponent === 'a' ? undefined : href}>
+      {buttonContent}
+    </LinkComponent>
   ) : (
     <button
-      aria-busy={isLoadingState || undefined}
+      aria-busy={isLoading || undefined}
       aria-disabled={useAriaDisabled || undefined}
       aria-label={ariaLabel}
       className={rootClassName}
       data-testid={dataTestId}
       disabled={useAriaDisabled ? undefined : buttonDisabled}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      ref={ref}
+      form={form}
+      name={name}
+      onClick={handleButtonClick}
+      onKeyDown={handleButtonKeyDown}
+      ref={ref as Ref<HTMLButtonElement>}
       style={style}
       type={type}
-      {...rest}>
+      value={value}>
       {buttonContent}
     </button>
   );
