@@ -10,7 +10,6 @@ export const buttonRecipe = cva({
     borderStyle: 'none',
     fontFamily: 'body',
     fontWeight: 'medium',
-    borderRadius: 'md',
     cursor: 'pointer',
     transitionProperty: 'background-color, color, opacity, transform',
     transitionDuration: 'fast',
@@ -63,12 +62,33 @@ export const buttonRecipe = cva({
         color: 'white',
         _hover: {bg: 'red.700'},
         _active: {bg: 'red.800'},
+        _focusVisible: {
+          outlineColor: 'red.600',
+        },
       },
     },
     size: {
-      sm: {h: '8', px: '3', fontSize: 'sm', gap: '1.5'},
-      md: {h: '10', px: '4', fontSize: 'md', gap: '2'},
-      lg: {h: '12', px: '5', fontSize: 'md', gap: '2.5'},
+      sm: {
+        h: 'component.sm',
+        px: 'component.sm',
+        fontSize: 'component.sm',
+        gap: '1.5',
+        borderRadius: 'component.sm',
+      },
+      md: {
+        h: 'component.md',
+        px: 'component.md',
+        fontSize: 'component.md',
+        gap: '2',
+        borderRadius: 'component.md',
+      },
+      lg: {
+        h: 'component.lg',
+        px: 'component.lg',
+        fontSize: 'component.lg',
+        gap: '2.5',
+        borderRadius: 'component.lg',
+      },
     },
     iconOnly: {
       true: {

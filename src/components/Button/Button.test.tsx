@@ -140,11 +140,8 @@ describe('Button', () => {
     expect(button).toHaveStyle({color: 'rgb(255, 0, 0)'});
   });
 
-  it('supports disabled aliases', () => {
-    const {rerender} = render(<Button label="Test" disabled />);
-    expect(screen.getByRole('button', {name: 'Test'})).toBeDisabled();
-
-    rerender(<Button label="Test" isDisabled />);
+  it('can be disabled', () => {
+    render(<Button label="Test" isDisabled />);
     expect(screen.getByRole('button', {name: 'Test'})).toBeDisabled();
   });
 

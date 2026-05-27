@@ -1660,83 +1660,83 @@ const tokens = {
     "variable": "var(--silver-colors-slate-950)"
   },
   "colors.silver-primary.50": {
-    "value": "#eff6ff",
+    "value": "#e6ecf0",
     "variable": "var(--silver-colors-silver-primary-50)"
   },
   "colors.silver-primary.100": {
-    "value": "#dbeafe",
+    "value": "#d0dbe3",
     "variable": "var(--silver-colors-silver-primary-100)"
   },
   "colors.silver-primary.200": {
-    "value": "#bfdbfe",
+    "value": "#a8bccb",
     "variable": "var(--silver-colors-silver-primary-200)"
   },
   "colors.silver-primary.300": {
-    "value": "#93c5fd",
+    "value": "#7a9ab0",
     "variable": "var(--silver-colors-silver-primary-300)"
   },
   "colors.silver-primary.400": {
-    "value": "#60a5fa",
+    "value": "#5d819b",
     "variable": "var(--silver-colors-silver-primary-400)"
   },
   "colors.silver-primary.500": {
-    "value": "#3b82f6",
+    "value": "#547A95",
     "variable": "var(--silver-colors-silver-primary-500)"
   },
   "colors.silver-primary.600": {
-    "value": "#2563eb",
+    "value": "#45647a",
     "variable": "var(--silver-colors-silver-primary-600)"
   },
   "colors.silver-primary.700": {
-    "value": "#1d4ed8",
+    "value": "#374f61",
     "variable": "var(--silver-colors-silver-primary-700)"
   },
   "colors.silver-primary.800": {
-    "value": "#1e40af",
+    "value": "#283b48",
     "variable": "var(--silver-colors-silver-primary-800)"
   },
   "colors.silver-primary.900": {
-    "value": "#1e3a8a",
+    "value": "#1b2730",
     "variable": "var(--silver-colors-silver-primary-900)"
   },
   "colors.silver-neutral.50": {
-    "value": "#fafafa",
+    "value": "#e9ebee",
     "variable": "var(--silver-colors-silver-neutral-50)"
   },
   "colors.silver-neutral.100": {
-    "value": "#f5f5f5",
+    "value": "#d5d9de",
     "variable": "var(--silver-colors-silver-neutral-100)"
   },
   "colors.silver-neutral.200": {
-    "value": "#e5e5e5",
+    "value": "#b1bac3",
     "variable": "var(--silver-colors-silver-neutral-200)"
   },
   "colors.silver-neutral.300": {
-    "value": "#d4d4d4",
+    "value": "#8a97a4",
     "variable": "var(--silver-colors-silver-neutral-300)"
   },
   "colors.silver-neutral.400": {
-    "value": "#a3a3a3",
+    "value": "#708090",
     "variable": "var(--silver-colors-silver-neutral-400)"
   },
   "colors.silver-neutral.500": {
-    "value": "#737373",
+    "value": "#6A7B8C",
     "variable": "var(--silver-colors-silver-neutral-500)"
   },
   "colors.silver-neutral.600": {
-    "value": "#525252",
+    "value": "#576573",
     "variable": "var(--silver-colors-silver-neutral-600)"
   },
   "colors.silver-neutral.700": {
-    "value": "#404040",
+    "value": "#45505b",
     "variable": "var(--silver-colors-silver-neutral-700)"
   },
   "colors.silver-neutral.800": {
-    "value": "#262626",
+    "value": "#333b43",
     "variable": "var(--silver-colors-silver-neutral-800)"
   },
   "colors.silver-neutral.900": {
-    "value": "#171717",
+    "value": "#22272d",
     "variable": "var(--silver-colors-silver-neutral-900)"
   },
   "fonts.sans": {
@@ -1842,6 +1842,54 @@ const tokens = {
   "colors.bg.subtle": {
     "value": "var(--silver-colors-bg-subtle)",
     "variable": "var(--silver-colors-bg-subtle)"
+  },
+  "sizes.component.sm": {
+    "value": "var(--silver-sizes-8)",
+    "variable": "var(--silver-sizes-component-sm)"
+  },
+  "sizes.component.md": {
+    "value": "var(--silver-sizes-10)",
+    "variable": "var(--silver-sizes-component-md)"
+  },
+  "sizes.component.lg": {
+    "value": "var(--silver-sizes-12)",
+    "variable": "var(--silver-sizes-component-lg)"
+  },
+  "spacing.component.sm": {
+    "value": "var(--silver-spacing-3)",
+    "variable": "var(--silver-spacing-component-sm)"
+  },
+  "spacing.component.md": {
+    "value": "var(--silver-spacing-4)",
+    "variable": "var(--silver-spacing-component-md)"
+  },
+  "spacing.component.lg": {
+    "value": "var(--silver-spacing-5)",
+    "variable": "var(--silver-spacing-component-lg)"
+  },
+  "fontSizes.component.sm": {
+    "value": "14px",
+    "variable": "var(--silver-font-sizes-component-sm)"
+  },
+  "fontSizes.component.md": {
+    "value": "14px",
+    "variable": "var(--silver-font-sizes-component-md)"
+  },
+  "fontSizes.component.lg": {
+    "value": "14px",
+    "variable": "var(--silver-font-sizes-component-lg)"
+  },
+  "radii.component.sm": {
+    "value": "var(--silver-radii-sm)",
+    "variable": "var(--silver-radii-component-sm)"
+  },
+  "radii.component.md": {
+    "value": "var(--silver-radii-md)",
+    "variable": "var(--silver-radii-component-md)"
+  },
+  "radii.component.lg": {
+    "value": "var(--silver-radii-lg)",
+    "variable": "var(--silver-radii-component-lg)"
   },
   "spacing.-1": {
     "value": "calc(var(--silver-spacing-1) * -1)",
@@ -1982,6 +2030,18 @@ const tokens = {
   "spacing.-5.5": {
     "value": "calc(var(--silver-spacing-5\\.5) * -1)",
     "variable": "var(--silver-spacing-5\\.5)"
+  },
+  "spacing.component.-sm": {
+    "value": "calc(var(--silver-spacing-component-sm) * -1)",
+    "variable": "var(--silver-spacing-component-sm)"
+  },
+  "spacing.component.-md": {
+    "value": "calc(var(--silver-spacing-component-md) * -1)",
+    "variable": "var(--silver-spacing-component-md)"
+  },
+  "spacing.component.-lg": {
+    "value": "calc(var(--silver-spacing-component-lg) * -1)",
+    "variable": "var(--silver-spacing-component-lg)"
   },
   "colors.colorPalette": {
     "value": "var(--silver-colors-color-palette)",

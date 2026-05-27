@@ -4,6 +4,7 @@ import vitest from '@vitest/eslint-plugin';
 import importX from 'eslint-plugin-import-x';
 import jestDom from 'eslint-plugin-jest-dom';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import react from 'eslint-plugin-react';
 import reactCompiler from 'eslint-plugin-react-compiler';
 import storybook from 'eslint-plugin-storybook';
 import testingLibrary from 'eslint-plugin-testing-library';
@@ -249,9 +250,21 @@ export default tseslint.config(
     files: ['src/components/**/*.tsx'],
     ignores: ['**/*.test.tsx', '**/*.stories.tsx'],
     plugins: {
+      react,
       'silver-ui': silverUiPlugin,
     },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
     rules: {
+      'react/boolean-prop-naming': [
+        'error',
+        {
+          rule: '^(is|has)[A-Z]([A-Za-z0-9]?)+',
+        },
+      ],
       'silver-ui/require-component-props': 'error',
     },
   },

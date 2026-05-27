@@ -20,7 +20,6 @@ type NativeButtonProps = Omit<
 export interface ButtonProps extends NativeButtonProps, ButtonRecipeVariants {
   label: string;
   isDisabled?: boolean;
-  disabled?: boolean;
   isLoading?: boolean;
   clickAction?: (event: MouseEvent<HTMLButtonElement>) => void | Promise<void>;
   icon?: ReactNode;
@@ -111,7 +110,6 @@ export function Button({
   type = 'button',
   ref,
   isDisabled = false,
-  disabled = false,
   isLoading = false,
   clickAction,
   icon,
@@ -126,7 +124,7 @@ export function Button({
   const actionInFlightRef = useRef(false);
   const size = sizeProp ?? 'md';
   const isLoadingState = isLoading || isPending;
-  const buttonDisabled = isDisabled || disabled || isLoadingState;
+  const buttonDisabled = isDisabled || isLoadingState;
   const useAriaDisabled = tooltip != null && buttonDisabled;
   const ariaLabel =
     isIconOnly || isLoadingState || endContent != null ? label : undefined;
