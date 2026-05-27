@@ -16,21 +16,72 @@ import {linkRecipe} from './Link.recipe';
 import type {LinkComponent} from './types';
 import {useLinkComponent} from './useLinkComponent';
 
+/**
+ * A polymorphic link component with built-in accessibility, external link handling,
+ * and router integration via LinkProvider. Supports custom link components (e.g.
+ * React Router's Link) through the `as` prop or a parent `LinkProvider`.
+ */
 export interface LinkProps {
+  /**
+   * Custom element type to render instead of `<a>`. Useful for integrating with routers.
+   * If you want to set this globally, use LinkProvider at the top level of your app.
+   */
   as?: LinkComponent;
+  /**
+   * Color variant controlling the link text color. Default is `active`.
+   */
   color?: TextColor;
+  /**
+   * Accessible label (aria-label). It is recommended to set this if your link does not contain sufficient text to make its purpose clear.
+   */
   label?: string;
+  /**
+   * Show a persistent underline on the link text.
+   */
   hasUnderline?: boolean;
+  /**
+   * Visually and functionally disable the link. Prevents navigation and removes from tab order.
+   */
   isDisabled?: boolean;
+  /**
+   * Mark as an external link. Adds target="_blank", rel="noopener noreferrer", and an icon.
+   */
   isExternalLink?: boolean;
+  /**
+   * Tooltip text shown on hover.
+   */
   tooltip?: string;
+  /**
+   * Link content.
+   */
   children: ReactNode;
+  /**
+   * URL destination. Passed as `to` for custom router components.
+   */
   href?: string;
+  /**
+   * HTML target attribute.
+   */
   target?: string;
+  /**
+   * HTML rel attribute.
+   */
   rel?: string;
+  /**
+   * Optionally, rendering by setting the className.
+   */
   className?: string;
+  /**
+   * Inline styles applied to the root element.
+   */
   style?: CSSProperties;
+  /**
+   * Ref forwarded to the underlying anchor element.
+   */
   ref?: Ref<HTMLAnchorElement>;
+  /**
+   * Click handler. Not called when the link is disabled.
+   */
   onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 

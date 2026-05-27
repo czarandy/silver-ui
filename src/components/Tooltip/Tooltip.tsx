@@ -166,7 +166,7 @@ export function Tooltip({
         <span
           ref={mergeRefs(tooltip.ref, ref)}
           // Text-only tooltip triggers need keyboard access.
-          // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
+          // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex
           tabIndex={0}
           aria-describedby={tooltip.describedBy}
           className={cx(

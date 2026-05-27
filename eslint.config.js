@@ -3,7 +3,7 @@ import eslintReact from '@eslint-react/eslint-plugin';
 import vitest from '@vitest/eslint-plugin';
 import importX from 'eslint-plugin-import-x';
 import jestDom from 'eslint-plugin-jest-dom-ya';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
+import jsxA11y from 'eslint-plugin-jsx-a11y-x';
 import reactCompiler from 'eslint-plugin-react-compiler';
 import storybook from 'eslint-plugin-storybook';
 import testingLibrary from 'eslint-plugin-testing-library';
@@ -242,7 +242,7 @@ export default tseslint.config(
   // Accessibility — component libraries must ship accessible primitives
   {
     files: ['src/components/**/*.tsx'],
-    ...jsxA11y.flatConfigs.strict,
+    ...jsxA11y.configs.strict,
   },
   // silver-ui component conventions — components must accept className, style, ref
   {
