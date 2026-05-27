@@ -12,7 +12,7 @@ import {
   type ContextRenderProps,
   type LayerAlignment,
   type LayerPlacement,
-} from './useLayer';
+} from '../internal/useLayer';
 
 export type TooltipFocusTrigger = 'auto' | 'always' | 'never';
 

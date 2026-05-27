@@ -127,7 +127,7 @@ export function Button({
   const ariaLabel =
     isIconOnly || isLoadingState || endContent != null ? label : undefined;
   const renderAsLink = href != null && !buttonDisabled;
-  const spinnerShade =
+  const spinnerVariant =
     variant === 'primary' || variant === 'destructive' ? 'onMedia' : 'default';
 
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -163,7 +163,7 @@ export function Button({
     <>
       {isLoadingState && (
         <span aria-hidden="true" className={styles.spinnerOverlay}>
-          <Spinner shade={spinnerShade} size={size} />
+          <Spinner size={size} variant={spinnerVariant} />
         </span>
       )}
       <span

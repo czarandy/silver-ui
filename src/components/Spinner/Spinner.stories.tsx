@@ -9,7 +9,7 @@ const meta: Meta<typeof Spinner> = {
       control: {type: 'select'},
       options: ['sm', 'md', 'lg'],
     },
-    shade: {
+    variant: {
       control: {type: 'select'},
       options: ['default', 'onMedia'],
     },
@@ -38,10 +38,28 @@ export const Sizes: Story = {
   ),
 };
 
+export const SizesWithLabels: Story = {
+  render: () => (
+    <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+      <Spinner label="Small" size="sm" />
+      <Spinner label="Medium" size="md" />
+      <Spinner label="Large" size="lg" />
+    </div>
+  ),
+};
+
 export const OnMedia: Story = {
   render: () => (
     <div style={{display: 'inline-flex', padding: '1rem', background: '#111'}}>
-      <Spinner shade="onMedia" />
+      <Spinner variant="onMedia" />
+    </div>
+  ),
+};
+
+export const OnMediaWithLabel: Story = {
+  render: () => (
+    <div style={{display: 'inline-flex', padding: '1rem', background: '#111'}}>
+      <Spinner label="Loading media" variant="onMedia" />
     </div>
   ),
 };

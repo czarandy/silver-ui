@@ -23,7 +23,7 @@ export const spinnerRecipe = cva({
         '--spinner-size': 'var(--silver-sizes-icon-lg)',
       },
     },
-    shade: {
+    variant: {
       default: {
         color: 'primary',
       },
@@ -43,7 +43,7 @@ export const spinnerRecipe = cva({
   },
   defaultVariants: {
     size: 'md',
-    shade: 'default',
+    variant: 'default',
     hasLabel: false,
   },
 });

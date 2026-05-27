@@ -8,7 +8,7 @@ import {
 } from 'react';
 import {css, cx} from 'styled-system/css';
 import {mergeRefs} from '../../lib/mergeRefs';
-import type {LayerAlignment, LayerPlacement} from './useLayer';
+import type {LayerAlignment, LayerPlacement} from '../internal/useLayer';
 import {useTooltip, type TooltipFocusTrigger} from './useTooltip';
 
 export type {TooltipFocusTrigger} from './useTooltip';

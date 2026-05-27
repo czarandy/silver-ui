@@ -1,11 +1,11 @@
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {CSSProperties, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../lib/cx';
 import {Text} from '../Text';
 import {spinnerRecipe, type SpinnerVariants} from './Spinner.recipe';
 
 type SpinnerSize = NonNullable<SpinnerVariants>['size'];
-type SpinnerShade = NonNullable<SpinnerVariants>['shade'];
+type SpinnerVariant = NonNullable<SpinnerVariants>['variant'];
 
 /**
  * A compact loading indicator for pending or indeterminate work.
@@ -30,15 +30,11 @@ export interface SpinnerProps {
   /**
    * Optional visible label shown below the spinner.
    */
-  label?: ReactNode;
+  label?: string;
   /**
    * Ref forwarded to the root span element.
    */
   ref?: Ref<HTMLSpanElement>;
-  /**
-   * Visual color treatment for the spinner. Default is `default`.
-   */
-  shade?: SpinnerShade;
   /**
    * Visual size of the spinner. Matches Button size names. Default is `md`.
    */
@@ -47,6 +43,10 @@ export interface SpinnerProps {
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
+  /**
+   * Visual style variant for the spinner. Default is `default`.
+   */
+  variant?: SpinnerVariant;
 }
 
 const styles = {
@@ -63,12 +63,15 @@ const styles = {
     borderColor: 'currentColor',
     borderTopColor: 'transparent',
     animation: 'spin 0.8s linear infinite',
+    '@media (prefers-reduced-motion: reduce)': {
+      animation: 'none',
+    },
   }),
 };
 
 export function Spinner({
-  size: sizeFromProps,
-  shade,
+  size,
+  variant,
   label,
   className,
   'data-testid': dataTestId,
@@ -76,24 +79,26 @@ export function Spinner({
   ref,
   'aria-label': ariaLabelFromProps,
 }: SpinnerProps): React.JSX.Element {
-  const hasLabel = label != null;
-  const size = sizeFromProps ?? 'md';
+  const hasLabel = typeof label === 'string' && label !== '';
   const ariaLabel =
-    ariaLabelFromProps ??
-    (typeof label === 'string' ? label : undefined) ??
-    'Loading';
+    ariaLabelFromProps != null && ariaLabelFromProps !== ''
+      ? ariaLabelFromProps
+      : hasLabel
+        ? label
+        : 'Loading';
+  const labelColor = variant === 'onMedia' ? 'inherit' : undefined;
 
   return (
     <span
       aria-label={ariaLabel}
-      className={cx(spinnerRecipe({size, shade, hasLabel}), className)}
+      className={cx(spinnerRecipe({size, variant, hasLabel}), className)}
       data-testid={dataTestId}
       ref={ref}
       role="status"
       style={style}>
       <span aria-hidden="true" className={styles.visual} />
       {hasLabel ? (
-        <Text as="span" type="label">
+        <Text as="span" color={labelColor} type="label">
           {label}
         </Text>
       ) : null}
