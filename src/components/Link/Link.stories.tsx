@@ -1,5 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import type {ComponentPropsWithRef} from 'react';
+import {fn} from 'storybook/test';
+import {Text} from '../Text';
 import {Link} from './Link';
 import {LinkProvider} from './LinkProvider';
 
@@ -83,6 +85,33 @@ export const External: Story = {
   },
 };
 
+export const ExternalSameTab: Story = {
+  args: {
+    children: 'External docs in same tab',
+    href: 'https://example.com',
+    isExternalLink: true,
+    target: '_self',
+  },
+};
+
+export const ExternalWithLabel: Story = {
+  args: {
+    children: '↗',
+    href: 'https://example.com/settings',
+    isExternalLink: true,
+    label: 'Open settings',
+  },
+};
+
+export const ExternalUnderlined: Story = {
+  args: {
+    children: 'External underlined docs',
+    hasUnderline: true,
+    href: 'https://example.com/docs',
+    isExternalLink: true,
+  },
+};
+
 export const ProviderOverride: Story = {
   render: () => (
     <LinkProvider component={StoryLink}>
@@ -97,6 +126,30 @@ export const AsOverride: Story = {
       Direct custom link
     </Link>
   ),
+};
+
+export const InlineWithText: Story = {
+  render: () => (
+    <Text as="p">
+      Read the <Link href="/docs">documentation</Link> before changing these
+      settings.
+    </Text>
+  ),
+};
+
+export const WithOnClick: Story = {
+  args: {
+    children: 'Log click',
+    href: undefined,
+    onClick: fn(),
+  },
+};
+
+export const WithoutHref: Story = {
+  args: {
+    children: 'Action-style link',
+    href: undefined,
+  },
 };
 
 export const TargetBlank: Story = {

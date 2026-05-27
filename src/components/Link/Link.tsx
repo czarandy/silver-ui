@@ -51,6 +51,8 @@ export interface LinkProps {
   /**
    * URL destination. Custom link components receive this as both `href` and
    * `to` so router links and anchor-like links can share the same Silver UI API.
+   * When omitted, Link renders `href="#"` to preserve native link semantics and
+   * prevents the fallback hash navigation.
    */
   href?: string;
   /**
@@ -58,7 +60,8 @@ export interface LinkProps {
    */
   isDisabled?: boolean;
   /**
-   * Mark as an external link. Adds target="_blank", rel="noopener noreferrer", and an icon.
+   * Mark as an external link. Adds an icon and rel="noopener noreferrer".
+   * Defaults target to "_blank" unless target is set explicitly.
    */
   isExternalLink?: boolean;
   /**
@@ -94,7 +97,7 @@ export interface LinkProps {
 export function Link({
   as,
   label,
-  href,
+  href: hrefFromProps,
   hasUnderline = false,
   isDisabled = false,
   isExternalLink = false,
@@ -110,12 +113,18 @@ export function Link({
   onClick,
 }: LinkProps): React.JSX.Element {
   const Component = useLinkComponent(as);
-  const target = isExternalLink ? '_blank' : targetFromProps;
+  const href = hrefFromProps ?? '#';
+  const isFallbackHref = hrefFromProps == null;
+  const target = targetFromProps ?? (isExternalLink ? '_blank' : undefined);
+  const opensInNewTab = target === '_blank';
   const rel = useRel({isExternalLink, target, rel: relFromProps});
 
   const handleClick: MouseEventHandler<HTMLAnchorElement> = event => {
-    if (isDisabled) {
+    if (isDisabled || isFallbackHref) {
       event.preventDefault();
+    }
+
+    if (isDisabled) {
       return;
     }
 
@@ -125,7 +134,7 @@ export function Link({
   const element = (
     <Component
       aria-disabled={isDisabled || undefined}
-      aria-label={getAriaLabel(label, isExternalLink)}
+      aria-label={getAriaLabel(label, opensInNewTab)}
       className={cx(linkRecipe({color, hasUnderline}), className)}
       data-testid={dataTestId}
       href={href}
@@ -137,7 +146,7 @@ export function Link({
       target={target}
       to={Component === 'a' ? undefined : href}>
       {children}
-      {isExternalLink && label == null ? (
+      {opensInNewTab && label == null ? (
         <>
           {' '}
           <VisuallyHidden>(opens in new tab)</VisuallyHidden>
@@ -171,9 +180,9 @@ const styles = {
 
 function getAriaLabel(
   label: string | undefined,
-  isExternalLink: boolean,
+  opensInNewTab: boolean,
 ): string | undefined {
-  if (!isExternalLink) {
+  if (!opensInNewTab) {
     return label;
   }
 

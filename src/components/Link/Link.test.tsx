@@ -58,6 +58,27 @@ describe('Link', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/destination');
   });
 
+  it('uses a fallback href when href is omitted', () => {
+    render(<Link>Action Link</Link>);
+
+    expect(screen.getByRole('link', {name: 'Action Link'})).toHaveAttribute(
+      'href',
+      '#',
+    );
+  });
+
+  it('prevents fallback hash navigation while still handling clicks', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn((event: MouseEvent) => {
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    render(<Link onClick={onClick}>Action Link</Link>);
+
+    await user.click(screen.getByRole('link', {name: 'Action Link'}));
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+
   it('forwards data-testid to the root element', () => {
     render(
       <Link data-testid="docs-link" href="/docs">
@@ -135,6 +156,18 @@ describe('Link', () => {
     expect(link).toHaveAttribute('rel', 'sponsored noopener noreferrer');
   });
 
+  it('allows target to override the external link default target', () => {
+    render(
+      <Link href="https://example.com" isExternalLink target="_self">
+        External Link
+      </Link>,
+    );
+
+    const link = screen.getByRole('link', {name: 'External Link'});
+    expect(link).toHaveAttribute('target', '_self');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
   it('adds noopener noreferrer when target="_blank" without isExternalLink', () => {
     render(
       <Link href="https://example.com" target="_blank">
@@ -142,8 +175,23 @@ describe('Link', () => {
       </Link>,
     );
 
-    const link = screen.getByRole('link', {name: 'Blank Target'});
+    const link = screen.getByRole('link', {
+      name: 'Blank Target (opens in new tab)',
+    });
     expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('passes through rel without external link or target blank behavior', () => {
+    render(
+      <Link href="https://example.com" rel="author">
+        Author Link
+      </Link>,
+    );
+
+    expect(screen.getByRole('link', {name: 'Author Link'})).toHaveAttribute(
+      'rel',
+      'author',
+    );
   });
 
   it('handles click events', async () => {
@@ -276,6 +324,24 @@ describe('Link', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('keeps color disabled links interactive', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <Link color="disabled" href="/test" onClick={onClick}>
+        Disabled Color
+      </Link>,
+    );
+
+    const link = screen.getByRole('link', {name: 'Disabled Color'});
+    expect(link).not.toHaveAttribute('aria-disabled');
+    expect(link).not.toHaveAttribute('tabIndex');
+
+    await user.click(link);
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+
   it('renders external link icon', () => {
     render(
       <Link href="https://example.com" isExternalLink>
@@ -324,6 +390,14 @@ describe('Link', () => {
     const link = screen.getByRole('link', {name: 'Router Link'});
     expect(link).toHaveAttribute('href', '/custom');
     expect(link).toHaveAttribute('data-to', '/custom');
+  });
+
+  it('passes fallback href and to to custom link components', () => {
+    render(<Link as={ToBasedRouterLink}>Router Action</Link>);
+
+    const link = screen.getByRole('link', {name: 'Router Action'});
+    expect(link).toHaveAttribute('href', '#');
+    expect(link).toHaveAttribute('data-to', '#');
   });
 });
 
