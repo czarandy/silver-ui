@@ -16,6 +16,7 @@ export const buttonRecipe = cva({
     transitionTimingFunction: 'default',
     userSelect: 'none',
     lineHeight: 'tight',
+    textDecoration: 'none',
     whiteSpace: 'nowrap',
     _active: {
       transform: 'scale(0.98)',

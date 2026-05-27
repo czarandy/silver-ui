@@ -1,5 +1,3 @@
-/* eslint-disable silver-ui/require-component-props -- Context providers do not render a DOM root. */
-
 import {useMemo, type ReactNode} from 'react';
 import {LinkContext} from './LinkContext';
 import type {LinkComponent} from './types';

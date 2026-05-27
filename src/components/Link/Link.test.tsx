@@ -1,12 +1,9 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {ComponentPropsWithRef, MouseEvent, ReactNode, Ref} from 'react';
-import {createElement} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Link} from './Link';
 import {LinkProvider} from './LinkProvider';
-import type {LinkComponent, LinkComponentProps} from './types';
-import {useLinkComponent} from './useLinkComponent';
 
 function CustomLink({
   children,
@@ -48,16 +45,6 @@ function ToBasedRouterLink({
       {children}
     </a>
   );
-}
-
-function TestConsumer({as}: {as?: LinkComponent}): React.JSX.Element {
-  const LinkComponent = useLinkComponent(as);
-  const props: LinkComponentProps & {'data-testid': string} = {
-    href: '/test',
-    'data-testid': 'resolved-link',
-  };
-
-  return createElement(LinkComponent, props, 'Link');
 }
 
 describe('Link', () => {
@@ -137,6 +124,17 @@ describe('Link', () => {
     expect(link).toHaveAttribute('rel', 'sponsored noopener noreferrer');
   });
 
+  it('adds noopener noreferrer when target="_blank" without isExternalLink', () => {
+    render(
+      <Link href="https://example.com" target="_blank">
+        Blank Target
+      </Link>,
+    );
+
+    const link = screen.getByRole('link', {name: 'Blank Target'});
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
   it('handles click events', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn((event: MouseEvent) => {
@@ -165,15 +163,14 @@ describe('Link', () => {
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLAnchorElement));
   });
 
-  it('passes tooltip through as title until tooltip primitive exists', () => {
+  it('renders tooltip content', () => {
     render(
       <Link href="/settings" tooltip="Configure settings">
         Settings
       </Link>,
     );
 
-    expect(screen.getByRole('link', {name: 'Settings'})).toHaveAttribute(
-      'title',
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
       'Configure settings',
     );
   });
@@ -219,23 +216,21 @@ describe('Link', () => {
 
 describe('useLinkComponent', () => {
   it('returns native anchor by default', () => {
-    render(<TestConsumer />);
+    render(<Link href="/test">Default</Link>);
 
-    expect(screen.getByTestId('resolved-link')).toHaveAttribute(
-      'href',
-      '/test',
-    );
-    expect(screen.getByTestId('resolved-link')).not.toHaveAttribute('to');
+    const link = screen.getByRole('link', {name: 'Default'});
+    expect(link).toHaveAttribute('href', '/test');
+    expect(link).not.toHaveAttribute('to');
   });
 
   it('passes to equal to href for custom components', () => {
     render(
       <LinkProvider component={ToBasedRouterLink}>
-        <TestConsumer />
+        <Link href="/test">Router Link</Link>
       </LinkProvider>,
     );
 
-    const link = screen.getByTestId('resolved-link');
+    const link = screen.getByRole('link', {name: 'Router Link'});
     expect(link).toHaveAttribute('data-router-link');
     expect(link).toHaveAttribute('data-to', '/test');
     expect(link).toHaveAttribute('href', '/test');
@@ -245,12 +240,12 @@ describe('useLinkComponent', () => {
     render(
       <LinkProvider component={AnotherLink}>
         <LinkProvider component={CustomLink}>
-          <TestConsumer />
+          <Link href="/test">Nested</Link>
         </LinkProvider>
       </LinkProvider>,
     );
 
-    const link = screen.getByTestId('resolved-link');
+    const link = screen.getByRole('link', {name: 'Nested'});
     expect(link).toHaveAttribute('data-custom-link');
     expect(link).not.toHaveAttribute('data-another-link');
   });

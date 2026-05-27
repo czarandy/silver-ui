@@ -5,10 +5,10 @@ export const linkRecipe = cva({
     display: 'inline-flex',
     alignItems: 'center',
     gap: '1',
-    fontFamily: 'inherit',
-    fontSize: 'inherit',
+    fontFamily: 'body',
+    fontSize: 'md',
     fontWeight: 'inherit',
-    lineHeight: 'inherit',
+    lineHeight: 'normal',
     textDecoration: 'none',
     cursor: 'pointer',
     transitionProperty: 'color, text-decoration-color, opacity',
@@ -43,25 +43,16 @@ export const linkRecipe = cva({
         color: 'inherit',
       },
     },
-    underline: {
+    hasUnderline: {
       true: {
         textDecoration: 'underline',
-      },
-      false: {},
-    },
-    isStandalone: {
-      true: {
-        fontFamily: 'body',
-        fontSize: 'md',
-        lineHeight: 'normal',
       },
       false: {},
     },
   },
   defaultVariants: {
     color: 'active',
-    underline: false,
-    isStandalone: false,
+    hasUnderline: false,
   },
 });
 

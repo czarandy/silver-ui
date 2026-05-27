@@ -1,27 +1,39 @@
 import {
+  createElement,
   useRef,
   useTransition,
   type ComponentPropsWithRef,
   type JSX,
   type KeyboardEvent,
+  type MouseEventHandler,
   type MouseEvent,
   type ReactNode,
+  type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../lib/cx';
+import type {LinkComponent} from '../Link';
+import {useLinkComponent} from '../Link';
+import {Spinner} from '../Spinner';
+import {Tooltip} from '../Tooltip';
 import {buttonRecipe, type ButtonVariants} from './Button.recipe';
 
 type ButtonRecipeVariants = Omit<NonNullable<ButtonVariants>, 'iconOnly'>;
 type NativeButtonProps = Omit<
   ComponentPropsWithRef<'button'>,
-  'aria-disabled' | 'children' | 'disabled'
+  'aria-disabled' | 'children' | 'disabled' | 'onClick'
 >;
 
 export interface ButtonProps extends NativeButtonProps, ButtonRecipeVariants {
   label: string;
+  href?: string;
+  as?: LinkComponent;
+  target?: string;
+  rel?: string;
   isDisabled?: boolean;
   isLoading?: boolean;
-  clickAction?: (event: MouseEvent<HTMLButtonElement>) => void | Promise<void>;
+  onClick?: MouseEventHandler<HTMLElement>;
+  clickAction?: (event: MouseEvent<HTMLElement>) => void | Promise<void>;
   icon?: ReactNode;
   isIconOnly?: boolean;
   endContent?: ReactNode;
@@ -67,22 +79,6 @@ const spinnerOverlayClassName = css({
   justifyContent: 'center',
 });
 
-const spinnerClassName = css({
-  w: '4',
-  h: '4',
-  borderRadius: 'full',
-  borderWidth: '2px',
-  borderStyle: 'solid',
-  borderColor: 'currentColor',
-  borderTopColor: 'transparent',
-  animation: 'spin 0.8s linear infinite',
-});
-
-const spinnerToneClassNames = {
-  light: css({color: 'white'}),
-  default: css({color: 'fg'}),
-} as const;
-
 const visuallyHiddenClassName = css({
   position: 'absolute',
   w: '1px',
@@ -103,6 +99,10 @@ const iconSizeClassNames = {
 
 export function Button({
   label,
+  href,
+  as,
+  target,
+  rel,
   variant,
   size: sizeProp,
   className,
@@ -120,6 +120,7 @@ export function Button({
   onKeyDown,
   ...rest
 }: ButtonProps): JSX.Element {
+  const LinkComponent = useLinkComponent(as);
   const [isPending, startTransition] = useTransition();
   const actionInFlightRef = useRef(false);
   const size = sizeProp ?? 'md';
@@ -128,10 +129,11 @@ export function Button({
   const useAriaDisabled = tooltip != null && buttonDisabled;
   const ariaLabel =
     isIconOnly || isLoadingState || endContent != null ? label : undefined;
-  const spinnerTone =
-    variant === 'primary' || variant === 'destructive' ? 'light' : 'default';
+  const renderAsLink = href != null && !buttonDisabled;
+  const spinnerShade =
+    variant === 'primary' || variant === 'destructive' ? 'onMedia' : 'default';
 
-  const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
     if (buttonDisabled || actionInFlightRef.current) {
       event.preventDefault();
       return;
@@ -160,32 +162,11 @@ export function Button({
     onKeyDown?.(event);
   };
 
-  return (
-    <button
-      ref={ref}
-      type={type}
-      className={cx(
-        buttonRecipe({variant, size, iconOnly: isIconOnly}),
-        isLoadingState && loadingClassName,
-        className,
-      )}
-      style={style}
-      disabled={useAriaDisabled ? undefined : buttonDisabled}
-      aria-busy={isLoadingState || undefined}
-      aria-disabled={useAriaDisabled || undefined}
-      aria-label={ariaLabel}
-      title={tooltip}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      {...rest}>
+  const buttonContent = (
+    <>
       {isLoadingState && (
-        <span
-          className={cx(
-            spinnerOverlayClassName,
-            spinnerToneClassNames[spinnerTone],
-          )}
-          aria-hidden="true">
-          <span className={spinnerClassName} />
+        <span className={spinnerOverlayClassName} aria-hidden="true">
+          <Spinner size="sm" shade={spinnerShade} />
         </span>
       )}
       <span
@@ -209,8 +190,53 @@ export function Button({
         aria-live="polite">
         {isLoadingState ? 'Loading' : ''}
       </span>
+    </>
+  );
+
+  const rootClassName = cx(
+    buttonRecipe({variant, size, iconOnly: isIconOnly}),
+    isLoadingState && loadingClassName,
+    className,
+  );
+
+  const element = renderAsLink ? (
+    createElement(
+      LinkComponent,
+      {
+        ...(rest as ComponentPropsWithRef<'a'>),
+        ref: ref as Ref<HTMLAnchorElement> | undefined,
+        href,
+        target,
+        rel,
+        className: rootClassName,
+        style,
+        'aria-label': ariaLabel,
+        onClick: handleClick,
+      },
+      buttonContent,
+    )
+  ) : (
+    <button
+      ref={ref}
+      type={type}
+      className={rootClassName}
+      style={style}
+      disabled={useAriaDisabled ? undefined : buttonDisabled}
+      aria-busy={isLoadingState || undefined}
+      aria-disabled={useAriaDisabled || undefined}
+      aria-label={ariaLabel}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      {...rest}>
+      {buttonContent}
     </button>
   );
+
+  if (tooltip != null) {
+    return <Tooltip content={tooltip}>{element}</Tooltip>;
+  }
+
+  return element;
 }
 
 Button.displayName = 'Button';

@@ -11,4 +11,18 @@ export {
   type LinkProviderProps,
   type LinkVariants,
 } from './components/Link';
+export {
+  Spinner,
+  spinnerRecipe,
+  type SpinnerProps,
+  type SpinnerVariants,
+} from './components/Spinner';
+export {
+  Tooltip,
+  useTooltip,
+  type TooltipFocusTrigger,
+  type TooltipProps,
+  type UseTooltipOptions,
+  type UseTooltipReturn,
+} from './components/Tooltip';
 export {cx} from './lib/cx';

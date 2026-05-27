@@ -26,14 +26,12 @@ const meta: Meta<typeof Link> = {
     hasUnderline: {control: 'boolean'},
     isDisabled: {control: 'boolean'},
     isExternalLink: {control: 'boolean'},
-    isStandalone: {control: 'boolean'},
     children: {control: 'text'},
     href: {control: 'text'},
   },
   args: {
     children: 'Documentation',
     href: '/docs',
-    isStandalone: true,
   },
 };
 

@@ -25,7 +25,8 @@ const requireComponentProps = {
       /src\/components\/[^/]+\/[A-Z][^/]*\.tsx$/.test(filename) &&
       !filename.includes('.test.') &&
       !filename.includes('.stories.') &&
-      !filename.includes('.recipe.');
+      !filename.includes('.recipe.') &&
+      !filename.endsWith('Provider.tsx');
 
     if (!isComponentFile) {
       return {};

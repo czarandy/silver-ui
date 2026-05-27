@@ -1,7 +1,24 @@
-import type {ComponentPropsWithRef, ElementType} from 'react';
+import type {
+  AriaAttributes,
+  CSSProperties,
+  MouseEventHandler,
+  ReactNode,
+  Ref,
+} from 'react';
 
-export type LinkComponentProps = ComponentPropsWithRef<'a'> & {
+export interface LinkComponentProps {
+  ref?: Ref<HTMLAnchorElement>;
+  href?: string;
   to?: string;
-};
+  target?: string;
+  rel?: string;
+  'aria-label'?: AriaAttributes['aria-label'];
+  'aria-disabled'?: AriaAttributes['aria-disabled'];
+  tabIndex?: number;
+  className?: string;
+  style?: CSSProperties;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  children?: ReactNode;
+}
 
-export type LinkComponent = ElementType<LinkComponentProps>;
+export type LinkComponent = React.ElementType<LinkComponentProps>;

@@ -1,7 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type {MouseEvent} from 'react';
+import type {ComponentPropsWithRef, MouseEvent} from 'react';
 import {describe, expect, it, vi} from 'vitest';
+import {LinkProvider} from '../Link';
 import {Button} from './Button';
 
 describe('Button', () => {
@@ -80,7 +81,9 @@ describe('Button', () => {
     const button = screen.getByRole('button', {name: 'Submit'});
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute('aria-busy', 'true');
-    expect(screen.getByRole('status')).toHaveTextContent('Loading');
+    const statuses = screen.getAllByRole('status');
+    expect(statuses).toHaveLength(1);
+    expect(statuses[0]).toHaveTextContent('Loading');
 
     await user.click(button);
     expect(onClick).not.toHaveBeenCalled();
@@ -163,7 +166,9 @@ describe('Button', () => {
     const button = screen.getByRole('button', {name: 'Test'});
     expect(button).toBeEnabled();
     expect(button).toHaveAttribute('aria-disabled', 'true');
-    expect(button).toHaveAttribute('title', 'Reason disabled');
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Reason disabled',
+    );
 
     await user.click(button);
     expect(onClick).not.toHaveBeenCalled();
@@ -193,5 +198,45 @@ describe('Button', () => {
     expect(button).toHaveAttribute('form', 'form-id');
     expect(button).toHaveAttribute('name', 'intent');
     expect(button).toHaveValue('save');
+  });
+
+  it('renders as a link when href is provided', () => {
+    render(<Button label="Docs" href="/docs" />);
+
+    expect(screen.getByRole('link', {name: 'Docs'})).toHaveAttribute(
+      'href',
+      '/docs',
+    );
+  });
+
+  it('uses LinkProvider component for link buttons', () => {
+    function CustomLink({
+      children,
+      ref,
+      ...props
+    }: ComponentPropsWithRef<'a'>): React.JSX.Element {
+      return (
+        <a ref={ref} data-custom-link {...props}>
+          {children}
+        </a>
+      );
+    }
+
+    render(
+      <LinkProvider component={CustomLink}>
+        <Button label="Docs" href="/docs" />
+      </LinkProvider>,
+    );
+
+    expect(screen.getByRole('link', {name: 'Docs'})).toHaveAttribute(
+      'data-custom-link',
+    );
+  });
+
+  it('falls back to button when link button is disabled', () => {
+    render(<Button label="Docs" href="/docs" isDisabled />);
+
+    expect(screen.getByRole('button', {name: 'Docs'})).toBeDisabled();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 });
