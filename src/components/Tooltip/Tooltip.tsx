@@ -33,20 +33,20 @@ export interface TooltipProps {
   style?: CSSProperties;
 }
 
-const wrapperContentsClassName = css({
-  display: 'contents',
-});
-
-const wrapperInlineClassName = css({
-  display: 'inline',
-});
-
-const hoverIndicationClassName = css({
-  textDecorationLine: 'underline',
-  textDecorationStyle: 'dashed',
-  textDecorationColor: 'fg.muted',
-  textUnderlineOffset: '2px',
-});
+const styles = {
+  wrapperContents: css({
+    display: 'contents',
+  }),
+  wrapperInline: css({
+    display: 'inline',
+  }),
+  hoverIndication: css({
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dashed',
+    textDecorationColor: 'fg.muted',
+    textUnderlineOffset: '2px',
+  }),
+};
 
 function isTextOnly(children: ReactNode): boolean {
   return typeof children === 'string' || typeof children === 'number';
@@ -168,8 +168,8 @@ export function Tooltip({
         <span
           aria-describedby={tooltip.describedBy}
           className={cx(
-            wrapperInlineClassName,
-            showHoverIndication ? hoverIndicationClassName : undefined,
+            styles.wrapperInline,
+            showHoverIndication ? styles.hoverIndication : undefined,
             className,
           )}
           data-testid={dataTestId}
@@ -188,7 +188,7 @@ export function Tooltip({
   return (
     <>
       <div
-        className={cx(wrapperContentsClassName, className)}
+        className={cx(styles.wrapperContents, className)}
         data-testid={dataTestId}
         ref={mergeRefs(wrapperRef, ref as Ref<HTMLDivElement>)}
         style={style}>

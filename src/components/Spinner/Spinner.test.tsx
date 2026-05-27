@@ -17,18 +17,12 @@ describe('Spinner', () => {
 
     rerender(<Spinner data-testid="spinner" size="lg" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
-
-    rerender(<Spinner data-testid="spinner" size="xl" />);
-    expect(screen.getByTestId('spinner')).toBeInTheDocument();
   });
 
   it('renders available shades', () => {
     const {rerender} = render(
       <Spinner data-testid="spinner" shade="default" />,
     );
-    expect(screen.getByTestId('spinner')).toBeInTheDocument();
-
-    rerender(<Spinner data-testid="spinner" shade="subtle" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
 
     rerender(<Spinner data-testid="spinner" shade="onMedia" />);

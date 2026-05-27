@@ -58,10 +58,12 @@ const levelToElement = {
   6: 'h6',
 } as const;
 
-const tooltipContentClassName = css({
-  maxW: '80',
-  wordBreak: 'break-word',
-});
+const styles = {
+  tooltipContent: css({
+    maxW: '80',
+    wordBreak: 'break-word',
+  }),
+};
 
 function getMaxLinesVariant(maxLines: number): 'none' | 'one' | 'multiple' {
   if (maxLines === 1) {
@@ -142,9 +144,7 @@ export function Heading({
         <Tooltip
           anchorRef={headingRef}
           content={
-            <span className={tooltipContentClassName}>
-              {truncation.fullText}
-            </span>
+            <span className={styles.tooltipContent}>{truncation.fullText}</span>
           }
           placement={tooltipPlacement}
         />

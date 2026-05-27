@@ -7,11 +7,11 @@ const meta: Meta<typeof Spinner> = {
   argTypes: {
     size: {
       control: {type: 'select'},
-      options: ['sm', 'md', 'lg', 'xl'],
+      options: ['sm', 'md', 'lg'],
     },
     shade: {
       control: {type: 'select'},
-      options: ['default', 'subtle', 'onMedia'],
+      options: ['default', 'onMedia'],
     },
     label: {control: 'text'},
   },
@@ -34,7 +34,6 @@ export const Sizes: Story = {
       <Spinner size="sm" />
       <Spinner size="md" />
       <Spinner size="lg" />
-      <Spinner size="xl" />
     </div>
   ),
 };

@@ -43,14 +43,16 @@ export interface LayerReturn {
   show: () => void;
 }
 
-const layerClassName = css({
-  m: 0,
-  p: 0,
-  borderWidth: 0,
-  borderStyle: 'none',
-  overflow: 'visible',
-  bg: 'transparent',
-});
+const styles = {
+  layer: css({
+    m: 0,
+    p: 0,
+    borderWidth: 0,
+    borderStyle: 'none',
+    overflow: 'visible',
+    bg: 'transparent',
+  }),
+};
 
 function getPositionArea(
   placement: LayerPlacement = 'above',
@@ -178,7 +180,7 @@ export function useLayer({
         id,
         role: props?.role,
         popover: hasLightDismiss ? 'auto' : 'manual',
-        className: cx(layerClassName, props?.className),
+        className: cx(styles.layer, props?.className),
         style: {...anchorStyle, ...props?.style},
       };
 

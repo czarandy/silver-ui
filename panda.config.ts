@@ -76,6 +76,11 @@ export default defineConfig({
             md: {value: '{sizes.10}'},
             lg: {value: '{sizes.12}'},
           },
+          icon: {
+            sm: {value: '{sizes.4}'},
+            md: {value: '{sizes.5}'},
+            lg: {value: '{sizes.6}'},
+          },
         },
         spacing: {
           component: {
@@ -89,6 +94,11 @@ export default defineConfig({
             sm: {value: '14px'},
             md: {value: '14px'},
             lg: {value: '14px'},
+          },
+          icon: {
+            sm: {value: '{sizes.icon.sm}'},
+            md: {value: '{sizes.icon.md}'},
+            lg: {value: '{sizes.icon.lg}'},
           },
         },
         radii: {

@@ -1855,6 +1855,18 @@ const tokens = {
     "value": "var(--silver-sizes-12)",
     "variable": "var(--silver-sizes-component-lg)"
   },
+  "sizes.icon.sm": {
+    "value": "var(--silver-sizes-4)",
+    "variable": "var(--silver-sizes-icon-sm)"
+  },
+  "sizes.icon.md": {
+    "value": "var(--silver-sizes-5)",
+    "variable": "var(--silver-sizes-icon-md)"
+  },
+  "sizes.icon.lg": {
+    "value": "var(--silver-sizes-6)",
+    "variable": "var(--silver-sizes-icon-lg)"
+  },
   "spacing.component.sm": {
     "value": "var(--silver-spacing-3)",
     "variable": "var(--silver-spacing-component-sm)"
@@ -1878,6 +1890,18 @@ const tokens = {
   "fontSizes.component.lg": {
     "value": "14px",
     "variable": "var(--silver-font-sizes-component-lg)"
+  },
+  "fontSizes.icon.sm": {
+    "value": "var(--silver-sizes-icon-sm)",
+    "variable": "var(--silver-font-sizes-icon-sm)"
+  },
+  "fontSizes.icon.md": {
+    "value": "var(--silver-sizes-icon-md)",
+    "variable": "var(--silver-font-sizes-icon-md)"
+  },
+  "fontSizes.icon.lg": {
+    "value": "var(--silver-sizes-icon-lg)",
+    "variable": "var(--silver-font-sizes-icon-lg)"
   },
   "radii.component.sm": {
     "value": "var(--silver-radii-sm)",

@@ -92,10 +92,12 @@ const defaultColorByType: Record<TextType, TextColor> = {
   inherit: 'inherit',
 };
 
-const tooltipContentClassName = css({
-  maxW: '80',
-  wordBreak: 'break-word',
-});
+const styles = {
+  tooltipContent: css({
+    maxW: '80',
+    wordBreak: 'break-word',
+  }),
+};
 
 function getMaxLinesVariant(maxLines: number): 'none' | 'one' | 'multiple' {
   if (maxLines === 1) {
@@ -176,9 +178,7 @@ export function Text({
         <Tooltip
           anchorRef={textRef}
           content={
-            <span className={tooltipContentClassName}>
-              {truncation.fullText}
-            </span>
+            <span className={styles.tooltipContent}>{truncation.fullText}</span>
           }
           placement={tooltipPlacement}
         />

@@ -38,28 +38,28 @@ export interface UseTooltipReturn {
   renderTooltip: (children: ReactNode, props?: ContextRenderProps) => ReactNode;
 }
 
-const tooltipContainerClassName = css({
-  bg: 'fg',
-  color: 'bg',
-  borderRadius: 'md',
-  fontFamily: 'body',
-  fontSize: 'sm',
-  lineHeight: 'normal',
-  boxShadow: 'md',
-});
-
-const tooltipContentClassName = css({
-  px: '2',
-  py: '1',
-  maxW: 'xs',
-  wordBreak: 'break-word',
-});
-
-const marginByPlacement = {
-  above: css({mb: '1'}),
-  below: css({mt: '1'}),
-  start: css({mr: '1'}),
-  end: css({ml: '1'}),
+const styles = {
+  tooltipContainer: css({
+    bg: 'fg',
+    color: 'bg',
+    borderRadius: 'md',
+    fontFamily: 'body',
+    fontSize: 'sm',
+    lineHeight: 'normal',
+    boxShadow: 'md',
+  }),
+  tooltipContent: css({
+    px: '2',
+    py: '1',
+    maxW: 'xs',
+    wordBreak: 'break-word',
+  }),
+  marginByPlacement: {
+    above: css({mb: '1'}),
+    below: css({mt: '1'}),
+    start: css({mr: '1'}),
+    end: css({ml: '1'}),
+  },
 } as const;
 
 function isFocusable(element: HTMLElement): boolean {
@@ -245,13 +245,13 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     (children: ReactNode, props?: ContextRenderProps): ReactNode => {
       const renderPlacement = props?.placement ?? placement;
       return layer.render(
-        <div className={tooltipContentClassName}>{children}</div>,
+        <div className={styles.tooltipContent}>{children}</div>,
         {
           placement: renderPlacement,
           alignment: props?.alignment ?? alignment,
           className: cx(
-            tooltipContainerClassName,
-            marginByPlacement[renderPlacement],
+            styles.tooltipContainer,
+            styles.marginByPlacement[renderPlacement],
             props?.className,
           ),
           role: 'tooltip',

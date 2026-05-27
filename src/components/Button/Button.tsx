@@ -41,61 +41,56 @@ export interface ButtonProps extends NativeButtonProps, ButtonRecipeVariants {
   tooltip?: string;
 }
 
-const contentClassName = css({
-  display: 'contents',
-});
-
-const labelClassName = css({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  minW: 0,
-});
-
-const iconClassName = css({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexShrink: 0,
-  '& > svg': {
-    w: '1em',
-    h: '1em',
+const styles = {
+  content: css({
+    display: 'contents',
+  }),
+  label: css({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    minW: 0,
+  }),
+  icon: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    '& > svg': {
+      w: '1em',
+      h: '1em',
+    },
+  }),
+  endContent: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    color: 'inherit',
+  }),
+  loading: css({
+    color: 'transparent',
+  }),
+  spinnerOverlay: css({
+    position: 'absolute',
+    inset: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }),
+  visuallyHidden: css({
+    position: 'absolute',
+    w: '1px',
+    h: '1px',
+    p: 0,
+    m: '-1px',
+    overflow: 'hidden',
+    clip: 'rect(0, 0, 0, 0)',
+    whiteSpace: 'nowrap',
+    borderWidth: 0,
+  }),
+  iconSize: {
+    sm: css({fontSize: 'icon.sm'}),
+    md: css({fontSize: 'icon.md'}),
+    lg: css({fontSize: 'icon.lg'}),
   },
-});
-
-const endContentClassName = css({
-  display: 'inline-flex',
-  alignItems: 'center',
-  color: 'inherit',
-});
-
-const loadingClassName = css({
-  color: 'transparent',
-});
-
-const spinnerOverlayClassName = css({
-  position: 'absolute',
-  inset: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-});
-
-const visuallyHiddenClassName = css({
-  position: 'absolute',
-  w: '1px',
-  h: '1px',
-  p: 0,
-  m: '-1px',
-  overflow: 'hidden',
-  clip: 'rect(0, 0, 0, 0)',
-  whiteSpace: 'nowrap',
-  borderWidth: 0,
-});
-
-const iconSizeClassNames = {
-  sm: css({fontSize: '16px'}),
-  md: css({fontSize: '16px'}),
-  lg: css({fontSize: '20px'}),
 } as const;
 
 export function Button({
@@ -167,29 +162,26 @@ export function Button({
   const buttonContent = (
     <>
       {isLoadingState && (
-        <span aria-hidden="true" className={spinnerOverlayClassName}>
-          <Spinner shade={spinnerShade} size="sm" />
+        <span aria-hidden="true" className={styles.spinnerOverlay}>
+          <Spinner shade={spinnerShade} size={size} />
         </span>
       )}
       <span
         aria-hidden={isLoadingState || undefined}
-        className={contentClassName}>
+        className={styles.content}>
         {icon != null ? (
           <span
             aria-hidden="true"
-            className={cx(iconClassName, iconSizeClassNames[size])}>
+            className={cx(styles.icon, styles.iconSize[size])}>
             {icon}
           </span>
         ) : null}
-        {!isIconOnly && <span className={labelClassName}>{label}</span>}
+        {!isIconOnly && <span className={styles.label}>{label}</span>}
         {!isIconOnly && endContent != null ? (
-          <span className={endContentClassName}>{endContent}</span>
+          <span className={styles.endContent}>{endContent}</span>
         ) : null}
       </span>
-      <span
-        aria-live="polite"
-        className={visuallyHiddenClassName}
-        role="status">
+      <span aria-live="polite" className={styles.visuallyHidden} role="status">
         {isLoadingState ? 'Loading' : ''}
       </span>
     </>
@@ -197,7 +189,7 @@ export function Button({
 
   const rootClassName = cx(
     buttonRecipe({variant, size, iconOnly: isIconOnly}),
-    isLoadingState && loadingClassName,
+    isLoadingState && styles.loading,
     className,
   );
 

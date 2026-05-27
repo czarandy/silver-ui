@@ -2,41 +2,30 @@ import {cva, type RecipeVariantProps} from 'styled-system/css';
 
 export const spinnerRecipe = cva({
   base: {
+    '--spinner-size': 'var(--silver-sizes-icon-md)',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     verticalAlign: 'middle',
     color: 'primary',
+    w: 'var(--spinner-size)',
+    h: 'var(--spinner-size)',
   },
   variants: {
     size: {
       sm: {
-        w: '3.5',
-        h: '3.5',
-        fontSize: '3.5',
+        '--spinner-size': 'var(--silver-sizes-icon-sm)',
       },
       md: {
-        w: '5',
-        h: '5',
-        fontSize: '5',
+        '--spinner-size': 'var(--silver-sizes-icon-md)',
       },
       lg: {
-        w: '6',
-        h: '6',
-        fontSize: '6',
-      },
-      xl: {
-        w: '9',
-        h: '9',
-        fontSize: '9',
+        '--spinner-size': 'var(--silver-sizes-icon-lg)',
       },
     },
     shade: {
       default: {
         color: 'primary',
-      },
-      subtle: {
-        color: 'fg.muted',
       },
       onMedia: {
         color: 'white',
