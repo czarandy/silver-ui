@@ -1,0 +1,6 @@
+dist/
+storybook-static/
+styled-system/
+node_modules/
+.pnpm-store/
+pnpm-lock.yaml

@@ -1,0 +1,19 @@
+[17:07:24.871] [INFO] storybook v10.4.1
+[17:07:25.559] [DEBUG] Getting package.json info for /Users/agoder/silver-ui/package.json...
+[17:07:26.107] [INFO] Starting...
+[17:07:26.220] [DEBUG] Starting preview..
+[17:07:26.251] [DEBUG] Using tsconfig paths for react-docgen
+[17:07:26.251] [ERROR] Failed to build the preview
+[17:07:26.254] [ERROR] [38;2;241;97;97mReferenceError: __dirname is not defined[39m
+    at Object.viteFinal (file://./.storybook/main.ts:14:32)
+    at file://./node_modules/.pnpm/storybook@10.4.1_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2_@testing-library+dom@10.4.1_@_c455bcb195f02e51476977163856b929/node_modules/storybook/dist/_node-chunks/chunk-PNYLLFX3.js:9190:36
+    at async createViteServer (file://./node_modules/.pnpm/@storybook+builder-vite@10.4.1_esbuild@0.27.7_rollup@4.60.4_storybook@10.4.1_@emnapi+co_007a1365909912c5238648bab5a67fc4/node_modules/@storybook/builder-vite/dist/index.js:1575:21)
+    at async Module.start (file://./node_modules/.pnpm/@storybook+builder-vite@10.4.1_esbuild@0.27.7_rollup@4.60.4_storybook@10.4.1_@emnapi+co_007a1365909912c5238648bab5a67fc4/node_modules/@storybook/builder-vite/dist/index.js:1606:17)
+    at async storybookDevServer (file://./node_modules/.pnpm/storybook@10.4.1_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2_@testing-library+dom@10.4.1_@_c455bcb195f02e51476977163856b929/node_modules/storybook/dist/core-server/index.js:18917:158)
+    at async buildOrThrow (file://./node_modules/.pnpm/storybook@10.4.1_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2_@testing-library+dom@10.4.1_@_c455bcb195f02e51476977163856b929/node_modules/storybook/dist/core-server/index.js:8205:12)
+    at async buildDevStandalone (file://./node_modules/.pnpm/storybook@10.4.1_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2_@testing-library+dom@10.4.1_@_c455bcb195f02e51476977163856b929/node_modules/storybook/dist/core-server/index.js:19478:41)
+    at async withTelemetry (file://./node_modules/.pnpm/storybook@10.4.1_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2_@testing-library+dom@10.4.1_@_c455bcb195f02e51476977163856b929/node_modules/storybook/dist/_node-chunks/chunk-CUZMMOHY.js:655:12)
+    at async dev (file://./node_modules/.pnpm/storybook@10.4.1_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2_@testing-library+dom@10.4.1_@_c455bcb195f02e51476977163856b929/node_modules/storybook/dist/bin/core.js:2736:3)
+    at async _Command.<anonymous> (file://./node_modules/.pnpm/storybook@10.4.1_@emnapi+core@1.9.2_@emnapi+runtime@1.9.2_@testing-library+dom@10.4.1_@_c455bcb195f02e51476977163856b929/node_modules/storybook/dist/bin/core.js:2806:92)
+[17:07:26.259] [WARN] Broken build, fix the error above.
+You may need to refresh the browser.
