@@ -186,6 +186,22 @@ describe('Link', () => {
     );
   });
 
+  it('renders tooltip content for disabled links', () => {
+    render(
+      <Link href="/settings" isDisabled tooltip="Reason disabled">
+        Settings
+      </Link>,
+    );
+
+    expect(screen.getByRole('link', {name: 'Settings'})).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Reason disabled',
+    );
+  });
+
   it('renders custom component when as is provided', () => {
     render(
       <Link as={CustomLink} href="/custom">

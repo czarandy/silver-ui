@@ -25,7 +25,6 @@ export const linkRecipe = cva({
     '&[aria-disabled="true"]': {
       cursor: 'not-allowed',
       opacity: 0.5,
-      pointerEvents: 'none',
     },
   },
   variants: {

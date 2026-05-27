@@ -120,6 +120,7 @@ export const IsDisabled: Story = {
   args: {
     children: 'Disabled link',
     isDisabled: true,
+    tooltip: 'This link is unavailable for your current role.',
   },
 };
 
