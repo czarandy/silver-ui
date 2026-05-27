@@ -26,7 +26,7 @@ describe('Heading', () => {
 
   it('sets aria-level when accessibilityLevel differs', () => {
     render(
-      <Heading level={2} accessibilityLevel={3}>
+      <Heading accessibilityLevel={3} level={2}>
         Sidebar section
       </Heading>,
     );
@@ -38,7 +38,7 @@ describe('Heading', () => {
 
   it('supports display type variants', () => {
     render(
-      <Heading level={1} type="display-1" data-testid="heading">
+      <Heading data-testid="heading" level={1} type="display-1">
         Hero
       </Heading>,
     );
@@ -47,7 +47,7 @@ describe('Heading', () => {
 
   it('sets line clamp style for multiline truncation', () => {
     render(
-      <Heading level={3} maxLines={2} data-testid="heading">
+      <Heading data-testid="heading" level={3} maxLines={2}>
         A very long heading
       </Heading>,
     );

@@ -28,11 +28,11 @@ describe('Text', () => {
   it('supports typography variants', () => {
     render(
       <Text
-        type="supporting"
-        size="sm"
         color="secondary"
-        weight="semibold"
-        data-testid="text">
+        data-testid="text"
+        size="sm"
+        type="supporting"
+        weight="semibold">
         Helper text
       </Text>,
     );
@@ -41,7 +41,7 @@ describe('Text', () => {
 
   it('applies truncation styles for single-line text', () => {
     render(
-      <Text maxLines={1} data-testid="text">
+      <Text data-testid="text" maxLines={1}>
         A very long line
       </Text>,
     );
@@ -50,7 +50,7 @@ describe('Text', () => {
 
   it('sets line clamp style for multiline truncation', () => {
     render(
-      <Text maxLines={2} data-testid="text">
+      <Text data-testid="text" maxLines={2}>
         A very long paragraph
       </Text>,
     );

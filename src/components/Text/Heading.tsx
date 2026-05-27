@@ -26,22 +26,28 @@ type NativeHeadingProps = Omit<
 >;
 
 export interface HeadingProps extends NativeHeadingProps {
-  level: HeadingLevel;
-  type?: HeadingType;
   accessibilityLevel?: HeadingLevel;
-  color?: TextColor;
-  display?: TextDisplay;
-  maxLines?: number;
-  hasTruncateTooltip?: boolean | HeadingTruncateTooltipPlacement;
-  wordBreak?: TextWordBreak;
-  textWrap?: TextWrap;
-  hasCapsize?: boolean;
-  hasStrikethrough?: boolean;
   children: ReactNode;
   className?: string;
-  style?: CSSProperties;
+  color?: TextColor;
+  'data-testid'?: string;
+  display?: TextDisplay;
+  hasCapsize?: boolean;
+  hasStrikethrough?: boolean;
+  hasTruncateTooltip?: boolean | HeadingTruncateTooltipPlacement;
+  level: HeadingLevel;
+  maxLines?: number;
   ref?: Ref<HTMLHeadingElement>;
+  style?: CSSProperties;
+  textWrap?: TextWrap;
+  type?: HeadingType;
+  wordBreak?: TextWordBreak;
 }
+
+type HeadingElementProps = HTMLAttributes<HTMLHeadingElement> & {
+  'data-testid'?: string;
+  ref?: Ref<HTMLHeadingElement>;
+};
 
 const levelToElement = {
   1: 'h1',
@@ -83,6 +89,7 @@ export function Heading({
   hasStrikethrough = false,
   children,
   className,
+  'data-testid': dataTestId,
   style,
   ref,
   ...props
@@ -103,31 +110,30 @@ export function Heading({
       ? accessibilityLevel
       : undefined;
 
-  const element = createElement(
-    levelToElement[level],
-    {
-      ...props,
-      ref: mergeRefs(ref, truncation.ref, headingRef),
-      'aria-level': ariaLevel,
-      className: cx(
-        headingRecipe({
-          level,
-          type,
-          color,
-          display: resolvedDisplay,
-          wordBreak: maxLines > 0 ? resolvedWordBreak : undefined,
-          textWrap,
-          hasCapsize,
-          hasStrikethrough,
-          maxLines: getMaxLinesVariant(maxLines),
-        }),
-        className,
-      ),
-      style: {...lineClampStyle, ...style},
-      title: isTooltipEnabled ? truncation.fullText : undefined,
-    },
-    children,
-  );
+  const elementProps: HeadingElementProps = {
+    ...props,
+    ref: mergeRefs(ref, truncation.ref, headingRef),
+    'aria-level': ariaLevel,
+    'data-testid': dataTestId,
+    className: cx(
+      headingRecipe({
+        level,
+        type,
+        color,
+        display: resolvedDisplay,
+        wordBreak: maxLines > 0 ? resolvedWordBreak : undefined,
+        textWrap,
+        hasCapsize,
+        hasStrikethrough,
+        maxLines: getMaxLinesVariant(maxLines),
+      }),
+      className,
+    ),
+    style: {...lineClampStyle, ...style},
+    title: isTooltipEnabled ? truncation.fullText : undefined,
+  };
+
+  const element = createElement(levelToElement[level], elementProps, children);
 
   return (
     <>

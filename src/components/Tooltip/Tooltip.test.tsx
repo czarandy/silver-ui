@@ -65,7 +65,7 @@ describe('Tooltip', () => {
     const onOpenChange = vi.fn();
 
     render(
-      <Tooltip content="Tooltip text" onOpenChange={onOpenChange} delay={0}>
+      <Tooltip content="Tooltip text" delay={0} onOpenChange={onOpenChange}>
         <button type="button">Trigger</button>
       </Tooltip>,
     );

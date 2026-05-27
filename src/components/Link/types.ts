@@ -7,18 +7,19 @@ import type {
 } from 'react';
 
 export interface LinkComponentProps {
-  ref?: Ref<HTMLAnchorElement>;
-  href?: string;
-  to?: string;
-  target?: string;
-  rel?: string;
-  'aria-label'?: AriaAttributes['aria-label'];
   'aria-disabled'?: AriaAttributes['aria-disabled'];
-  tabIndex?: number;
-  className?: string;
-  style?: CSSProperties;
-  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  'aria-label'?: AriaAttributes['aria-label'];
   children?: ReactNode;
+  className?: string;
+  'data-testid'?: string;
+  href?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  ref?: Ref<HTMLAnchorElement>;
+  rel?: string;
+  style?: CSSProperties;
+  tabIndex?: number;
+  target?: string;
+  to?: string;
 }
 
 export type LinkComponent = React.ElementType<LinkComponentProps>;

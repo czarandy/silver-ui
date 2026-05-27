@@ -11,19 +11,19 @@ export interface UseTruncationOptions {
 }
 
 export interface UseTruncationReturn {
-  ref: RefCallback<HTMLElement>;
-  isTruncated: boolean;
   fullText: string;
+  isTruncated: boolean;
+  ref: RefCallback<HTMLElement>;
 }
 
 interface TruncationState {
-  isTruncated: boolean;
   fullText: string;
+  isTruncated: boolean;
 }
 
 interface TruncationStore {
-  state: TruncationState;
   listeners: Set<() => void>;
+  state: TruncationState;
 }
 
 const initialState: TruncationState = {

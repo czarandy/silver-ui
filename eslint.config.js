@@ -4,6 +4,7 @@ import vitest from '@vitest/eslint-plugin';
 import importX from 'eslint-plugin-import-x';
 import jestDom from 'eslint-plugin-jest-dom-ya';
 import jsxA11y from 'eslint-plugin-jsx-a11y-x';
+import perfectionist from 'eslint-plugin-perfectionist';
 import reactCompiler from 'eslint-plugin-react-compiler';
 import storybook from 'eslint-plugin-storybook';
 import testingLibrary from 'eslint-plugin-testing-library';
@@ -60,6 +61,23 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'error',
+    },
+  },
+  // Prop and interface sorting — auto-fixable consistent ordering
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: {
+      perfectionist,
+    },
+    rules: {
+      'perfectionist/sort-jsx-props': [
+        'error',
+        {type: 'alphabetical', order: 'asc'},
+      ],
+      'perfectionist/sort-interfaces': [
+        'error',
+        {type: 'alphabetical', order: 'asc'},
+      ],
     },
   },
   // Import hygiene — clean module structure for a published library

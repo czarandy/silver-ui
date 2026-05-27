@@ -14,22 +14,23 @@ import {useTooltip, type TooltipFocusTrigger} from './useTooltip';
 export type {TooltipFocusTrigger} from './useTooltip';
 
 export interface TooltipProps {
-  children?: ReactNode;
-  anchorRef?: React.RefObject<HTMLElement | null>;
-  content: ReactNode;
-  placement?: LayerPlacement;
   alignment?: LayerAlignment;
+  anchorRef?: React.RefObject<HTMLElement | null>;
+  children?: ReactNode;
+  className?: string;
+  content: ReactNode;
+  'data-testid'?: string;
   delay?: number;
-  hideDelay?: number;
   focusTrigger?: TooltipFocusTrigger;
+  hasHoverIndication?: 'auto' | boolean;
+  hideDelay?: number;
+  isDefaultOpen?: boolean;
   isEnabled?: boolean;
   isOpen?: boolean;
-  isDefaultOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
-  hasHoverIndication?: 'auto' | boolean;
-  className?: string;
-  style?: CSSProperties;
+  placement?: LayerPlacement;
   ref?: Ref<HTMLDivElement | HTMLSpanElement>;
+  style?: CSSProperties;
 }
 
 const wrapperContentsClassName = css({
@@ -71,6 +72,7 @@ export function Tooltip({
   onOpenChange,
   hasHoverIndication = 'auto',
   className,
+  'data-testid': dataTestId,
   style,
   ref,
 }: TooltipProps): React.JSX.Element {
@@ -164,17 +166,18 @@ export function Tooltip({
     return (
       <>
         <span
-          ref={mergeRefs(tooltip.ref, ref)}
-          // Text-only tooltip triggers need keyboard access.
-          // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex
-          tabIndex={0}
           aria-describedby={tooltip.describedBy}
           className={cx(
             wrapperInlineClassName,
             showHoverIndication ? hoverIndicationClassName : undefined,
             className,
           )}
-          style={style}>
+          data-testid={dataTestId}
+          ref={mergeRefs(tooltip.ref, ref)}
+          style={style}
+          // Text-only tooltip triggers need keyboard access.
+          // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex
+          tabIndex={0}>
           {children}
         </span>
         {tooltip.renderTooltip(content)}
@@ -185,8 +188,9 @@ export function Tooltip({
   return (
     <>
       <div
-        ref={mergeRefs(wrapperRef, ref as Ref<HTMLDivElement>)}
         className={cx(wrapperContentsClassName, className)}
+        data-testid={dataTestId}
+        ref={mergeRefs(wrapperRef, ref as Ref<HTMLDivElement>)}
         style={style}>
         {children}
       </div>

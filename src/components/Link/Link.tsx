@@ -12,6 +12,7 @@ import {css} from 'styled-system/css';
 import {cx} from '../../lib/cx';
 import type {TextColor} from '../Text';
 import {Tooltip} from '../Tooltip';
+import {VisuallyHidden} from '../internal';
 import {linkRecipe} from './Link.recipe';
 import type {LinkComponent} from './types';
 import {useLinkComponent} from './useLinkComponent';
@@ -28,17 +29,30 @@ export interface LinkProps {
    */
   as?: LinkComponent;
   /**
+   * Link content.
+   */
+  children: ReactNode;
+  /**
+   * Optionally, rendering by setting the className.
+   */
+  className?: string;
+  /**
    * Color variant controlling the link text color. Default is `active`.
    */
   color?: TextColor;
   /**
-   * Accessible label (aria-label). It is recommended to set this if your link does not contain sufficient text to make its purpose clear.
+   * Test id applied to the root element.
    */
-  label?: string;
+  'data-testid'?: string;
   /**
    * Show a persistent underline on the link text.
    */
   hasUnderline?: boolean;
+  /**
+   * URL destination. Custom link components receive this as both `href` and
+   * `to` so router links and anchor-like links can share the same Silver UI API.
+   */
+  href?: string;
   /**
    * Visually and functionally disable the link. Prevents navigation and removes from tab order.
    */
@@ -48,41 +62,33 @@ export interface LinkProps {
    */
   isExternalLink?: boolean;
   /**
-   * Tooltip text shown on hover.
+   * Accessible label (aria-label). It is recommended to set this if your link does not contain sufficient text to make its purpose clear.
    */
-  tooltip?: string;
+  label?: string;
   /**
-   * Link content.
+   * Click handler. Not called when the link is disabled.
    */
-  children: ReactNode;
-  /**
-   * URL destination. Passed as `to` for custom router components.
-   */
-  href?: string;
-  /**
-   * HTML target attribute.
-   */
-  target?: string;
-  /**
-   * HTML rel attribute.
-   */
-  rel?: string;
-  /**
-   * Optionally, rendering by setting the className.
-   */
-  className?: string;
-  /**
-   * Inline styles applied to the root element.
-   */
-  style?: CSSProperties;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
   /**
    * Ref forwarded to the underlying anchor element.
    */
   ref?: Ref<HTMLAnchorElement>;
   /**
-   * Click handler. Not called when the link is disabled.
+   * HTML rel attribute.
    */
-  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  rel?: string;
+  /**
+   * Inline styles applied to the root element.
+   */
+  style?: CSSProperties;
+  /**
+   * HTML target attribute.
+   */
+  target?: string;
+  /**
+   * Tooltip text shown on hover.
+   */
+  tooltip?: string;
 }
 
 export function Link({
@@ -97,6 +103,7 @@ export function Link({
   tooltip,
   color,
   className,
+  'data-testid': dataTestId,
   style,
   ref,
   children,
@@ -117,20 +124,27 @@ export function Link({
 
   const element = (
     <Component
-      ref={ref}
-      href={href}
-      to={Component === 'a' ? undefined : href}
-      target={target}
-      rel={rel}
-      aria-label={getAriaLabel(label, isExternalLink)}
       aria-disabled={isDisabled || undefined}
-      tabIndex={isDisabled ? -1 : undefined}
+      aria-label={getAriaLabel(label, isExternalLink)}
       className={cx(linkRecipe({color, hasUnderline}), className)}
+      data-testid={dataTestId}
+      href={href}
+      onClick={handleClick}
+      ref={ref}
+      rel={rel}
       style={style}
-      onClick={handleClick}>
+      tabIndex={isDisabled ? -1 : undefined}
+      target={target}
+      to={Component === 'a' ? undefined : href}>
       {children}
+      {isExternalLink && label == null ? (
+        <>
+          {' '}
+          <VisuallyHidden>(opens in new tab)</VisuallyHidden>
+        </>
+      ) : null}
       {isExternalLink ? (
-        <span className={styles.externalLink} aria-hidden="true">
+        <span aria-hidden="true" className={styles.externalLink}>
           <ExternalLink size="1em" strokeWidth={2} />
         </span>
       ) : null}
@@ -163,8 +177,7 @@ function getAriaLabel(
     return label;
   }
 
-  const suffix = '(opens in new tab)';
-  return label != null ? `${label} ${suffix}` : suffix;
+  return label != null ? `${label} (opens in new tab)` : undefined;
 }
 
 function useRel({

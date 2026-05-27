@@ -30,9 +30,9 @@ describe('Button', () => {
   it('renders icon-only button with aria-label', () => {
     render(
       <Button
-        label="Settings"
         icon={<span data-testid="icon">Icon</span>}
         isIconOnly
+        label="Settings"
       />,
     );
 
@@ -42,7 +42,7 @@ describe('Button', () => {
   });
 
   it('renders icon and label together', () => {
-    render(<Button label="Settings" icon={<span data-testid="icon" />} />);
+    render(<Button icon={<span data-testid="icon" />} label="Settings" />);
 
     const button = screen.getByRole('button', {name: 'Settings'});
     expect(button).not.toHaveAttribute('aria-label');
@@ -51,7 +51,7 @@ describe('Button', () => {
 
   it('renders endContent after the label', () => {
     render(
-      <Button label="Inbox" endContent={<span data-testid="end">3</span>} />,
+      <Button endContent={<span data-testid="end">3</span>} label="Inbox" />,
     );
 
     const button = screen.getByRole('button', {name: 'Inbox'});
@@ -62,10 +62,10 @@ describe('Button', () => {
   it('does not render endContent for icon-only buttons', () => {
     render(
       <Button
-        label="Settings"
-        icon={<span data-testid="icon" />}
         endContent={<span data-testid="end">3</span>}
+        icon={<span data-testid="icon" />}
         isIconOnly
+        label="Settings"
       />,
     );
 
@@ -76,7 +76,7 @@ describe('Button', () => {
   it('shows loading state and suppresses clicks', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
-    render(<Button label="Submit" isLoading onClick={onClick} />);
+    render(<Button isLoading label="Submit" onClick={onClick} />);
 
     const button = screen.getByRole('button', {name: 'Submit'});
     expect(button).toBeDisabled();
@@ -108,7 +108,7 @@ describe('Button', () => {
       order.push('clickAction');
     });
 
-    render(<Button label="Test" onClick={onClick} clickAction={clickAction} />);
+    render(<Button clickAction={clickAction} label="Test" onClick={onClick} />);
 
     await user.click(screen.getByRole('button', {name: 'Test'}));
     expect(order).toEqual(['onClick', 'clickAction']);
@@ -121,7 +121,7 @@ describe('Button', () => {
     });
     const clickAction = vi.fn();
 
-    render(<Button label="Test" onClick={onClick} clickAction={clickAction} />);
+    render(<Button clickAction={clickAction} label="Test" onClick={onClick} />);
 
     await user.click(screen.getByRole('button', {name: 'Test'}));
     expect(clickAction).not.toHaveBeenCalled();
@@ -135,7 +135,7 @@ describe('Button', () => {
 
   it('applies custom className and style', () => {
     render(
-      <Button label="Test" className="custom-class" style={{color: 'red'}} />,
+      <Button className="custom-class" label="Test" style={{color: 'red'}} />,
     );
 
     const button = screen.getByRole('button', {name: 'Test'});
@@ -144,7 +144,7 @@ describe('Button', () => {
   });
 
   it('can be disabled', () => {
-    render(<Button label="Test" isDisabled />);
+    render(<Button isDisabled label="Test" />);
     expect(screen.getByRole('button', {name: 'Test'})).toBeDisabled();
   });
 
@@ -155,11 +155,11 @@ describe('Button', () => {
 
     render(
       <Button
-        label="Test"
-        tooltip="Reason disabled"
         isDisabled
+        label="Test"
         onClick={onClick}
         onKeyDown={onKeyDown}
+        tooltip="Reason disabled"
       />,
     );
 
@@ -184,9 +184,9 @@ describe('Button', () => {
   it('defaults type to button and passes form attributes', () => {
     render(
       <Button
-        label="Submit"
         data-testid="my-button"
         form="form-id"
+        label="Submit"
         name="intent"
         type="submit"
         value="save"
@@ -201,7 +201,7 @@ describe('Button', () => {
   });
 
   it('renders as a link when href is provided', () => {
-    render(<Button label="Docs" href="/docs" />);
+    render(<Button href="/docs" label="Docs" />);
 
     expect(screen.getByRole('link', {name: 'Docs'})).toHaveAttribute(
       'href',
@@ -216,7 +216,7 @@ describe('Button', () => {
       ...props
     }: ComponentPropsWithRef<'a'>): React.JSX.Element {
       return (
-        <a ref={ref} data-custom-link {...props}>
+        <a data-custom-link ref={ref} {...props}>
           {children}
         </a>
       );
@@ -224,7 +224,7 @@ describe('Button', () => {
 
     render(
       <LinkProvider component={CustomLink}>
-        <Button label="Docs" href="/docs" />
+        <Button href="/docs" label="Docs" />
       </LinkProvider>,
     );
 
@@ -234,7 +234,7 @@ describe('Button', () => {
   });
 
   it('falls back to button when link button is disabled', () => {
-    render(<Button label="Docs" href="/docs" isDisabled />);
+    render(<Button href="/docs" isDisabled label="Docs" />);
 
     expect(screen.getByRole('button', {name: 'Docs'})).toBeDisabled();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();

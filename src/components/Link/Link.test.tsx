@@ -11,7 +11,7 @@ function CustomLink({
   ...props
 }: ComponentPropsWithRef<'a'>): React.JSX.Element {
   return (
-    <a ref={ref} data-custom-link {...props}>
+    <a data-custom-link ref={ref} {...props}>
       {children}
     </a>
   );
@@ -23,7 +23,7 @@ function AnotherLink({
   ...props
 }: ComponentPropsWithRef<'a'>): React.JSX.Element {
   return (
-    <a ref={ref} data-another-link {...props}>
+    <a data-another-link ref={ref} {...props}>
       {children}
     </a>
   );
@@ -41,7 +41,7 @@ function ToBasedRouterLink({
   ref?: Ref<HTMLAnchorElement>;
 }): React.JSX.Element {
   return (
-    <a ref={ref} href={to} data-router-link data-to={to} {...props}>
+    <a data-router-link data-to={to} href={to} ref={ref} {...props}>
       {children}
     </a>
   );
@@ -58,9 +58,18 @@ describe('Link', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/destination');
   });
 
+  it('forwards data-testid to the root element', () => {
+    render(
+      <Link data-testid="docs-link" href="/docs">
+        Docs
+      </Link>,
+    );
+    expect(screen.getByTestId('docs-link')).toHaveAttribute('href', '/docs');
+  });
+
   it('uses label as an accessible override', () => {
     render(
-      <Link label="Home" href="/home">
+      <Link href="/home" label="Home">
         <span aria-hidden="true">Icon</span>
       </Link>,
     );
@@ -73,21 +82,21 @@ describe('Link', () => {
 
   it('renders color variants and underline styles', () => {
     const {rerender} = render(
-      <Link href="/test" color="active" hasUnderline>
+      <Link color="active" hasUnderline href="/test">
         Active
       </Link>,
     );
     expect(screen.getByRole('link', {name: 'Active'})).toBeInTheDocument();
 
     rerender(
-      <Link href="/test" color="secondary">
+      <Link color="secondary" href="/test">
         Secondary
       </Link>,
     );
     expect(screen.getByRole('link', {name: 'Secondary'})).toBeInTheDocument();
 
     rerender(
-      <Link href="/test" color="inherit">
+      <Link color="inherit" href="/test">
         Inherit
       </Link>,
     );
@@ -112,14 +121,16 @@ describe('Link', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('renders external link attributes and icon text', () => {
+  it('renders external link attributes and keeps visible text in the accessible name', () => {
     render(
       <Link href="https://example.com" isExternalLink rel="sponsored">
         External Link
       </Link>,
     );
 
-    const link = screen.getByRole('link', {name: '(opens in new tab)'});
+    const link = screen.getByRole('link', {
+      name: 'External Link (opens in new tab)',
+    });
     expect(link).toHaveAttribute('target', '_blank');
     expect(link).toHaveAttribute('rel', 'sponsored noopener noreferrer');
   });
@@ -177,7 +188,7 @@ describe('Link', () => {
 
   it('renders custom component when as is provided', () => {
     render(
-      <Link href="/custom" as={CustomLink}>
+      <Link as={CustomLink} href="/custom">
         Custom Link
       </Link>,
     );
@@ -202,7 +213,7 @@ describe('Link', () => {
   it('as prop overrides LinkProvider', () => {
     render(
       <LinkProvider component={AnotherLink}>
-        <Link href="/override" as={CustomLink}>
+        <Link as={CustomLink} href="/override">
           Override Link
         </Link>
       </LinkProvider>,
@@ -215,7 +226,7 @@ describe('Link', () => {
 
   it('applies custom className', () => {
     render(
-      <Link href="/test" className="custom-class">
+      <Link className="custom-class" href="/test">
         Test
       </Link>,
     );
@@ -274,17 +285,29 @@ describe('Link', () => {
     );
   });
 
-  it('sets aria-label without label for external links', () => {
+  it('uses hidden suffix text instead of aria-label without label for external links', () => {
     render(
       <Link href="https://example.com" isExternalLink>
         Docs
       </Link>,
     );
 
-    expect(screen.getByRole('link')).toHaveAttribute(
-      'aria-label',
-      '(opens in new tab)',
+    const link = screen.getByRole('link', {
+      name: 'Docs (opens in new tab)',
+    });
+    expect(link).not.toHaveAttribute('aria-label');
+  });
+
+  it('passes href and to to custom link components for router compatibility', () => {
+    render(
+      <Link as={ToBasedRouterLink} href="/custom">
+        Router Link
+      </Link>,
     );
+
+    const link = screen.getByRole('link', {name: 'Router Link'});
+    expect(link).toHaveAttribute('href', '/custom');
+    expect(link).toHaveAttribute('data-to', '/custom');
   });
 });
 
@@ -297,7 +320,7 @@ describe('useLinkComponent', () => {
     expect(link).not.toHaveAttribute('to');
   });
 
-  it('passes to equal to href for custom components', () => {
+  it('passes href and to equal to href for provider custom components', () => {
     render(
       <LinkProvider component={ToBasedRouterLink}>
         <Link href="/test">Router Link</Link>

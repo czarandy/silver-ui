@@ -25,18 +25,19 @@ type NativeButtonProps = Omit<
 >;
 
 export interface ButtonProps extends NativeButtonProps, ButtonRecipeVariants {
-  label: string;
-  href?: string;
   as?: LinkComponent;
-  target?: string;
-  rel?: string;
-  isDisabled?: boolean;
-  isLoading?: boolean;
-  onClick?: MouseEventHandler<HTMLElement>;
   clickAction?: (event: MouseEvent<HTMLElement>) => void | Promise<void>;
-  icon?: ReactNode;
-  isIconOnly?: boolean;
+  'data-testid'?: string;
   endContent?: ReactNode;
+  href?: string;
+  icon?: ReactNode;
+  isDisabled?: boolean;
+  isIconOnly?: boolean;
+  isLoading?: boolean;
+  label: string;
+  onClick?: MouseEventHandler<HTMLElement>;
+  rel?: string;
+  target?: string;
   tooltip?: string;
 }
 
@@ -106,6 +107,7 @@ export function Button({
   variant,
   size: sizeProp,
   className,
+  'data-testid': dataTestId,
   style,
   type = 'button',
   ref,
@@ -165,17 +167,17 @@ export function Button({
   const buttonContent = (
     <>
       {isLoadingState && (
-        <span className={spinnerOverlayClassName} aria-hidden="true">
-          <Spinner size="sm" shade={spinnerShade} />
+        <span aria-hidden="true" className={spinnerOverlayClassName}>
+          <Spinner shade={spinnerShade} size="sm" />
         </span>
       )}
       <span
-        className={contentClassName}
-        aria-hidden={isLoadingState || undefined}>
+        aria-hidden={isLoadingState || undefined}
+        className={contentClassName}>
         {icon != null ? (
           <span
-            className={cx(iconClassName, iconSizeClassNames[size])}
-            aria-hidden="true">
+            aria-hidden="true"
+            className={cx(iconClassName, iconSizeClassNames[size])}>
             {icon}
           </span>
         ) : null}
@@ -185,9 +187,9 @@ export function Button({
         ) : null}
       </span>
       <span
+        aria-live="polite"
         className={visuallyHiddenClassName}
-        role="status"
-        aria-live="polite">
+        role="status">
         {isLoadingState ? 'Loading' : ''}
       </span>
     </>
@@ -209,6 +211,7 @@ export function Button({
         target,
         rel,
         className: rootClassName,
+        'data-testid': dataTestId,
         style,
         'aria-label': ariaLabel,
         onClick: handleClick,
@@ -217,16 +220,17 @@ export function Button({
     )
   ) : (
     <button
-      ref={ref}
-      type={type}
-      className={rootClassName}
-      style={style}
-      disabled={useAriaDisabled ? undefined : buttonDisabled}
       aria-busy={isLoadingState || undefined}
       aria-disabled={useAriaDisabled || undefined}
       aria-label={ariaLabel}
+      className={rootClassName}
+      data-testid={dataTestId}
+      disabled={useAriaDisabled ? undefined : buttonDisabled}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
+      ref={ref}
+      style={style}
+      type={type}
       {...rest}>
       {buttonContent}
     </button>

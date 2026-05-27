@@ -17,24 +17,24 @@ import {
 export type TooltipFocusTrigger = 'auto' | 'always' | 'never';
 
 export interface UseTooltipOptions {
-  placement?: LayerPlacement;
   alignment?: LayerAlignment;
   delay?: number;
-  hideDelay?: number;
   focusTrigger?: TooltipFocusTrigger;
+  hideDelay?: number;
+  isDefaultOpen?: boolean;
   isEnabled?: boolean;
   isOpen?: boolean;
-  isDefaultOpen?: boolean;
-  onShow?: () => void;
   onHide?: () => void;
+  onShow?: () => void;
+  placement?: LayerPlacement;
 }
 
 export interface UseTooltipReturn {
-  ref: RefCallback<HTMLElement>;
-  positionRef: RefCallback<HTMLElement>;
-  interactionRef: RefCallback<HTMLElement>;
   anchorId: string;
   describedBy: string;
+  interactionRef: RefCallback<HTMLElement>;
+  positionRef: RefCallback<HTMLElement>;
+  ref: RefCallback<HTMLElement>;
   renderTooltip: (children: ReactNode, props?: ContextRenderProps) => ReactNode;
 }
 

@@ -9,7 +9,7 @@ function StoryLink({
   ...props
 }: ComponentPropsWithRef<'a'>): React.JSX.Element {
   return (
-    <a ref={ref} data-story-link {...props}>
+    <a data-story-link ref={ref} {...props}>
       {children}
     </a>
   );
@@ -35,6 +35,8 @@ const meta: Meta<typeof Link> = {
     isExternalLink: {control: 'boolean'},
     children: {control: 'text'},
     href: {control: 'text'},
+    rel: {control: 'text'},
+    target: {control: 'text'},
   },
   args: {
     children: 'Documentation',
@@ -87,6 +89,31 @@ export const ProviderOverride: Story = {
       <Link href="/provider">Provider link</Link>
     </LinkProvider>
   ),
+};
+
+export const AsOverride: Story = {
+  render: () => (
+    <Link as={StoryLink} href="/as-override">
+      Direct custom link
+    </Link>
+  ),
+};
+
+export const TargetBlank: Story = {
+  args: {
+    children: 'Open report',
+    href: 'https://example.com/report',
+    target: '_blank',
+  },
+};
+
+export const CustomRel: Story = {
+  args: {
+    children: 'Sponsored partner',
+    href: 'https://example.com/partner',
+    rel: 'sponsored',
+    target: '_blank',
+  },
 };
 
 export const IsDisabled: Story = {

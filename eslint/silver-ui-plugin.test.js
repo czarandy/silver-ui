@@ -17,12 +17,12 @@ tester.run('require-component-props', requireComponentPropsRule, {
   valid: [
     {
       name: 'function declaration with all required props',
-      code: 'export function Button({ className, style, ref, ...rest }) { return <button />; }',
+      code: 'export function Button({ className, style, ref, "data-testid": dataTestId, ...rest }) { return <button />; }',
       filename: 'src/components/Button/Button.tsx',
     },
     {
       name: 'arrow function with all required props',
-      code: 'export const Button = ({ className, style, ref, ...rest }) => <button />;',
+      code: 'export const Button = ({ className, style, ref, "data-testid": dataTestId, ...rest }) => <button />;',
       filename: 'src/components/Button/Button.tsx',
     },
     {
@@ -45,6 +45,11 @@ tester.run('require-component-props', requireComponentPropsRule, {
       code: 'export const buttonRecipe = cva({});',
       filename: 'src/components/Button/Button.recipe.ts',
     },
+    {
+      name: 'internal components are ignored',
+      code: 'export function VisuallyHidden({ children, ref }) { return <span ref={ref}>{children}</span>; }',
+      filename: 'src/components/internal/VisuallyHidden.tsx',
+    },
   ],
   invalid: [
     {
@@ -55,6 +60,10 @@ tester.run('require-component-props', requireComponentPropsRule, {
         {
           messageId: 'missingPropDestructure',
           data: {name: 'Button', prop: 'className'},
+        },
+        {
+          messageId: 'missingPropDestructure',
+          data: {name: 'Button', prop: 'data-testid'},
         },
       ],
     },
@@ -67,6 +76,10 @@ tester.run('require-component-props', requireComponentPropsRule, {
           messageId: 'missingPropDestructure',
           data: {name: 'Button', prop: 'style'},
         },
+        {
+          messageId: 'missingPropDestructure',
+          data: {name: 'Button', prop: 'data-testid'},
+        },
       ],
     },
     {
@@ -78,10 +91,14 @@ tester.run('require-component-props', requireComponentPropsRule, {
           messageId: 'missingPropDestructure',
           data: {name: 'Button', prop: 'ref'},
         },
+        {
+          messageId: 'missingPropDestructure',
+          data: {name: 'Button', prop: 'data-testid'},
+        },
       ],
     },
     {
-      name: 'all three props missing',
+      name: 'all required props missing',
       code: 'export function Button({ children }) { return <button />; }',
       filename: 'src/components/Button/Button.tsx',
       errors: [
@@ -96,6 +113,10 @@ tester.run('require-component-props', requireComponentPropsRule, {
         {
           messageId: 'missingPropDestructure',
           data: {name: 'Button', prop: 'ref'},
+        },
+        {
+          messageId: 'missingPropDestructure',
+          data: {name: 'Button', prop: 'data-testid'},
         },
       ],
     },
@@ -115,6 +136,10 @@ tester.run('require-component-props', requireComponentPropsRule, {
         {
           messageId: 'missingPropDestructure',
           data: {name: 'Card', prop: 'ref'},
+        },
+        {
+          messageId: 'missingPropDestructure',
+          data: {name: 'Card', prop: 'data-testid'},
         },
       ],
     },

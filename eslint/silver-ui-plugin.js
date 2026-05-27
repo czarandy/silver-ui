@@ -2,7 +2,7 @@
  * Custom ESLint plugin for silver-ui component conventions.
  *
  * Rules:
- * - silver-ui/require-component-props: Components must accept className, style, and ref
+ * - silver-ui/require-component-props: Components must accept className, style, ref, and data-testid
  * - silver-ui/boolean-prop-naming: Boolean props must start with is or has
  */
 
@@ -11,7 +11,7 @@ const requireComponentProps = {
     type: 'problem',
     docs: {
       description:
-        'Require silver-ui components to accept className, style, and ref props',
+        'Require silver-ui components to accept className, style, ref, and data-testid props',
     },
     messages: {
       missingPropDestructure:
@@ -24,6 +24,7 @@ const requireComponentProps = {
 
     const isComponentFile =
       /src\/components\/[^/]+\/[A-Z][^/]*\.tsx$/.test(filename) &&
+      !filename.includes('src/components/internal/') &&
       !filename.includes('.test.') &&
       !filename.includes('.stories.') &&
       !filename.includes('.recipe.') &&
@@ -44,8 +45,9 @@ const requireComponentProps = {
           const propsParam = node.params[0];
           if (propsParam && propsParam.type === 'ObjectPattern') {
             for (const prop of propsParam.properties) {
-              if (prop.type === 'Property' && prop.key.type === 'Identifier') {
-                destructuredProps.add(prop.key.name);
+              const propName = getDestructuredPropertyName(prop);
+              if (propName != null) {
+                destructuredProps.add(propName);
               }
             }
           }
@@ -64,8 +66,9 @@ const requireComponentProps = {
           const propsParam = node.init.params[0];
           if (propsParam && propsParam.type === 'ObjectPattern') {
             for (const prop of propsParam.properties) {
-              if (prop.type === 'Property' && prop.key.type === 'Identifier') {
-                destructuredProps.add(prop.key.name);
+              const propName = getDestructuredPropertyName(prop);
+              if (propName != null) {
+                destructuredProps.add(propName);
               }
             }
           }
@@ -76,7 +79,7 @@ const requireComponentProps = {
           return;
         }
 
-        for (const prop of ['className', 'style', 'ref']) {
+        for (const prop of ['className', 'style', 'ref', 'data-testid']) {
           if (!destructuredProps.has(prop)) {
             context.report({
               loc: {line: 1, column: 0},
@@ -89,6 +92,22 @@ const requireComponentProps = {
     };
   },
 };
+
+function getDestructuredPropertyName(prop) {
+  if (prop.type !== 'Property') {
+    return null;
+  }
+
+  if (prop.key.type === 'Identifier') {
+    return prop.key.name;
+  }
+
+  if (prop.key.type === 'Literal' && typeof prop.key.value === 'string') {
+    return prop.key.value;
+  }
+
+  return null;
+}
 
 function getPropertyName(node) {
   if (node.key.type === 'Identifier') {

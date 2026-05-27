@@ -9,29 +9,29 @@ describe('Spinner', () => {
   });
 
   it('renders available sizes', () => {
-    const {rerender} = render(<Spinner size="sm" data-testid="spinner" />);
+    const {rerender} = render(<Spinner data-testid="spinner" size="sm" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
 
-    rerender(<Spinner size="md" data-testid="spinner" />);
+    rerender(<Spinner data-testid="spinner" size="md" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
 
-    rerender(<Spinner size="lg" data-testid="spinner" />);
+    rerender(<Spinner data-testid="spinner" size="lg" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
 
-    rerender(<Spinner size="xl" data-testid="spinner" />);
+    rerender(<Spinner data-testid="spinner" size="xl" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
   });
 
   it('renders available shades', () => {
     const {rerender} = render(
-      <Spinner shade="default" data-testid="spinner" />,
+      <Spinner data-testid="spinner" shade="default" />,
     );
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
 
-    rerender(<Spinner shade="subtle" data-testid="spinner" />);
+    rerender(<Spinner data-testid="spinner" shade="subtle" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
 
-    rerender(<Spinner shade="onMedia" data-testid="spinner" />);
+    rerender(<Spinner data-testid="spinner" shade="onMedia" />);
     expect(screen.getByTestId('spinner')).toBeInTheDocument();
   });
 
@@ -50,7 +50,7 @@ describe('Spinner', () => {
   });
 
   it('uses explicit aria-label over string label', () => {
-    render(<Spinner label="Loading..." aria-label="Please wait" />);
+    render(<Spinner aria-label="Please wait" label="Loading..." />);
     expect(screen.getByRole('status')).toHaveAttribute(
       'aria-label',
       'Please wait',
@@ -60,8 +60,8 @@ describe('Spinner', () => {
   it('renders ReactNode label', () => {
     render(
       <Spinner
-        label={<span data-testid="custom-label">Custom content</span>}
         aria-label="Loading"
+        label={<span data-testid="custom-label">Custom content</span>}
       />,
     );
     expect(screen.getByTestId('custom-label')).toBeInTheDocument();

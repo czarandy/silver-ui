@@ -10,6 +10,7 @@ type NativeSpinnerProps = Omit<
 
 export interface SpinnerProps
   extends NativeSpinnerProps, NonNullable<SpinnerVariants> {
+  'data-testid'?: string;
   label?: ReactNode;
 }
 
@@ -38,6 +39,7 @@ export function Spinner({
   shade,
   label,
   className,
+  'data-testid': dataTestId,
   style,
   ref,
   'aria-label': ariaLabel,
@@ -49,13 +51,14 @@ export function Spinner({
 
   return (
     <span
-      ref={ref}
-      role="status"
       aria-label={resolvedAriaLabel}
       className={cx(spinnerRecipe({size, shade, hasLabel}), className)}
+      data-testid={dataTestId}
+      ref={ref}
+      role="status"
       style={style}
       {...rest}>
-      <span className={visualClassName} aria-hidden="true" />
+      <span aria-hidden="true" className={visualClassName} />
       {hasLabel ? <span className={labelClassName}>{label}</span> : null}
     </span>
   );

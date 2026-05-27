@@ -55,24 +55,30 @@ type NativeTextProps = Omit<
 >;
 
 export interface TextProps extends NativeTextProps {
-  type?: TextType;
-  size?: TextSize;
-  color?: TextColor;
-  weight?: TextWeight;
-  display?: TextDisplay;
-  maxLines?: number;
-  hasTruncateTooltip?: boolean | TruncateTooltipPlacement;
-  wordBreak?: TextWordBreak;
-  textWrap?: TextWrap;
-  hasCapsize?: boolean;
-  hasStrikethrough?: boolean;
-  hasTabularNumbers?: boolean;
   as?: TextElement;
   children: ReactNode;
   className?: string;
-  style?: CSSProperties;
+  color?: TextColor;
+  'data-testid'?: string;
+  display?: TextDisplay;
+  hasCapsize?: boolean;
+  hasStrikethrough?: boolean;
+  hasTabularNumbers?: boolean;
+  hasTruncateTooltip?: boolean | TruncateTooltipPlacement;
+  maxLines?: number;
   ref?: Ref<HTMLElement>;
+  size?: TextSize;
+  style?: CSSProperties;
+  textWrap?: TextWrap;
+  type?: TextType;
+  weight?: TextWeight;
+  wordBreak?: TextWordBreak;
 }
+
+type TextElementProps = AllHTMLAttributes<HTMLElement> & {
+  'data-testid'?: string;
+  ref?: Ref<HTMLElement>;
+};
 
 const defaultColorByType: Record<TextType, TextColor> = {
   body: 'primary',
@@ -119,6 +125,7 @@ export function Text({
   as: Component = 'span',
   children,
   className,
+  'data-testid': dataTestId,
   style,
   ref,
   ...props
@@ -136,32 +143,31 @@ export function Text({
   const lineClampStyle: CSSProperties | undefined =
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
 
-  const element = createElement(
-    Component,
-    {
-      ...props,
-      ref: mergeRefs(ref, truncation.ref, textRef),
-      className: cx(
-        textRecipe({
-          type,
-          size,
-          color: resolvedColor,
-          weight,
-          display: resolvedDisplay,
-          wordBreak: maxLines > 0 ? resolvedWordBreak : undefined,
-          textWrap,
-          hasCapsize,
-          hasStrikethrough,
-          hasTabularNumbers,
-          maxLines: getMaxLinesVariant(maxLines),
-        }),
-        className,
-      ),
-      style: {...lineClampStyle, ...style},
-      title: isTooltipEnabled ? truncation.fullText : undefined,
-    },
-    children,
-  );
+  const elementProps: TextElementProps = {
+    ...props,
+    ref: mergeRefs(ref, truncation.ref, textRef),
+    'data-testid': dataTestId,
+    className: cx(
+      textRecipe({
+        type,
+        size,
+        color: resolvedColor,
+        weight,
+        display: resolvedDisplay,
+        wordBreak: maxLines > 0 ? resolvedWordBreak : undefined,
+        textWrap,
+        hasCapsize,
+        hasStrikethrough,
+        hasTabularNumbers,
+        maxLines: getMaxLinesVariant(maxLines),
+      }),
+      className,
+    ),
+    style: {...lineClampStyle, ...style},
+    title: isTooltipEnabled ? truncation.fullText : undefined,
+  };
+
+  const element = createElement(Component, elementProps, children);
 
   return (
     <>

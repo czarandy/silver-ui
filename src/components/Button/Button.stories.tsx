@@ -55,16 +55,16 @@ export const Sizes: Story = {
 export const WithContent: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-      <Button label="Add" icon={<span aria-hidden="true">+</span>} />
+      <Button icon={<span aria-hidden="true">+</span>} label="Add" />
       <Button
+        endContent={<span aria-hidden="true">3</span>}
         label="Inbox"
         variant="secondary"
-        endContent={<span aria-hidden="true">3</span>}
       />
       <Button
-        label="Settings"
         icon={<span aria-hidden="true">S</span>}
         isIconOnly
+        label="Settings"
       />
     </div>
   ),

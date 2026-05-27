@@ -13,17 +13,17 @@ export type LayerPlacement = 'above' | 'below' | 'start' | 'end';
 export type LayerAlignment = 'start' | 'center' | 'end';
 
 export interface ContextRenderProps {
-  placement?: LayerPlacement;
   alignment?: LayerAlignment;
-  role?: string;
   className?: string;
+  placement?: LayerPlacement;
+  role?: string;
   style?: React.CSSProperties;
 }
 
 interface LayerOptions {
-  onShow?: () => void;
-  onHide?: () => void;
   hasLightDismiss?: boolean;
+  onHide?: () => void;
+  onShow?: () => void;
 }
 
 type PopoverValue = 'auto' | 'manual' | 'hint' | '';
@@ -34,13 +34,13 @@ type LayerElementProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 export interface LayerReturn {
-  ref: RefCallback<HTMLElement>;
   anchorId: string;
-  show: () => void;
   hide: () => void;
-  isOpen: boolean;
   id: string;
+  isOpen: boolean;
+  ref: RefCallback<HTMLElement>;
   render: (children: ReactNode, props?: ContextRenderProps) => ReactNode;
+  show: () => void;
 }
 
 const layerClassName = css({

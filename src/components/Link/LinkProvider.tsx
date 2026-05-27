@@ -3,8 +3,8 @@ import {LinkContext} from './LinkContext';
 import type {LinkComponent} from './types';
 
 export interface LinkProviderProps {
-  component: LinkComponent;
   children: ReactNode;
+  component: LinkComponent;
 }
 
 export function LinkProvider({
