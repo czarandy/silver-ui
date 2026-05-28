@@ -1,6 +1,6 @@
 import type {CSSProperties, Ref} from 'react';
 import {css} from 'styled-system/css';
-import {cx} from '../../lib/cx';
+import {cx} from '../../internal/cx';
 import {Text} from '../Text';
 import {spinnerRecipe, type SpinnerVariants} from './Spinner.recipe';
 

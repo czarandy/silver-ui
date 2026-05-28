@@ -127,7 +127,7 @@ describe('Button', () => {
     );
 
     const endContent = screen.getByTestId('end-content');
-    const spinner = screen.getByRole('status', {hidden: true});
+    const spinner = screen.getByRole('status', {hidden: true, name: 'Loading'});
     expect(endContent.compareDocumentPosition(spinner)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     );

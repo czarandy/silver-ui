@@ -1,14 +1,14 @@
 import {
   useCallback,
-  useLayoutEffect,
   useRef,
   type CSSProperties,
   type ReactNode,
   type Ref,
 } from 'react';
 import {css, cx} from 'styled-system/css';
-import {mergeRefs} from '../../lib/mergeRefs';
-import type {LayerAlignment, LayerPlacement} from '../internal/useLayer';
+import {mergeRefs} from '../../internal/mergeRefs';
+import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
+import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
 import {useTooltip, type TooltipFocusTrigger} from './useTooltip';
 
 export type {TooltipFocusTrigger} from './useTooltip';
@@ -102,7 +102,7 @@ export function Tooltip({
     onHide: handleHide,
   });
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (anchorRef == null) {
       return;
     }
@@ -130,7 +130,7 @@ export function Tooltip({
     };
   }, [anchorRef, tooltip]);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (anchorRef != null || textOnly) {
       return;
     }

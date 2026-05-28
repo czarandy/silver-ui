@@ -8,7 +8,7 @@ import {
   type Ref,
 } from 'react';
 import {css, cx} from 'styled-system/css';
-import {mergeRefs} from '../../lib/mergeRefs';
+import {mergeRefs} from '../../internal/mergeRefs';
 import {Tooltip, type TooltipProps} from '../Tooltip';
 import type {TextColor, TextDisplay, TextWordBreak, TextWrap} from './Text';
 import {headingRecipe} from './Text.recipe';

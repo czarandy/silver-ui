@@ -6,7 +6,10 @@ tests. Audit the stories as well and look for any important props that don't hav
 [x] Link
 [x] Spinner
 [x] Button
+[ ] ButtonGroup
 [ ] Text
 [ ] Heading
 [ ] Tooltip
 [ ] useLayer
+[ ] Avatar
+[ ] AvatarGroup

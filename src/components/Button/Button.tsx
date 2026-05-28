@@ -10,15 +10,16 @@ import type {
   Ref,
 } from 'react';
 import {css} from 'styled-system/css';
-import {cx} from '../../lib/cx';
+import {cx} from '../../internal/cx';
+import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
+import {useButtonGroup} from '../ButtonGroup/ButtonGroupContext';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Spinner} from '../Spinner';
 import {Tooltip} from '../Tooltip';
-import {getAriaLabel, useRel} from '../internal/linkAccessibility';
 import {buttonRecipe, type ButtonVariants} from './Button.recipe';
 
-type ButtonSize = NonNullable<ButtonVariants>['size'];
+export type ButtonSize = NonNullable<ButtonVariants>['size'];
 type ButtonVariant = NonNullable<ButtonVariants>['variant'];
 
 /**
@@ -210,8 +211,10 @@ export function Button({
   value,
 }: ButtonProps): JSX.Element {
   const LinkComponent = useLinkComponent(as);
-  const size = sizeProp ?? 'md';
-  const buttonDisabled = isDisabled || isLoading;
+  const buttonGroup = useButtonGroup();
+  const size = sizeProp ?? buttonGroup?.size ?? 'md';
+  const buttonDisabled =
+    isDisabled || buttonGroup?.isDisabled === true || isLoading;
   const useAriaDisabled = tooltip != null && buttonDisabled;
   const renderAsLink = href != null && !buttonDisabled;
   const opensInNewTab = renderAsLink && target === '_blank';

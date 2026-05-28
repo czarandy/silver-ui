@@ -46,6 +46,19 @@ export default tseslint.config(
         },
       ],
       'no-console': ['error', {allow: ['warn', 'error']}],
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'react',
+              importNames: ['useLayoutEffect'],
+              message:
+                'useLayoutEffect warns during SSR. Import useIsomorphicLayoutEffect from lib/useIsomorphicLayoutEffect instead.',
+            },
+          ],
+        },
+      ],
       curly: 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/consistent-type-assertions': [
@@ -61,6 +74,13 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'error',
+    },
+  },
+  // Allow useLayoutEffect in the isomorphic wrapper itself
+  {
+    files: ['src/internal/useIsomorphicLayoutEffect.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   // Prop and interface sorting — auto-fixable consistent ordering

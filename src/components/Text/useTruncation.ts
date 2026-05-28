@@ -1,10 +1,10 @@
 import {
   useCallback,
-  useLayoutEffect,
   useRef,
   useSyncExternalStore,
   type RefCallback,
 } from 'react';
+import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 
 export interface UseTruncationOptions {
   maxLines: number;
@@ -32,11 +32,14 @@ const initialState: TruncationState = {
 };
 
 function getContentHeight(element: HTMLElement): number {
+  if (typeof document === 'undefined') {
+    return element.scrollHeight;
+  }
+
   try {
     const range = document.createRange();
     range.selectNodeContents(element);
-    const height = range.getBoundingClientRect().height;
-    return height;
+    return range.getBoundingClientRect().height;
   } catch {
     return element.scrollHeight;
   }
@@ -155,7 +158,7 @@ export function useTruncation({
     [maxLines, observeElement, scheduleUpdate],
   );
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const element = elementRef.current;
     observeElement(element, maxLines);
     scheduleUpdate(element, maxLines);

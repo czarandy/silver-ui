@@ -3,11 +3,11 @@
 import {ExternalLink} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
-import {cx} from '../../lib/cx';
+import {VisuallyHidden} from '../../internal';
+import {cx} from '../../internal/cx';
+import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import type {TextColor} from '../Text';
 import {Tooltip} from '../Tooltip';
-import {VisuallyHidden} from '../internal';
-import {getAriaLabel, useRel} from '../internal/linkAccessibility';
 import {linkRecipe} from './Link.recipe';
 import type {LinkComponent} from './types';
 import {useLinkComponent} from './useLinkComponent';
