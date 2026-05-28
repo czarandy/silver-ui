@@ -3,6 +3,7 @@ import eslintReact from '@eslint-react/eslint-plugin';
 import vitest from '@vitest/eslint-plugin';
 import importX from 'eslint-plugin-import-x';
 import jestDom from 'eslint-plugin-jest-dom-ya';
+import jsdoc from 'eslint-plugin-jsdoc';
 import jsxA11y from 'eslint-plugin-jsx-a11y-x';
 import perfectionist from 'eslint-plugin-perfectionist';
 import reactCompiler from 'eslint-plugin-react-compiler';
@@ -81,6 +82,16 @@ export default tseslint.config(
     files: ['src/internal/useIsomorphicLayoutEffect.ts'],
     rules: {
       'no-restricted-imports': 'off',
+    },
+  },
+  // JSDoc formatting — enforce multi-line block style
+  {
+    files: ['**/*.{ts,tsx}'],
+    plugins: {
+      jsdoc,
+    },
+    rules: {
+      'jsdoc/multiline-blocks': ['error', {noSingleLineBlocks: true}],
     },
   },
   // Prop and interface sorting — auto-fixable consistent ordering
