@@ -14,6 +14,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {useInputGroup} from '../InputGroup';
 import {Spinner} from '../Spinner';
 
 export type TextInputType = 'email' | 'password' | 'text';
@@ -151,6 +152,68 @@ export function TextInput({
     description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const inputGroup = useInputGroup();
+  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+
+  const inputWrapper = (
+    <div
+      className={cx(
+        inputStyles.wrapper,
+        inputStyles.size[size],
+        status != null ? inputStyles.status[status.type] : undefined,
+        effectiveDisabled ? inputStyles.wrapperDisabled : undefined,
+        className,
+      )}
+      style={style}>
+      {startIcon != null ? (
+        <span className={inputStyles.iconSlot}>{startIcon}</span>
+      ) : null}
+      <input
+        aria-busy={isLoading || undefined}
+        aria-describedby={describedBy}
+        aria-invalid={status?.type === 'error' || undefined}
+        aria-label={inputGroup != null ? label : undefined}
+        aria-required={isRequired || undefined}
+        // eslint-disable-next-line jsx-a11y-x/no-autofocus
+        autoFocus={hasAutoFocus}
+        className={inputStyles.control}
+        data-testid={dataTestId}
+        disabled={effectiveDisabled}
+        id={inputId}
+        name={htmlName}
+        onChange={event => onChange?.(event.target.value, event)}
+        onKeyDown={event => {
+          if (event.key === 'Enter') {
+            onEnter?.();
+          }
+          onKeyDown?.(event);
+        }}
+        placeholder={placeholder}
+        ref={ref}
+        type={type}
+        value={value}
+      />
+      {hasClear && value !== '' && !effectiveDisabled ? (
+        <button
+          aria-label={`Clear ${label}`}
+          className={inputStyles.clearButton}
+          onClick={() => onChange?.('', null)}
+          type="button">
+          <X aria-hidden="true" />
+        </button>
+      ) : null}
+      {isLoading ? <Spinner size="sm" /> : null}
+      {status != null ? (
+        <span className={inputStyles.iconSlot}>
+          {getStatusIcon(status.type)}
+        </span>
+      ) : null}
+    </div>
+  );
+
+  if (inputGroup != null) {
+    return inputWrapper;
+  }
 
   return (
     <Field
@@ -166,58 +229,7 @@ export function TextInput({
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
       }>
-      <div
-        className={cx(
-          inputStyles.wrapper,
-          inputStyles.size[size],
-          status != null ? inputStyles.status[status.type] : undefined,
-          isDisabled ? inputStyles.wrapperDisabled : undefined,
-          className,
-        )}
-        style={style}>
-        {startIcon != null ? (
-          <span className={inputStyles.iconSlot}>{startIcon}</span>
-        ) : null}
-        <input
-          aria-busy={isLoading || undefined}
-          aria-describedby={describedBy}
-          aria-invalid={status?.type === 'error' || undefined}
-          aria-required={isRequired || undefined}
-          // eslint-disable-next-line jsx-a11y-x/no-autofocus
-          autoFocus={hasAutoFocus}
-          className={inputStyles.control}
-          data-testid={dataTestId}
-          disabled={isDisabled}
-          id={inputId}
-          name={htmlName}
-          onChange={event => onChange?.(event.target.value, event)}
-          onKeyDown={event => {
-            if (event.key === 'Enter') {
-              onEnter?.();
-            }
-            onKeyDown?.(event);
-          }}
-          placeholder={placeholder}
-          ref={ref}
-          type={type}
-          value={value}
-        />
-        {hasClear && value !== '' && !isDisabled ? (
-          <button
-            aria-label={`Clear ${label}`}
-            className={inputStyles.clearButton}
-            onClick={() => onChange?.('', null)}
-            type="button">
-            <X aria-hidden="true" />
-          </button>
-        ) : null}
-        {isLoading ? <Spinner size="sm" /> : null}
-        {status != null ? (
-          <span className={inputStyles.iconSlot}>
-            {getStatusIcon(status.type)}
-          </span>
-        ) : null}
-      </div>
+      {inputWrapper}
     </Field>
   );
 }

@@ -18,6 +18,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {useInputGroup} from '../InputGroup';
 
 interface NumberInputBaseProps {
   autoComplete?: string;
@@ -135,6 +136,8 @@ export function NumberInput({
     description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const inputGroup = useInputGroup();
+  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
   const [pendingInput, setPendingInput] = useState<string | null>(null);
   const displayValue = useMemo(() => {
     if (pendingInput != null) {
@@ -146,6 +149,95 @@ export function NumberInput({
     pendingInput == null ||
     pendingInput.trim() === '' ||
     parseNumberInput(pendingInput, {min, max, isIntegerOnly}) != null;
+
+  const inputWrapper = (
+    <div
+      className={cx(
+        inputStyles.wrapper,
+        inputStyles.size[size],
+        status != null ? inputStyles.status[status.type] : undefined,
+        effectiveDisabled ? inputStyles.wrapperDisabled : undefined,
+        className,
+      )}
+      style={style}>
+      {startIcon != null ? (
+        <span className={inputStyles.iconSlot}>{startIcon}</span>
+      ) : null}
+      <input
+        aria-describedby={describedBy}
+        aria-invalid={status?.type === 'error' || !isInputValid || undefined}
+        aria-label={inputGroup != null ? label : undefined}
+        aria-required={isRequired || undefined}
+        autoComplete={autoComplete}
+        // eslint-disable-next-line jsx-a11y-x/no-autofocus
+        autoFocus={hasAutoFocus}
+        className={inputStyles.control}
+        data-testid={dataTestId}
+        disabled={effectiveDisabled}
+        id={inputId}
+        max={max ?? undefined}
+        min={min ?? undefined}
+        name={htmlName}
+        onBlur={event => {
+          if (pendingInput != null) {
+            const parsed = parseNumberInput(pendingInput, {
+              min,
+              max,
+              isIntegerOnly,
+            });
+            if (parsed != null && parsed !== value) {
+              onChange(parsed);
+            }
+            setPendingInput(null);
+          }
+          onBlur?.(event);
+        }}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          const nextValue = event.target.value;
+          setPendingInput(nextValue);
+          const parsed = parseNumberInput(nextValue, {
+            min,
+            max,
+            isIntegerOnly,
+          });
+          if (parsed != null && parsed !== value) {
+            onChange(parsed);
+          }
+        }}
+        onFocus={onFocus}
+        onKeyDown={event => {
+          if (event.key === 'Enter') {
+            onEnter?.();
+          }
+          onKeyDown?.(event);
+        }}
+        placeholder={placeholder}
+        ref={ref}
+        step={step ?? undefined}
+        type="number"
+        value={displayValue}
+      />
+      {units != null ? <span className={styles.units}>{units}</span> : null}
+      {hasClear === true && value != null && !effectiveDisabled ? (
+        <button
+          aria-label={`Clear ${label}`}
+          className={inputStyles.clearButton}
+          onClick={() => onChange(null)}
+          type="button">
+          <X aria-hidden="true" />
+        </button>
+      ) : null}
+      {status != null ? (
+        <span className={inputStyles.iconSlot}>
+          {getStatusIcon(status.type)}
+        </span>
+      ) : null}
+    </div>
+  );
+
+  if (inputGroup != null) {
+    return inputWrapper;
+  }
 
   return (
     <Field
@@ -162,87 +254,7 @@ export function NumberInput({
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
       }>
-      <div
-        className={cx(
-          inputStyles.wrapper,
-          inputStyles.size[size],
-          status != null ? inputStyles.status[status.type] : undefined,
-          isDisabled ? inputStyles.wrapperDisabled : undefined,
-          className,
-        )}
-        style={style}>
-        {startIcon != null ? (
-          <span className={inputStyles.iconSlot}>{startIcon}</span>
-        ) : null}
-        <input
-          aria-describedby={describedBy}
-          aria-invalid={status?.type === 'error' || !isInputValid || undefined}
-          aria-required={isRequired || undefined}
-          autoComplete={autoComplete}
-          // eslint-disable-next-line jsx-a11y-x/no-autofocus
-          autoFocus={hasAutoFocus}
-          className={inputStyles.control}
-          data-testid={dataTestId}
-          disabled={isDisabled}
-          id={inputId}
-          max={max ?? undefined}
-          min={min ?? undefined}
-          name={htmlName}
-          onBlur={event => {
-            if (pendingInput != null) {
-              const parsed = parseNumberInput(pendingInput, {
-                min,
-                max,
-                isIntegerOnly,
-              });
-              if (parsed != null && parsed !== value) {
-                onChange(parsed);
-              }
-              setPendingInput(null);
-            }
-            onBlur?.(event);
-          }}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => {
-            const nextValue = event.target.value;
-            setPendingInput(nextValue);
-            const parsed = parseNumberInput(nextValue, {
-              min,
-              max,
-              isIntegerOnly,
-            });
-            if (parsed != null && parsed !== value) {
-              onChange(parsed);
-            }
-          }}
-          onFocus={onFocus}
-          onKeyDown={event => {
-            if (event.key === 'Enter') {
-              onEnter?.();
-            }
-            onKeyDown?.(event);
-          }}
-          placeholder={placeholder}
-          ref={ref}
-          step={step ?? undefined}
-          type="number"
-          value={displayValue}
-        />
-        {units != null ? <span className={styles.units}>{units}</span> : null}
-        {hasClear === true && value != null && !isDisabled ? (
-          <button
-            aria-label={`Clear ${label}`}
-            className={inputStyles.clearButton}
-            onClick={() => onChange(null)}
-            type="button">
-            <X aria-hidden="true" />
-          </button>
-        ) : null}
-        {status != null ? (
-          <span className={inputStyles.iconSlot}>
-            {getStatusIcon(status.type)}
-          </span>
-        ) : null}
-      </div>
+      {inputWrapper}
     </Field>
   );
 }
