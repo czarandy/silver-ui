@@ -1,3 +1,4 @@
+import {Info} from 'lucide-react';
 import {
   useId,
   type ChangeEvent,
@@ -9,9 +10,12 @@ import {
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
-import {Field, type InputStatus} from '../Field';
+import type {InputStatus, InputStatusType} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
+import {Icon} from '../Icon';
 import {Spinner} from '../Spinner';
+import {Text} from '../Text';
+import {Tooltip} from '../Tooltip';
 
 export type SwitchLabelPosition = 'end' | 'start';
 export type SwitchLabelSpacing = 'default' | 'spread';
@@ -108,6 +112,9 @@ export interface SwitchProps {
 
 const styles = {
   field: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1',
     w: 'fit-content',
   }),
   spreadField: css({
@@ -122,6 +129,58 @@ const styles = {
     justifyContent: 'space-between',
     w: 'full',
   }),
+  labelWrapper: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5',
+    minW: 0,
+  }),
+  label: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '1',
+    w: 'fit-content',
+    color: 'fg.muted',
+    cursor: 'pointer',
+  }),
+  labelDisabled: css({
+    color: 'silver-neutral.400',
+    cursor: 'not-allowed',
+  }),
+  labelIcon: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    '& > svg': {
+      w: 'var(--silver-sizes-icon-sm)',
+      h: 'var(--silver-sizes-icon-sm)',
+    },
+  }),
+  requiredness: css({
+    fontWeight: 'normal',
+    color: 'fg.muted',
+  }),
+  tooltipIcon: css({
+    display: 'inline-flex',
+    color: 'fg.muted',
+    '& > svg': {
+      w: 'var(--silver-sizes-icon-sm)',
+      h: 'var(--silver-sizes-icon-sm)',
+    },
+  }),
+  status: css({
+    fontFamily: 'body',
+    fontSize: 'sm',
+    lineHeight: 'normal',
+    px: '2',
+    py: '1.5',
+    mt: '1',
+    borderRadius: 'md',
+  }),
+  statusColor: {
+    warning: css({bg: 'yellow.100', color: 'yellow.800'}),
+    error: css({bg: 'red.100', color: 'red.800'}),
+    success: css({bg: 'green.100', color: 'green.800'}),
+  } satisfies Record<InputStatusType, string>,
   control: css({
     position: 'relative',
     display: 'inline-flex',
@@ -226,6 +285,11 @@ export function Switch({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const isBusy = isLoading;
+  const requirednessText = isOptional
+    ? 'Optional'
+    : isRequired
+      ? 'Required'
+      : null;
   const control = (
     <span className={styles.control}>
       <input
@@ -264,38 +328,82 @@ export function Switch({
       ) : null}
     </span>
   );
+  const labelNode = (
+    <div className={styles.labelWrapper}>
+      <label
+        className={cx(
+          styles.label,
+          isDisabled ? styles.labelDisabled : undefined,
+        )}
+        htmlFor={inputId}>
+        {labelIcon != null ? (
+          <span className={styles.labelIcon}>{labelIcon}</span>
+        ) : null}
+        <Text as="span" color="inherit" type="label">
+          {label}
+        </Text>
+        {requirednessText != null ? (
+          <Text as="span" className={styles.requiredness} type="supporting">
+            <span aria-hidden="true"> · </span>
+            {requirednessText}
+          </Text>
+        ) : null}
+        {labelTooltip != null ? (
+          <Tooltip content={labelTooltip}>
+            <span className={styles.tooltipIcon}>
+              <Icon icon={Info} size="sm" />
+            </span>
+          </Tooltip>
+        ) : null}
+      </label>
+      {description != null ? (
+        <Text as="span" color="secondary" id={descriptionID} type="supporting">
+          {description}
+        </Text>
+      ) : null}
+    </div>
+  );
 
   return (
-    <Field
+    <div
       className={cx(
         styles.field,
         labelSpacing === 'spread' ? styles.spreadField : undefined,
         className,
       )}
-      description={description}
-      descriptionID={descriptionID}
-      inputId={inputId}
-      isDisabled={isDisabled}
-      isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
-      label={label}
-      labelIcon={labelIcon}
-      labelTooltip={labelTooltip}
-      status={
-        status == null ? undefined : {...status, messageID: statusMessageID}
-      }
-      statusVariant="detached"
       style={style}>
       <div
         className={cx(
           styles.row,
           labelSpacing === 'spread' ? styles.spread : undefined,
         )}>
-        {labelPosition === 'start' ? null : control}
-        {labelPosition === 'start' ? control : null}
+        {labelPosition === 'start' ? (
+          isLabelHidden ? (
+            <VisuallyHidden>{labelNode}</VisuallyHidden>
+          ) : (
+            labelNode
+          )
+        ) : (
+          control
+        )}
+        {labelPosition === 'start' ? (
+          control
+        ) : isLabelHidden ? (
+          <VisuallyHidden>{labelNode}</VisuallyHidden>
+        ) : (
+          labelNode
+        )}
       </div>
-    </Field>
+      {status?.message != null ? (
+        <div
+          aria-live={status.type === 'error' ? 'assertive' : 'polite'}
+          className={cx(styles.status, styles.statusColor[status.type])}
+          id={statusMessageID}
+          role={status.type === 'error' ? 'alert' : 'status'}>
+          {status.message}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

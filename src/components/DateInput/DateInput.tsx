@@ -22,6 +22,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {Icon} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
@@ -134,7 +135,7 @@ export function DateInput({
           label={`Choose ${label}`}
           onOpenChange={setIsOpen}>
           <Button
-            icon={<CalendarIcon />}
+            icon={<Icon icon={CalendarIcon} size="sm" />}
             isDisabled={isDisabled || isLoading}
             isIconOnly
             label={`Choose ${label}`}
@@ -163,7 +164,7 @@ export function DateInput({
             className={inputStyles.clearButton}
             onClick={() => onChange?.(undefined)}
             type="button">
-            <X aria-hidden="true" />
+            <Icon icon={X} size="sm" />
           </button>
         ) : null}
         {isLoading ? <Spinner size="sm" /> : null}

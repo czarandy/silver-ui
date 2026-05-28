@@ -6,6 +6,7 @@ import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal';
 import {cx} from '../../internal/cx';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
+import {Icon} from '../Icon';
 import type {TextColor} from '../Text';
 import {Tooltip} from '../Tooltip';
 import {linkRecipe} from './Link.recipe';
@@ -149,7 +150,7 @@ export function Link({
       ) : null}
       {isExternalLink ? (
         <span aria-hidden="true" className={styles.externalLink}>
-          <ExternalLink size="1em" strokeWidth={2} />
+          <Icon icon={ExternalLink} size="sm" />
         </span>
       ) : null}
     </Component>

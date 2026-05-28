@@ -8,6 +8,7 @@ import type {
 } from 'react';
 
 export interface LinkComponentProps {
+  'aria-current'?: AriaAttributes['aria-current'];
   'aria-disabled'?: AriaAttributes['aria-disabled'];
   'aria-label'?: AriaAttributes['aria-label'];
   children?: ReactNode;

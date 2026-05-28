@@ -3,6 +3,7 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
+import {Icon} from '../Icon';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
 import type {InputStatusType} from './types';
@@ -133,10 +134,6 @@ const styles = {
   tooltipIcon: css({
     display: 'inline-flex',
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   inputStatusWrapper: css({
     display: 'flex',
@@ -214,7 +211,7 @@ export function Field({
       {labelTooltip != null ? (
         <Tooltip content={labelTooltip}>
           <span className={styles.tooltipIcon}>
-            <Info aria-hidden="true" />
+            <Icon icon={Info} size="sm" />
           </span>
         </Tooltip>
       ) : null}

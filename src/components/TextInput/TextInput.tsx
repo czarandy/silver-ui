@@ -14,6 +14,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {Icon} from '../Icon';
 import {useInputGroup} from '../InputGroup';
 import {Spinner} from '../Spinner';
 
@@ -32,6 +33,10 @@ export interface TextInputProps {
    * Supporting text rendered below the label.
    */
   description?: ReactNode;
+  /**
+   * Content rendered after the input, before the status icon.
+   */
+  endContent?: ReactNode;
   /**
    * Whether to focus the input on mount.
    */
@@ -129,6 +134,7 @@ export function TextInput({
   size = 'md',
   placeholder,
   description,
+  endContent,
   isLabelHidden = false,
   isOptional = false,
   isRequired = false,
@@ -199,9 +205,10 @@ export function TextInput({
           className={inputStyles.clearButton}
           onClick={() => onChange?.('', null)}
           type="button">
-          <X aria-hidden="true" />
+          <Icon icon={X} size="sm" />
         </button>
       ) : null}
+      {endContent}
       {isLoading ? <Spinner size="sm" /> : null}
       {status != null ? (
         <span className={inputStyles.iconSlot}>

@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Inbox, Plus, Settings} from 'lucide-react';
+import {Icon} from '../Icon';
 import {Button} from './Button';
 
 const meta: Meta<typeof Button> = {
@@ -56,9 +57,13 @@ export const Sizes: Story = {
 export const WithContent: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-      <Button icon={<Plus />} label="Add" />
-      <Button endContent={<Inbox />} label="Inbox" variant="secondary" />
-      <Button icon={<Settings />} isIconOnly label="Settings" />
+      <Button icon={<Icon icon={Plus} />} label="Add" />
+      <Button
+        endContent={<Icon icon={Inbox} />}
+        label="Inbox"
+        variant="secondary"
+      />
+      <Button icon={<Icon icon={Settings} />} isIconOnly label="Settings" />
     </div>
   ),
 };
@@ -66,9 +71,9 @@ export const WithContent: Story = {
 export const IconSizes: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-      <Button icon={<Plus />} label="Small" size="sm" />
-      <Button icon={<Plus />} label="Medium" size="md" />
-      <Button icon={<Plus />} label="Large" size="lg" />
+      <Button icon={<Icon icon={Plus} />} label="Small" size="sm" />
+      <Button icon={<Icon icon={Plus} />} label="Medium" size="md" />
+      <Button icon={<Icon icon={Plus} />} label="Large" size="lg" />
     </div>
   ),
 };
@@ -94,7 +99,7 @@ export const Loading: Story = {
 export const LoadingWithEndContent: Story = {
   render: () => (
     <Button
-      endContent={<Inbox />}
+      endContent={<Icon icon={Inbox} />}
       isLoading
       label="Sync inbox"
       variant="primary"

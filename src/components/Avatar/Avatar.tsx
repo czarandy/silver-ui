@@ -4,6 +4,7 @@ import {useMemo, useState} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useAvatarGroup} from '../AvatarGroup/AvatarGroupContext';
+import {Icon} from '../Icon';
 import {avatarRecipe} from './Avatar.recipe';
 import {AvatarSizeContext} from './AvatarSizeContext';
 
@@ -232,7 +233,10 @@ export function Avatar({
           ) : null}
           {!showImage && !showFallbackImage && !showInitials ? (
             <div className={styles.fallback}>
-              <User aria-hidden="true" size={numericSize * 0.6} />
+              <Icon
+                icon={User}
+                size={numericSize < 48 ? 'sm' : numericSize < 96 ? 'md' : 'lg'}
+              />
             </div>
           ) : null}
         </div>

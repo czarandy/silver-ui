@@ -9,6 +9,7 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
+import {Icon} from '../Icon';
 import {Heading, Text} from '../Text';
 
 export interface DialogHeaderProps {
@@ -97,7 +98,7 @@ export function DialogHeader({
           {endContent}
           {onOpenChange != null ? (
             <Button
-              icon={<X />}
+              icon={<Icon icon={X} size="sm" />}
               isIconOnly
               label="Close"
               onClick={() => onOpenChange(false)}

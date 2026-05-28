@@ -7,6 +7,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {Icon} from '../Icon';
 import {Spinner} from '../Spinner';
 
 export type ISOTimeString =
@@ -96,7 +97,7 @@ export function TimeInput({
         )}
         style={style}>
         <span className={inputStyles.iconSlot}>
-          <Clock aria-hidden="true" />
+          <Icon icon={Clock} size="sm" />
         </span>
         <input
           aria-busy={isLoading || undefined}
@@ -131,7 +132,7 @@ export function TimeInput({
             className={inputStyles.clearButton}
             onClick={() => onChange?.(undefined)}
             type="button">
-            <X aria-hidden="true" />
+            <Icon icon={X} size="sm" />
           </button>
         ) : null}
         {isLoading ? <Spinner size="sm" /> : null}

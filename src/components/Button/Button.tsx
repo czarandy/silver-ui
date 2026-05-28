@@ -29,6 +29,11 @@ type ButtonVariant = NonNullable<ButtonVariants>['variant'];
  */
 export interface ButtonProps {
   /**
+   * Indicates the current item in a set. Used by composite controls such as
+   * pagination.
+   */
+  'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time';
+  /**
    * Custom link component to render when `href` is set. Falls back to the
    * component provided by `LinkProvider`, or a plain `<a>` tag.
    */
@@ -187,6 +192,7 @@ const styles = {
 
 export function Button({
   label,
+  'aria-current': ariaCurrent,
   href,
   as,
   target,
@@ -286,6 +292,7 @@ export function Button({
 
   const element = renderAsLink ? (
     <LinkComponent
+      aria-current={ariaCurrent}
       aria-label={ariaLabel}
       className={rootClassName}
       data-testid={dataTestId}
@@ -302,6 +309,7 @@ export function Button({
   ) : (
     <button
       aria-busy={isLoading || undefined}
+      aria-current={ariaCurrent}
       aria-disabled={useAriaDisabled || undefined}
       aria-label={ariaLabel}
       className={rootClassName}

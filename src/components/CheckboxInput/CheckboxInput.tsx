@@ -14,6 +14,7 @@ import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Field, type InputStatus} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
+import {Icon} from '../Icon';
 import {Spinner} from '../Spinner';
 
 export type CheckboxInputSize = 'sm' | 'md';
@@ -186,9 +187,9 @@ export function CheckboxInput({
                 variant={isCheckedOrIndeterminate ? 'onMedia' : 'default'}
               />
             ) : isIndeterminate ? (
-              <Minus className={styles.icon} />
+              <Icon className={styles.icon} icon={Minus} />
             ) : isChecked ? (
-              <Check className={styles.icon} />
+              <Icon className={styles.icon} icon={Check} />
             ) : null}
           </span>
         </span>

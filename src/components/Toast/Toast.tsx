@@ -11,6 +11,7 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
+import {Icon} from '../Icon';
 import type {ToastDismissReason, ToastType} from './types';
 
 export interface ToastProps {
@@ -198,7 +199,7 @@ export function Toast({
         <div className={styles.end}>
           {endContent}
           <Button
-            icon={<X />}
+            icon={<Icon icon={X} size="sm" />}
             isIconOnly
             label="Dismiss notification"
             onClick={() => onDismiss('manual')}

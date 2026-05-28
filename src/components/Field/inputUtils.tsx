@@ -1,5 +1,6 @@
 import {CheckCircle2, CircleAlert, CircleX} from 'lucide-react';
 import type {ReactNode} from 'react';
+import {Icon} from '../Icon';
 import type {InputStatus, InputStatusType} from './types';
 
 export function getDescribedBy(
@@ -18,14 +19,14 @@ export function getStatusMessageID(
 
 export function getStatusIcon(type: InputStatusType): ReactNode {
   if (type === 'success') {
-    return <CheckCircle2 aria-hidden="true" />;
+    return <Icon color="success" icon={CheckCircle2} size="sm" />;
   }
 
   if (type === 'warning') {
-    return <CircleAlert aria-hidden="true" />;
+    return <Icon color="warning" icon={CircleAlert} size="sm" />;
   }
 
-  return <CircleX aria-hidden="true" />;
+  return <Icon color="error" icon={CircleX} size="sm" />;
 }
 
 export function formatFileSize(bytes: number): string {

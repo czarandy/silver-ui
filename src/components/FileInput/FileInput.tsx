@@ -18,6 +18,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {Icon} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 
@@ -337,7 +338,7 @@ export function FileInput({
           <Spinner size={isDropzone ? 'md' : 'sm'} />
         ) : (
           <span className={styles.icon}>
-            <Upload aria-hidden="true" />
+            <Icon icon={Upload} size={isDropzone ? 'md' : 'sm'} />
           </span>
         )}
         <Text
@@ -356,7 +357,7 @@ export function FileInput({
               onChange(null);
             }}
             type="button">
-            <X aria-hidden="true" />
+            <Icon icon={X} size="sm" />
           </button>
         ) : null}
         {status != null && !isDropzone ? (

@@ -18,6 +18,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {Icon} from '../Icon';
 import {useInputGroup} from '../InputGroup';
 
 interface NumberInputBaseProps {
@@ -224,7 +225,7 @@ export function NumberInput({
           className={inputStyles.clearButton}
           onClick={() => onChange(null)}
           type="button">
-          <X aria-hidden="true" />
+          <Icon icon={X} size="sm" />
         </button>
       ) : null}
       {status != null ? (
