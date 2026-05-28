@@ -77,6 +77,22 @@ export function plainDateFromDate(date: Date): PlainDate {
   });
 }
 
+export function plainDateFromInstant(
+  instant: number,
+  timezoneID = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+): PlainDate {
+  return Temporal.Instant.fromEpochMilliseconds(instant)
+    .toZonedDateTimeISO(timezoneID)
+    .toPlainDate();
+}
+
+export function plainDateToInstant(
+  date: PlainDate,
+  timezoneID = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+): number {
+  return date.toZonedDateTime(timezoneID).epochMilliseconds;
+}
+
 export function plainDateToday(): PlainDate {
   return plainDateFromDate(new Date());
 }
@@ -121,6 +137,10 @@ export function plainDateIsInRange(
 
 export function plainDateSetFirstOfMonth(date: PlainDate): PlainDate {
   return date.with({day: 1});
+}
+
+export function plainDateSetStartOfWeek(date: PlainDate): PlainDate {
+  return plainDateAddDays(date, -(date.dayOfWeek % 7));
 }
 
 export function plainDateGetWeekNumber(date: PlainDate): number {

@@ -1,8 +1,14 @@
 # Component Audits
 
+For each component in the list below that isn't checked off ([ ]), spin up a separate subagent to perform an audit, following these steps:
+
+```
 Audit each component for: performance problems, accessibility concerns, logic
 bugs, unclear API, missing tests, and missing stories. Check that important
-props have stories demonstrating them.
+props have stories demonstrating them, and that key behavior is tested.
+
+Save your audits in a report in the repo root audits-codex/ dir in a <ComponentName>.md file
+```
 
 ## Layout & Structure
 
@@ -17,7 +23,7 @@ props have stories demonstrating them.
 ## Navigation
 
 - [ ] Breadcrumbs
-- [x] Link
+- [ ] Link
 - [ ] MobileNav
 - [ ] Pagination
 - [ ] SideNav
@@ -26,7 +32,7 @@ props have stories demonstrating them.
 
 ## Buttons & Actions
 
-- [x] Button
+- [ ] Button
 - [ ] ButtonGroup
 - [ ] ContextMenu
 - [ ] DropdownMenu
@@ -84,7 +90,7 @@ props have stories demonstrating them.
 - [ ] EmptyState
 - [ ] Progress
 - [ ] Skeleton
-- [x] Spinner
+- [ ] Spinner
 - [ ] Stepper
 - [ ] Toast
 
