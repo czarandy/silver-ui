@@ -3,7 +3,7 @@ import {Inbox, Plus, Settings} from 'lucide-react';
 import {Icon} from '../Icon';
 import {Button} from './Button';
 
-const meta: Meta<typeof Button> = {
+const meta = {
   title: 'Components/Button',
   component: Button,
   argTypes: {
@@ -23,10 +23,10 @@ const meta: Meta<typeof Button> = {
   args: {
     label: 'Button',
   },
-};
+} satisfies Meta<typeof Button>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof Button>;
 
 export const Primary: Story = {
   args: {variant: 'primary'},

@@ -39,7 +39,11 @@ export type DropdownMenuOption =
   | DropdownMenuItemData
   | DropdownMenuSection;
 
-export type DropdownMenuButtonProps = Omit<ButtonProps, 'onClick'>;
+type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
+  ? Omit<T, K>
+  : never;
+
+export type DropdownMenuButtonProps = DistributiveOmit<ButtonProps, 'onClick'>;
 
 export interface DropdownMenuProps {
   /**

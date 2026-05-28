@@ -368,4 +368,56 @@ describe('Button', () => {
     expect(screen.getByRole('button', {name: 'Docs'})).toBeDisabled();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
+
+  it('passes through ARIA trigger attributes', () => {
+    render(
+      <Button
+        aria-controls="menu-1"
+        aria-expanded={true}
+        aria-haspopup="menu"
+        label="Open menu"
+      />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Open menu'});
+    expect(button).toHaveAttribute('aria-controls', 'menu-1');
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+    expect(button).toHaveAttribute('aria-haspopup', 'menu');
+  });
+
+  it('passes through aria-pressed for toggle buttons', () => {
+    render(<Button aria-pressed={true} label="Bold" />);
+
+    const button = screen.getByRole('button', {name: 'Bold'});
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('passes through aria-describedby and aria-labelledby', () => {
+    render(
+      <Button
+        aria-describedby="help-text"
+        aria-labelledby="ext-label"
+        label="Action"
+      />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Action'});
+    expect(button).toHaveAttribute('aria-describedby', 'help-text');
+    expect(button).toHaveAttribute('aria-labelledby', 'ext-label');
+  });
+
+  it('passes ARIA attributes through to link buttons', () => {
+    render(
+      <Button
+        aria-describedby="help-text"
+        aria-expanded={false}
+        href="/settings"
+        label="Settings"
+      />,
+    );
+
+    const link = screen.getByRole('link', {name: 'Settings'});
+    expect(link).toHaveAttribute('aria-describedby', 'help-text');
+    expect(link).toHaveAttribute('aria-expanded', 'false');
+  });
 });

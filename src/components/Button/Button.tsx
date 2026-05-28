@@ -27,12 +27,55 @@ type ButtonVariant = NonNullable<ButtonVariants>['variant'];
  * on whether `href` is provided. Supports explicit loading states, icon-only
  * modes, link buttons, and tooltips.
  */
-export interface ButtonProps {
+interface ButtonBaseProps {
   /**
-   * Indicates the current item in a set. Used by composite controls such as
-   * pagination.
+   * Identifies the element(s) whose contents are controlled by the button.
+   */
+  'aria-controls'?: string;
+  /**
+   * Indicates the current item in a set.
    */
   'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time';
+  /**
+   * Identifies the element(s) that describe the button.
+   */
+  'aria-describedby'?: string;
+  /**
+   * Identifies the element that provides a detailed description.
+   */
+  'aria-details'?: string;
+  /**
+   * Indicates whether a controlled element is expanded or collapsed.
+   */
+  'aria-expanded'?: boolean;
+  /**
+   * Indicates the button opens an interactive popup element.
+   */
+  'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
+  /**
+   * Indicates whether the element is exposed to the accessibility API.
+   */
+  'aria-hidden'?: boolean;
+  /**
+   * Keyboard shortcuts that activate or focus the button.
+   */
+  'aria-keyshortcuts'?: string;
+  /**
+   * Identifies the element(s) that label the button.
+   */
+  'aria-labelledby'?: string;
+  /**
+   * Identifies element(s) owned by the button that are not DOM children.
+   */
+  'aria-owns'?: string;
+  /**
+   * Indicates the current pressed state of a toggle button.
+   */
+  'aria-pressed'?: boolean | 'mixed';
+  /**
+   * Human-readable description of the role of the button.
+   */
+  'aria-roledescription'?: string;
   /**
    * Custom link component to render when `href` is set. Falls back to the
    * component provided by `LinkProvider`, or a plain `<a>` tag.
@@ -61,19 +104,10 @@ export interface ButtonProps {
    */
   href?: string;
   /**
-   * Icon element rendered before the label.
-   */
-  icon?: ReactNode;
-  /**
    * Whether the button is disabled. Prevents interaction and applies disabled
    * styling.
    */
   isDisabled?: boolean;
-  /**
-   * Whether to visually hide the label, showing only the icon. The `label`
-   * prop is still required and used as `aria-label`.
-   */
-  isIconOnly?: boolean;
   /**
    * Whether the button is in a loading state. Shows a spinner overlay,
    * disables interaction, and announces "Loading" to assistive technologies.
@@ -138,6 +172,30 @@ export interface ButtonProps {
   variant?: ButtonVariant;
 }
 
+export type ButtonProps =
+  | (ButtonBaseProps & {
+      /**
+       * Icon element rendered before the label. Required in icon-only mode.
+       */
+      icon: ReactNode;
+      /**
+       * Visually hides the label, showing only the icon. The `label` prop is
+       * still required and used as `aria-label`.
+       */
+      isIconOnly: true;
+    })
+  | (ButtonBaseProps & {
+      /**
+       * Icon element rendered before the label.
+       */
+      icon?: ReactNode;
+      /**
+       * Visually hides the label, showing only the icon. The `label` prop is
+       * still required and used as `aria-label`.
+       */
+      isIconOnly?: false;
+    });
+
 const styles = {
   content: css({
     display: 'contents',
@@ -192,7 +250,18 @@ const styles = {
 
 export function Button({
   label,
+  'aria-controls': ariaControls,
   'aria-current': ariaCurrent,
+  'aria-describedby': ariaDescribedby,
+  'aria-details': ariaDetails,
+  'aria-expanded': ariaExpanded,
+  'aria-haspopup': ariaHaspopup,
+  'aria-hidden': ariaHidden,
+  'aria-keyshortcuts': ariaKeyshortcuts,
+  'aria-labelledby': ariaLabelledby,
+  'aria-owns': ariaOwns,
+  'aria-pressed': ariaPressed,
+  'aria-roledescription': ariaRoledescription,
   href,
   as,
   target,
@@ -233,6 +302,21 @@ export function Button({
   const linkRel = useRel({target, rel});
   const spinnerVariant =
     variant === 'primary' || variant === 'destructive' ? 'onMedia' : 'default';
+
+  const ariaAttrs = {
+    'aria-controls': ariaControls,
+    'aria-current': ariaCurrent,
+    'aria-describedby': ariaDescribedby,
+    'aria-details': ariaDetails,
+    'aria-expanded': ariaExpanded,
+    'aria-haspopup': ariaHaspopup,
+    'aria-hidden': ariaHidden,
+    'aria-keyshortcuts': ariaKeyshortcuts,
+    'aria-labelledby': ariaLabelledby,
+    'aria-owns': ariaOwns,
+    'aria-pressed': ariaPressed,
+    'aria-roledescription': ariaRoledescription,
+  };
 
   const handleButtonClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (buttonDisabled) {
@@ -292,7 +376,7 @@ export function Button({
 
   const element = renderAsLink ? (
     <LinkComponent
-      aria-current={ariaCurrent}
+      {...ariaAttrs}
       aria-label={ariaLabel}
       className={rootClassName}
       data-testid={dataTestId}
@@ -308,8 +392,8 @@ export function Button({
     </LinkComponent>
   ) : (
     <button
+      {...ariaAttrs}
       aria-busy={isLoading || undefined}
-      aria-current={ariaCurrent}
       aria-disabled={useAriaDisabled || undefined}
       aria-label={ariaLabel}
       className={rootClassName}

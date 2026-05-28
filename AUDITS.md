@@ -23,7 +23,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 ## Navigation
 
 - [ ] Breadcrumbs
-- [ ] Link
+- [x] Link
 - [ ] MobileNav
 - [ ] Pagination
 - [ ] SideNav
@@ -32,7 +32,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 
 ## Buttons & Actions
 
-- [ ] Button
+- [x] Button
 - [ ] ButtonGroup
 - [ ] ContextMenu
 - [ ] DropdownMenu
@@ -90,7 +90,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] EmptyState
 - [ ] Progress
 - [ ] Skeleton
-- [ ] Spinner
+- [x] Spinner
 - [ ] Stepper
 - [ ] Toast
 

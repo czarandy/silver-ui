@@ -288,6 +288,27 @@ describe('Link', () => {
     expect(link).not.toHaveAttribute('data-another-link');
   });
 
+  it('passes through ARIA attributes to the rendered element', () => {
+    render(
+      <Link
+        aria-controls="menu-1"
+        aria-current="page"
+        aria-describedby="desc-1"
+        aria-expanded={true}
+        aria-haspopup="menu"
+        href="/nav">
+        Nav
+      </Link>,
+    );
+
+    const link = screen.getByRole('link', {name: 'Nav'});
+    expect(link).toHaveAttribute('aria-controls', 'menu-1');
+    expect(link).toHaveAttribute('aria-current', 'page');
+    expect(link).toHaveAttribute('aria-describedby', 'desc-1');
+    expect(link).toHaveAttribute('aria-expanded', 'true');
+    expect(link).toHaveAttribute('aria-haspopup', 'menu');
+  });
+
   it('applies custom className', () => {
     render(
       <Link className="custom-class" href="/test">

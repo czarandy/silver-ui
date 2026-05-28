@@ -19,6 +19,28 @@ import {useLinkComponent} from './useLinkComponent';
  * React Router's Link) through the `as` prop or a parent `LinkProvider`.
  */
 export interface LinkProps {
+  /** Identifies the element(s) whose contents are controlled by the link. */
+  'aria-controls'?: string;
+  /** Indicates the current item in a set (e.g. current page in navigation). */
+  'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true';
+  /** Identifies the element(s) that describe the link. */
+  'aria-describedby'?: string;
+  /** Identifies the element that provides a detailed description. */
+  'aria-details'?: string;
+  /** Indicates whether a controlled element is expanded or collapsed. */
+  'aria-expanded'?: boolean;
+  /** Indicates the link opens an interactive popup element. */
+  'aria-haspopup'?: boolean | 'menu' | 'listbox' | 'tree' | 'grid' | 'dialog';
+  /** Indicates whether the element is exposed to the accessibility API. */
+  'aria-hidden'?: boolean;
+  /** Keyboard shortcuts that activate or focus the link. */
+  'aria-keyshortcuts'?: string;
+  /** Identifies the element(s) that label the link. */
+  'aria-labelledby'?: string;
+  /** Identifies element(s) owned by the link that are not DOM children. */
+  'aria-owns'?: string;
+  /** Human-readable description of the role of the link. */
+  'aria-roledescription'?: string;
   /**
    * Custom element type to render instead of `<a>`. Useful for integrating with routers.
    * If you want to set this globally, use LinkProvider at the top level of your app.
@@ -91,6 +113,17 @@ export interface LinkProps {
 }
 
 export function Link({
+  'aria-controls': ariaControls,
+  'aria-current': ariaCurrent,
+  'aria-describedby': ariaDescribedby,
+  'aria-details': ariaDetails,
+  'aria-expanded': ariaExpanded,
+  'aria-haspopup': ariaHaspopup,
+  'aria-hidden': ariaHidden,
+  'aria-keyshortcuts': ariaKeyshortcuts,
+  'aria-labelledby': ariaLabelledby,
+  'aria-owns': ariaOwns,
+  'aria-roledescription': ariaRoledescription,
   as,
   label,
   href: hrefFromProps,
@@ -115,6 +148,20 @@ export function Link({
   const opensInNewTab = target === '_blank';
   const rel = useRel({isExternalLink, target, rel: relFromProps});
 
+  const ariaAttrs = {
+    'aria-controls': ariaControls,
+    'aria-current': ariaCurrent,
+    'aria-describedby': ariaDescribedby,
+    'aria-details': ariaDetails,
+    'aria-expanded': ariaExpanded,
+    'aria-haspopup': ariaHaspopup,
+    'aria-hidden': ariaHidden,
+    'aria-keyshortcuts': ariaKeyshortcuts,
+    'aria-labelledby': ariaLabelledby,
+    'aria-owns': ariaOwns,
+    'aria-roledescription': ariaRoledescription,
+  };
+
   const handleClick: MouseEventHandler<HTMLAnchorElement> = event => {
     if (isDisabled || isFallbackHref) {
       event.preventDefault();
@@ -129,6 +176,7 @@ export function Link({
 
   const element = (
     <Component
+      {...ariaAttrs}
       aria-disabled={isDisabled || undefined}
       aria-label={getAriaLabel(label, opensInNewTab)}
       className={cx(linkRecipe({color, hasUnderline}), className)}

@@ -190,7 +190,8 @@ const booleanPropNaming = {
         if (
           name == null ||
           !includesBooleanType(node.typeAnnotation) ||
-          /^(is|has)[A-Z]/.test(name)
+          /^(is|has)[A-Z]/.test(name) ||
+          name.startsWith('aria-')
         ) {
           return;
         }
