@@ -37,7 +37,7 @@ const styles = {
   divider: css({
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.200',
+    borderBlockEndColor: 'border',
   }),
   title: css({
     flex: 1,

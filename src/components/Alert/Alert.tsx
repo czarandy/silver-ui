@@ -115,7 +115,7 @@ const styles = {
   body: css({
     bg: 'bg',
     borderBlockEndWidth: '1px',
-    borderColor: 'silver-neutral.200',
+    borderColor: 'border',
     borderInlineWidth: '1px',
     borderStyle: 'solid',
     px: '4',

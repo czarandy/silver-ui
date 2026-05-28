@@ -40,7 +40,7 @@ const styles = {
     textAlign: 'center',
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.200',
+    borderBlockEndColor: 'border',
   }),
   cell: css({
     minH: '24',

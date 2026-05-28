@@ -49,7 +49,7 @@ const styles = {
     boxShadow: 'lg',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.200',
+    borderColor: 'border',
     _dark: {
       borderColor: 'silver-neutral.700',
     },

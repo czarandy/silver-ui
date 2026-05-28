@@ -80,7 +80,7 @@ const styles = {
   withDivider: css({
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.200',
+    borderBlockEndColor: 'border',
     _last: {
       borderBlockEndWidth: 0,
     },

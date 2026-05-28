@@ -51,7 +51,7 @@ const styles = {
     gap: '2',
     borderBlockStartWidth: '1px',
     borderBlockStartStyle: 'solid',
-    borderBlockStartColor: 'silver-neutral.200',
+    borderBlockStartColor: 'border',
   }),
   footerRow: css({
     display: 'flex',

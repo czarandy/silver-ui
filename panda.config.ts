@@ -69,6 +69,20 @@ export default defineConfig({
               },
             },
           },
+          border: {
+            DEFAULT: {
+              value: {
+                base: '{colors.silver-neutral.200}',
+                _dark: '{colors.silver-neutral.700}',
+              },
+            },
+            emphasized: {
+              value: {
+                base: '{colors.silver-neutral.300}',
+                _dark: '{colors.silver-neutral.600}',
+              },
+            },
+          },
           icon: {
             primary: {value: '{colors.fg}'},
             secondary: {value: '{colors.fg.muted}'},

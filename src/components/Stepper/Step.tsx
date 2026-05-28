@@ -177,7 +177,7 @@ const styles = {
   }),
   indicatorDisabled: css({
     bg: 'transparent',
-    borderColor: 'silver-neutral.200',
+    borderColor: 'border',
     color: 'silver-neutral.400',
   }),
   indicatorError: css({

@@ -59,7 +59,7 @@ const styles = {
     borderRadius: 0,
     borderInlineEndWidth: '1px',
     borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'silver-neutral.200',
+    borderInlineEndColor: 'border',
   }),
   right: css({
     inset: 0,
@@ -69,7 +69,7 @@ const styles = {
     borderRadius: 0,
     borderInlineStartWidth: '1px',
     borderInlineStartStyle: 'solid',
-    borderInlineStartColor: 'silver-neutral.200',
+    borderInlineStartColor: 'border',
   }),
   top: css({
     inset: 0,
@@ -79,7 +79,7 @@ const styles = {
     borderRadius: 0,
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.200',
+    borderBlockEndColor: 'border',
   }),
   bottom: css({
     inset: 0,
@@ -89,7 +89,7 @@ const styles = {
     borderRadius: 0,
     borderBlockStartWidth: '1px',
     borderBlockStartStyle: 'solid',
-    borderBlockStartColor: 'silver-neutral.200',
+    borderBlockStartColor: 'border',
   }),
   inner: css({
     display: 'flex',

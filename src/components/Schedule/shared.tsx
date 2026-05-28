@@ -63,7 +63,7 @@ export const styles = {
   surface: css({
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.200',
+    borderColor: 'border',
     borderRadius: 'md',
     overflow: 'hidden',
     bg: 'bg',

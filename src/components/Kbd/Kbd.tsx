@@ -1,4 +1,4 @@
-import {useSyncExternalStore, type CSSProperties, type Ref} from 'react';
+import {useMemo, type CSSProperties, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 
@@ -15,13 +15,13 @@ export interface KbdProps {
    * Keyboard shortcut string. Use "+" to separate keys.
    *
    * Special keys: mod, ctrl, alt, shift, enter, backspace, escape, tab, up,
-   * down, left, right.
+   * down, left, right, plus.
    */
   keys: string;
   /**
    * Ref forwarded to the root element.
    */
-  ref?: Ref<HTMLSpanElement>;
+  ref?: Ref<HTMLElement>;
   /**
    * Inline styles applied to the root element.
    */
@@ -34,6 +34,7 @@ const styles = {
     alignItems: 'center',
     gap: '1',
     flexShrink: 0,
+    verticalAlign: 'bottom',
   }),
   key: css({
     display: 'inline-flex',
@@ -64,21 +65,35 @@ const keyDisplay: Record<string, string> = {
   enter: '↵',
   escape: 'Esc',
   left: '←',
+  plus: '+',
   right: '→',
   shift: '⇧',
   tab: '⇥',
   up: '↑',
 };
 
-function subscribeToPlatformChanges(): () => void {
-  return () => {};
-}
+const keyLabel: Record<string, string> = {
+  alt: 'Alt',
+  backspace: 'Backspace',
+  ctrl: 'Control',
+  down: 'Down Arrow',
+  enter: 'Enter',
+  escape: 'Escape',
+  left: 'Left Arrow',
+  plus: 'Plus',
+  right: 'Right Arrow',
+  shift: 'Shift',
+  tab: 'Tab',
+  up: 'Up Arrow',
+};
 
-function getServerPlatformSnapshot(): boolean {
-  return false;
-}
+let cachedIsMac: boolean | undefined;
 
 function detectMac(): boolean {
+  if (cachedIsMac !== undefined) {
+    return cachedIsMac;
+  }
+
   if (typeof navigator === 'undefined') {
     return false;
   }
@@ -90,10 +105,16 @@ function detectMac(): boolean {
     typeof userAgentData === 'object' &&
     'platform' in userAgentData
   ) {
-    return /mac/i.test(String(userAgentData.platform));
+    cachedIsMac = /mac/i.test(String(userAgentData.platform));
+  } else {
+    cachedIsMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
   }
 
-  return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+  return cachedIsMac;
+}
+
+export function resetPlatformCache(): void {
+  cachedIsMac = undefined;
 }
 
 function getKeyDisplay(key: string, isMac: boolean): string {
@@ -101,6 +122,13 @@ function getKeyDisplay(key: string, isMac: boolean): string {
     return isMac ? '⌘' : 'Ctrl';
   }
   return keyDisplay[key] ?? key.toUpperCase();
+}
+
+function getKeyLabel(key: string, isMac: boolean): string {
+  if (key === 'mod') {
+    return isMac ? 'Command' : 'Control';
+  }
+  return keyLabel[key] ?? key.toUpperCase();
 }
 
 /**
@@ -113,35 +141,43 @@ export function Kbd({
   ref,
   style,
 }: KbdProps): React.JSX.Element {
-  const isMac = useSyncExternalStore(
-    subscribeToPlatformChanges,
-    detectMac,
-    getServerPlatformSnapshot,
-  );
-  const parts = keys
-    .split('+')
-    .map(key => key.trim().toLowerCase())
-    .filter(Boolean);
-  const keyCounts = new Map<string, number>();
-  const keyedParts = parts.map(key => {
-    const count = (keyCounts.get(key) ?? 0) + 1;
-    keyCounts.set(key, count);
-    return {id: `${key}-${count}`, key};
-  });
+  const isMac = detectMac();
+  const {keyedParts, ariaLabel} = useMemo(() => {
+    const parts = keys
+      .split('+')
+      .map(key => key.trim().toLowerCase())
+      .filter(Boolean);
+
+    if (process.env.NODE_ENV !== 'production' && parts.length === 0) {
+      console.warn(
+        'Kbd: `keys` prop resolved to zero keys. Check the value passed to `keys`.',
+      );
+    }
+
+    const keyCounts = new Map<string, number>();
+    return {
+      keyedParts: parts.map(key => {
+        const count = (keyCounts.get(key) ?? 0) + 1;
+        keyCounts.set(key, count);
+        return {id: `${key}-${count}`, display: getKeyDisplay(key, isMac)};
+      }),
+      ariaLabel: parts.map(key => getKeyLabel(key, isMac)).join('+'),
+    };
+  }, [keys, isMac]);
 
   return (
-    <span
-      aria-hidden="true"
+    <kbd
+      aria-label={ariaLabel}
       className={cx(styles.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       {keyedParts.map(part => (
         <kbd className={styles.key} key={part.id}>
-          {getKeyDisplay(part.key, isMac)}
+          {part.display}
         </kbd>
       ))}
-    </span>
+    </kbd>
   );
 }
 

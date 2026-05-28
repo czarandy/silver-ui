@@ -49,7 +49,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] Card
 - [ ] Icon
 - [ ] Item
-- [ ] Kbd
+- [x] Kbd
 - [ ] Lightbox
 - [ ] List
 - [ ] MetadataList

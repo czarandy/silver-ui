@@ -31,12 +31,12 @@ const styles = {
   dividerEnd: css({
     borderInlineEndWidth: '1px',
     borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'silver-neutral.200',
+    borderInlineEndColor: 'border',
   }),
   dividerStart: css({
     borderInlineStartWidth: '1px',
     borderInlineStartStyle: 'solid',
-    borderInlineStartColor: 'silver-neutral.200',
+    borderInlineStartColor: 'border',
   }),
 };
 

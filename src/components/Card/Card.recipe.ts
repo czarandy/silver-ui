@@ -13,7 +13,7 @@ export const cardRecipe = cva({
     variant: {
       default: {
         bg: 'bg',
-        borderColor: 'silver-neutral.200',
+        borderColor: 'border',
       },
       transparent: {
         bg: 'transparent',

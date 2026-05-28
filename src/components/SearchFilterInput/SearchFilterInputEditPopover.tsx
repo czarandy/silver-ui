@@ -92,7 +92,7 @@ const styles = {
     ps: '3',
     borderInlineStartWidth: '1px',
     borderInlineStartStyle: 'solid',
-    borderColor: 'silver-neutral.200',
+    borderColor: 'border',
   }),
   nestedRow: css({
     display: 'flex',

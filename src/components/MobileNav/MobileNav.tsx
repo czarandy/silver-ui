@@ -35,7 +35,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     bg: 'bg',
-    borderColor: 'silver-neutral.200',
+    borderColor: 'border',
     boxSizing: 'border-box',
     overflow: 'hidden',
     transitionProperty: 'transform',
@@ -66,7 +66,7 @@ const styles = {
     justifyContent: 'space-between',
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.200',
+    borderBlockEndColor: 'border',
     flexShrink: 0,
   }),
   content: css({

@@ -30,7 +30,7 @@ const styles = {
   divider: css({
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.200',
+    borderBlockEndColor: 'border',
   }),
   inner: css({
     boxSizing: 'border-box',

@@ -1843,6 +1843,14 @@ const tokens = {
     "value": "var(--silver-colors-bg-subtle)",
     "variable": "var(--silver-colors-bg-subtle)"
   },
+  "colors.border": {
+    "value": "var(--silver-colors-border)",
+    "variable": "var(--silver-colors-border)"
+  },
+  "colors.border.emphasized": {
+    "value": "var(--silver-colors-border-emphasized)",
+    "variable": "var(--silver-colors-border-emphasized)"
+  },
   "colors.icon.primary": {
     "value": "var(--silver-colors-fg)",
     "variable": "var(--silver-colors-icon-primary)"
@@ -2202,6 +2210,10 @@ const tokens = {
   "colors.colorPalette.muted": {
     "value": "var(--silver-colors-color-palette-muted)",
     "variable": "var(--silver-colors-color-palette-muted)"
+  },
+  "colors.colorPalette.emphasized": {
+    "value": "var(--silver-colors-color-palette-emphasized)",
+    "variable": "var(--silver-colors-color-palette-emphasized)"
   },
   "colors.colorPalette.primary": {
     "value": "var(--silver-colors-color-palette-primary)",

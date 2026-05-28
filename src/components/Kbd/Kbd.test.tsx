@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {Kbd} from './Kbd';
+import {Kbd, resetPlatformCache} from './Kbd';
 
 describe('Kbd', () => {
   const originalPlatform = navigator.platform;
@@ -10,6 +10,7 @@ describe('Kbd', () => {
       configurable: true,
       value: originalPlatform,
     });
+    resetPlatformCache();
   });
 
   it('renders a single key', () => {
@@ -53,8 +54,112 @@ describe('Kbd', () => {
     expect(screen.getByText('K')).toBeInTheDocument();
   });
 
+  it('sets aria-label with readable key names for a single key', () => {
+    render(<Kbd keys="enter" />);
+
+    expect(screen.getByLabelText('Enter')).toBeInTheDocument();
+  });
+
+  it('sets aria-label with readable key names for a multi-key shortcut', () => {
+    render(<Kbd keys="ctrl+shift+k" />);
+
+    expect(screen.getByLabelText('Control+Shift+K')).toBeInTheDocument();
+  });
+
+  it('sets aria-label with Command for mod on Mac', () => {
+    Object.defineProperty(navigator, 'platform', {
+      configurable: true,
+      value: 'MacIntel',
+    });
+
+    render(<Kbd keys="mod+k" />);
+
+    expect(screen.getByLabelText('Command+K')).toBeInTheDocument();
+  });
+
+  it('sets aria-label with Control for mod on non-Mac', () => {
+    render(<Kbd keys="mod+k" />);
+
+    expect(screen.getByLabelText('Control+K')).toBeInTheDocument();
+  });
+
+  it('renders the plus key via the "plus" keyword', () => {
+    render(<Kbd keys="shift+plus" />);
+
+    expect(screen.getByText('⇧')).toBeInTheDocument();
+    expect(screen.getByText('+')).toBeInTheDocument();
+    expect(screen.getByLabelText('Shift+Plus')).toBeInTheDocument();
+  });
+
+  it('warns in development when keys resolve to empty', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(<Kbd keys="" />);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      'Kbd: `keys` prop resolved to zero keys. Check the value passed to `keys`.',
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('renders arrow key symbols', () => {
+    render(<Kbd keys="up+down+left+right" />);
+
+    expect(screen.getByText('↑')).toBeInTheDocument();
+    expect(screen.getByText('↓')).toBeInTheDocument();
+    expect(screen.getByText('←')).toBeInTheDocument();
+    expect(screen.getByText('→')).toBeInTheDocument();
+  });
+
+  it('renders backspace and tab symbols', () => {
+    render(<Kbd keys="backspace+tab" />);
+
+    expect(screen.getByText('⌫')).toBeInTheDocument();
+    expect(screen.getByText('⇥')).toBeInTheDocument();
+  });
+
+  it('uppercases unknown keys', () => {
+    render(<Kbd keys="f1+space+delete" />);
+
+    expect(screen.getByText('F1')).toBeInTheDocument();
+    expect(screen.getByText('SPACE')).toBeInTheDocument();
+    expect(screen.getByText('DELETE')).toBeInTheDocument();
+  });
+
+  it('handles malformed keys strings gracefully', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const {rerender} = render(<Kbd keys="+" />);
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockClear();
+
+    rerender(<Kbd keys="mod+" />);
+    expect(screen.getByText('Ctrl')).toBeInTheDocument();
+
+    warnSpy.mockRestore();
+  });
+
+  it('renders duplicate keys with unique React keys', () => {
+    render(<Kbd keys="up+up" />);
+
+    const arrows = screen.getAllByText('↑');
+    expect(arrows).toHaveLength(2);
+  });
+
+  it('renders mod as Ctrl on explicitly non-Mac platforms', () => {
+    Object.defineProperty(navigator, 'platform', {
+      configurable: true,
+      value: 'Win32',
+    });
+
+    render(<Kbd keys="mod" />);
+
+    expect(screen.getByText('Ctrl')).toBeInTheDocument();
+    expect(screen.getByLabelText('Control')).toBeInTheDocument();
+  });
+
   it('forwards className, style, data-testid, and ref', () => {
-    const ref = vi.fn<(element: HTMLSpanElement | null) => void>();
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
 
     render(
       <Kbd
@@ -69,7 +174,6 @@ describe('Kbd', () => {
     const root = screen.getByTestId('kbd');
     expect(root).toHaveClass('custom-kbd');
     expect(root).toHaveStyle({color: 'rgb(255, 0, 0)'});
-    expect(root).toHaveAttribute('aria-hidden', 'true');
-    expect(ref).toHaveBeenCalledWith(expect.any(HTMLSpanElement));
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
   });
 });
