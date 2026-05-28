@@ -6,8 +6,10 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import {toPixelSize, type SizeValue} from '../../internal/toPixelSize';
 import {stackRecipe} from './Stack.recipe';
 
+export type {SizeValue};
 export type StackDirection = 'horizontal' | 'vertical';
 export type StackMainAlignment =
   | 'start'
@@ -20,7 +22,6 @@ export type StackCrossAlignment = 'start' | 'center' | 'end' | 'stretch';
 export type StackAlignment = StackMainAlignment | StackCrossAlignment;
 export type StackWrap = 'nowrap' | 'wrap' | 'wrap-reverse';
 export type StackGap = 0 | 0.5 | 1 | 1.5 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
-export type SizeValue = number | string;
 
 export interface StackProps {
   align?: StackCrossAlignment;
@@ -70,10 +71,6 @@ const crossAlignValues: Record<StackCrossAlignment, string> = {
   stretch: 'stretch',
 };
 
-function toSize(value: SizeValue | undefined): string | number | undefined {
-  return typeof value === 'number' ? `${value}px` : value;
-}
-
 export function Stack({
   align,
   children,
@@ -109,8 +106,8 @@ export function Stack({
       crossAlign != null && crossAlign in crossAlignValues
         ? crossAlignValues[crossAlign as StackCrossAlignment]
         : undefined,
-    width: toSize(width),
-    height: toSize(height),
+    width: toPixelSize(width),
+    height: toPixelSize(height),
     ...style,
   };
 

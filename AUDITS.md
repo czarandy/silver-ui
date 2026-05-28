@@ -14,7 +14,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 
 - [ ] AppShell
 - [ ] AspectRatio
-- [ ] Center
+- [x] Center
 - [ ] Collapsible
 - [ ] Divider
 - [ ] Layout

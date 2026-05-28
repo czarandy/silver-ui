@@ -1,24 +1,39 @@
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {HTMLAttributes, ReactNode, Ref} from 'react';
 import {cx} from '../../internal/cx';
-import type {SizeValue} from '../Stack';
+import {toPixelSize, type SizeValue} from '../../internal/toPixelSize';
 import {centerRecipe} from './Center.recipe';
 
 export type CenterAxis = 'both' | 'horizontal' | 'vertical';
 
-export interface CenterProps {
+export interface CenterProps extends HTMLAttributes<HTMLDivElement> {
+  /**
+   * Which axes to center content along.
+   */
   axis?: CenterAxis;
+  /**
+   * Content to center.
+   */
   children: ReactNode;
-  className?: string;
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
+  /**
+   * Fixed height. Numbers are treated as pixels.
+   */
   height?: SizeValue;
+  /**
+   * Render as `inline-flex` instead of `flex`.
+   */
   isInline?: boolean;
+  /**
+   * Ref forwarded to the root element.
+   */
   ref?: Ref<HTMLDivElement>;
-  style?: CSSProperties;
+  /**
+   * Fixed width. Numbers are treated as pixels.
+   */
   width?: SizeValue;
-}
-
-function toSize(value: SizeValue | undefined): string | number | undefined {
-  return typeof value === 'number' ? `${value}px` : value;
 }
 
 export function Center({
@@ -31,13 +46,19 @@ export function Center({
   ref,
   style,
   width,
+  ...htmlProps
 }: CenterProps): React.JSX.Element {
   return (
     <div
+      {...htmlProps}
       className={cx(centerRecipe({axis, isInline}), className)}
       data-testid={dataTestId}
       ref={ref}
-      style={{width: toSize(width), height: toSize(height), ...style}}>
+      style={{
+        width: toPixelSize(width),
+        height: toPixelSize(height),
+        ...style,
+      }}>
       {children}
     </div>
   );
