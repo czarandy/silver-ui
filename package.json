@@ -96,6 +96,7 @@
     "vitest": "^4.1.7"
   },
   "dependencies": {
+    "@js-temporal/polyfill": "^0.5.1",
     "lucide-react": "^1.16.0"
   }
 }

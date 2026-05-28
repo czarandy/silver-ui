@@ -1,0 +1,73 @@
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
+import {Button} from '../Button';
+import {HoverCard} from './HoverCard';
+
+const showPopoverMock = vi.fn();
+const hidePopoverMock = vi.fn();
+
+beforeAll(() => {
+  HTMLElement.prototype.showPopover = showPopoverMock;
+  HTMLElement.prototype.hidePopover = hidePopoverMock;
+});
+
+afterAll(() => {
+  Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+  Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+});
+
+describe('HoverCard', () => {
+  it('renders text triggers as focusable content', () => {
+    render(<HoverCard content="Details">Hover target</HoverCard>);
+
+    const trigger = screen.getByText('Hover target');
+    expect(trigger).toHaveAttribute('tabIndex', '0');
+    expect(trigger).toHaveAttribute('aria-describedby');
+  });
+
+  it('sets aria-describedby on element children', () => {
+    render(
+      <HoverCard content="Details">
+        <Button label="Hover" />
+      </HoverCard>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Hover'})).toHaveAttribute(
+      'aria-describedby',
+    );
+  });
+
+  it('opens on hover', async () => {
+    showPopoverMock.mockClear();
+    const onOpenChange = vi.fn();
+
+    render(
+      <HoverCard content="Details" delay={0} onOpenChange={onOpenChange}>
+        <Button label="Hover" />
+      </HoverCard>,
+    );
+
+    fireEvent.mouseEnter(screen.getByRole('button', {name: 'Hover'}));
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+      expect(onOpenChange).toHaveBeenCalledWith(true);
+    });
+  });
+
+  it('applies className, style, and data-testid to text triggers', () => {
+    render(
+      <HoverCard
+        className="custom-hover"
+        content="Details"
+        data-testid="hover-trigger"
+        style={{color: 'red'}}>
+        Hover target
+      </HoverCard>,
+    );
+
+    const trigger = screen.getByTestId('hover-trigger');
+    expect(trigger).toHaveClass('custom-hover');
+    expect(trigger).toHaveStyle({color: 'rgb(255, 0, 0)'});
+  });
+});

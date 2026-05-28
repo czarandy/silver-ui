@@ -174,4 +174,70 @@ export {
   type UseTooltipOptions,
   type UseTooltipReturn,
 } from './components/Tooltip';
+export {
+  Popover,
+  usePopover,
+  type PopoverProps,
+  type UsePopoverOptions,
+  type UsePopoverReturn,
+} from './components/Popover';
+export {
+  HoverCard,
+  useHoverCard,
+  type HoverCardFocusTrigger,
+  type HoverCardProps,
+  type UseHoverCardOptions,
+  type UseHoverCardReturn,
+} from './components/HoverCard';
+export {
+  Calendar,
+  type CalendarHandle,
+  type CalendarProps,
+  type DateRange,
+  type DayOfWeek,
+  type ISODateString,
+} from './components/Calendar';
+export {
+  Field,
+  inputStyles,
+  type FieldProps,
+  type FieldStatus,
+  type FieldStatusVariant,
+  type InputSize,
+  type InputStatus,
+  type InputStatusType,
+} from './components/Field';
+export {
+  TextInput,
+  type TextInputProps,
+  type TextInputType,
+} from './components/TextInput';
+export {TextArea, type TextAreaProps} from './components/TextArea';
+export {NumberInput, type NumberInputProps} from './components/NumberInput';
+export {
+  CheckboxInput,
+  type CheckboxInputProps,
+  type CheckboxInputSize,
+  type CheckboxInputValue,
+} from './components/CheckboxInput';
+export {DateInput, type DateInputProps} from './components/DateInput';
+export {
+  TimeInput,
+  type ISOTimeString,
+  type TimeInputProps,
+} from './components/TimeInput';
+export {
+  DateTimeInput,
+  type DateTimeInputProps,
+  type ISODateTimeString,
+} from './components/DateTimeInput';
+export {
+  DateRangeInput,
+  type DateRangeInputProps,
+} from './components/DateRangeInput';
+export {
+  FileInput,
+  type FileInputMode,
+  type FileInputProps,
+} from './components/FileInput';
 export {cx} from './internal/cx';
