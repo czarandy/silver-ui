@@ -14,16 +14,51 @@ export type MobileNavSide = 'start' | 'end';
  * Slide-out drawer for mobile navigation.
  */
 export interface MobileNavProps {
+  /**
+   * Drawer body content.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the dialog element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the dialog element.
+   */
   'data-testid'?: string;
+  /**
+   * Content rendered in the drawer header bar.
+   */
   header?: ReactNode;
+  /**
+   * Whether the drawer is open.
+   */
   isOpen?: boolean;
+  /**
+   * Accessible label for the dialog.
+   */
   label?: string;
+  /**
+   * Called when the drawer requests an open-state change.
+   */
   onOpenChange?: (isOpen: boolean) => void;
+  /**
+   * Ref forwarded to the dialog element.
+   */
   ref?: Ref<HTMLDialogElement>;
+  /**
+   * Which edge of the viewport the drawer slides from.
+   * @default 'end'
+   */
   side?: MobileNavSide;
+  /**
+   * Inline styles applied to the dialog element.
+   */
   style?: CSSProperties;
+  /**
+   * Maximum drawer width in pixels.
+   * @default 320
+   */
   width?: number;
 }
 
@@ -76,6 +111,9 @@ const styles = {
   }),
 };
 
+/**
+ * Slide-out drawer for mobile navigation, backed by a native dialog element.
+ */
 export function MobileNav({
   children,
   className,

@@ -25,27 +25,101 @@ import {Text} from '../Text';
 export type FileInputMode = 'dropzone' | 'input';
 
 export interface FileInputProps {
+  /**
+   * Comma-separated MIME types or file extensions the input accepts.
+   */
   accept?: string;
+  /**
+   * Additional CSS class names applied to the root element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the hidden file input.
+   */
   'data-testid'?: string;
+  /**
+   * Supporting text rendered below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether to show a clear button when files are selected.
+   * @default false
+   */
   hasClear?: boolean;
+  /**
+   * Whether the input is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the input is in a loading state.
+   * @default false
+   */
   isLoading?: boolean;
+  /**
+   * Whether multiple files can be selected.
+   * @default false
+   */
   isMultiple?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label text.
+   */
   label: string;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Maximum number of files allowed when isMultiple is true.
+   */
   maxFiles?: number;
+  /**
+   * Maximum file size in bytes.
+   */
   maxSize?: number;
+  /**
+   * Display mode: inline input or drag-and-drop dropzone.
+   * @default 'input'
+   */
   mode?: FileInputMode;
+  /**
+   * Called when the selected files change.
+   */
   onChange: (files: File | File[] | null) => void;
+  /**
+   * Placeholder text shown when no file is selected.
+   */
   placeholder?: string;
+  /**
+   * Ref forwarded to the hidden file input element.
+   */
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Validation status displayed below the input.
+   */
   status?: InputStatus;
+  /**
+   * Inline styles applied to the root element.
+   */
   style?: CSSProperties;
+  /**
+   * Currently selected file(s).
+   */
   value: File | File[] | null;
 }
 
@@ -185,6 +259,9 @@ function getFileNames(value: File | File[] | null): string | null {
     : value.name;
 }
 
+/**
+ * A file input supporting both inline and drag-and-drop dropzone modes.
+ */
 export function FileInput({
   label,
   value,

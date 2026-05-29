@@ -216,6 +216,9 @@ export function getEventAccessibleLabel(
   return `${event.title}, ${category.label}, ${getEventTimeLabel(event, timezoneID)}`;
 }
 
+/**
+ * Renders a colored pill displaying an event's accessible label.
+ */
 export function CalendarEventPill({
   event,
 }: {
@@ -230,13 +233,25 @@ export function CalendarEventPill({
   );
 }
 
+/**
+ * Layout wrapper that renders the schedule header (with plugin slots) and body.
+ */
 export function ScheduleFrame({
   children,
   title,
   titleLabel,
 }: {
+  /**
+   * View content rendered below the header.
+   */
   children: ReactNode;
+  /**
+   * Title displayed in the header center slot.
+   */
   title: ReactNode;
+  /**
+   * Accessible label for the enclosing section.
+   */
   titleLabel: string;
 }): React.JSX.Element {
   const {isLoading, plugins} = useScheduleContext();

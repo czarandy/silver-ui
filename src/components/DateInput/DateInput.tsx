@@ -29,27 +29,101 @@ import {Spinner} from '../Spinner';
 export type {ISODateString} from '../../internal/dateTypes';
 
 export interface DateInputProps {
+  /**
+   * Additional CSS class names applied to the input wrapper.
+   */
   className?: string;
+  /**
+   * Test ID applied to the input element.
+   */
   'data-testid'?: string;
+  /**
+   * Predicate functions that constrain which dates are selectable.
+   */
   dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
+  /**
+   * Supporting text rendered below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether to show a clear button when a value is selected.
+   * @default false
+   */
   hasClear?: boolean;
+  /**
+   * Whether the input is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the input is in a loading state.
+   * @default false
+   */
   isLoading?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label text.
+   */
   label: string;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Maximum selectable date (ISO string).
+   */
   max?: ISODateString;
+  /**
+   * Minimum selectable date (ISO string).
+   */
   min?: ISODateString;
+  /**
+   * Number of calendar months shown in the popover.
+   * @default 1
+   */
   numberOfMonths?: 1 | 2;
+  /**
+   * Called when the selected date changes.
+   */
   onChange?: (value: ISODateString | undefined) => void;
+  /**
+   * Placeholder text shown when no date is selected.
+   */
   placeholder?: string;
+  /**
+   * Ref forwarded to the input element.
+   */
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Visual size of the input.
+   * @default 'md'
+   */
   size?: InputSize;
+  /**
+   * Validation status displayed below the input.
+   */
   status?: InputStatus;
+  /**
+   * Inline styles applied to the input wrapper.
+   */
   style?: CSSProperties;
+  /**
+   * Currently selected date (ISO string).
+   */
   value?: ISODateString;
 }
 
@@ -59,6 +133,9 @@ function formatDate(value: ISODateString | undefined): string {
     : plainDateFormat(plainDateFromISO(value), DATE_FORMAT_LONG);
 }
 
+/**
+ * A date picker input that opens a calendar popover for selecting a single date.
+ */
 export function DateInput({
   label,
   value,

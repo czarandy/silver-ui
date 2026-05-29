@@ -111,6 +111,9 @@ function mergeIds(...ids: (string | undefined | null)[]): string | undefined {
   return filtered.length > 0 ? filtered.join(' ') : undefined;
 }
 
+/**
+ * A floating card that appears on hover or focus of a trigger element.
+ */
 export function HoverCard({
   children,
   content,

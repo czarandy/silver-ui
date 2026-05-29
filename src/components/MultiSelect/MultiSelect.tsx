@@ -37,12 +37,24 @@ export interface MultiSelectOptionData {
 }
 
 export interface MultiSelectDivider {
+  /**
+   * Discriminator identifying a divider entry.
+   */
   type: 'divider';
 }
 
 export interface MultiSelectSection {
+  /**
+   * Options within this section.
+   */
   options: ReadonlyArray<MultiSelectOptionData>;
+  /**
+   * Optional heading text for the section.
+   */
   title?: string;
+  /**
+   * Discriminator identifying a section entry.
+   */
   type: 'section';
 }
 

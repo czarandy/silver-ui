@@ -222,6 +222,10 @@ type AppShellRootStyle = CSSProperties & {
   '--appshell-header-height'?: string;
 };
 
+/**
+ * Application-level layout shell with top navigation, side navigation,
+ * banner, skip-to-content support, and responsive mobile navigation.
+ */
 export function AppShell({
   banner,
   children,

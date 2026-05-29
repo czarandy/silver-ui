@@ -55,23 +55,85 @@ type NativeTextProps = Omit<
 >;
 
 export interface TextProps extends NativeTextProps {
+  /**
+   * HTML element to render.
+   * @default 'span'
+   */
   as?: TextElement;
+  /**
+   * Text content.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the element.
+   */
   className?: string;
+  /**
+   * Text color token.
+   */
   color?: TextColor;
+  /**
+   * Test ID applied to the element.
+   */
   'data-testid'?: string;
+  /**
+   * Display mode of the element.
+   * @default 'inline'
+   */
   display?: TextDisplay;
+  /**
+   * Whether to apply capsize leading-trim adjustments.
+   * @default false
+   */
   hasCapsize?: boolean;
+  /**
+   * Whether to render text with a strikethrough line.
+   * @default false
+   */
   hasStrikethrough?: boolean;
+  /**
+   * Whether to use tabular (monospaced) number figures.
+   * @default false
+   */
   hasTabularNumbers?: boolean;
+  /**
+   * Whether to show a tooltip when text is truncated, or the tooltip placement.
+   * @default true
+   */
   hasTruncateTooltip?: boolean | TruncateTooltipPlacement;
+  /**
+   * Maximum number of visible lines before truncation. 0 disables truncation.
+   * @default 0
+   */
   maxLines?: number;
+  /**
+   * Ref forwarded to the rendered element.
+   */
   ref?: Ref<HTMLElement>;
+  /**
+   * Font size token.
+   */
   size?: TextSize;
+  /**
+   * Inline styles applied to the element.
+   */
   style?: CSSProperties;
+  /**
+   * CSS text-wrap value.
+   */
   textWrap?: TextWrap;
+  /**
+   * Typographic preset that determines font size and line height.
+   * @default 'body'
+   */
   type?: TextType;
+  /**
+   * Font weight.
+   */
   weight?: TextWeight;
+  /**
+   * Word-break strategy.
+   */
   wordBreak?: TextWordBreak;
 }
 
@@ -111,6 +173,9 @@ function getMaxLinesVariant(maxLines: number): 'none' | 'one' | 'multiple' {
   return 'none';
 }
 
+/**
+ * Renders styled text with optional truncation, tooltip, and typographic presets.
+ */
 export function Text({
   type = 'body',
   size,

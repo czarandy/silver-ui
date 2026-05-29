@@ -4,10 +4,25 @@ import {cx} from '../../internal/cx';
 import {useTableContext} from './TableContext';
 
 export interface TableRowProps {
+  /**
+   * Cell elements rendered inside the row.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the tr.
+   */
   className?: string;
+  /**
+   * Test ID applied to the tr.
+   */
   'data-testid'?: string;
+  /**
+   * Ref forwarded to the tr element.
+   */
   ref?: Ref<HTMLTableRowElement>;
+  /**
+   * Inline styles applied to the tr.
+   */
   style?: CSSProperties;
 }
 
@@ -41,6 +56,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Table row with hover and striped styling from context.
+ */
 export function TableRow({
   children,
   className,

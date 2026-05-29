@@ -17,15 +17,46 @@ import {
 export type MetadataListColumns = 'multi' | 'single' | number;
 
 export interface MetadataListProps {
+  /**
+   * Metadata items to render inside the list.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the root.
+   */
   className?: string;
+  /**
+   * Number of columns or layout mode.
+   */
   columns?: MetadataListColumns;
+  /**
+   * Test ID applied to the root.
+   */
   'data-testid'?: string;
+  /**
+   * Configuration for item labels (position, width).
+   */
   label?: MetadataListLabelConfig;
+  /**
+   * Maximum number of visible items before "Show more" appears.
+   */
   maxNumOfItems?: number;
+  /**
+   * Layout orientation of the list.
+   * @default 'vertical'
+   */
   orientation?: 'horizontal' | 'vertical';
+  /**
+   * Ref forwarded to the root element.
+   */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * Inline styles applied to the root.
+   */
   style?: CSSProperties;
+  /**
+   * Optional title rendered above the list.
+   */
   title?: ReactNode;
 }
 
@@ -76,6 +107,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Displays a list of label-value metadata pairs in configurable layouts.
+ */
 export function MetadataList({
   children,
   columns = 'single',

@@ -159,6 +159,9 @@ const styles = {
   } satisfies Record<InputStatusType, string>,
 } as const;
 
+/**
+ * A form field wrapper that renders a label, description, control slot, and validation status.
+ */
 export function Field({
   children,
   label,

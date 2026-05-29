@@ -51,6 +51,10 @@ export interface ButtonGroupProps {
   style?: CSSProperties;
 }
 
+/**
+ * Groups related Buttons and propagates shared size, disabled state, and
+ * orientation to child Buttons.
+ */
 export function ButtonGroup({
   children,
   className,

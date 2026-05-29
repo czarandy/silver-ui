@@ -19,12 +19,39 @@ export interface TableProps<T extends Record<string, unknown>> extends Omit<
   BaseTableProps<T>,
   'plugins'
 > {
+  /**
+   * Spacing density for rows and cells.
+   * @default 'balanced'
+   */
   density?: TableDensity;
+  /**
+   * Which divider lines to show between cells.
+   * @default 'rows'
+   */
   dividers?: TableDividers;
+  /**
+   * Whether rows highlight on hover.
+   * @default false
+   */
   hasHover?: boolean;
+  /**
+   * Whether alternating rows have a subtle background.
+   * @default false
+   */
   isStriped?: boolean;
+  /**
+   * Plugin map or array that extends table behavior.
+   */
   plugins?: Record<string, TablePlugin<T>> | TablePlugin<T>[];
+  /**
+   * How overflowing cell text is handled.
+   * @default 'wrap'
+   */
   textOverflow?: TableTextOverflow;
+  /**
+   * Vertical alignment of cell content.
+   * @default 'middle'
+   */
   verticalAlign?: TableVerticalAlign;
 }
 
@@ -60,6 +87,9 @@ function buildTableStylePlugin<
   };
 }
 
+/**
+ * Data table with configurable density, dividers, hover, and striping.
+ */
 function TableInner<T extends Record<string, unknown>>({
   children,
   className,

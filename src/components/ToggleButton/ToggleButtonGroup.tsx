@@ -113,6 +113,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Groups related ToggleButtons and manages shared selection state.
+ */
 export function ToggleButtonGroup({
   children,
   className,

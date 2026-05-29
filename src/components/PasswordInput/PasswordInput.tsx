@@ -14,6 +14,9 @@ export interface PasswordInputProps extends Omit<
   ref?: Ref<HTMLInputElement>;
 }
 
+/**
+ * Password input with a toggle to show or hide the entered value.
+ */
 export function PasswordInput({
   className,
   'data-testid': dataTestId,

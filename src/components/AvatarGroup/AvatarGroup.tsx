@@ -42,6 +42,9 @@ export interface AvatarGroupProps {
   style?: CSSProperties;
 }
 
+/**
+ * Displays a stacked group of Avatars with shared size and overlap.
+ */
 export function AvatarGroup({
   'aria-label': ariaLabel = 'Avatars',
   children,

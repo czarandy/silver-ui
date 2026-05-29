@@ -29,27 +29,101 @@ import {Spinner} from '../Spinner';
 export type {DateRange, ISODateString} from '../../internal/dateTypes';
 
 export interface DateRangeInputProps {
+  /**
+   * Additional CSS class names applied to the input wrapper.
+   */
   className?: string;
+  /**
+   * Test ID applied to the input element.
+   */
   'data-testid'?: string;
+  /**
+   * Predicate functions that constrain which dates are selectable.
+   */
   dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
+  /**
+   * Supporting text rendered below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether to show a clear button when a value is selected.
+   * @default false
+   */
   hasClear?: boolean;
+  /**
+   * Whether the input is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the input is in a loading state.
+   * @default false
+   */
   isLoading?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label text.
+   */
   label: string;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Maximum selectable date (ISO string).
+   */
   max?: ISODateString;
+  /**
+   * Minimum selectable date (ISO string).
+   */
   min?: ISODateString;
+  /**
+   * Number of calendar months shown in the popover.
+   * @default 2
+   */
   numberOfMonths?: 1 | 2;
+  /**
+   * Called when the selected date range changes.
+   */
   onChange?: (value: DateRange | undefined) => void;
+  /**
+   * Placeholder text shown when no range is selected.
+   */
   placeholder?: string;
+  /**
+   * Ref forwarded to the input element.
+   */
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Visual size of the input.
+   * @default 'md'
+   */
   size?: InputSize;
+  /**
+   * Validation status displayed below the input.
+   */
   status?: InputStatus;
+  /**
+   * Inline styles applied to the input wrapper.
+   */
   style?: CSSProperties;
+  /**
+   * Currently selected date range.
+   */
   value?: DateRange;
 }
 
@@ -60,6 +134,9 @@ function formatRange(value: DateRange | undefined): string {
   return `${plainDateFormat(plainDateFromISO(value.start), DATE_FORMAT_SHORT_WITH_YEAR)} - ${plainDateFormat(plainDateFromISO(value.end), DATE_FORMAT_SHORT_WITH_YEAR)}`;
 }
 
+/**
+ * A date range picker input that opens a calendar popover for selecting a start and end date.
+ */
 export function DateRangeInput({
   label,
   value,

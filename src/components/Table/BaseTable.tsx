@@ -183,6 +183,9 @@ const MemoizedDataRow = memo(DataRowInner, areRowPropsEqual) as <
   props: DataRowProps<T>,
 ) => ReactElement;
 
+/**
+ * Low-level table renderer that applies column definitions, plugins, and data mapping.
+ */
 function BaseTableInner<T extends Record<string, unknown>>({
   children,
   className,

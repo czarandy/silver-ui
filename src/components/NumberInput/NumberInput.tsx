@@ -22,44 +22,150 @@ import {Icon} from '../Icon';
 import {useInputGroup} from '../InputGroup';
 
 interface NumberInputBaseProps {
+  /**
+   * HTML autocomplete attribute value.
+   */
   autoComplete?: string;
+  /**
+   * Additional CSS class names applied to the input wrapper.
+   */
   className?: string;
+  /**
+   * Test ID applied to the input element.
+   */
   'data-testid'?: string;
+  /**
+   * Supporting text displayed below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether to focus the input on mount.
+   * @default false
+   */
   hasAutoFocus?: boolean;
+  /**
+   * HTML name attribute.
+   */
   htmlName?: string;
+  /**
+   * Whether the input is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to restrict input to integer values only.
+   * @default false
+   */
   isIntegerOnly?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label.
+   */
   label: string;
+  /**
+   * Icon rendered beside the label.
+   */
   labelIcon?: ReactNode;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Maximum allowed value.
+   */
   max?: number | null;
+  /**
+   * Minimum allowed value.
+   */
   min?: number | null;
+  /**
+   * Called when the input loses focus.
+   */
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  /**
+   * Called when Enter is pressed.
+   */
   onEnter?: () => void;
+  /**
+   * Called when the input receives focus.
+   */
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
+  /**
+   * Keyboard event handler for the input.
+   */
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  /**
+   * Placeholder text.
+   */
   placeholder?: string;
+  /**
+   * Ref forwarded to the input element.
+   */
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Visual size.
+   * @default 'md'
+   */
   size?: InputSize;
+  /**
+   * Icon or content shown before the input.
+   */
   startIcon?: ReactNode;
+  /**
+   * Validation status displayed below the input.
+   */
   status?: InputStatus;
+  /**
+   * Step increment for the number input.
+   */
   step?: number | null;
+  /**
+   * Inline styles applied to the input wrapper.
+   */
   style?: CSSProperties;
+  /**
+   * Unit label displayed after the input value.
+   */
   units?: string | null;
+  /**
+   * Controlled numeric value.
+   */
   value?: number | null;
 }
 
 interface NumberInputNonClearableProps extends NumberInputBaseProps {
+  /**
+   * Whether to show a clear button.
+   */
   hasClear?: false;
+  /**
+   * Called when the numeric value changes.
+   */
   onChange: (value: number) => void;
 }
 
 interface NumberInputClearableProps extends NumberInputBaseProps {
+  /**
+   * Whether to show a clear button.
+   */
   hasClear: true;
+  /**
+   * Called when the numeric value changes or is cleared.
+   */
   onChange: (value: number | null) => void;
 }
 
@@ -99,6 +205,9 @@ function parseNumberInput(
   return number;
 }
 
+/**
+ * Numeric input field with optional min/max bounds and step control.
+ */
 export function NumberInput({
   label,
   value,

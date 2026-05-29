@@ -16,19 +16,43 @@ import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
 export interface SelectOptionData {
+  /**
+   * Icon displayed before the label.
+   */
   icon?: ReactNode;
+  /**
+   * Whether the option is disabled.
+   */
   isDisabled?: boolean;
+  /**
+   * Option label. Defaults to `value`.
+   */
   label?: string;
+  /**
+   * Option value.
+   */
   value: string;
 }
 
 export interface SelectDivider {
+  /**
+   * Discriminator identifying a divider entry.
+   */
   type: 'divider';
 }
 
 export interface SelectSection {
+  /**
+   * Options within this section.
+   */
   options: ReadonlyArray<SelectOptionData>;
+  /**
+   * Optional heading text for the section.
+   */
   title?: string;
+  /**
+   * Discriminator identifying a section entry.
+   */
   type: 'section';
 }
 

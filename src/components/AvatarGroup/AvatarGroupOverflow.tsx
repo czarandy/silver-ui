@@ -76,6 +76,9 @@ type AvatarGroupOverflowStyle = CSSProperties & {
   '--avatar-group-overlap': string;
 };
 
+/**
+ * Overflow indicator showing the count of hidden avatars in an AvatarGroup.
+ */
 export function AvatarGroupOverflow({
   children,
   className,

@@ -59,6 +59,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Navigation landmark that displays a trail of breadcrumb links.
+ */
 export function Breadcrumbs({
   children,
   className,

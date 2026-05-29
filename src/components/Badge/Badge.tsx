@@ -18,6 +18,9 @@ export type BadgeVariant =
   | 'teal'
   | 'yellow';
 
+/**
+ * A compact status label, category marker, or count.
+ */
 export interface BadgeProps {
   /**
    * Additional CSS class names applied to the badge.

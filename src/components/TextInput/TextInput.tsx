@@ -126,6 +126,9 @@ export interface TextInputProps {
   value?: string;
 }
 
+/**
+ * Single-line text input field.
+ */
 export function TextInput({
   label,
   value = '',

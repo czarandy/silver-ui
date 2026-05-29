@@ -19,31 +19,118 @@ import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 
 export interface TextAreaProps {
+  /**
+   * Additional CSS class names applied to the textarea wrapper.
+   */
   className?: string;
+  /**
+   * Test ID applied to the textarea element.
+   */
   'data-testid'?: string;
+  /**
+   * Supporting text displayed below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether to focus the textarea on mount.
+   * @default false
+   */
   hasAutoFocus?: boolean;
+  /**
+   * Whether the browser spellcheck is enabled.
+   * @default true
+   */
   hasSpellCheck?: boolean;
+  /**
+   * HTML name attribute.
+   */
   htmlName?: string;
+  /**
+   * Whether the textarea is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the textarea is loading.
+   * @default false
+   */
   isLoading?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label.
+   */
   label: string;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Maximum character count. Displays a counter when set.
+   */
   maxLength?: number;
+  /**
+   * Called when the textarea loses focus.
+   */
   onBlur?: (event: FocusEvent<HTMLTextAreaElement>) => void;
+  /**
+   * Called with the next string value.
+   */
   onChange?: (value: string, event: ChangeEvent<HTMLTextAreaElement>) => void;
+  /**
+   * Called when the textarea receives focus.
+   */
   onFocus?: (event: FocusEvent<HTMLTextAreaElement>) => void;
+  /**
+   * Called when content is pasted into the textarea.
+   */
   onPaste?: (event: ClipboardEvent<HTMLTextAreaElement>) => void;
+  /**
+   * Placeholder text.
+   */
   placeholder?: string;
+  /**
+   * Ref forwarded to the textarea element.
+   */
   ref?: Ref<HTMLTextAreaElement>;
+  /**
+   * Number of visible text rows.
+   * @default 3
+   */
   rows?: number;
+  /**
+   * Visual size.
+   * @default 'md'
+   */
   size?: InputSize;
+  /**
+   * Icon or content shown before the textarea.
+   */
   startIcon?: ReactNode;
+  /**
+   * Validation status displayed below the textarea.
+   */
   status?: InputStatus;
+  /**
+   * Inline styles applied to the textarea wrapper.
+   */
   style?: CSSProperties;
+  /**
+   * Controlled textarea value.
+   */
   value?: string;
 }
 
@@ -62,6 +149,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Multi-line text input field with optional character counter.
+ */
 export function TextArea({
   label,
   value = '',

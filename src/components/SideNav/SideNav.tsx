@@ -7,12 +7,35 @@ import {sideNavRecipe} from './SideNav.recipe';
 import {SideNavCollapseContext, useSideNavRenderMode} from './SideNavContext';
 
 export interface SideNavProps {
+  /**
+   * Navigation item children rendered in the scrollable area.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the nav element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the nav element.
+   */
   'data-testid'?: string;
+  /**
+   * Content rendered in the sticky bottom section.
+   */
   footer?: ReactNode;
+  /**
+   * Icon actions rendered alongside the footer.
+   */
   footerIcons?: ReactNode;
+  /**
+   * Content rendered at the top of the nav (e.g. a logo or title).
+   */
   header?: ReactNode;
+  /**
+   * Whether the nav can be collapsed, or a configuration object for
+   * controlled/uncontrolled collapse behavior.
+   * @default false
+   */
   isCollapsible?:
     | boolean
     | {
@@ -22,8 +45,17 @@ export interface SideNavProps {
         isCollapsed?: boolean;
         onCollapsedChange?: (isCollapsed: boolean) => void;
       };
+  /**
+   * Ref forwarded to the nav element.
+   */
   ref?: Ref<HTMLElement>;
+  /**
+   * Inline styles applied to the nav element.
+   */
   style?: CSSProperties;
+  /**
+   * Non-scrollable content rendered below the header.
+   */
   topContent?: ReactNode;
 }
 
@@ -66,6 +98,10 @@ const styles = {
   }),
 };
 
+/**
+ * Vertical side navigation panel with optional collapsing support.
+ * Adapts to AppShell render modes (inline, drawer, topbar).
+ */
 export function SideNav({
   children,
   className,

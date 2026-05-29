@@ -19,20 +19,61 @@ export type CardVariant =
   | 'teal'
   | 'yellow';
 
+/**
+ * Rounded container surface for grouping related content.
+ */
 export interface CardProps {
+  /**
+   * Card content.
+   */
   children?: ReactNode;
+  /**
+   * Additional CSS class names applied to the root element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
+  /**
+   * Fixed height of the card.
+   */
   height?: SizeValue;
+  /**
+   * Maximum width of the card.
+   */
   maxWidth?: SizeValue;
+  /**
+   * Minimum height of the card.
+   */
   minHeight?: SizeValue;
+  /**
+   * Inner padding step.
+   * @default 0
+   */
   padding?: SpacingStep;
+  /**
+   * Ref forwarded to the root element.
+   */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * Inline styles applied to the root element.
+   */
   style?: CSSProperties;
+  /**
+   * Visual style variant.
+   * @default 'default'
+   */
   variant?: CardVariant;
+  /**
+   * Fixed width of the card.
+   */
   width?: SizeValue;
 }
 
+/**
+ * Rounded container surface for grouping related content.
+ */
 export function Card({
   children,
   className,

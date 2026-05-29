@@ -26,21 +26,75 @@ type NativeHeadingProps = Omit<
 >;
 
 export interface HeadingProps extends NativeHeadingProps {
+  /**
+   * Overrides the ARIA heading level independently of the rendered element.
+   */
   accessibilityLevel?: HeadingLevel;
+  /**
+   * Heading content.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the heading.
+   */
   className?: string;
+  /**
+   * Text color token.
+   * @default 'primary'
+   */
   color?: TextColor;
+  /**
+   * Test ID applied to the heading.
+   */
   'data-testid'?: string;
+  /**
+   * Display mode of the heading.
+   * @default 'block'
+   */
   display?: TextDisplay;
+  /**
+   * Whether to apply capsize leading-trim adjustments.
+   * @default false
+   */
   hasCapsize?: boolean;
+  /**
+   * Whether to render text with a strikethrough line.
+   * @default false
+   */
   hasStrikethrough?: boolean;
+  /**
+   * Whether to show a tooltip when text is truncated, or the tooltip placement.
+   * @default true
+   */
   hasTruncateTooltip?: boolean | HeadingTruncateTooltipPlacement;
+  /**
+   * Semantic heading level that determines the rendered h1-h6 element.
+   */
   level: HeadingLevel;
+  /**
+   * Maximum number of visible lines before truncation. 0 disables truncation.
+   * @default 0
+   */
   maxLines?: number;
+  /**
+   * Ref forwarded to the heading element.
+   */
   ref?: Ref<HTMLHeadingElement>;
+  /**
+   * Inline styles applied to the heading.
+   */
   style?: CSSProperties;
+  /**
+   * CSS text-wrap value.
+   */
   textWrap?: TextWrap;
+  /**
+   * Typographic preset for the heading.
+   */
   type?: HeadingType;
+  /**
+   * Word-break strategy.
+   */
   wordBreak?: TextWordBreak;
 }
 
@@ -77,6 +131,9 @@ function getMaxLinesVariant(maxLines: number): 'none' | 'one' | 'multiple' {
   return 'none';
 }
 
+/**
+ * Renders a semantic heading element (h1-h6) with typographic styling and optional truncation.
+ */
 export function Heading({
   level,
   type,

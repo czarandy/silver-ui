@@ -115,6 +115,9 @@ function findTriggerButton(element: HTMLElement): HTMLElement | null {
   return element.querySelector<HTMLElement>(BUTTON_SELECTOR);
 }
 
+/**
+ * A click-triggered floating dialog anchored to a trigger element.
+ */
 export function Popover({
   anchorRef,
   children,

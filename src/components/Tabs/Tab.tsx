@@ -31,7 +31,8 @@ export interface TabProps {
   /**
    * Icon shown before the label.
    */
-  icon?: IconComponent; /**
+  icon?: IconComponent;
+  /**
    * Visible tab label.
    */
   label: string;

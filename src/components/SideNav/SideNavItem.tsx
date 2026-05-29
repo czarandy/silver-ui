@@ -9,18 +9,59 @@ import {useLinkComponent} from '../Link';
 import {useSideNavCollapse} from './SideNavContext';
 
 export interface SideNavItemProps {
+  /**
+   * Custom link component used when href is set.
+   */
   as?: LinkComponent;
+  /**
+   * Custom label content. Falls back to the `label` prop text.
+   */
   children?: ReactNode;
+  /**
+   * Additional CSS class names applied to the item.
+   */
   className?: string;
+  /**
+   * Test ID applied to the item.
+   */
   'data-testid'?: string;
+  /**
+   * Content rendered at the end of the item (e.g. a badge).
+   */
   endContent?: ReactNode;
+  /**
+   * Link destination. When set, the item renders as a link.
+   */
   href?: string;
+  /**
+   * Icon rendered before the label.
+   */
   icon?: ReactNode;
+  /**
+   * Whether the item is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether the item is currently selected.
+   * @default false
+   */
   isSelected?: boolean;
+  /**
+   * Accessible item label, also used as visible text when children are omitted.
+   */
   label: string;
+  /**
+   * Click handler for the item.
+   */
   onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Ref forwarded to the root element.
+   */
   ref?: Ref<HTMLElement>;
+  /**
+   * Inline styles applied to the item.
+   */
   style?: CSSProperties;
 }
 
@@ -89,6 +130,10 @@ const styles = {
   }),
 };
 
+/**
+ * A single navigation item inside a SideNav. Renders as a link when
+ * `href` is provided, or a button otherwise.
+ */
 export function SideNavItem({
   as,
   children,

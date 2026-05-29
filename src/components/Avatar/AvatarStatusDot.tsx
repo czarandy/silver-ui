@@ -93,6 +93,9 @@ function resolveStatusDotSize(avatarSize: number): {
   return {borderWidth: 4, dotSize: 32, iconSize: 18};
 }
 
+/**
+ * Size-aware status indicator dot rendered in the corner of an Avatar.
+ */
 export function AvatarStatusDot({
   className,
   'data-testid': dataTestId,

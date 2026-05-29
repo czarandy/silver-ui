@@ -4,11 +4,30 @@ import {cx} from '../../internal/cx';
 import {useTableContext} from './TableContext';
 
 export interface TableHeaderCellProps {
+  /**
+   * Header cell content.
+   */
   children?: ReactNode;
+  /**
+   * Additional CSS class names applied to the th.
+   */
   className?: string;
+  /**
+   * Test ID applied to the th.
+   */
   'data-testid'?: string;
+  /**
+   * Ref forwarded to the th element.
+   */
   ref?: Ref<HTMLTableCellElement>;
+  /**
+   * Scope of the header cell.
+   * @default 'col'
+   */
   scope?: 'col' | 'colgroup' | 'row' | 'rowgroup';
+  /**
+   * Inline styles applied to the th.
+   */
   style?: CSSProperties;
 }
 
@@ -42,6 +61,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Table header cell with density and divider styling from context.
+ */
 export function TableHeaderCell({
   children,
   className,

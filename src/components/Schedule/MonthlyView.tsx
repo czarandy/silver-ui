@@ -27,6 +27,10 @@ import type {
 } from './types';
 
 export interface ScheduleMonthlyViewOptions {
+  /**
+   * Number of weeks to display in the monthly grid.
+   * @default 6
+   */
   weekCount?: number;
 }
 
@@ -115,6 +119,9 @@ function getGridCellName({
     : dateLabel;
 }
 
+/**
+ * Internal view component that renders a month grid with day cells and events.
+ */
 function ScheduleMonthlyView({
   options,
 }: ScheduleViewComponentProps<ScheduleMonthlyViewOptions>): React.JSX.Element {
@@ -184,6 +191,9 @@ function ScheduleMonthlyView({
   );
 }
 
+/**
+ * Creates a monthly schedule view configuration.
+ */
 export function createScheduleMonthlyView({
   weekCount = 6,
 }: ScheduleMonthlyViewOptions = {}): ScheduleView<ScheduleMonthlyViewOptions> {

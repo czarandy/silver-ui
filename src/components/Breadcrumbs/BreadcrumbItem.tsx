@@ -130,6 +130,10 @@ const styles = {
   }),
 } as const;
 
+/**
+ * A single item in a breadcrumb trail, rendered as a link, button, or
+ * static text depending on the props provided.
+ */
 export function BreadcrumbItem({
   as,
   children,

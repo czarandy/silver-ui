@@ -13,15 +13,46 @@ import {mergeRefs} from '../../internal/mergeRefs';
 export type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
 
 export interface DrawerProps {
+  /**
+   * Drawer body content.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the drawer.
+   */
   className?: string;
+  /**
+   * Test ID applied to the drawer.
+   */
   'data-testid'?: string;
+  /**
+   * Whether the drawer is open.
+   */
   isOpen: boolean;
+  /**
+   * Accessible label for the drawer.
+   */
   label: string;
+  /**
+   * Called when the drawer requests an open-state change.
+   */
   onOpenChange: (isOpen: boolean) => void;
+  /**
+   * Edge of the viewport the drawer slides in from.
+   * @default 'right'
+   */
   placement?: DrawerPlacement;
+  /**
+   * Ref forwarded to the drawer element.
+   */
   ref?: Ref<HTMLElement>;
+  /**
+   * Width (left/right) or height (top/bottom) of the drawer.
+   */
   size?: number | string;
+  /**
+   * Inline styles applied to the drawer.
+   */
   style?: CSSProperties;
 }
 
@@ -118,6 +149,9 @@ function getSizeStyle(
   return {height: formatted, maxHeight: '100dvh'};
 }
 
+/**
+ * A slide-in panel anchored to an edge of the viewport.
+ */
 export function Drawer({
   isOpen,
   label,

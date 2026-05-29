@@ -122,6 +122,9 @@ const styles = {
   },
 } as const;
 
+/**
+ * Individual segment within a `SegmentedControl`.
+ */
 export function SegmentedControlItem({
   className,
   'data-testid': dataTestId,

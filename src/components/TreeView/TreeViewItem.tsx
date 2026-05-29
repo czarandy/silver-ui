@@ -9,23 +9,79 @@ import {TreeViewBranches} from './TreeViewBranches';
 import type {TreeViewDensity} from './types';
 
 interface TreeViewItemProps {
+  /**
+   * Whether each ancestor at the corresponding level is the last sibling.
+   */
   ancestorsIsLast: ReadonlyArray<boolean>;
+  /**
+   * Spacing density for the item.
+   */
   density: TreeViewDensity;
+  /**
+   * Secondary description text shown below the label.
+   */
   description?: string;
+  /**
+   * Content rendered at the end of the item row.
+   */
   endContent?: React.ReactNode;
+  /**
+   * Whether this item has child items.
+   */
   hasChildren: boolean;
+  /**
+   * Link destination. When provided, the item renders as a link.
+   */
   href?: string;
+  /**
+   * Unique identifier for the item.
+   */
   id: string;
+  /**
+   * Whether the item is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether the item's children are visible.
+   */
   isExpanded: boolean;
+  /**
+   * Whether this item is the last sibling at its level.
+   */
   isLast: boolean;
+  /**
+   * Whether the item is selected.
+   * @default false
+   */
   isSelected?: boolean;
+  /**
+   * Primary label content.
+   */
   label: React.ReactNode;
+  /**
+   * Zero-based nesting depth of this item.
+   */
   nestedLevel: number;
+  /**
+   * Click handler for the item action.
+   */
   onClick?: (event: React.MouseEvent) => void;
+  /**
+   * Called when the expand/collapse toggle is activated.
+   */
   onToggle?: (id: string) => void;
+  /**
+   * Pre-rendered child items.
+   */
   renderedChildren?: ReactNode;
+  /**
+   * Content rendered before the label.
+   */
   startContent?: React.ReactNode;
+  /**
+   * Link target attribute (e.g. '_blank').
+   */
   target?: string;
 }
 
@@ -175,6 +231,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Renders a single tree item with toggle, branch lines, and optional link or button action.
+ */
 export function TreeViewItem({
   ancestorsIsLast,
   density,

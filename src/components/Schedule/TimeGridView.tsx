@@ -147,13 +147,27 @@ function getCellName({
     : `${dateLabel} ${hourLabel}`;
 }
 
+/**
+ * Shared time grid layout used by day and week views with hourly rows.
+ */
 export function TimeGridView({
   days,
   maxHour = 23,
   minHour = 0,
 }: {
+  /**
+   * Days to display as columns in the grid.
+   */
   days: PlainDate[];
+  /**
+   * Last hour shown in the grid (0-23).
+   * @default 23
+   */
   maxHour?: number;
+  /**
+   * First hour shown in the grid (0-23).
+   * @default 0
+   */
   minHour?: number;
 }): React.JSX.Element {
   const {categories, events, focusDate, timezoneID} = useScheduleContext();

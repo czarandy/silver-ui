@@ -156,6 +156,9 @@ function defaultFormatValueLabel(value: number, max: number): string {
   return `${Math.round((value / max) * 100)}%`;
 }
 
+/**
+ * A progress bar that communicates determinate or indeterminate loading state.
+ */
 export function Progress({
   className,
   'data-testid': dataTestId,

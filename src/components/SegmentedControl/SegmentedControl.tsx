@@ -90,6 +90,9 @@ const styles = {
   },
 } as const;
 
+/**
+ * Segmented toggle control that allows selecting one option from a set.
+ */
 export function SegmentedControl({
   children,
   className,

@@ -22,6 +22,10 @@ import type {
 } from './types';
 
 export interface ScheduleListViewOptions {
+  /**
+   * Number of days shown in the list.
+   * @default 7
+   */
   days?: number;
 }
 
@@ -68,6 +72,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Renders a single event row in the list view.
+ */
 function ListEvent({event}: {event: CalendarEvent}): React.JSX.Element {
   const {categories, timezoneID} = useScheduleContext();
   const category = getCategory(categories, event);
@@ -94,6 +101,9 @@ function ListEvent({event}: {event: CalendarEvent}): React.JSX.Element {
   );
 }
 
+/**
+ * Internal view component that renders events as a chronological day-by-day list.
+ */
 function ScheduleListView(
   _props: ScheduleViewComponentProps<ScheduleListViewOptions>,
 ): React.JSX.Element {
@@ -138,6 +148,9 @@ function ScheduleListView(
   );
 }
 
+/**
+ * Creates a list schedule view configuration.
+ */
 export function createScheduleListView({
   days = 7,
 }: ScheduleListViewOptions = {}): ScheduleView<ScheduleListViewOptions> {

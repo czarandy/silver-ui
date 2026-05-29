@@ -16,10 +16,21 @@ import type {
 import {scheduleRangeToZonedDateTimeRange} from './zonedDateTime';
 
 export interface ScheduleWeeklyViewOptions {
+  /**
+   * Last hour shown in the weekly grid (0-23).
+   * @default 23
+   */
   maxHour?: number;
+  /**
+   * First hour shown in the weekly grid (0-23).
+   * @default 0
+   */
   minHour?: number;
 }
 
+/**
+ * Internal view component that renders a 7-day time grid.
+ */
 function ScheduleWeeklyView({
   options,
 }: ScheduleViewComponentProps<ScheduleWeeklyViewOptions>): React.JSX.Element {
@@ -38,6 +49,9 @@ function ScheduleWeeklyView({
   );
 }
 
+/**
+ * Creates a weekly schedule view configuration.
+ */
 export function createScheduleWeeklyView({
   maxHour = 23,
   minHour = 0,

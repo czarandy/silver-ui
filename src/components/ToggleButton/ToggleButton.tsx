@@ -137,6 +137,9 @@ const styles = {
   },
 } as const;
 
+/**
+ * Button that toggles between pressed and unpressed states.
+ */
 export function ToggleButton({
   children,
   className,

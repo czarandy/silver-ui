@@ -73,6 +73,9 @@ function collectExpandedKeys(items: TreeViewItemData[]): string[] {
   return keys;
 }
 
+/**
+ * Renders a hierarchical tree of expandable and selectable items.
+ */
 export function TreeView({
   className,
   'data-testid': dataTestId,

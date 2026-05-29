@@ -14,22 +14,80 @@ import {useTooltip, type TooltipFocusTrigger} from './useTooltip';
 export type {TooltipFocusTrigger} from './useTooltip';
 
 export interface TooltipProps {
+  /**
+   * Cross-axis alignment of the tooltip relative to the anchor.
+   * @default 'center'
+   */
   alignment?: LayerAlignment;
+  /**
+   * External ref to the anchor element. When provided, `children` is optional.
+   */
   anchorRef?: React.RefObject<HTMLElement | null>;
+  /**
+   * Element(s) that the tooltip is anchored to.
+   */
   children?: ReactNode;
+  /**
+   * Additional CSS class names applied to the wrapper.
+   */
   className?: string;
+  /**
+   * Content rendered inside the tooltip popup.
+   */
   content: ReactNode;
+  /**
+   * Test ID applied to the wrapper.
+   */
   'data-testid'?: string;
+  /**
+   * Delay in milliseconds before the tooltip appears.
+   * @default 200
+   */
   delay?: number;
+  /**
+   * How focus interactions trigger the tooltip.
+   * @default 'auto'
+   */
   focusTrigger?: TooltipFocusTrigger;
+  /**
+   * Whether to show a dashed underline on text-only children.
+   * @default 'auto'
+   */
   hasHoverIndication?: 'auto' | boolean;
+  /**
+   * Delay in milliseconds before the tooltip hides after leaving.
+   * @default 0
+   */
   hideDelay?: number;
+  /**
+   * Whether the tooltip is open by default (uncontrolled).
+   */
   isDefaultOpen?: boolean;
+  /**
+   * Whether the tooltip can be shown.
+   * @default true
+   */
   isEnabled?: boolean;
+  /**
+   * Controlled open state of the tooltip.
+   */
   isOpen?: boolean;
+  /**
+   * Called when the tooltip open state changes.
+   */
   onOpenChange?: (isOpen: boolean) => void;
+  /**
+   * Preferred placement of the tooltip relative to the anchor.
+   * @default 'above'
+   */
   placement?: LayerPlacement;
+  /**
+   * Ref forwarded to the wrapper element.
+   */
   ref?: Ref<HTMLDivElement | HTMLSpanElement>;
+  /**
+   * Inline styles applied to the wrapper.
+   */
   style?: CSSProperties;
 }
 
@@ -57,6 +115,9 @@ function mergeIds(...ids: (string | undefined | null)[]): string | undefined {
   return filtered.length > 0 ? filtered.join(' ') : undefined;
 }
 
+/**
+ * Displays contextual information in a popup anchored to a trigger element.
+ */
 export function Tooltip({
   children,
   anchorRef,

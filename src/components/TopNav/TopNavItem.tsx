@@ -9,19 +9,65 @@ import {useLinkComponent} from '../Link';
 import {useTopNavRenderMode} from './TopNavContext';
 
 export interface TopNavItemProps {
+  /**
+   * Custom link component used for routing.
+   */
   as?: LinkComponent;
+  /**
+   * Custom label content. Falls back to the `label` prop text.
+   */
   children?: ReactNode;
+  /**
+   * Additional CSS class names applied to the item.
+   */
   className?: string;
+  /**
+   * Test ID applied to the item.
+   */
   'data-testid'?: string;
+  /**
+   * Link destination.
+   * @default '#'
+   */
   href?: string;
+  /**
+   * Icon rendered before the label.
+   */
   icon?: ReactNode;
+  /**
+   * Whether the item is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether only the icon is visible (label used for accessibility).
+   * @default false
+   */
   isIconOnly?: boolean;
+  /**
+   * Whether the item is currently selected.
+   * @default false
+   */
   isSelected?: boolean;
+  /**
+   * Accessible item label, also used as visible text when children are omitted.
+   */
   label: string;
+  /**
+   * Ref forwarded to the anchor element.
+   */
   ref?: Ref<HTMLAnchorElement>;
+  /**
+   * The `rel` attribute for the anchor element.
+   */
   rel?: string;
+  /**
+   * Inline styles applied to the item.
+   */
   style?: CSSProperties;
+  /**
+   * The `target` attribute for the anchor element.
+   */
   target?: string;
 }
 
@@ -77,6 +123,10 @@ const styles = {
   }),
 };
 
+/**
+ * A single navigation link inside a TopNav. Supports icons, selected
+ * state, and adapts to drawer layout on mobile.
+ */
 export function TopNavItem({
   as,
   children,

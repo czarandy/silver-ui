@@ -20,10 +20,19 @@ const styles = {
 } as const;
 
 interface TreeViewBranchesProps {
+  /**
+   * Whether each ancestor at the corresponding level is the last sibling.
+   */
   ancestorsIsLast: ReadonlyArray<boolean>;
+  /**
+   * Zero-based nesting depth used to draw vertical connector lines.
+   */
   nestedLevel: number;
 }
 
+/**
+ * Renders vertical connector lines for tree item indentation levels.
+ */
 export function TreeViewBranches({
   ancestorsIsLast,
   nestedLevel,

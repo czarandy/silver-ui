@@ -5,16 +5,54 @@ import {cx} from '../../internal/cx';
 import {Icon, type IconSize} from '../Icon';
 
 export interface RatingProps {
+  /**
+   * Additional CSS class names applied to the rating root.
+   */
   className?: string;
+  /**
+   * Number of stars to display.
+   * @default 5
+   */
   count?: number;
+  /**
+   * Test ID applied to the rating root.
+   */
   'data-testid'?: string;
+  /**
+   * Whether the rating is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether the rating is read-only.
+   * @default false
+   */
   isReadOnly?: boolean;
+  /**
+   * Accessible label for the rating group.
+   * @default 'Rating'
+   */
   label?: string;
+  /**
+   * Called when the selected rating changes.
+   */
   onChange?: (value: number) => void;
+  /**
+   * Ref forwarded to the rating root.
+   */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * Size of the star icons.
+   * @default 'md'
+   */
   size?: IconSize;
+  /**
+   * Inline styles applied to the rating root.
+   */
   style?: CSSProperties;
+  /**
+   * Current rating value.
+   */
   value: number;
 }
 
@@ -94,6 +132,9 @@ function StarIcon({
   );
 }
 
+/**
+ * Star-based rating control supporting read-only and interactive modes.
+ */
 export function Rating({
   value,
   onChange,

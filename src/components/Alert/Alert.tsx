@@ -129,6 +129,10 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Displays a contextual message with status-based styling, an optional
+ * collapsible body, and dismiss functionality.
+ */
 export function Alert({
   children,
   className,

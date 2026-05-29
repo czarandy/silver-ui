@@ -4,14 +4,41 @@ import {cx} from '../../internal/cx';
 import {useTableContext} from './TableContext';
 
 export interface TableCellProps {
+  /**
+   * Cell content.
+   */
   children?: ReactNode;
+  /**
+   * Additional CSS class names applied to the td.
+   */
   className?: string;
+  /**
+   * Number of columns the cell spans.
+   */
   colSpan?: number;
+  /**
+   * Test ID applied to the td.
+   */
   'data-testid'?: string;
+  /**
+   * Space-separated list of header cell IDs this cell relates to.
+   */
   headers?: string;
+  /**
+   * Ref forwarded to the td element.
+   */
   ref?: Ref<HTMLTableCellElement>;
+  /**
+   * Number of rows the cell spans.
+   */
   rowSpan?: number;
+  /**
+   * Scope of the cell when used as a header-like td.
+   */
   scope?: 'col' | 'colgroup' | 'row' | 'rowgroup';
+  /**
+   * Inline styles applied to the td.
+   */
   style?: CSSProperties;
 }
 
@@ -53,6 +80,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * Table data cell with density, alignment, and divider styling from context.
+ */
 export function TableCell({
   children,
   className,

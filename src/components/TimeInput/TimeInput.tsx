@@ -15,32 +15,117 @@ export type ISOTimeString =
   | `${number}${number}:${number}${number}:${number}${number}`;
 
 export interface TimeInputProps {
+  /**
+   * Additional CSS class names applied to the input wrapper.
+   */
   className?: string;
+  /**
+   * Test ID applied to the input element.
+   */
   'data-testid'?: string;
+  /**
+   * Supporting text displayed below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether to focus the input on mount.
+   * @default false
+   */
   hasAutoFocus?: boolean;
+  /**
+   * Whether to show a clear button when a value is set.
+   * @default false
+   */
   hasClear?: boolean;
+  /**
+   * Whether the input includes a seconds field.
+   * @default false
+   */
   hasSeconds?: boolean;
+  /**
+   * HTML name attribute.
+   */
   htmlName?: string;
+  /**
+   * Whether the input is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the input is loading.
+   * @default false
+   */
   isLoading?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label.
+   */
   label: string;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Latest allowed time.
+   */
   max?: ISOTimeString;
+  /**
+   * Earliest allowed time.
+   */
   min?: ISOTimeString;
+  /**
+   * Called when the time value changes.
+   */
   onChange?: (value: ISOTimeString | undefined) => void;
+  /**
+   * Placeholder text.
+   * @default 'Select a time'
+   */
   placeholder?: string;
+  /**
+   * Ref forwarded to the input element.
+   */
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Visual size.
+   * @default 'md'
+   */
   size?: InputSize;
+  /**
+   * Validation status displayed below the input.
+   */
   status?: InputStatus;
+  /**
+   * Step increment in seconds for the time picker.
+   */
   step?: number;
+  /**
+   * Inline styles applied to the input wrapper.
+   */
   style?: CSSProperties;
+  /**
+   * Controlled time value in ISO format.
+   */
   value?: ISOTimeString;
 }
 
+/**
+ * Time picker input field with optional seconds granularity.
+ */
 export function TimeInput({
   label,
   value,

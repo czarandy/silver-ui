@@ -12,15 +12,46 @@ import {
 } from './TopNavContext';
 
 export interface TopNavProps {
+  /**
+   * Content rendered in the center section of the navigation bar.
+   */
   centerContent?: ReactNode;
+  /**
+   * Shorthand for `startContent`. Rendered in the start section when
+   * `startContent` is not provided.
+   */
   children?: ReactNode;
+  /**
+   * Additional CSS class names applied to the nav element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the nav element.
+   */
   'data-testid'?: string;
+  /**
+   * Content rendered in the end (right) section of the navigation bar.
+   */
   endContent?: ReactNode;
+  /**
+   * Branding or title content rendered at the start of the bar.
+   */
   heading?: ReactNode;
+  /**
+   * Accessible label for the navigation landmark.
+   */
   label?: string;
+  /**
+   * Ref forwarded to the nav element.
+   */
   ref?: Ref<HTMLElement>;
+  /**
+   * Content rendered in the start (left) section after the heading.
+   */
   startContent?: ReactNode;
+  /**
+   * Inline styles applied to the nav element.
+   */
   style?: CSSProperties;
 }
 
@@ -77,6 +108,10 @@ const styles = {
   }),
 };
 
+/**
+ * Horizontal top navigation bar with heading, start, center, and end
+ * content slots. Adapts to mobile layouts when rendered inside AppShell.
+ */
 export function TopNav({
   centerContent,
   children,

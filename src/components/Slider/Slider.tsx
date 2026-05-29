@@ -19,7 +19,13 @@ export type SliderOrientation = 'horizontal' | 'vertical';
 export type SliderValueDisplay = 'tooltip' | 'text' | 'none';
 
 export interface SliderMark {
+  /**
+   * Text label rendered beside the mark.
+   */
   label?: string;
+  /**
+   * Numeric position of the mark along the track.
+   */
   value: number;
 }
 
@@ -318,6 +324,9 @@ function getPercent(value: number, min: number, max: number): number {
   return ((value - min) / (max - min)) * 100;
 }
 
+/**
+ * Slider control for selecting a single value or a range.
+ */
 export function Slider({
   className,
   'data-testid': dataTestId,

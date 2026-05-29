@@ -13,10 +13,21 @@ import type {
 import {scheduleRangeToZonedDateTimeRange} from './zonedDateTime';
 
 export interface ScheduleDayViewOptions {
+  /**
+   * Last hour shown in the day grid (0-23).
+   * @default 23
+   */
   maxHour?: number;
+  /**
+   * First hour shown in the day grid (0-23).
+   * @default 0
+   */
   minHour?: number;
 }
 
+/**
+ * Internal view component that renders a single-day time grid.
+ */
 function ScheduleDayView({
   options,
 }: ScheduleViewComponentProps<ScheduleDayViewOptions>): React.JSX.Element {
@@ -33,6 +44,9 @@ function ScheduleDayView({
   );
 }
 
+/**
+ * Creates a single-day schedule view configuration.
+ */
 export function createScheduleDayView({
   maxHour = 23,
   minHour = 0,

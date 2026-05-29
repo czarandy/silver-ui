@@ -11,19 +11,66 @@ import {Field, type InputSize, type InputStatus} from '../Field';
 import {InputGroupContext} from './InputGroupContext';
 
 export interface InputGroupProps {
+  /**
+   * Grouped input children to render side-by-side.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the group wrapper.
+   */
   className?: string;
+  /**
+   * Test ID applied to the group wrapper.
+   */
   'data-testid'?: string;
+  /**
+   * Supporting text displayed below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether all grouped inputs are disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Label text for the input group.
+   */
   label: string;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Ref forwarded to the group wrapper.
+   */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * Visual size applied to the group.
+   * @default 'md'
+   */
   size?: InputSize;
+  /**
+   * Validation status displayed below the group.
+   */
   status?: InputStatus;
+  /**
+   * Inline styles applied to the group wrapper.
+   */
   style?: CSSProperties;
 }
 
@@ -61,6 +108,9 @@ const styles = {
   } satisfies Record<InputSize, string>,
 } as const;
 
+/**
+ * Groups multiple inputs into a single visually connected row.
+ */
 export function InputGroup({
   children,
   label,

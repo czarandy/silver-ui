@@ -21,24 +21,88 @@ export type CheckboxInputSize = 'sm' | 'md';
 export type CheckboxInputValue = boolean | 'indeterminate';
 
 export interface CheckboxInputProps {
+  /**
+   * Additional CSS class names applied to the root element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the input element.
+   */
   'data-testid'?: string;
+  /**
+   * Supporting text rendered below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether the checkbox is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the checkbox is in a loading state.
+   * @default false
+   */
   isLoading?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the checkbox is read-only.
+   * @default false
+   */
   isReadOnly?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label text.
+   */
   label: string;
+  /**
+   * Optional content shown before the label.
+   */
   labelIcon?: ReactNode;
+  /**
+   * Called when the input loses focus.
+   */
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  /**
+   * Called when the checked state changes.
+   */
   onChange?: (checked: boolean, event: ChangeEvent<HTMLInputElement>) => void;
+  /**
+   * Called when the input receives focus.
+   */
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
+  /**
+   * Ref forwarded to the input element.
+   */
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Visual size of the checkbox.
+   * @default 'md'
+   */
   size?: CheckboxInputSize;
+  /**
+   * Validation status displayed below the checkbox.
+   */
   status?: InputStatus;
+  /**
+   * Inline styles applied to the root element.
+   */
   style?: CSSProperties;
+  /**
+   * Current checked state: true, false, or 'indeterminate'.
+   */
   value: CheckboxInputValue;
 }
 
@@ -107,6 +171,9 @@ const styles = {
   }),
 } as const;
 
+/**
+ * A checkbox input with label, description, and validation support.
+ */
 export function CheckboxInput({
   label,
   value,

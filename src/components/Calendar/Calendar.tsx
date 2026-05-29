@@ -112,16 +112,40 @@ interface CalendarBaseProps {
 }
 
 interface CalendarSingleProps extends CalendarBaseProps {
+  /**
+   * Default selected date for uncontrolled usage.
+   */
   defaultValue?: ISODateString;
+  /**
+   * Selection mode. Defaults to 'single'.
+   */
   mode?: 'single';
+  /**
+   * Called when the selected date changes.
+   */
   onChange?: (value: ISODateString, valueAsDate: Date) => void;
+  /**
+   * Controlled selected date.
+   */
   value?: ISODateString;
 }
 
 interface CalendarRangeProps extends CalendarBaseProps {
+  /**
+   * Default selected range for uncontrolled usage.
+   */
   defaultValue?: DateRange;
+  /**
+   * Selection mode set to 'range'.
+   */
   mode: 'range';
+  /**
+   * Called when the selected date range changes.
+   */
   onChange?: (value: DateRange) => void;
+  /**
+   * Controlled selected date range.
+   */
   value?: DateRange;
 }
 
@@ -388,6 +412,9 @@ function getSelectedTabDate({
   return days.find(day => !day.isOutside && !isDisabled(day.date))?.iso ?? null;
 }
 
+/**
+ * A date picker calendar supporting single date and date range selection.
+ */
 export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
   const {
     mode = 'single',
@@ -608,27 +635,87 @@ export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
 }
 
 interface MonthGridProps {
+  /**
+   * Custom date constraint functions.
+   */
   dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
+  /**
+   * Whether to render outside-month days.
+   */
   hasOutsideDays: boolean;
+  /**
+   * Whether the grid uses variable row counts.
+   */
   hasVariableRowCount: boolean;
+  /**
+   * Whether to display ISO week numbers.
+   */
   hasWeekNumbers: boolean;
+  /**
+   * Currently hovered date, used for range preview.
+   */
   hoveredDate: ISODateString | null;
+  /**
+   * Maximum selectable date.
+   */
   max?: ISODateString;
+  /**
+   * Minimum selectable date.
+   */
   min?: ISODateString;
+  /**
+   * Selection mode: single date or date range.
+   */
   mode: 'single' | 'range';
+  /**
+   * The month to render.
+   */
   month: PlainDate;
+  /**
+   * Called when a day is clicked.
+   */
   onDayClick: (date: PlainDate) => void;
+  /**
+   * Called when a day is hovered or unhovered.
+   */
   onDayHover: (date: PlainDate | null) => void;
+  /**
+   * Called when navigating past the last day in the grid.
+   */
   onNavigateNext: (focusedDate: ISODateString, offset: number) => void;
+  /**
+   * Called when navigating before the first day in the grid.
+   */
   onNavigatePrevious: (focusedDate: ISODateString, offset: number) => void;
+  /**
+   * Called after a pending focus target has been focused.
+   */
   onPendingFocusHandled: () => void;
+  /**
+   * Date that should receive focus after a navigation.
+   */
   pendingFocus: ISODateString | null;
+  /**
+   * Start date of an in-progress range selection.
+   */
   rangeSelectionStart: ISODateString | null;
+  /**
+   * Today's date, used for highlighting.
+   */
   today: PlainDate;
+  /**
+   * Current selected value (single date or range).
+   */
   value: DateRange | ISODateString | undefined;
+  /**
+   * First day of the week, where 0 is Sunday.
+   */
   weekStartsOn: DayOfWeek;
 }
 
+/**
+ * Renders the day grid for a single month within the calendar.
+ */
 function MonthGrid({
   month,
   value,
@@ -809,25 +896,79 @@ function MonthGrid({
 }
 
 interface DayCellProps {
+  /**
+   * Additional CSS class names for the cell.
+   */
   className?: string;
+  /**
+   * Test ID for the cell.
+   */
   'data-testid'?: string;
+  /**
+   * Calendar day data to render.
+   */
   day: CalendarDay;
+  /**
+   * Zero-based column index of this day in the week row.
+   */
   dayIndex: number;
+  /**
+   * Whether outside-month days are shown.
+   */
   hasOutsideDays: boolean;
+  /**
+   * Whether this day is disabled.
+   */
   isDisabled: boolean;
+  /**
+   * Whether this day is the tabbable cell in the grid.
+   */
   isTabbable: boolean;
+  /**
+   * Selection mode: single date or date range.
+   */
   mode: 'single' | 'range';
+  /**
+   * Called when a day is clicked.
+   */
   onDayClick: (date: PlainDate) => void;
+  /**
+   * Called when a day is hovered or unhovered.
+   */
   onDayHover: (date: PlainDate | null) => void;
+  /**
+   * End of the preview range highlight.
+   */
   previewEnd: PlainDate | null;
+  /**
+   * Start of the preview range highlight.
+   */
   previewStart: PlainDate | null;
+  /**
+   * End of the confirmed selected range.
+   */
   rangeEnd: PlainDate | null;
+  /**
+   * Start of the confirmed selected range.
+   */
   rangeStart: PlainDate | null;
+  /**
+   * Currently selected date in single mode.
+   */
   selectedDate: PlainDate | null;
+  /**
+   * Inline styles for the cell.
+   */
   style?: CSSProperties;
+  /**
+   * Today's date, used for highlighting.
+   */
   today: PlainDate;
 }
 
+/**
+ * Renders a single day cell within the month grid.
+ */
 function DayCell({
   className,
   day,

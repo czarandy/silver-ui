@@ -21,19 +21,66 @@ export interface DialogPosition {
 }
 
 export interface DialogProps {
+  /**
+   * Dialog body content.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the dialog.
+   */
   className?: string;
+  /**
+   * Test ID applied to the dialog.
+   */
   'data-testid'?: string;
+  /**
+   * Whether to render inline instead of as a modal.
+   * @default false
+   */
   isInline?: boolean;
+  /**
+   * Whether the dialog is open.
+   */
   isOpen: boolean;
+  /**
+   * Accessible label for the dialog.
+   */
   label: string;
+  /**
+   * Maximum height of the dialog. Numbers are treated as pixels.
+   * @default '75vh'
+   */
   maxHeight?: number | string;
+  /**
+   * Called when the dialog requests an open-state change.
+   */
   onOpenChange: (isOpen: boolean) => void;
+  /**
+   * Fixed positioning offsets for the dialog.
+   */
   position?: Readonly<DialogPosition>;
+  /**
+   * Controls escape and backdrop-click dismiss behavior.
+   * @default 'info'
+   */
   purpose?: DialogPurpose;
+  /**
+   * Ref forwarded to the dialog element.
+   */
   ref?: Ref<HTMLElement>;
+  /**
+   * Inline styles applied to the dialog.
+   */
   style?: CSSProperties;
+  /**
+   * Display variant.
+   * @default 'standard'
+   */
   variant?: DialogVariant;
+  /**
+   * Dialog width. Numbers are treated as pixels.
+   * @default 400
+   */
   width?: number | string;
 }
 
@@ -96,6 +143,10 @@ function formatSize(value: number | string): string {
   return typeof value === 'number' ? `${value}px` : value;
 }
 
+/**
+ * A modal or inline dialog surface with backdrop, focus management,
+ * and configurable dismiss behavior.
+ */
 export function Dialog({
   isOpen,
   isInline = false,

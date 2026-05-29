@@ -9,27 +9,102 @@ import {TimeInput, type ISOTimeString} from '../TimeInput';
 export type ISODateTimeString = `${ISODateString}T${ISOTimeString}`;
 
 export interface DateTimeInputProps {
+  /**
+   * Additional CSS class names applied to the root element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
+  /**
+   * Predicate functions that constrain which dates are selectable.
+   */
   dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
+  /**
+   * Supporting text rendered below the label.
+   */
   description?: ReactNode;
+  /**
+   * Whether to show clear buttons on the date and time inputs.
+   * @default false
+   */
   hasClear?: boolean;
+  /**
+   * Whether to show the seconds field in the time input.
+   * @default false
+   */
   hasSeconds?: boolean;
+  /**
+   * Whether the input is disabled.
+   * @default false
+   */
   isDisabled?: boolean;
+  /**
+   * Whether to visually hide the label.
+   * @default false
+   */
   isLabelHidden?: boolean;
+  /**
+   * Whether the input is in a loading state.
+   * @default false
+   */
   isLoading?: boolean;
+  /**
+   * Whether the field is optional.
+   * @default false
+   */
   isOptional?: boolean;
+  /**
+   * Whether the field is required.
+   * @default false
+   */
   isRequired?: boolean;
+  /**
+   * Field label text.
+   */
   label: string;
+  /**
+   * Tooltip content shown next to the label.
+   */
   labelTooltip?: ReactNode;
+  /**
+   * Maximum selectable date-time (ISO string).
+   */
   max?: ISODateTimeString;
+  /**
+   * Minimum selectable date-time (ISO string).
+   */
   min?: ISODateTimeString;
+  /**
+   * Number of calendar months shown in the date popover.
+   * @default 1
+   */
   numberOfMonths?: 1 | 2;
+  /**
+   * Called when the selected date-time changes.
+   */
   onChange: (value: ISODateTimeString | undefined) => void;
+  /**
+   * Ref forwarded to the date input element.
+   */
   ref?: Ref<HTMLInputElement>;
+  /**
+   * Visual size of the inputs.
+   * @default 'md'
+   */
   size?: InputSize;
+  /**
+   * Validation status displayed below the input.
+   */
   status?: InputStatus;
+  /**
+   * Inline styles applied to the root element.
+   */
   style?: CSSProperties;
+  /**
+   * Currently selected date-time (ISO string).
+   */
   value?: ISODateTimeString;
 }
 
@@ -59,6 +134,9 @@ function combineDateTime(
   return date != null && time != null ? `${date}T${time}` : undefined;
 }
 
+/**
+ * A combined date and time input with calendar popover and time fields.
+ */
 export function DateTimeInput({
   label,
   value,

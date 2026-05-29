@@ -216,6 +216,10 @@ export function generatePageRange(
   ];
 }
 
+/**
+ * Page navigation controls with multiple display variants
+ * (numbered pages, count summary, compact label, dots, or none).
+ */
 export function Pagination({
   className,
   changeAction,
