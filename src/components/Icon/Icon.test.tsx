@@ -67,6 +67,24 @@ describe('Icon', () => {
     }
   });
 
+  it('applies the correct size class for each variant', () => {
+    const {rerender} = render(
+      <Icon data-testid="icon" icon={Home} size="sm" />,
+    );
+
+    const icon = screen.getByTestId('icon');
+    expect(icon).toHaveClass('silver-w_icon.sm');
+    expect(icon).toHaveClass('silver-h_icon.sm');
+
+    rerender(<Icon data-testid="icon" icon={Home} size="md" />);
+    expect(icon).toHaveClass('silver-w_icon.md');
+    expect(icon).toHaveClass('silver-h_icon.md');
+
+    rerender(<Icon data-testid="icon" icon={Home} size="lg" />);
+    expect(icon).toHaveClass('silver-w_icon.lg');
+    expect(icon).toHaveClass('silver-h_icon.lg');
+  });
+
   it('forwards className, style, ref, and SVG props', () => {
     const ref = vi.fn<(element: SVGSVGElement | null) => void>();
 

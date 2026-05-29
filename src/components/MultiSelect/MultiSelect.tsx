@@ -19,13 +19,13 @@ import {Text} from '../Text';
 
 export interface MultiSelectOptionData {
   /**
-   * Whether the option is disabled.
-   */
-  disabled?: boolean;
-  /**
    * Icon displayed before the label.
    */
   icon?: ReactNode;
+  /**
+   * Whether the option is disabled.
+   */
+  isDisabled?: boolean;
   /**
    * Option label. Defaults to `value`.
    */
@@ -218,10 +218,6 @@ const styles = {
     alignItems: 'center',
     flexShrink: 0,
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   badges: css({
     display: 'inline-flex',
@@ -289,10 +285,6 @@ const styles = {
     borderRadius: 'sm',
     bg: 'bg',
     color: 'white',
-    '& > svg': {
-      w: '3.5',
-      h: '3.5',
-    },
   }),
   checkboxSelected: css({
     bg: 'primary',
@@ -391,7 +383,7 @@ export function MultiSelect({
     [options],
   );
   const enabledOptions = selectableOptions.filter(
-    option => option.disabled !== true,
+    option => option.isDisabled !== true,
   );
   const selectedOptions = selectableOptions.filter(option =>
     selectedValues.has(option.value),
@@ -493,7 +485,7 @@ export function MultiSelect({
       <button
         aria-selected={isSelected}
         className={styles.option}
-        disabled={normalized.disabled}
+        disabled={normalized.isDisabled}
         key={normalized.value}
         onClick={() => toggleValue(normalized.value)}
         role="option"

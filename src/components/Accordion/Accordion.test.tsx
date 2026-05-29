@@ -90,6 +90,28 @@ describe('AccordionItem (standalone)', () => {
     expect(screen.getByText('Controlled content')).not.toBeVisible();
   });
 
+  it('toggles internal state and calls onOpenChange in uncontrolled mode', async () => {
+    const onOpenChange = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <AccordionItem onOpenChange={onOpenChange} trigger="Notified">
+        <p>Content</p>
+      </AccordionItem>,
+    );
+
+    const trigger = screen.getByRole('button', {name: /Notified/});
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
   it('activates via keyboard (Enter and Space)', async () => {
     const user = userEvent.setup();
     render(
@@ -105,6 +127,36 @@ describe('AccordionItem (standalone)', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
 
     await user.keyboard(' ');
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('links trigger to content panel via aria-controls', () => {
+    render(
+      <AccordionItem trigger="Details">
+        <p>Content</p>
+      </AccordionItem>,
+    );
+
+    const trigger = screen.getByRole('button', {name: /Details/});
+    const panel = screen.getByRole('region');
+
+    expect(trigger).toHaveAttribute('aria-controls', panel.id);
+    expect(panel).toHaveAttribute('aria-labelledby', trigger.id);
+  });
+
+  it('disables the trigger when isDisabled is true', async () => {
+    const user = userEvent.setup();
+    render(
+      <AccordionItem isDisabled trigger="Disabled">
+        <p>Content</p>
+      </AccordionItem>,
+    );
+
+    const trigger = screen.getByRole('button', {name: /Disabled/});
+    expect(trigger).toBeDisabled();
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });
 });
@@ -177,7 +229,7 @@ describe('Accordion', () => {
   });
 
   describe('controlled mode', () => {
-    it('respects value and onChange', async () => {
+    it('respects value and onChange in single mode', async () => {
       const onChange = vi.fn();
       const user = userEvent.setup();
 
@@ -210,6 +262,60 @@ describe('Accordion', () => {
       );
       expect(screen.getByText('Content A')).not.toBeVisible();
       expect(screen.getByText('Content B')).toBeVisible();
+    });
+
+    it('emits null when closing the active item in single mode', async () => {
+      const onChange = vi.fn();
+      const user = userEvent.setup();
+
+      render(
+        <Accordion onChange={onChange} type="single" value="a">
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+
+      await user.click(screen.getByRole('button', {name: /Item A/}));
+      expect(onChange).toHaveBeenCalledWith(null);
+    });
+
+    it('respects value and onChange in multiple mode', async () => {
+      const onChange = vi.fn();
+      const user = userEvent.setup();
+
+      const {rerender} = render(
+        <Accordion onChange={onChange} type="multiple" value={['a']}>
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+          <AccordionItem trigger="Item B" value="b">
+            <p>Content B</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+
+      expect(screen.getByText('Content A')).toBeVisible();
+      expect(screen.getByText('Content B')).not.toBeVisible();
+
+      await user.click(screen.getByRole('button', {name: /Item B/}));
+      expect(onChange).toHaveBeenCalledWith(['a', 'b']);
+
+      rerender(
+        <Accordion onChange={onChange} type="multiple" value={['a', 'b']}>
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+          <AccordionItem trigger="Item B" value="b">
+            <p>Content B</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+      expect(screen.getByText('Content A')).toBeVisible();
+      expect(screen.getByText('Content B')).toBeVisible();
+
+      await user.click(screen.getByRole('button', {name: /Item A/}));
+      expect(onChange).toHaveBeenCalledWith(['b']);
     });
   });
 
@@ -272,6 +378,141 @@ describe('Accordion', () => {
         'aria-expanded',
         'false',
       );
+    });
+
+    it('links each trigger to its content panel via aria-controls', () => {
+      render(
+        <Accordion defaultValue="a" type="single">
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+          <AccordionItem trigger="Item B" value="b">
+            <p>Content B</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+
+      const triggers = screen.getAllByRole('button');
+      const panels = screen.getAllByRole('region', {hidden: true});
+      expect(panels).toHaveLength(2);
+
+      for (const [i, trigger] of triggers.entries()) {
+        const panel = panels[i];
+        expect(trigger).toHaveAttribute('aria-controls', panel.id);
+        expect(panel).toHaveAttribute('aria-labelledby', trigger.id);
+      }
+    });
+
+    it('throws when an item inside Accordion has no value', () => {
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+      expect(() => {
+        render(
+          <Accordion defaultValue="a" type="single">
+            <AccordionItem trigger="Item A" value="a">
+              <p>Content A</p>
+            </AccordionItem>
+            <AccordionItem trigger="No Value">
+              <p>Content B</p>
+            </AccordionItem>
+          </Accordion>,
+        );
+      }).toThrow('`value` prop is required');
+
+      errorSpy.mockRestore();
+    });
+  });
+
+  describe('root element props', () => {
+    it('applies className, style, data-testid, and ref', () => {
+      const ref = vi.fn<(el: HTMLDivElement | null) => void>();
+
+      render(
+        <Accordion
+          className="custom-accordion"
+          data-testid="my-accordion"
+          defaultValue="a"
+          ref={ref}
+          style={{color: 'red'}}>
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+
+      const root = screen.getByTestId('my-accordion');
+      expect(root).toHaveClass('custom-accordion');
+      expect(root).toHaveStyle({color: 'rgb(255, 0, 0)'});
+      expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+    });
+
+    it('forwards aria-label and is discoverable by role', () => {
+      render(
+        <Accordion aria-label="FAQ" defaultValue="a">
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+
+      expect(screen.getByRole('group', {name: 'FAQ'})).toBeInTheDocument();
+    });
+
+    it('forwards aria-labelledby and is discoverable by role', () => {
+      render(
+        <>
+          <h2 id="heading">Frequently Asked Questions</h2>
+          <Accordion aria-labelledby="heading" defaultValue="a">
+            <AccordionItem trigger="Item A" value="a">
+              <p>Content A</p>
+            </AccordionItem>
+          </Accordion>
+        </>,
+      );
+
+      expect(
+        screen.getByRole('group', {name: 'Frequently Asked Questions'}),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('grouped item behavior', () => {
+    it('ignores isDefaultOpen on items inside an Accordion', () => {
+      render(
+        <Accordion defaultValue="a" type="single">
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+          <AccordionItem isDefaultOpen trigger="Item B" value="b">
+            <p>Content B</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+
+      expect(screen.getByText('Content A')).toBeVisible();
+      expect(screen.getByText('Content B')).not.toBeVisible();
+    });
+
+    it('does not toggle a disabled item inside an Accordion', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <Accordion defaultValue="a" type="single">
+          <AccordionItem trigger="Item A" value="a">
+            <p>Content A</p>
+          </AccordionItem>
+          <AccordionItem isDisabled trigger="Item B" value="b">
+            <p>Content B</p>
+          </AccordionItem>
+        </Accordion>,
+      );
+
+      const triggerB = screen.getByRole('button', {name: /Item B/});
+      expect(triggerB).toBeDisabled();
+
+      await user.click(triggerB);
+      expect(screen.getByText('Content A')).toBeVisible();
+      expect(screen.getByText('Content B')).not.toBeVisible();
     });
   });
 });

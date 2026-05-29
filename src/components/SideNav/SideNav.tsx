@@ -17,7 +17,7 @@ export interface SideNavProps {
     | boolean
     | {
         buttonLabel?: string;
-        defaultIsCollapsed?: boolean;
+        isDefaultCollapsed?: boolean;
         hasButton?: boolean;
         isCollapsed?: boolean;
         onCollapsedChange?: (isCollapsed: boolean) => void;
@@ -87,7 +87,7 @@ export function SideNav({
   const isCollapsible = Boolean(isCollapsibleFromProps);
   const isControlled = collapsibleConfig.isCollapsed != null;
   const [uncontrolledCollapsed, setUncontrolledCollapsed] = useState(
-    collapsibleConfig.defaultIsCollapsed ?? false,
+    collapsibleConfig.isDefaultCollapsed ?? false,
   );
   const isCollapsed = isControlled
     ? Boolean(collapsibleConfig.isCollapsed)

@@ -168,10 +168,10 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
       `,
     },
     {
-      name: 'ignores non-Props type names',
+      name: 'allows is and has prefixes on non-Props interfaces',
       code: `
         interface TruncationState {
-          truncated: boolean;
+          isTruncated: boolean;
         }
       `,
     },
@@ -182,6 +182,36 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
           target?: string;
           label: string;
         }
+      `,
+    },
+    {
+      name: 'allows is and has prefixes on function parameters',
+      code: `
+        function toggle(isOpen: boolean) {}
+      `,
+    },
+    {
+      name: 'allows is and has prefixes on arrow function parameters',
+      code: `
+        const toggle = (hasItems: boolean) => {};
+      `,
+    },
+    {
+      name: 'ignores non-boolean function parameters',
+      code: `
+        function foo(name: string, count: number) {}
+      `,
+    },
+    {
+      name: 'ignores destructured function parameters',
+      code: `
+        function foo({ isDisabled }: { isDisabled: boolean }) {}
+      `,
+    },
+    {
+      name: 'allows is prefix on parameters with defaults',
+      code: `
+        function foo(isActive: boolean = true) {}
       `,
     },
   ],
@@ -225,6 +255,56 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
         {
           messageId: 'invalidBooleanProp',
           data: {name: 'selected'},
+        },
+      ],
+    },
+    {
+      name: 'reports boolean props on non-Props interfaces',
+      code: `
+        interface TruncationState {
+          truncated: boolean;
+        }
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanProp',
+          data: {name: 'truncated'},
+        },
+      ],
+    },
+    {
+      name: 'reports boolean function parameters without is or has',
+      code: `
+        function foo(foobar: boolean) {}
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanParam',
+          data: {name: 'foobar'},
+        },
+      ],
+    },
+    {
+      name: 'reports boolean arrow function parameters without is or has',
+      code: `
+        const check = (valid: boolean) => {};
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanParam',
+          data: {name: 'valid'},
+        },
+      ],
+    },
+    {
+      name: 'reports boolean parameters with defaults without is or has',
+      code: `
+        function foo(active: boolean = true) {}
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanParam',
+          data: {name: 'active'},
         },
       ],
     },

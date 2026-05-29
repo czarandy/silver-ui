@@ -109,11 +109,6 @@ const styles = {
     textDecoration: 'none',
     whiteSpace: 'nowrap',
     verticalAlign: 'middle',
-    '& > svg': {
-      flexShrink: 0,
-      w: 'var(--tag-icon-size)',
-      h: 'var(--tag-icon-size)',
-    },
   }),
   interactive: css({
     cursor: 'pointer',
@@ -158,10 +153,6 @@ const styles = {
       outline: '2px solid',
       outlineColor: 'primary',
       outlineOffset: '2px',
-    },
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
     },
   }),
   size: {

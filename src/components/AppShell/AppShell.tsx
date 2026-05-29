@@ -46,13 +46,13 @@ export interface MobileNavConfig {
    */
   content?: ReactNode;
   /**
-   * Initial mobile-layout hint for server-rendered apps.
-   */
-  defaultIsMobile?: boolean;
-  /**
    * Whether AppShell should render an automatic mobile nav toggle.
    */
   hasToggle?: boolean;
+  /**
+   * Initial mobile-layout hint for server-rendered apps.
+   */
+  isDefaultMobile?: boolean;
   /**
    * Controlled open state for the generated mobile nav.
    */
@@ -260,12 +260,12 @@ export function AppShell({
   const isMobileNavOpen = mobileNavConfig?.isOpen ?? uncontrolledMobileOpen;
   const isControlled = mobileNavConfig?.isOpen !== undefined;
   const setMobileNavOpen = useCallback(
-    (open: boolean) => {
+    (isOpen: boolean) => {
       if (!isControlled) {
-        setUncontrolledMobileOpen(open);
+        setUncontrolledMobileOpen(isOpen);
       }
 
-      mobileNavConfig?.onOpenChange?.(open);
+      mobileNavConfig?.onOpenChange?.(isOpen);
     },
     [isControlled, mobileNavConfig],
   );

@@ -15,7 +15,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] AppShell
 - [x] AspectRatio
 - [x] Center
-- [ ] Collapsible
+- [x] Collapsible
 - [ ] Divider
 - [ ] Layout
 - [x] Stack
@@ -41,7 +41,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 
 ## Data Display
 
-- [ ] Accordion
+- [x] Accordion
 - [ ] Avatar
 - [ ] AvatarGroup
 - [ ] Badge

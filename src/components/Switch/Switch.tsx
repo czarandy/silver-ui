@@ -150,10 +150,6 @@ const styles = {
   labelIcon: css({
     display: 'inline-flex',
     alignItems: 'center',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   requiredness: css({
     fontWeight: 'normal',
@@ -162,10 +158,6 @@ const styles = {
   tooltipIcon: css({
     display: 'inline-flex',
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   status: css({
     fontFamily: 'body',

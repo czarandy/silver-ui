@@ -30,7 +30,7 @@ export interface UsePopoverReturn {
   id: string;
   isOpen: boolean;
   render: (children: ReactNode, props?: ContextRenderProps) => ReactNode;
-  show: (options?: {skipAutoFocus?: boolean}) => void;
+  show: (options?: {isAutoFocusSkipped?: boolean}) => void;
   toggle: () => void;
   triggerProps: {
     'aria-controls': string;
@@ -103,8 +103,8 @@ export function usePopover({
   }, [focusFirst, hasAutoFocus, layer.isOpen]);
 
   const show = useCallback(
-    (options?: {skipAutoFocus?: boolean}) => {
-      skipAutoFocusRef.current = options?.skipAutoFocus ?? false;
+    (options?: {isAutoFocusSkipped?: boolean}) => {
+      skipAutoFocusRef.current = options?.isAutoFocusSkipped ?? false;
       layer.show();
     },
     [layer],

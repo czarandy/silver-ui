@@ -19,7 +19,7 @@ export type TableSortState<TSortKey extends string = string> =
   TableSortEntry<TSortKey>[];
 
 export interface UseTableSortableConfig<TSortKey extends string = string> {
-  allowUnsortedState?: boolean;
+  hasUnsortedState?: boolean;
   isMultiSortEnabled?: boolean;
   onSortChange: (sort: TableSortState<TSortKey>) => void;
   sort: TableSortState<TSortKey>;
@@ -51,10 +51,6 @@ const styles = {
     display: 'inline-flex',
     flexShrink: 0,
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-xs)',
-      h: 'var(--silver-sizes-icon-xs)',
-    },
   }),
   iconActive: css({
     color: 'primary',
@@ -90,7 +86,7 @@ function getHeaderLabel<T extends Record<string, unknown>>(
 
 function getNextDirection(
   current: TableSortDirection | null,
-  allowUnsortedState: boolean,
+  hasUnsortedState: boolean,
 ): TableSortDirection | null {
   if (current == null) {
     return 'ascending';
@@ -98,7 +94,7 @@ function getNextDirection(
   if (current === 'ascending') {
     return 'descending';
   }
-  return allowUnsortedState ? null : 'ascending';
+  return hasUnsortedState ? null : 'ascending';
 }
 
 function SortHeaderButton<T extends Record<string, unknown>>({
@@ -138,7 +134,7 @@ function SortHeaderButton<T extends Record<string, unknown>>({
     const nextConfig = config;
     const isMultiSort =
       event.shiftKey && nextConfig.isMultiSortEnabled === true;
-    const allowUnsorted = nextConfig.allowUnsortedState ?? true;
+    const allowUnsorted = nextConfig.hasUnsortedState ?? true;
 
     if (isMultiSort) {
       const index = nextConfig.sort.findIndex(sort => sort.sortKey === sortKey);

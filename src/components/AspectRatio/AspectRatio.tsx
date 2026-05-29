@@ -35,13 +35,17 @@ export function AspectRatio({
   style,
   ...rest
 }: AspectRatioProps): React.JSX.Element {
+  const isValidRatio = Number.isFinite(ratio) && ratio > 0;
+
   if (process.env.NODE_ENV !== 'production') {
-    if (!Number.isFinite(ratio) || ratio <= 0) {
-      console.warn(
+    if (!isValidRatio) {
+      throw new Error(
         `AspectRatio: \`ratio\` must be a finite positive number, received ${String(ratio)}.`,
       );
     }
   }
+
+  const resolvedRatio = isValidRatio ? ratio : 1;
 
   return (
     <div
@@ -49,7 +53,7 @@ export function AspectRatio({
       className={cx(aspectRatioRecipe(), className)}
       data-testid={dataTestId}
       ref={ref}
-      style={{...style, aspectRatio: ratio}}>
+      style={{...style, aspectRatio: resolvedRatio}}>
       <div className={styles.child}>{children}</div>
     </div>
   );

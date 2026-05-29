@@ -149,7 +149,7 @@ export function Kbd({
       .filter(Boolean);
 
     if (process.env.NODE_ENV !== 'production' && parts.length === 0) {
-      console.warn(
+      throw new Error(
         'Kbd: `keys` prop resolved to zero keys. Check the value passed to `keys`.',
       );
     }

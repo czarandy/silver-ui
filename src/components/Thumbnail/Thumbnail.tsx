@@ -118,10 +118,6 @@ const styles = {
     w: 'full',
     h: 'full',
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-lg)',
-      h: 'var(--silver-sizes-icon-lg)',
-    },
   }),
   insetBorder: css({
     position: 'absolute',
@@ -180,7 +176,7 @@ export function Thumbnail({
       />
     ) : (
       <div className={styles.placeholder}>
-        <Icon icon={ImageIcon} />
+        <Icon icon={ImageIcon} size="lg" />
       </div>
     );
 

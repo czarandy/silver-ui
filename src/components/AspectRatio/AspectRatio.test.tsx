@@ -78,27 +78,25 @@ describe('AspectRatio', () => {
     });
   });
 
-  it('warns in development for invalid ratio values', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('throws in development for invalid ratio values', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const {unmount} = render(
-      <AspectRatio ratio={0}>
-        <div>Content</div>
-      </AspectRatio>,
-    );
-    unmount();
+    expect(() => {
+      render(
+        <AspectRatio ratio={0}>
+          <div>Content</div>
+        </AspectRatio>,
+      );
+    }).toThrow('finite positive number');
 
-    render(
-      <AspectRatio ratio={-1}>
-        <div>Content</div>
-      </AspectRatio>,
-    );
+    expect(() => {
+      render(
+        <AspectRatio ratio={-1}>
+          <div>Content</div>
+        </AspectRatio>,
+      );
+    }).toThrow('finite positive number');
 
-    expect(warnSpy).toHaveBeenCalledTimes(2);
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('finite positive number'),
-    );
-
-    warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 });

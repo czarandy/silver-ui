@@ -170,22 +170,45 @@ const booleanPropNaming = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Require boolean props to start with is or has',
+      description: 'Require boolean props and parameters to start with is or has',
     },
     messages: {
       invalidBooleanProp:
         'Boolean prop "{{name}}" must start with "is" or "has".',
+      invalidBooleanParam:
+        'Boolean parameter "{{name}}" must start with "is" or "has".',
     },
     schema: [],
   },
   create(context) {
-    return {
-      TSPropertySignature(node) {
-        const typeName = parentTypeName(node);
-        if (typeName == null || !typeName.endsWith('Props')) {
-          return;
+    function checkFunctionParams(node) {
+      for (const param of node.params) {
+        const identifier =
+          param.type === 'Identifier'
+            ? param
+            : param.type === 'AssignmentPattern' &&
+                param.left.type === 'Identifier'
+              ? param.left
+              : null;
+
+        if (
+          identifier == null ||
+          !includesBooleanType(identifier.typeAnnotation) ||
+          /^(is|has)[A-Z]/.test(identifier.name)
+        ) {
+          continue;
         }
 
+        context.report({
+          node: identifier,
+          messageId: 'invalidBooleanParam',
+          data: {name: identifier.name},
+        });
+      }
+    }
+
+    return {
+      TSPropertySignature(node) {
         const name = getPropertyName(node);
         if (
           name == null ||
@@ -202,6 +225,9 @@ const booleanPropNaming = {
           data: {name},
         });
       },
+      FunctionDeclaration: checkFunctionParams,
+      FunctionExpression: checkFunctionParams,
+      ArrowFunctionExpression: checkFunctionParams,
     };
   },
 };

@@ -16,8 +16,8 @@ import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
 export interface SelectOptionData {
-  disabled?: boolean;
   icon?: ReactNode;
+  isDisabled?: boolean;
   label?: string;
   value: string;
 }
@@ -182,10 +182,6 @@ const styles = {
     alignItems: 'center',
     flexShrink: 0,
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   menu: css({
     display: 'flex',
@@ -246,10 +242,6 @@ const styles = {
   check: css({
     display: 'inline-flex',
     color: 'primary',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   sectionHeading: css({
     px: '2',
@@ -358,7 +350,7 @@ export function Select({
           styles.option,
           isSelected ? styles.optionSelected : undefined,
         )}
-        disabled={normalized.disabled}
+        disabled={normalized.isDisabled}
         key={normalized.value}
         onClick={() => {
           onChange?.(normalized.value);

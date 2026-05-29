@@ -95,8 +95,8 @@ export function MobileNav({
   const onOpenChange = useMemo(
     () =>
       onOpenChangeFromProps ??
-      ((open: boolean) => {
-        if (open) {
+      ((isNavOpen: boolean) => {
+        if (isNavOpen) {
           appShellMobile.openMobileNav();
         } else {
           appShellMobile.closeMobileNav();

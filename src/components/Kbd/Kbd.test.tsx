@@ -91,15 +91,14 @@ describe('Kbd', () => {
     expect(screen.getByLabelText('Shift+Plus')).toBeInTheDocument();
   });
 
-  it('warns in development when keys resolve to empty', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('throws in development when keys resolve to empty', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    render(<Kbd keys="" />);
+    expect(() => {
+      render(<Kbd keys="" />);
+    }).toThrow('`keys` prop resolved to zero keys');
 
-    expect(warnSpy).toHaveBeenCalledWith(
-      'Kbd: `keys` prop resolved to zero keys. Check the value passed to `keys`.',
-    );
-    warnSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   it('renders arrow key symbols', () => {
@@ -126,17 +125,19 @@ describe('Kbd', () => {
     expect(screen.getByText('DELETE')).toBeInTheDocument();
   });
 
-  it('handles malformed keys strings gracefully', () => {
-    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('throws when malformed keys strings resolve to empty', () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const {rerender} = render(<Kbd keys="+" />);
-    expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockClear();
+    expect(() => {
+      render(<Kbd keys="+" />);
+    }).toThrow('`keys` prop resolved to zero keys');
 
-    rerender(<Kbd keys="mod+" />);
+    errorSpy.mockRestore();
+  });
+
+  it('handles trailing separators when at least one key is present', () => {
+    render(<Kbd keys="mod+" />);
     expect(screen.getByText('Ctrl')).toBeInTheDocument();
-
-    warnSpy.mockRestore();
   });
 
   it('renders duplicate keys with unique React keys', () => {

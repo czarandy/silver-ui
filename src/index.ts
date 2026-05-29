@@ -327,6 +327,14 @@ export {
   type AspectRatioVariants,
 } from './components/AspectRatio';
 export {
+  Accordion,
+  AccordionItem,
+  Collapsible,
+  type AccordionItemProps,
+  type AccordionProps,
+  type CollapsibleProps,
+} from './components/Accordion';
+export {
   Divider,
   dividerRecipe,
   type DividerOrientation,

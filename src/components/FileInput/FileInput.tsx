@@ -106,18 +106,10 @@ const styles = {
   icon: css({
     display: 'inline-flex',
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   statusIcon: css({
     display: 'inline-flex',
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   clearButton: css({
     display: 'inline-flex',

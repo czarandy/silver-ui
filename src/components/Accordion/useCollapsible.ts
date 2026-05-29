@@ -2,13 +2,13 @@ import {use, useState} from 'react';
 import {AccordionContext} from './AccordionContext';
 
 export interface CollapsibleConfig {
-  defaultIsOpen?: boolean;
+  isDefaultOpen?: boolean;
   isOpen?: boolean;
   onOpenChange?: (isOpen: boolean) => void;
 }
 
 export interface UseCollapsibleOptions {
-  isCollapsible?: boolean | CollapsibleConfig;
+  config?: CollapsibleConfig;
   value?: string;
 }
 
@@ -20,17 +20,19 @@ export interface UseCollapsibleReturn {
 export function useCollapsible(
   options: UseCollapsibleOptions,
 ): UseCollapsibleReturn {
-  const {isCollapsible, value} = options;
+  const {config, value} = options;
 
   const group = use(AccordionContext);
+  const isMissingGroupValue = group != null && value == null;
   const isControlledByGroup = group != null && value != null;
 
-  const config: CollapsibleConfig | null =
-    isCollapsible === true
-      ? {}
-      : isCollapsible === false || isCollapsible == null
-        ? null
-        : isCollapsible;
+  if (process.env.NODE_ENV !== 'production') {
+    if (isMissingGroupValue) {
+      throw new Error(
+        'AccordionItem: `value` prop is required when used inside an Accordion.',
+      );
+    }
+  }
 
   const [internalIsOpen, setInternalIsOpen] = useState(() => {
     if (isControlledByGroup) {
@@ -39,12 +41,14 @@ export function useCollapsible(
     if (config?.isOpen !== undefined) {
       return config.isOpen;
     }
-    return config?.defaultIsOpen ?? true;
+    return config?.isDefaultOpen ?? true;
   });
 
   let isOpen: boolean;
   if (isControlledByGroup) {
     isOpen = group.isOpen(value);
+  } else if (isMissingGroupValue) {
+    isOpen = false;
   } else if (config?.isOpen !== undefined) {
     isOpen = config.isOpen;
   } else {
@@ -54,10 +58,13 @@ export function useCollapsible(
   const toggle = () => {
     if (isControlledByGroup) {
       group.toggle(value);
-    } else if (config?.onOpenChange) {
-      config.onOpenChange(!isOpen);
+    } else if (isMissingGroupValue) {
+      return;
+    } else if (config?.isOpen !== undefined) {
+      config.onOpenChange?.(!isOpen);
     } else {
       setInternalIsOpen(prev => !prev);
+      config?.onOpenChange?.(!isOpen);
     }
   };
 

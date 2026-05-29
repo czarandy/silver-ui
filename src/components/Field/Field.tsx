@@ -122,10 +122,6 @@ const styles = {
   labelIcon: css({
     display: 'inline-flex',
     alignItems: 'center',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   indicator: css({
     fontWeight: 'normal',

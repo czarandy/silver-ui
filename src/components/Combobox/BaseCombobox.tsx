@@ -174,10 +174,6 @@ const styles = {
     display: 'inline-flex',
     flexShrink: 0,
     color: 'primary',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   loading: css({
     display: 'inline-flex',
@@ -186,8 +182,6 @@ const styles = {
     p: '2',
     color: 'fg.muted',
     '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
       animation: 'spin 0.8s linear infinite',
     },
     '@media (prefers-reduced-motion: reduce)': {
@@ -242,10 +236,10 @@ export function BaseCombobox<T extends SearchableItem>({
   const [isOpen, setIsOpen] = useState(false);
 
   const setOpen = useCallback(
-    (nextOpen: boolean) => {
-      setIsOpen(nextOpen);
-      onOpenChange?.(nextOpen);
-      if (!nextOpen) {
+    (isNextOpen: boolean) => {
+      setIsOpen(isNextOpen);
+      onOpenChange?.(isNextOpen);
+      if (!isNextOpen) {
         searchSource.cancel?.();
         setHighlightedIndex(-1);
       }

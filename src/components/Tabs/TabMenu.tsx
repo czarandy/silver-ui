@@ -86,10 +86,6 @@ const styles = {
   },
   chevron: css({
     display: 'inline-flex',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   chevronOpen: css({transform: 'rotate(180deg)'}),
   indicator: css({
@@ -148,18 +144,10 @@ const styles = {
   itemIcon: css({
     display: 'inline-flex',
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   check: css({
     display: 'inline-flex',
     color: 'primary',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
 } as const;
 

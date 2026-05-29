@@ -7,10 +7,10 @@ export interface UseTableSortableStateConfig<
   T extends Record<string, unknown>,
   TSortKey extends string = string,
 > {
-  allowUnsortedState?: boolean;
   comparators?: Partial<Record<TSortKey, TableSortComparator<T>>>;
   data: T[];
   defaultSort?: TableSortState<TSortKey>;
+  hasUnsortedState?: boolean;
   isMultiSortEnabled?: boolean;
   onSortChange?: (sort: TableSortState<TSortKey>) => void;
   sort?: TableSortState<TSortKey>;
@@ -73,7 +73,7 @@ export function useTableSortableState<
   T extends Record<string, unknown>,
   TSortKey extends string = string,
 >({
-  allowUnsortedState,
+  hasUnsortedState,
   comparators,
   data,
   defaultSort = [],
@@ -121,12 +121,12 @@ export function useTableSortableState<
   const sortedData = useMemo(() => applySort(data), [applySort, data]);
   const sortConfig = useMemo(
     (): UseTableSortableConfig<TSortKey> => ({
-      allowUnsortedState,
+      hasUnsortedState,
       isMultiSortEnabled,
       onSortChange,
       sort,
     }),
-    [allowUnsortedState, isMultiSortEnabled, onSortChange, sort],
+    [hasUnsortedState, isMultiSortEnabled, onSortChange, sort],
   );
 
   return {applySort, sort, sortConfig, sortedData};
