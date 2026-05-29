@@ -21,6 +21,7 @@ const docsClassName = css({
 const themeDecorator: DecoratorFunction<ReactRenderer> = (Story, context) => {
   const theme = context.globals.theme as string;
   const isDocs = context.viewMode === 'docs';
+  document.documentElement.dataset.theme = theme;
   document.documentElement.style.colorScheme = theme;
   return (
     <div className={isDocs ? docsClassName : canvasClassName}>

@@ -15,7 +15,10 @@ export default defineConfig({
   cssVarRoot: ':where(:root, :host)',
   conditions: {
     extend: {
-      dark: '@media (prefers-color-scheme: dark)',
+      dark: [
+        '@media (prefers-color-scheme: dark)',
+        '&:is([data-theme=dark] *, [data-theme=dark])',
+      ],
     },
   },
   theme: {
@@ -85,45 +88,45 @@ export default defineConfig({
           },
           surface: {
             blue: {
-              value: {base: '{colors.blue.50}', _dark: '{colors.blue.950}'},
+              value: {base: '{colors.blue.100}', _dark: '{colors.blue.900}'},
             },
             cyan: {
-              value: {base: '{colors.cyan.50}', _dark: '{colors.cyan.950}'},
+              value: {base: '{colors.cyan.100}', _dark: '{colors.cyan.900}'},
             },
             gray: {
               value: {
-                base: '{colors.silver-neutral.50}',
+                base: '{colors.silver-neutral.100}',
                 _dark: '{colors.silver-neutral.800}',
               },
             },
             green: {
-              value: {base: '{colors.green.50}', _dark: '{colors.green.950}'},
+              value: {base: '{colors.green.100}', _dark: '{colors.green.900}'},
             },
             orange: {
               value: {
-                base: '{colors.orange.50}',
-                _dark: '{colors.orange.950}',
+                base: '{colors.orange.100}',
+                _dark: '{colors.orange.900}',
               },
             },
             pink: {
-              value: {base: '{colors.pink.50}', _dark: '{colors.pink.950}'},
+              value: {base: '{colors.pink.100}', _dark: '{colors.pink.900}'},
             },
             purple: {
               value: {
-                base: '{colors.purple.50}',
-                _dark: '{colors.purple.950}',
+                base: '{colors.purple.100}',
+                _dark: '{colors.purple.900}',
               },
             },
             red: {
-              value: {base: '{colors.red.50}', _dark: '{colors.red.950}'},
+              value: {base: '{colors.red.100}', _dark: '{colors.red.900}'},
             },
             teal: {
-              value: {base: '{colors.teal.50}', _dark: '{colors.teal.950}'},
+              value: {base: '{colors.teal.100}', _dark: '{colors.teal.900}'},
             },
             yellow: {
               value: {
-                base: '{colors.yellow.50}',
-                _dark: '{colors.yellow.950}',
+                base: '{colors.yellow.100}',
+                _dark: '{colors.yellow.900}',
               },
             },
           },
