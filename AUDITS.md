@@ -13,7 +13,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 ## Layout & Structure
 
 - [ ] AppShell
-- [ ] AspectRatio
+- [x] AspectRatio
 - [x] Center
 - [ ] Collapsible
 - [ ] Divider

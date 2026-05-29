@@ -44,4 +44,61 @@ describe('AspectRatio', () => {
     expect(ratio).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
+
+  it('forwards additional HTML attributes to the root element', () => {
+    render(
+      <AspectRatio
+        aria-label="media container"
+        data-testid="ratio"
+        id="hero-media"
+        ratio={16 / 9}
+        role="img">
+        <div>Content</div>
+      </AspectRatio>,
+    );
+
+    const root = screen.getByTestId('ratio');
+    expect(root).toHaveAttribute('id', 'hero-media');
+    expect(root).toHaveAttribute('role', 'img');
+    expect(root).toHaveAttribute('aria-label', 'media container');
+  });
+
+  it('ratio prop takes precedence over aspectRatio in style', () => {
+    render(
+      <AspectRatio
+        data-testid="ratio"
+        ratio={16 / 9}
+        style={{aspectRatio: '1/1'}}>
+        <div>Content</div>
+      </AspectRatio>,
+    );
+
+    expect(screen.getByTestId('ratio')).toHaveStyle({
+      aspectRatio: String(16 / 9),
+    });
+  });
+
+  it('warns in development for invalid ratio values', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const {unmount} = render(
+      <AspectRatio ratio={0}>
+        <div>Content</div>
+      </AspectRatio>,
+    );
+    unmount();
+
+    render(
+      <AspectRatio ratio={-1}>
+        <div>Content</div>
+      </AspectRatio>,
+    );
+
+    expect(warnSpy).toHaveBeenCalledTimes(2);
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('finite positive number'),
+    );
+
+    warnSpy.mockRestore();
+  });
 });
