@@ -1,2 +1,7 @@
-export type SpacingStep = 0 | 0.5 | 1 | 1.5 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
+import type {LayoutRegionVariants} from './Layout.recipe';
+
+export type {LayoutRegionVariants};
+export type SpacingStep = NonNullable<
+  NonNullable<LayoutRegionVariants>['padding']
+>;
 export type LayoutHeight = 'fill' | 'auto';

@@ -27,7 +27,7 @@ describe('Stack', () => {
     expect(screen.getByTestId('stack').tagName).toBe('NAV');
   });
 
-  it('applies gap as inline style', () => {
+  it('applies gap class for the given gap value', () => {
     render(
       <VStack data-testid="stack" gap={4}>
         <div>One</div>
@@ -35,7 +35,7 @@ describe('Stack', () => {
       </VStack>,
     );
 
-    expect(screen.getByTestId('stack')).toHaveStyle({gap: '1rem'});
+    expect(screen.getByTestId('stack')).toHaveClass('silver-gap_4');
   });
 
   it('applies numeric width and height as pixels', () => {

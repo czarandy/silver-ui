@@ -358,7 +358,7 @@ export function AppShell({
   const headerContent =
     hasTopNav || banner != null ? (
       <div className={cx(isAuto && styles.headerSticky)} ref={headerRef}>
-        <LayoutHeader hasDivider={navHasDividers && hasTopNav} padding={0}>
+        <LayoutHeader padding={0}>
           {banner != null ? (
             <div className={styles.banner}>{banner}</div>
           ) : null}
@@ -376,7 +376,7 @@ export function AppShell({
     isBelowBreakpoint &&
     !hasTopNavContent &&
     hasSideNav ? (
-      <LayoutHeader hasDivider={navHasDividers} padding={0}>
+      <LayoutHeader padding={0}>
         <div
           aria-label="Mobile navigation"
           className={styles.autoMobileTopBar}
@@ -391,7 +391,7 @@ export function AppShell({
       </LayoutHeader>
     ) : undefined;
   const sideNavPanel = showSideNavInline ? (
-    <LayoutPanel hasDivider={navHasDividers} isScrollable={isFill} padding={0}>
+    <LayoutPanel isScrollable={isFill} padding={0}>
       <div className={styles.slotContents} ref={sideNavPresenceRef}>
         {sideNav}
       </div>
@@ -448,6 +448,7 @@ export function AppShell({
         </a>
         <Layout
           content={mainContent}
+          hasDividers={navHasDividers}
           header={
             <>
               {headerContent}

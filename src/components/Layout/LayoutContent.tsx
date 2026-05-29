@@ -1,19 +1,30 @@
-import type {AriaRole, CSSProperties, ReactNode, Ref} from 'react';
+import type {ComponentPropsWithRef} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {layoutRegionRecipe} from './Layout.recipe';
 import type {SpacingStep} from './types';
 
-export interface LayoutContentProps {
-  children?: ReactNode;
-  className?: string;
+/**
+ * Scrollable main content area within a Layout. Fills the remaining space
+ * between panels and stretches to fill the available height.
+ */
+export interface LayoutContentProps extends ComponentPropsWithRef<'div'> {
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
-  id?: string;
+  /**
+   * Whether the content area scrolls when it overflows.
+   */
   isScrollable?: boolean;
+  /**
+   * Accessible label. Automatically sets role="region" when provided.
+   */
   label?: string;
+  /**
+   * Inner padding.
+   */
   padding?: SpacingStep;
-  ref?: Ref<HTMLDivElement>;
-  role?: AriaRole;
-  style?: CSSProperties;
 }
 
 const styles = {
@@ -23,57 +34,42 @@ const styles = {
     minH: 0,
     minW: 0,
     overflow: 'clip',
-    p: 'var(--layout-region-padding)',
   }),
   scrollable: css({
     overflow: 'auto',
   }),
 };
 
-const paddingByStep: Record<SpacingStep, string> = {
-  0: '0px',
-  0.5: '0.125rem',
-  1: '0.25rem',
-  1.5: '0.375rem',
-  2: '0.5rem',
-  3: '0.75rem',
-  4: '1rem',
-  5: '1.25rem',
-  6: '1.5rem',
-  8: '2rem',
-  10: '2.5rem',
-};
-
-type LayoutContentStyle = CSSProperties & {
-  '--layout-region-padding': string;
-};
-
+/**
+ * Scrollable main content area within a Layout. Fills the remaining space
+ * between panels and stretches to fill the available height.
+ */
 export function LayoutContent({
   children,
   className,
   'data-testid': dataTestId,
-  id,
   isScrollable = true,
   label,
   padding = 4,
   ref,
   role,
   style,
+  ...rest
 }: LayoutContentProps): React.JSX.Element {
-  const rootStyle: LayoutContentStyle = {
-    '--layout-region-padding': paddingByStep[padding],
-    ...style,
-  };
-
   return (
     <div
+      {...rest}
       aria-label={label}
-      className={cx(styles.root, isScrollable && styles.scrollable, className)}
+      className={cx(
+        styles.root,
+        layoutRegionRecipe({padding}),
+        isScrollable && styles.scrollable,
+        className,
+      )}
       data-testid={dataTestId}
-      id={id}
       ref={ref}
-      role={role}
-      style={rootStyle}>
+      role={role ?? (label != null ? 'region' : undefined)}
+      style={style}>
       {children}
     </div>
   );

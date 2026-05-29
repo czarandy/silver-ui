@@ -12,7 +12,7 @@ import {
 import type {LayoutHeight, SpacingStep} from './types';
 
 /**
- * Page shell with header, side panels, content, and footer slots.
+ * Shell with header, side panels, content, and footer slots.
  */
 export interface LayoutProps {
   /**
@@ -23,10 +23,6 @@ export interface LayoutProps {
    * Main content slot.
    */
   content?: ReactNode;
-  /**
-   * Maximum content width in pixels.
-   */
-  contentWidth?: number;
   /**
    * Test ID applied to the root element.
    */
@@ -40,9 +36,9 @@ export interface LayoutProps {
    */
   footer?: ReactNode;
   /**
-   * Whether child layout regions should show dividers by default.
+   * Whether child layout regions should show dividers.
    */
-  hasDefaultDividers?: boolean;
+  hasDividers?: boolean;
   /**
    * Header slot.
    */
@@ -70,39 +66,12 @@ export interface LayoutProps {
 }
 
 const styles = {
-  padded: css({
-    p: 'var(--layout-padding)',
-  }),
-  contentWidth: css({
-    w: '100%',
-    maxW: 'var(--layout-content-width)',
-    mx: 'auto',
-  }),
   contentFill: css({
     flex: 1,
     minW: 0,
     display: 'flex',
     flexDirection: 'column',
   }),
-};
-
-const spacingByStep: Record<SpacingStep, string> = {
-  0: '0px',
-  0.5: '0.125rem',
-  1: '0.25rem',
-  1.5: '0.375rem',
-  2: '0.5rem',
-  3: '0.75rem',
-  4: '1rem',
-  5: '1.25rem',
-  6: '1.5rem',
-  8: '2rem',
-  10: '2.5rem',
-};
-
-type LayoutStyle = CSSProperties & {
-  '--layout-content-width'?: string;
-  '--layout-padding'?: string;
 };
 
 function AreaProvider({
@@ -122,9 +91,8 @@ function AreaProvider({
 export function Layout({
   className,
   content,
-  contentWidth,
   'data-testid': dataTestId,
-  hasDefaultDividers,
+  hasDividers = true,
   end,
   footer,
   header,
@@ -143,56 +111,32 @@ export function Layout({
     }),
     [end, footer, header, start],
   );
-  const dividerValue = useMemo(
-    () =>
-      hasDefaultDividers != null
-        ? {defaultHasDividers: hasDefaultDividers}
-        : null,
-    [hasDefaultDividers],
-  );
-  const rootStyle: LayoutStyle = {
-    ...(contentWidth != null
-      ? {'--layout-content-width': `${contentWidth}px`}
-      : undefined),
-    ...(padding != null ? {'--layout-padding': spacingByStep[padding]} : {}),
+  const dividerValue = useMemo(() => ({hasDividers}), [hasDividers]);
+  const rootStyle: CSSProperties = {
     ...style,
   };
 
-  const tree = (
-    <LayoutSlotsContext value={slots}>
-      <div
-        className={cx(
-          layoutRecipe({height}),
-          padding != null && styles.padded,
-          className,
-        )}
-        data-testid={dataTestId}
-        ref={ref}
-        style={rootStyle}>
-        <AreaProvider area="header">{header}</AreaProvider>
+  return (
+    <LayoutDividerContext value={dividerValue}>
+      <LayoutSlotsContext value={slots}>
         <div
-          className={cx(
-            layoutMiddleRecipe(),
-            contentWidth != null && styles.contentWidth,
-          )}>
-          <AreaProvider area="start">{start}</AreaProvider>
-          <div className={styles.contentFill}>
-            <AreaProvider area="content">{content}</AreaProvider>
+          className={cx(layoutRecipe({height, padding}), className)}
+          data-testid={dataTestId}
+          ref={ref}
+          style={rootStyle}>
+          <AreaProvider area="header">{header}</AreaProvider>
+          <div className={layoutMiddleRecipe()}>
+            <AreaProvider area="start">{start}</AreaProvider>
+            <div className={styles.contentFill}>
+              <AreaProvider area="content">{content}</AreaProvider>
+            </div>
+            <AreaProvider area="end">{end}</AreaProvider>
           </div>
-          <AreaProvider area="end">{end}</AreaProvider>
+          <AreaProvider area="footer">{footer}</AreaProvider>
         </div>
-        <AreaProvider area="footer">{footer}</AreaProvider>
-      </div>
-    </LayoutSlotsContext>
+      </LayoutSlotsContext>
+    </LayoutDividerContext>
   );
-
-  if (dividerValue != null) {
-    return (
-      <LayoutDividerContext value={dividerValue}>{tree}</LayoutDividerContext>
-    );
-  }
-
-  return tree;
 }
 
 Layout.displayName = 'Layout';

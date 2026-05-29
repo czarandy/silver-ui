@@ -6,20 +6,20 @@ import {useLayoutDivider} from './LayoutContext';
 import type {SpacingStep} from './types';
 
 /**
- * Header landmark region within a Layout. Renders as a semantic
- * `<header>` element with an optional bottom-edge divider.
+ * Footer landmark region within a Layout. Renders as a semantic
+ * `<footer>` element with an optional top-edge divider.
  */
-export interface LayoutHeaderProps extends ComponentPropsWithRef<'header'> {
+export interface LayoutFooterProps extends ComponentPropsWithRef<'footer'> {
   /**
    * Test ID applied to the root element.
    */
   'data-testid'?: string;
   /**
-   * Fixed height for the header.
+   * Fixed height for the footer.
    */
   height?: number | string;
   /**
-   * Accessible label for the header landmark.
+   * Accessible label for the footer landmark.
    */
   label?: string;
   /**
@@ -33,9 +33,9 @@ const styles = {
     flexShrink: 0,
   }),
   divider: css({
-    borderBlockEndWidth: '1px',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
+    borderBlockStartWidth: '1px',
+    borderBlockStartStyle: 'solid',
+    borderBlockStartColor: 'border',
   }),
   inner: css({
     boxSizing: 'border-box',
@@ -43,10 +43,10 @@ const styles = {
 };
 
 /**
- * Header landmark region within a Layout. Renders as a semantic
- * `<header>` element with an optional bottom-edge divider.
+ * Footer landmark region within a Layout. Renders as a semantic
+ * `<footer>` element with an optional top-edge divider.
  */
-export function LayoutHeader({
+export function LayoutFooter({
   children,
   className,
   'data-testid': dataTestId,
@@ -56,13 +56,13 @@ export function LayoutHeader({
   ref,
   style,
   ...rest
-}: LayoutHeaderProps): React.JSX.Element {
+}: LayoutFooterProps): React.JSX.Element {
   const dividerContext = useLayoutDivider();
   const hasDivider = dividerContext?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
 
   return (
-    <header
+    <footer
       {...rest}
       aria-label={label}
       className={cx(styles.root, hasDivider && styles.divider, className)}
@@ -73,8 +73,8 @@ export function LayoutHeader({
       <div className={cx(styles.inner, layoutRegionRecipe({padding}))}>
         {children}
       </div>
-    </header>
+    </footer>
   );
 }
 
-LayoutHeader.displayName = 'LayoutHeader';
+LayoutFooter.displayName = 'LayoutFooter';

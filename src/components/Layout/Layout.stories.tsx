@@ -1,6 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {Button} from '../Button';
+import {Card} from '../Card';
+import {HStack, VStack} from '../Stack';
+import {Heading, Text} from '../Text';
 import {Layout} from './Layout';
 import {LayoutContent} from './LayoutContent';
+import {LayoutFooter} from './LayoutFooter';
 import {LayoutHeader} from './LayoutHeader';
 import {LayoutPanel} from './LayoutPanel';
 
@@ -21,14 +26,274 @@ export const Basic: Story = {
     <div style={{height: 420}}>
       <Layout
         {...args}
-        content={<LayoutContent>Main content</LayoutContent>}
-        header={<LayoutHeader hasDivider>Header</LayoutHeader>}
+        content={
+          <LayoutContent>
+            <Text type="body">Main content</Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header</Heading>
+          </LayoutHeader>
+        }
         start={
-          <LayoutPanel hasDivider width={220}>
-            Start panel
+          <LayoutPanel width={220}>
+            <Text type="body">Start panel</Text>
           </LayoutPanel>
         }
       />
     </div>
+  ),
+};
+
+export const ContentOnly: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">
+              This layout has only content, no header or panels.
+            </Text>
+          </LayoutContent>
+        }
+        hasDividers={false}
+      />
+    </Card>
+  ),
+};
+
+export const AutoHeight: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <VStack gap={2}>
+              <Text type="body">Auto-height layout grows with content.</Text>
+              <Text type="body">No fixed height constraint.</Text>
+              <Text type="body">The layout is only as tall as needed.</Text>
+              <Text type="body">
+                Additional content pushes the height further.
+              </Text>
+              <Text type="body">This demonstrates natural document flow.</Text>
+            </VStack>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header</Heading>
+          </LayoutHeader>
+        }
+        height="auto"
+      />
+    </Card>
+  ),
+};
+
+export const WithPadding: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Content with outer padding on the layout.</Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header</Heading>
+          </LayoutHeader>
+        }
+        padding={4}
+      />
+    </Card>
+  ),
+};
+
+export const WithEndPanel: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Main content area</Text>
+          </LayoutContent>
+        }
+        end={
+          <LayoutPanel width={200}>
+            <Text type="body">End panel</Text>
+          </LayoutPanel>
+        }
+        start={
+          <LayoutPanel width={200}>
+            <Text type="body">Start panel</Text>
+          </LayoutPanel>
+        }
+      />
+    </Card>
+  ),
+};
+
+export const WithFooter: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Main content</Text>
+          </LayoutContent>
+        }
+        footer={
+          <LayoutFooter>
+            <HStack gap={2} justify="end">
+              <Button label="Cancel" variant="ghost" />
+              <Button label="Save" variant="primary" />
+            </HStack>
+          </LayoutFooter>
+        }
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header</Heading>
+          </LayoutHeader>
+        }
+      />
+    </Card>
+  ),
+};
+
+export const AllSlots: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Main content</Text>
+          </LayoutContent>
+        }
+        end={
+          <LayoutPanel width={180}>
+            <Text type="body">End panel</Text>
+          </LayoutPanel>
+        }
+        footer={
+          <LayoutFooter>
+            <HStack gap={2} justify="end">
+              <Button label="Cancel" variant="ghost" />
+              <Button label="Save" variant="primary" />
+            </HStack>
+          </LayoutFooter>
+        }
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header</Heading>
+          </LayoutHeader>
+        }
+        start={
+          <LayoutPanel width={180}>
+            <Text type="body">Start panel</Text>
+          </LayoutPanel>
+        }
+      />
+    </Card>
+  ),
+};
+
+export const PanelWidth: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Start panel is 200px, end panel is 300px.</Text>
+          </LayoutContent>
+        }
+        end={
+          <LayoutPanel width={300}>
+            <Text type="body">300px panel</Text>
+          </LayoutPanel>
+        }
+        start={
+          <LayoutPanel width={200}>
+            <Text type="body">200px panel</Text>
+          </LayoutPanel>
+        }
+      />
+    </Card>
+  ),
+};
+
+export const NoDividers: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">No dividers on any region.</Text>
+          </LayoutContent>
+        }
+        hasDividers={false}
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header</Heading>
+          </LayoutHeader>
+        }
+        start={
+          <LayoutPanel width={200}>
+            <Text type="body">Start panel</Text>
+          </LayoutPanel>
+        }
+      />
+    </Card>
+  ),
+};
+
+export const NonScrollableContent: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent isScrollable={false}>
+            <Text type="body">This content area does not scroll.</Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header</Heading>
+          </LayoutHeader>
+        }
+      />
+    </Card>
+  ),
+};
+
+export const ContentPadding: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent padding={8}>
+            <Text type="body">
+              This content has padding=8 for extra spacing.
+            </Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader>
+            <Heading level={3}>Header (default padding)</Heading>
+          </LayoutHeader>
+        }
+      />
+    </Card>
   ),
 };

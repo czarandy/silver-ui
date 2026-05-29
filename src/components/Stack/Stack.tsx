@@ -8,6 +8,7 @@ import {
 } from 'react';
 import {cx} from '../../internal/cx';
 import {toPixelSize, type SizeValue} from '../../internal/toPixelSize';
+import type {SpacingStep} from '../Layout/types';
 import {stackRecipe} from './Stack.recipe';
 
 export type {SizeValue};
@@ -22,7 +23,7 @@ export type StackMainAlignment =
 export type StackCrossAlignment = 'start' | 'center' | 'end' | 'stretch';
 export type StackAlignment = StackMainAlignment | StackCrossAlignment;
 export type StackWrap = 'nowrap' | 'wrap' | 'wrap-reverse';
-export type StackGap = 0 | 0.5 | 1 | 1.5 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
+export type StackGap = SpacingStep;
 
 export interface StackProps extends HTMLAttributes<HTMLElement> {
   /**
@@ -79,20 +80,6 @@ export interface StackProps extends HTMLAttributes<HTMLElement> {
   wrap?: StackWrap;
 }
 
-const gapByStep: Record<StackGap, string> = {
-  0: '0px',
-  0.5: '0.125rem',
-  1: '0.25rem',
-  1.5: '0.375rem',
-  2: '0.5rem',
-  3: '0.75rem',
-  4: '1rem',
-  5: '1.25rem',
-  6: '1.5rem',
-  8: '2rem',
-  10: '2.5rem',
-};
-
 const mainAlignValues: Record<StackMainAlignment, string> = {
   start: 'flex-start',
   center: 'center',
@@ -136,7 +123,6 @@ export function Stack({
   const crossAlign =
     direction === 'horizontal' ? resolvedVAlign : resolvedHAlign;
   const stackStyle: CSSProperties = {
-    gap: gap != null ? gapByStep[gap] : undefined,
     justifyContent:
       mainAlign != null && mainAlign in mainAlignValues
         ? mainAlignValues[mainAlign as StackMainAlignment]
@@ -154,7 +140,7 @@ export function Stack({
     Element,
     {
       ...htmlProps,
-      className: cx(stackRecipe({direction, wrap}), className),
+      className: cx(stackRecipe({direction, gap, wrap}), className),
       'data-testid': dataTestId,
       ref,
       style: stackStyle,

@@ -17,7 +17,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [x] Center
 - [x] Collapsible
 - [x] Divider
-- [ ] Layout
+- [x] Layout
 - [x] Stack
 
 ## Navigation
@@ -47,7 +47,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] Badge
 - [ ] Blockquote
 - [ ] Card
-- [ ] Icon
+- [x] Icon
 - [ ] Item
 - [x] Kbd
 - [ ] Lightbox

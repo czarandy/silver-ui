@@ -10,7 +10,7 @@ export interface LayoutSlots {
 }
 
 export interface LayoutDividerContextValue {
-  defaultHasDividers: boolean;
+  hasDividers: boolean;
 }
 
 export const LayoutAreaContext = createContext<LayoutArea>('content');

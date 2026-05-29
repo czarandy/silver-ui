@@ -345,10 +345,12 @@ export {
 export {
   Layout,
   LayoutContent,
+  LayoutFooter,
   LayoutHeader,
   LayoutPanel,
   layoutRecipe,
   type LayoutContentProps,
+  type LayoutFooterProps,
   type LayoutHeaderProps,
   type LayoutHeight,
   type LayoutPanelProps,

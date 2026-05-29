@@ -1,20 +1,34 @@
-import type {AriaRole, CSSProperties, ReactNode, Ref} from 'react';
+import type {ComponentPropsWithRef} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {useLayoutArea} from './LayoutContext';
+import {layoutRegionRecipe} from './Layout.recipe';
+import {useLayoutArea, useLayoutDivider} from './LayoutContext';
 import type {SpacingStep} from './types';
 
-export interface LayoutPanelProps {
-  children?: ReactNode;
-  className?: string;
+/**
+ * Side panel region within a Layout. Placed in the start or end slot,
+ * with optional dividers and scrolling.
+ */
+export interface LayoutPanelProps extends ComponentPropsWithRef<'div'> {
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
-  hasDivider?: boolean;
+  /**
+   * Whether the panel scrolls when it overflows.
+   */
   isScrollable?: boolean;
+  /**
+   * Accessible label. Automatically sets role="region" when provided.
+   */
   label?: string;
+  /**
+   * Inner padding.
+   */
   padding?: SpacingStep;
-  ref?: Ref<HTMLDivElement>;
-  role?: AriaRole;
-  style?: CSSProperties;
+  /**
+   * Fixed width for the panel.
+   */
   width?: number | string;
 }
 
@@ -23,7 +37,6 @@ const styles = {
     boxSizing: 'border-box',
     flexShrink: 0,
     overflow: 'clip',
-    p: 'var(--layout-region-padding)',
   }),
   scrollable: css({
     overflow: 'auto',
@@ -40,29 +53,14 @@ const styles = {
   }),
 };
 
-const paddingByStep: Record<SpacingStep, string> = {
-  0: '0px',
-  0.5: '0.125rem',
-  1: '0.25rem',
-  1.5: '0.375rem',
-  2: '0.5rem',
-  3: '0.75rem',
-  4: '1rem',
-  5: '1.25rem',
-  6: '1.5rem',
-  8: '2rem',
-  10: '2.5rem',
-};
-
-type LayoutPanelStyle = CSSProperties & {
-  '--layout-region-padding': string;
-};
-
+/**
+ * Side panel region within a Layout. Placed in the start or end slot,
+ * with optional dividers and scrolling.
+ */
 export function LayoutPanel({
   children,
   className,
   'data-testid': dataTestId,
-  hasDivider = false,
   isScrollable = true,
   label,
   padding = 4,
@@ -70,19 +68,19 @@ export function LayoutPanel({
   role,
   style,
   width,
+  ...rest
 }: LayoutPanelProps): React.JSX.Element {
   const area = useLayoutArea();
-  const rootStyle: LayoutPanelStyle = {
-    '--layout-region-padding': paddingByStep[padding],
-    width,
-    ...style,
-  };
+  const dividerContext = useLayoutDivider();
+  const hasDivider = dividerContext?.hasDividers ?? false;
 
   return (
     <div
+      {...rest}
       aria-label={label}
       className={cx(
         styles.root,
+        layoutRegionRecipe({padding}),
         isScrollable && styles.scrollable,
         hasDivider && area === 'start' && styles.dividerEnd,
         hasDivider && area === 'end' && styles.dividerStart,
@@ -90,8 +88,8 @@ export function LayoutPanel({
       )}
       data-testid={dataTestId}
       ref={ref}
-      role={role}
-      style={rootStyle}>
+      role={role ?? (label != null ? 'region' : undefined)}
+      style={{width, ...style}}>
       {children}
     </div>
   );
