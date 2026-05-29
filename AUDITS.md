@@ -16,7 +16,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [x] AspectRatio
 - [x] Center
 - [x] Collapsible
-- [ ] Divider
+- [x] Divider
 - [ ] Layout
 - [x] Stack
 

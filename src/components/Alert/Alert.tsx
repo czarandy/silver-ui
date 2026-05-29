@@ -189,15 +189,8 @@ export function Alert({
             {endContent}
             {hasChildren ? (
               <Button
-                icon={
-                  <Icon
-                    className={cx(
-                      isExpanded ? styles.chevronExpanded : undefined,
-                    )}
-                    icon={ChevronDown}
-                    size="sm"
-                  />
-                }
+                className={isExpanded ? styles.chevronExpanded : undefined}
+                icon={ChevronDown}
                 isIconOnly
                 label={isExpanded ? 'Collapse' : 'Expand'}
                 onClick={() => setIsExpanded(value => !value)}
@@ -207,7 +200,7 @@ export function Alert({
             ) : null}
             {isDismissable ? (
               <Button
-                icon={<Icon icon={X} size="sm" />}
+                icon={X}
                 isIconOnly
                 label="Dismiss"
                 onClick={() => {

@@ -36,7 +36,6 @@ import {
 } from '../../internal/plainDate';
 import {useGridFocus} from '../../internal/useGridFocus';
 import {Button} from '../Button';
-import {Icon} from '../Icon';
 
 export type {
   DateRange,
@@ -553,7 +552,7 @@ export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
       style={style}>
       <div className={styles.header}>
         <Button
-          icon={<Icon icon={ChevronLeft} size="sm" />}
+          icon={ChevronLeft}
           isDisabled={!canNavigatePrevious}
           isIconOnly
           label="Previous month"
@@ -563,7 +562,7 @@ export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
         />
         <span className={styles.monthYear}>{monthYearLabel}</span>
         <Button
-          icon={<Icon icon={ChevronRight} size="sm" />}
+          icon={ChevronRight}
           isDisabled={!canNavigateNext}
           isIconOnly
           label="Next month"

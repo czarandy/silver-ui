@@ -16,7 +16,6 @@ import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 import {Button} from '../Button';
-import {Icon} from '../Icon';
 
 export type LightboxMediaType = 'image' | 'video';
 
@@ -340,7 +339,7 @@ export function Lightbox({
       <div className={styles.container}>
         <div className={styles.close}>
           <Button
-            icon={<Icon icon={X} size="sm" />}
+            icon={X}
             isIconOnly
             label="Close"
             onClick={close}
@@ -350,7 +349,7 @@ export function Lightbox({
         {canPrev ? (
           <div className={cx(styles.nav, styles.prev)}>
             <Button
-              icon={<Icon icon={ChevronLeft} />}
+              icon={ChevronLeft}
               isIconOnly
               label="Previous image"
               onClick={goPrev}
@@ -415,7 +414,7 @@ export function Lightbox({
         {canNext ? (
           <div className={cx(styles.nav, styles.next)}>
             <Button
-              icon={<Icon icon={ChevronRight} />}
+              icon={ChevronRight}
               isIconOnly
               label="Next image"
               onClick={goNext}

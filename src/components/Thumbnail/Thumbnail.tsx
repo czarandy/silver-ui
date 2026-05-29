@@ -216,7 +216,7 @@ export function Thumbnail({
         {onRemove != null && !isDisabled ? (
           <div className={styles.remove}>
             <Button
-              icon={<Icon icon={X} size="sm" />}
+              icon={X}
               isIconOnly
               label={`Remove ${accessibleName}`}
               onClick={event => {

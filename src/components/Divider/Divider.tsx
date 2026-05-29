@@ -1,4 +1,4 @@
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {dividerRecipe} from './Divider.recipe';
@@ -10,6 +10,11 @@ export type DividerVariant = 'subtle' | 'strong';
  * Visual separator for grouping content.
  */
 export interface DividerProps {
+  /**
+   * Accessible label for the separator. Use when the divider conveys
+   * meaning beyond a visual break (e.g., separating named sections).
+   */
+  'aria-label'?: string;
   /**
    * Additional CSS class names applied to the root element.
    */
@@ -46,12 +51,10 @@ export interface DividerProps {
 
 const styles = {
   line: css({
-    bg: 'silver-neutral.200',
-    _dark: {bg: 'silver-neutral.700'},
+    bg: 'border',
   }),
   lineStrong: css({
-    bg: 'silver-neutral.400',
-    _dark: {bg: 'silver-neutral.500'},
+    bg: 'border.emphasized',
   }),
   horizontalLine: css({
     h: '1px',
@@ -73,16 +76,17 @@ const styles = {
     py: '3',
   }),
   fullBleedHorizontal: css({
-    mx: 'calc(-1 * var(--container-padding-inline-start, 0px))',
-    w: 'calc(100% + var(--container-padding-inline-start, 0px) + var(--container-padding-inline-end, 0px))',
+    mx: 'calc(-1 * var(--card-padding, 0px))',
+    w: 'calc(100% + var(--card-padding, 0px) * 2)',
   }),
   fullBleedVertical: css({
-    my: 'calc(-1 * var(--container-padding-block-start, 0px))',
-    h: 'calc(100% + var(--container-padding-block-start, 0px) + var(--container-padding-block-end, 0px))',
+    my: 'calc(-1 * var(--card-padding, 0px))',
+    h: 'calc(100% + var(--card-padding, 0px) * 2)',
   }),
 };
 
 export function Divider({
+  'aria-label': ariaLabel,
   className,
   'data-testid': dataTestId,
   isFullBleed = false,
@@ -93,6 +97,7 @@ export function Divider({
   variant = 'subtle',
 }: DividerProps): React.JSX.Element {
   const isHorizontal = orientation === 'horizontal';
+  const labelId = useId();
   const lineClassName = cx(
     styles.line,
     variant === 'strong' && styles.lineStrong,
@@ -101,9 +106,11 @@ export function Divider({
 
   return (
     <div
+      aria-label={ariaLabel}
+      aria-labelledby={label != null && ariaLabel == null ? labelId : undefined}
       aria-orientation={orientation}
       className={cx(
-        dividerRecipe({orientation}),
+        dividerRecipe({orientation, variant}),
         isFullBleed &&
           (isHorizontal
             ? styles.fullBleedHorizontal
@@ -118,7 +125,8 @@ export function Divider({
       {label != null ? (
         <>
           <div
-            className={cx(styles.label, !isHorizontal && styles.verticalLabel)}>
+            className={cx(styles.label, !isHorizontal && styles.verticalLabel)}
+            id={labelId}>
             {label}
           </div>
           <div className={lineClassName} />

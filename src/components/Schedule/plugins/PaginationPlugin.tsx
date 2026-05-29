@@ -2,7 +2,6 @@ import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {useMemo, type ReactNode} from 'react';
 import {Button} from '../../Button';
 import {ButtonGroup} from '../../ButtonGroup';
-import {Icon} from '../../Icon';
 import {useScheduleContext} from '../context';
 import type {
   ScheduleHeaderContent,
@@ -25,7 +24,7 @@ function SchedulePaginationControls(): React.JSX.Element {
   return (
     <ButtonGroup label="Schedule pagination" size="sm">
       <Button
-        icon={<Icon icon={ChevronLeft} size="sm" />}
+        icon={ChevronLeft}
         isIconOnly
         label={previousDateLabel}
         onClick={onPreviousDate}
@@ -33,7 +32,7 @@ function SchedulePaginationControls(): React.JSX.Element {
       />
       <Button label="Today" onClick={onToday} size="sm" />
       <Button
-        icon={<Icon icon={ChevronRight} size="sm" />}
+        icon={ChevronRight}
         isIconOnly
         label={nextDateLabel}
         onClick={onNextDate}

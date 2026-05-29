@@ -3,7 +3,6 @@ import {useTransition, type CSSProperties, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
-import {Icon} from '../Icon';
 import {Select} from '../Select';
 import {Text} from '../Text';
 
@@ -393,7 +392,7 @@ export function Pagination({
       ) : null}
       <div className={styles.controls}>
         <Button
-          icon={<Icon icon={ChevronLeft} size="sm" />}
+          icon={ChevronLeft}
           isDisabled={isDisabled || !hasPrevious}
           isIconOnly
           label="Go to previous page"
@@ -403,7 +402,7 @@ export function Pagination({
         />
         {renderIndicator()}
         <Button
-          icon={<Icon icon={ChevronRight} size="sm" />}
+          icon={ChevronRight}
           isDisabled={isDisabled || !hasNext}
           isIconOnly
           label="Go to next page"

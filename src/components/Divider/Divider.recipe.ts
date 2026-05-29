@@ -18,9 +18,14 @@ export const dividerRecipe = cva({
         h: '100%',
       },
     },
+    variant: {
+      subtle: {},
+      strong: {},
+    },
   },
   defaultVariants: {
     orientation: 'horizontal',
+    variant: 'subtle',
   },
 });
 

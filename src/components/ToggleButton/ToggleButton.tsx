@@ -9,6 +9,7 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {buttonRecipe} from '../Button';
 import type {ButtonSize} from '../Button';
+import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Tooltip} from '../Tooltip';
 import {useToggleButtonGroup} from './ToggleButtonGroup';
@@ -29,7 +30,7 @@ export interface ToggleButtonProps {
   /**
    * Icon element rendered before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the button is disabled.
    * @default false
@@ -65,7 +66,7 @@ export interface ToggleButtonProps {
   /**
    * Icon element rendered when the button is pressed.
    */
-  pressedIcon?: ReactNode;
+  pressedIcon?: IconComponent;
   /**
    * Ref forwarded to the button root.
    */
@@ -123,11 +124,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    fontSize: 'var(--toggle-button-icon-size)',
-    '& > svg': {
-      w: '1em',
-      h: '1em',
-    },
   }),
   spinner: css({
     display: 'inline-flex',
@@ -213,7 +209,9 @@ export function ToggleButton({
       type="button">
       <span aria-hidden={isBusy || undefined} className={styles.content}>
         {resolvedIcon != null ? (
-          <span className={styles.icon}>{resolvedIcon}</span>
+          <span className={styles.icon}>
+            <Icon icon={resolvedIcon} size={size} />
+          </span>
         ) : null}
         {!isIconOnly ? (
           <span className={styles.labelWrapper}>

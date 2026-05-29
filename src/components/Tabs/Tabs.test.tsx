@@ -28,7 +28,7 @@ describe('Tabs', () => {
         <Tab label="Overview" value="overview" />
         <Tab
           endContent={<Badge label="New" />}
-          icon={<Settings />}
+          icon={Settings}
           label="Settings"
           value="settings"
         />

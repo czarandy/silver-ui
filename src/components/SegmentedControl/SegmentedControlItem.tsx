@@ -1,7 +1,8 @@
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {CSSProperties, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
+import {Icon, type IconComponent} from '../Icon';
 import {useSegmentedControlContext} from './SegmentedControlContext';
 
 export interface SegmentedControlItemProps {
@@ -16,7 +17,7 @@ export interface SegmentedControlItemProps {
   /**
    * Icon element displayed before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether this segment is disabled.
    * @default false
@@ -95,10 +96,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    '& > svg': {
-      w: 'var(--segmented-control-icon-size)',
-      h: 'var(--segmented-control-icon-size)',
-    },
   }),
   size: {
     sm: css({
@@ -165,7 +162,11 @@ export function SegmentedControlItem({
       style={style}
       tabIndex={isSelected ? 0 : -1}
       type="button">
-      {icon != null ? <span className={styles.icon}>{icon}</span> : null}
+      {icon != null ? (
+        <span className={styles.icon}>
+          <Icon icon={icon} size="sm" />
+        </span>
+      ) : null}
       {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
     </button>
   );

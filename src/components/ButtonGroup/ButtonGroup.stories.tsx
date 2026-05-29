@@ -29,9 +29,9 @@ type Story = StoryObj<typeof meta>;
 export const Horizontal: Story = {
   render: args => (
     <ButtonGroup {...args}>
-      <Button icon={<AlignLeft />} isIconOnly label="Align left" />
-      <Button icon={<AlignCenter />} isIconOnly label="Align center" />
-      <Button icon={<AlignRight />} isIconOnly label="Align right" />
+      <Button icon={AlignLeft} isIconOnly label="Align left" />
+      <Button icon={AlignCenter} isIconOnly label="Align center" />
+      <Button icon={AlignRight} isIconOnly label="Align right" />
     </ButtonGroup>
   ),
 };

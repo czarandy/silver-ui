@@ -2,6 +2,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {useTabsContext} from './TabsContext';
@@ -30,8 +31,7 @@ export interface TabProps {
   /**
    * Icon shown before the label.
    */
-  icon?: ReactNode;
-  /**
+  icon?: IconComponent; /**
    * Visible tab label.
    */
   label: string;
@@ -42,7 +42,7 @@ export interface TabProps {
   /**
    * Icon shown when selected. Falls back to icon.
    */
-  selectedIcon?: ReactNode;
+  selectedIcon?: IconComponent;
   /**
    * Inline styles applied to the tab.
    */
@@ -97,10 +97,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    '& > svg': {
-      w: 'var(--tab-icon-size)',
-      h: 'var(--tab-icon-size)',
-    },
   }),
   label: css({
     display: 'inline-grid',
@@ -171,7 +167,9 @@ export function Tab({
   const content = (
     <>
       {displayIcon != null ? (
-        <span className={styles.icon}>{displayIcon}</span>
+        <span className={styles.icon}>
+          <Icon icon={displayIcon} size="sm" />
+        </span>
       ) : null}
       <span className={styles.label}>
         <span className={styles.labelText}>{label}</span>

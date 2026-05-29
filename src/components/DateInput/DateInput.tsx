@@ -135,7 +135,7 @@ export function DateInput({
           label={`Choose ${label}`}
           onOpenChange={setIsOpen}>
           <Button
-            icon={<Icon icon={CalendarIcon} size="sm" />}
+            icon={CalendarIcon}
             isDisabled={isDisabled || isLoading}
             isIconOnly
             label={`Choose ${label}`}

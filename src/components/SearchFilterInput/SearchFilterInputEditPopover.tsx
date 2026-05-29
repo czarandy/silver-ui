@@ -4,7 +4,6 @@ import {X} from 'lucide-react';
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {css} from 'styled-system/css';
 import {Button} from '../Button';
-import {Icon} from '../Icon';
 import {Select} from '../Select';
 import {HStack, VStack} from '../Stack';
 import {SearchFilterInputValueEditor} from './SearchFilterInputValueEditor';
@@ -291,7 +290,7 @@ function NestedSubFilterRow({
       ) : null}
       {!isReadOnly ? (
         <Button
-          icon={<Icon icon={X} size="sm" />}
+          icon={X}
           isIconOnly
           label="Remove filter"
           onClick={onRemove}

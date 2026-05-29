@@ -13,6 +13,7 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {useButtonGroup} from '../ButtonGroup/ButtonGroupContext';
+import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Spinner} from '../Spinner';
@@ -177,7 +178,7 @@ export type ButtonProps =
       /**
        * Icon element rendered before the label. Required in icon-only mode.
        */
-      icon: ReactNode;
+      icon: IconComponent;
       /**
        * Visually hides the label, showing only the icon. The `label` prop is
        * still required and used as `aria-label`.
@@ -188,7 +189,7 @@ export type ButtonProps =
       /**
        * Icon element rendered before the label.
        */
-      icon?: ReactNode;
+      icon?: IconComponent;
       /**
        * Visually hides the label, showing only the icon. The `label` prop is
        * still required and used as `aria-label`.
@@ -210,20 +211,11 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    fontSize: 'var(--button-icon-size)',
-    '& > svg': {
-      w: '1em',
-      h: '1em',
-    },
   }),
   endContent: css({
     display: 'inline-flex',
     alignItems: 'center',
     color: 'inherit',
-    '& > svg': {
-      w: 'var(--button-icon-size)',
-      h: 'var(--button-icon-size)',
-    },
   }),
   loadingIndicator: css({
     display: 'inline-flex',
@@ -349,7 +341,7 @@ export function Button({
       <span aria-hidden={isLoading || undefined} className={styles.content}>
         {icon != null ? (
           <span aria-hidden="true" className={styles.icon}>
-            {icon}
+            <Icon icon={icon} size={size} />
           </span>
         ) : null}
         {!isIconOnly && <span className={styles.label}>{label}</span>}

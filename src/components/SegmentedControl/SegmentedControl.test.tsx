@@ -1,5 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {LayoutGrid} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {SegmentedControl} from './SegmentedControl';
 import {SegmentedControlItem} from './SegmentedControlItem';
@@ -72,7 +73,7 @@ describe('SegmentedControl', () => {
     render(
       <SegmentedControl label="View mode" onChange={() => {}} value="grid">
         <SegmentedControlItem
-          icon={<span data-testid="grid-icon">G</span>}
+          icon={LayoutGrid}
           isLabelHidden
           label="Grid view"
           value="grid"
@@ -81,6 +82,7 @@ describe('SegmentedControl', () => {
     );
 
     expect(screen.getByRole('radio', {name: 'Grid view'})).toBeInTheDocument();
-    expect(screen.getByTestId('grid-icon')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    expect(screen.getByRole('radio').querySelector('svg')).toBeInTheDocument();
   });
 });

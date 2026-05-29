@@ -5,7 +5,6 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Button} from '../Button';
-import {Icon} from '../Icon';
 import {Heading} from '../Text';
 import {mobileNavRecipe} from './MobileNav.recipe';
 
@@ -161,7 +160,7 @@ export function MobileNav({
             (header ?? <span />)
           )}
           <Button
-            icon={<Icon icon={X} size="sm" />}
+            icon={X}
             isIconOnly
             label="Close navigation"
             onClick={() => onOpenChange(false)}

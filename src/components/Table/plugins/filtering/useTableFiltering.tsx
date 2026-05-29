@@ -4,7 +4,6 @@ import {css} from 'styled-system/css';
 import {Button} from '../../../Button';
 import {createStaticSource, type SearchableItem} from '../../../Combobox';
 import {DateInput, type ISODateString} from '../../../DateInput';
-import {Icon} from '../../../Icon';
 import {MultiSelect} from '../../../MultiSelect';
 import {NumberInput} from '../../../NumberInput';
 import {Popover} from '../../../Popover';
@@ -560,7 +559,7 @@ function PopoverFilterTrigger<T extends Record<string, unknown>>({
           {isActive ? (
             <div className={styles.popoverActions}>
               <Button
-                icon={<Icon icon={X} size="sm" />}
+                icon={X}
                 label="Clear"
                 onClick={() => {
                   store.getConfig().onFilterChange(column.key, null);
@@ -575,7 +574,7 @@ function PopoverFilterTrigger<T extends Record<string, unknown>>({
       label={`Filter ${getHeaderText(column)}`}
       placement="below">
       <Button
-        icon={<Icon icon={Filter} size="sm" />}
+        icon={Filter}
         isIconOnly
         label={`Filter ${getHeaderText(column)}`}
         size="sm"

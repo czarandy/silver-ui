@@ -25,7 +25,7 @@ function TabsStory(args: React.ComponentProps<typeof Tabs>) {
         label="Activity"
         value="activity"
       />
-      <Tab icon={<Settings />} label="Settings" value="settings" />
+      <Tab icon={Settings} label="Settings" value="settings" />
       <TabMenu
         label="More"
         options={[

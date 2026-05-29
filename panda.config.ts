@@ -72,13 +72,13 @@ export default defineConfig({
           border: {
             DEFAULT: {
               value: {
-                base: '{colors.silver-neutral.200}',
+                base: '{colors.silver-neutral.100}',
                 _dark: '{colors.silver-neutral.700}',
               },
             },
             emphasized: {
               value: {
-                base: '{colors.silver-neutral.300}',
+                base: '{colors.silver-neutral.200}',
                 _dark: '{colors.silver-neutral.600}',
               },
             },

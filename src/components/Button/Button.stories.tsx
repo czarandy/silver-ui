@@ -57,13 +57,13 @@ export const Sizes: Story = {
 export const WithContent: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-      <Button icon={<Icon icon={Plus} />} label="Add" />
+      <Button icon={Plus} label="Add" />
       <Button
         endContent={<Icon icon={Inbox} />}
         label="Inbox"
         variant="secondary"
       />
-      <Button icon={<Icon icon={Settings} />} isIconOnly label="Settings" />
+      <Button icon={Settings} isIconOnly label="Settings" />
     </div>
   ),
 };
@@ -71,9 +71,9 @@ export const WithContent: Story = {
 export const IconSizes: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
-      <Button icon={<Icon icon={Plus} />} label="Small" size="sm" />
-      <Button icon={<Icon icon={Plus} />} label="Medium" size="md" />
-      <Button icon={<Icon icon={Plus} />} label="Large" size="lg" />
+      <Button icon={Plus} label="Small" size="sm" />
+      <Button icon={Plus} label="Medium" size="md" />
+      <Button icon={Plus} label="Large" size="lg" />
     </div>
   ),
 };

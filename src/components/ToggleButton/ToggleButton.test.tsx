@@ -1,5 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {Heart, Star} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {ToggleButton} from './ToggleButton';
@@ -42,16 +43,19 @@ describe('ToggleButton', () => {
   it('renders pressedIcon when pressed', () => {
     render(
       <ToggleButton
-        icon={<span data-testid="outline-icon">Outline</span>}
+        icon={Star}
         isIconOnly
         isPressed
         label="Favorite"
-        pressedIcon={<span data-testid="filled-icon">Filled</span>}
+        pressedIcon={Heart}
       />,
     );
 
-    expect(screen.getByTestId('filled-icon')).toBeInTheDocument();
-    expect(screen.queryByTestId('outline-icon')).not.toBeInTheDocument();
+    const button = screen.getByRole('button', {name: 'Favorite'});
+    // eslint-disable-next-line testing-library/no-node-access -- no testing-library query for SVG class
+    expect(button.querySelector('.lucide-heart')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- no testing-library query for SVG class
+    expect(button.querySelector('.lucide-star')).not.toBeInTheDocument();
   });
 
   it('does not call onPressedChange when disabled', async () => {

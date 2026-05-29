@@ -1,5 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {Home} from 'lucide-react';
 import type {ComponentPropsWithRef, ReactNode, Ref} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {LinkProvider} from '../Link';
@@ -54,25 +55,21 @@ describe('Button', () => {
   });
 
   it('renders icon-only button with aria-label', () => {
-    render(
-      <Button
-        icon={<span data-testid="icon">Icon</span>}
-        isIconOnly
-        label="Settings"
-      />,
-    );
+    render(<Button icon={Home} isIconOnly label="Settings" />);
 
     const button = screen.getByRole('button', {name: 'Settings'});
     expect(button).toHaveAttribute('aria-label', 'Settings');
-    expect(screen.getByTestId('icon')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    expect(button.querySelector('svg')).toBeInTheDocument();
   });
 
   it('renders icon and label together', () => {
-    render(<Button icon={<span data-testid="icon" />} label="Settings" />);
+    render(<Button icon={Home} label="Settings" />);
 
     const button = screen.getByRole('button', {name: 'Settings'});
     expect(button).not.toHaveAttribute('aria-label');
-    expect(screen.getByTestId('icon')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    expect(button.querySelector('svg')).toBeInTheDocument();
   });
 
   it('renders endContent after the label', () => {
@@ -90,13 +87,14 @@ describe('Button', () => {
     render(
       <Button
         endContent={<span data-testid="end">3</span>}
-        icon={<span data-testid="icon" />}
+        icon={Home}
         isIconOnly
         label="Settings"
       />,
     );
 
-    expect(screen.getByTestId('icon')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    expect(screen.getByRole('button').querySelector('svg')).toBeInTheDocument();
     expect(screen.queryByTestId('end')).not.toBeInTheDocument();
   });
 
