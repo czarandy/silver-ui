@@ -1,6 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {Stack} from '../Stack';
+import {VStack} from '../Stack';
 import {Switch} from './Switch';
 
 const meta: Meta<typeof Switch> = {
@@ -26,12 +26,12 @@ export const Default: Story = {
 };
 export const States: Story = {
   render: () => (
-    <Stack gap={4}>
+    <VStack gap={4}>
       <Switch isSelected={false} label="Off" />
       <Switch isSelected label="On" />
       <Switch isDisabled isSelected={false} label="Disabled" />
       <Switch isLoading isSelected label="Loading" />
-    </Stack>
+    </VStack>
   ),
 };
 export const Error: Story = {

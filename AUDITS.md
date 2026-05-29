@@ -18,7 +18,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] Collapsible
 - [ ] Divider
 - [ ] Layout
-- [ ] Stack
+- [x] Stack
 
 ## Navigation
 

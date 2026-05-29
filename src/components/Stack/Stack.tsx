@@ -2,6 +2,7 @@ import {
   createElement,
   type CSSProperties,
   type ElementType,
+  type HTMLAttributes,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -23,21 +24,58 @@ export type StackAlignment = StackMainAlignment | StackCrossAlignment;
 export type StackWrap = 'nowrap' | 'wrap' | 'wrap-reverse';
 export type StackGap = 0 | 0.5 | 1 | 1.5 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
 
-export interface StackProps {
+export interface StackProps extends HTMLAttributes<HTMLElement> {
+  /**
+   * Cross-axis alignment.
+   */
   align?: StackCrossAlignment;
+  /**
+   * HTML element type to render.
+   */
+  as?: ElementType;
+  /**
+   * Stack content.
+   */
   children?: ReactNode;
-  className?: string;
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
+  /**
+   * Layout direction.
+   */
   direction?: StackDirection;
-  element?: ElementType;
+  /**
+   * Gap between children.
+   */
   gap?: StackGap;
+  /**
+   * Horizontal alignment (overrides align/justify for horizontal axis).
+   */
   hAlign?: StackAlignment;
+  /**
+   * Fixed height. Numbers are treated as pixels.
+   */
   height?: SizeValue;
+  /**
+   * Main-axis alignment.
+   */
   justify?: StackMainAlignment;
+  /**
+   * Ref forwarded to the root element.
+   */
   ref?: Ref<HTMLElement>;
-  style?: CSSProperties;
+  /**
+   * Vertical alignment (overrides align/justify for vertical axis).
+   */
   vAlign?: StackAlignment;
+  /**
+   * Fixed width. Numbers are treated as pixels.
+   */
   width?: SizeValue;
+  /**
+   * Flex wrap behavior.
+   */
   wrap?: StackWrap;
 }
 
@@ -77,7 +115,7 @@ export function Stack({
   className,
   'data-testid': dataTestId,
   direction = 'vertical',
-  element = 'div',
+  as: Element = 'div',
   gap,
   hAlign,
   height,
@@ -87,6 +125,7 @@ export function Stack({
   vAlign,
   width,
   wrap = 'nowrap',
+  ...htmlProps
 }: StackProps): React.JSX.Element {
   const resolvedHAlign =
     hAlign ?? (direction === 'horizontal' ? justify : align);
@@ -112,8 +151,9 @@ export function Stack({
   };
 
   return createElement(
-    element,
+    Element,
     {
+      ...htmlProps,
       className: cx(stackRecipe({direction, wrap}), className),
       'data-testid': dataTestId,
       ref,

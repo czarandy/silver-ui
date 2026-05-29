@@ -296,17 +296,13 @@ export {
 } from './components/Center';
 export {
   HStack,
-  Stack,
   stackRecipe,
   VStack,
   type HStackProps,
   type SizeValue,
-  type StackAlignment,
   type StackCrossAlignment,
-  type StackDirection,
   type StackGap,
   type StackMainAlignment,
-  type StackProps,
   type StackVariants,
   type StackWrap,
   type VStackProps,

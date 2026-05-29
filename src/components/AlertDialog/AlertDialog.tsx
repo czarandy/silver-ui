@@ -2,7 +2,7 @@ import type {CSSProperties, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {Button, type ButtonProps} from '../Button';
 import {Dialog} from '../Dialog';
-import {HStack, Stack} from '../Stack';
+import {HStack, VStack} from '../Stack';
 import {Heading, Text} from '../Text';
 
 export type AlertDialogActionVariant = NonNullable<ButtonProps['variant']>;
@@ -111,13 +111,13 @@ export function AlertDialog({
       ref={ref}
       style={style}
       width={width}>
-      <Stack className={styles.content} gap={4}>
-        <Stack gap={2}>
+      <VStack className={styles.content} gap={4}>
+        <VStack gap={2}>
           <Heading level={2}>{title}</Heading>
           <Text as="p" color="secondary">
             {description}
           </Text>
-        </Stack>
+        </VStack>
         <HStack gap={2} justify="end">
           <Button
             label={cancelLabel}
@@ -131,7 +131,7 @@ export function AlertDialog({
             variant={actionVariant}
           />
         </HStack>
-      </Stack>
+      </VStack>
     </Dialog>
   );
 }

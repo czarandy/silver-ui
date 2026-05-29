@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {Button} from '../Button';
-import {HStack, Stack} from '../Stack';
+import {HStack, VStack} from '../Stack';
 import {Heading, Text} from '../Text';
 import {Dialog} from './Dialog';
 import {useDialog} from './useDialog';
@@ -40,13 +40,13 @@ function DefaultDialogStory(args: React.ComponentProps<typeof Dialog>) {
     <>
       <Button label="Open dialog" onClick={() => setIsOpen(true)} />
       <Dialog {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
-        <Stack gap={4}>
-          <Stack gap={1}>
+        <VStack gap={4}>
+          <VStack gap={1}>
             <Heading level={2}>Confirm changes</Heading>
             <Text as="p" color="secondary">
               Review the updates before applying them to this workspace.
             </Text>
-          </Stack>
+          </VStack>
           <HStack gap={2} justify="end">
             <Button label="Cancel" onClick={() => setIsOpen(false)} />
             <Button
@@ -55,7 +55,7 @@ function DefaultDialogStory(args: React.ComponentProps<typeof Dialog>) {
               variant="primary"
             />
           </HStack>
-        </Stack>
+        </VStack>
       </Dialog>
     </>
   );
@@ -72,13 +72,13 @@ function RequiredDialogStory(args: React.ComponentProps<typeof Dialog>) {
     <>
       <Button label="Open required dialog" onClick={() => setIsOpen(true)} />
       <Dialog {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
-        <Stack gap={4}>
-          <Stack gap={1}>
+        <VStack gap={4}>
+          <VStack gap={1}>
             <Heading level={2}>Required action</Heading>
             <Text as="p" color="secondary">
               This dialog can only be closed from an explicit action.
             </Text>
-          </Stack>
+          </VStack>
           <HStack justify="end">
             <Button
               label="Acknowledge"
@@ -86,7 +86,7 @@ function RequiredDialogStory(args: React.ComponentProps<typeof Dialog>) {
               variant="primary"
             />
           </HStack>
-        </Stack>
+        </VStack>
       </Dialog>
     </>
   );
@@ -109,17 +109,17 @@ function ImperativeDialogStory() {
         label="Show report"
         onClick={() =>
           dialog.show(
-            <Stack gap={4}>
-              <Stack gap={1}>
+            <VStack gap={4}>
+              <VStack gap={1}>
                 <Heading level={2}>Generated report</Heading>
                 <Text as="p" color="secondary">
                   The report is ready for review.
                 </Text>
-              </Stack>
+              </VStack>
               <HStack justify="end">
                 <Button label="Done" onClick={dialog.hide} variant="primary" />
               </HStack>
-            </Stack>,
+            </VStack>,
           )
         }
       />

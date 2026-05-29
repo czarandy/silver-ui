@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {css} from 'styled-system/css';
 import {Card} from '../Card';
-import {Stack} from '../Stack';
+import {HStack, VStack} from '../Stack';
 import {Text} from '../Text';
 import {Center} from './Center';
 
@@ -70,20 +70,20 @@ export const Inline: Story = {
 
 export const ExplicitSize: Story = {
   render: () => (
-    <Stack direction="horizontal" gap={4}>
+    <HStack gap={4}>
       <Center className={containerStyle} height={120} width={200}>
         <Text type="body">200 × 120</Text>
       </Center>
       <Center className={containerStyle} height="8rem" width="50%">
         <Text type="body">50% × 8rem</Text>
       </Center>
-    </Stack>
+    </HStack>
   ),
 };
 
 export const InsideStack: Story = {
   render: () => (
-    <Stack gap={4} height={300}>
+    <VStack gap={4} height={300}>
       <Card>
         <Text type="body">Above</Text>
       </Card>
@@ -93,7 +93,7 @@ export const InsideStack: Story = {
       <Card>
         <Text type="body">Below</Text>
       </Card>
-    </Stack>
+    </VStack>
   ),
 };
 
