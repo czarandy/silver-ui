@@ -83,6 +83,50 @@ export default defineConfig({
               },
             },
           },
+          surface: {
+            blue: {
+              value: {base: '{colors.blue.50}', _dark: '{colors.blue.950}'},
+            },
+            cyan: {
+              value: {base: '{colors.cyan.50}', _dark: '{colors.cyan.950}'},
+            },
+            gray: {
+              value: {
+                base: '{colors.silver-neutral.50}',
+                _dark: '{colors.silver-neutral.800}',
+              },
+            },
+            green: {
+              value: {base: '{colors.green.50}', _dark: '{colors.green.950}'},
+            },
+            orange: {
+              value: {
+                base: '{colors.orange.50}',
+                _dark: '{colors.orange.950}',
+              },
+            },
+            pink: {
+              value: {base: '{colors.pink.50}', _dark: '{colors.pink.950}'},
+            },
+            purple: {
+              value: {
+                base: '{colors.purple.50}',
+                _dark: '{colors.purple.950}',
+              },
+            },
+            red: {
+              value: {base: '{colors.red.50}', _dark: '{colors.red.950}'},
+            },
+            teal: {
+              value: {base: '{colors.teal.50}', _dark: '{colors.teal.950}'},
+            },
+            yellow: {
+              value: {
+                base: '{colors.yellow.50}',
+                _dark: '{colors.yellow.950}',
+              },
+            },
+          },
           icon: {
             primary: {value: '{colors.fg}'},
             secondary: {value: '{colors.fg.muted}'},

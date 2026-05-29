@@ -3,7 +3,6 @@ import {cva, type RecipeVariantProps} from 'styled-system/css';
 export const cardRecipe = cva({
   base: {
     borderRadius: 'lg',
-    overflow: 'clip',
     borderWidth: '1px',
     borderStyle: 'solid',
     borderColor: 'transparent',
@@ -20,16 +19,16 @@ export const cardRecipe = cva({
       muted: {
         bg: 'bg.subtle',
       },
-      blue: {bg: 'blue.50'},
-      cyan: {bg: 'cyan.50'},
-      gray: {bg: 'silver-neutral.50'},
-      green: {bg: 'green.50'},
-      orange: {bg: 'orange.50'},
-      pink: {bg: 'pink.50'},
-      purple: {bg: 'purple.50'},
-      red: {bg: 'red.50'},
-      teal: {bg: 'teal.50'},
-      yellow: {bg: 'yellow.50'},
+      blue: {bg: 'surface.blue'},
+      cyan: {bg: 'surface.cyan'},
+      gray: {bg: 'surface.gray'},
+      green: {bg: 'surface.green'},
+      orange: {bg: 'surface.orange'},
+      pink: {bg: 'surface.pink'},
+      purple: {bg: 'surface.purple'},
+      red: {bg: 'surface.red'},
+      teal: {bg: 'surface.teal'},
+      yellow: {bg: 'surface.yellow'},
     },
     padding: {
       0: {p: '0'},
@@ -44,17 +43,10 @@ export const cardRecipe = cva({
       8: {p: '8'},
       10: {p: '10'},
     },
-    hasFixedHeight: {
-      true: {
-        overflow: 'auto',
-      },
-      false: {},
-    },
   },
   defaultVariants: {
     variant: 'default',
     padding: 0,
-    hasFixedHeight: false,
   },
 });
 
