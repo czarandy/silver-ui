@@ -129,7 +129,6 @@ export {
   type ButtonGroupContextValue,
   type ButtonGroupOrientation,
   type ButtonGroupProps,
-  type ButtonGroupVariants,
 } from './components/ButtonGroup';
 export {
   SegmentedControl,

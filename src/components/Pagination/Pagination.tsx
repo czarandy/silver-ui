@@ -1,5 +1,5 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {useTransition, type CSSProperties, type Ref} from 'react';
+import type {CSSProperties, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
@@ -10,10 +10,6 @@ export type PaginationVariant = 'pages' | 'count' | 'compact' | 'dots' | 'none';
 export type PaginationSize = 'sm' | 'md';
 
 export interface PaginationProps {
-  /**
-   * Async action fired after a page change.
-   */
-  changeAction?: (page: number) => Promise<void> | void;
   /**
    * Additional CSS class names applied to the navigation root.
    */
@@ -222,7 +218,6 @@ export function generatePageRange(
  */
 export function Pagination({
   className,
-  changeAction,
   'data-testid': dataTestId,
   hasMore,
   isDisabled = false,
@@ -240,7 +235,6 @@ export function Pagination({
   totalPages: totalPagesProp,
   variant = 'pages',
 }: PaginationProps): React.JSX.Element | null {
-  const [isPending, startTransition] = useTransition();
   const computedTotalPages =
     totalPagesProp ??
     (totalItems != null ? Math.ceil(totalItems / pageSize) : undefined);
@@ -258,16 +252,11 @@ export function Pagination({
   }
 
   const handlePageChange = (newPage: number) => {
-    if (isDisabled || isPending) {
+    if (isDisabled) {
       return;
     }
 
     onChange(newPage);
-    if (changeAction != null) {
-      startTransition(() => {
-        void changeAction(newPage);
-      });
-    }
   };
 
   const handlePageSizeChange = (value: string | null) => {

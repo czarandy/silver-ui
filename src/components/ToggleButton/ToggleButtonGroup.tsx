@@ -52,10 +52,6 @@ interface ToggleButtonGroupBaseProps {
    */
   label: string;
   /**
-   * Called with the selected value or values when selection changes.
-   */
-  onChange: ((value: string | null) => void) | ((value: string[]) => void);
-  /**
    * Group orientation.
    * @default 'horizontal'
    */
@@ -76,17 +72,26 @@ interface ToggleButtonGroupBaseProps {
 
 export interface ToggleButtonGroupSingleProps extends ToggleButtonGroupBaseProps {
   /**
+   * Called with the selected value when selection changes, or `null`
+   * when the active button is deselected.
+   */
+  onChange: (value: string | null) => void;
+  /**
    * Single-selection mode. Clicking the active button clears selection.
    * @default 'single'
    */
   type?: 'single';
   /**
-   * Currently selected value.
+   * Currently selected value, or `null` for no selection.
    */
   value: string | null;
 }
 
 export interface ToggleButtonGroupMultipleProps extends ToggleButtonGroupBaseProps {
+  /**
+   * Called with the array of selected values when selection changes.
+   */
+  onChange: (value: string[]) => void;
   /**
    * Multiple-selection mode.
    */
@@ -129,33 +134,34 @@ export function ToggleButtonGroup({
   ...props
 }: ToggleButtonGroupProps): React.JSX.Element {
   const isMultiple = props.type === 'multiple';
+  const {onChange, value} = props;
 
   const selectedValues = useMemo(() => {
     if (isMultiple) {
-      return new Set(props.value);
+      return new Set(value as string[]);
     }
 
-    return props.value == null ? new Set<string>() : new Set([props.value]);
-  }, [isMultiple, props.value]);
+    return value == null ? new Set<string>() : new Set([value as string]);
+  }, [isMultiple, value]);
 
   const toggle = useCallback(
     (itemValue: string) => {
       if (isMultiple) {
-        const current = props.value;
-        const onChange = props.onChange as (value: string[]) => void;
-        onChange(
+        const current = value as string[];
+        (onChange as (v: string[]) => void)(
           current.includes(itemValue)
-            ? current.filter(value => value !== itemValue)
+            ? current.filter(v => v !== itemValue)
             : [...current, itemValue],
         );
         return;
       }
 
-      const current = props.value;
-      const onChange = props.onChange as (value: string | null) => void;
-      onChange(current === itemValue ? null : itemValue);
+      const current = value as string | null;
+      (onChange as (v: string | null) => void)(
+        current === itemValue ? null : itemValue,
+      );
     },
-    [isMultiple, props],
+    [isMultiple, value, onChange],
   );
 
   const contextValue = useMemo(

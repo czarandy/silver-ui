@@ -68,10 +68,6 @@ export type MultiSelectTriggerDisplay = 'count' | 'labels' | 'badges';
 
 export interface MultiSelectProps {
   /**
-   * Async action called after `onChange`.
-   */
-  changeAction?: (value: string[]) => Promise<void> | void;
-  /**
    * Custom render function for selectable options.
    */
   children?: (option: MultiSelectOptionData) => ReactNode;
@@ -354,7 +350,6 @@ function getSelectableOptions(
 export function MultiSelect({
   children,
   className,
-  changeAction,
   'data-testid': dataTestId,
   description,
   hasClear = false,
@@ -419,7 +414,6 @@ export function MultiSelect({
 
   const commitChange = (nextValue: string[]) => {
     onChange(nextValue);
-    void changeAction?.(nextValue);
   };
 
   const toggleValue = (optionValue: string) => {

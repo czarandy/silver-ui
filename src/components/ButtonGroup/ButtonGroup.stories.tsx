@@ -1,5 +1,12 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {AlignCenter, AlignLeft, AlignRight} from 'lucide-react';
+import {
+  AlignCenter,
+  AlignLeft,
+  AlignRight,
+  Bold,
+  Italic,
+  Underline,
+} from 'lucide-react';
 import {Button} from '../Button';
 import {ButtonGroup} from './ButtonGroup';
 
@@ -76,6 +83,67 @@ export const Disabled: Story = {
     <ButtonGroup {...args}>
       <Button label="Approve" />
       <Button label="Reject" />
+    </ButtonGroup>
+  ),
+};
+
+export const MixedVariants: Story = {
+  render: args => (
+    <ButtonGroup {...args}>
+      <Button label="Save draft" variant="secondary" />
+      <Button label="Discard" variant="destructive" />
+    </ButtonGroup>
+  ),
+};
+
+export const DisabledVertical: Story = {
+  args: {
+    isDisabled: true,
+    orientation: 'vertical',
+  },
+  render: args => (
+    <ButtonGroup {...args}>
+      <Button label="Copy" />
+      <Button label="Paste" />
+      <Button label="Delete" variant="destructive" />
+    </ButtonGroup>
+  ),
+};
+
+export const LinkButtons: Story = {
+  render: args => (
+    <ButtonGroup {...args}>
+      <Button href="/home" label="Home" />
+      <Button href="/about" label="About" />
+      <Button href="/contact" label="Contact" />
+    </ButtonGroup>
+  ),
+};
+
+export const LargeGroup: Story = {
+  render: args => (
+    <ButtonGroup {...args} label="Pagination">
+      <Button label="First" />
+      <Button label="Prev" />
+      <Button label="1" />
+      <Button label="2" />
+      <Button label="3" />
+      <Button label="Next" />
+      <Button label="Last" />
+    </ButtonGroup>
+  ),
+};
+
+export const VerticalIconOnly: Story = {
+  args: {
+    orientation: 'vertical',
+    label: 'Formatting toolbar',
+  },
+  render: args => (
+    <ButtonGroup {...args}>
+      <Button icon={Bold} isIconOnly label="Bold" />
+      <Button icon={Italic} isIconOnly label="Italic" />
+      <Button icon={Underline} isIconOnly label="Underline" />
     </ButtonGroup>
   ),
 };

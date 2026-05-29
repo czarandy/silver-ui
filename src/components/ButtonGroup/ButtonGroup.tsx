@@ -14,7 +14,7 @@ import {
  */
 export interface ButtonGroupProps {
   /**
-   * Button children.
+   * Direct children should be `<Button>` elements.
    */
   children: ReactNode;
   /**

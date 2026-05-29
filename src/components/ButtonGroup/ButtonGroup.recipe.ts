@@ -5,10 +5,10 @@ export const buttonGroupRecipe = cva({
     display: 'inline-flex',
     alignItems: 'stretch',
     isolation: 'isolate',
-    '& > :where(button, a)': {
+    '& :where(button, a)': {
       position: 'relative',
     },
-    '& > :where(button, a):focus-visible': {
+    '& :where(button, a):focus-visible': {
       zIndex: 1,
     },
   },
@@ -16,25 +16,35 @@ export const buttonGroupRecipe = cva({
     orientation: {
       horizontal: {
         flexDirection: 'row',
-        '& > :where(button, a):not(:first-child)': {
-          borderTopLeftRadius: 0,
-          borderBottomLeftRadius: 0,
-        },
-        '& > :where(button, a):not(:last-child)': {
-          borderTopRightRadius: 0,
-          borderBottomRightRadius: 0,
-        },
+        '& > :not(:first-child):is(button, a), & > :not(:first-child) :where(button, a)':
+          {
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+            borderInlineStartWidth: '1px',
+            borderInlineStartStyle: 'solid',
+            borderInlineStartColor: 'border',
+          },
+        '& > :not(:last-child):is(button, a), & > :not(:last-child) :where(button, a)':
+          {
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          },
       },
       vertical: {
         flexDirection: 'column',
-        '& > :where(button, a):not(:first-child)': {
-          borderTopLeftRadius: 0,
-          borderTopRightRadius: 0,
-        },
-        '& > :where(button, a):not(:last-child)': {
-          borderBottomLeftRadius: 0,
-          borderBottomRightRadius: 0,
-        },
+        '& > :not(:first-child):is(button, a), & > :not(:first-child) :where(button, a)':
+          {
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderBlockStartWidth: '1px',
+            borderBlockStartStyle: 'solid',
+            borderBlockStartColor: 'border',
+          },
+        '& > :not(:last-child):is(button, a), & > :not(:last-child) :where(button, a)':
+          {
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+          },
       },
     },
   },

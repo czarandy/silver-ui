@@ -3,7 +3,4 @@ export {
   type ButtonGroupContextValue,
   type ButtonGroupOrientation,
 } from './ButtonGroupContext';
-export {
-  buttonGroupRecipe,
-  type ButtonGroupVariants,
-} from './ButtonGroup.recipe';
+export {buttonGroupRecipe} from './ButtonGroup.recipe';

@@ -1,10 +1,4 @@
-import {
-  useState,
-  type CSSProperties,
-  type MouseEvent,
-  type ReactNode,
-  type Ref,
-} from 'react';
+import type {CSSProperties, MouseEvent, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {buttonRecipe} from '../Button';
@@ -47,30 +41,26 @@ export interface ToggleButtonProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the button is currently pressed.
+   * Whether the button is currently selected.
    * @default false
    */
-  isPressed?: boolean;
+  isSelected?: boolean;
   /**
    * Accessible label for the button.
    */
   label: string;
   /**
-   * Called when the pressed state should change.
+   * Called when the selected state should change.
    */
-  onPressedChange?: (isPressed: boolean) => void;
-  /**
-   * Async action fired after a standalone pressed state change.
-   */
-  pressedChangeAction?: (isPressed: boolean) => Promise<void> | void;
-  /**
-   * Icon element rendered when the button is pressed.
-   */
-  pressedIcon?: IconComponent;
+  onChange?: (isSelected: boolean) => void;
   /**
    * Ref forwarded to the button root.
    */
   ref?: Ref<HTMLButtonElement>;
+  /**
+   * Icon element rendered when the button is selected.
+   */
+  selectedIcon?: IconComponent;
   /**
    * Visual size of the button.
    */
@@ -90,11 +80,11 @@ export interface ToggleButtonProps {
 }
 
 const styles = {
-  pressed: css({
-    bg: 'silver-neutral.100',
+  selected: css({
+    bg: 'bg.subtle',
     fontWeight: 'semibold',
-    _hover: {bg: 'silver-neutral.100'},
-    _active: {bg: 'silver-neutral.200'},
+    _hover: {bg: 'bg.subtle'},
+    _active: {bg: 'bg.subtle'},
   }),
   content: css({
     display: 'contents',
@@ -138,7 +128,7 @@ const styles = {
 } as const;
 
 /**
- * Button that toggles between pressed and unpressed states.
+ * Button that toggles between selected and unselected states.
  */
 export function ToggleButton({
   children,
@@ -148,11 +138,10 @@ export function ToggleButton({
   isDisabled: isDisabledProp = false,
   isIconOnly = false,
   isLoading = false,
-  isPressed: isPressedProp = false,
+  isSelected: isSelectedProp = false,
   label,
-  onPressedChange,
-  pressedChangeAction,
-  pressedIcon,
+  onChange,
+  selectedIcon,
   ref,
   size: sizeProp,
   style,
@@ -160,19 +149,26 @@ export function ToggleButton({
   value,
 }: ToggleButtonProps): React.JSX.Element {
   const group = useToggleButtonGroup();
-  const [isActionPending, setIsActionPending] = useState(false);
-  const isPressed =
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (group != null && value == null) {
+      throw new Error(
+        'ToggleButton: `value` prop is required when used inside a ToggleButtonGroup.',
+      );
+    }
+  }
+
+  const isSelected =
     group != null && value != null
       ? group.selectedValues.has(value)
-      : isPressedProp;
+      : isSelectedProp;
   const size = sizeProp ?? group?.size ?? 'md';
-  const isDisabled = group?.isDisabled ?? isDisabledProp;
-  const isBusy = isLoading || isActionPending;
-  const resolvedIcon = isPressed && pressedIcon != null ? pressedIcon : icon;
+  const isDisabled = isDisabledProp || group?.isDisabled === true;
+  const resolvedIcon = isSelected && selectedIcon != null ? selectedIcon : icon;
   const visibleLabel = children ?? label;
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
-    if (isDisabled || isBusy) {
+    if (isDisabled || isLoading) {
       event.preventDefault();
       return;
     }
@@ -182,35 +178,27 @@ export function ToggleButton({
       return;
     }
 
-    const nextPressed = !isPressed;
-    onPressedChange?.(nextPressed);
-
-    if (pressedChangeAction != null) {
-      setIsActionPending(true);
-      void Promise.resolve(pressedChangeAction(nextPressed)).finally(() => {
-        setIsActionPending(false);
-      });
-    }
+    onChange?.(!isSelected);
   };
 
   const button = (
     <button
-      aria-busy={isBusy || undefined}
+      aria-busy={isLoading || undefined}
       aria-label={isIconOnly ? label : undefined}
-      aria-pressed={isPressed}
+      aria-pressed={isSelected}
       className={cx(
         buttonRecipe({variant: 'ghost', size, iconOnly: isIconOnly}),
         styles.iconSize[size],
-        isPressed ? styles.pressed : undefined,
+        isSelected ? styles.selected : undefined,
         className,
       )}
       data-testid={dataTestId}
-      disabled={isDisabled || isBusy}
+      disabled={isDisabled || isLoading}
       onClick={handleClick}
       ref={ref}
       style={style}
       type="button">
-      <span aria-hidden={isBusy || undefined} className={styles.content}>
+      <span aria-hidden={isLoading || undefined} className={styles.content}>
         {resolvedIcon != null ? (
           <span className={styles.icon}>
             <Icon icon={resolvedIcon} size={size} />
@@ -224,7 +212,7 @@ export function ToggleButton({
             </span>
           </span>
         ) : null}
-        {!isIconOnly && isBusy ? (
+        {!isIconOnly && isLoading ? (
           <span aria-hidden="true" className={styles.spinner}>
             <Spinner size={size} />
           </span>

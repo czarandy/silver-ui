@@ -33,11 +33,11 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 ## Buttons & Actions
 
 - [x] Button
-- [ ] ButtonGroup
+- [x] ButtonGroup
 - [ ] ContextMenu
 - [ ] DropdownMenu
 - [ ] SegmentedControl
-- [ ] ToggleButton
+- [x] ToggleButton
 
 ## Data Display
 
