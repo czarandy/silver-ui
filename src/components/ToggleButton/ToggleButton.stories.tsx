@@ -226,3 +226,37 @@ export const DisabledGroup: Story = {
     );
   },
 };
+
+export const GroupSizes: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+      {(['sm', 'md', 'lg'] as const).map(size => (
+        <ToggleButtonGroup
+          key={size}
+          label={`Alignment (${size})`}
+          onChange={() => {}}
+          size={size}
+          value="left">
+          <ToggleButton
+            icon={AlignLeft}
+            isIconOnly
+            label="Align left"
+            value="left"
+          />
+          <ToggleButton
+            icon={AlignCenter}
+            isIconOnly
+            label="Align center"
+            value="center"
+          />
+          <ToggleButton
+            icon={AlignRight}
+            isIconOnly
+            label="Align right"
+            value="right"
+          />
+        </ToggleButtonGroup>
+      ))}
+    </div>
+  ),
+};

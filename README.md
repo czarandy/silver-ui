@@ -2,6 +2,8 @@
 
 A React component library with CSS variable theming, built with [Panda CSS](https://panda-css.com/).
 
+[Storybook](https://silver-ui-eight.vercel.app/) — browse and interact with all components.
+
 ## Installation
 
 ```bash
@@ -55,9 +57,101 @@ Every component accepts `className` and `style` props:
 
 ## Components
 
-- **Button** — `variant`: `solid` | `outline` | `ghost`, `size`: `sm` | `md` | `lg`
+### Layout & Structure
 
-More components coming soon.
+- **Accordion** — collapsible content sections
+- **AppShell** — application-level layout shell with responsive mobile navigation
+- **AspectRatio** — constrains children to a fixed aspect ratio
+- **Card** — rounded container surface for grouping content
+- **Center** — centers content horizontally, vertically, or both
+- **Divider** — visual separator between sections
+- **Layout** — page shell with header, footer, side panels, and content slots
+- **HStack / VStack** — horizontal and vertical flex containers with gap
+
+### Navigation
+
+- **Breadcrumbs** — hierarchical page location trail
+- **Link** — polymorphic link with external link handling and router integration
+- **MobileNav** — slide-out drawer for mobile navigation
+- **Pagination** — page navigation controls
+- **SideNav** — vertical side navigation panel with collapsing support
+- **Tabs** — tabbed content switching
+- **TopNav** — horizontal top navigation bar
+
+### Buttons & Actions
+
+- **Button** — versatile action element supporting links, loading states, and icon-only mode
+- **ButtonGroup** — connected group of related buttons
+- **ContextMenu** — right-click context menu
+- **DropdownMenu** — button-triggered dropdown menu
+- **SegmentedControl** — mutually exclusive option selector
+- **ToggleButton** — button with pressed/unpressed state
+
+### Data Display
+
+- **Avatar** — user or entity avatar with status indicators
+- **AvatarGroup** — stacked avatar collection with overflow count
+- **Badge** — small status label with icon support
+- **Blockquote** — styled quotation block
+- **Icon** — renders Lucide icons with size and color tokens
+- **Item** — generic list item with icon, label, and description
+- **Kbd** — keyboard shortcut display with accessible labels
+- **Lightbox** — full-screen media viewer
+- **List** — ordered or unordered list with dividers
+- **MetadataList** — key-value metadata display
+- **Table** — data table with sorting, filtering, and column resize plugins
+- **Tag** — removable label for categories or filters
+- **Text / Heading** — typography primitives with size, color, and truncation
+- **Thumbnail** — image preview with fallback and remove action
+- **Tooltip** — informational popup on hover or focus
+- **TreeView** — hierarchical expandable tree
+
+### Forms
+
+- **CheckboxInput** — checkbox with label and description
+- **Combobox** — searchable autocomplete input
+- **DateInput** — date picker field
+- **DateRangeInput** — date range picker field
+- **DateTimeInput** — combined date and time picker
+- **Field** — form field wrapper with label, description, and validation
+- **FileInput** — file upload with drag-and-drop support
+- **InputGroup** — groups related form inputs with shared label
+- **MultiSelect** — multi-value dropdown selector
+- **NumberInput** — numeric input with increment/decrement
+- **PasswordInput** — text input with show/hide toggle
+- **RadioGroup** — radio button group
+- **Rating** — star rating input
+- **SearchFilterInput** — search input with structured filter tags
+- **Select** — single-value dropdown selector
+- **Slider** — range slider with marks and labels
+- **Switch** — toggle switch
+- **TagsInput** — free-form tag entry field
+- **TextArea** — multi-line text input
+- **TextInput** — single-line text input
+- **TimeInput** — time picker field
+
+### Feedback & Status
+
+- **Alert** — dismissable notification banner
+- **EmptyState** — placeholder for empty content areas
+- **Progress** — determinate progress bar
+- **Skeleton** — loading placeholder with pulse animation
+- **Spinner** — indeterminate loading indicator
+- **Stepper** — multi-step progress indicator
+- **Toast** — temporary notification popup
+
+### Overlays
+
+- **AlertDialog** — confirmation dialog requiring explicit action
+- **Dialog** — modal dialog with header and content
+- **Drawer** — slide-in panel from screen edge
+- **HoverCard** — rich content popup on hover
+- **Popover** — anchored popup with arbitrary content
+
+### Composite
+
+- **Calendar** — date picker calendar grid with single and range selection
+- **Schedule** — event calendar with day, week, month, and list views
 
 ---
 

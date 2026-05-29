@@ -6,6 +6,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import {AccordionContext, type AccordionContextValue} from './AccordionContext';
 
 /**
@@ -101,6 +103,14 @@ function normalizeToSet(
   return new Set(Array.isArray(value) ? value : [value]);
 }
 
+const styles = {
+  root: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '3',
+  }),
+};
+
 export function Accordion({
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledby,
@@ -173,7 +183,7 @@ export function Accordion({
       <div
         aria-label={ariaLabel}
         aria-labelledby={ariaLabelledby}
-        className={className}
+        className={cx(styles.root, className)}
         data-testid={dataTestId}
         ref={ref}
         role="group"

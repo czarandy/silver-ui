@@ -16,7 +16,7 @@ type Story = StoryObj<typeof Accordion>;
 
 export const Single: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Accordion aria-label="FAQ" defaultValue="features">
         <AccordionItem trigger="Features" value="features">
           <Text>
@@ -41,7 +41,7 @@ export const Single: Story = {
 
 export const Multiple: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Accordion
         aria-label="Documentation"
         defaultValue={['features', 'usage']}
@@ -69,7 +69,7 @@ export const Multiple: Story = {
 
 export const AllCollapsed: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Accordion aria-label="Sections" type="single">
         <AccordionItem trigger="Section A" value="a">
           <Text>Content for section A.</Text>
@@ -87,7 +87,7 @@ export const AllCollapsed: Story = {
 
 export const WithDisabledItem: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Accordion aria-label="Settings" defaultValue="general">
         <AccordionItem trigger="General" value="general">
           <Text>General settings content.</Text>
@@ -131,7 +131,7 @@ export const Controlled: Story = {
             variant="ghost"
           />
         </div>
-        <Card>
+        <Card padding={4}>
           <Accordion
             aria-label="FAQ"
             onChange={setValue}
@@ -182,7 +182,7 @@ export const ControlledMultiple: Story = {
             variant="ghost"
           />
         </div>
-        <Card>
+        <Card padding={4}>
           <Accordion
             aria-label="FAQ"
             onChange={setValue}
@@ -208,6 +208,43 @@ export const ControlledMultiple: Story = {
           </Accordion>
         </Card>
       </div>
+    );
+  },
+};
+
+export const ItemsInCards: Story = {
+  render: function ItemsInCards() {
+    const [value, setValue] = useState<string | null>('features');
+    return (
+      <Accordion
+        aria-label="FAQ"
+        onChange={setValue}
+        type="single"
+        value={value}>
+        <Card padding={4}>
+          <AccordionItem trigger="Features" value="features">
+            <Text>
+              Built with TypeScript, accessible by default, and fully
+              composable.
+            </Text>
+          </AccordionItem>
+        </Card>
+        <Card padding={4}>
+          <AccordionItem trigger="Installation" value="installation">
+            <Text>
+              Install via npm, pnpm, or yarn. No additional peer dependencies.
+            </Text>
+          </AccordionItem>
+        </Card>
+        <Card padding={4}>
+          <AccordionItem trigger="Usage" value="usage">
+            <Text>
+              Import components directly. Tree-shaking is supported out of the
+              box.
+            </Text>
+          </AccordionItem>
+        </Card>
+      </Accordion>
     );
   },
 };

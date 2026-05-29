@@ -76,6 +76,7 @@ export const buttonRecipe = cva({
         fontSize: 'component.sm',
         gap: '1.5',
         borderRadius: 'component.sm',
+        '--button-icon-size': 'var(--silver-sizes-icon-sm)',
       },
       md: {
         h: 'component.md',
@@ -83,6 +84,7 @@ export const buttonRecipe = cva({
         fontSize: 'component.md',
         gap: '2',
         borderRadius: 'component.md',
+        '--button-icon-size': 'var(--silver-sizes-icon-md)',
       },
       lg: {
         h: 'component.lg',
@@ -90,6 +92,7 @@ export const buttonRecipe = cva({
         fontSize: 'component.lg',
         gap: '2.5',
         borderRadius: 'component.lg',
+        '--button-icon-size': 'var(--silver-sizes-icon-lg)',
       },
     },
     iconOnly: {

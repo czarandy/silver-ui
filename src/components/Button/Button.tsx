@@ -233,11 +233,6 @@ const styles = {
     whiteSpace: 'nowrap',
     borderWidth: 0,
   }),
-  iconSize: {
-    sm: css({'--button-icon-size': 'var(--silver-sizes-icon-sm)'}),
-    md: css({'--button-icon-size': 'var(--silver-sizes-icon-md)'}),
-    lg: css({'--button-icon-size': 'var(--silver-sizes-icon-lg)'}),
-  },
 } as const;
 
 export function Button({
@@ -362,7 +357,6 @@ export function Button({
 
   const rootClassName = cx(
     buttonRecipe({variant, size, iconOnly: isIconOnly}),
-    styles.iconSize[size],
     className,
   );
 

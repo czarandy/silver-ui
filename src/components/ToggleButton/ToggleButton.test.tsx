@@ -66,17 +66,11 @@ describe('ToggleButton', () => {
   it('sets aria-busy and disables the button when isLoading is true', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
-    render(
-      <ToggleButton
-        data-testid="sync"
-        isLoading
-        label="Sync"
-        onChange={onChange}
-      />,
-    );
+    render(<ToggleButton isLoading label="Sync" onChange={onChange} />);
 
-    const button = screen.getByTestId('sync');
+    const button = screen.getByRole('button', {name: 'Sync'});
     expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button).toHaveAttribute('aria-label', 'Sync');
     expect(button).toBeDisabled();
 
     await user.click(button);
@@ -268,5 +262,43 @@ describe('ToggleButtonGroup', () => {
     expect(group).toHaveClass('custom-group');
     expect(group).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+
+  it('propagates size from group to child buttons', () => {
+    render(
+      <ToggleButtonGroup
+        label="View mode"
+        onChange={() => {}}
+        size="sm"
+        value="a">
+        <ToggleButton data-testid="btn-a" isIconOnly label="A" value="a" />
+        <ToggleButton data-testid="btn-b" isIconOnly label="B" value="b" />
+      </ToggleButtonGroup>,
+    );
+
+    expect(screen.getByTestId('btn-a')).toHaveClass('silver-h_component.sm');
+    expect(screen.getByTestId('btn-b')).toHaveClass('silver-h_component.sm');
+  });
+
+  it('allows a child button to override the group size', () => {
+    render(
+      <ToggleButtonGroup
+        label="View mode"
+        onChange={() => {}}
+        size="sm"
+        value="a">
+        <ToggleButton data-testid="btn-a" isIconOnly label="A" value="a" />
+        <ToggleButton
+          data-testid="btn-b"
+          isIconOnly
+          label="B"
+          size="lg"
+          value="b"
+        />
+      </ToggleButtonGroup>,
+    );
+
+    expect(screen.getByTestId('btn-a')).toHaveClass('silver-h_component.sm');
+    expect(screen.getByTestId('btn-b')).toHaveClass('silver-h_component.lg');
   });
 });

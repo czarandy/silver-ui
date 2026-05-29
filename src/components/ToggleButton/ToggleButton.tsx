@@ -120,11 +120,6 @@ const styles = {
     alignItems: 'center',
     color: 'inherit',
   }),
-  iconSize: {
-    sm: css({'--toggle-button-icon-size': 'var(--silver-sizes-icon-sm)'}),
-    md: css({'--toggle-button-icon-size': 'var(--silver-sizes-icon-md)'}),
-    lg: css({'--toggle-button-icon-size': 'var(--silver-sizes-icon-lg)'}),
-  },
 } as const;
 
 /**
@@ -174,7 +169,7 @@ export function ToggleButton({
     }
 
     if (group != null && value != null) {
-      group.toggle(value);
+      group.onToggle(value);
       return;
     }
 
@@ -184,11 +179,10 @@ export function ToggleButton({
   const button = (
     <button
       aria-busy={isLoading || undefined}
-      aria-label={isIconOnly ? label : undefined}
+      aria-label={isIconOnly || isLoading ? label : undefined}
       aria-pressed={isSelected}
       className={cx(
         buttonRecipe({variant: 'ghost', size, iconOnly: isIconOnly}),
-        styles.iconSize[size],
         isSelected ? styles.selected : undefined,
         className,
       )}

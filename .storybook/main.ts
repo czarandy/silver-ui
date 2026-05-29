@@ -18,6 +18,10 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       'styled-system': resolve(__dirname, '../styled-system'),
     };
+    config.build = {
+      ...config.build,
+      chunkSizeWarningLimit: 1000,
+    };
     return config;
   },
 };

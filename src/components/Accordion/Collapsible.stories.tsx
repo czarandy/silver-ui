@@ -29,7 +29,7 @@ type Story = StoryObj<typeof Collapsible>;
 
 export const Default: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Collapsible trigger="Toggle details">
         <Text>
           This is the collapsible content. It can contain any elements including
@@ -42,7 +42,7 @@ export const Default: Story = {
 
 export const InitiallyClosed: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Collapsible isDefaultOpen={false} trigger="Toggle details">
         <Text>This content starts hidden.</Text>
       </Collapsible>
@@ -52,7 +52,7 @@ export const InitiallyClosed: Story = {
 
 export const Disabled: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Collapsible isDisabled trigger="Disabled section">
         <Text>This content cannot be toggled.</Text>
       </Collapsible>
@@ -72,7 +72,7 @@ export const Controlled: Story = {
           }}
           variant="secondary"
         />
-        <Card>
+        <Card padding={4}>
           <Collapsible
             isOpen={isOpen}
             onOpenChange={setIsOpen}
@@ -90,7 +90,7 @@ export const Controlled: Story = {
 
 export const CustomTrigger: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Collapsible
         trigger={
           <span style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
@@ -119,7 +119,7 @@ export const CustomTrigger: Story = {
 
 export const LongContent: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Collapsible isDefaultOpen={false} trigger="Terms and conditions">
         <div>
           {Array.from({length: 8}, (_, i) => (
@@ -138,7 +138,7 @@ export const LongContent: Story = {
 
 export const Multiple: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
         <Collapsible trigger="Section A">
           <Text>Content for section A.</Text>
@@ -156,7 +156,7 @@ export const Multiple: Story = {
 
 export const Nested: Story = {
   render: () => (
-    <Card>
+    <Card padding={4}>
       <Collapsible trigger="Outer section">
         <Text>This section contains a nested collapsible.</Text>
         <Collapsible isDefaultOpen={false} trigger="Inner section">

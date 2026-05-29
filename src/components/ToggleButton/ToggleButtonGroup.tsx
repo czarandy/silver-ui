@@ -15,9 +15,9 @@ export type ToggleButtonGroupOrientation = 'horizontal' | 'vertical';
 
 interface ToggleButtonGroupContextValue {
   isDisabled?: boolean;
+  onToggle: (value: string) => void;
   selectedValues: Set<string>;
   size?: ButtonSize;
-  toggle: (value: string) => void;
 }
 
 export const ToggleButtonGroupContext =
@@ -144,7 +144,7 @@ export function ToggleButtonGroup({
     return value == null ? new Set<string>() : new Set([value as string]);
   }, [isMultiple, value]);
 
-  const toggle = useCallback(
+  const onToggle = useCallback(
     (itemValue: string) => {
       if (isMultiple) {
         const current = value as string[];
@@ -165,8 +165,8 @@ export function ToggleButtonGroup({
   );
 
   const contextValue = useMemo(
-    () => ({isDisabled, selectedValues, size, toggle}),
-    [isDisabled, selectedValues, size, toggle],
+    () => ({isDisabled, onToggle, selectedValues, size}),
+    [isDisabled, onToggle, selectedValues, size],
   );
 
   return (
