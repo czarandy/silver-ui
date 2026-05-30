@@ -44,7 +44,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [x] Accordion
 - [x] Avatar
 - [x] AvatarGroup
-- [ ] Badge
+- [x] Badge
 - [ ] Blockquote
 - [x] Card
 - [x] Icon

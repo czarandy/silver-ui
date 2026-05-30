@@ -88,45 +88,119 @@ export default defineConfig({
           },
           surface: {
             blue: {
-              value: {base: '{colors.blue.100}', _dark: '{colors.blue.900}'},
+              DEFAULT: {
+                value: {base: '{colors.blue.100}', _dark: '{colors.blue.900}'},
+              },
+              fg: {
+                value: {base: '{colors.blue.800}', _dark: '{colors.blue.200}'},
+              },
             },
             cyan: {
-              value: {base: '{colors.cyan.100}', _dark: '{colors.cyan.900}'},
+              DEFAULT: {
+                value: {base: '{colors.cyan.100}', _dark: '{colors.cyan.900}'},
+              },
+              fg: {
+                value: {base: '{colors.cyan.800}', _dark: '{colors.cyan.200}'},
+              },
             },
             gray: {
-              value: {
-                base: '{colors.silver-neutral.100}',
-                _dark: '{colors.silver-neutral.800}',
+              DEFAULT: {
+                value: {
+                  base: '{colors.silver-neutral.100}',
+                  _dark: '{colors.silver-neutral.800}',
+                },
+              },
+              fg: {
+                value: {
+                  base: '{colors.silver-neutral.800}',
+                  _dark: '{colors.silver-neutral.200}',
+                },
               },
             },
             green: {
-              value: {base: '{colors.green.100}', _dark: '{colors.green.900}'},
+              DEFAULT: {
+                value: {
+                  base: '{colors.green.100}',
+                  _dark: '{colors.green.900}',
+                },
+              },
+              fg: {
+                value: {
+                  base: '{colors.green.800}',
+                  _dark: '{colors.green.200}',
+                },
+              },
             },
             orange: {
-              value: {
-                base: '{colors.orange.100}',
-                _dark: '{colors.orange.900}',
+              DEFAULT: {
+                value: {
+                  base: '{colors.orange.100}',
+                  _dark: '{colors.orange.900}',
+                },
+              },
+              fg: {
+                value: {
+                  base: '{colors.orange.800}',
+                  _dark: '{colors.orange.200}',
+                },
               },
             },
             pink: {
-              value: {base: '{colors.pink.100}', _dark: '{colors.pink.900}'},
+              DEFAULT: {
+                value: {base: '{colors.pink.100}', _dark: '{colors.pink.900}'},
+              },
+              fg: {
+                value: {
+                  base: '{colors.pink.800}',
+                  _dark: '{colors.pink.200}',
+                },
+              },
             },
             purple: {
-              value: {
-                base: '{colors.purple.100}',
-                _dark: '{colors.purple.900}',
+              DEFAULT: {
+                value: {
+                  base: '{colors.purple.100}',
+                  _dark: '{colors.purple.900}',
+                },
+              },
+              fg: {
+                value: {
+                  base: '{colors.purple.800}',
+                  _dark: '{colors.purple.200}',
+                },
               },
             },
             red: {
-              value: {base: '{colors.red.100}', _dark: '{colors.red.900}'},
+              DEFAULT: {
+                value: {base: '{colors.red.100}', _dark: '{colors.red.900}'},
+              },
+              fg: {
+                value: {base: '{colors.red.800}', _dark: '{colors.red.200}'},
+              },
             },
             teal: {
-              value: {base: '{colors.teal.100}', _dark: '{colors.teal.900}'},
+              DEFAULT: {
+                value: {base: '{colors.teal.100}', _dark: '{colors.teal.900}'},
+              },
+              fg: {
+                value: {
+                  base: '{colors.teal.800}',
+                  _dark: '{colors.teal.200}',
+                },
+              },
             },
             yellow: {
-              value: {
-                base: '{colors.yellow.100}',
-                _dark: '{colors.yellow.900}',
+              DEFAULT: {
+                value: {
+                  base: '{colors.yellow.100}',
+                  _dark: '{colors.yellow.900}',
+                },
+              },
+              fg: {
+                value: {
+                  base: '{colors.yellow.800}',
+                  _dark: '{colors.yellow.200}',
+                },
               },
             },
           },

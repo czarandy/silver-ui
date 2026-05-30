@@ -1,16 +1,45 @@
 import {render, screen} from '@testing-library/react';
 import {Check} from 'lucide-react';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {Badge} from './Badge';
+import {badgeRecipe} from './Badge.recipe';
 
 describe('Badge', () => {
-  it('renders a label and optional icon', () => {
-    render(<Badge icon={<Check />} label="Active" />);
+  it('renders a label and icon', () => {
+    render(<Badge data-testid="badge" icon={Check} label="Active" />);
 
     expect(screen.getByText('Active')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying decorative svg presence
+    expect(
+      screen.getByTestId('badge').querySelector('svg'),
+    ).toBeInTheDocument();
   });
 
-  it('applies root props', () => {
+  it('applies the neutral variant by default', () => {
+    render(<Badge data-testid="badge" label="Default" />);
+
+    expect(screen.getByTestId('badge')).toHaveClass(
+      badgeRecipe({variant: 'neutral'}),
+    );
+  });
+
+  it('applies the specified variant', () => {
+    render(<Badge data-testid="badge" label="Error" variant="error" />);
+
+    expect(screen.getByTestId('badge')).toHaveClass(
+      badgeRecipe({variant: 'error'}),
+    );
+  });
+
+  it('forwards ref to the root span', () => {
+    const ref = vi.fn<(element: HTMLSpanElement | null) => void>();
+
+    render(<Badge label="Ref" ref={ref} />);
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLSpanElement));
+  });
+
+  it('applies className, style, and data-testid', () => {
     render(
       <Badge
         className="custom-badge"
@@ -20,7 +49,29 @@ describe('Badge', () => {
       />,
     );
 
-    expect(screen.getByTestId('badge')).toHaveClass('custom-badge');
-    expect(screen.getByTestId('badge')).toHaveStyle({color: 'rgb(255, 0, 0)'});
+    const badge = screen.getByTestId('badge');
+    expect(badge).toHaveClass('custom-badge');
+    expect(badge).toHaveStyle({color: 'rgb(255, 0, 0)'});
+  });
+
+  it('applies the specified size', () => {
+    render(<Badge data-testid="badge" label="Large" size="lg" />);
+
+    expect(screen.getByTestId('badge')).toHaveClass(badgeRecipe({size: 'lg'}));
+  });
+
+  it('applies aria-label and role', () => {
+    render(
+      <Badge
+        aria-label="3 notifications"
+        data-testid="badge"
+        label={3}
+        role="status"
+      />,
+    );
+
+    const badge = screen.getByTestId('badge');
+    expect(badge).toHaveAttribute('aria-label', '3 notifications');
+    expect(badge).toHaveAttribute('role', 'status');
   });
 });

@@ -274,7 +274,14 @@ export {
   type AlertStatus,
   type AlertVariants,
 } from './components/Alert';
-export {Badge, type BadgeProps, type BadgeVariant} from './components/Badge';
+export {
+  Badge,
+  badgeRecipe,
+  type BadgeProps,
+  type BadgeSize,
+  type BadgeVariant,
+  type BadgeVariants,
+} from './components/Badge';
 export {
   Card,
   cardRecipe,

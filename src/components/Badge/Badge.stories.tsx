@@ -10,8 +10,14 @@ const variants: BadgeVariant[] = [
   'warning',
   'error',
   'blue',
+  'cyan',
+  'green',
+  'orange',
+  'pink',
   'purple',
+  'red',
   'teal',
+  'yellow',
 ];
 
 const meta: Meta<typeof Badge> = {
@@ -24,9 +30,25 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
 export const WithIcon: Story = {
-  args: {icon: <CheckCircle2 />, label: 'Verified', variant: 'success'},
+  args: {icon: CheckCircle2, label: 'Verified', variant: 'success'},
 };
+
+export const Count: Story = {
+  args: {label: 42, variant: 'info'},
+};
+
+export const Sizes: Story = {
+  render: () => (
+    <HStack align="center" gap={2}>
+      <Badge icon={CheckCircle2} label="Small" size="sm" variant="info" />
+      <Badge icon={CheckCircle2} label="Medium" size="md" variant="info" />
+      <Badge icon={CheckCircle2} label="Large" size="lg" variant="info" />
+    </HStack>
+  ),
+};
+
 export const Variants: Story = {
   render: () => (
     <HStack gap={2} wrap="wrap">

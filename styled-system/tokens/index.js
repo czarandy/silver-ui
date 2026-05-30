@@ -1855,41 +1855,81 @@ const tokens = {
     "value": "var(--silver-colors-surface-blue)",
     "variable": "var(--silver-colors-surface-blue)"
   },
+  "colors.surface.blue.fg": {
+    "value": "var(--silver-colors-surface-blue-fg)",
+    "variable": "var(--silver-colors-surface-blue-fg)"
+  },
   "colors.surface.cyan": {
     "value": "var(--silver-colors-surface-cyan)",
     "variable": "var(--silver-colors-surface-cyan)"
+  },
+  "colors.surface.cyan.fg": {
+    "value": "var(--silver-colors-surface-cyan-fg)",
+    "variable": "var(--silver-colors-surface-cyan-fg)"
   },
   "colors.surface.gray": {
     "value": "var(--silver-colors-surface-gray)",
     "variable": "var(--silver-colors-surface-gray)"
   },
+  "colors.surface.gray.fg": {
+    "value": "var(--silver-colors-surface-gray-fg)",
+    "variable": "var(--silver-colors-surface-gray-fg)"
+  },
   "colors.surface.green": {
     "value": "var(--silver-colors-surface-green)",
     "variable": "var(--silver-colors-surface-green)"
+  },
+  "colors.surface.green.fg": {
+    "value": "var(--silver-colors-surface-green-fg)",
+    "variable": "var(--silver-colors-surface-green-fg)"
   },
   "colors.surface.orange": {
     "value": "var(--silver-colors-surface-orange)",
     "variable": "var(--silver-colors-surface-orange)"
   },
+  "colors.surface.orange.fg": {
+    "value": "var(--silver-colors-surface-orange-fg)",
+    "variable": "var(--silver-colors-surface-orange-fg)"
+  },
   "colors.surface.pink": {
     "value": "var(--silver-colors-surface-pink)",
     "variable": "var(--silver-colors-surface-pink)"
+  },
+  "colors.surface.pink.fg": {
+    "value": "var(--silver-colors-surface-pink-fg)",
+    "variable": "var(--silver-colors-surface-pink-fg)"
   },
   "colors.surface.purple": {
     "value": "var(--silver-colors-surface-purple)",
     "variable": "var(--silver-colors-surface-purple)"
   },
+  "colors.surface.purple.fg": {
+    "value": "var(--silver-colors-surface-purple-fg)",
+    "variable": "var(--silver-colors-surface-purple-fg)"
+  },
   "colors.surface.red": {
     "value": "var(--silver-colors-surface-red)",
     "variable": "var(--silver-colors-surface-red)"
+  },
+  "colors.surface.red.fg": {
+    "value": "var(--silver-colors-surface-red-fg)",
+    "variable": "var(--silver-colors-surface-red-fg)"
   },
   "colors.surface.teal": {
     "value": "var(--silver-colors-surface-teal)",
     "variable": "var(--silver-colors-surface-teal)"
   },
+  "colors.surface.teal.fg": {
+    "value": "var(--silver-colors-surface-teal-fg)",
+    "variable": "var(--silver-colors-surface-teal-fg)"
+  },
   "colors.surface.yellow": {
     "value": "var(--silver-colors-surface-yellow)",
     "variable": "var(--silver-colors-surface-yellow)"
+  },
+  "colors.surface.yellow.fg": {
+    "value": "var(--silver-colors-surface-yellow-fg)",
+    "variable": "var(--silver-colors-surface-yellow-fg)"
   },
   "colors.icon.primary": {
     "value": "var(--silver-colors-fg)",
@@ -2259,41 +2299,85 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-blue)",
     "variable": "var(--silver-colors-color-palette-blue)"
   },
+  "colors.colorPalette.blue.fg": {
+    "value": "var(--silver-colors-color-palette-blue-fg)",
+    "variable": "var(--silver-colors-color-palette-blue-fg)"
+  },
+  "colors.colorPalette.fg": {
+    "value": "var(--silver-colors-color-palette-fg)",
+    "variable": "var(--silver-colors-color-palette-fg)"
+  },
   "colors.colorPalette.cyan": {
     "value": "var(--silver-colors-color-palette-cyan)",
     "variable": "var(--silver-colors-color-palette-cyan)"
+  },
+  "colors.colorPalette.cyan.fg": {
+    "value": "var(--silver-colors-color-palette-cyan-fg)",
+    "variable": "var(--silver-colors-color-palette-cyan-fg)"
   },
   "colors.colorPalette.gray": {
     "value": "var(--silver-colors-color-palette-gray)",
     "variable": "var(--silver-colors-color-palette-gray)"
   },
+  "colors.colorPalette.gray.fg": {
+    "value": "var(--silver-colors-color-palette-gray-fg)",
+    "variable": "var(--silver-colors-color-palette-gray-fg)"
+  },
   "colors.colorPalette.green": {
     "value": "var(--silver-colors-color-palette-green)",
     "variable": "var(--silver-colors-color-palette-green)"
+  },
+  "colors.colorPalette.green.fg": {
+    "value": "var(--silver-colors-color-palette-green-fg)",
+    "variable": "var(--silver-colors-color-palette-green-fg)"
   },
   "colors.colorPalette.orange": {
     "value": "var(--silver-colors-color-palette-orange)",
     "variable": "var(--silver-colors-color-palette-orange)"
   },
+  "colors.colorPalette.orange.fg": {
+    "value": "var(--silver-colors-color-palette-orange-fg)",
+    "variable": "var(--silver-colors-color-palette-orange-fg)"
+  },
   "colors.colorPalette.pink": {
     "value": "var(--silver-colors-color-palette-pink)",
     "variable": "var(--silver-colors-color-palette-pink)"
+  },
+  "colors.colorPalette.pink.fg": {
+    "value": "var(--silver-colors-color-palette-pink-fg)",
+    "variable": "var(--silver-colors-color-palette-pink-fg)"
   },
   "colors.colorPalette.purple": {
     "value": "var(--silver-colors-color-palette-purple)",
     "variable": "var(--silver-colors-color-palette-purple)"
   },
+  "colors.colorPalette.purple.fg": {
+    "value": "var(--silver-colors-color-palette-purple-fg)",
+    "variable": "var(--silver-colors-color-palette-purple-fg)"
+  },
   "colors.colorPalette.red": {
     "value": "var(--silver-colors-color-palette-red)",
     "variable": "var(--silver-colors-color-palette-red)"
+  },
+  "colors.colorPalette.red.fg": {
+    "value": "var(--silver-colors-color-palette-red-fg)",
+    "variable": "var(--silver-colors-color-palette-red-fg)"
   },
   "colors.colorPalette.teal": {
     "value": "var(--silver-colors-color-palette-teal)",
     "variable": "var(--silver-colors-color-palette-teal)"
   },
+  "colors.colorPalette.teal.fg": {
+    "value": "var(--silver-colors-color-palette-teal-fg)",
+    "variable": "var(--silver-colors-color-palette-teal-fg)"
+  },
   "colors.colorPalette.yellow": {
     "value": "var(--silver-colors-color-palette-yellow)",
     "variable": "var(--silver-colors-color-palette-yellow)"
+  },
+  "colors.colorPalette.yellow.fg": {
+    "value": "var(--silver-colors-color-palette-yellow-fg)",
+    "variable": "var(--silver-colors-color-palette-yellow-fg)"
   },
   "colors.colorPalette.primary": {
     "value": "var(--silver-colors-color-palette-primary)",
