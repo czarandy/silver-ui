@@ -32,6 +32,26 @@ const meta: Meta<typeof Link> = {
         'inherit',
       ],
     },
+    weight: {
+      control: {type: 'select'},
+      options: ['normal', 'medium', 'semibold', 'bold', 'inherit'],
+    },
+    size: {
+      control: {type: 'select'},
+      options: [
+        'xs',
+        'sm',
+        'md',
+        'lg',
+        'xl',
+        '2xl',
+        '3xl',
+        '4xl',
+        '5xl',
+        '6xl',
+        'inherit',
+      ],
+    },
     hasUnderline: {control: 'boolean'},
     isDisabled: {control: 'boolean'},
     isExternalLink: {control: 'boolean'},
@@ -71,6 +91,38 @@ export const Placeholder: Story = {
 
 export const Inherit: Story = {
   args: {color: 'inherit'},
+};
+
+export const WeightNormal: Story = {
+  args: {weight: 'normal'},
+};
+
+export const WeightMedium: Story = {
+  args: {weight: 'medium'},
+};
+
+export const WeightSemibold: Story = {
+  args: {weight: 'semibold'},
+};
+
+export const WeightBold: Story = {
+  args: {weight: 'bold'},
+};
+
+export const SizeSmall: Story = {
+  args: {size: 'sm'},
+};
+
+export const SizeLarge: Story = {
+  args: {size: 'lg'},
+};
+
+export const SizeXL: Story = {
+  args: {size: 'xl'},
+};
+
+export const SizeInherit: Story = {
+  args: {size: 'inherit'},
 };
 
 export const Underlined: Story = {

@@ -24,7 +24,7 @@ export interface AvatarStatusDotProps {
   /**
    * Accessible label describing the status, such as "Online".
    */
-  label?: string;
+  label: string;
   /**
    * Ref forwarded to the root element.
    */
@@ -115,7 +115,7 @@ export function AvatarStatusDot({
       className={cx(styles.root, variantClassName[variant], className)}
       data-testid={dataTestId}
       ref={ref}
-      role={label != null ? 'img' : undefined}
+      role="img"
       style={{width: dotSize, height: dotSize, borderWidth, ...style}}>
       {hasVisibleIcon ? (
         <span

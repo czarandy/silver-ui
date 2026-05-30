@@ -6,7 +6,6 @@ export const linkRecipe = cva({
     alignItems: 'center',
     gap: '1',
     fontFamily: 'body',
-    fontSize: 'md',
     fontWeight: 'inherit',
     lineHeight: 'normal',
     textDecoration: 'none',
@@ -28,6 +27,19 @@ export const linkRecipe = cva({
     },
   },
   variants: {
+    size: {
+      xs: {fontSize: 'xs'},
+      sm: {fontSize: 'sm'},
+      md: {fontSize: 'md'},
+      lg: {fontSize: 'lg'},
+      xl: {fontSize: 'xl'},
+      '2xl': {fontSize: '2xl'},
+      '3xl': {fontSize: '3xl'},
+      '4xl': {fontSize: '4xl'},
+      '5xl': {fontSize: '5xl'},
+      '6xl': {fontSize: '6xl'},
+      inherit: {fontSize: 'inherit'},
+    },
     color: {
       primary: {
         color: 'fg',
@@ -48,6 +60,13 @@ export const linkRecipe = cva({
         color: 'inherit',
       },
     },
+    weight: {
+      normal: {fontWeight: 'normal'},
+      medium: {fontWeight: 'medium'},
+      semibold: {fontWeight: 'semibold'},
+      bold: {fontWeight: 'bold'},
+      inherit: {fontWeight: 'inherit'},
+    },
     hasUnderline: {
       true: {
         textDecoration: 'underline',
@@ -57,6 +76,7 @@ export const linkRecipe = cva({
   },
   defaultVariants: {
     color: 'active',
+    size: 'md',
     hasUnderline: false,
   },
 });

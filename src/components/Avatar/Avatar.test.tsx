@@ -26,24 +26,37 @@ describe('Avatar', () => {
   it('renders an image and falls back to fallbackSrc when it fails', () => {
     render(
       <Avatar
+        data-testid="avatar"
         fallbackSrc="/fallback.png"
         name="Ada Lovelace"
         src="/avatar.png"
       />,
     );
 
-    fireEvent.error(screen.getByAltText('Ada Lovelace'));
+    const avatar = screen.getByTestId('avatar');
+    // eslint-disable-next-line testing-library/no-node-access -- presentational img (alt="") has no accessible role
+    const img = avatar.querySelector('img');
+    expect(img).toHaveAttribute('src', '/avatar.png');
+    fireEvent.error(img!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
 
-    expect(screen.getByAltText('Ada Lovelace')).toHaveAttribute(
-      'src',
-      '/fallback.png',
-    );
+    // eslint-disable-next-line testing-library/no-node-access
+    const fallbackImg = avatar.querySelector('img');
+    expect(fallbackImg).toHaveAttribute('src', '/fallback.png');
   });
 
   it('renders a default icon when no image or name is provided', () => {
     render(<Avatar data-testid="avatar" />);
 
     expect(screen.getByTestId('avatar')).toHaveAccessibleName('Avatar');
+  });
+
+  it('falls back to the default icon when name is only whitespace', () => {
+    render(<Avatar data-testid="avatar" name="   " />);
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying svg icon presence, no accessible query available
+    expect(
+      screen.getByTestId('avatar').querySelector('svg'),
+    ).toBeInTheDocument();
   });
 
   it('renders status content positioned on the avatar', () => {
@@ -96,5 +109,31 @@ describe('Avatar', () => {
     expect(avatar).toHaveClass('custom-avatar');
     expect(avatar).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+
+  it('resets image error state when src changes', () => {
+    const {rerender} = render(<Avatar data-testid="avatar" src="/old.png" />);
+
+    const avatar = screen.getByTestId('avatar');
+    // eslint-disable-next-line testing-library/no-node-access -- presentational img (alt="") has no accessible role
+    const img = avatar.querySelector('img');
+    fireEvent.error(img!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(avatar.querySelector('img')).toBeNull();
+
+    rerender(<Avatar data-testid="avatar" src="/new.png" />);
+
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(avatar.querySelector('img')).toHaveAttribute('src', '/new.png');
+  });
+
+  it('applies numeric size as pixel dimensions', () => {
+    render(<Avatar data-testid="avatar" name="Ada Lovelace" size={64} />);
+
+    // eslint-disable-next-line testing-library/no-node-access -- inner content div has no role or testid
+    expect(screen.getByTestId('avatar').firstElementChild).toHaveStyle({
+      width: '64px',
+      height: '64px',
+    });
   });
 });

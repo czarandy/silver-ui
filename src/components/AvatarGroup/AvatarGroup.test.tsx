@@ -75,6 +75,14 @@ describe('AvatarGroup', () => {
     expect(screen.getByLabelText('8 more')).toHaveTextContent('More');
   });
 
+  it('renders nothing when overflow count is zero', () => {
+    const {container} = render(
+      <AvatarGroupOverflow count={0} data-testid="overflow" />,
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('applies className, style, data-testid, and ref to the group root', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 
@@ -92,5 +100,50 @@ describe('AvatarGroup', () => {
     expect(group).toHaveClass('custom-group');
     expect(group).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+
+  it('applies group size to overflow indicator dimensions', () => {
+    render(
+      <AvatarGroup size="medium">
+        <Avatar name="Ada Lovelace" />
+        <AvatarGroupOverflow count={3} data-testid="overflow" />
+      </AvatarGroup>,
+    );
+
+    expect(screen.getByTestId('overflow')).toHaveStyle({
+      width: '48px',
+      height: '48px',
+    });
+  });
+
+  it('forwards ref to overflow span', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+
+    render(<AvatarGroupOverflow count={2} ref={ref} />);
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLSpanElement));
+  });
+
+  it('forwards ref to overflow button', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+
+    render(<AvatarGroupOverflow count={2} onClick={vi.fn()} ref={ref} />);
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLButtonElement));
+  });
+
+  it('applies className, style, and data-testid to overflow indicator', () => {
+    render(
+      <AvatarGroupOverflow
+        className="custom-overflow"
+        count={5}
+        data-testid="overflow"
+        style={{opacity: 0.5}}
+      />,
+    );
+
+    const overflow = screen.getByTestId('overflow');
+    expect(overflow).toHaveClass('custom-overflow');
+    expect(overflow).toHaveStyle({opacity: '0.5'});
   });
 });

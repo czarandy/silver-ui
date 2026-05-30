@@ -63,3 +63,22 @@ export const WithStatus: Story = {
     </div>
   ),
 };
+
+export const FallbackSrc: Story = {
+  args: {
+    src: 'https://broken.example.com/missing.png',
+    fallbackSrc: 'https://i.pravatar.cc/256?img=47',
+  },
+};
+
+export const NumericSizes: Story = {
+  render: () => (
+    <div style={{display: 'flex', alignItems: 'center', gap: 16}}>
+      <Avatar name="Ada Lovelace" size={16} />
+      <Avatar name="Ada Lovelace" size={24} />
+      <Avatar name="Ada Lovelace" size={48} />
+      <Avatar name="Ada Lovelace" size={96} />
+      <Avatar name="Ada Lovelace" size={144} />
+    </div>
+  ),
+};

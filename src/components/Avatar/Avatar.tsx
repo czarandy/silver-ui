@@ -133,10 +133,6 @@ const styles = {
   }),
 };
 
-type AvatarRootStyle = CSSProperties & {
-  '--avatar-group-overlap'?: string;
-};
-
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
 
@@ -165,25 +161,15 @@ export function Avatar({
   style,
   status,
 }: AvatarProps): React.JSX.Element {
-  const [imageError, setImageError] = useState(false);
-  const [fallbackError, setFallbackError] = useState(false);
   const avatarGroup = useAvatarGroup();
   const resolvedSize = avatarGroup?.size ?? size;
   const numericSize = useMemo(
     () => resolveAvatarSize(resolvedSize),
     [resolvedSize],
   );
-  const showImage = src != null && src !== '' && !imageError;
-  const showFallbackImage =
-    !showImage && fallbackSrc != null && fallbackSrc !== '' && !fallbackError;
-  const showInitials = !showImage && !showFallbackImage && name != null;
+  const initials = name != null ? getInitials(name) : '';
+  const showInitials = initials !== '';
   const accessibleName = alt ?? name ?? 'Avatar';
-  const rootStyle: AvatarRootStyle = {
-    ...(avatarGroup != null
-      ? {'--avatar-group-overlap': `${-avatarGroup.overlap}px`}
-      : undefined),
-    ...style,
-  };
   const contentStyle = {
     width: numericSize,
     height: numericSize,
@@ -208,37 +194,27 @@ export function Avatar({
         data-testid={dataTestId}
         ref={ref}
         role="img"
-        style={rootStyle}>
+        style={style}>
         <div className={styles.content} style={contentStyle}>
-          {showImage ? (
-            <img
-              alt={accessibleName}
-              className={styles.image}
-              onError={() => setImageError(true)}
-              src={src}
-            />
-          ) : null}
-          {showFallbackImage ? (
-            <img
-              alt={accessibleName}
-              className={styles.image}
-              onError={() => setFallbackError(true)}
-              src={fallbackSrc}
-            />
-          ) : null}
-          {showInitials ? (
-            <div className={styles.fallback} style={fallbackStyle}>
-              {getInitials(name)}
-            </div>
-          ) : null}
-          {!showImage && !showFallbackImage && !showInitials ? (
-            <div className={styles.fallback}>
-              <Icon
-                icon={User}
-                size={numericSize < 48 ? 'sm' : numericSize < 96 ? 'md' : 'lg'}
-              />
-            </div>
-          ) : null}
+          <AvatarImage
+            fallbackSrc={fallbackSrc}
+            key={`${src}\0${fallbackSrc}`}
+            src={src}>
+            {showInitials ? (
+              <div className={styles.fallback} style={fallbackStyle}>
+                {initials}
+              </div>
+            ) : (
+              <div className={styles.fallback}>
+                <Icon
+                  icon={User}
+                  size={
+                    numericSize < 48 ? 'sm' : numericSize < 96 ? 'md' : 'lg'
+                  }
+                />
+              </div>
+            )}
+          </AvatarImage>
         </div>
         {status != null ? (
           <div className={styles.status} style={statusStyle}>
@@ -248,6 +224,46 @@ export function Avatar({
       </div>
     </AvatarSizeContext>
   );
+}
+
+function AvatarImage({
+  children,
+  fallbackSrc,
+  src,
+}: {
+  children: ReactNode;
+  fallbackSrc?: string;
+  src?: string;
+}): React.JSX.Element {
+  const [imageError, setImageError] = useState(false);
+  const [fallbackError, setFallbackError] = useState(false);
+  const showImage = src != null && src !== '' && !imageError;
+  const showFallbackImage =
+    !showImage && fallbackSrc != null && fallbackSrc !== '' && !fallbackError;
+
+  if (showImage) {
+    return (
+      <img
+        alt=""
+        className={styles.image}
+        onError={() => setImageError(true)}
+        src={src}
+      />
+    );
+  }
+
+  if (showFallbackImage) {
+    return (
+      <img
+        alt=""
+        className={styles.image}
+        onError={() => setFallbackError(true)}
+        src={fallbackSrc}
+      />
+    );
+  }
+
+  return <>{children}</>;
 }
 
 Avatar.displayName = 'Avatar';

@@ -72,10 +72,6 @@ const styles = {
   }),
 };
 
-type AvatarGroupOverflowStyle = CSSProperties & {
-  '--avatar-group-overlap': string;
-};
-
 /**
  * Overflow indicator showing the count of hidden avatars in an AvatarGroup.
  */
@@ -87,14 +83,17 @@ export function AvatarGroupOverflow({
   onClick,
   ref,
   style,
-}: AvatarGroupOverflowProps): React.JSX.Element {
+}: AvatarGroupOverflowProps): React.JSX.Element | null {
   const group = useAvatarGroup();
+
+  if (count <= 0) {
+    return null;
+  }
+
   const numericSize = group?.numericSize ?? DEFAULT_SIZE;
-  const overlap = group?.overlap ?? 0;
   const label = `${count} more`;
   const content = children ?? `+${count}`;
-  const rootStyle: AvatarGroupOverflowStyle = {
-    '--avatar-group-overlap': `${-overlap}px`,
+  const rootStyle: CSSProperties = {
     width: numericSize,
     height: numericSize,
     fontSize: numericSize * OVERFLOW_FONT_RATIO,
@@ -122,6 +121,7 @@ export function AvatarGroupOverflow({
       className={cx(styles.root, className)}
       data-testid={dataTestId}
       ref={ref}
+      role="img"
       style={rootStyle}>
       {content}
     </span>

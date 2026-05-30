@@ -34,6 +34,22 @@ const meta: Meta<typeof Text> = {
       control: {type: 'select'},
       options: ['normal', 'medium', 'semibold', 'bold', 'inherit'],
     },
+    size: {
+      control: {type: 'select'},
+      options: [
+        'xs',
+        'sm',
+        'md',
+        'lg',
+        'xl',
+        '2xl',
+        '3xl',
+        '4xl',
+        '5xl',
+        '6xl',
+        'inherit',
+      ],
+    },
     display: {
       control: {type: 'select'},
       options: ['inline', 'block'],
@@ -69,6 +85,22 @@ export const Code: Story = {
     type: 'code',
     children: 'const status = "ready";',
   },
+};
+
+export const SizeSmall: Story = {
+  args: {size: 'sm'},
+};
+
+export const SizeLarge: Story = {
+  args: {size: 'lg'},
+};
+
+export const SizeXL: Story = {
+  args: {size: 'xl'},
+};
+
+export const SizeInherit: Story = {
+  args: {size: 'inherit'},
 };
 
 export const Truncated: Story = {

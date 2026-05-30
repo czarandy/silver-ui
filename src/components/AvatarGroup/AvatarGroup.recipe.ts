@@ -1,4 +1,4 @@
-import {cva, type RecipeVariantProps} from 'styled-system/css';
+import {cva} from 'styled-system/css';
 
 export const avatarGroupRecipe = cva({
   base: {
@@ -7,5 +7,3 @@ export const avatarGroupRecipe = cva({
     verticalAlign: 'middle',
   },
 });
-
-export type AvatarGroupVariants = RecipeVariantProps<typeof avatarGroupRecipe>;

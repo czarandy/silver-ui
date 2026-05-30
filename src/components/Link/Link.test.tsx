@@ -124,6 +124,77 @@ describe('Link', () => {
     expect(screen.getByRole('link', {name: 'Inherit'})).toBeInTheDocument();
   });
 
+  it('renders weight variants', () => {
+    const {rerender} = render(
+      <Link href="/test" weight="bold">
+        Bold
+      </Link>,
+    );
+    expect(screen.getByRole('link', {name: 'Bold'})).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" weight="semibold">
+        Semibold
+      </Link>,
+    );
+    expect(screen.getByRole('link', {name: 'Semibold'})).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" weight="medium">
+        Medium
+      </Link>,
+    );
+    expect(screen.getByRole('link', {name: 'Medium'})).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" weight="normal">
+        Normal
+      </Link>,
+    );
+    expect(screen.getByRole('link', {name: 'Normal'})).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" weight="inherit">
+        Inherit Weight
+      </Link>,
+    );
+    expect(
+      screen.getByRole('link', {name: 'Inherit Weight'}),
+    ).toBeInTheDocument();
+  });
+
+  it('renders size variants', () => {
+    const {rerender} = render(
+      <Link href="/test" size="sm">
+        Small
+      </Link>,
+    );
+    expect(screen.getByRole('link', {name: 'Small'})).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" size="lg">
+        Large
+      </Link>,
+    );
+    expect(screen.getByRole('link', {name: 'Large'})).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" size="xl">
+        Extra Large
+      </Link>,
+    );
+    expect(screen.getByRole('link', {name: 'Extra Large'})).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" size="inherit">
+        Inherit Size
+      </Link>,
+    );
+    expect(
+      screen.getByRole('link', {name: 'Inherit Size'}),
+    ).toBeInTheDocument();
+  });
+
   it('supports disabled links', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

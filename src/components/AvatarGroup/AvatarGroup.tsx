@@ -42,6 +42,10 @@ export interface AvatarGroupProps {
   style?: CSSProperties;
 }
 
+type AvatarGroupStyle = CSSProperties & {
+  '--avatar-group-overlap': string;
+};
+
 /**
  * Displays a stacked group of Avatars with shared size and overlap.
  */
@@ -60,6 +64,10 @@ export function AvatarGroup({
     () => ({numericSize, overlap, size}),
     [numericSize, overlap, size],
   );
+  const rootStyle: AvatarGroupStyle = {
+    '--avatar-group-overlap': `${-overlap}px`,
+    ...style,
+  };
 
   return (
     <AvatarGroupContext value={contextValue}>
@@ -69,7 +77,7 @@ export function AvatarGroup({
         data-testid={dataTestId}
         ref={ref}
         role="group"
-        style={style}>
+        style={rootStyle}>
         {children}
       </div>
     </AvatarGroupContext>

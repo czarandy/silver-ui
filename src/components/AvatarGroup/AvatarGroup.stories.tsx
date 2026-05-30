@@ -51,3 +51,42 @@ export const ClickableOverflow: Story = {
     </AvatarGroup>
   ),
 };
+
+export const Sizes: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+      {(['tiny', 'xsmall', 'small', 'medium', 'large'] as const).map(size => (
+        <AvatarGroup aria-label={`${size} group`} key={size} size={size}>
+          <Avatar name="Ada Lovelace" />
+          <Avatar name="Grace Hopper" />
+          <Avatar name="Katherine Johnson" />
+          <AvatarGroupOverflow count={4} />
+        </AvatarGroup>
+      ))}
+    </div>
+  ),
+};
+
+export const NumericSizes: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+      {([24, 48, 96] as const).map(size => (
+        <AvatarGroup aria-label={`${size}px group`} key={size} size={size}>
+          <Avatar name="Ada Lovelace" />
+          <Avatar name="Grace Hopper" />
+          <AvatarGroupOverflow count={5} />
+        </AvatarGroup>
+      ))}
+    </div>
+  ),
+};
+
+export const CustomOverflowContent: Story = {
+  render: args => (
+    <AvatarGroup {...args}>
+      <Avatar name="Ada Lovelace" />
+      <Avatar name="Grace Hopper" />
+      <AvatarGroupOverflow count={12}>View all</AvatarGroupOverflow>
+    </AvatarGroup>
+  ),
+};

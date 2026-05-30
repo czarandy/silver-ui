@@ -19,6 +19,17 @@ cp -R dist/* path/to/app/src/vendor/silver-ui/
 Copy the whole `dist/` directory, not only `index.js`; component entry points
 share generated chunks.
 
+The vendored build expects your app to install silver-ui's runtime
+dependencies:
+
+```bash
+npm install lucide-react
+# or
+pnpm add lucide-react
+# or
+yarn add lucide-react
+```
+
 Then import from the vendored ESM files. Use component subpaths for smaller JS
 bundles:
 

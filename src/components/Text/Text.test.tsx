@@ -39,6 +39,36 @@ describe('Text', () => {
     expect(screen.getByTestId('text')).toBeInTheDocument();
   });
 
+  it('renders size variants', () => {
+    const {rerender} = render(
+      <Text data-testid="text" size="sm">
+        Small
+      </Text>,
+    );
+    expect(screen.getByTestId('text')).toBeInTheDocument();
+
+    rerender(
+      <Text data-testid="text" size="lg">
+        Large
+      </Text>,
+    );
+    expect(screen.getByTestId('text')).toBeInTheDocument();
+
+    rerender(
+      <Text data-testid="text" size="xl">
+        Extra Large
+      </Text>,
+    );
+    expect(screen.getByTestId('text')).toBeInTheDocument();
+
+    rerender(
+      <Text data-testid="text" size="inherit">
+        Inherit Size
+      </Text>,
+    );
+    expect(screen.getByTestId('text')).toBeInTheDocument();
+  });
+
   it('applies truncation styles for single-line text', () => {
     render(
       <Text data-testid="text" maxLines={1}>

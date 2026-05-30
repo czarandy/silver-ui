@@ -25,7 +25,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] Breadcrumbs
 - [x] Link
 - [ ] MobileNav
-- [ ] Pagination
+- [x] Pagination
 - [x] SideNav
 - [ ] Tabs
 - [ ] TopNav
@@ -42,8 +42,8 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 ## Data Display
 
 - [x] Accordion
-- [ ] Avatar
-- [ ] AvatarGroup
+- [x] Avatar
+- [x] AvatarGroup
 - [ ] Badge
 - [ ] Blockquote
 - [x] Card

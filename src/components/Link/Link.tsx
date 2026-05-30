@@ -7,7 +7,7 @@ import {VisuallyHidden} from '../../internal';
 import {cx} from '../../internal/cx';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {Icon} from '../Icon';
-import type {TextColor} from '../Text';
+import type {TextColor, TextSize, TextWeight} from '../Text';
 import {Tooltip} from '../Tooltip';
 import {linkRecipe} from './Link.recipe';
 import type {LinkComponent} from './types';
@@ -121,6 +121,10 @@ export interface LinkProps {
    */
   rel?: string;
   /**
+   * Font size variant. Default is `md`.
+   */
+  size?: TextSize;
+  /**
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
@@ -132,6 +136,10 @@ export interface LinkProps {
    * Tooltip text shown on hover.
    */
   tooltip?: string;
+  /**
+   * Font weight variant. Default is inherited from parent styles.
+   */
+  weight?: TextWeight;
 }
 
 export function Link({
@@ -154,8 +162,10 @@ export function Link({
   isExternalLink = false,
   target: targetFromProps,
   rel: relFromProps,
+  size,
   tooltip,
   color,
+  weight,
   className,
   'data-testid': dataTestId,
   style,
@@ -201,7 +211,7 @@ export function Link({
       {...ariaAttrs}
       aria-disabled={isDisabled || undefined}
       aria-label={getAriaLabel(label, opensInNewTab)}
-      className={cx(linkRecipe({color, hasUnderline}), className)}
+      className={cx(linkRecipe({color, hasUnderline, size, weight}), className)}
       data-testid={dataTestId}
       href={href}
       onClick={handleClick}

@@ -106,7 +106,6 @@ export {
   Avatar,
   AvatarStatusDot,
   avatarRecipe,
-  resolveAvatarSize,
   type AvatarNamedSize,
   type AvatarNumericSize,
   type AvatarProps,
@@ -121,7 +120,6 @@ export {
   avatarGroupRecipe,
   type AvatarGroupOverflowProps,
   type AvatarGroupProps,
-  type AvatarGroupVariants,
 } from './components/AvatarGroup';
 export {
   ButtonGroup,
