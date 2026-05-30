@@ -15,13 +15,18 @@ describe('Blockquote', () => {
     expect(screen.getByTestId('bq')).not.toHaveTextContent('—');
   });
 
-  it('renders cite when provided', () => {
+  it('renders cite in a footer > cite structure', () => {
     render(
       <Blockquote cite="Steve Jobs" data-testid="bq">
         Design is not just what it looks like.
       </Blockquote>,
     );
-    expect(screen.getByTestId('bq')).toHaveTextContent('Steve Jobs');
+
+    const bq = screen.getByTestId('bq');
+    // eslint-disable-next-line testing-library/no-node-access -- verifying semantic HTML structure
+    const cite = bq.querySelector('footer > cite');
+    expect(cite).toBeInTheDocument();
+    expect(cite).toHaveTextContent('Steve Jobs');
   });
 
   it('renders cite as ReactNode', () => {
