@@ -188,18 +188,18 @@ export function ListItem({
       data-testid={dataTestId}
       density={density === 'compact' ? 'compact' : 'default'}
       description={description}
+      endContent={endContent}
       href={href}
       isDisabled={isDisabled}
       isSelected={isSelected}
       label={label}
-      media={startContent}
       onClick={onClick}
       ref={ref}
       rel={rel}
       startAdornment={<Marker listStyle={listStyle} />}
+      startContent={startContent}
       style={style}
       target={target}
-      trailing={endContent}
     />
   );
 }

@@ -26,21 +26,21 @@ describe('Item', () => {
     expect(screen.getByText('Supporting text')).toBeInTheDocument();
   });
 
-  it('renders media, trailing content, and start adornment', () => {
+  it('renders startContent, endContent, and start adornment', () => {
     render(
       <Item
         data-testid="item"
+        endContent={<span data-testid="end">T</span>}
         label="Project"
-        media={<span data-testid="media">M</span>}
         startAdornment={<span data-testid="marker">1.</span>}
-        trailing={<span data-testid="trailing">T</span>}
+        startContent={<span data-testid="start">M</span>}
       />,
     );
 
     expect(screen.getByTestId('item')).toBeInTheDocument();
     expect(screen.getByTestId('marker')).toBeInTheDocument();
-    expect(screen.getByTestId('media')).toBeInTheDocument();
-    expect(screen.getByTestId('trailing')).toBeInTheDocument();
+    expect(screen.getByTestId('start')).toBeInTheDocument();
+    expect(screen.getByTestId('end')).toBeInTheDocument();
   });
 
   it('fires onClick from the invisible button', async () => {

@@ -62,6 +62,12 @@ interface ButtonBaseProps {
    */
   'aria-keyshortcuts'?: string;
   /**
+   * Accessible label that overrides the visible `label` for assistive
+   * technologies. Use when the visible text is too terse (e.g. a page
+   * number) and a longer description is needed.
+   */
+  'aria-label'?: string;
+  /**
    * Identifies the element(s) that label the button.
    */
   'aria-labelledby'?: string;
@@ -239,6 +245,7 @@ export function Button({
   label,
   'aria-controls': ariaControls,
   'aria-current': ariaCurrent,
+  'aria-label': ariaLabelProp,
   'aria-describedby': ariaDescribedby,
   'aria-details': ariaDetails,
   'aria-expanded': ariaExpanded,
@@ -280,12 +287,14 @@ export function Button({
   const useAriaDisabled = tooltip != null && buttonDisabled;
   const renderAsLink = href != null && !buttonDisabled;
   const opensInNewTab = renderAsLink && target === '_blank';
-  const ariaLabel = getAriaLabel(
-    isIconOnly || isLoading || endContent != null || opensInNewTab
-      ? label
-      : undefined,
-    opensInNewTab,
-  );
+  const ariaLabel =
+    ariaLabelProp ??
+    getAriaLabel(
+      isIconOnly || isLoading || endContent != null || opensInNewTab
+        ? label
+        : undefined,
+      opensInNewTab,
+    );
   const linkRel = useRel({target, rel});
   const spinnerVariant =
     variant === 'primary' || variant === 'destructive' ? 'onMedia' : 'default';

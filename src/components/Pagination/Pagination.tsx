@@ -1,15 +1,15 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
+import {useMemo} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import type {ButtonSize} from '../Button';
 import {Button} from '../Button';
-import {Select} from '../Select';
 import {Text} from '../Text';
 
-export type PaginationVariant = 'pages' | 'count' | 'compact' | 'dots' | 'none';
-export type PaginationSize = 'sm' | 'md';
+export type PaginationVariant = 'pages' | 'count' | 'compact' | 'none';
 
-export interface PaginationProps {
+interface PaginationBaseProps {
   /**
    * Additional CSS class names applied to the navigation root.
    */
@@ -37,10 +37,6 @@ export interface PaginationProps {
    */
   onChange: (page: number) => void;
   /**
-   * Called when the page size changes.
-   */
-  onPageSizeChange?: (pageSize: number) => void;
-  /**
    * Current page number, starting at 1.
    */
   page: number;
@@ -49,10 +45,6 @@ export interface PaginationProps {
    * @default 10
    */
   pageSize?: number;
-  /**
-   * Available page size options.
-   */
-  pageSizeOptions?: number[];
   /**
    * Ref forwarded to the navigation root.
    */
@@ -66,25 +58,24 @@ export interface PaginationProps {
    * Control size.
    * @default 'md'
    */
-  size?: PaginationSize;
+  size?: ButtonSize;
   /**
    * Inline styles applied to the navigation root.
    */
   style?: CSSProperties;
-  /**
-   * Total item count. Takes precedence over `totalPages`.
-   */
-  totalItems?: number;
-  /**
-   * Total page count.
-   */
-  totalPages?: number;
   /**
    * Display variant.
    * @default 'pages'
    */
   variant?: PaginationVariant;
 }
+
+export type PaginationProps = PaginationBaseProps &
+  (
+    | {totalItems: number; totalPages?: never}
+    | {totalItems?: never; totalPages: number}
+    | {totalItems?: never; totalPages?: never}
+  );
 
 const styles = {
   root: css({
@@ -102,8 +93,6 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    minW: 'var(--pagination-control-size)',
-    h: 'var(--pagination-control-size)',
     color: 'fg.muted',
     fontFamily: 'body',
     fontSize: 'sm',
@@ -114,56 +103,13 @@ const styles = {
     alignItems: 'center',
     whiteSpace: 'nowrap',
   }),
-  dotsContainer: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-  }),
-  dot: css({
-    w: '2',
-    h: '2',
-    p: 0,
-    borderWidth: 0,
-    borderStyle: 'none',
-    borderRadius: 'full',
-    bg: 'silver-neutral.300',
-    cursor: 'pointer',
-    transitionProperty: 'background-color',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    _focusVisible: {
-      outline: '2px solid',
-      outlineColor: 'primary',
-      outlineOffset: '2px',
-    },
-    _disabled: {
-      cursor: 'not-allowed',
-      opacity: 0.5,
-    },
-  }),
-  dotSm: css({
-    w: '1.5',
-    h: '1.5',
-  }),
-  dotActive: css({
-    bg: 'primary',
-  }),
   activePage: css({
     bg: 'silver-neutral.100',
     fontWeight: 'medium',
   }),
-  pageSizeSelector: css({
-    display: 'flex',
-    alignItems: 'center',
-    w: '20',
-  }),
-  size: {
-    sm: css({'--pagination-control-size': 'var(--silver-sizes-component-sm)'}),
-    md: css({'--pagination-control-size': 'var(--silver-sizes-component-md)'}),
-  },
 } as const;
 
-export function generatePageRange(
+function generatePageRange(
   currentPage: number,
   totalPages: number,
   siblingCount: number,
@@ -214,7 +160,7 @@ export function generatePageRange(
 
 /**
  * Page navigation controls with multiple display variants
- * (numbered pages, count summary, compact label, dots, or none).
+ * (numbered pages, count summary, compact label, or none).
  */
 export function Pagination({
   className,
@@ -223,25 +169,38 @@ export function Pagination({
   isDisabled = false,
   label = 'Pagination',
   onChange,
-  onPageSizeChange,
-  page,
-  pageSize = 10,
-  pageSizeOptions,
+  page: pageFromProps,
+  pageSize: pageSizeFromProps = 10,
   ref,
-  siblingCount = 1,
+  siblingCount: siblingCountFromProps = 1,
   size = 'md',
   style,
   totalItems,
   totalPages: totalPagesProp,
   variant = 'pages',
 }: PaginationProps): React.JSX.Element | null {
+  const siblingCount = Math.max(0, siblingCountFromProps);
+  const pageSize = Math.max(1, pageSizeFromProps);
   const computedTotalPages =
     totalPagesProp ??
     (totalItems != null ? Math.ceil(totalItems / pageSize) : undefined);
+  const page = Math.max(
+    1,
+    computedTotalPages != null
+      ? Math.min(pageFromProps, computedTotalPages)
+      : pageFromProps,
+  );
   const hasPrevious = page > 1;
   const hasNext =
     computedTotalPages != null ? page < computedTotalPages : (hasMore ?? false);
-  const buttonSize = size === 'sm' ? 'sm' : 'md';
+
+  const pageRange = useMemo(
+    () =>
+      computedTotalPages != null
+        ? generatePageRange(page, computedTotalPages, siblingCount)
+        : [],
+    [page, computedTotalPages, siblingCount],
+  );
 
   if (totalItems != null && totalItems <= 0) {
     return null;
@@ -259,15 +218,6 @@ export function Pagination({
     onChange(newPage);
   };
 
-  const handlePageSizeChange = (value: string | null) => {
-    if (value == null) {
-      return;
-    }
-
-    onPageSizeChange?.(Number(value));
-    handlePageChange(1);
-  };
-
   const rangeStart = (page - 1) * pageSize + 1;
   const rangeEnd =
     totalItems == null
@@ -281,40 +231,41 @@ export function Pagination({
           return null;
         }
 
-        return generatePageRange(page, computedTotalPages, siblingCount).map(
-          (item, index, pageRange) => {
-            if (item === '...') {
-              return (
-                <span
-                  aria-hidden="true"
-                  className={styles.ellipsis}
-                  key={`ellipsis-${pageRange[index - 1]}-${pageRange[index + 1]}`}>
-                  ...
-                </span>
-              );
-            }
-
-            const isActive = item === page;
+        return pageRange.map((item, index) => {
+          if (item === '...') {
             return (
-              <Button
-                aria-current={isActive ? 'page' : undefined}
-                className={isActive ? styles.activePage : undefined}
-                isDisabled={isDisabled}
-                key={item}
-                label={`Go to page ${item}`}
-                onClick={() => handlePageChange(item)}
-                size={buttonSize}
-                variant="ghost"
-              />
+              <span
+                aria-hidden="true"
+                className={styles.ellipsis}
+                key={`ellipsis-${pageRange[index - 1]}-${pageRange[index + 1]}`}>
+                ...
+              </span>
             );
-          },
-        );
+          }
+
+          const isActive = item === page;
+          return (
+            <Button
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={
+                isActive ? `Page ${item}, current page` : `Go to page ${item}`
+              }
+              className={isActive ? styles.activePage : undefined}
+              isDisabled={isDisabled}
+              key={item}
+              label={String(item)}
+              onClick={isActive ? undefined : () => handlePageChange(item)}
+              size={size}
+              variant="ghost"
+            />
+          );
+        });
       }
 
       case 'count':
         return totalItems == null ? null : (
-          <span className={styles.infoText}>
-            <Text color="secondary" size="sm" type="body">
+          <span aria-live="polite" className={styles.infoText}>
+            <Text color="primary" size="sm" type="body">
               {`${rangeStart}-${rangeEnd} of ${totalItems}`}
             </Text>
           </span>
@@ -322,39 +273,11 @@ export function Pagination({
 
       case 'compact':
         return computedTotalPages == null ? null : (
-          <span className={styles.infoText}>
-            <Text color="secondary" size="sm" type="body">
+          <span aria-live="polite" className={styles.infoText}>
+            <Text color="primary" size="sm" type="body">
               {`Page ${page} of ${computedTotalPages}`}
             </Text>
           </span>
-        );
-
-      case 'dots':
-        return computedTotalPages == null ? null : (
-          <div
-            aria-label="Page indicators"
-            className={styles.dotsContainer}
-            role="group">
-            {Array.from({length: computedTotalPages}, (_, index) => {
-              const dotPage = index + 1;
-              const isActive = dotPage === page;
-              return (
-                <button
-                  aria-current={isActive ? 'page' : undefined}
-                  aria-label={`Go to page ${dotPage}`}
-                  className={cx(
-                    styles.dot,
-                    size === 'sm' ? styles.dotSm : undefined,
-                    isActive ? styles.dotActive : undefined,
-                  )}
-                  disabled={isDisabled}
-                  key={dotPage}
-                  onClick={() => handlePageChange(dotPage)}
-                  type="button"
-                />
-              );
-            })}
-          </div>
         );
 
       case 'none':
@@ -366,23 +289,10 @@ export function Pagination({
   return (
     <nav
       aria-label={label}
-      className={cx(styles.root, styles.size[size], className)}
+      className={cx(styles.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      {pageSizeOptions != null && pageSizeOptions.length > 0 ? (
-        <div className={styles.pageSizeSelector}>
-          <Select
-            isDisabled={isDisabled}
-            isLabelHidden
-            label="Items per page"
-            onChange={handlePageSizeChange}
-            options={pageSizeOptions.map(option => String(option))}
-            size={buttonSize}
-            value={String(pageSize)}
-          />
-        </div>
-      ) : null}
       <div className={styles.controls}>
         <Button
           icon={ChevronLeft}
@@ -390,7 +300,7 @@ export function Pagination({
           isIconOnly
           label="Go to previous page"
           onClick={() => handlePageChange(page - 1)}
-          size={buttonSize}
+          size={size}
           variant="ghost"
         />
         {renderIndicator()}
@@ -400,7 +310,7 @@ export function Pagination({
           isIconOnly
           label="Go to next page"
           onClick={() => handlePageChange(page + 1)}
-          size={buttonSize}
+          size={size}
           variant="ghost"
         />
       </div>

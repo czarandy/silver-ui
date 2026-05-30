@@ -119,11 +119,11 @@ export function DropdownMenuItem({
         as="span"
         density={size === 'lg' ? 'default' : 'compact'}
         description={description}
+        endContent={endContent}
         label={label}
-        media={
+        startContent={
           icon != null ? <span className={styles.icon}>{icon}</span> : null
         }
-        trailing={endContent}
       />
     </button>
   );

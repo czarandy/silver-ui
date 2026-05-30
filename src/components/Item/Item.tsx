@@ -19,7 +19,7 @@ export type ItemElement = 'div' | 'li' | 'span';
 
 export interface ItemProps {
   /**
-   * Vertical alignment of the media and trailing slots.
+   * Vertical alignment of the start and end content slots.
    * @default 'center'
    */
   align?: ItemAlign;
@@ -50,6 +50,10 @@ export interface ItemProps {
    */
   descriptionLines?: number;
   /**
+   * Trailing content rendered at the end of the item.
+   */
+  endContent?: ReactNode;
+  /**
    * Link URL. When set, the content area renders as a link.
    */
   href?: string;
@@ -77,10 +81,6 @@ export interface ItemProps {
    */
   labelLines?: number;
   /**
-   * Leading visual content, such as an icon, avatar, or image.
-   */
-  media?: ReactNode;
-  /**
    * Click handler. When set, the content area renders as a button.
    */
   onClick?: MouseEventHandler<HTMLElement>;
@@ -98,9 +98,13 @@ export interface ItemProps {
    */
   role?: string;
   /**
-   * Content rendered before the media slot as a direct flex child.
+   * Content rendered before the start content slot as a direct flex child.
    */
   startAdornment?: ReactNode;
+  /**
+   * Leading visual content, such as an icon, avatar, or image.
+   */
+  startContent?: ReactNode;
   /**
    * Inline styles applied to the root element.
    */
@@ -109,10 +113,6 @@ export interface ItemProps {
    * Link target.
    */
   target?: string;
-  /**
-   * Trailing content rendered at the end of the item.
-   */
-  trailing?: ReactNode;
 }
 
 const styles = {
@@ -160,30 +160,38 @@ const styles = {
   disabledContent: css({
     opacity: 0.5,
   }),
-  media: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-  }),
-  content: css({
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-    minW: 0,
-    textAlign: 'start',
-  }),
   interactiveContent: css({
     all: 'unset',
     boxSizing: 'border-box',
     cursor: 'inherit',
     color: 'inherit',
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '2',
     flex: 1,
     minW: 0,
     textAlign: 'start',
     textDecoration: 'none',
   }),
-  trailing: css({
+  content: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2',
+    flex: 1,
+    minW: 0,
+    textAlign: 'start',
+  }),
+  textContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
+    minW: 0,
+  }),
+  startContent: css({
+    display: 'inline-flex',
+    flexShrink: 0,
+  }),
+  endContent: css({
     display: 'inline-flex',
     alignItems: 'center',
     flexShrink: 0,
@@ -203,7 +211,7 @@ function getMaxLines(
 }
 
 /**
- * Shared media, label, description, and trailing-content row primitive.
+ * Shared start content, label, description, and end content row primitive.
  */
 export function Item({
   align = 'center',
@@ -213,21 +221,21 @@ export function Item({
   density = 'default',
   description,
   descriptionLines,
+  endContent,
   href,
   isDisabled = false,
   isHighlighted = false,
   isSelected = false,
   label,
   labelLines,
-  media,
   onClick,
   ref,
   rel,
   role,
   startAdornment,
+  startContent,
   style,
   target,
-  trailing,
 }: ItemProps): React.JSX.Element {
   const LinkComponent = useLinkComponent();
   const linkRel = useRel({target, rel});
@@ -263,13 +271,31 @@ export function Item({
     onClick?.(event);
   };
 
+  const innerSlots = (
+    <>
+      {startContent != null ? (
+        <span className={styles.startContent}>{startContent}</span>
+      ) : null}
+      <span className={styles.textContent}>{labelAndDescription}</span>
+      {endContent != null ? (
+        <span
+          className={cx(
+            styles.endContent,
+            isDisabled ? styles.disabledContent : undefined,
+          )}>
+          {endContent}
+        </span>
+      ) : null}
+    </>
+  );
+
   const content = hasParentRole ? (
     <span
       className={cx(
         styles.content,
         isDisabled ? styles.disabledContent : undefined,
       )}>
-      {labelAndDescription}
+      {innerSlots}
     </span>
   ) : href != null ? (
     <LinkComponent
@@ -284,7 +310,7 @@ export function Item({
       tabIndex={isDisabled ? -1 : undefined}
       target={target}
       to={LinkComponent === 'a' ? undefined : href}>
-      {labelAndDescription}
+      {innerSlots}
     </LinkComponent>
   ) : onClick != null ? (
     <button
@@ -295,7 +321,7 @@ export function Item({
       disabled={isDisabled}
       onClick={onClick}
       type="button">
-      {labelAndDescription}
+      {innerSlots}
     </button>
   ) : (
     <span
@@ -303,7 +329,7 @@ export function Item({
         styles.content,
         isDisabled ? styles.disabledContent : undefined,
       )}>
-      {labelAndDescription}
+      {innerSlots}
     </span>
   );
 
@@ -333,17 +359,7 @@ export function Item({
       role={role}
       style={style}>
       {startAdornment}
-      {media != null ? <span className={styles.media}>{media}</span> : null}
       {content}
-      {trailing != null ? (
-        <span
-          className={cx(
-            styles.trailing,
-            isDisabled ? styles.disabledContent : undefined,
-          )}>
-          {trailing}
-        </span>
-      ) : null}
     </Component>
   );
 }

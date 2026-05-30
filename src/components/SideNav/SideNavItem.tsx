@@ -59,6 +59,7 @@ export interface SideNavItemProps {
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLElement>;
+
   /**
    * Inline styles applied to the item.
    */
@@ -70,6 +71,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '2',
+    w: '100%',
     minH: '8',
     px: '2',
     py: '1.5',

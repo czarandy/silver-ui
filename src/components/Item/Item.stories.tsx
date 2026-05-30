@@ -29,8 +29,8 @@ export const WithSlots: Story = {
   render: args => (
     <Item
       {...args}
-      media={<Icon color="secondary" icon={User} size="sm" />}
-      trailing={<Badge label="Admin" />}
+      endContent={<Badge label="Admin" />}
+      startContent={<Icon color="secondary" icon={User} size="sm" />}
     />
   ),
 };
@@ -38,13 +38,13 @@ export const WithSlots: Story = {
 export const Interactive: Story = {
   args: {
     onClick: () => {},
-    trailing: <Icon icon={ChevronRight} size="sm" />,
+    endContent: <Icon icon={ChevronRight} size="sm" />,
   },
 };
 
 export const Compact: Story = {
   args: {
     density: 'compact',
-    media: <Icon color="accent" icon={Bell} size="sm" />,
+    startContent: <Icon color="accent" icon={Bell} size="sm" />,
   },
 };

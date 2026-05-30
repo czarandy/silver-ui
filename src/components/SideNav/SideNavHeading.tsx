@@ -67,11 +67,15 @@ export function SideNavHeading({
   style,
   subheading,
   superheading,
-}: SideNavHeadingProps): React.JSX.Element {
+}: SideNavHeadingProps): React.JSX.Element | null {
   const LinkComponent = useLinkComponent(as);
   const {isCollapsed} = useSideNavCollapse();
   const resolvedHref = headingHref ?? href;
   const Element = resolvedHref != null ? LinkComponent : 'div';
+
+  if (isCollapsed && logo == null) {
+    return null;
+  }
 
   return (
     <Element

@@ -5,7 +5,7 @@ const primary = generateColorScale('#547A95');
 const neutral = generateColorScale('#6A7B8C');
 
 export default defineConfig({
-  preflight: false,
+  preflight: true,
   prefix: 'silver',
   include: ['./src/**/*.{ts,tsx}', './.storybook/**/*.{ts,tsx}'],
   exclude: [],

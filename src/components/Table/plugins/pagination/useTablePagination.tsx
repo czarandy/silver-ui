@@ -8,15 +8,13 @@ export interface UseTablePaginationConfig {
   hasMore?: boolean;
   label?: string;
   onPageChange: (page: number) => void;
-  onPageSizeChange?: (pageSize: number) => void;
   page: number;
   pageSize?: number;
-  pageSizeOptions?: number[];
   position?: 'above' | 'below' | 'both' | 'none';
-  size?: 'md' | 'sm';
+  size?: 'lg' | 'md' | 'sm';
   totalItems?: number;
   totalPages?: number;
-  variant?: 'compact' | 'count' | 'dots' | 'none' | 'pages';
+  variant?: 'compact' | 'count' | 'none' | 'pages';
 }
 
 const styles = {
@@ -35,10 +33,8 @@ export function useTablePagination<T extends Record<string, unknown>>({
   hasMore,
   label = 'Table pagination',
   onPageChange,
-  onPageSizeChange,
   page,
   pageSize = 10,
-  pageSizeOptions,
   position = 'below',
   size = 'md',
   totalItems,
@@ -53,13 +49,14 @@ export function useTablePagination<T extends Record<string, unknown>>({
       hasMore,
       label,
       onChange: onPageChange,
-      onPageSizeChange,
       page,
       pageSize,
-      pageSizeOptions,
       size,
-      totalItems,
-      totalPages: computedTotalPages,
+      ...(totalItems != null
+        ? {totalItems}
+        : computedTotalPages != null
+          ? {totalPages: computedTotalPages}
+          : {}),
       variant,
     }),
     [
@@ -67,10 +64,8 @@ export function useTablePagination<T extends Record<string, unknown>>({
       hasMore,
       label,
       onPageChange,
-      onPageSizeChange,
       page,
       pageSize,
-      pageSizeOptions,
       size,
       totalItems,
       variant,
@@ -83,19 +78,7 @@ export function useTablePagination<T extends Record<string, unknown>>({
         if (current.position === 'none') {
           return children;
         }
-        const resolvedTotalPages =
-          current.paginationProps.totalPages ??
-          (current.paginationProps.totalItems != null &&
-          current.paginationProps.pageSize != null
-            ? Math.ceil(
-                current.paginationProps.totalItems /
-                  current.paginationProps.pageSize,
-              )
-            : undefined);
-        if (
-          resolvedTotalPages === 1 &&
-          current.paginationProps.hasMore !== true
-        ) {
+        if (computedTotalPages === 1 && hasMore !== true) {
           return children;
         }
 
@@ -119,6 +102,6 @@ export function useTablePagination<T extends Record<string, unknown>>({
         );
       },
     }),
-    [align, paginationProps, position],
+    [align, computedTotalPages, hasMore, paginationProps, position],
   );
 }

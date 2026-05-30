@@ -161,9 +161,7 @@ export {
 } from './components/ToggleButton';
 export {
   Pagination,
-  generatePageRange,
   type PaginationProps,
-  type PaginationSize,
   type PaginationVariant,
 } from './components/Pagination';
 export {

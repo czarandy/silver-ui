@@ -5,6 +5,7 @@ import {cx} from '../../internal/cx';
 import {MobileNav} from '../MobileNav';
 import {sideNavRecipe} from './SideNav.recipe';
 import {SideNavCollapseContext, useSideNavRenderMode} from './SideNavContext';
+import {SideNavCollapseButton} from './internal/SideNavCollapseButton';
 
 export interface SideNavProps {
   /**
@@ -32,19 +33,10 @@ export interface SideNavProps {
    */
   header?: ReactNode;
   /**
-   * Whether the nav can be collapsed, or a configuration object for
-   * controlled/uncontrolled collapse behavior.
+   * Whether the nav can be collapsed to an icon-only toolbar.
    * @default false
    */
-  isCollapsible?:
-    | boolean
-    | {
-        buttonLabel?: string;
-        isDefaultCollapsed?: boolean;
-        hasButton?: boolean;
-        isCollapsed?: boolean;
-        onCollapsedChange?: (isCollapsed: boolean) => void;
-      };
+  isCollapsible?: boolean;
   /**
    * Ref forwarded to the nav element.
    */
@@ -72,7 +64,12 @@ const styles = {
     overflowY: 'auto',
     overflowX: 'hidden',
     px: '2',
-    py: '2',
+  }),
+  scrollableCollapsed: css({
+    flex: 'none',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   }),
   stickyBottom: css({
     display: 'flex',
@@ -90,6 +87,21 @@ const styles = {
     alignItems: 'center',
     gap: '1',
   }),
+  footerRowCollapsed: css({
+    flexDirection: 'column-reverse',
+    alignItems: 'center',
+  }),
+  footerIcons: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1',
+    ms: 'auto',
+  }),
+  footerIconsCollapsed: css({
+    flexDirection: 'column',
+    alignItems: 'center',
+    ms: '0',
+  }),
   topbarIcons: css({
     display: 'flex',
     alignItems: 'center',
@@ -105,7 +117,7 @@ const styles = {
 export function SideNav({
   children,
   className,
-  isCollapsible: isCollapsibleFromProps = false,
+  isCollapsible = false,
   'data-testid': dataTestId,
   footer,
   footerIcons,
@@ -115,26 +127,10 @@ export function SideNav({
   topContent,
 }: SideNavProps): React.JSX.Element {
   const renderMode = useSideNavRenderMode();
-  const collapsibleConfig = useMemo(
-    () =>
-      typeof isCollapsibleFromProps === 'object' ? isCollapsibleFromProps : {},
-    [isCollapsibleFromProps],
-  );
-  const isCollapsible = Boolean(isCollapsibleFromProps);
-  const isControlled = collapsibleConfig.isCollapsed != null;
-  const [uncontrolledCollapsed, setUncontrolledCollapsed] = useState(
-    collapsibleConfig.isDefaultCollapsed ?? false,
-  );
-  const isCollapsed = isControlled
-    ? Boolean(collapsibleConfig.isCollapsed)
-    : uncontrolledCollapsed;
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const toggle = useCallback(() => {
-    const nextValue = !isCollapsed;
-    if (!isControlled) {
-      setUncontrolledCollapsed(nextValue);
-    }
-    collapsibleConfig.onCollapsedChange?.(nextValue);
-  }, [collapsibleConfig, isCollapsed, isControlled]);
+    setIsCollapsed(prev => !prev);
+  }, []);
   const collapseContext = useMemo(
     () => ({isCollapsed, isCollapsible, toggle}),
     [isCollapsed, isCollapsible, toggle],
@@ -183,17 +179,38 @@ export function SideNav({
         ref={ref}
         role="navigation"
         style={style}>
-        {header != null || topContent != null ? (
+        {header != null || (!isCollapsed && topContent != null) ? (
           <div className={styles.stickyTop}>
             {header}
-            {topContent}
+            {!isCollapsed ? topContent : null}
           </div>
         ) : null}
-        <div className={styles.scrollable}>{children}</div>
-        {footer != null || footerIcons != null ? (
+        <div
+          className={cx(
+            styles.scrollable,
+            isCollapsed && styles.scrollableCollapsed,
+          )}>
+          {children}
+        </div>
+        {footer != null || footerIcons != null || isCollapsible ? (
           <div className={styles.stickyBottom}>
             {footer}
-            <div className={styles.footerRow}>{footerIcons}</div>
+            <div
+              className={cx(
+                styles.footerRow,
+                isCollapsed && styles.footerRowCollapsed,
+              )}>
+              {isCollapsible ? <SideNavCollapseButton /> : null}
+              {footerIcons != null ? (
+                <div
+                  className={cx(
+                    styles.footerIcons,
+                    isCollapsed && styles.footerIconsCollapsed,
+                  )}>
+                  {footerIcons}
+                </div>
+              ) : null}
+            </div>
           </div>
         ) : null}
       </nav>

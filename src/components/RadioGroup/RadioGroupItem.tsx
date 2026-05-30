@@ -197,6 +197,7 @@ export function RadioGroupItem({
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }
+      endContent={endContent}
       isDisabled={isDisabled}
       label={
         <label
@@ -208,10 +209,9 @@ export function RadioGroupItem({
           {label}
         </label>
       }
-      media={media}
       ref={ref}
+      startContent={media}
       style={style}
-      trailing={endContent}
     />
   );
 }

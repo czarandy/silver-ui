@@ -24,6 +24,9 @@ const styles = {
     flexDirection: 'column',
     py: '1',
   }),
+  rootCollapsed: css({
+    py: '0',
+  }),
   header: css({
     display: 'flex',
     alignItems: 'center',
@@ -91,7 +94,11 @@ export function SideNavSection({
   return (
     <div
       aria-labelledby={titleId}
-      className={cx(styles.root, className)}
+      className={cx(
+        styles.root,
+        isCollapsed && styles.rootCollapsed,
+        className,
+      )}
       data-testid={dataTestId}
       ref={ref}
       role="group"

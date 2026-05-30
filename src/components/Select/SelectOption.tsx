@@ -75,11 +75,13 @@ export function SelectOption({
       data-testid={dataTestId}
       density="compact"
       description={description}
+      endContent={endContent}
       label={label}
-      media={icon != null ? <span className={styles.icon}>{icon}</span> : null}
       ref={ref}
+      startContent={
+        icon != null ? <span className={styles.icon}>{icon}</span> : null
+      }
       style={style}
-      trailing={endContent}
     />
   );
 }
