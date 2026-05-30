@@ -7,23 +7,36 @@ A React component library with CSS variable theming, built with [Panda CSS](http
 ## Installation
 
 silver-ui is not published to npm yet. Until it is, consume a local build by
-copying the built files into your app:
+copying the full build output into your app:
 
 ```bash
 pnpm build
+rm -rf path/to/app/src/vendor/silver-ui
 mkdir -p path/to/app/src/vendor/silver-ui
-cp dist/index.js dist/index.d.ts dist/styles.css path/to/app/src/vendor/silver-ui/
+cp -R dist/* path/to/app/src/vendor/silver-ui/
 ```
 
-Then import from the vendored ESM bundle:
+Copy the whole `dist/` directory, not only `index.js`; component entry points
+share generated chunks.
+
+Then import from the vendored ESM files. Use component subpaths for smaller JS
+bundles:
 
 ```tsx
 import './vendor/silver-ui/styles.css';
-import {Button} from './vendor/silver-ui/index.js';
+import {Button} from './vendor/silver-ui/components/Button/index.js';
 
 function App() {
   return <Button label="Click me" />;
 }
+```
+
+The root vendored entry is also available when convenience matters more than
+bundle size:
+
+```tsx
+import './vendor/silver-ui/styles.css';
+import {Button} from './vendor/silver-ui/index.js';
 ```
 
 The JS bundle uses the standard React ecosystem pattern
@@ -54,6 +67,14 @@ pnpm add silver-ui
 yarn add silver-ui
 ```
 
+The npm package exposes the same tree-shakeable component subpaths:
+
+```tsx
+import 'silver-ui/styles.css';
+import {Button} from 'silver-ui/Button';
+import {SideNav, SideNavItem} from 'silver-ui/SideNav';
+```
+
 ## Usage
 
 Import the stylesheet once in your app's entry point, then use components:
@@ -71,28 +92,99 @@ function App() {
 }
 ```
 
+For smaller JS bundles, import component subpaths:
+
+```tsx
+import 'silver-ui/styles.css';
+import {Button} from 'silver-ui/Button';
+import {SideNav, SideNavItem} from 'silver-ui/SideNav';
+```
+
 ## Theming
 
-silver-ui uses CSS variables for theming. Override any `--silver-*` variable to customize the look:
+silver-ui uses CSS variables for theming. Import `styles.css` first, then define
+your overrides in your app CSS.
+
+### Global theme overrides
+
+Override any `--silver-*` variable at `:root` to change the default theme:
 
 ```css
 :root {
   --silver-colors-primary: #e11d48;
   --silver-colors-primary-hover: #be123c;
   --silver-colors-primary-active: #9f1239;
+  --silver-radii-component-md: 0.5rem;
+  --silver-fonts-body: Inter, system-ui, sans-serif;
 }
 ```
 
 All library styles use CSS `@layer`, so your custom CSS always takes precedence without specificity battles.
+
+### Scoped themes
+
+CSS variables can be scoped to any container. This is useful for branded areas,
+previews, or embedded tools:
+
+```css
+.acme-theme {
+  --silver-colors-primary: #2563eb;
+  --silver-colors-primary-hover: #1d4ed8;
+  --silver-colors-primary-active: #1e40af;
+  --silver-colors-bg: #ffffff;
+  --silver-colors-bg-subtle: #f8fafc;
+}
+```
+
+```tsx
+<div className="acme-theme">
+  <Button label="Save" />
+</div>
+```
+
+### Dark theme overrides
+
+The built styles include dark-mode tokens for `[data-theme="dark"]`. Set that
+attribute on a parent element and override dark values there:
+
+```css
+[data-theme='dark'] {
+  --silver-colors-primary: #93c5fd;
+  --silver-colors-primary-hover: #bfdbfe;
+  --silver-colors-bg: #0f172a;
+  --silver-colors-bg-subtle: #1e293b;
+  --silver-colors-fg: #f8fafc;
+  --silver-colors-fg-muted: #cbd5e1;
+  --silver-colors-border: #334155;
+}
+```
 
 ### Per-instance overrides
 
 Every component accepts `className` and `style` props:
 
 ```tsx
-<Button className="my-custom-class" style={{marginTop: 8}}>
-  Custom
-</Button>
+<Button className="danger-action" label="Delete" />
+```
+
+```css
+.danger-action {
+  --silver-colors-primary: #dc2626;
+  --silver-colors-primary-hover: #b91c1c;
+  --silver-colors-primary-active: #991b1b;
+}
+```
+
+Use `style` for one-off layout or variable overrides:
+
+```tsx
+<Button
+  label="Custom"
+  style={{
+    marginTop: 8,
+    '--silver-radii-component-md': '9999px',
+  }}
+/>
 ```
 
 ## Components

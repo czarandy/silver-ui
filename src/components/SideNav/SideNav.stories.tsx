@@ -286,20 +286,43 @@ export const WithLogo: Story = {
   ),
 };
 
-export const ChildrenOverridingLabel: Story = {
+export const CollapsibleItems: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home">
-            <strong>Home</strong>{' '}
-            <span style={{color: 'var(--colors-fg-muted)', fontSize: 12}}>
-              (default)
-            </span>
+          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
+          <SideNavItem icon={<Settings />} isCollapsible label="Settings">
+            <SideNavItem href="/general" label="General" />
+            <SideNavItem href="/security" label="Security" />
+            <SideNavItem href="/notifications" label="Notifications" />
           </SideNavItem>
-          <SideNavItem href="/settings" icon={<Settings />} label="Settings">
-            Settings <Badge label="New" />
+        </SideNavSection>
+      </SideNav>
+    </div>
+  ),
+};
+
+export const CollapsibleWithLinks: Story = {
+  render: () => (
+    <div style={{height: 420}}>
+      <SideNav
+        header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
+        <SideNavSection title="Main">
+          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
+          <SideNavItem
+            href="/settings"
+            icon={<Settings />}
+            isCollapsible
+            label="Settings">
+            <SideNavItem href="/general" label="General" />
+            <SideNavItem href="/security" label="Security" />
+          </SideNavItem>
+          <SideNavItem href="/team" icon={<Users />} isCollapsible label="Team">
+            <SideNavItem href="/members" label="Members" />
+            <SideNavItem href="/roles" label="Roles" />
           </SideNavItem>
         </SideNavSection>
       </SideNav>

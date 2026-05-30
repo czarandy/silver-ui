@@ -649,6 +649,17 @@ export {
   type TimeOperatorValue,
 } from './components/SearchFilterInput';
 export {TextArea, type TextAreaProps} from './components/TextArea';
+export {
+  Heading,
+  type HeadingLevel,
+  type HeadingProps,
+  type HeadingType,
+  Text,
+  type TextColor,
+  type TextProps,
+  type TextType,
+  type TextWeight,
+} from './components/Text';
 export {NumberInput, type NumberInputProps} from './components/NumberInput';
 export {
   CheckboxInput,

@@ -1,9 +1,12 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
+import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {useCallback, useId, useState} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
+import {Item} from '../Item';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {useSideNavCollapse} from './SideNavContext';
@@ -14,7 +17,7 @@ export interface SideNavItemProps {
    */
   as?: LinkComponent;
   /**
-   * Custom label content. Falls back to the `label` prop text.
+   * Nested sub-items rendered below this item.
    */
   children?: ReactNode;
   /**
@@ -36,7 +39,17 @@ export interface SideNavItemProps {
   /**
    * Icon rendered before the label.
    */
-  icon: ReactNode;
+  icon?: ReactNode;
+  /**
+   * Whether the item can expand/collapse its children.
+   * @default false
+   */
+  isCollapsible?: boolean;
+  /**
+   * Whether the item's children are initially expanded.
+   * @default true
+   */
+  isDefaultExpanded?: boolean;
   /**
    * Whether the item is disabled.
    * @default false
@@ -48,7 +61,7 @@ export interface SideNavItemProps {
    */
   isSelected?: boolean;
   /**
-   * Accessible item label, also used as visible text when children are omitted.
+   * Accessible item label, also used as visible text.
    */
   label: string;
   /**
@@ -59,7 +72,6 @@ export interface SideNavItemProps {
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLElement>;
-
   /**
    * Inline styles applied to the item.
    */
@@ -67,47 +79,17 @@ export interface SideNavItemProps {
 }
 
 const styles = {
-  item: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    w: '100%',
-    minH: '8',
-    px: '2',
-    py: '1.5',
-    borderRadius: 'md',
+  navItem: css({
     color: 'fg.muted',
-    textDecoration: 'none',
-    fontFamily: 'body',
     fontSize: 'sm',
     fontWeight: 'medium',
-    bg: 'transparent',
-    borderWidth: 0,
-    textAlign: 'start',
-    cursor: 'pointer',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outline: '2px solid',
-      outlineColor: 'primary',
-      outlineOffset: '2px',
-    },
+    minH: '8',
+    py: '0.5',
   }),
-  selected: css({
+  navItemSelected: css({
     bg: 'bg.subtle',
     color: 'fg',
     fontWeight: 'semibold',
-  }),
-  disabled: css({
-    opacity: 0.5,
-    cursor: 'not-allowed',
-    pointerEvents: 'none',
-  }),
-  label: css({
-    flex: 1,
-    minW: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
   }),
   icon: css({
     flexShrink: 0,
@@ -120,21 +102,109 @@ const styles = {
       h: '1em',
     },
   }),
-  endContent: css({
-    flexShrink: 0,
+  collapsed: css({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    w: '10',
+    minH: '8',
+    px: 0,
+    py: '1.5',
+    borderRadius: 'md',
+    color: 'fg.muted',
+    textDecoration: 'none',
+    bg: 'transparent',
+    borderWidth: 0,
+    cursor: 'pointer',
+    _hover: {bg: 'bg.subtle'},
+    _focusVisible: {
+      outline: '2px solid',
+      outlineColor: 'primary',
+      outlineOffset: '2px',
+    },
+  }),
+  collapsedSelected: css({
+    bg: 'bg.subtle',
+    color: 'fg',
+  }),
+  collapsedDisabled: css({
+    opacity: 0.5,
+    cursor: 'not-allowed',
+    pointerEvents: 'none',
+  }),
+  toggleRow: css({
+    all: 'unset',
+    boxSizing: 'border-box',
+    display: 'flex',
+    w: '100%',
+    cursor: 'pointer',
+    borderRadius: 'md',
+    _hover: {bg: 'bg.subtle'},
+    _focusVisible: {
+      outline: '2px solid',
+      outlineColor: 'primary',
+      outlineOffset: '2px',
+    },
+  }),
+  toggleRowDisabled: css({
+    opacity: 0.5,
+    cursor: 'not-allowed',
+    pointerEvents: 'none',
+  }),
+  chevron: css({
     display: 'inline-flex',
     alignItems: 'center',
-  }),
-  collapsed: css({
     justifyContent: 'center',
-    px: 0,
-    w: '10',
+    transitionProperty: 'transform',
+    transitionDuration: 'fast',
+    transitionTimingFunction: 'default',
+    '& > svg': {
+      w: '1em',
+      h: '1em',
+    },
+  }),
+  chevronExpanded: css({
+    transform: 'rotate(180deg)',
+  }),
+  toggleButton: css({
+    all: 'unset',
+    boxSizing: 'border-box',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+    w: '7',
+    h: '7',
+    borderRadius: 'md',
+    cursor: 'pointer',
+    color: 'fg.muted',
+    _hover: {bg: 'bg.subtle'},
+    _focusVisible: {
+      outline: '2px solid',
+      outlineColor: 'primary',
+      outlineOffset: '2px',
+    },
+  }),
+  childrenContainer: css({
+    display: 'grid',
+    gridTemplateRows: '1fr',
+    transitionProperty: 'grid-template-rows',
+    transitionDuration: 'fast',
+    transitionTimingFunction: 'default',
+  }),
+  childrenCollapsed: css({
+    gridTemplateRows: '0fr',
+  }),
+  childrenInner: css({
+    overflow: 'hidden',
+    ps: '6',
   }),
 };
 
 /**
  * A single navigation item inside a SideNav. Renders as a link when
- * `href` is provided, or a button otherwise.
+ * `href` is provided, or a button otherwise. Supports nested sub-items
+ * via `children` with optional expand/collapse behavior.
  */
 export function SideNavItem({
   as,
@@ -144,6 +214,8 @@ export function SideNavItem({
   endContent,
   href,
   icon,
+  isCollapsible: isItemCollapsible = false,
+  isDefaultExpanded = true,
   isDisabled = false,
   isSelected = false,
   label,
@@ -154,68 +226,192 @@ export function SideNavItem({
   const LinkComponent = useLinkComponent(as);
   const {closeMobileNav} = useAppShellMobile();
   const {isCollapsed} = useSideNavCollapse();
-  const classNames = cx(
-    styles.item,
-    isSelected && styles.selected,
-    isDisabled && styles.disabled,
-    isCollapsed && styles.collapsed,
-    className,
-  );
+  const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
+  const childrenId = useId();
 
-  const content = (
-    <>
-      <span aria-hidden="true" className={styles.icon}>
-        {icon}
-      </span>
-      {!isCollapsed ? (
-        <span className={styles.label}>{children ?? label}</span>
-      ) : null}
-      {!isCollapsed && endContent != null ? (
-        <span className={styles.endContent}>{endContent}</span>
-      ) : null}
-    </>
-  );
+  const hasChildren = children != null;
+  const isExpandable = hasChildren && isItemCollapsible;
+  const hasPrimaryAction = href != null || onClick != null;
+
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded(prev => !prev);
+  }, []);
 
   const handleClick: MouseEventHandler<HTMLElement> = event => {
     if (isDisabled) {
       event.preventDefault();
       return;
     }
-
     onClick?.(event);
     closeMobileNav();
   };
 
-  if (href != null && !isDisabled) {
+  const iconSlot =
+    icon != null ? (
+      <span aria-hidden="true" className={styles.icon}>
+        {icon}
+      </span>
+    ) : undefined;
+
+  // --- Collapsed sidebar: icon-only rendering ---
+  if (isCollapsed) {
+    const collapsedClassNames = cx(
+      styles.collapsed,
+      isSelected && styles.collapsedSelected,
+      isDisabled && styles.collapsedDisabled,
+      className,
+    );
+
+    if (href != null && !isDisabled) {
+      return (
+        <LinkComponent
+          aria-current={isSelected ? 'page' : undefined}
+          aria-label={label}
+          className={collapsedClassNames}
+          data-testid={dataTestId}
+          href={href}
+          onClick={handleClick}
+          ref={ref as Ref<HTMLAnchorElement>}
+          style={style}
+          to={LinkComponent === 'a' ? undefined : href}>
+          {iconSlot}
+        </LinkComponent>
+      );
+    }
+
     return (
-      <LinkComponent
+      <button
         aria-current={isSelected ? 'page' : undefined}
-        aria-label={isCollapsed ? label : undefined}
-        className={classNames}
+        aria-label={label}
+        className={collapsedClassNames}
         data-testid={dataTestId}
-        href={href}
+        disabled={isDisabled}
         onClick={handleClick}
-        ref={ref as Ref<HTMLAnchorElement>}
+        ref={ref as Ref<HTMLButtonElement>}
         style={style}
-        to={LinkComponent === 'a' ? undefined : href}>
-        {content}
-      </LinkComponent>
+        type="button">
+        {iconSlot}
+      </button>
     );
   }
 
+  // --- Expanded sidebar ---
+
+  const chevronSlot = isExpandable ? (
+    <span className={cx(styles.chevron, isExpanded && styles.chevronExpanded)}>
+      <ChevronDown />
+    </span>
+  ) : null;
+
+  const childrenContainer =
+    children != null ? (
+      <div
+        className={cx(
+          styles.childrenContainer,
+          isExpandable && !isExpanded && styles.childrenCollapsed,
+        )}
+        id={childrenId}
+        role="group">
+        <div className={styles.childrenInner}>{children}</div>
+      </div>
+    ) : null;
+
+  // Collapsible WITHOUT primary action: whole row toggles
+  if (isExpandable && !hasPrimaryAction) {
+    return (
+      <>
+        <button
+          aria-controls={childrenId}
+          aria-expanded={isExpanded}
+          className={cx(
+            styles.toggleRow,
+            isSelected && styles.navItemSelected,
+            isDisabled && styles.toggleRowDisabled,
+            className,
+          )}
+          data-testid={dataTestId}
+          disabled={isDisabled}
+          onClick={toggleExpanded}
+          ref={ref as Ref<HTMLButtonElement>}
+          style={style}
+          type="button">
+          <Item
+            as="span"
+            className={styles.navItem}
+            density="compact"
+            endContent={chevronSlot}
+            label={label}
+            startContent={iconSlot}
+          />
+        </button>
+        {childrenContainer}
+      </>
+    );
+  }
+
+  // Collapsible WITH primary action: split-action (link + chevron)
+  if (isExpandable && hasPrimaryAction) {
+    return (
+      <>
+        <Item
+          aria-current={isSelected ? 'page' : undefined}
+          className={cx(
+            styles.navItem,
+            isSelected && styles.navItemSelected,
+            className,
+          )}
+          data-testid={dataTestId}
+          density="compact"
+          endContent={endContent}
+          href={isDisabled ? undefined : href}
+          isDisabled={isDisabled}
+          label={label}
+          linkComponent={as}
+          onClick={handleClick}
+          ref={ref}
+          startContent={iconSlot}
+          style={style}
+          trailingContent={
+            <button
+              aria-controls={childrenId}
+              aria-expanded={isExpanded}
+              aria-label={isExpanded ? `Collapse ${label}` : `Expand ${label}`}
+              className={styles.toggleButton}
+              onClick={toggleExpanded}
+              type="button">
+              {chevronSlot}
+            </button>
+          }
+        />
+        {childrenContainer}
+      </>
+    );
+  }
+
+  // Leaf item (no collapsible children): compose Item directly
   return (
-    <button
-      aria-current={isSelected ? 'page' : undefined}
-      aria-label={isCollapsed ? label : undefined}
-      className={classNames}
-      data-testid={dataTestId}
-      disabled={isDisabled}
-      onClick={handleClick}
-      ref={ref as Ref<HTMLButtonElement>}
-      style={style}
-      type="button">
-      {content}
-    </button>
+    <>
+      <Item
+        aria-current={isSelected ? 'page' : undefined}
+        className={cx(
+          styles.navItem,
+          isSelected && styles.navItemSelected,
+          className,
+        )}
+        data-testid={dataTestId}
+        density="compact"
+        endContent={endContent}
+        href={isDisabled ? undefined : href}
+        isDisabled={isDisabled}
+        label={label}
+        linkComponent={as}
+        onClick={handleClick}
+        ref={ref}
+        startContent={iconSlot}
+        style={style}
+      />
+      {childrenContainer}
+    </>
   );
 }
 

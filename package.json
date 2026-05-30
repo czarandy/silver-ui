@@ -18,11 +18,21 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.cts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index.cjs"
       }
     },
-    "./styles.css": "./dist/styles.css"
+    "./styles.css": "./dist/styles.css",
+    "./*": {
+      "import": {
+        "types": "./dist/components/*/index.d.ts",
+        "default": "./dist/components/*/index.js"
+      },
+      "require": {
+        "types": "./dist/components/*/index.d.ts",
+        "default": "./dist/components/*/index.cjs"
+      }
+    }
   },
   "files": [
     "dist"
@@ -30,7 +40,7 @@
   "scripts": {
     "prepare": "husky && panda codegen",
     "storybook": "storybook dev -p 6006 --ci",
-    "build": "panda codegen && tsup && panda cssgen --outfile dist/styles.css --minify",
+    "build": "panda codegen && tsup && tsc -p tsconfig.build.json && panda cssgen --outfile dist/styles.css --minify",
     "build:storybook": "storybook build",
     "test": "vitest run",
     "test:watch": "vitest",

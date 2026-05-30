@@ -1,9 +1,15 @@
 import {defineConfig} from 'tsup';
+import {getComponentEntries} from './build/componentEntries.mjs';
+
+const componentEntries = getComponentEntries();
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    ...componentEntries,
+  },
   format: ['esm', 'cjs'],
-  dts: true,
+  dts: false,
   sourcemap: true,
   clean: true,
   external: ['react', 'react-dom'],

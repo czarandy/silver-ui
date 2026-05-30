@@ -187,16 +187,18 @@ describe('SideNavItem', () => {
     expect(screen.getByTestId('badge')).toBeInTheDocument();
   });
 
-  it('renders children instead of label text', () => {
+  it('renders nested children below the item', () => {
     render(
       <SideNav>
-        <SideNavItem href="/home" icon={<Home />} label="Home">
-          <strong>Custom Home</strong>
+        <SideNavItem icon={<Home />} label="Settings">
+          <SideNavItem href="/general" label="General" />
+          <SideNavItem href="/security" label="Security" />
         </SideNavItem>
       </SideNav>,
     );
 
-    expect(screen.getByText('Custom Home')).toBeInTheDocument();
+    expect(screen.getByText('General')).toBeInTheDocument();
+    expect(screen.getByText('Security')).toBeInTheDocument();
   });
 
   it('applies className, style, data-testid, and ref', () => {
@@ -217,10 +219,10 @@ describe('SideNavItem', () => {
     const item = screen.getByTestId('nav-item');
     expect(item).toHaveClass('custom-item');
     expect(item).toHaveStyle({color: 'rgb(255, 0, 0)'});
-    expect(ref).toHaveBeenCalledWith(expect.any(HTMLButtonElement));
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 
-  it('forwards ref as anchor when href is provided', () => {
+  it('forwards ref as div when href is provided', () => {
     const ref = vi.fn<(el: HTMLElement | null) => void>();
     render(
       <SideNav>
@@ -228,7 +230,7 @@ describe('SideNavItem', () => {
       </SideNav>,
     );
 
-    expect(ref).toHaveBeenCalledWith(expect.any(HTMLAnchorElement));
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 
   it('uses custom link component via as prop', () => {
@@ -693,12 +695,92 @@ describe('SideNav collapsed state', () => {
       </SideNav>,
     );
 
-    const link = screen.getByRole('link', {name: 'Home'});
-    expect(link).toHaveTextContent('Home');
+    expect(screen.getByRole('link', {name: 'Home'})).toHaveTextContent('Home');
 
     await user.click(screen.getByRole('button', {name: 'Collapse sidebar'}));
 
-    expect(link).not.toHaveTextContent('Home');
-    expect(link).toHaveAttribute('aria-label', 'Home');
+    const collapsedLink = screen.getByRole('link', {name: 'Home'});
+    expect(collapsedLink).toHaveAttribute('aria-label', 'Home');
+  });
+});
+
+describe('SideNavItem collapsible', () => {
+  it('toggles children on click', async () => {
+    const user = userEvent.setup();
+    render(
+      <SideNav>
+        <SideNavItem icon={<Home />} isCollapsible label="Settings">
+          <SideNavItem href="/general" label="General" />
+        </SideNavItem>
+      </SideNav>,
+    );
+
+    const toggle = screen.getByRole('button', {name: 'Settings'});
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(toggle);
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('starts collapsed when isDefaultExpanded is false', () => {
+    render(
+      <SideNav>
+        <SideNavItem
+          icon={<Home />}
+          isCollapsible
+          isDefaultExpanded={false}
+          label="Settings">
+          <SideNavItem href="/general" label="General" />
+        </SideNavItem>
+      </SideNav>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Settings'})).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  it('renders split-action when collapsible with href', async () => {
+    const user = userEvent.setup();
+    render(
+      <SideNav>
+        <SideNavItem
+          href="/settings"
+          icon={<Home />}
+          isCollapsible
+          label="Settings">
+          <SideNavItem href="/general" label="General" />
+        </SideNavItem>
+      </SideNav>,
+    );
+
+    expect(screen.getByRole('link', {name: 'Settings'})).toHaveAttribute(
+      'href',
+      '/settings',
+    );
+
+    const chevron = screen.getByRole('button', {name: 'Collapse Settings'});
+    expect(chevron).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(chevron);
+
+    expect(chevron).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('hides children when sidebar is collapsed', async () => {
+    const user = userEvent.setup();
+    render(
+      <SideNav isCollapsible>
+        <SideNavItem icon={<Home />} isCollapsible label="Settings">
+          <SideNavItem href="/general" label="General" />
+        </SideNavItem>
+      </SideNav>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Collapse sidebar'}));
+
+    expect(screen.queryByText('General')).not.toBeInTheDocument();
   });
 });

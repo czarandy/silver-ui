@@ -1,6 +1,7 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as/link component props */
 
 import type {
+  AriaAttributes,
   CSSProperties,
   MouseEvent,
   MouseEventHandler,
@@ -10,6 +11,7 @@ import type {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useRel} from '../../internal/linkAccessibility';
+import type {LinkComponent as LinkComponentType} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Text} from '../Text';
 
@@ -23,6 +25,10 @@ export interface ItemProps {
    * @default 'center'
    */
   align?: ItemAlign;
+  /**
+   * ARIA current indicator forwarded to the interactive element.
+   */
+  'aria-current'?: AriaAttributes['aria-current'];
   /**
    * HTML element used for the root.
    * @default 'div'
@@ -50,7 +56,8 @@ export interface ItemProps {
    */
   descriptionLines?: number;
   /**
-   * Trailing content rendered at the end of the item.
+   * Trailing content rendered at the end of the item, inside the
+   * interactive area.
    */
   endContent?: ReactNode;
   /**
@@ -81,7 +88,16 @@ export interface ItemProps {
    */
   labelLines?: number;
   /**
-   * Click handler. When set, the content area renders as a button.
+   * Content rendered outside the interactive area, before it.
+   */
+  leadingContent?: ReactNode;
+  /**
+   * Custom link component used when href is set.
+   */
+  linkComponent?: LinkComponentType;
+  /**
+   * Click handler. When set without href, the content area renders as a
+   * button. When set with href, also fires on link clicks.
    */
   onClick?: MouseEventHandler<HTMLElement>;
   /**
@@ -98,10 +114,6 @@ export interface ItemProps {
    */
   role?: string;
   /**
-   * Content rendered before the start content slot as a direct flex child.
-   */
-  startAdornment?: ReactNode;
-  /**
    * Leading visual content, such as an icon, avatar, or image.
    */
   startContent?: ReactNode;
@@ -113,6 +125,10 @@ export interface ItemProps {
    * Link target.
    */
   target?: string;
+  /**
+   * Content rendered outside the interactive area, after it.
+   */
+  trailingContent?: ReactNode;
 }
 
 const styles = {
@@ -197,6 +213,11 @@ const styles = {
     flexShrink: 0,
     marginInlineStart: 'auto',
   }),
+  trailingContent: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    flexShrink: 0,
+  }),
 } as const;
 
 function getMaxLines(
@@ -215,6 +236,7 @@ function getMaxLines(
  */
 export function Item({
   align = 'center',
+  'aria-current': ariaCurrent,
   as: Component = 'div',
   className,
   'data-testid': dataTestId,
@@ -228,16 +250,18 @@ export function Item({
   isSelected = false,
   label,
   labelLines,
+  leadingContent,
+  linkComponent,
   onClick,
   ref,
   rel,
   role,
-  startAdornment,
   startContent,
   style,
   target,
+  trailingContent,
 }: ItemProps): React.JSX.Element {
-  const LinkComponent = useLinkComponent();
+  const LinkComponent = useLinkComponent(linkComponent);
   const linkRel = useRel({target, rel});
   const isInteractive = href != null || onClick != null;
   const hasParentRole = role != null;
@@ -299,12 +323,14 @@ export function Item({
     </span>
   ) : href != null ? (
     <LinkComponent
+      aria-current={ariaCurrent ?? undefined}
       aria-disabled={isDisabled || undefined}
       className={cx(
         styles.interactiveContent,
         isDisabled ? styles.disabledContent : undefined,
       )}
       href={href}
+      onClick={onClick}
       ref={undefined}
       rel={linkRel}
       tabIndex={isDisabled ? -1 : undefined}
@@ -314,6 +340,7 @@ export function Item({
     </LinkComponent>
   ) : onClick != null ? (
     <button
+      aria-current={ariaCurrent ?? undefined}
       className={cx(
         styles.interactiveContent,
         isDisabled ? styles.disabledContent : undefined,
@@ -358,8 +385,11 @@ export function Item({
       ref={ref as Ref<never>}
       role={role}
       style={style}>
-      {startAdornment}
+      {leadingContent}
       {content}
+      {trailingContent != null ? (
+        <span className={styles.trailingContent}>{trailingContent}</span>
+      ) : null}
     </Component>
   );
 }

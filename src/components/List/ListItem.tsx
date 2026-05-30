@@ -193,10 +193,10 @@ export function ListItem({
       isDisabled={isDisabled}
       isSelected={isSelected}
       label={label}
+      leadingContent={<Marker listStyle={listStyle} />}
       onClick={onClick}
       ref={ref}
       rel={rel}
-      startAdornment={<Marker listStyle={listStyle} />}
       startContent={startContent}
       style={style}
       target={target}

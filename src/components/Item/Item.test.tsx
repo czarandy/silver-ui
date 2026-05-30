@@ -26,21 +26,23 @@ describe('Item', () => {
     expect(screen.getByText('Supporting text')).toBeInTheDocument();
   });
 
-  it('renders startContent, endContent, and start adornment', () => {
+  it('renders startContent, endContent, leadingContent, trailingContent', () => {
     render(
       <Item
         data-testid="item"
         endContent={<span data-testid="end">T</span>}
         label="Project"
-        startAdornment={<span data-testid="marker">1.</span>}
+        leadingContent={<span data-testid="leading">1.</span>}
         startContent={<span data-testid="start">M</span>}
+        trailingContent={<span data-testid="trailing">X</span>}
       />,
     );
 
     expect(screen.getByTestId('item')).toBeInTheDocument();
-    expect(screen.getByTestId('marker')).toBeInTheDocument();
+    expect(screen.getByTestId('leading')).toBeInTheDocument();
     expect(screen.getByTestId('start')).toBeInTheDocument();
     expect(screen.getByTestId('end')).toBeInTheDocument();
+    expect(screen.getByTestId('trailing')).toBeInTheDocument();
   });
 
   it('fires onClick from the invisible button', async () => {
@@ -86,5 +88,68 @@ describe('Item', () => {
 
     expect(screen.getByTestId('item')).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByTestId('item')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('forwards aria-current to the link element', () => {
+    render(<Item aria-current="page" href="/home" label="Home" />);
+
+    expect(screen.getByRole('link', {name: 'Home'})).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  it('forwards aria-current to the button element', () => {
+    render(<Item aria-current="page" label="Home" onClick={() => {}} />);
+
+    expect(screen.getByRole('button', {name: 'Home'})).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+  });
+
+  it('fires onClick on link clicks', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(<Item href="/home" label="Home" onClick={onClick} />);
+
+    await user.click(screen.getByRole('link', {name: 'Home'}));
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+
+  it('uses linkComponent for link rendering', () => {
+    render(
+      <Item href="/settings" label="Settings" linkComponent={RouterLink} />,
+    );
+
+    expect(screen.getByRole('link', {name: 'Settings'})).toHaveAttribute(
+      'data-to',
+      '/settings',
+    );
+  });
+
+  it('linkComponent overrides LinkProvider', () => {
+    function ProviderLink({
+      children,
+      ref,
+      ...props
+    }: ComponentPropsWithRef<'a'>): React.JSX.Element {
+      return (
+        <a data-provider ref={ref} {...props}>
+          {children}
+        </a>
+      );
+    }
+
+    render(
+      <LinkProvider component={ProviderLink}>
+        <Item href="/settings" label="Settings" linkComponent={RouterLink} />
+      </LinkProvider>,
+    );
+
+    const link = screen.getByRole('link', {name: 'Settings'});
+    expect(link).toHaveAttribute('data-to');
+    expect(link).not.toHaveAttribute('data-provider');
   });
 });
