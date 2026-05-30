@@ -36,7 +36,7 @@ export interface SideNavItemProps {
   /**
    * Icon rendered before the label.
    */
-  icon?: ReactNode;
+  icon: ReactNode;
   /**
    * Whether the item is disabled.
    * @default false
@@ -164,11 +164,9 @@ export function SideNavItem({
 
   const content = (
     <>
-      {icon != null ? (
-        <span aria-hidden="true" className={styles.icon}>
-          {icon}
-        </span>
-      ) : null}
+      <span aria-hidden="true" className={styles.icon}>
+        {icon}
+      </span>
       {!isCollapsed ? (
         <span className={styles.label}>{children ?? label}</span>
       ) : null}

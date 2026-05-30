@@ -1,4 +1,5 @@
 import {render, screen} from '@testing-library/react';
+import {Home} from 'lucide-react';
 import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
 import {SideNav, SideNavItem, SideNavSection} from '../SideNav';
 import {TopNav, TopNavHeading, TopNavItem} from '../TopNav';
@@ -58,7 +59,7 @@ describe('AppShell', () => {
         sideNav={
           <SideNav>
             <SideNavSection title="Main">
-              <SideNavItem href="/home" label="Home" />
+              <SideNavItem href="/home" icon={<Home />} label="Home" />
             </SideNavSection>
           </SideNav>
         }
@@ -89,7 +90,7 @@ describe('AppShell', () => {
       <AppShell
         sideNav={
           <SideNav>
-            <SideNavItem href="/home" label="Home" />
+            <SideNavItem href="/home" icon={<Home />} label="Home" />
           </SideNav>
         }>
         <div>Content</div>

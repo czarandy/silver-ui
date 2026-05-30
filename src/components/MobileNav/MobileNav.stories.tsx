@@ -1,4 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {Home, Settings} from 'lucide-react';
 import type {ComponentProps} from 'react';
 import {useState} from 'react';
 import {Button} from '../Button';
@@ -25,8 +26,8 @@ function ControlledExample(args: ComponentProps<typeof MobileNav>) {
     <>
       <Button label="Open navigation" onClick={() => setIsOpen(true)} />
       <MobileNav {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
-        <SideNavItem href="/home" label="Home" />
-        <SideNavItem href="/settings" label="Settings" />
+        <SideNavItem href="/home" icon={<Home />} label="Home" />
+        <SideNavItem href="/settings" icon={<Settings />} label="Settings" />
       </MobileNav>
     </>
   );

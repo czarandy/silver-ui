@@ -6,6 +6,46 @@ A React component library with CSS variable theming, built with [Panda CSS](http
 
 ## Installation
 
+silver-ui is not published to npm yet. Until it is, consume a local build by
+copying the built files into your app:
+
+```bash
+pnpm build
+mkdir -p path/to/app/src/vendor/silver-ui
+cp dist/index.js dist/index.d.ts dist/styles.css path/to/app/src/vendor/silver-ui/
+```
+
+Then import from the vendored ESM bundle:
+
+```tsx
+import './vendor/silver-ui/styles.css';
+import {Button} from './vendor/silver-ui/index.js';
+
+function App() {
+  return <Button label="Click me" />;
+}
+```
+
+The JS bundle uses the standard React ecosystem pattern
+`process.env.NODE_ENV` for development-only validation. Most app bundlers
+(Vite, Webpack, Next.js, Remix, etc.) replace this automatically. If you copy
+the file into a setup that does not perform that replacement, configure your
+bundler to define it. For example:
+
+```ts
+import {defineConfig} from 'vite';
+
+export default defineConfig({
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(
+      process.env.NODE_ENV ?? 'development',
+    ),
+  },
+});
+```
+
+Once silver-ui is published, install it from npm:
+
 ```bash
 npm install silver-ui
 # or

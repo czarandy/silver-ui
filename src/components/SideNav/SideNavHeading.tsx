@@ -79,6 +79,7 @@ export function SideNavHeading({
 
   return (
     <Element
+      aria-label={isCollapsed && resolvedHref != null ? heading : undefined}
       className={cx(styles.root, isCollapsed && styles.collapsed, className)}
       data-testid={dataTestId}
       href={resolvedHref}
