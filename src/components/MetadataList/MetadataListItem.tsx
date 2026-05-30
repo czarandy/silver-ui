@@ -1,15 +1,40 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {Icon, type IconComponent} from '../Icon';
 import {useMetadataList} from './MetadataListContext';
 
+/**
+ * A single label-value pair rendered inside a MetadataList.
+ */
 export interface MetadataListItemProps {
+  /**
+   * Value content rendered beside or below the label.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the root element.
+   */
   className?: string;
+  /**
+   * Test ID applied to the root element.
+   */
   'data-testid'?: string;
-  icon?: ReactNode;
+  /**
+   * Optional icon rendered before the label text.
+   */
+  icon?: IconComponent;
+  /**
+   * Descriptive label for this metadata entry.
+   */
   label: string;
-  ref?: Ref<HTMLElement>;
+  /**
+   * Ref forwarded to the root element.
+   */
+  ref?: Ref<HTMLDivElement>;
+  /**
+   * Inline styles applied to the root element.
+   */
   style?: CSSProperties;
 }
 
@@ -17,7 +42,7 @@ const styles = {
   label: css({
     color: 'fg.muted',
     fontSize: 'md',
-    fontWeight: 'medium',
+    fontWeight: 'bold',
     display: 'flex',
     alignItems: 'center',
     gap: '2',
@@ -36,12 +61,14 @@ const styles = {
     flexDirection: 'column',
     gap: '0.5',
   }),
-  icon: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
+  inline: css({
+    display: 'contents',
   }),
 } as const;
 
+/**
+ * A single label-value pair rendered inside a MetadataList.
+ */
 export function MetadataListItem({
   children,
   icon,
@@ -52,11 +79,15 @@ export function MetadataListItem({
   ref,
 }: MetadataListItemProps): React.JSX.Element {
   const context = useMetadataList();
-  const isStacked =
-    context?.label.position === 'top' || context?.orientation === 'horizontal';
+
+  if (context == null && process.env.NODE_ENV !== 'production') {
+    throw new Error('MetadataListItem must be rendered inside a MetadataList.');
+  }
+
+  const isStacked = context?.labelPosition === 'top';
   const labelContent = (
     <>
-      {icon != null ? <span className={styles.icon}>{icon}</span> : null}
+      {icon != null ? <Icon color="secondary" icon={icon} size="sm" /> : null}
       {label}
     </>
   );
@@ -66,7 +97,7 @@ export function MetadataListItem({
       <div
         className={cx(styles.stacked, className)}
         data-testid={dataTestId}
-        ref={ref as Ref<HTMLDivElement>}
+        ref={ref}
         style={style}>
         <dt className={styles.label}>{labelContent}</dt>
         <dd className={styles.value}>{children}</dd>
@@ -75,20 +106,14 @@ export function MetadataListItem({
   }
 
   return (
-    <>
-      <dt
-        className={cx(styles.label, className)}
-        data-testid={dataTestId ? `${dataTestId}-label` : undefined}
-        ref={ref}
-        style={style}>
-        {labelContent}
-      </dt>
-      <dd
-        className={styles.value}
-        data-testid={dataTestId ? `${dataTestId}-value` : undefined}>
-        {children}
-      </dd>
-    </>
+    <div
+      className={cx(styles.inline, className)}
+      data-testid={dataTestId}
+      ref={ref}
+      style={style}>
+      <dt className={styles.label}>{labelContent}</dt>
+      <dd className={styles.value}>{children}</dd>
+    </div>
   );
 }
 

@@ -52,7 +52,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [x] Kbd
 - [ ] Lightbox
 - [ ] List
-- [ ] MetadataList
+- [x] MetadataList
 - [ ] Table
 - [ ] Tag
 - [ ] Text

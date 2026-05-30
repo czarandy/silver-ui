@@ -1,20 +1,16 @@
 import {
-  Children,
   useId,
   useMemo,
-  useState,
   type CSSProperties,
   type ReactNode,
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {
-  MetadataListContext,
-  type MetadataListLabelConfig,
-} from './MetadataListContext';
+import {Heading} from '../Text';
+import {MetadataListContext} from './MetadataListContext';
 
-export type MetadataListColumns = 'multi' | 'single' | number;
+export type MetadataListLabelPosition = 'start' | 'top';
 
 export interface MetadataListProps {
   /**
@@ -26,26 +22,14 @@ export interface MetadataListProps {
    */
   className?: string;
   /**
-   * Number of columns or layout mode.
-   */
-  columns?: MetadataListColumns;
-  /**
    * Test ID applied to the root.
    */
   'data-testid'?: string;
   /**
-   * Configuration for item labels (position, width).
+   * Position of item labels relative to their values.
+   * @default 'start'
    */
-  label?: MetadataListLabelConfig;
-  /**
-   * Maximum number of visible items before "Show more" appears.
-   */
-  maxNumOfItems?: number;
-  /**
-   * Layout orientation of the list.
-   * @default 'vertical'
-   */
-  orientation?: 'horizontal' | 'vertical';
+  labelPosition?: MetadataListLabelPosition;
   /**
    * Ref forwarded to the root element.
    */
@@ -55,55 +39,26 @@ export interface MetadataListProps {
    */
   style?: CSSProperties;
   /**
-   * Optional title rendered above the list.
+   * Optional title rendered above the list as a heading.
    */
-  title?: ReactNode;
+  title?: string;
 }
 
 const styles = {
   root: css({display: 'flex', flexDirection: 'column'}),
   title: css({mb: '3'}),
   dl: css({m: 0, p: 0}),
-  gridSingle: css({
+  grid: css({
     display: 'grid',
     gridTemplateColumns: 'auto 1fr',
-    gap: '2 4',
-    alignItems: 'baseline',
+    rowGap: '3',
+    columnGap: '6',
+    alignItems: 'center',
   }),
-  gridStackedSingle: css({
+  gridStacked: css({
     display: 'grid',
     gridTemplateColumns: '1fr',
     gap: '3',
-  }),
-  gridMulti: css({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '4',
-  }),
-  horizontal: css({
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '4',
-  }),
-  toggle: css({alignSelf: 'flex-start', mt: '2'}),
-  toggleButton: css({
-    appearance: 'none',
-    borderWidth: 0,
-    bg: 'transparent',
-    color: 'primary',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    fontWeight: 'medium',
-    p: 0,
-    _hover: {
-      textDecoration: 'underline',
-    },
-    _focusVisible: {
-      outline: '2px solid',
-      outlineColor: 'primary',
-      outlineOffset: '2px',
-    },
   }),
 } as const;
 
@@ -112,64 +67,17 @@ const styles = {
  */
 export function MetadataList({
   children,
-  columns = 'single',
-  label,
-  maxNumOfItems,
-  orientation = 'vertical',
+  labelPosition = 'start',
   title,
   className,
   'data-testid': dataTestId,
   style,
   ref,
 }: MetadataListProps): React.JSX.Element {
-  const contentId = useId();
-  const [isShowAll, setIsShowAll] = useState(false);
-  const isMultiColumn =
-    columns === 'multi' || (typeof columns === 'number' && columns > 1);
-  const contextValue = useMemo(
-    () => ({
-      label:
-        orientation === 'horizontal'
-          ? {position: 'top' as const}
-          : {
-              ...label,
-              position:
-                label?.position ??
-                (isMultiColumn ? ('top' as const) : ('start' as const)),
-            },
-      orientation,
-    }),
-    [isMultiColumn, label, orientation],
-  );
-  // Needed to count and slice arbitrary children for maxNumOfItems.
-  // eslint-disable-next-line @eslint-react/no-children-to-array
-  const childArray = Children.toArray(children);
-  const effectiveMax = orientation === 'horizontal' ? undefined : maxNumOfItems;
-  const isCollapsible =
-    effectiveMax != null && childArray.length > effectiveMax;
-  const visibleChildren =
-    isCollapsible && !isShowAll
-      ? childArray.slice(0, effectiveMax)
-      : childArray;
-  const isStacked = contextValue.label.position === 'top';
+  const titleId = useId();
+  const contextValue = useMemo(() => ({labelPosition}), [labelPosition]);
   const dlClassName =
-    orientation === 'horizontal'
-      ? styles.horizontal
-      : isStacked
-        ? columns === 'single' || columns === 1
-          ? styles.gridStackedSingle
-          : styles.gridMulti
-        : columns === 'single' || columns === 1
-          ? styles.gridSingle
-          : styles.gridMulti;
-  const dlStyle: CSSProperties | undefined =
-    !isStacked && typeof columns === 'number' && columns > 1
-      ? {gridTemplateColumns: `repeat(${columns}, auto 1fr)`}
-      : !isStacked && contextValue.label.width != null
-        ? {
-            gridTemplateColumns: `${typeof contextValue.label.width === 'number' ? `${contextValue.label.width}px` : contextValue.label.width} 1fr`,
-          }
-        : undefined;
+    labelPosition === 'top' ? styles.gridStacked : styles.grid;
 
   return (
     <MetadataListContext value={contextValue}>
@@ -178,25 +86,16 @@ export function MetadataList({
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        {title != null ? <div className={styles.title}>{title}</div> : null}
-        <dl
-          className={cx(styles.dl, dlClassName)}
-          id={contentId}
-          style={dlStyle}>
-          {visibleChildren}
-        </dl>
-        {isCollapsible ? (
-          <div className={styles.toggle}>
-            <button
-              aria-controls={contentId}
-              aria-expanded={isShowAll}
-              className={styles.toggleButton}
-              onClick={() => setIsShowAll(value => !value)}
-              type="button">
-              {isShowAll ? 'Show less' : 'Show more'}
-            </button>
-          </div>
+        {title != null ? (
+          <Heading className={styles.title} id={titleId} level={5}>
+            {title}
+          </Heading>
         ) : null}
+        <dl
+          aria-labelledby={title != null ? titleId : undefined}
+          className={cx(styles.dl, dlClassName)}>
+          {children}
+        </dl>
       </div>
     </MetadataListContext>
   );

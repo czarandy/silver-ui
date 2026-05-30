@@ -688,11 +688,8 @@ export {
 export {
   MetadataList,
   MetadataListItem,
-  type MetadataListColumns,
   type MetadataListItemProps,
-  type MetadataListLabelConfig,
   type MetadataListLabelPosition,
-  type MetadataListOrientation,
   type MetadataListProps,
 } from './components/MetadataList';
 export {
