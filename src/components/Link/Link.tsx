@@ -32,6 +32,10 @@ export interface LinkProps {
    */
   'aria-describedby'?: string;
   /**
+   * Accessible description for the link.
+   */
+  'aria-description'?: string;
+  /**
    * Identifies the element that provides a detailed description.
    */
   'aria-details'?: string;
@@ -145,6 +149,7 @@ export interface LinkProps {
 export function Link({
   'aria-controls': ariaControls,
   'aria-current': ariaCurrent,
+  'aria-description': ariaDescription,
   'aria-describedby': ariaDescribedby,
   'aria-details': ariaDetails,
   'aria-expanded': ariaExpanded,
@@ -183,6 +188,7 @@ export function Link({
   const ariaAttrs = {
     'aria-controls': ariaControls,
     'aria-current': ariaCurrent,
+    'aria-description': ariaDescription,
     'aria-describedby': ariaDescribedby,
     'aria-details': ariaDetails,
     'aria-expanded': ariaExpanded,

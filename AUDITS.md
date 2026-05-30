@@ -54,7 +54,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] List
 - [x] MetadataList
 - [ ] Table
-- [ ] Tag
+- [x] Tag
 - [ ] Text
 - [ ] Thumbnail
 - [ ] Tooltip

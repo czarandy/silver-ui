@@ -277,9 +277,9 @@ export {
 export {
   Badge,
   badgeRecipe,
+  type BadgeColor,
   type BadgeProps,
   type BadgeSize,
-  type BadgeVariant,
   type BadgeVariants,
 } from './components/Badge';
 export {
@@ -569,9 +569,11 @@ export {
 } from './components/MultiSelect';
 export {
   Tag,
+  tagRecipe,
   type TagColor,
   type TagProps,
   type TagSize,
+  type TagVariants,
 } from './components/Tag';
 export {
   BaseCombobox,

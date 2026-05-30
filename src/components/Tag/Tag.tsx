@@ -9,8 +9,10 @@ import type {
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Link} from '../Link';
+import {Tooltip} from '../Tooltip';
+import {tagRecipe} from './Tag.recipe';
 
 export type TagColor =
   | 'default'
@@ -56,7 +58,7 @@ export interface TagProps {
   /**
    * Icon rendered before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the tag is disabled.
    * @default false
@@ -72,7 +74,7 @@ export interface TagProps {
    */
   label: string;
   /**
-   * Click handler. Ignored when `href` is provided.
+   * Click handler.
    */
   onClick?: MouseEventHandler<HTMLElement>;
   /**
@@ -92,46 +94,37 @@ export interface TagProps {
    * Inline styles applied to the tag.
    */
   style?: CSSProperties;
+  /**
+   * Tooltip text shown on hover.
+   */
+  tooltip?: string;
 }
 
 const styles = {
-  root: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    maxW: 'full',
-    overflow: 'hidden',
-    borderWidth: 0,
-    borderRadius: 'sm',
-    fontFamily: 'body',
-    fontWeight: 'medium',
-    lineHeight: 'normal',
-    textDecoration: 'none',
-    whiteSpace: 'nowrap',
-    verticalAlign: 'middle',
-  }),
-  interactive: css({
-    cursor: 'pointer',
-    _hover: {
-      bg: 'bg.subtle',
-    },
-    _focusVisible: {
-      outline: '2px solid',
-      outlineColor: 'primary',
-      outlineOffset: '2px',
-    },
-  }),
   buttonReset: css({
     p: 0,
     borderWidth: 0,
     font: 'inherit',
     color: 'inherit',
     bg: 'transparent',
+    cursor: 'pointer',
   }),
-  disabled: css({
-    opacity: 0.55,
-    cursor: 'not-allowed',
-    pointerEvents: 'none',
+  bodyButton: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 'inherit',
+    p: 0,
+    borderWidth: 0,
+    font: 'inherit',
+    color: 'inherit',
+    bg: 'transparent',
+    cursor: 'pointer',
+    minW: 0,
+    _focusVisible: {
+      outline: '2px solid',
+      outlineColor: 'primary',
+      outlineOffset: '2px',
+    },
   }),
   label: css({
     minW: 0,
@@ -149,45 +142,18 @@ const styles = {
     bg: 'transparent',
     color: 'inherit',
     cursor: 'pointer',
+    _hover: {
+      opacity: 0.7,
+    },
+    _active: {
+      opacity: 0.5,
+    },
     _focusVisible: {
       outline: '2px solid',
       outlineColor: 'primary',
       outlineOffset: '2px',
     },
   }),
-  size: {
-    sm: css({
-      '--tag-icon-size': 'var(--silver-sizes-icon-sm)',
-      minH: '6',
-      px: '2',
-      fontSize: 'sm',
-    }),
-    md: css({
-      '--tag-icon-size': 'var(--silver-sizes-icon-sm)',
-      minH: '8',
-      px: '2',
-      fontSize: 'sm',
-    }),
-    lg: css({
-      '--tag-icon-size': 'var(--silver-sizes-icon-md)',
-      minH: '10',
-      px: '2.5',
-      fontSize: 'md',
-    }),
-  } satisfies Record<TagSize, string>,
-  color: {
-    default: css({bg: 'silver-neutral.100', color: 'fg'}),
-    red: css({bg: 'red.100', color: 'red.800'}),
-    orange: css({bg: 'orange.100', color: 'orange.800'}),
-    yellow: css({bg: 'yellow.100', color: 'yellow.800'}),
-    green: css({bg: 'green.100', color: 'green.800'}),
-    teal: css({bg: 'teal.100', color: 'teal.800'}),
-    cyan: css({bg: 'cyan.100', color: 'cyan.800'}),
-    blue: css({bg: 'blue.100', color: 'blue.800'}),
-    purple: css({bg: 'purple.100', color: 'purple.800'}),
-    pink: css({bg: 'pink.100', color: 'pink.800'}),
-    gray: css({bg: 'silver-neutral.200', color: 'silver-neutral.800'}),
-  } satisfies Record<TagColor, string>,
 } as const;
 
 function TagContent({
@@ -197,13 +163,18 @@ function TagContent({
   label,
   onRemove,
   isDisabled,
+  size = 'md',
 }: Pick<
   TagProps,
-  'endContent' | 'icon' | 'isDisabled' | 'isLabelHidden' | 'label' | 'onRemove'
->): React.JSX.Element {
+  'endContent' | 'icon' | 'isDisabled' | 'isLabelHidden' | 'label' | 'size'
+> & {
+  onRemove?: (event: MouseEvent<HTMLButtonElement>) => void;
+}): React.JSX.Element {
   return (
     <>
-      {icon}
+      {icon != null ? (
+        <Icon aria-hidden="true" color="inherit" icon={icon} size={size} />
+      ) : null}
       {isLabelHidden === true ? (
         <VisuallyHidden>{label}</VisuallyHidden>
       ) : (
@@ -246,34 +217,65 @@ export function Tag({
   ref,
   size = 'md',
   style,
+  tooltip,
 }: TagProps): React.JSX.Element {
+  const isInteractive = href != null || onClick != null;
   const classNames = cx(
-    styles.root,
-    styles.size[size],
-    styles.color[color],
-    href != null || onClick != null ? styles.interactive : undefined,
+    tagRecipe({size, color, isInteractive, isDisabled}),
     href == null && onClick != null && onRemove == null
       ? styles.buttonReset
       : undefined,
-    isDisabled ? styles.disabled : undefined,
     className,
   );
   const sharedProps = {
     'aria-description': description,
-    'aria-label': isLabelHidden ? label : undefined,
     className: classNames,
     'data-testid': dataTestId,
     style,
   };
 
-  if (href != null) {
-    return (
+  let element: React.JSX.Element;
+
+  if (href != null && onRemove != null) {
+    element = (
+      <span {...sharedProps} ref={ref}>
+        <Link
+          className={styles.bodyButton}
+          color="inherit"
+          href={href}
+          isDisabled={isDisabled}
+          onClick={onClick}>
+          {icon != null ? (
+            <Icon aria-hidden="true" color="inherit" icon={icon} size={size} />
+          ) : null}
+          {isLabelHidden ? (
+            <VisuallyHidden>{label}</VisuallyHidden>
+          ) : (
+            <span className={styles.label}>{label}</span>
+          )}
+          {endContent}
+        </Link>
+        <button
+          aria-label={`Remove ${label}`}
+          className={styles.removeButton}
+          disabled={isDisabled}
+          onClick={event => {
+            event.stopPropagation();
+            onRemove(event);
+          }}
+          type="button">
+          <Icon icon={X} size="sm" />
+        </button>
+      </span>
+    );
+  } else if (href != null) {
+    element = (
       <Link
         {...sharedProps}
         color="inherit"
         href={href}
         isDisabled={isDisabled}
-        label={isLabelHidden ? label : undefined}
+        onClick={onClick}
         ref={ref as Ref<HTMLAnchorElement>}>
         <TagContent
           endContent={endContent}
@@ -281,14 +283,43 @@ export function Tag({
           isDisabled={isDisabled}
           isLabelHidden={isLabelHidden}
           label={label}
-          onRemove={onRemove}
+          size={size}
         />
       </Link>
     );
-  }
-
-  if (onClick != null && onRemove == null) {
-    return (
+  } else if (onClick != null && onRemove != null) {
+    element = (
+      <span {...sharedProps} ref={ref}>
+        <button
+          className={styles.bodyButton}
+          disabled={isDisabled}
+          onClick={onClick}
+          type="button">
+          {icon != null ? (
+            <Icon aria-hidden="true" color="inherit" icon={icon} size={size} />
+          ) : null}
+          {isLabelHidden ? (
+            <VisuallyHidden>{label}</VisuallyHidden>
+          ) : (
+            <span className={styles.label}>{label}</span>
+          )}
+          {endContent}
+        </button>
+        <button
+          aria-label={`Remove ${label}`}
+          className={styles.removeButton}
+          disabled={isDisabled}
+          onClick={event => {
+            event.stopPropagation();
+            onRemove(event);
+          }}
+          type="button">
+          <Icon icon={X} size="sm" />
+        </button>
+      </span>
+    );
+  } else if (onClick != null) {
+    element = (
       <button
         {...sharedProps}
         disabled={isDisabled}
@@ -301,52 +332,31 @@ export function Tag({
           isDisabled={isDisabled}
           isLabelHidden={isLabelHidden}
           label={label}
+          size={size}
         />
       </button>
     );
-  }
-
-  if (onClick != null) {
-    return (
+  } else {
+    element = (
       <span {...sharedProps} ref={ref}>
-        {icon}
-        <button
-          className={cx(styles.buttonReset, styles.label)}
-          disabled={isDisabled}
-          onClick={onClick}
-          type="button">
-          {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
-        </button>
-        {endContent}
-        {onRemove != null ? (
-          <button
-            aria-label={`Remove ${label}`}
-            className={styles.removeButton}
-            disabled={isDisabled}
-            onClick={event => {
-              event.stopPropagation();
-              onRemove(event);
-            }}
-            type="button">
-            <Icon icon={X} size="sm" />
-          </button>
-        ) : null}
+        <TagContent
+          endContent={endContent}
+          icon={icon}
+          isDisabled={isDisabled}
+          isLabelHidden={isLabelHidden}
+          label={label}
+          onRemove={onRemove}
+          size={size}
+        />
       </span>
     );
   }
 
-  return (
-    <span {...sharedProps} ref={ref}>
-      <TagContent
-        endContent={endContent}
-        icon={icon}
-        isDisabled={isDisabled}
-        isLabelHidden={isLabelHidden}
-        label={label}
-        onRemove={onRemove}
-      />
-    </span>
-  );
+  if (tooltip != null) {
+    return <Tooltip content={tooltip}>{element}</Tooltip>;
+  }
+
+  return element;
 }
 
 Tag.displayName = 'Tag';

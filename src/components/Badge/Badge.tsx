@@ -5,7 +5,7 @@ import {badgeRecipe} from './Badge.recipe';
 
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
-export type BadgeVariant =
+export type BadgeColor =
   | 'neutral'
   | 'info'
   | 'success'
@@ -33,6 +33,11 @@ export interface BadgeProps {
    * Additional CSS class names applied to the badge.
    */
   className?: string;
+  /**
+   * Visual color.
+   * @default 'neutral'
+   */
+  color?: BadgeColor;
   /**
    * Test ID applied to the badge.
    */
@@ -62,11 +67,6 @@ export interface BadgeProps {
    * Inline styles applied to the badge.
    */
   style?: CSSProperties;
-  /**
-   * Visual style.
-   * @default 'neutral'
-   */
-  variant?: BadgeVariant;
 }
 
 /**
@@ -82,12 +82,12 @@ export function Badge({
   role,
   size = 'md',
   style,
-  variant = 'neutral',
+  color = 'neutral',
 }: BadgeProps): React.JSX.Element {
   return (
     <span
       aria-label={ariaLabel}
-      className={cx(badgeRecipe({size, variant}), className)}
+      className={cx(badgeRecipe({size, color}), className)}
       data-testid={dataTestId}
       ref={ref}
       role={role}

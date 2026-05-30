@@ -683,24 +683,34 @@
     --silver-colors-border-emphasized: var(--silver-colors-silver-neutral-200);
     --silver-colors-surface-blue: var(--silver-colors-blue-100);
     --silver-colors-surface-blue-fg: var(--silver-colors-blue-800);
+    --silver-colors-surface-blue-hover: var(--silver-colors-blue-200);
     --silver-colors-surface-cyan: var(--silver-colors-cyan-100);
     --silver-colors-surface-cyan-fg: var(--silver-colors-cyan-800);
+    --silver-colors-surface-cyan-hover: var(--silver-colors-cyan-200);
     --silver-colors-surface-gray: var(--silver-colors-silver-neutral-100);
     --silver-colors-surface-gray-fg: var(--silver-colors-silver-neutral-800);
+    --silver-colors-surface-gray-hover: var(--silver-colors-silver-neutral-200);
     --silver-colors-surface-green: var(--silver-colors-green-100);
     --silver-colors-surface-green-fg: var(--silver-colors-green-800);
+    --silver-colors-surface-green-hover: var(--silver-colors-green-200);
     --silver-colors-surface-orange: var(--silver-colors-orange-100);
     --silver-colors-surface-orange-fg: var(--silver-colors-orange-800);
+    --silver-colors-surface-orange-hover: var(--silver-colors-orange-200);
     --silver-colors-surface-pink: var(--silver-colors-pink-100);
     --silver-colors-surface-pink-fg: var(--silver-colors-pink-800);
+    --silver-colors-surface-pink-hover: var(--silver-colors-pink-200);
     --silver-colors-surface-purple: var(--silver-colors-purple-100);
     --silver-colors-surface-purple-fg: var(--silver-colors-purple-800);
+    --silver-colors-surface-purple-hover: var(--silver-colors-purple-200);
     --silver-colors-surface-red: var(--silver-colors-red-100);
     --silver-colors-surface-red-fg: var(--silver-colors-red-800);
+    --silver-colors-surface-red-hover: var(--silver-colors-red-200);
     --silver-colors-surface-teal: var(--silver-colors-teal-100);
     --silver-colors-surface-teal-fg: var(--silver-colors-teal-800);
+    --silver-colors-surface-teal-hover: var(--silver-colors-teal-200);
     --silver-colors-surface-yellow: var(--silver-colors-yellow-100);
     --silver-colors-surface-yellow-fg: var(--silver-colors-yellow-800);
+    --silver-colors-surface-yellow-hover: var(--silver-colors-yellow-200);
     --silver-colors-icon-primary: var(--silver-colors-fg);
     --silver-colors-icon-secondary: var(--silver-colors-fg-muted);
     --silver-colors-icon-tertiary: var(--silver-colors-silver-neutral-500);
@@ -748,24 +758,34 @@
     --silver-colors-border-emphasized: var(--silver-colors-silver-neutral-600);
     --silver-colors-surface-blue: var(--silver-colors-blue-900);
     --silver-colors-surface-blue-fg: var(--silver-colors-blue-200);
+    --silver-colors-surface-blue-hover: var(--silver-colors-blue-800);
     --silver-colors-surface-cyan: var(--silver-colors-cyan-900);
     --silver-colors-surface-cyan-fg: var(--silver-colors-cyan-200);
+    --silver-colors-surface-cyan-hover: var(--silver-colors-cyan-800);
     --silver-colors-surface-gray: var(--silver-colors-silver-neutral-800);
     --silver-colors-surface-gray-fg: var(--silver-colors-silver-neutral-200);
+    --silver-colors-surface-gray-hover: var(--silver-colors-silver-neutral-700);
     --silver-colors-surface-green: var(--silver-colors-green-900);
     --silver-colors-surface-green-fg: var(--silver-colors-green-200);
+    --silver-colors-surface-green-hover: var(--silver-colors-green-800);
     --silver-colors-surface-orange: var(--silver-colors-orange-900);
     --silver-colors-surface-orange-fg: var(--silver-colors-orange-200);
+    --silver-colors-surface-orange-hover: var(--silver-colors-orange-800);
     --silver-colors-surface-pink: var(--silver-colors-pink-900);
     --silver-colors-surface-pink-fg: var(--silver-colors-pink-200);
+    --silver-colors-surface-pink-hover: var(--silver-colors-pink-800);
     --silver-colors-surface-purple: var(--silver-colors-purple-900);
     --silver-colors-surface-purple-fg: var(--silver-colors-purple-200);
+    --silver-colors-surface-purple-hover: var(--silver-colors-purple-800);
     --silver-colors-surface-red: var(--silver-colors-red-900);
     --silver-colors-surface-red-fg: var(--silver-colors-red-200);
+    --silver-colors-surface-red-hover: var(--silver-colors-red-800);
     --silver-colors-surface-teal: var(--silver-colors-teal-900);
     --silver-colors-surface-teal-fg: var(--silver-colors-teal-200);
+    --silver-colors-surface-teal-hover: var(--silver-colors-teal-800);
     --silver-colors-surface-yellow: var(--silver-colors-yellow-900);
     --silver-colors-surface-yellow-fg: var(--silver-colors-yellow-200);
+    --silver-colors-surface-yellow-hover: var(--silver-colors-yellow-800);
     --silver-colors-icon-tertiary: var(--silver-colors-silver-neutral-500);
     --silver-colors-icon-disabled: var(--silver-colors-silver-neutral-600)
 }
@@ -1236,30 +1256,6 @@
     background: none;
 }
 
-  .silver-bg_orange\.100 {
-    background: var(--silver-colors-orange-100);
-}
-
-  .silver-bg_teal\.100 {
-    background: var(--silver-colors-teal-100);
-}
-
-  .silver-bg_cyan\.100 {
-    background: var(--silver-colors-cyan-100);
-}
-
-  .silver-bg_blue\.100 {
-    background: var(--silver-colors-blue-100);
-}
-
-  .silver-bg_purple\.100 {
-    background: var(--silver-colors-purple-100);
-}
-
-  .silver-bg_pink\.100 {
-    background: var(--silver-colors-pink-100);
-}
-
   .silver-bg_rgba\(0\,_0\,_0\,_0\.35\) {
     background: rgba(0, 0, 0, 0.35);
 }
@@ -1356,14 +1352,6 @@
     border-color: var(--silver-colors-bg);
 }
 
-  .silver-gap_0\.5 {
-    gap: var(--silver-spacing-0\.5);
-}
-
-  .silver-px_1\.5 {
-    padding-inline: var(--silver-spacing-1\.5);
-}
-
   .silver-gap_1 {
     gap: var(--silver-spacing-1);
 }
@@ -1374,6 +1362,10 @@
 
   .silver-px_2\.5 {
     padding-inline: var(--silver-spacing-2\.5);
+}
+
+  .silver-px_3 {
+    padding-inline: var(--silver-spacing-3);
 }
 
   .silver-py_1 {
@@ -1460,12 +1452,12 @@
     outline: var(--silver-borders-none);
 }
 
-  .silver-py_2 {
-    padding-block: var(--silver-spacing-2);
+  .silver-gap_0\.5 {
+    gap: var(--silver-spacing-0\.5);
 }
 
-  .silver-px_3 {
-    padding-inline: var(--silver-spacing-3);
+  .silver-py_2 {
+    padding-block: var(--silver-spacing-2);
 }
 
   .silver-py_2\.5 {
@@ -1883,10 +1875,6 @@
     line-height: var(--silver-line-heights-none);
 }
 
-  .silver-fs_xs {
-    font-size: var(--silver-font-sizes-xs);
-}
-
   .silver-fs_sm {
     font-size: var(--silver-font-sizes-sm);
 }
@@ -1965,6 +1953,10 @@
 
   .silver-font-style_normal {
     font-style: normal;
+}
+
+  .silver-fs_xs {
+    font-size: var(--silver-font-sizes-xs);
 }
 
   .silver-d_var\(--breadcrumb-separator-display\) {
@@ -2439,6 +2431,10 @@
     column-gap: var(--silver-spacing-6);
 }
 
+  .silver-ai_start {
+    align-items: start;
+}
+
   .silver-grid-tc_1fr {
     grid-template-columns: 1fr;
 }
@@ -2754,32 +2750,12 @@
     inset-inline-end: var(--silver-spacing-3);
 }
 
-  .silver-c_orange\.800 {
-    color: var(--silver-colors-orange-800);
+  .silver-c_blue {
+    color: blue;
 }
 
-  .silver-c_teal\.800 {
-    color: var(--silver-colors-teal-800);
-}
-
-  .silver-c_cyan\.800 {
-    color: var(--silver-colors-cyan-800);
-}
-
-  .silver-c_blue\.800 {
-    color: var(--silver-colors-blue-800);
-}
-
-  .silver-c_purple\.800 {
-    color: var(--silver-colors-purple-800);
-}
-
-  .silver-c_pink\.800 {
-    color: var(--silver-colors-pink-800);
-}
-
-  .silver-c_silver-neutral\.800 {
-    color: var(--silver-colors-silver-neutral-800);
+  .silver-c_surface\.gray\.fg {
+    color: var(--silver-colors-surface-gray-fg);
 }
 
   .silver-wb_break-word {
@@ -3001,16 +2977,16 @@
     height: fill;
 }
 
-  .silver-h_4 {
-    height: var(--silver-sizes-4);
-}
-
   .silver-h_5 {
     height: var(--silver-sizes-5);
 }
 
   .silver-h_6 {
     height: var(--silver-sizes-6);
+}
+
+  .silver-h_7 {
+    height: var(--silver-sizes-7);
 }
 
   .silver-mt_2 {
@@ -3493,10 +3469,6 @@
     padding-bottom: var(--silver-spacing-3);
 }
 
-  .silver-h_7 {
-    height: var(--silver-sizes-7);
-}
-
   .silver-h_9 {
     height: var(--silver-sizes-9);
 }
@@ -3623,6 +3595,10 @@
 
   .silver-pt_3 {
     padding-top: var(--silver-spacing-3);
+}
+
+  .silver-h_4 {
+    height: var(--silver-sizes-4);
 }
 
   .silver-max-lines_1 {
@@ -4363,6 +4339,46 @@
     background: var(--silver-colors-transparent);
 }
 
+  .hover\:silver-bg_surface\.gray\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-gray-hover);
+}
+
+  .hover\:silver-bg_surface\.red\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-red-hover);
+}
+
+  .hover\:silver-bg_surface\.orange\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-orange-hover);
+}
+
+  .hover\:silver-bg_surface\.yellow\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-yellow-hover);
+}
+
+  .hover\:silver-bg_surface\.green\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-green-hover);
+}
+
+  .hover\:silver-bg_surface\.teal\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-teal-hover);
+}
+
+  .hover\:silver-bg_surface\.cyan\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-cyan-hover);
+}
+
+  .hover\:silver-bg_surface\.blue\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-blue-hover);
+}
+
+  .hover\:silver-bg_surface\.purple\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-purple-hover);
+}
+
+  .hover\:silver-bg_surface\.pink\.hover:is(:hover, [data-hover]) {
+    background: var(--silver-colors-surface-pink-hover);
+}
+
   .hover\:silver-td_underline:is(:hover, [data-hover]) {
     text-decoration: underline;
 }
@@ -4373,6 +4389,10 @@
 
   .hover\:silver-op_0\.85:is(:hover, [data-hover]) {
     opacity: 0.85;
+}
+
+  .hover\:silver-op_0\.7:is(:hover, [data-hover]) {
+    opacity: 0.7;
 }
 
   .hover\:silver-bx-sh_lg:is(:hover, [data-hover]) {
@@ -4405,6 +4425,10 @@
 
   .active\:silver-trf_scale\(0\.98\):is(:active, [data-active]) {
     transform: scale(0.98);
+}
+
+  .active\:silver-op_0\.5:is(:active, [data-active]) {
+    opacity: 0.5;
 }
 
   .active\:silver-op_0\.75:is(:active, [data-active]) {

@@ -71,6 +71,28 @@ export const LabelsOnTopWithIcons: Story = {
   },
 };
 
+export const LongValues: Story = {
+  args: {
+    title: 'Project details',
+    children: (
+      <>
+        <MetadataListItem icon={User} label="Owner">
+          Design systems
+        </MetadataListItem>
+        <MetadataListItem label="Description">
+          This project provides a shared set of accessible, themeable UI
+          components used across all internal applications. It includes layout
+          primitives, form controls, data display elements, and composite
+          patterns that follow the company design guidelines.
+        </MetadataListItem>
+        <MetadataListItem icon={CircleCheck} label="Status">
+          Active
+        </MetadataListItem>
+      </>
+    ),
+  },
+};
+
 export const WithoutTitle: Story = {
   args: {
     children: (

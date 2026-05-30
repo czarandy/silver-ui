@@ -53,7 +53,7 @@ const styles = {
     gridTemplateColumns: 'auto 1fr',
     rowGap: '3',
     columnGap: '6',
-    alignItems: 'center',
+    alignItems: 'start',
   }),
   gridStacked: css({
     display: 'grid',

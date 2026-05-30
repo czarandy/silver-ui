@@ -35,7 +35,7 @@ export const Default: Story = {
       />
       <ListItem
         description="Control account security"
-        endContent={<Badge label="Required" variant="warning" />}
+        endContent={<Badge color="warning" label="Required" />}
         label="Security"
         startContent={<Icon color="success" icon={Shield} size="sm" />}
       />

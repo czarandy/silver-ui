@@ -15,19 +15,19 @@ describe('Badge', () => {
     ).toBeInTheDocument();
   });
 
-  it('applies the neutral variant by default', () => {
+  it('applies the neutral color by default', () => {
     render(<Badge data-testid="badge" label="Default" />);
 
     expect(screen.getByTestId('badge')).toHaveClass(
-      badgeRecipe({variant: 'neutral'}),
+      badgeRecipe({color: 'neutral'}),
     );
   });
 
-  it('applies the specified variant', () => {
-    render(<Badge data-testid="badge" label="Error" variant="error" />);
+  it('applies the specified color', () => {
+    render(<Badge color="error" data-testid="badge" label="Error" />);
 
     expect(screen.getByTestId('badge')).toHaveClass(
-      badgeRecipe({variant: 'error'}),
+      badgeRecipe({color: 'error'}),
     );
   });
 

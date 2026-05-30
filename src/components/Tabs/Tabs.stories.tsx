@@ -21,7 +21,7 @@ function TabsStory(args: React.ComponentProps<typeof Tabs>) {
     <Tabs {...args} onChange={setValue} value={value}>
       <Tab label="Overview" value="overview" />
       <Tab
-        endContent={<Badge label="3" variant="info" />}
+        endContent={<Badge color="info" label="3" />}
         label="Activity"
         value="activity"
       />

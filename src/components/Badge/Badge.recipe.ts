@@ -14,10 +14,10 @@ export const badgeRecipe = cva({
   variants: {
     size: {
       sm: {gap: '1', h: '5', px: '2', fontSize: 'sm'},
-      md: {gap: '1.5', h: '6', px: '2.5', fontSize: 'md'},
+      md: {gap: '1.5', h: '6', px: '2.5', fontSize: 'sm'},
       lg: {gap: '2', h: '7', px: '3', fontSize: 'md'},
     },
-    variant: {
+    color: {
       neutral: {bg: 'surface.gray', color: 'fg'},
       info: {bg: 'primary', color: 'white'},
       success: {bg: 'green.600', color: 'white'},
@@ -36,7 +36,7 @@ export const badgeRecipe = cva({
   },
   defaultVariants: {
     size: 'md',
-    variant: 'neutral',
+    color: 'neutral',
   },
 });
 

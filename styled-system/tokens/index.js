@@ -1859,6 +1859,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-blue-fg)",
     "variable": "var(--silver-colors-surface-blue-fg)"
   },
+  "colors.surface.blue.hover": {
+    "value": "var(--silver-colors-surface-blue-hover)",
+    "variable": "var(--silver-colors-surface-blue-hover)"
+  },
   "colors.surface.cyan": {
     "value": "var(--silver-colors-surface-cyan)",
     "variable": "var(--silver-colors-surface-cyan)"
@@ -1866,6 +1870,10 @@ const tokens = {
   "colors.surface.cyan.fg": {
     "value": "var(--silver-colors-surface-cyan-fg)",
     "variable": "var(--silver-colors-surface-cyan-fg)"
+  },
+  "colors.surface.cyan.hover": {
+    "value": "var(--silver-colors-surface-cyan-hover)",
+    "variable": "var(--silver-colors-surface-cyan-hover)"
   },
   "colors.surface.gray": {
     "value": "var(--silver-colors-surface-gray)",
@@ -1875,6 +1883,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-gray-fg)",
     "variable": "var(--silver-colors-surface-gray-fg)"
   },
+  "colors.surface.gray.hover": {
+    "value": "var(--silver-colors-surface-gray-hover)",
+    "variable": "var(--silver-colors-surface-gray-hover)"
+  },
   "colors.surface.green": {
     "value": "var(--silver-colors-surface-green)",
     "variable": "var(--silver-colors-surface-green)"
@@ -1882,6 +1894,10 @@ const tokens = {
   "colors.surface.green.fg": {
     "value": "var(--silver-colors-surface-green-fg)",
     "variable": "var(--silver-colors-surface-green-fg)"
+  },
+  "colors.surface.green.hover": {
+    "value": "var(--silver-colors-surface-green-hover)",
+    "variable": "var(--silver-colors-surface-green-hover)"
   },
   "colors.surface.orange": {
     "value": "var(--silver-colors-surface-orange)",
@@ -1891,6 +1907,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-orange-fg)",
     "variable": "var(--silver-colors-surface-orange-fg)"
   },
+  "colors.surface.orange.hover": {
+    "value": "var(--silver-colors-surface-orange-hover)",
+    "variable": "var(--silver-colors-surface-orange-hover)"
+  },
   "colors.surface.pink": {
     "value": "var(--silver-colors-surface-pink)",
     "variable": "var(--silver-colors-surface-pink)"
@@ -1898,6 +1918,10 @@ const tokens = {
   "colors.surface.pink.fg": {
     "value": "var(--silver-colors-surface-pink-fg)",
     "variable": "var(--silver-colors-surface-pink-fg)"
+  },
+  "colors.surface.pink.hover": {
+    "value": "var(--silver-colors-surface-pink-hover)",
+    "variable": "var(--silver-colors-surface-pink-hover)"
   },
   "colors.surface.purple": {
     "value": "var(--silver-colors-surface-purple)",
@@ -1907,6 +1931,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-purple-fg)",
     "variable": "var(--silver-colors-surface-purple-fg)"
   },
+  "colors.surface.purple.hover": {
+    "value": "var(--silver-colors-surface-purple-hover)",
+    "variable": "var(--silver-colors-surface-purple-hover)"
+  },
   "colors.surface.red": {
     "value": "var(--silver-colors-surface-red)",
     "variable": "var(--silver-colors-surface-red)"
@@ -1914,6 +1942,10 @@ const tokens = {
   "colors.surface.red.fg": {
     "value": "var(--silver-colors-surface-red-fg)",
     "variable": "var(--silver-colors-surface-red-fg)"
+  },
+  "colors.surface.red.hover": {
+    "value": "var(--silver-colors-surface-red-hover)",
+    "variable": "var(--silver-colors-surface-red-hover)"
   },
   "colors.surface.teal": {
     "value": "var(--silver-colors-surface-teal)",
@@ -1923,6 +1955,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-teal-fg)",
     "variable": "var(--silver-colors-surface-teal-fg)"
   },
+  "colors.surface.teal.hover": {
+    "value": "var(--silver-colors-surface-teal-hover)",
+    "variable": "var(--silver-colors-surface-teal-hover)"
+  },
   "colors.surface.yellow": {
     "value": "var(--silver-colors-surface-yellow)",
     "variable": "var(--silver-colors-surface-yellow)"
@@ -1930,6 +1966,10 @@ const tokens = {
   "colors.surface.yellow.fg": {
     "value": "var(--silver-colors-surface-yellow-fg)",
     "variable": "var(--silver-colors-surface-yellow-fg)"
+  },
+  "colors.surface.yellow.hover": {
+    "value": "var(--silver-colors-surface-yellow-hover)",
+    "variable": "var(--silver-colors-surface-yellow-hover)"
   },
   "colors.icon.primary": {
     "value": "var(--silver-colors-fg)",
@@ -2307,6 +2347,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-fg)",
     "variable": "var(--silver-colors-color-palette-fg)"
   },
+  "colors.colorPalette.blue.hover": {
+    "value": "var(--silver-colors-color-palette-blue-hover)",
+    "variable": "var(--silver-colors-color-palette-blue-hover)"
+  },
   "colors.colorPalette.cyan": {
     "value": "var(--silver-colors-color-palette-cyan)",
     "variable": "var(--silver-colors-color-palette-cyan)"
@@ -2314,6 +2358,10 @@ const tokens = {
   "colors.colorPalette.cyan.fg": {
     "value": "var(--silver-colors-color-palette-cyan-fg)",
     "variable": "var(--silver-colors-color-palette-cyan-fg)"
+  },
+  "colors.colorPalette.cyan.hover": {
+    "value": "var(--silver-colors-color-palette-cyan-hover)",
+    "variable": "var(--silver-colors-color-palette-cyan-hover)"
   },
   "colors.colorPalette.gray": {
     "value": "var(--silver-colors-color-palette-gray)",
@@ -2323,6 +2371,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-gray-fg)",
     "variable": "var(--silver-colors-color-palette-gray-fg)"
   },
+  "colors.colorPalette.gray.hover": {
+    "value": "var(--silver-colors-color-palette-gray-hover)",
+    "variable": "var(--silver-colors-color-palette-gray-hover)"
+  },
   "colors.colorPalette.green": {
     "value": "var(--silver-colors-color-palette-green)",
     "variable": "var(--silver-colors-color-palette-green)"
@@ -2330,6 +2382,10 @@ const tokens = {
   "colors.colorPalette.green.fg": {
     "value": "var(--silver-colors-color-palette-green-fg)",
     "variable": "var(--silver-colors-color-palette-green-fg)"
+  },
+  "colors.colorPalette.green.hover": {
+    "value": "var(--silver-colors-color-palette-green-hover)",
+    "variable": "var(--silver-colors-color-palette-green-hover)"
   },
   "colors.colorPalette.orange": {
     "value": "var(--silver-colors-color-palette-orange)",
@@ -2339,6 +2395,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-orange-fg)",
     "variable": "var(--silver-colors-color-palette-orange-fg)"
   },
+  "colors.colorPalette.orange.hover": {
+    "value": "var(--silver-colors-color-palette-orange-hover)",
+    "variable": "var(--silver-colors-color-palette-orange-hover)"
+  },
   "colors.colorPalette.pink": {
     "value": "var(--silver-colors-color-palette-pink)",
     "variable": "var(--silver-colors-color-palette-pink)"
@@ -2346,6 +2406,10 @@ const tokens = {
   "colors.colorPalette.pink.fg": {
     "value": "var(--silver-colors-color-palette-pink-fg)",
     "variable": "var(--silver-colors-color-palette-pink-fg)"
+  },
+  "colors.colorPalette.pink.hover": {
+    "value": "var(--silver-colors-color-palette-pink-hover)",
+    "variable": "var(--silver-colors-color-palette-pink-hover)"
   },
   "colors.colorPalette.purple": {
     "value": "var(--silver-colors-color-palette-purple)",
@@ -2355,6 +2419,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-purple-fg)",
     "variable": "var(--silver-colors-color-palette-purple-fg)"
   },
+  "colors.colorPalette.purple.hover": {
+    "value": "var(--silver-colors-color-palette-purple-hover)",
+    "variable": "var(--silver-colors-color-palette-purple-hover)"
+  },
   "colors.colorPalette.red": {
     "value": "var(--silver-colors-color-palette-red)",
     "variable": "var(--silver-colors-color-palette-red)"
@@ -2362,6 +2430,10 @@ const tokens = {
   "colors.colorPalette.red.fg": {
     "value": "var(--silver-colors-color-palette-red-fg)",
     "variable": "var(--silver-colors-color-palette-red-fg)"
+  },
+  "colors.colorPalette.red.hover": {
+    "value": "var(--silver-colors-color-palette-red-hover)",
+    "variable": "var(--silver-colors-color-palette-red-hover)"
   },
   "colors.colorPalette.teal": {
     "value": "var(--silver-colors-color-palette-teal)",
@@ -2371,6 +2443,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-teal-fg)",
     "variable": "var(--silver-colors-color-palette-teal-fg)"
   },
+  "colors.colorPalette.teal.hover": {
+    "value": "var(--silver-colors-color-palette-teal-hover)",
+    "variable": "var(--silver-colors-color-palette-teal-hover)"
+  },
   "colors.colorPalette.yellow": {
     "value": "var(--silver-colors-color-palette-yellow)",
     "variable": "var(--silver-colors-color-palette-yellow)"
@@ -2378,6 +2454,10 @@ const tokens = {
   "colors.colorPalette.yellow.fg": {
     "value": "var(--silver-colors-color-palette-yellow-fg)",
     "variable": "var(--silver-colors-color-palette-yellow-fg)"
+  },
+  "colors.colorPalette.yellow.hover": {
+    "value": "var(--silver-colors-color-palette-yellow-hover)",
+    "variable": "var(--silver-colors-color-palette-yellow-hover)"
   },
   "colors.colorPalette.primary": {
     "value": "var(--silver-colors-color-palette-primary)",

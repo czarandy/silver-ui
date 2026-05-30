@@ -94,6 +94,9 @@ export default defineConfig({
               fg: {
                 value: {base: '{colors.blue.800}', _dark: '{colors.blue.200}'},
               },
+              hover: {
+                value: {base: '{colors.blue.200}', _dark: '{colors.blue.800}'},
+              },
             },
             cyan: {
               DEFAULT: {
@@ -101,6 +104,9 @@ export default defineConfig({
               },
               fg: {
                 value: {base: '{colors.cyan.800}', _dark: '{colors.cyan.200}'},
+              },
+              hover: {
+                value: {base: '{colors.cyan.200}', _dark: '{colors.cyan.800}'},
               },
             },
             gray: {
@@ -112,8 +118,14 @@ export default defineConfig({
               },
               fg: {
                 value: {
-                  base: '{colors.silver-neutral.800}',
-                  _dark: '{colors.silver-neutral.200}',
+                  base: '{colors.silver-neutral.900}',
+                  _dark: '{colors.silver-neutral.100}',
+                },
+              },
+              hover: {
+                value: {
+                  base: '{colors.silver-neutral.200}',
+                  _dark: '{colors.silver-neutral.700}',
                 },
               },
             },
@@ -130,6 +142,12 @@ export default defineConfig({
                   _dark: '{colors.green.200}',
                 },
               },
+              hover: {
+                value: {
+                  base: '{colors.green.200}',
+                  _dark: '{colors.green.800}',
+                },
+              },
             },
             orange: {
               DEFAULT: {
@@ -144,6 +162,12 @@ export default defineConfig({
                   _dark: '{colors.orange.200}',
                 },
               },
+              hover: {
+                value: {
+                  base: '{colors.orange.200}',
+                  _dark: '{colors.orange.800}',
+                },
+              },
             },
             pink: {
               DEFAULT: {
@@ -153,6 +177,12 @@ export default defineConfig({
                 value: {
                   base: '{colors.pink.800}',
                   _dark: '{colors.pink.200}',
+                },
+              },
+              hover: {
+                value: {
+                  base: '{colors.pink.200}',
+                  _dark: '{colors.pink.800}',
                 },
               },
             },
@@ -169,6 +199,12 @@ export default defineConfig({
                   _dark: '{colors.purple.200}',
                 },
               },
+              hover: {
+                value: {
+                  base: '{colors.purple.200}',
+                  _dark: '{colors.purple.800}',
+                },
+              },
             },
             red: {
               DEFAULT: {
@@ -176,6 +212,9 @@ export default defineConfig({
               },
               fg: {
                 value: {base: '{colors.red.800}', _dark: '{colors.red.200}'},
+              },
+              hover: {
+                value: {base: '{colors.red.200}', _dark: '{colors.red.800}'},
               },
             },
             teal: {
@@ -186,6 +225,12 @@ export default defineConfig({
                 value: {
                   base: '{colors.teal.800}',
                   _dark: '{colors.teal.200}',
+                },
+              },
+              hover: {
+                value: {
+                  base: '{colors.teal.200}',
+                  _dark: '{colors.teal.800}',
                 },
               },
             },
@@ -200,6 +245,12 @@ export default defineConfig({
                 value: {
                   base: '{colors.yellow.800}',
                   _dark: '{colors.yellow.200}',
+                },
+              },
+              hover: {
+                value: {
+                  base: '{colors.yellow.200}',
+                  _dark: '{colors.yellow.800}',
                 },
               },
             },
