@@ -169,6 +169,12 @@ export {
 } from './components/Progress';
 export {Kbd, type KbdProps} from './components/Kbd';
 export {
+  CodeBlock,
+  type CodeBlockContainer,
+  type CodeBlockProps,
+  type CodeBlockSize,
+} from './components/CodeBlock';
+export {
   Step,
   Stepper,
   useStepperContext,

@@ -8,6 +8,11 @@ import {useLinkComponent} from '../Link';
 import {Text} from '../Text';
 
 export interface TopNavHeadingProps {
+  /**
+   * Accessible label for the heading link. Use when `heading` text is absent
+   * (e.g., logo-only headings) to ensure the link has an accessible name.
+   */
+  'aria-label'?: string;
   as?: LinkComponent;
   className?: string;
   'data-testid'?: string;
@@ -49,6 +54,7 @@ const styles = {
 };
 
 export function TopNavHeading({
+  'aria-label': ariaLabel,
   as,
   className,
   'data-testid': dataTestId,
@@ -68,6 +74,7 @@ export function TopNavHeading({
 
   return (
     <Element
+      aria-label={ariaLabel}
       className={cx(styles.root, className)}
       data-testid={dataTestId}
       href={resolvedHref}

@@ -28,7 +28,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [x] Pagination
 - [x] SideNav
 - [ ] Tabs
-- [ ] TopNav
+- [x] TopNav
 
 ## Buttons & Actions
 

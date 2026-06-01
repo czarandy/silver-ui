@@ -39,6 +39,7 @@ export interface TopNavProps {
   heading?: ReactNode;
   /**
    * Accessible label for the navigation landmark.
+   * @default 'Top navigation'
    */
   label?: string;
   /**
@@ -119,7 +120,7 @@ export function TopNav({
   'data-testid': dataTestId,
   endContent,
   heading,
-  label,
+  label = 'Top navigation',
   ref,
   startContent,
   style,
@@ -140,7 +141,6 @@ export function TopNav({
         className={cx(topNavRecipe({layout: 'mobile'}), className)}
         data-testid={dataTestId}
         ref={ref}
-        role="navigation"
         style={style}>
         {heading != null ? (
           <div className={styles.heading}>{heading}</div>
@@ -187,7 +187,6 @@ export function TopNav({
       )}
       data-testid={dataTestId}
       ref={ref}
-      role="navigation"
       style={style}>
       <div className={styles.leftSection}>
         {heading != null ? (

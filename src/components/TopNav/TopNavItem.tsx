@@ -1,9 +1,10 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
+import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {useTopNavRenderMode} from './TopNavContext';
@@ -27,13 +28,12 @@ export interface TopNavItemProps {
   'data-testid'?: string;
   /**
    * Link destination.
-   * @default '#'
    */
-  href?: string;
+  href: string;
   /**
    * Icon rendered before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the item is disabled.
    * @default false
@@ -53,6 +53,10 @@ export interface TopNavItemProps {
    * Accessible item label, also used as visible text when children are omitted.
    */
   label: string;
+  /**
+   * Click handler called when the item is clicked.
+   */
+  onClick?: MouseEventHandler<HTMLElement>;
   /**
    * Ref forwarded to the anchor element.
    */
@@ -111,16 +115,6 @@ const styles = {
     px: '2',
     aspectRatio: 'square',
   }),
-  icon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 'var(--silver-sizes-icon-md)',
-    '& > svg': {
-      w: '1em',
-      h: '1em',
-    },
-  }),
 };
 
 /**
@@ -132,12 +126,13 @@ export function TopNavItem({
   children,
   className,
   'data-testid': dataTestId,
-  href = '#',
+  href,
   icon,
   isDisabled = false,
   isIconOnly = false,
   isSelected = false,
   label,
+  onClick,
   ref,
   rel,
   style,
@@ -146,20 +141,32 @@ export function TopNavItem({
   const LinkComponent = useLinkComponent(as);
   const renderMode = useTopNavRenderMode();
   const {closeMobileNav} = useAppShellMobile();
+  const isDrawer = renderMode === 'drawer';
+
+  const content = (
+    <>
+      {icon != null ? (
+        <Icon aria-hidden="true" color="inherit" icon={icon} size="md" />
+      ) : null}
+      {!isIconOnly ? (children ?? label) : null}
+    </>
+  );
+
+  const sharedClassName = cx(
+    styles.item,
+    isDrawer && styles.drawer,
+    isSelected && styles.selected,
+    isDisabled && styles.disabled,
+    isIconOnly && styles.iconOnly,
+    className,
+  );
 
   return (
     <LinkComponent
       aria-current={isSelected ? 'page' : undefined}
       aria-disabled={isDisabled || undefined}
       aria-label={isIconOnly ? label : undefined}
-      className={cx(
-        styles.item,
-        renderMode === 'drawer' && styles.drawer,
-        isSelected && styles.selected,
-        isDisabled && styles.disabled,
-        isIconOnly && styles.iconOnly,
-        className,
-      )}
+      className={sharedClassName}
       data-testid={dataTestId}
       href={href}
       onClick={event => {
@@ -168,7 +175,11 @@ export function TopNavItem({
           return;
         }
 
-        closeMobileNav();
+        onClick?.(event);
+
+        if (isDrawer) {
+          closeMobileNav();
+        }
       }}
       ref={ref}
       rel={rel}
@@ -176,12 +187,7 @@ export function TopNavItem({
       tabIndex={isDisabled ? -1 : undefined}
       target={target}
       to={LinkComponent === 'a' ? undefined : href}>
-      {icon != null ? (
-        <span aria-hidden="true" className={styles.icon}>
-          {icon}
-        </span>
-      ) : null}
-      {!isIconOnly ? (children ?? label) : null}
+      {content}
     </LinkComponent>
   );
 }
