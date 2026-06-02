@@ -10,9 +10,8 @@ import type {
 
 export interface ScheduleContextValue {
   categories: ReadonlyArray<ScheduleCategory>;
-  date: ZonedDateTime;
   events: ReadonlyArray<CalendarEvent>;
-  focusDate: ZonedDateTime;
+  highlightDate: ZonedDateTime;
   isLoading: boolean;
   nextDateLabel: string;
   onNextDate: () => void;
@@ -23,6 +22,7 @@ export interface ScheduleContextValue {
   range: ScheduleRange;
   timezoneID: string;
   view: ScheduleViewBase;
+  viewDate: ZonedDateTime;
 }
 
 export const ScheduleContext = createContext<ScheduleContextValue | null>(null);

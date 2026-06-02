@@ -1,4 +1,4 @@
-import {Check, Minus} from 'lucide-react';
+import {Check, Info, Minus} from 'lucide-react';
 import {
   useEffect,
   useId,
@@ -10,12 +10,17 @@ import {
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
+import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {Field, type FieldNecessity, type InputStatus} from '../Field';
+import type {FieldNecessity, InputStatus} from '../Field';
+import {fieldStatusRecipe} from '../Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
+import {Item} from '../Item';
 import {Spinner} from '../Spinner';
+import {Text} from '../Text';
+import {Tooltip} from '../Tooltip';
 
 export type CheckboxInputSize = 'sm' | 'md';
 export type CheckboxInputValue = boolean | 'indeterminate';
@@ -33,6 +38,20 @@ export type CheckboxInputProps = {
    * Supporting text rendered below the label.
    */
   description?: ReactNode;
+  /**
+   * Content rendered after the label.
+   */
+  endContent?: ReactNode;
+  /**
+   * Where to place `endContent` within the item.
+   * `'end'` pushes it to the trailing edge; `'inline'` keeps it next to the label.
+   * @default 'inline'
+   */
+  endContentPosition?: 'end' | 'inline';
+  /**
+   * HTML name attribute for native form submission.
+   */
+  htmlName?: string;
   /**
    * Whether the checkbox is disabled.
    * @default false
@@ -62,6 +81,10 @@ export type CheckboxInputProps = {
    */
   labelIcon?: IconComponent;
   /**
+   * Tooltip content shown next to the label.
+   */
+  labelTooltip?: ReactNode;
+  /**
    * Called when the input loses focus.
    */
   onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
@@ -83,6 +106,10 @@ export type CheckboxInputProps = {
    */
   size?: CheckboxInputSize;
   /**
+   * Content rendered after the checkbox control and before the label.
+   */
+  startContent?: ReactNode;
+  /**
    * Validation status displayed below the checkbox.
    */
   status?: InputStatus;
@@ -101,18 +128,12 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
   }),
-  row: css({
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '2',
-  }),
   boxWrap: css({
     position: 'relative',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    mt: '0.5',
   }),
   input: css({
     position: 'absolute',
@@ -135,9 +156,10 @@ const styles = {
     color: 'fg.onPrimary',
     pointerEvents: 'none',
     _peerFocusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   boxChecked: css({
@@ -147,7 +169,7 @@ const styles = {
   boxDisabled: css({
     opacity: 0.55,
   }),
-  size: {
+  boxSize: {
     sm: css({w: '4.5', h: '4.5'}),
     md: css({w: '5.5', h: '5.5'}),
   },
@@ -155,9 +177,19 @@ const styles = {
     w: '70%',
     h: '70%',
   }),
-  fieldContent: css({
-    flex: 1,
-    minW: 0,
+  label: css({
+    cursor: 'pointer',
+  }),
+  labelDisabled: css({
+    cursor: 'not-allowed',
+  }),
+  indicator: css({
+    fontWeight: 'normal',
+    color: 'fg.muted',
+  }),
+  tooltipIcon: css({
+    display: 'inline-flex',
+    color: 'fg.muted',
   }),
 } as const;
 
@@ -169,6 +201,9 @@ export function CheckboxInput({
   value,
   onChange,
   description,
+  endContent,
+  endContentPosition = 'inline',
+  htmlName,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -177,7 +212,9 @@ export function CheckboxInput({
   isLoading = false,
   status,
   labelIcon,
+  labelTooltip,
   size = 'md',
+  startContent,
   onFocus,
   onBlur,
   className,
@@ -186,11 +223,13 @@ export function CheckboxInput({
   ref,
 }: CheckboxInputProps): React.JSX.Element {
   const inputId = useId();
+  const descriptionId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
-  const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const describedBy = getDescribedBy(
+    description != null ? descriptionId : undefined,
+    statusMessageID,
+  );
   const isIndeterminate = value === 'indeterminate';
   const isChecked = value === true;
   const isCheckedOrIndeterminate = isChecked || isIndeterminate;
@@ -201,77 +240,119 @@ export function CheckboxInput({
     }
   }, [isIndeterminate]);
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
+
+  const control = (
+    <span className={styles.boxWrap}>
+      <input
+        aria-busy={isLoading || undefined}
+        aria-checked={isIndeterminate ? 'mixed' : undefined}
+        aria-describedby={describedBy}
+        aria-invalid={status?.type === 'error' || undefined}
+        aria-readonly={isReadOnly || undefined}
+        checked={isChecked}
+        className={styles.input}
+        data-testid={dataTestId}
+        disabled={isDisabled}
+        id={inputId}
+        name={htmlName}
+        onBlur={onBlur}
+        onChange={event => {
+          if (isReadOnly || isLoading) {
+            event.preventDefault();
+            return;
+          }
+          onChange(event.target.checked, event);
+        }}
+        onFocus={onFocus}
+        readOnly={isReadOnly}
+        ref={mergeRefs(ref, inputRef)}
+        required={isRequired}
+        type="checkbox"
+      />
+      <span
+        aria-hidden="true"
+        className={cx(
+          styles.box,
+          styles.boxSize[size],
+          isCheckedOrIndeterminate ? styles.boxChecked : undefined,
+          isDisabled ? styles.boxDisabled : undefined,
+        )}>
+        {isLoading ? (
+          <Spinner
+            size="sm"
+            variant={isCheckedOrIndeterminate ? 'onMedia' : 'default'}
+          />
+        ) : isIndeterminate ? (
+          <Icon className={styles.icon} icon={Minus} />
+        ) : isChecked ? (
+          <Icon className={styles.icon} icon={Check} />
+        ) : null}
+      </span>
+    </span>
+  );
+
+  const labelNode = (
+    <label
+      className={cx(
+        styles.label,
+        isDisabled ? styles.labelDisabled : undefined,
+      )}
+      htmlFor={inputId}>
+      {labelIcon != null ? (
+        <Icon color="secondary" icon={labelIcon} size="sm" />
+      ) : null}
+      {label}
+      {statusText != null ? (
+        <Text as="span" className={styles.indicator} type="supporting">
+          <span aria-hidden="true"> · </span>
+          {statusText}
+        </Text>
+      ) : null}
+      {labelTooltip != null ? (
+        <Tooltip content={labelTooltip}>
+          <span className={styles.tooltipIcon}>
+            <Icon icon={Info} size="sm" />
+          </span>
+        </Tooltip>
+      ) : null}
+    </label>
+  );
+
+  const statusNode =
+    status?.message != null ? (
+      <div
+        aria-live={status.type === 'error' ? 'assertive' : 'polite'}
+        className={fieldStatusRecipe({
+          statusType: status.type,
+          statusVariant: 'detached',
+        })}
+        id={statusMessageID}
+        role={status.type === 'error' ? 'alert' : 'status'}>
+        {status.message}
+      </div>
+    ) : null;
+
+  const item = (
+    <Item
+      description={
+        description != null ? (
+          <span id={descriptionId}>{description}</span>
+        ) : undefined
+      }
+      endContent={endContent}
+      endContentPosition={endContentPosition}
+      isDisabled={isDisabled}
+      label={labelNode}
+      leadingContent={control}
+      startContent={startContent}
+    />
+  );
 
   return (
     <div className={cx(styles.root, className)} style={style}>
-      <div className={styles.row}>
-        <span className={styles.boxWrap}>
-          <input
-            aria-busy={isLoading || undefined}
-            aria-checked={isIndeterminate ? 'mixed' : undefined}
-            aria-describedby={describedBy}
-            aria-invalid={status?.type === 'error' || undefined}
-            aria-readonly={isReadOnly || undefined}
-            checked={isChecked}
-            className={styles.input}
-            data-testid={dataTestId}
-            disabled={isDisabled}
-            id={inputId}
-            onBlur={onBlur}
-            onChange={event => {
-              if (isReadOnly || isLoading) {
-                event.preventDefault();
-                return;
-              }
-              onChange(event.target.checked, event);
-            }}
-            onFocus={onFocus}
-            readOnly={isReadOnly}
-            ref={mergeRefs(ref, inputRef)}
-            required={isRequired}
-            type="checkbox"
-          />
-          <span
-            aria-hidden="true"
-            className={cx(
-              styles.box,
-              styles.size[size],
-              isCheckedOrIndeterminate ? styles.boxChecked : undefined,
-              isDisabled ? styles.boxDisabled : undefined,
-            )}>
-            {isLoading ? (
-              <Spinner
-                size="sm"
-                variant={isCheckedOrIndeterminate ? 'onMedia' : 'default'}
-              />
-            ) : isIndeterminate ? (
-              <Icon className={styles.icon} icon={Minus} />
-            ) : isChecked ? (
-              <Icon className={styles.icon} icon={Check} />
-            ) : null}
-          </span>
-        </span>
-        <div className={styles.fieldContent}>
-          <Field
-            description={description}
-            descriptionID={descriptionID}
-            inputId={inputId}
-            isDisabled={isDisabled}
-            isLabelHidden={isLabelHidden}
-            {...necessity}
-            label={label}
-            labelIcon={labelIcon}
-            status={
-              status == null
-                ? undefined
-                : {...status, messageID: statusMessageID}
-            }
-            statusVariant="detached">
-            <span />
-          </Field>
-        </div>
-      </div>
+      {isLabelHidden ? <VisuallyHidden>{item}</VisuallyHidden> : item}
+      {statusNode}
     </div>
   );
 }

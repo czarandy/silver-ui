@@ -94,4 +94,39 @@ describe('Text', () => {
     render(<Text ref={ref}>Ref text</Text>);
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLSpanElement));
   });
+
+  it('merges custom className with recipe classes', () => {
+    render(
+      <Text className="custom" data-testid="text">
+        Styled
+      </Text>,
+    );
+    expect(screen.getByTestId('text')).toHaveClass('custom');
+  });
+
+  it('forwards inline styles', () => {
+    render(
+      <Text data-testid="text" style={{marginTop: '8px'}}>
+        Styled
+      </Text>,
+    );
+    expect(screen.getByTestId('text')).toHaveStyle({marginTop: '8px'});
+  });
+
+  it('throws on negative maxLines in development', () => {
+    expect(() => render(<Text maxLines={-1}>Negative</Text>)).toThrow(
+      'maxLines must be a non-negative integer',
+    );
+  });
+
+  it('forwards native HTML attributes', () => {
+    render(
+      <Text aria-label="description" data-testid="text" id="my-text">
+        Attrs
+      </Text>,
+    );
+    const el = screen.getByTestId('text');
+    expect(el).toHaveAttribute('id', 'my-text');
+    expect(el).toHaveAttribute('aria-label', 'description');
+  });
 });

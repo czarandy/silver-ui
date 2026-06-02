@@ -92,11 +92,12 @@ export function AlertDialog({
     <Dialog
       className={className}
       data-testid={dataTestId}
+      dismissBehavior={false}
       isOpen={isOpen}
       label={title}
       onOpenChange={onOpenChange}
-      purpose="required"
       ref={ref}
+      role="alertdialog"
       style={style}
       width={width}>
       <Layout

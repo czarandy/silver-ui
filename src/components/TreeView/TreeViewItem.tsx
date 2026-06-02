@@ -157,9 +157,10 @@ const styles = {
       },
     },
     '&:has(:focus-visible)': {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   invisibleAction: css({

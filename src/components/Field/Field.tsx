@@ -66,9 +66,19 @@ interface FieldBaseProps {
    */
   label: string;
   /**
+   * HTML element used for the label. Use 'span' for group controls
+   * (e.g., radiogroup) where `htmlFor` cannot target a labelable element.
+   * @default 'label'
+   */
+  labelAs?: 'label' | 'span';
+  /**
    * Optional icon shown before the label.
    */
   labelIcon?: IconComponent;
+  /**
+   * ID applied to the label element, useful for `aria-labelledby`.
+   */
+  labelId?: string;
   /**
    * Tooltip content shown next to the label.
    */
@@ -139,7 +149,9 @@ export function Field({
   isOptional = false,
   isRequired = false,
   isDisabled = false,
+  labelAs: LabelComponent = 'label',
   labelIcon,
+  labelId,
   labelTooltip,
   status,
   statusVariant = 'attached',
@@ -156,7 +168,10 @@ export function Field({
     (status?.message != null ? `${inputId}-status` : undefined);
   const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
   const labelNode = (
-    <label className={fieldLabelRecipe({isDisabled})} htmlFor={inputId}>
+    <LabelComponent
+      className={fieldLabelRecipe({isDisabled})}
+      htmlFor={LabelComponent === 'label' ? inputId : undefined}
+      id={labelId}>
       {labelIcon != null ? (
         <Icon color="secondary" icon={labelIcon} size="sm" />
       ) : null}
@@ -176,7 +191,7 @@ export function Field({
           </span>
         </Tooltip>
       ) : null}
-    </label>
+    </LabelComponent>
   );
   const descriptionNode =
     description != null ? (

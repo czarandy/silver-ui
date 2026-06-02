@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {createEventFromISO} from './CalendarEvent';
@@ -14,6 +15,22 @@ import type {
   ScheduleCategory,
   SchedulePlugin,
 } from './types';
+
+function instantUTC(
+  year: number,
+  monthIndex: number,
+  day: number,
+  hour = 0,
+  minute = 0,
+): Instant {
+  return Temporal.PlainDateTime.from({
+    day,
+    hour,
+    minute,
+    month: monthIndex + 1,
+    year,
+  }).toZonedDateTime('UTC').epochMilliseconds;
+}
 
 describe('createEventFromISO', () => {
   it('creates all-day PlainDate events from date-only ISO strings', () => {
@@ -38,7 +55,9 @@ describe('createEventFromISO', () => {
     });
 
     expect(typeof event.start).toBe('number');
-    expect(event.start).toBe(Date.parse('2026-05-13T16:00:00.000Z'));
+    expect(event.start).toBe(
+      Temporal.Instant.from('2026-05-13T16:00:00.000Z').epochMilliseconds,
+    );
   });
 });
 
@@ -77,11 +96,11 @@ describe('Schedule', () => {
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13)}
         events={events}
-        focusDate={Date.UTC(2026, 4, 13)}
+        highlightDate={instantUTC(2026, 4, 13)}
         timezoneID="UTC"
         view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
       />,
     );
 
@@ -112,17 +131,17 @@ describe('Schedule', () => {
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13)}
         events={loader}
         timezoneID="UTC"
         view={createScheduleDayView()}
+        viewDate={instantUTC(2026, 4, 13)}
       />,
     );
 
     await waitFor(() => expect(loader).toHaveBeenCalledTimes(1));
     const [start, end] = loader.mock.calls[0];
-    expect(start).toBe(Date.UTC(2026, 4, 13));
-    expect(end).toBe(Date.UTC(2026, 4, 14));
+    expect(start).toBe(instantUTC(2026, 4, 13));
+    expect(end).toBe(instantUTC(2026, 4, 14));
     expect(
       await screen.findByText('Loaded event, Event, 5:00 PM - 6:00 PM'),
     ).toBeInTheDocument();
@@ -143,10 +162,10 @@ describe('Schedule', () => {
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13)}
         events={listEvents}
         timezoneID="UTC"
         view={createScheduleListView({days: 7})}
+        viewDate={instantUTC(2026, 4, 13)}
       />,
     );
 
@@ -161,11 +180,11 @@ describe('Schedule', () => {
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13)}
         events={events}
-        focusDate={Date.UTC(2026, 4, 13)}
+        highlightDate={instantUTC(2026, 4, 13)}
         timezoneID="UTC"
         view={createScheduleWeeklyView()}
+        viewDate={instantUTC(2026, 4, 13)}
       />,
     );
 
@@ -176,11 +195,11 @@ describe('Schedule', () => {
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13)}
         events={events}
-        focusDate={Date.UTC(2026, 4, 13)}
+        highlightDate={instantUTC(2026, 4, 13)}
         timezoneID="UTC"
         view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
       />,
     );
 
@@ -197,11 +216,11 @@ describe('Schedule', () => {
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13)}
         events={events}
-        focusDate={Date.UTC(2026, 4, 13)}
+        highlightDate={instantUTC(2026, 4, 13)}
         timezoneID="UTC"
         view={createScheduleDayView({maxHour: 10, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
       />,
     );
 
@@ -218,21 +237,23 @@ describe('Schedule', () => {
     ).toBeInTheDocument();
   });
 
-  it('calls onChangeDate with the previous view date preserving time of day', () => {
-    const onChangeDate = vi.fn();
+  it('calls onViewDateChange with the previous view date preserving time of day', () => {
+    const onViewDateChange = vi.fn();
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13, 15, 6)}
         events={events}
-        onChangeDate={onChangeDate}
+        onViewDateChange={onViewDateChange}
         timezoneID="UTC"
         view={createScheduleDayView()}
+        viewDate={instantUTC(2026, 4, 13, 15, 6)}
       />,
     );
 
     fireEvent.click(screen.getByRole('button', {name: 'Previous day'}));
-    expect(onChangeDate).toHaveBeenCalledWith(Date.UTC(2026, 4, 12, 15, 6));
+    expect(onViewDateChange).toHaveBeenCalledWith(
+      instantUTC(2026, 4, 12, 15, 6),
+    );
   });
 
   it('allows plugins to customize header slots', () => {
@@ -247,11 +268,11 @@ describe('Schedule', () => {
     render(
       <Schedule
         categories={categories}
-        date={Date.UTC(2026, 4, 13)}
         events={events}
         plugins={[plugin]}
         timezoneID="UTC"
         view={createScheduleDayView()}
+        viewDate={instantUTC(2026, 4, 13)}
       />,
     );
 
@@ -277,11 +298,11 @@ describe('Schedule', () => {
       return (
         <Schedule
           categories={categories}
-          date={Date.UTC(2026, 4, 13)}
           events={events}
           plugins={[viewSelectorPlugin]}
           timezoneID="UTC"
           view={dayView}
+          viewDate={instantUTC(2026, 4, 13)}
         />
       );
     }

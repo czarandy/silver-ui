@@ -120,9 +120,10 @@ const styles = {
       overflow: 'visible',
       clipPath: 'none',
       whiteSpace: 'normal',
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   headerSticky: css({

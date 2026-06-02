@@ -16,7 +16,7 @@ import {
   type SegmentedControlSize,
 } from './SegmentedControlContext';
 
-export interface SegmentedControlProps {
+export interface SegmentedControlProps<TValue extends string = string> {
   /**
    * SegmentedControlItem children.
    */
@@ -46,7 +46,7 @@ export interface SegmentedControlProps {
   /**
    * Called when a segment is selected.
    */
-  onChange: (value: string) => void;
+  onChange: (value: TValue) => void;
   /**
    * Ref forwarded to the root element.
    */
@@ -63,7 +63,7 @@ export interface SegmentedControlProps {
   /**
    * Current selected value.
    */
-  value: string;
+  value: TValue;
 }
 
 const styles = {
@@ -83,17 +83,12 @@ const styles = {
     opacity: 0.5,
     pointerEvents: 'none',
   }),
-  size: {
-    sm: css({'--segmented-control-radius': 'var(--silver-radii-md)'}),
-    md: css({'--segmented-control-radius': 'var(--silver-radii-md)'}),
-    lg: css({'--segmented-control-radius': 'var(--silver-radii-md)'}),
-  },
 } as const;
 
 /**
  * Segmented toggle control that allows selecting one option from a set.
  */
-export function SegmentedControl({
+export function SegmentedControl<TValue extends string = string>({
   children,
   className,
   'data-testid': dataTestId,
@@ -105,11 +100,17 @@ export function SegmentedControl({
   size = 'md',
   style,
   value,
-}: SegmentedControlProps): React.JSX.Element {
+}: SegmentedControlProps<TValue>): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
+  const handleChange = useCallback(
+    (nextValue: string) => {
+      onChange(nextValue as TValue);
+    },
+    [onChange],
+  );
   const contextValue = useMemo(
-    () => ({isDisabled, layout, onChange, size, value}),
-    [isDisabled, layout, onChange, size, value],
+    () => ({isDisabled, layout, onChange: handleChange, size, value}),
+    [handleChange, isDisabled, layout, size, value],
   );
 
   const handleKeyDown = useCallback(
@@ -166,10 +167,10 @@ export function SegmentedControl({
       nextItem.focus();
       const nextValue = nextItem.dataset.value;
       if (nextValue != null) {
-        onChange(nextValue);
+        handleChange(nextValue);
       }
     },
-    [isDisabled, onChange],
+    [handleChange, isDisabled],
   );
 
   return (
@@ -177,9 +178,9 @@ export function SegmentedControl({
       <div
         aria-disabled={isDisabled || undefined}
         aria-label={label}
+        aria-orientation="horizontal"
         className={cx(
           styles.root,
-          styles.size[size],
           layout === 'fill' ? styles.fill : undefined,
           isDisabled ? styles.disabled : undefined,
           className,

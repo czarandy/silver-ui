@@ -102,14 +102,6 @@ export const textRecipe = cva({
       balance: {textWrap: 'balance'},
       pretty: {textWrap: 'pretty'},
     },
-    hasCapsize: {
-      true: {
-        display: 'block',
-        textBoxEdge: 'cap alphabetic',
-        textBoxTrim: 'trim-both',
-      },
-      false: {},
-    },
     hasStrikethrough: {
       true: {textDecoration: 'line-through'},
       false: {},
@@ -137,7 +129,6 @@ export const textRecipe = cva({
     type: 'body',
     color: 'primary',
     display: 'inline',
-    hasCapsize: false,
     hasStrikethrough: false,
     hasTabularNumbers: false,
     maxLines: 'none',
@@ -159,20 +150,6 @@ export const headingRecipe = cva({
       4: {fontSize: 'xl', lineHeight: 'snug'},
       5: {fontSize: 'lg', lineHeight: 'snug'},
       6: {fontSize: 'md', lineHeight: 'snug'},
-    },
-    type: {
-      'display-1': {
-        fontSize: '5xl',
-        lineHeight: 'tight',
-      },
-      'display-2': {
-        fontSize: '4xl',
-        lineHeight: 'tight',
-      },
-      'display-3': {
-        fontSize: '3xl',
-        lineHeight: 'tight',
-      },
     },
     color: {
       primary: {color: 'fg'},
@@ -201,14 +178,6 @@ export const headingRecipe = cva({
       balance: {textWrap: 'balance'},
       pretty: {textWrap: 'pretty'},
     },
-    hasCapsize: {
-      true: {
-        display: 'block',
-        textBoxEdge: 'cap alphabetic',
-        textBoxTrim: 'trim-both',
-      },
-      false: {},
-    },
     hasStrikethrough: {
       true: {textDecoration: 'line-through'},
       false: {},
@@ -232,7 +201,6 @@ export const headingRecipe = cva({
     level: 2,
     color: 'primary',
     display: 'block',
-    hasCapsize: false,
     hasStrikethrough: false,
     maxLines: 'none',
   },

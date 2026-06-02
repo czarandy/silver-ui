@@ -5,7 +5,6 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {
   Field,
@@ -13,6 +12,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
+import {inputGroupRecipe} from './InputGroup.recipe';
 import {InputGroupContext} from './InputGroupContext';
 
 export type InputGroupProps = {
@@ -69,40 +69,6 @@ export type InputGroupProps = {
   style?: CSSProperties;
 } & FieldNecessity;
 
-const styles = {
-  group: css({
-    display: 'inline-flex',
-    alignItems: 'stretch',
-    minW: 0,
-    '& > *': {
-      minH: '100%',
-      borderRadius: 0,
-      ml: '-1px',
-    },
-    '& > *:first-child': {
-      ml: 0,
-      borderStartStartRadius: 'md',
-      borderEndStartRadius: 'md',
-    },
-    '& > *:last-child': {
-      borderStartEndRadius: 'md',
-      borderEndEndRadius: 'md',
-    },
-    '& > *:focus-within': {
-      zIndex: 1,
-    },
-  }),
-  disabled: css({
-    cursor: 'not-allowed',
-    opacity: 0.55,
-  }),
-  size: {
-    sm: css({h: 'component.sm'}),
-    md: css({h: 'component.md'}),
-    lg: css({h: 'component.lg'}),
-  } satisfies Record<InputSize, string>,
-} as const;
-
 /**
  * Groups multiple inputs into a single visually connected row.
  */
@@ -123,9 +89,21 @@ export function InputGroup({
   ref,
 }: InputGroupProps): React.JSX.Element {
   const inputId = useId();
+  const labelId = `${inputId}-label`;
+  const descriptionID =
+    description != null ? `${inputId}-description` : undefined;
+  const statusID = status?.message != null ? `${inputId}-status` : undefined;
+  const describedBy =
+    [descriptionID, statusID].filter(Boolean).join(' ') || undefined;
   const contextValue = useMemo(
-    () => ({isInGroup: true as const, isDisabled, label}),
-    [isDisabled, label],
+    () => ({
+      isInGroup: true as const,
+      isDisabled,
+      label,
+      size,
+      statusType: status?.type,
+    }),
+    [isDisabled, label, size, status?.type],
   );
 
   const necessity: FieldNecessity = {isOptional, isRequired};
@@ -134,24 +112,30 @@ export function InputGroup({
     <InputGroupContext value={contextValue}>
       <Field
         description={description}
+        descriptionID={descriptionID}
         inputId={inputId}
         isDisabled={isDisabled}
         isLabelHidden={isLabelHidden}
+        labelAs="span"
+        labelId={labelId}
         {...necessity}
         label={label}
         labelTooltip={labelTooltip}
-        status={status}
+        status={status == null ? undefined : {...status, messageID: statusID}}
         statusVariant="detached">
         <div
-          aria-label={label}
+          aria-describedby={describedBy}
+          aria-disabled={isDisabled || undefined}
+          aria-labelledby={labelId}
           className={cx(
-            styles.group,
-            styles.size[size],
-            isDisabled ? styles.disabled : undefined,
+            inputGroupRecipe({
+              isDisabled,
+              size,
+              status: status?.type,
+            }),
             className,
           )}
           data-testid={dataTestId}
-          id={inputId}
           ref={ref}
           role="group"
           style={style}>

@@ -11,12 +11,14 @@ export interface UseTruncationOptions {
 }
 
 export interface UseTruncationReturn {
+  elementWidth: number;
   fullText: string;
   isTruncated: boolean;
   ref: RefCallback<HTMLElement>;
 }
 
 interface TruncationState {
+  elementWidth: number;
   fullText: string;
   isTruncated: boolean;
 }
@@ -27,6 +29,7 @@ interface TruncationStore {
 }
 
 const initialState: TruncationState = {
+  elementWidth: 0,
   isTruncated: false,
   fullText: '',
 };
@@ -62,6 +65,7 @@ function getTruncationState(
   }
 
   return {
+    elementWidth: element.offsetWidth,
     fullText: element.textContent,
     isTruncated: hasOverflow(element, maxLines),
   };
@@ -95,7 +99,8 @@ export function useTruncation({
     const store = storeRef.current;
     if (
       store.state.isTruncated === nextState.isTruncated &&
-      store.state.fullText === nextState.fullText
+      store.state.fullText === nextState.fullText &&
+      store.state.elementWidth === nextState.elementWidth
     ) {
       return;
     }
@@ -142,11 +147,11 @@ export function useTruncation({
       }
 
       observerRef.current = new ResizeObserver(() => {
-        publishState(getTruncationState(element, lines));
+        scheduleUpdate(element, lines);
       });
       observerRef.current.observe(element);
     },
-    [disconnectObserver, publishState],
+    [disconnectObserver, scheduleUpdate],
   );
 
   const ref = useCallback<RefCallback<HTMLElement>>(

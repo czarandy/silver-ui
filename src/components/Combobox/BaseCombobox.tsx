@@ -158,9 +158,10 @@ const styles = {
     textAlign: 'start',
     _hover: {bg: 'bg.subtle'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '1px',
+      outlineOffset: 'focusOffsetTight',
     },
   }),
   optionHighlighted: css({bg: 'bg.subtle'}),
@@ -234,6 +235,7 @@ export function BaseCombobox<T extends SearchableItem>({
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const pointerActiveRef = useRef(false);
 
   const setOpen = useCallback(
     (isNextOpen: boolean) => {
@@ -246,6 +248,18 @@ export function BaseCombobox<T extends SearchableItem>({
     },
     [onOpenChange, searchSource],
   );
+
+  const showMenu = useCallback(() => {
+    if (pointerActiveRef.current) {
+      document.addEventListener(
+        'click',
+        () => requestAnimationFrame(() => setOpen(true)),
+        {once: true},
+      );
+    } else {
+      setOpen(true);
+    }
+  }, [setOpen]);
 
   const runSearch = useCallback(
     async (nextQuery: string, kind: 'bootstrap' | 'search') => {
@@ -426,7 +440,7 @@ export function BaseCombobox<T extends SearchableItem>({
           if (hasEntriesOnFocus && query === '' && results.length === 0) {
             void runSearch('', 'bootstrap');
           } else if (results.length > 0) {
-            setOpen(true);
+            showMenu();
           }
         }}
         onKeyDown={event => {
@@ -439,7 +453,7 @@ export function BaseCombobox<T extends SearchableItem>({
             event.preventDefault();
             if (!isOpen) {
               if (results.length > 0) {
-                setOpen(true);
+                showMenu();
               } else if (hasEntriesOnFocus) {
                 void runSearch('', 'bootstrap');
               }
@@ -467,6 +481,16 @@ export function BaseCombobox<T extends SearchableItem>({
             event.preventDefault();
             setOpen(false);
           }
+        }}
+        onPointerDown={() => {
+          pointerActiveRef.current = true;
+          document.addEventListener(
+            'click',
+            () => {
+              pointerActiveRef.current = false;
+            },
+            {once: true},
+          );
         }}
         placeholder={placeholder}
         ref={mergeRefs(ref, inputRef, fallbackAnchorRef)}

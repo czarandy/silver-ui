@@ -141,6 +141,10 @@ function includesBooleanType(typeAnnotation) {
     return typeNode.types.some(includesBooleanType);
   }
 
+  if (typeNode.type === 'TSFunctionType') {
+    return includesBooleanType(typeNode.returnType);
+  }
+
   if (
     typeNode.type === 'TSLiteralType' &&
     typeof typeNode.literal.value === 'boolean'
@@ -151,38 +155,51 @@ function includesBooleanType(typeAnnotation) {
   return false;
 }
 
-function parentTypeName(node) {
-  const parent = node.parent;
-
-  if (parent?.type === 'TSInterfaceBody') {
-    return parent.parent?.id?.name ?? null;
+function isBooleanFunctionType(typeAnnotation) {
+  if (!typeAnnotation) {
+    return false;
   }
 
-  if (
-    parent?.type === 'TSTypeLiteral' &&
-    parent.parent?.type === 'TSTypeAliasDeclaration'
-  ) {
-    return parent.parent.id.name;
-  }
+  const typeNode =
+    typeAnnotation.type === 'TSTypeAnnotation'
+      ? typeAnnotation.typeAnnotation
+      : typeAnnotation;
 
-  return null;
+  return (
+    typeNode.type === 'TSFunctionType' && includesBooleanType(typeNode.returnType)
+  );
 }
 
 const booleanPropNaming = {
   meta: {
     type: 'suggestion',
     docs: {
-      description: 'Require boolean props and parameters to start with is or has',
+      description:
+        'Require boolean props and parameters to start with is or has, and require is/has-prefixed props and parameters to be boolean-compatible',
     },
     messages: {
       invalidBooleanProp:
         'Boolean prop "{{name}}" must start with "is" or "has".',
+      invalidBooleanPredicateProp:
+        'Boolean predicate prop "{{name}}" must start with "getIs" or "getHas".',
       invalidBooleanParam:
         'Boolean parameter "{{name}}" must start with "is" or "has".',
+      invalidPrefixedProp:
+        'Prop "{{name}}" starts with "is" or "has" and must include a boolean type.',
+      invalidPrefixedParam:
+        'Parameter "{{name}}" starts with "is" or "has" and must include a boolean type.',
     },
     schema: [],
   },
   create(context) {
+    function hasBooleanPrefix(name) {
+      return /^(is|has)[A-Z]/.test(name);
+    }
+
+    function hasBooleanPredicatePrefix(name) {
+      return /^get(Is|Has)[A-Z]/.test(name);
+    }
+
     function checkFunctionParams(node) {
       for (const param of node.params) {
         const identifier =
@@ -193,39 +210,67 @@ const booleanPropNaming = {
               ? param.left
               : null;
 
-        if (
-          identifier == null ||
-          !includesBooleanType(identifier.typeAnnotation) ||
-          /^(is|has)[A-Z]/.test(identifier.name)
-        ) {
+        if (identifier == null || identifier.typeAnnotation == null) {
           continue;
         }
 
-        context.report({
-          node: identifier,
-          messageId: 'invalidBooleanParam',
-          data: {name: identifier.name},
-        });
+        const isBoolean = includesBooleanType(identifier.typeAnnotation);
+        const isPrefixed = hasBooleanPrefix(identifier.name);
+
+        if (isBoolean && !isPrefixed) {
+          context.report({
+            node: identifier,
+            messageId: 'invalidBooleanParam',
+            data: {name: identifier.name},
+          });
+        }
+
+        if (isPrefixed && !isBoolean) {
+          context.report({
+            node: identifier,
+            messageId: 'invalidPrefixedParam',
+            data: {name: identifier.name},
+          });
+        }
       }
     }
 
     return {
       TSPropertySignature(node) {
         const name = getPropertyName(node);
-        if (
-          name == null ||
-          !includesBooleanType(node.typeAnnotation) ||
-          /^(is|has)[A-Z]/.test(name) ||
-          name.startsWith('aria-')
-        ) {
+        if (name == null || name.startsWith('aria-')) {
           return;
         }
 
-        context.report({
-          node: node.key,
-          messageId: 'invalidBooleanProp',
-          data: {name},
-        });
+        const isBoolean = includesBooleanType(node.typeAnnotation);
+        const isBooleanFunction = isBooleanFunctionType(node.typeAnnotation);
+        const isPrefixed = hasBooleanPrefix(name);
+        const isPredicatePrefixed = hasBooleanPredicatePrefix(name);
+
+        if (isBooleanFunction && !isPredicatePrefixed) {
+          context.report({
+            node: node.key,
+            messageId: 'invalidBooleanPredicateProp',
+            data: {name},
+          });
+          return;
+        }
+
+        if (isBoolean && !isBooleanFunction && !isPrefixed) {
+          context.report({
+            node: node.key,
+            messageId: 'invalidBooleanProp',
+            data: {name},
+          });
+        }
+
+        if (isPrefixed && !isBoolean) {
+          context.report({
+            node: node.key,
+            messageId: 'invalidPrefixedProp',
+            data: {name},
+          });
+        }
       },
       FunctionDeclaration: checkFunctionParams,
       FunctionExpression: checkFunctionParams,

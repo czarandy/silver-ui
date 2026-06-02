@@ -1,6 +1,5 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
-import {plainDateAddDays} from '../../internal/plainDate';
 import {TimeGridView} from './TimeGridView';
 import {useScheduleContext} from './context';
 import {getScheduleRangeFromDates} from './dateMath';
@@ -31,8 +30,8 @@ export interface ScheduleDayViewOptions {
 function ScheduleDayView({
   options,
 }: ScheduleViewComponentProps<ScheduleDayViewOptions>): React.JSX.Element {
-  const {date} = useScheduleContext();
-  const day = date.toPlainDate();
+  const {viewDate} = useScheduleContext();
+  const day = viewDate.toPlainDate();
   return (
     <ScheduleFrame title={formatMonthTitle(day)} titleLabel={formatDate(day)}>
       <TimeGridView
@@ -56,7 +55,7 @@ export function createScheduleDayView({
     getDateRange: (date: ZonedDateTime) =>
       scheduleRangeToZonedDateTimeRange(
         getScheduleRangeFromDates({
-          endDate: plainDateAddDays(date.toPlainDate(), 1),
+          endDate: date.toPlainDate().add({days: 1}),
           startDate: date.toPlainDate(),
           timezoneID: date.timezoneID,
         }),

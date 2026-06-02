@@ -21,6 +21,7 @@ export interface UsePopoverOptions {
   label?: string;
   onHide?: () => void;
   onShow?: () => void;
+  role?: 'dialog' | 'menu';
 }
 
 export interface UsePopoverReturn {
@@ -35,7 +36,7 @@ export interface UsePopoverReturn {
   triggerProps: {
     'aria-controls': string;
     'aria-expanded': boolean;
-    'aria-haspopup': 'dialog';
+    'aria-haspopup': 'dialog' | 'menu';
   };
   triggerRef: RefCallback<HTMLElement>;
 }
@@ -80,6 +81,7 @@ export function usePopover({
   hasCloseButton = true,
   closeButtonLabel = 'Close popover',
   label,
+  role = 'dialog',
 }: UsePopoverOptions = {}): UsePopoverReturn {
   const skipAutoFocusRef = useRef(false);
   const layer = useLayer({hasLightDismiss, onShow, onHide});
@@ -121,10 +123,10 @@ export function usePopover({
       return layer.render(
         <div
           aria-label={label}
-          aria-modal="true"
+          aria-modal={role === 'dialog' ? 'true' : undefined}
           className={hasSurface ? styles.surface : undefined}
           ref={contentRef}
-          role="dialog">
+          role={role}>
           {children}
           {hasCloseButton ? (
             <div className={styles.closeButtonWrapper}>
@@ -141,7 +143,15 @@ export function usePopover({
         },
       );
     },
-    [closeButtonLabel, contentRef, hasCloseButton, hasSurface, label, layer],
+    [
+      closeButtonLabel,
+      contentRef,
+      hasCloseButton,
+      hasSurface,
+      label,
+      layer,
+      role,
+    ],
   );
 
   return {
@@ -156,7 +166,7 @@ export function usePopover({
     triggerProps: {
       'aria-controls': layer.id,
       'aria-expanded': layer.isOpen,
-      'aria-haspopup': 'dialog',
+      'aria-haspopup': role,
     },
     triggerRef: layer.ref,
   };

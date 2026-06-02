@@ -153,7 +153,7 @@ export function TextInput({
   onBlur,
   onFocus,
   type = 'text',
-  size = 'md',
+  size: sizeProp = 'md',
   placeholder,
   description,
   endContent,
@@ -183,13 +183,15 @@ export function TextInput({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
   const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const size = inputGroup?.size ?? sizeProp;
+  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 
   const inputWrapper = (
     <div
       className={cx(
         inputRecipe({
           size,
-          status: status?.type,
+          status: effectiveStatusType,
           isDisabled: effectiveDisabled,
         }),
         inputGroup != null ? className : undefined,

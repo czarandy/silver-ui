@@ -84,6 +84,20 @@ export default tseslint.config(
       'no-restricted-imports': 'off',
     },
   },
+  // Date/time — use Temporal instead of raw JavaScript Date
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'Date',
+          message:
+            'Use Temporal from @js-temporal/polyfill instead of raw JavaScript Date.',
+        },
+      ],
+    },
+  },
   // JSDoc formatting — enforce multi-line block style
   {
     files: ['**/*.{ts,tsx}'],

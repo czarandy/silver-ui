@@ -134,7 +134,7 @@ export function Accordion({
     [isControlled, controlledValue, internalValue],
   );
 
-  const isOpen = useCallback(
+  const getIsOpen = useCallback(
     (itemValue: string) => openValues.has(itemValue),
     [openValues],
   );
@@ -174,8 +174,8 @@ export function Accordion({
   );
 
   const contextValue = useMemo<AccordionContextValue>(
-    () => ({isOpen, toggle}),
-    [isOpen, toggle],
+    () => ({getIsOpen, toggle}),
+    [getIsOpen, toggle],
   );
 
   return (

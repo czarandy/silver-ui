@@ -219,7 +219,7 @@ export function NumberInput({
   label,
   value,
   onChange,
-  size = 'md',
+  size: sizeProp = 'md',
   description,
   endContent,
   isLabelHidden = false,
@@ -257,6 +257,8 @@ export function NumberInput({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
   const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const size = inputGroup?.size ?? sizeProp;
+  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
   const [pendingInput, setPendingInput] = useState<string | null>(null);
   const displayValue = useMemo(() => {
     if (pendingInput != null) {
@@ -276,7 +278,7 @@ export function NumberInput({
       className={cx(
         inputRecipe({
           size,
-          status: status?.type,
+          status: effectiveStatusType,
           isDisabled: effectiveDisabled,
         }),
         inputGroup != null ? className : undefined,

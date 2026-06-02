@@ -1,9 +1,15 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {Filter, X} from 'lucide-react';
 import {createContext, use, useMemo, type ReactNode} from 'react';
 import {css} from 'styled-system/css';
+import {
+  plainDateToUnixSeconds,
+  type PlainDate,
+} from '../../../../internal/plainDate';
+import {getBrowserTimezoneID} from '../../../../internal/time';
 import {Button} from '../../../Button';
 import {createStaticSource, type SearchableItem} from '../../../Combobox';
-import {DateInput, type ISODateString} from '../../../DateInput';
+import {DateInput} from '../../../DateInput';
 import {MultiSelect} from '../../../MultiSelect';
 import {NumberInput} from '../../../NumberInput';
 import {Popover} from '../../../Popover';
@@ -24,14 +30,14 @@ import type {
 import {Select} from '../../../Select';
 import {TagsInput} from '../../../TagsInput';
 import {TextInput} from '../../../TextInput';
-import {TimeInput, type ISOTimeString} from '../../../TimeInput';
+import {TimeInput} from '../../../TimeInput';
 import type {
   HeaderCellRenderProps,
   TableColumn,
   TablePlugin,
 } from '../../types';
 
-export type TableFilterValue = number | string | string[];
+export type TableFilterValue = number | string | string[] | PlainDate;
 export type TableFilterState = Record<string, TableFilterValue | undefined>;
 export type TableFilterVariant = 'inline' | 'inline-compact' | 'popover';
 
@@ -44,8 +50,13 @@ export interface UseTableFilteringConfig {
   filters: TableFilterState;
   onFilterChange: (columnKey: string, value: TableFilterValue | null) => void;
   searchConfig: SearchFilterInputConfig;
+  timezoneID?: string;
   variant?: TableFilterVariant;
 }
+
+type ToSearchFiltersConfig =
+  | Pick<UseTableFilteringConfig, 'searchConfig' | 'timezoneID'>
+  | SearchFilterInputConfig;
 
 interface FilterStore {
   getConfig: () => UseTableFilteringConfig;
@@ -121,13 +132,14 @@ function resolveFilterConfig(
 function tableValueToFilterValue(
   value: TableFilterValue,
   operatorValue: OperatorValue,
+  timezoneID: string,
 ): FilterValue | undefined {
   switch (operatorValue.type) {
     case 'date_absolute':
-      return typeof value === 'string'
+      return value instanceof Temporal.PlainDate
         ? {
             type: 'date_absolute',
-            unixSeconds: Math.floor(new Date(value).getTime() / 1000),
+            unixSeconds: plainDateToUnixSeconds(value, timezoneID),
           }
         : undefined;
     case 'enum':
@@ -163,9 +175,15 @@ function tableValueToFilterValue(
 export function toSearchFilters<T extends Record<string, unknown>>(
   filters: TableFilterState,
   columns: ReadonlyArray<Pick<TableColumn<T>, 'filter' | 'key'>>,
-  searchConfig: SearchFilterInputConfig,
+  config: ToSearchFiltersConfig,
+  timezoneID?: string,
 ): SearchFilterInputFilter[] {
   const result: SearchFilterInputFilter[] = [];
+  const searchConfig = 'searchConfig' in config ? config.searchConfig : config;
+  const effectiveTimezoneID =
+    ('searchConfig' in config ? config.timezoneID : undefined) ??
+    timezoneID ??
+    getBrowserTimezoneID();
 
   for (const column of columns) {
     if (column.filter == null) {
@@ -187,7 +205,11 @@ export function toSearchFilters<T extends Record<string, unknown>>(
     if (operator == null) {
       continue;
     }
-    const filterValue = tableValueToFilterValue(value, operator.value);
+    const filterValue = tableValueToFilterValue(
+      value,
+      operator.value,
+      effectiveTimezoneID,
+    );
     if (filterValue != null) {
       result.push({
         field: fieldKey,
@@ -374,7 +396,7 @@ function DateFilterControl({
       }}
       placeholder={`Filter ${header}`}
       size={size}
-      value={typeof value === 'string' ? (value as ISODateString) : undefined}
+      value={value instanceof Temporal.PlainDate ? value : undefined}
     />
   );
 }
@@ -398,11 +420,13 @@ function TimeFilterControl({
       isLabelHidden
       label={`Filter ${header}`}
       onChange={nextValue => {
-        store.getConfig().onFilterChange(columnKey, nextValue ?? null);
+        store
+          .getConfig()
+          .onFilterChange(columnKey, nextValue?.toString() ?? null);
       }}
       placeholder={`Filter ${header}`}
       size={size}
-      value={typeof value === 'string' ? (value as ISOTimeString) : undefined}
+      value={value instanceof Temporal.PlainTime ? value : undefined}
     />
   );
 }
@@ -584,6 +608,7 @@ function PopoverFilterTrigger<T extends Record<string, unknown>>({
         </div>
       }
       label={`Filter ${getHeaderText(column)}`}
+      padding="3"
       placement="below">
       <Button
         icon={Filter}

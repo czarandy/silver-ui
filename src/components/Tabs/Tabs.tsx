@@ -1,4 +1,10 @@
-import {useMemo, type CSSProperties, type ReactNode, type Ref} from 'react';
+import {
+  useMemo,
+  type CSSProperties,
+  type KeyboardEvent,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {TabsContext, type TabsLayout, type TabsSize} from './TabsContext';
@@ -9,11 +15,11 @@ export interface TabsProps {
    */
   children: ReactNode;
   /**
-   * Additional CSS class names applied to the nav element.
+   * Additional CSS class names applied to the tablist element.
    */
   className?: string;
   /**
-   * Test ID applied to the nav element.
+   * Test ID applied to the tablist element.
    */
   'data-testid'?: string;
   /**
@@ -36,7 +42,7 @@ export interface TabsProps {
    */
   onChange: (value: string) => void;
   /**
-   * Ref forwarded to the nav element.
+   * Ref forwarded to the tablist element.
    */
   ref?: Ref<HTMLElement>;
   /**
@@ -45,7 +51,7 @@ export interface TabsProps {
    */
   size?: TabsSize;
   /**
-   * Inline styles applied to the nav element.
+   * Inline styles applied to the tablist element.
    */
   style?: CSSProperties;
   /**
@@ -58,7 +64,6 @@ const styles = {
   root: css({
     display: 'flex',
     alignItems: 'stretch',
-    gap: '0.5',
     maxW: 'full',
     minW: 0,
   }),
@@ -73,7 +78,7 @@ const styles = {
 } as const;
 
 /**
- * Controlled tab navigation wrapper.
+ * Controlled tab wrapper.
  */
 export function Tabs({
   children,
@@ -93,9 +98,55 @@ export function Tabs({
     [layout, onChange, size, value],
   );
 
+  const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (
+      event.key !== 'ArrowLeft' &&
+      event.key !== 'ArrowRight' &&
+      event.key !== 'Home' &&
+      event.key !== 'End'
+    ) {
+      return;
+    }
+
+    const activeTab = (event.target as HTMLElement).closest<HTMLElement>(
+      '[role="tab"]',
+    );
+    if (activeTab == null || !event.currentTarget.contains(activeTab)) {
+      return;
+    }
+
+    const tabs = Array.from(
+      event.currentTarget.querySelectorAll<HTMLElement>(
+        '[role="tab"]:not([data-tab-disabled="true"])',
+      ),
+    );
+    const currentIndex = tabs.indexOf(activeTab);
+    if (currentIndex === -1) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const nextIndex =
+      event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? tabs.length - 1
+          : event.key === 'ArrowRight'
+            ? (currentIndex + 1) % tabs.length
+            : (currentIndex - 1 + tabs.length) % tabs.length;
+    const nextTab = tabs[nextIndex];
+    nextTab.focus();
+
+    const nextValue = nextTab.dataset.tabValue;
+    if (nextValue != null) {
+      onChange(nextValue);
+    }
+  };
+
   return (
     <TabsContext value={contextValue}>
-      <nav
+      <div
         aria-label={label}
         className={cx(
           styles.root,
@@ -104,10 +155,13 @@ export function Tabs({
           className,
         )}
         data-testid={dataTestId}
-        ref={ref}
-        style={style}>
+        onKeyDown={handleKeyDown}
+        ref={ref as Ref<HTMLDivElement>}
+        role="tablist"
+        style={style}
+        tabIndex={-1}>
         {children}
-      </nav>
+      </div>
     </TabsContext>
   );
 }

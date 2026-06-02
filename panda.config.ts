@@ -80,8 +80,9 @@ export default defineConfig({
           full: {value: '9999px'},
         },
         borderWidths: {
-          DEFAULT: {value: '1px'},
+          default: {value: '1px'},
           emphasized: {value: '2px'},
+          focus: {value: '2px'},
         },
       },
       semanticTokens: {
@@ -345,7 +346,7 @@ export default defineConfig({
             gray: {
               DEFAULT: {
                 value: {
-                  base: '{colors.silver-neutral.100}',
+                  base: '{colors.silver-neutral.50}',
                   _dark: '{colors.silver-neutral.800}',
                 },
               },
@@ -357,7 +358,7 @@ export default defineConfig({
               },
               hover: {
                 value: {
-                  base: '{colors.silver-neutral.200}',
+                  base: '{colors.silver-neutral.100}',
                   _dark: '{colors.silver-neutral.700}',
                 },
               },
@@ -580,6 +581,9 @@ export default defineConfig({
             md: {value: '{spacing.4}'},
             lg: {value: '{spacing.5}'},
           },
+          focusOffset: {value: '2px'},
+          focusOffsetTight: {value: '1px'},
+          focusOffsetLoose: {value: '3px'},
         },
         fontSizes: {
           component: {
@@ -598,6 +602,20 @@ export default defineConfig({
             sm: {value: '{radii.sm}'},
             md: {value: '{radii.md}'},
             lg: {value: '{radii.lg}'},
+          },
+        },
+        shadows: {
+          focus: {
+            value: '0 0 0 {borderWidths.focus} {colors.primary.subtle}',
+          },
+          'focus.error': {
+            value: '0 0 0 {borderWidths.focus} {colors.red.100}',
+          },
+          'focus.warning': {
+            value: '0 0 0 {borderWidths.focus} {colors.yellow.100}',
+          },
+          'focus.success': {
+            value: '0 0 0 {borderWidths.focus} {colors.green.100}',
           },
         },
       },

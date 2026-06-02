@@ -42,9 +42,10 @@ const styles = {
     font: 'inherit',
     textAlign: 'inherit',
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   icon: css({

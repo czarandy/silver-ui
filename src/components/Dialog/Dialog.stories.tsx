@@ -13,10 +13,11 @@ const meta: Meta<typeof Dialog> = {
   title: 'Components/Dialog',
   component: Dialog,
   argTypes: {
+    dismissBehavior: {control: 'object'},
     maxHeight: {control: 'text'},
-    purpose: {
+    role: {
       control: {type: 'select'},
-      options: ['info', 'form', 'required'],
+      options: ['dialog', 'alertdialog'],
     },
     variant: {
       control: {type: 'select'},
@@ -25,9 +26,13 @@ const meta: Meta<typeof Dialog> = {
     width: {control: 'text'},
   },
   args: {
+    dismissBehavior: {
+      isBackdropDismissEnabled: true,
+      isEscapeDismissEnabled: true,
+    },
     label: 'Confirm changes',
     maxHeight: '75vh',
-    purpose: 'info',
+    role: 'dialog',
     variant: 'standard',
     width: 420,
   },
@@ -81,7 +86,11 @@ export const Default: Story = {
 };
 
 export const Required: Story = {
-  args: {label: 'Required action', purpose: 'required'},
+  args: {
+    dismissBehavior: false,
+    label: 'Required action',
+    role: 'alertdialog',
+  },
   render: args => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -117,7 +126,14 @@ export const Required: Story = {
 };
 
 export const Form: Story = {
-  args: {label: 'Edit profile', purpose: 'form', width: 480},
+  args: {
+    dismissBehavior: {
+      isBackdropDismissEnabled: false,
+      isEscapeDismissEnabled: true,
+    },
+    label: 'Edit profile',
+    width: 480,
+  },
   render: args => {
     const [isOpen, setIsOpen] = useState(false);
 

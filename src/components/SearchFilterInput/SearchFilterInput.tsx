@@ -19,7 +19,6 @@ import {
   TagsInput,
   type TagsInputChange,
   type TagsInputHandle,
-  type TagsInputOverflowBehavior,
 } from '../TagsInput';
 import {Text} from '../Text';
 import {SearchFilterInputEditPopover} from './SearchFilterInputEditPopover';
@@ -150,11 +149,6 @@ export interface SearchFilterInputProps {
    */
   style?: CSSProperties;
   /**
-   * Tag overflow behavior.
-   * @default 'none'
-   */
-  tagOverflowBehavior?: TagsInputOverflowBehavior;
-  /**
    * Timezone ID for date formatting.
    */
   timezoneID?: string;
@@ -210,7 +204,6 @@ export function SearchFilterInput({
   startIcon,
   style,
   timezoneID,
-  tagOverflowBehavior,
 }: SearchFilterInputProps): React.JSX.Element {
   const config = useInternalSearchFilterInputConfig(configFromProps);
   const searchSource = useSearchFilterInputSource(config);
@@ -537,7 +530,6 @@ export function SearchFilterInput({
           size={size}
           startIcon={startIcon}
           style={style}
-          tagOverflowBehavior={tagOverflowBehavior}
           value={tagsInputValue}
         />
       </div>

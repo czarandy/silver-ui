@@ -70,7 +70,6 @@ export function SelectOption({
       as="span"
       className={cx(styles.root, className)}
       data-testid={dataTestId}
-      density="compact"
       description={description}
       endContent={endContent}
       label={label}

@@ -16,7 +16,6 @@ import {useLinkComponent} from '../Link';
 import {Text} from '../Text';
 
 export type ItemAlign = 'center' | 'start';
-export type ItemDensity = 'default' | 'compact';
 export type ItemElement = 'div' | 'li' | 'span';
 
 export interface ItemProps {
@@ -43,11 +42,6 @@ export interface ItemProps {
    */
   'data-testid'?: string;
   /**
-   * Spacing density.
-   * @default 'default'
-   */
-  density?: ItemDensity;
-  /**
    * Supporting text shown below the label.
    */
   description?: ReactNode;
@@ -56,10 +50,16 @@ export interface ItemProps {
    */
   descriptionLines?: number;
   /**
-   * Trailing content rendered at the end of the item, inside the
-   * interactive area.
+   * Content rendered after the label and description.
+   * Position controlled by `endContentPosition`.
    */
   endContent?: ReactNode;
+  /**
+   * Where to place `endContent` within the item.
+   * `'end'` pushes it to the trailing edge; `'inline'` keeps it next to the label.
+   * @default 'end'
+   */
+  endContentPosition?: 'end' | 'inline';
   /**
    * Link URL. When set, the content area renders as a link.
    */
@@ -129,6 +129,11 @@ export interface ItemProps {
    * Content rendered outside the interactive area, after it.
    */
   trailingContent?: ReactNode;
+  /**
+   * Width of the root element.
+   * @default 'full'
+   */
+  width?: 'full' | 'auto';
 }
 
 const styles = {
@@ -138,18 +143,17 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '2',
-    w: 'full',
     px: '2',
+    py: '2',
     textAlign: 'start',
     borderRadius: 'md',
+  }),
+  widthFull: css({
+    w: 'full',
   }),
   alignStart: css({
     alignItems: 'flex-start',
   }),
-  density: {
-    default: css({py: '2'}),
-    compact: css({py: '1'}),
-  } satisfies Record<ItemDensity, string>,
   interactive: css({
     cursor: 'pointer',
     transitionProperty: 'background-color',
@@ -158,9 +162,10 @@ const styles = {
     _hover: {bg: 'bg.subtle'},
     _active: {bg: 'bg.hover'},
     '&:has(:focus-visible)': {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   highlighted: css({
@@ -213,6 +218,16 @@ const styles = {
     flexShrink: 0,
     marginInlineStart: 'auto',
   }),
+  endContentInline: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    flexShrink: 0,
+  }),
+  labelRow: css({
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2',
+  }),
   trailingContent: css({
     display: 'inline-flex',
     alignItems: 'center',
@@ -240,10 +255,10 @@ export function Item({
   as: Component = 'div',
   className,
   'data-testid': dataTestId,
-  density = 'default',
   description,
   descriptionLines,
   endContent,
+  endContentPosition = 'end',
   href,
   isDisabled = false,
   isHighlighted = false,
@@ -260,17 +275,38 @@ export function Item({
   style,
   target,
   trailingContent,
+  width = 'full',
 }: ItemProps): React.JSX.Element {
   const LinkComponent = useLinkComponent(linkComponent);
   const linkRel = useRel({target, rel});
   const isInteractive = href != null || onClick != null;
   const hasParentRole = role != null;
 
+  const inlineEndContent =
+    endContent != null && endContentPosition === 'inline' ? (
+      <span
+        className={cx(
+          styles.endContentInline,
+          isDisabled ? styles.disabledContent : undefined,
+        )}>
+        {endContent}
+      </span>
+    ) : null;
+
   const labelAndDescription = (
     <>
-      <Text as="span" maxLines={getMaxLines(labelLines, label)} type="body">
-        {label}
-      </Text>
+      {inlineEndContent != null ? (
+        <span className={styles.labelRow}>
+          <Text as="span" maxLines={getMaxLines(labelLines, label)} type="body">
+            {label}
+          </Text>
+          {inlineEndContent}
+        </span>
+      ) : (
+        <Text as="span" maxLines={getMaxLines(labelLines, label)} type="body">
+          {label}
+        </Text>
+      )}
       {description != null ? (
         <Text
           as="span"
@@ -301,7 +337,7 @@ export function Item({
         <span className={styles.startContent}>{startContent}</span>
       ) : null}
       <span className={styles.textContent}>{labelAndDescription}</span>
-      {endContent != null ? (
+      {endContent != null && endContentPosition !== 'inline' ? (
         <span
           className={cx(
             styles.endContent,
@@ -366,7 +402,7 @@ export function Item({
       aria-selected={isSelected || undefined}
       className={cx(
         styles.root,
-        styles.density[density],
+        width === 'full' ? styles.widthFull : undefined,
         align === 'start' ? styles.alignStart : undefined,
         isInteractive ? styles.interactive : undefined,
         isHighlighted ? styles.highlighted : undefined,

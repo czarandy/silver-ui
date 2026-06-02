@@ -22,30 +22,39 @@ export const inputRecipe = cva({
     },
     _focusWithin: {
       borderColor: 'primary',
-      boxShadow: '0 0 0 2px token(colors.primary.subtle)',
+      boxShadow: 'focus',
     },
   },
   variants: {
     size: {
-      sm: {minH: 'component.sm', py: '0.5'},
-      md: {minH: 'component.md', py: '1.5'},
-      lg: {minH: 'component.lg', py: '2'},
+      sm: {minH: 'component.sm'},
+      md: {minH: 'component.md'},
+      lg: {minH: 'component.lg'},
     },
     status: {
       warning: {
         borderColor: 'status.warning.border',
         _hover: {borderColor: 'status.warning.borderHover'},
-        _focusWithin: {borderColor: 'status.warning.border'},
+        _focusWithin: {
+          borderColor: 'status.warning.border',
+          boxShadow: 'focus.warning',
+        },
       },
       error: {
         borderColor: 'status.error.border',
         _hover: {borderColor: 'status.error.borderHover'},
-        _focusWithin: {borderColor: 'status.error.border'},
+        _focusWithin: {
+          borderColor: 'status.error.border',
+          boxShadow: 'focus.error',
+        },
       },
       success: {
         borderColor: 'status.success.border',
         _hover: {borderColor: 'status.success.borderHover'},
-        _focusWithin: {borderColor: 'status.success.border'},
+        _focusWithin: {
+          borderColor: 'status.success.border',
+          boxShadow: 'focus.success',
+        },
       },
     },
     isDisabled: {
@@ -105,9 +114,10 @@ export const inputStyles = {
     cursor: 'pointer',
     borderRadius: 'sm',
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
 } as const;

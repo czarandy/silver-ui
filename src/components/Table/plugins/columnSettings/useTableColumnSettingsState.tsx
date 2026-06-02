@@ -15,8 +15,8 @@ export interface UseTableColumnSettingsStateReturn<
 > {
   activeColumnKeys: ReadonlyArray<TColumnKey>;
   columnSettingsConfig: UseTableColumnSettingsStateConfig<TColumnKey>;
-  isColumnActive: (key: TColumnKey) => boolean;
-  isColumnToggleable: (key: TColumnKey) => boolean;
+  getIsColumnActive: (key: TColumnKey) => boolean;
+  getIsColumnToggleable: (key: TColumnKey) => boolean;
   resetToDefault: () => void;
   setActiveColumnKeys: (keys: string[]) => void;
   showAllColumns: () => void;
@@ -59,11 +59,11 @@ export function useTableColumnSettingsState<TColumnKey extends string = string>(
     },
     [config],
   );
-  const isColumnActive = useCallback(
+  const getIsColumnActive = useCallback(
     (key: TColumnKey) => activeSet.has(key),
     [activeSet],
   );
-  const isColumnToggleable = useCallback(
+  const getIsColumnToggleable = useCallback(
     (key: TColumnKey) => !alwaysVisibleSet.has(key),
     [alwaysVisibleSet],
   );
@@ -91,8 +91,8 @@ export function useTableColumnSettingsState<TColumnKey extends string = string>(
   return {
     activeColumnKeys,
     columnSettingsConfig: config,
-    isColumnActive,
-    isColumnToggleable,
+    getIsColumnActive,
+    getIsColumnToggleable,
     resetToDefault,
     setActiveColumnKeys,
     showAllColumns,

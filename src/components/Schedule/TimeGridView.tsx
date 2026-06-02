@@ -1,5 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
+import {Temporal} from '@js-temporal/polyfill';
 import {Fragment, type CSSProperties} from 'react';
 import {css, cx} from 'styled-system/css';
 import {
@@ -115,13 +116,9 @@ function isEventInHour(
   if (isDayEvent(event)) {
     return false;
   }
-  const eventHour = Number(
-    new Intl.DateTimeFormat('en-US', {
-      hour: 'numeric',
-      hour12: false,
-      timeZone: timezoneID,
-    }).format(new Date(event.start)),
-  );
+  const eventHour = Temporal.Instant.fromEpochMilliseconds(
+    event.start,
+  ).toZonedDateTimeISO(timezoneID).hour;
   return eventHour === hour;
 }
 
@@ -170,12 +167,12 @@ export function TimeGridView({
    */
   minHour?: number;
 }): React.JSX.Element {
-  const {categories, events, focusDate, timezoneID} = useScheduleContext();
+  const {categories, events, highlightDate, timezoneID} = useScheduleContext();
   const hours = Array.from(
     {length: Math.max(0, maxHour - minHour + 1)},
     (_, index) => minHour + index,
   );
-  const focusPlainDate = focusDate.toPlainDate();
+  const highlightPlainDate = highlightDate.toPlainDate();
   const gridStyle: GridStyle = {
     '--schedule-day-count': String(days.length),
   };
@@ -192,7 +189,7 @@ export function TimeGridView({
           <div
             aria-colindex={index + 2}
             aria-current={
-              plainDateIsEqual(day, focusPlainDate) ? 'date' : undefined
+              plainDateIsEqual(day, highlightPlainDate) ? 'date' : undefined
             }
             className={styles.dayHeader}
             key={day.toString()}

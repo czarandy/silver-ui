@@ -3,7 +3,6 @@ export {
   type HeadingLevel,
   type HeadingProps,
   type HeadingTruncateTooltipPlacement,
-  type HeadingType,
 } from './Heading';
 export {
   Text,

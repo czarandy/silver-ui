@@ -115,9 +115,10 @@ const styles = {
     cursor: 'pointer',
     _hover: {bg: 'bg.hover'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   collapsedSelected: css({
@@ -138,9 +139,10 @@ const styles = {
     borderRadius: 'md',
     _hover: {bg: 'bg.hover'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   toggleRowDisabled: css({
@@ -173,9 +175,10 @@ const styles = {
     color: 'fg.muted',
     _hover: {bg: 'bg.hover'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   childrenContainer: css({
@@ -331,7 +334,6 @@ export function SideNavItem({
           <Item
             as="span"
             className={styles.navItem}
-            density="compact"
             endContent={chevronSlot}
             label={label}
             startContent={iconSlot}
@@ -354,7 +356,6 @@ export function SideNavItem({
             className,
           )}
           data-testid={dataTestId}
-          density="compact"
           endContent={endContent}
           href={isDisabled ? undefined : href}
           isDisabled={isDisabled}
@@ -392,7 +393,6 @@ export function SideNavItem({
           className,
         )}
         data-testid={dataTestId}
-        density="compact"
         endContent={endContent}
         href={isDisabled ? undefined : href}
         isDisabled={isDisabled}

@@ -1,5 +1,8 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {Clock, X} from 'lucide-react';
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import {
   Field,
   inputRecipe,
@@ -16,9 +19,15 @@ import {
 import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 
-export type ISOTimeString =
-  | `${number}${number}:${number}${number}`
-  | `${number}${number}:${number}${number}:${number}${number}`;
+const styles = {
+  input: css({
+    '&::-webkit-calendar-picker-indicator': {
+      display: 'none',
+    },
+  }),
+} as const;
+
+export type PlainTime = Temporal.PlainTime;
 
 export type TimeInputProps = {
   /**
@@ -82,15 +91,15 @@ export type TimeInputProps = {
   /**
    * Latest allowed time.
    */
-  max?: ISOTimeString;
+  max?: PlainTime;
   /**
    * Earliest allowed time.
    */
-  min?: ISOTimeString;
+  min?: PlainTime;
   /**
    * Called when the time value changes.
    */
-  onChange: (value: ISOTimeString | undefined) => void;
+  onChange: (value: PlainTime | undefined) => void;
   /**
    * Placeholder text.
    * @default 'Select a time'
@@ -118,10 +127,29 @@ export type TimeInputProps = {
    */
   style?: CSSProperties;
   /**
-   * Controlled time value in ISO format.
+   * Controlled time value.
    */
-  value: ISOTimeString | undefined;
+  value: PlainTime | undefined;
 } & FieldNecessity;
+
+function toInputString(
+  time: PlainTime | undefined,
+  hasSeconds: boolean,
+): string {
+  if (time == null) {
+    return '';
+  }
+  return time.toString({
+    smallestUnit: hasSeconds ? 'second' : 'minute',
+  });
+}
+
+function fromInputString(value: string): PlainTime | undefined {
+  if (value === '') {
+    return undefined;
+  }
+  return Temporal.PlainTime.from(value);
+}
 
 /**
  * Time picker input field with optional seconds granularity.
@@ -193,26 +221,20 @@ export function TimeInput({
           aria-required={isRequired ?? undefined}
           // eslint-disable-next-line jsx-a11y-x/no-autofocus
           autoFocus={hasAutoFocus}
-          className={inputStyles.control}
+          className={cx(inputStyles.control, styles.input)}
           data-autofocus={hasAutoFocus || undefined}
           data-testid={dataTestId}
-          disabled={isDisabled || isLoading}
+          disabled={isDisabled}
           id={inputId}
-          max={max}
-          min={min}
+          max={toInputString(max, hasSeconds)}
+          min={toInputString(min, hasSeconds)}
           name={htmlName}
-          onChange={event =>
-            onChange(
-              event.target.value === ''
-                ? undefined
-                : (event.target.value as ISOTimeString),
-            )
-          }
+          onChange={event => onChange(fromInputString(event.target.value))}
           placeholder={placeholder}
           ref={ref}
           step={step ?? (hasSeconds ? 1 : 60)}
           type="time"
-          value={value ?? ''}
+          value={toInputString(value, hasSeconds)}
         />
         {hasClear && value != null && !isDisabled ? (
           <button

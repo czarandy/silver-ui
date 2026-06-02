@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {createEventFromISO} from './CalendarEvent';
@@ -46,17 +47,27 @@ const meta: Meta<typeof Schedule> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+function instantUTC(year: number, monthIndex: number, day: number): Instant {
+  return Temporal.PlainDateTime.from({
+    day,
+    month: monthIndex + 1,
+    year,
+  }).toZonedDateTime('UTC').epochMilliseconds;
+}
+
 function ScheduleStory({view}: {view: ScheduleView}) {
-  const [date, setDate] = useState<Instant>(Date.UTC(2026, 4, 13));
+  const [viewDate, setViewDate] = useState<Instant>(() =>
+    instantUTC(2026, 4, 13),
+  );
   return (
     <Schedule
       categories={categories}
-      date={date}
       events={events}
-      focusDate={Date.UTC(2026, 4, 13)}
-      onChangeDate={setDate}
+      highlightDate={instantUTC(2026, 4, 13)}
+      onViewDateChange={setViewDate}
       timezoneID="UTC"
       view={view}
+      viewDate={viewDate}
     />
   );
 }

@@ -24,10 +24,10 @@ export const dialogRecipe = cva({
       backdropFilter: 'blur(2px)',
     },
     _focusVisible: {
-      outlineWidth: '2px',
+      outlineWidth: 'focus',
       outlineStyle: 'solid',
       outlineColor: 'accent',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   },
   variants: {

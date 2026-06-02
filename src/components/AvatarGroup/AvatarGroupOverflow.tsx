@@ -65,9 +65,10 @@ const styles = {
     cursor: 'pointer',
     p: 0,
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
 };

@@ -46,7 +46,7 @@ export function useCollapsible(
 
   let isOpen: boolean;
   if (isControlledByGroup) {
-    isOpen = group.isOpen(value);
+    isOpen = group.getIsOpen(value);
   } else if (isMissingGroupValue) {
     isOpen = false;
   } else if (config?.isOpen !== undefined) {

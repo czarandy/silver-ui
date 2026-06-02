@@ -1,13 +1,9 @@
-import type {ISODateString, PlainDate} from '../../internal/dateTypes';
-import {plainDateFromISO} from '../../internal/plainDate';
+import {Temporal} from '@js-temporal/polyfill';
+import type {PlainDate} from '../../internal/dateTypes';
 import type {TagColor} from '../Tag';
 import type {Instant} from './types';
 
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
-
-function toISODateString(value: string): ISODateString {
-  return value as ISODateString;
-}
 
 export type ScheduleEventColor = Exclude<TagColor, 'default'>;
 
@@ -50,18 +46,18 @@ export function createEventFromISO({
   if (DATE_ONLY_RE.test(start) && DATE_ONLY_RE.test(end)) {
     return {
       category,
-      end: plainDateFromISO(toISODateString(end)),
+      end: Temporal.PlainDate.from(end),
       id,
-      start: plainDateFromISO(toISODateString(start)),
+      start: Temporal.PlainDate.from(start),
       title,
     };
   }
 
   return {
     category,
-    end: Date.parse(end),
+    end: Temporal.Instant.from(end).epochMilliseconds,
     id,
-    start: Date.parse(start),
+    start: Temporal.Instant.from(start).epochMilliseconds,
     title,
   };
 }

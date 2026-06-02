@@ -62,9 +62,10 @@ const styles = {
     textAlign: 'start',
     _hover: {bg: 'bg.subtle'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '1px',
+      outlineOffset: 'focusOffsetTight',
     },
     _disabled: {
       opacity: 0.5,
@@ -94,7 +95,6 @@ export function DropdownMenuItem({
   style,
 }: DropdownMenuItemProps): React.JSX.Element {
   const context = useDropdownMenuContext();
-  const size = context?.menuSize ?? 'md';
 
   return (
     <button
@@ -114,7 +114,6 @@ export function DropdownMenuItem({
       type="button">
       <Item
         as="span"
-        density={size === 'lg' ? 'default' : 'compact'}
         description={description}
         endContent={endContent}
         label={label}

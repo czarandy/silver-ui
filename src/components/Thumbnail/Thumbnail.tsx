@@ -91,9 +91,10 @@ const styles = {
       opacity: 0.75,
     },
     '&:has(:focus-visible)': {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   imageButton: css({

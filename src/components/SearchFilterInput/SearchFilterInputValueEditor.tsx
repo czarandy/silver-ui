@@ -1,7 +1,13 @@
 /* eslint-disable silver-ui/require-component-props */
 
+import {Temporal} from '@js-temporal/polyfill';
 import {useCallback, useMemo} from 'react';
-import type {ISODateString} from '../../internal/dateTypes';
+import {
+  plainDateFromUnixSeconds,
+  plainDateToUnixSeconds,
+  type PlainDate,
+} from '../../internal/plainDate';
+import {getBrowserTimezoneID} from '../../internal/time';
 import {
   Combobox,
   createStaticSource,
@@ -13,7 +19,7 @@ import {NumberInput} from '../NumberInput';
 import {Select} from '../Select';
 import {TagsInput} from '../TagsInput';
 import {TextInput} from '../TextInput';
-import {TimeInput, type ISOTimeString} from '../TimeInput';
+import {TimeInput} from '../TimeInput';
 import type {InternalSearchFilterInputConfig} from './internalConfig';
 import type {
   EnumItem,
@@ -181,34 +187,38 @@ function TimeEditor({
     <TimeInput
       isLabelHidden
       label="Time"
-      max={operatorValue.maxValue as ISOTimeString | undefined}
-      min={operatorValue.minValue as ISOTimeString | undefined}
+      max={
+        typeof operatorValue.maxValue === 'string'
+          ? Temporal.PlainTime.from(operatorValue.maxValue)
+          : undefined
+      }
+      min={
+        typeof operatorValue.minValue === 'string'
+          ? Temporal.PlainTime.from(operatorValue.minValue)
+          : undefined
+      }
       onChange={value => {
         if (value != null) {
-          onChange({type: 'time', value});
+          onChange({type: 'time', value: value.toString()});
         }
       }}
       value={
         filterValue?.type === 'time'
-          ? (filterValue.value as ISOTimeString)
+          ? Temporal.PlainTime.from(filterValue.value)
           : undefined
       }
     />
   );
 }
 
-function toISODate(unixSeconds: number): ISODateString {
-  return new Date(unixSeconds * 1000)
-    .toISOString()
-    .split('T')[0] as ISODateString;
-}
-
 function DateAbsoluteEditor({
   filterValue,
   onChange,
+  timezoneID,
 }: {
   filterValue: FilterValue | undefined;
   onChange: (value: FilterValue) => void;
+  timezoneID: string;
 }): React.JSX.Element {
   return (
     <DateInput
@@ -218,13 +228,13 @@ function DateAbsoluteEditor({
         if (value != null) {
           onChange({
             type: 'date_absolute',
-            unixSeconds: Math.floor(new Date(value).getTime() / 1000),
+            unixSeconds: plainDateToUnixSeconds(value, timezoneID),
           });
         }
       }}
       value={
         filterValue?.type === 'date_absolute'
-          ? toISODate(filterValue.unixSeconds)
+          ? plainDateFromUnixSeconds(filterValue.unixSeconds, timezoneID)
           : undefined
       }
     />
@@ -290,22 +300,27 @@ function DateRelativeEditor({
 function DateRangeEditor({
   filterValue,
   onChange,
+  timezoneID,
 }: {
   filterValue: FilterValue | undefined;
   onChange: (value: FilterValue) => void;
+  timezoneID: string;
 }): React.JSX.Element {
   const startValue =
     filterValue?.type === 'date_range' &&
     filterValue.value.start.type === 'ABSOLUTE'
-      ? toISODate(filterValue.value.start.unixSeconds)
+      ? plainDateFromUnixSeconds(
+          filterValue.value.start.unixSeconds,
+          timezoneID,
+        )
       : undefined;
   const endValue =
     filterValue?.type === 'date_range' &&
     filterValue.value.end.type === 'ABSOLUTE'
-      ? toISODate(filterValue.value.end.unixSeconds)
+      ? plainDateFromUnixSeconds(filterValue.value.end.unixSeconds, timezoneID)
       : undefined;
   const handleStartChange = useCallback(
-    (value: ISODateString | undefined) => {
+    (value: PlainDate | undefined) => {
       const existingEnd =
         filterValue?.type === 'date_range'
           ? filterValue.value.end
@@ -317,15 +332,15 @@ function DateRangeEditor({
           start: {
             type: 'ABSOLUTE',
             unixSeconds:
-              value == null ? 0 : Math.floor(new Date(value).getTime() / 1000),
+              value == null ? 0 : plainDateToUnixSeconds(value, timezoneID),
           },
         },
       });
     },
-    [filterValue, onChange],
+    [filterValue, onChange, timezoneID],
   );
   const handleEndChange = useCallback(
-    (value: ISODateString | undefined) => {
+    (value: PlainDate | undefined) => {
       const existingStart =
         filterValue?.type === 'date_range'
           ? filterValue.value.start
@@ -336,13 +351,13 @@ function DateRangeEditor({
           end: {
             type: 'ABSOLUTE',
             unixSeconds:
-              value == null ? 0 : Math.floor(new Date(value).getTime() / 1000),
+              value == null ? 0 : plainDateToUnixSeconds(value, timezoneID),
           },
           start: existingStart,
         },
       });
     },
-    [filterValue, onChange],
+    [filterValue, onChange, timezoneID],
   );
   return (
     <>
@@ -511,7 +526,10 @@ export function SearchFilterInputValueEditor({
   onChange,
   onEnter,
   operatorValue,
+  timezoneID,
 }: SearchFilterInputValueEditorProps): React.JSX.Element | null {
+  const effectiveTimezoneID = timezoneID ?? getBrowserTimezoneID();
+
   switch (operatorValue.type) {
     case 'empty':
     case 'nested':
@@ -558,7 +576,11 @@ export function SearchFilterInputValueEditor({
       );
     case 'date_absolute':
       return (
-        <DateAbsoluteEditor filterValue={filterValue} onChange={onChange} />
+        <DateAbsoluteEditor
+          filterValue={filterValue}
+          onChange={onChange}
+          timezoneID={effectiveTimezoneID}
+        />
       );
     case 'date_relative':
       return (
@@ -569,7 +591,13 @@ export function SearchFilterInputValueEditor({
         />
       );
     case 'date_range':
-      return <DateRangeEditor filterValue={filterValue} onChange={onChange} />;
+      return (
+        <DateRangeEditor
+          filterValue={filterValue}
+          onChange={onChange}
+          timezoneID={effectiveTimezoneID}
+        />
+      );
     case 'enum':
       return (
         <EnumEditor

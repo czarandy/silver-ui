@@ -1,5 +1,5 @@
 export {
   DateTimeInput,
   type DateTimeInputProps,
-  type ISODateTimeString,
+  type PlainDateTime,
 } from './DateTimeInput';

@@ -1,7 +1,15 @@
-import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
+import {Temporal} from '@js-temporal/polyfill';
+import {
+  useCallback,
+  useId,
+  useMemo,
+  type CSSProperties,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import type {ISODateString} from '../../internal/dateTypes';
+import {plainDateIsEqual, type PlainDate} from '../../internal/plainDate';
 import {DateInput} from '../DateInput';
 import {
   Field,
@@ -10,9 +18,9 @@ import {
   type InputStatus,
 } from '../Field';
 import type {IconComponent} from '../Icon';
-import {TimeInput, type ISOTimeString} from '../TimeInput';
+import {TimeInput, type PlainTime} from '../TimeInput';
 
-export type ISODateTimeString = `${ISODateString}T${ISOTimeString}`;
+export type PlainDateTime = Temporal.PlainDateTime;
 
 export type DateTimeInputProps = {
   /**
@@ -24,18 +32,13 @@ export type DateTimeInputProps = {
    */
   'data-testid'?: string;
   /**
-   * Predicate functions that constrain which dates are selectable.
+   * Returns true for dates that should be disabled.
    */
-  dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
+  getIsDateDisabled?: (date: PlainDate) => boolean;
   /**
    * Supporting text rendered below the label.
    */
   description?: ReactNode;
-  /**
-   * Whether to show clear buttons on the date and time inputs.
-   * @default false
-   */
-  hasClear?: boolean;
   /**
    * Whether to show the seconds field in the time input.
    * @default false
@@ -69,22 +72,17 @@ export type DateTimeInputProps = {
    */
   labelTooltip?: ReactNode;
   /**
-   * Maximum selectable date-time (ISO string).
+   * Maximum selectable date-time.
    */
-  max?: ISODateTimeString;
+  max?: PlainDateTime;
   /**
-   * Minimum selectable date-time (ISO string).
+   * Minimum selectable date-time.
    */
-  min?: ISODateTimeString;
-  /**
-   * Number of calendar months shown in the date popover.
-   * @default 1
-   */
-  numberOfMonths?: 1 | 2;
+  min?: PlainDateTime;
   /**
    * Called when the selected date-time changes.
    */
-  onChange: (value: ISODateTimeString | undefined) => void;
+  onChange: (value: PlainDateTime | undefined) => void;
   /**
    * Ref forwarded to the date input element.
    */
@@ -103,9 +101,9 @@ export type DateTimeInputProps = {
    */
   style?: CSSProperties;
   /**
-   * Currently selected date-time (ISO string).
+   * Currently selected date-time.
    */
-  value: ISODateTimeString | undefined;
+  value: PlainDateTime | undefined;
 } & FieldNecessity;
 
 const styles = {
@@ -116,22 +114,29 @@ const styles = {
   }),
 } as const;
 
-function splitDateTime(value: ISODateTimeString | undefined): {
-  date: ISODateString | undefined;
-  time: ISOTimeString | undefined;
+function splitDateTime(value: PlainDateTime | undefined): {
+  date: PlainDate | undefined;
+  time: PlainTime | undefined;
 } {
   if (value == null) {
     return {date: undefined, time: undefined};
   }
-  const [date, time] = value.split('T');
-  return {date: date as ISODateString, time: time as ISOTimeString};
+  return {
+    date: value.toPlainDate(),
+    time: value.toPlainTime(),
+  };
 }
 
 function combineDateTime(
-  date: ISODateString | undefined,
-  time: ISOTimeString | undefined,
-): ISODateTimeString | undefined {
-  return date != null && time != null ? `${date}T${time}` : undefined;
+  date: PlainDate | undefined,
+  time: PlainTime | undefined,
+): PlainDateTime | undefined {
+  if (date == null && time == null) {
+    return undefined;
+  }
+  const resolvedDate = date ?? Temporal.Now.plainDateISO();
+  const resolvedTime = time ?? Temporal.Now.plainTimeISO();
+  return resolvedDate.toPlainDateTime(resolvedTime);
 }
 
 /**
@@ -143,9 +148,7 @@ export function DateTimeInput({
   onChange,
   min,
   max,
-  dateConstraints,
-  numberOfMonths = 1,
-  hasClear = false,
+  getIsDateDisabled,
   hasSeconds = false,
   size = 'md',
   description,
@@ -163,9 +166,20 @@ export function DateTimeInput({
   ref,
 }: DateTimeInputProps): React.JSX.Element {
   const fieldId = useId();
-  const {date, time} = splitDateTime(value);
-  const minParts = splitDateTime(min);
-  const maxParts = splitDateTime(max);
+  const {date, time} = useMemo(() => splitDateTime(value), [value]);
+  const minParts = useMemo(() => splitDateTime(min), [min]);
+  const maxParts = useMemo(() => splitDateTime(max), [max]);
+
+  const handleDateChange = useCallback(
+    (nextDate: PlainDate | undefined) =>
+      onChange(combineDateTime(nextDate, time)),
+    [onChange, time],
+  );
+  const handleTimeChange = useCallback(
+    (nextTime: PlainTime | undefined) =>
+      onChange(combineDateTime(date, nextTime)),
+    [onChange, date],
+  );
 
   const necessity: FieldNecessity = {isOptional, isRequired};
 
@@ -185,30 +199,39 @@ export function DateTimeInput({
         data-testid={dataTestId}
         style={style}>
         <DateInput
-          dateConstraints={dateConstraints}
-          hasClear={hasClear}
+          getIsDateDisabled={getIsDateDisabled}
           isDisabled={isDisabled}
           isLabelHidden
           isLoading={isLoading}
           label={`${label} date`}
           max={maxParts.date}
           min={minParts.date}
-          numberOfMonths={numberOfMonths}
-          onChange={nextDate => onChange(combineDateTime(nextDate, time))}
+          onChange={handleDateChange}
           ref={ref}
           size={size}
           value={date}
         />
         <TimeInput
-          hasClear={hasClear}
           hasSeconds={hasSeconds}
           isDisabled={isDisabled}
           isLabelHidden
           isLoading={isLoading}
           label={`${label} time`}
-          max={date === maxParts.date ? maxParts.time : undefined}
-          min={date === minParts.date ? minParts.time : undefined}
-          onChange={nextTime => onChange(combineDateTime(date, nextTime))}
+          max={
+            date != null &&
+            maxParts.date != null &&
+            plainDateIsEqual(date, maxParts.date)
+              ? maxParts.time
+              : undefined
+          }
+          min={
+            date != null &&
+            minParts.date != null &&
+            plainDateIsEqual(date, minParts.date)
+              ? minParts.time
+              : undefined
+          }
+          onChange={handleTimeChange}
           size={size}
           value={time}
         />

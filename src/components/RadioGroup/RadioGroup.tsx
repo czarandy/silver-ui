@@ -8,9 +8,13 @@ import {
 import {css} from 'styled-system/css';
 import {Field, type FieldNecessity, type InputStatus} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
-import {RadioGroupContext, type RadioGroupSize} from './RadioGroupContext';
+import {
+  RadioGroupContext,
+  type RadioGroupOrientation,
+  type RadioGroupSize,
+} from './RadioGroupContext';
 
-export type RadioGroupOrientation = 'horizontal' | 'vertical';
+export type {RadioGroupOrientation} from './RadioGroupContext';
 
 export type RadioGroupProps = {
   /**
@@ -49,6 +53,7 @@ export type RadioGroupProps = {
   labelTooltip?: ReactNode;
   /**
    * Callback fired when the selected value changes.
+   * Memoize with `useCallback` to avoid unnecessary re-renders of radio items.
    */
   onChange: (value: string) => void;
   /**
@@ -85,13 +90,13 @@ const styles = {
   }),
   vertical: css({
     flexDirection: 'column',
-    gap: '2',
+    gap: '0.5',
   }),
   horizontal: css({
     flexDirection: 'row',
     flexWrap: 'wrap',
-    columnGap: '5',
-    rowGap: '2',
+    columnGap: '4',
+    rowGap: '0',
   }),
 } as const;
 
@@ -119,6 +124,7 @@ export function RadioGroup({
 }: RadioGroupProps): React.JSX.Element {
   const nameId = useId();
   const inputId = useId();
+  const labelId = `${inputId}-label`;
   const descriptionID =
     description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
@@ -129,11 +135,11 @@ export function RadioGroup({
       isRequired,
       name: nameId,
       onChange,
+      orientation,
       size,
-      status,
       value,
     }),
-    [isDisabled, isRequired, nameId, onChange, size, status, value],
+    [isDisabled, isRequired, nameId, onChange, orientation, size, value],
   );
 
   const necessity: FieldNecessity = {isOptional, isRequired};
@@ -147,6 +153,8 @@ export function RadioGroup({
       isLabelHidden={isLabelHidden}
       {...necessity}
       label={label}
+      labelAs="span"
+      labelId={labelId}
       labelTooltip={labelTooltip}
       ref={ref}
       status={
@@ -157,7 +165,8 @@ export function RadioGroup({
       <div
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
-        aria-label={label}
+        aria-labelledby={labelId}
+        aria-orientation={orientation}
         aria-required={isRequired ?? undefined}
         className={
           orientation === 'vertical'

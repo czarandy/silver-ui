@@ -108,9 +108,9 @@ function ListEvent({event}: {event: CalendarEvent}): React.JSX.Element {
 function ScheduleListView(
   _props: ScheduleViewComponentProps<ScheduleListViewOptions>,
 ): React.JSX.Element {
-  const {date, events, range, timezoneID} = useScheduleContext();
+  const {events, range, timezoneID, viewDate} = useScheduleContext();
   const days = enumerateDates(range.startDate, range.endDate);
-  const title = plainDateFormat(date.toPlainDate(), {
+  const title = plainDateFormat(viewDate.toPlainDate(), {
     month: 'long',
     year: 'numeric',
   });
@@ -125,7 +125,7 @@ function ScheduleListView(
           const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
           return (
             <section className={styles.day} key={day.toString()}>
-              <Heading className={styles.dayHeading} level={3} type="display-3">
+              <Heading className={styles.dayHeading} level={3}>
                 <span className={styles.dayName}>
                   {plainDateFormat(day, {weekday: 'short'})}
                 </span>

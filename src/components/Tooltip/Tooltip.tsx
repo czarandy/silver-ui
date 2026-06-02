@@ -36,6 +36,10 @@ export interface TooltipProps {
    */
   content: ReactNode;
   /**
+   * Inline styles applied to the tooltip content area.
+   */
+  contentStyle?: CSSProperties;
+  /**
    * Test ID applied to the wrapper.
    */
   'data-testid'?: string;
@@ -122,6 +126,7 @@ export function Tooltip({
   children,
   anchorRef,
   content,
+  contentStyle,
   placement = 'above',
   alignment = 'center',
   delay = 200,
@@ -220,7 +225,7 @@ export function Tooltip({
   }, [anchorRef, textOnly, tooltip]);
 
   if (anchorRef != null && children == null) {
-    return <>{tooltip.renderTooltip(content)}</>;
+    return <>{tooltip.renderTooltip(content, {contentStyle})}</>;
   }
 
   if (textOnly) {
@@ -241,7 +246,7 @@ export function Tooltip({
           tabIndex={0}>
           {children}
         </span>
-        {tooltip.renderTooltip(content)}
+        {tooltip.renderTooltip(content, {contentStyle})}
       </>
     );
   }
@@ -255,7 +260,7 @@ export function Tooltip({
         style={style}>
         {children}
       </div>
-      {tooltip.renderTooltip(content)}
+      {tooltip.renderTooltip(content, {contentStyle})}
     </>
   );
 }

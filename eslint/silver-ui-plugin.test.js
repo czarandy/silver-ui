@@ -177,6 +177,15 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
       `,
     },
     {
+      name: 'allows getIs and getHas predicate function properties',
+      code: `
+        interface AccordionContextValue {
+          getIsOpen: (value: string) => boolean;
+          getHasItem: (value: string) => true | false;
+        }
+      `,
+    },
+    {
       name: 'ignores non-boolean props',
       code: `
         interface LinkProps {
@@ -207,6 +216,12 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
       name: 'ignores destructured function parameters',
       code: `
         function foo({ isDisabled }: { isDisabled: boolean }) {}
+      `,
+    },
+    {
+      name: 'ignores untyped prefixed function parameters',
+      code: `
+        const onOpenChange = isOpen => {};
       `,
     },
     {
@@ -274,6 +289,25 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
       ],
     },
     {
+      name: 'reports boolean predicate props without getIs or getHas',
+      code: `
+        interface AccordionContextValue {
+          isOpen: (value: string) => boolean;
+          hasItem: (value: string) => true | false;
+        }
+      `,
+      errors: [
+        {
+          messageId: 'invalidBooleanPredicateProp',
+          data: {name: 'isOpen'},
+        },
+        {
+          messageId: 'invalidBooleanPredicateProp',
+          data: {name: 'hasItem'},
+        },
+      ],
+    },
+    {
       name: 'reports boolean function parameters without is or has',
       code: `
         function foo(foobar: boolean) {}
@@ -306,6 +340,72 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
         {
           messageId: 'invalidBooleanParam',
           data: {name: 'active'},
+        },
+      ],
+    },
+    {
+      name: 'reports is-prefixed props without boolean types',
+      code: `
+        interface MeterProps {
+          isFoo?: number;
+        }
+      `,
+      errors: [
+        {
+          messageId: 'invalidPrefixedProp',
+          data: {name: 'isFoo'},
+        },
+      ],
+    },
+    {
+      name: 'reports has-prefixed props without boolean types',
+      code: `
+        interface CardProps {
+          hasTitle?: string;
+        }
+      `,
+      errors: [
+        {
+          messageId: 'invalidPrefixedProp',
+          data: {name: 'hasTitle'},
+        },
+      ],
+    },
+    {
+      name: 'reports is-prefixed literal props without boolean types',
+      code: `
+        type BadgeProps = {
+          isVariant?: 'success' | 'error';
+        };
+      `,
+      errors: [
+        {
+          messageId: 'invalidPrefixedProp',
+          data: {name: 'isVariant'},
+        },
+      ],
+    },
+    {
+      name: 'reports is-prefixed function parameters without boolean types',
+      code: `
+        function foo(isCount: number) {}
+      `,
+      errors: [
+        {
+          messageId: 'invalidPrefixedParam',
+          data: {name: 'isCount'},
+        },
+      ],
+    },
+    {
+      name: 'reports has-prefixed parameters with defaults without boolean types',
+      code: `
+        function foo(hasCount: number = 1) {}
+      `,
+      errors: [
+        {
+          messageId: 'invalidPrefixedParam',
+          data: {name: 'hasCount'},
         },
       ],
     },

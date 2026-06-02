@@ -7,10 +7,11 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {cx} from 'styled-system/css';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Tooltip, type TooltipProps} from '../Tooltip';
 import {textRecipe} from './Text.recipe';
+import {getMaxLinesVariant} from './Text.utils';
 import {useTruncation} from './useTruncation';
 
 export type TextType =
@@ -44,7 +45,7 @@ export type TextColor =
   | 'inherit';
 export type TextWeight = 'normal' | 'medium' | 'semibold' | 'bold' | 'inherit';
 export type TextDisplay = 'inline' | 'block';
-export type TextElement = 'span' | 'p' | 'div' | 'label' | 'h1' | 'h2' | 'h3';
+export type TextElement = 'span' | 'p' | 'div' | 'label';
 export type TextWordBreak = 'break-word' | 'break-all';
 export type TextWrap = 'wrap' | 'nowrap' | 'balance' | 'pretty';
 export type TruncateTooltipPlacement = NonNullable<TooltipProps['placement']>;
@@ -81,11 +82,6 @@ export interface TextProps extends NativeTextProps {
    * @default 'inline'
    */
   display?: TextDisplay;
-  /**
-   * Whether to apply capsize leading-trim adjustments.
-   * @default false
-   */
-  hasCapsize?: boolean;
   /**
    * Whether to render text with a strikethrough line.
    * @default false
@@ -154,39 +150,64 @@ const defaultColorByType: Record<TextType, TextColor> = {
   inherit: 'inherit',
 };
 
-const styles = {
-  tooltipContent: css({
-    maxW: '80',
-    wordBreak: 'break-word',
-  }),
-};
-
-function getMaxLinesVariant(maxLines: number): 'none' | 'one' | 'multiple' {
-  if (maxLines === 1) {
-    return 'one';
-  }
-
-  if (maxLines > 1) {
-    return 'multiple';
-  }
-
-  return 'none';
-}
-
-/**
- * Renders styled text with optional truncation, tooltip, and typographic presets.
- */
-export function Text({
+function BaseText({
   type = 'body',
   size,
   color,
   weight,
   display = 'inline',
-  maxLines = 0,
+  maxLines: _maxLines,
+  hasTruncateTooltip: _hasTruncateTooltip,
+  wordBreak: _wordBreak,
+  textWrap,
+  hasStrikethrough = false,
+  hasTabularNumbers = false,
+  as: Component = 'span',
+  children,
+  className,
+  'data-testid': dataTestId,
+  style,
+  ref,
+  ...props
+}: TextProps): JSX.Element {
+  const resolvedColor = color ?? defaultColorByType[type];
+
+  return createElement(
+    Component,
+    {
+      ...props,
+      ref,
+      'data-testid': dataTestId,
+      className: cx(
+        textRecipe({
+          type,
+          size,
+          color: resolvedColor,
+          weight,
+          display,
+          textWrap,
+          hasStrikethrough,
+          hasTabularNumbers,
+          maxLines: 'none',
+        }),
+        className,
+      ),
+      style,
+    },
+    children,
+  );
+}
+
+function TruncatedText({
+  type = 'body',
+  size,
+  color,
+  weight,
+  display: _display,
+  maxLines = 1,
   hasTruncateTooltip = true,
   wordBreak,
   textWrap,
-  hasCapsize = false,
   hasStrikethrough = false,
   hasTabularNumbers = false,
   as: Component = 'span',
@@ -200,13 +221,11 @@ export function Text({
   const textRef = useRef<HTMLElement>(null);
   const truncation = useTruncation({maxLines});
   const resolvedColor = color ?? defaultColorByType[type];
-  const resolvedWordBreak =
-    wordBreak ?? (maxLines === 1 ? 'break-all' : 'break-word');
-  const resolvedDisplay = maxLines > 0 || hasCapsize ? 'block' : display;
+  const resolvedWordBreak = wordBreak ?? 'break-word';
   const tooltipPlacement =
     typeof hasTruncateTooltip === 'string' ? hasTruncateTooltip : 'above';
   const isTooltipEnabled =
-    maxLines > 0 && hasTruncateTooltip !== false && truncation.isTruncated;
+    hasTruncateTooltip !== false && truncation.isTruncated;
   const lineClampStyle: CSSProperties | undefined =
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
 
@@ -220,18 +239,16 @@ export function Text({
         size,
         color: resolvedColor,
         weight,
-        display: resolvedDisplay,
-        wordBreak: maxLines > 0 ? resolvedWordBreak : undefined,
+        display: 'block',
+        wordBreak: resolvedWordBreak,
         textWrap,
-        hasCapsize,
         hasStrikethrough,
         hasTabularNumbers,
         maxLines: getMaxLinesVariant(maxLines),
       }),
       className,
     ),
-    style: {...lineClampStyle, ...style},
-    title: isTooltipEnabled ? truncation.fullText : undefined,
+    style: {...style, ...lineClampStyle},
   };
 
   const element = createElement(Component, elementProps, children);
@@ -242,14 +259,38 @@ export function Text({
       {isTooltipEnabled ? (
         <Tooltip
           anchorRef={textRef}
-          content={
-            <span className={styles.tooltipContent}>{truncation.fullText}</span>
-          }
+          content={truncation.fullText}
+          contentStyle={{
+            maxWidth: truncation.elementWidth || undefined,
+          }}
           placement={tooltipPlacement}
         />
       ) : null}
     </>
   );
+}
+
+/**
+ * Renders styled text with optional truncation, tooltip, and typographic presets.
+ */
+export function Text(props: TextProps): JSX.Element {
+  let {maxLines = 0} = props;
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (maxLines < 0) {
+      throw new Error(
+        `Text: maxLines must be a non-negative integer, received ${maxLines}.`,
+      );
+    }
+  }
+
+  maxLines = Math.max(0, maxLines);
+
+  if (maxLines > 0) {
+    return <TruncatedText {...props} maxLines={maxLines} />;
+  }
+
+  return <BaseText {...props} />;
 }
 
 Text.displayName = 'Text';

@@ -1,5 +1,6 @@
 import {X} from 'lucide-react';
 import {
+  useCallback,
   useImperativeHandle,
   useId,
   useMemo,
@@ -13,6 +14,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {useOverflowCount} from '../../internal/useOverflowCount';
 import {BaseCombobox} from '../Combobox';
 import type {SearchableItem, SearchSource} from '../Combobox';
 import {
@@ -30,7 +32,8 @@ import {Tag} from '../Tag';
 export type TagsInputChange<T extends SearchableItem> =
   | {item: T; type: 'add'}
   | {item: T; type: 'create'}
-  | {item: T; type: 'remove'};
+  | {item: T; type: 'remove'}
+  | {items: T[]; type: 'remove-all'};
 
 export type TagsInputOverflowBehavior =
   | 'none'
@@ -184,7 +187,10 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    */
   style?: CSSProperties;
   /**
-   * Overflow behavior for selected tags.
+   * Controls how tags overflow when the container is too narrow.
+   * - `'none'`: Tags wrap to multiple lines (default).
+   * - `'unfocusedInline'`: Single line with "+ N more" when unfocused; expands inline on focus.
+   * - `'unfocusedLayer'`: Single line with "+ N more" when unfocused; expands as overlay on focus.
    * @default 'none'
    */
   tagOverflowBehavior?: TagsInputOverflowBehavior;
@@ -203,6 +209,10 @@ const styles = {
     alignItems: 'center',
     h: 'auto',
   }),
+  truncatedWrapper: css({
+    flexWrap: 'nowrap',
+    overflow: 'hidden',
+  }),
   tag: css({flexShrink: 0}),
   input: css({
     minW: '10',
@@ -219,6 +229,21 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     flexShrink: 0,
+  }),
+  overflowText: css({
+    flexShrink: 0,
+    whiteSpace: 'nowrap',
+    fontSize: 'sm',
+    color: 'fg.muted',
+    px: '1',
+  }),
+  liveRegion: css({
+    position: 'absolute',
+    w: '1px',
+    h: '1px',
+    overflow: 'hidden',
+    clip: 'rect(0 0 0 0)',
+    whiteSpace: 'nowrap',
   }),
 } as const;
 
@@ -263,6 +288,7 @@ export function TagsInput<T extends SearchableItem>({
   startIcon,
   status,
   style,
+  tagOverflowBehavior = 'none',
   value,
 }: TagsInputProps<T>): React.JSX.Element {
   const inputId = useId();
@@ -272,25 +298,32 @@ export function TagsInput<T extends SearchableItem>({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [query, setQuery] = useState('');
-  const selectedIDs = useMemo(
-    () => new Set(value.map(item => item.id)),
-    [value],
-  );
+  const [isFocusedWithin, setIsFocusedWithin] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
+  const selectedIDsRef = useRef(new Set<string>());
+  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern: synchronous, idempotent sync with props
+  selectedIDsRef.current = new Set(value.map(item => item.id));
   const isAtMax = maxEntries != null && value.length >= maxEntries;
+  const isAtMaxRef = useRef(false);
+  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
+  isAtMaxRef.current = isAtMax;
+  const isTruncated =
+    !isFocusedWithin && tagOverflowBehavior !== 'none' && value.length > 0;
+  const overflow = useOverflowCount(isTruncated);
+
   const filteredSource = useMemo<SearchSource<T>>(
     () => ({
       cancel: () => searchSource.cancel?.(),
       async bootstrap() {
         const results = await searchSource.bootstrap();
-        return results.filter(item => !selectedIDs.has(item.id));
+        return results.filter(item => !selectedIDsRef.current.has(item.id));
       },
       async search(searchQuery) {
         const results = await searchSource.search(searchQuery);
         const filteredResults = results.filter(
-          item => !selectedIDs.has(item.id),
+          item => !selectedIDsRef.current.has(item.id),
         );
-        if (!hasCreate || searchQuery.trim() === '' || isAtMax) {
+        if (!hasCreate || searchQuery.trim() === '' || isAtMaxRef.current) {
           return filteredResults;
         }
         const existing = filteredResults.some(
@@ -310,7 +343,7 @@ export function TagsInput<T extends SearchableItem>({
         ];
       },
     }),
-    [hasCreate, isAtMax, searchSource, selectedIDs],
+    [hasCreate, searchSource],
   );
 
   useImperativeHandle(
@@ -322,14 +355,71 @@ export function TagsInput<T extends SearchableItem>({
     [],
   );
 
-  const removeItem = (item: T) => {
-    onChange(
-      value.filter(selectedItem => selectedItem.id !== item.id),
-      {item, type: 'remove'},
-    );
-  };
+  const valueRef = useRef(value);
+  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
+  valueRef.current = value;
+  const onChangeRef = useRef(onChange);
+  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
+  onChangeRef.current = onChange;
+
+  const announce = useCallback((message: string) => {
+    setAnnouncement('');
+    requestAnimationFrame(() => setAnnouncement(message));
+  }, []);
+
+  const removeItem = useCallback(
+    (item: T) => {
+      onChangeRef.current(
+        valueRef.current.filter(selectedItem => selectedItem.id !== item.id),
+        {item, type: 'remove'},
+      );
+      announce(`Removed ${item.label}`);
+    },
+    [announce],
+  );
+
+  const handleFocus = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) {
+        setIsFocusedWithin(true);
+        onFocus?.(event);
+      }
+    },
+    [onFocus],
+  );
+
+  const handleBlur = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.relatedTarget)) {
+        setIsFocusedWithin(false);
+        onBlur?.(event);
+      }
+    },
+    [onBlur],
+  );
+
+  const handleWrapperClick = useCallback(() => {
+    if (!isDisabled) {
+      inputRef.current?.focus();
+    }
+  }, [isDisabled]);
 
   const necessity: FieldNecessity = {isOptional, isRequired};
+
+  const tokens = value.map(item => (
+    <span className={styles.tag} key={item.id}>
+      {renderTag == null ? (
+        <Tag
+          isDisabled={isDisabled}
+          label={item.label}
+          onRemove={() => removeItem(item)}
+          size={size}
+        />
+      ) : (
+        renderTag(item, () => removeItem(item))
+      )}
+    </span>
+  ));
 
   return (
     <Field
@@ -348,8 +438,9 @@ export function TagsInput<T extends SearchableItem>({
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
       style={style}>
-      {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- container observes descendant focus entering/leaving the compound input */}
+      {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- click delegates to inner input for focus convenience */}
       <div
+        aria-label={label}
         className={cx(
           inputRecipe({
             size,
@@ -357,42 +448,47 @@ export function TagsInput<T extends SearchableItem>({
             isDisabled,
           }),
           styles.wrapper,
+          isTruncated ? styles.truncatedWrapper : undefined,
         )}
         data-testid={dataTestId}
-        onBlur={event => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            onBlur?.(event);
-          }
-        }}
-        onFocus={event => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            onFocus?.(event);
-          }
-        }}
-        ref={wrapperRef}>
+        onBlur={handleBlur}
+        onClick={handleWrapperClick}
+        onFocus={handleFocus}
+        ref={wrapperRef}
+        role="group">
         {startIcon != null ? (
           <span className={inputStyles.iconSlot}>
             <Icon color="secondary" icon={startIcon} size="sm" />
           </span>
         ) : null}
-        {value.map(item => (
-          <span className={styles.tag} key={item.id}>
-            {renderTag == null ? (
-              <Tag
-                isDisabled={isDisabled}
-                label={item.label}
-                onRemove={() => removeItem(item)}
-                size={size}
-              />
-            ) : (
-              renderTag(item, () => removeItem(item))
-            )}
-          </span>
-        ))}
+        {isTruncated ? (
+          <div
+            ref={overflow.ref}
+            style={{
+              display: 'flex',
+              flexWrap: 'nowrap',
+              gap: 'inherit',
+              overflow: 'hidden',
+              flex: 1,
+              alignItems: 'center',
+            }}>
+            {tokens}
+            {overflow.count > 0 ? (
+              <span className={styles.overflowText} data-overflow-ignore="">
+                +{overflow.count} more
+              </span>
+            ) : null}
+          </div>
+        ) : (
+          tokens
+        )}
         <BaseCombobox
           anchorRef={wrapperRef}
           ariaDescribedBy={describedBy}
-          className={cx(styles.input, isAtMax ? styles.inputHidden : undefined)}
+          className={cx(
+            styles.input,
+            isAtMax || isTruncated ? styles.inputHidden : undefined,
+          )}
           debounceMs={debounceMs}
           emptySearchResultsText={emptySearchResultsText}
           hasAutoFocus={hasAutoFocus}
@@ -416,24 +512,30 @@ export function TagsInput<T extends SearchableItem>({
                 id: rawValue,
                 label: rawValue,
               };
-              onChange([...value, createdItem], {
+              onChangeRef.current([...valueRef.current, createdItem], {
                 item: createdItem,
                 type: 'create',
               });
+              announce(`Added ${rawValue}`);
               return;
             }
-            onChange([...value, item], {item, type: 'add'});
+            onChangeRef.current([...valueRef.current, item], {
+              item,
+              type: 'add',
+            });
+            announce(`Added ${item.label}`);
           }}
           onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-            if (event.key === 'Backspace' && query === '' && value.length > 0) {
-              const item = value[value.length - 1];
+            if (
+              event.key === 'Backspace' &&
+              event.currentTarget.value === '' &&
+              valueRef.current.length > 0
+            ) {
+              const item = valueRef.current[valueRef.current.length - 1];
               removeItem(item);
             }
           }}
-          onQueryChange={nextQuery => {
-            setQuery(nextQuery);
-            onQueryChange?.(nextQuery);
-          }}
+          onQueryChange={onQueryChange}
           placeholder={value.length === 0 ? placeholder : undefined}
           ref={inputRef}
           renderItem={renderItem}
@@ -450,15 +552,19 @@ export function TagsInput<T extends SearchableItem>({
             className={inputStyles.clearButton}
             onClick={event => {
               event.stopPropagation();
-              for (const item of value) {
-                onChange([], {item, type: 'remove'});
-                break;
-              }
+              onChangeRef.current([], {
+                items: valueRef.current,
+                type: 'remove-all',
+              });
+              announce('Cleared all tags');
             }}
             type="button">
             <Icon icon={X} size="sm" />
           </button>
         ) : null}
+        <span aria-live="polite" className={styles.liveRegion} role="status">
+          {announcement}
+        </span>
       </div>
     </Field>
   );

@@ -7,11 +7,13 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import type {DateRange, ISODateString} from '../../internal/dateTypes';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
+import type {DateRange} from '../../internal/dateTypes';
 import {
   DATE_FORMAT_SHORT_WITH_YEAR,
   plainDateFormat,
-  plainDateFromISO,
+  type PlainDate,
 } from '../../internal/plainDate';
 import {Button} from '../Button';
 import {Calendar} from '../Calendar';
@@ -32,7 +34,11 @@ import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
-export type {DateRange, ISODateString} from '../../internal/dateTypes';
+export type {DateRange} from '../../internal/dateTypes';
+
+const styles = {
+  wrapper: css({ps: '1', gap: '1'}),
+} as const;
 
 export type DateRangeInputProps = {
   /**
@@ -44,9 +50,9 @@ export type DateRangeInputProps = {
    */
   'data-testid'?: string;
   /**
-   * Predicate functions that constrain which dates are selectable.
+   * Returns true for dates that should be disabled.
    */
-  dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
+  getIsDateDisabled?: (date: PlainDate) => boolean;
   /**
    * Supporting text rendered below the label.
    */
@@ -84,13 +90,13 @@ export type DateRangeInputProps = {
    */
   labelTooltip?: ReactNode;
   /**
-   * Maximum selectable date (ISO string).
+   * Maximum selectable date.
    */
-  max?: ISODateString;
+  max?: PlainDate;
   /**
-   * Minimum selectable date (ISO string).
+   * Minimum selectable date.
    */
-  min?: ISODateString;
+  min?: PlainDate;
   /**
    * Number of calendar months shown in the popover.
    * @default 2
@@ -131,7 +137,7 @@ function formatRange(value: DateRange | undefined): string {
   if (value == null) {
     return '';
   }
-  return `${plainDateFormat(plainDateFromISO(value.start), DATE_FORMAT_SHORT_WITH_YEAR)} - ${plainDateFormat(plainDateFromISO(value.end), DATE_FORMAT_SHORT_WITH_YEAR)}`;
+  return `${plainDateFormat(value.start, DATE_FORMAT_SHORT_WITH_YEAR)} - ${plainDateFormat(value.end, DATE_FORMAT_SHORT_WITH_YEAR)}`;
 }
 
 /**
@@ -143,7 +149,7 @@ export function DateRangeInput({
   onChange,
   min,
   max,
-  dateConstraints,
+  getIsDateDisabled,
   numberOfMonths = 2,
   placeholder = 'Select a date range',
   size = 'md',
@@ -189,15 +195,18 @@ export function DateRangeInput({
       }
       style={style}>
       <div
-        className={inputRecipe({
-          size,
-          status: status?.type,
-          isDisabled,
-        })}>
+        className={cx(
+          inputRecipe({
+            size,
+            status: status?.type,
+            isDisabled,
+          }),
+          styles.wrapper,
+        )}>
         <Popover
           content={
             <Calendar
-              dateConstraints={dateConstraints}
+              getIsDateDisabled={getIsDateDisabled}
               max={max}
               min={min}
               mode="range"
@@ -207,16 +216,18 @@ export function DateRangeInput({
                 setIsOpen(false);
               }}
               value={value}
+              viewDate={value?.start}
             />
           }
           hasAutoFocus
           isEnabled={!isDisabled && !isLoading}
           isOpen={isOpen}
           label={`Choose ${label}`}
-          onOpenChange={setIsOpen}>
+          onOpenChange={setIsOpen}
+          padding="3">
           <Button
             icon={CalendarIcon}
-            isDisabled={isDisabled || isLoading}
+            isDisabled={isDisabled}
             isIconOnly
             label={`Choose ${label}`}
             size="sm"
@@ -230,7 +241,7 @@ export function DateRangeInput({
           aria-required={isRequired ?? undefined}
           className={inputStyles.control}
           data-testid={dataTestId}
-          disabled={isDisabled || isLoading}
+          disabled={isDisabled}
           id={inputId}
           placeholder={placeholder}
           readOnly

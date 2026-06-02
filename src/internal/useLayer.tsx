@@ -49,6 +49,7 @@ const styles = {
     p: 0,
     borderWidth: 0,
     borderStyle: 'none',
+    borderColor: 'transparent',
     overflow: 'visible',
     bg: 'transparent',
   }),
@@ -170,6 +171,7 @@ export function useLayer({
       const placement = props?.placement ?? 'above';
       const alignment = props?.alignment ?? 'center';
       const anchorStyle: React.CSSProperties = {
+        border: 'none',
         positionAnchor: anchorId,
         positionArea: getPositionArea(placement, alignment),
         positionTryFallbacks: 'flip-block, flip-inline, flip-block flip-inline',

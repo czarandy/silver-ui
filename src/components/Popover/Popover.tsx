@@ -7,6 +7,9 @@ import {
   type RefObject,
 } from 'react';
 import {css, cx} from 'styled-system/css';
+import type {SpacingToken} from 'styled-system/tokens';
+import {token} from 'styled-system/tokens';
+import {nowMonotonicMilliseconds} from '../../internal/time';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
 import {usePopover} from './usePopover';
@@ -54,6 +57,11 @@ export interface PopoverProps {
    */
   hasCloseButton?: boolean;
   /**
+   * Whether clicking outside closes the popover.
+   * @default true
+   */
+  hasLightDismiss?: boolean;
+  /**
    * Whether trigger interactions open the popover.
    * @default true
    */
@@ -71,6 +79,11 @@ export interface PopoverProps {
    */
   onOpenChange?: (isOpen: boolean) => void;
   /**
+   * Inner padding of the popover content.
+   * @default 0
+   */
+  padding?: SpacingToken;
+  /**
    * Position relative to the trigger.
    * @default 'below'
    */
@@ -79,6 +92,11 @@ export interface PopoverProps {
    * Ref forwarded to the popover content element.
    */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * ARIA role for the floating content.
+   * @default 'dialog'
+   */
+  role?: 'dialog' | 'menu';
   /**
    * Inline styles applied to the popover content.
    */
@@ -96,7 +114,6 @@ const styles = {
     display: 'inline-flex',
   }),
   content: css({
-    p: '3',
     minW: 'anchor-size(width)',
   }),
   gap: {
@@ -130,11 +147,14 @@ export function Popover({
   width,
   label,
   hasCloseButton,
+  hasLightDismiss,
   closeButtonLabel,
+  padding,
   ref,
   hasAutoFocus,
   className,
   style,
+  role,
   'data-testid': dataTestId,
 }: PopoverProps): React.JSX.Element {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -145,12 +165,14 @@ export function Popover({
     closeButtonLabel,
     hasAutoFocus,
     hasCloseButton,
+    hasLightDismiss,
     label,
     onHide: () => {
-      lastHideTimeRef.current = Date.now();
+      lastHideTimeRef.current = nowMonotonicMilliseconds();
       onOpenChange?.(false);
     },
     onShow: () => onOpenChange?.(true),
+    role,
   });
 
   const handleTriggerClick = useCallback(() => {
@@ -158,7 +180,7 @@ export function Popover({
       return;
     }
 
-    if (Date.now() - lastHideTimeRef.current < 50) {
+    if (nowMonotonicMilliseconds() - lastHideTimeRef.current < 50) {
       return;
     }
 
@@ -248,12 +270,17 @@ export function Popover({
       ? undefined
       : {width: typeof width === 'number' ? `${width}px` : width};
 
+  const paddingStyle =
+    padding != null && padding !== '0'
+      ? {padding: token(`spacing.${padding}`)}
+      : undefined;
+
   const popoverContent = popover.render(
     <div
       className={cx(styles.content, className)}
       data-testid={dataTestId}
       ref={ref}
-      style={{...widthStyle, ...style}}>
+      style={{...paddingStyle, ...widthStyle, ...style}}>
       {content}
     </div>,
     {placement, alignment, className: styles.gap[placement]},

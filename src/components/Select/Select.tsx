@@ -248,9 +248,10 @@ const styles = {
     textAlign: 'start',
     _hover: {bg: 'bg.subtle'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '1px',
+      outlineOffset: 'focusOffsetTight',
     },
     _disabled: {
       opacity: 0.5,

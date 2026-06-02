@@ -1,6 +1,6 @@
 import {createContext} from 'react';
-import type {InputStatus} from '../Field';
 
+export type RadioGroupOrientation = 'horizontal' | 'vertical';
 export type RadioGroupSize = 'sm' | 'md';
 
 export interface RadioGroupContextValue {
@@ -8,8 +8,8 @@ export interface RadioGroupContextValue {
   isRequired?: boolean;
   name: string;
   onChange: (value: string) => void;
+  orientation: RadioGroupOrientation;
   size: RadioGroupSize;
-  status?: InputStatus;
   value: string;
 }
 

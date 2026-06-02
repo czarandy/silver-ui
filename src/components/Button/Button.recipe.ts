@@ -34,9 +34,10 @@ export const buttonRecipe = cva({
       transform: 'none',
     },
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '3px',
+      outlineOffset: 'focusOffsetLoose',
     },
   },
   variants: {

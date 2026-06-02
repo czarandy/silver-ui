@@ -88,10 +88,10 @@ const styles = {
     alignItems: 'center',
     gap: '2',
     flexShrink: 0,
-    '&:last-child': {
-      marginInlineEnd: '-2',
-      marginBlockStart: '-2',
-    },
+  }),
+  closeButton: css({
+    marginInlineEnd: '-2',
+    marginBlockStart: '-2',
   }),
 } as const;
 
@@ -119,6 +119,7 @@ export function LayoutHeader({
   const closeButton =
     dialogContext != null ? (
       <Button
+        className={styles.closeButton}
         icon={X}
         isIconOnly
         label="Close"

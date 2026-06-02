@@ -17,9 +17,10 @@ export const linkRecipe = cva({
       textDecoration: 'underline',
     },
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
     '&[aria-disabled="true"]': {
       cursor: 'not-allowed',

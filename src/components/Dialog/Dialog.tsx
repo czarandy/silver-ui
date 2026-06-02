@@ -13,7 +13,13 @@ import {mergeRefs} from '../../internal/mergeRefs';
 import {DialogContext} from './DialogContext';
 
 export type DialogVariant = 'fullscreen' | 'standard';
-export type DialogPurpose = 'form' | 'info' | 'required';
+export type DialogRole = 'alertdialog' | 'dialog';
+export type DialogDismissBehavior =
+  | boolean
+  | {
+      isBackdropDismissEnabled?: boolean;
+      isEscapeDismissEnabled?: boolean;
+    };
 
 export interface DialogPosition {
   bottom?: number | string;
@@ -36,6 +42,12 @@ export interface DialogProps {
    */
   'data-testid'?: string;
   /**
+   * Controls whether Escape and backdrop clicks request dismissal. Pass a
+   * boolean to enable or disable both behaviors together.
+   * @default {isEscapeDismissEnabled: true, isBackdropDismissEnabled: true}
+   */
+  dismissBehavior?: DialogDismissBehavior;
+  /**
    * Whether the dialog is open.
    */
   isOpen: boolean;
@@ -57,14 +69,14 @@ export interface DialogProps {
    */
   position?: Readonly<DialogPosition>;
   /**
-   * Controls escape and backdrop-click dismiss behavior.
-   * @default 'info'
-   */
-  purpose?: DialogPurpose;
-  /**
    * Ref forwarded to the dialog element.
    */
   ref?: Ref<HTMLDialogElement>;
+  /**
+   * ARIA role exposed by the dialog.
+   * @default 'dialog'
+   */
+  role?: DialogRole;
   /**
    * Inline styles applied to the dialog.
    */
@@ -98,9 +110,10 @@ const styles = {
       backdropFilter: 'blur(2px)',
     },
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   open: css({
@@ -129,6 +142,26 @@ function formatSize(value: number | string): string {
   return typeof value === 'number' ? `${value}px` : value;
 }
 
+function getDismissBehavior(
+  dismissBehavior: DialogDismissBehavior | undefined,
+): {isBackdropDismissEnabled: boolean; isEscapeDismissEnabled: boolean} {
+  if (dismissBehavior == null) {
+    return {isBackdropDismissEnabled: true, isEscapeDismissEnabled: true};
+  }
+
+  if (typeof dismissBehavior === 'boolean') {
+    return {
+      isBackdropDismissEnabled: dismissBehavior,
+      isEscapeDismissEnabled: dismissBehavior,
+    };
+  }
+
+  return {
+    isBackdropDismissEnabled: dismissBehavior.isBackdropDismissEnabled ?? true,
+    isEscapeDismissEnabled: dismissBehavior.isEscapeDismissEnabled ?? true,
+  };
+}
+
 /**
  * A modal dialog surface with backdrop, focus management,
  * and configurable dismiss behavior.
@@ -141,18 +174,19 @@ export function Dialog({
   maxHeight = '75vh',
   position,
   variant = 'standard',
-  purpose = 'info',
+  dismissBehavior,
   children,
   className,
   'data-testid': dataTestId,
+  role = 'dialog',
   style,
   ref,
 }: DialogProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const isFullscreen = variant === 'fullscreen';
-  const allowEscape = purpose !== 'required';
-  const allowBackdropClick = purpose === 'info';
+  const {isBackdropDismissEnabled, isEscapeDismissEnabled} =
+    getDismissBehavior(dismissBehavior);
   const dialogContextValue = useMemo(() => ({onOpenChange}), [onOpenChange]);
 
   useEffect(() => {
@@ -212,17 +246,17 @@ export function Dialog({
       data-testid={dataTestId}
       onCancel={event => {
         event.preventDefault();
-        if (allowEscape) {
+        if (isEscapeDismissEnabled) {
           onOpenChange(false);
         }
       }}
       onClick={event => {
-        if (event.target === event.currentTarget && allowBackdropClick) {
+        if (event.target === event.currentTarget && isBackdropDismissEnabled) {
           onOpenChange(false);
         }
       }}
       ref={mergeRefs(ref, dialogRef)}
-      role={purpose === 'required' ? 'alertdialog' : undefined}
+      role={role === 'dialog' ? undefined : role}
       style={{
         width: isFullscreen ? undefined : formatSize(width),
         maxHeight: isFullscreen ? undefined : formatSize(maxHeight),

@@ -1,5 +1,6 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {
+  memo,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -9,42 +10,30 @@ import {
   type Ref,
 } from 'react';
 import {css, cx} from 'styled-system/css';
-import type {
-  DateRange,
-  DayOfWeek,
-  ISODateString,
-} from '../../internal/dateTypes';
+import type {DateRange, DayOfWeek} from '../../internal/dateTypes';
 import {
   DATE_FORMAT_MONTH_YEAR,
   DATE_FORMAT_WITH_WEEKDAY,
   getDaysInMonth,
-  plainDateAddDays,
-  plainDateAddMonths,
+  plainDateCreate,
   plainDateDayOfWeek,
   plainDateFormat,
-  plainDateFromISO,
   plainDateGetWeekNumber,
   plainDateIsAfter,
   plainDateIsBefore,
   plainDateIsEqual,
   plainDateIsInRange,
-  plainDateSetFirstOfMonth,
-  plainDateToDate,
-  plainDateToISO,
   plainDateToday,
   type PlainDate,
 } from '../../internal/plainDate';
+import {getBrowserTimezoneID} from '../../internal/time';
 import {useGridFocus} from '../../internal/useGridFocus';
 import {Button} from '../Button';
 
-export type {
-  DateRange,
-  DayOfWeek,
-  ISODateString,
-} from '../../internal/dateTypes';
+export type {DateRange, DayOfWeek} from '../../internal/dateTypes';
 
 export interface CalendarHandle {
-  navigateTo: (date: ISODateString) => void;
+  navigateTo: (date: PlainDate) => void;
 }
 
 interface CalendarBaseProps {
@@ -57,13 +46,9 @@ interface CalendarBaseProps {
    */
   'data-testid'?: string;
   /**
-   * Custom date constraints. A date is disabled when any function returns false.
+   * Returns true for dates that should be disabled.
    */
-  dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
-  /**
-   * Controlled visible month.
-   */
-  focusDate?: ISODateString;
+  getIsDateDisabled?: (date: PlainDate) => boolean;
   /**
    * Whether to show outside-month days.
    * @default true
@@ -82,11 +67,11 @@ interface CalendarBaseProps {
   /**
    * Maximum selectable date.
    */
-  max?: ISODateString;
+  max?: PlainDate;
   /**
    * Minimum selectable date.
    */
-  min?: ISODateString;
+  min?: PlainDate;
   /**
    * Number of months displayed.
    * @default 1
@@ -95,7 +80,7 @@ interface CalendarBaseProps {
   /**
    * Called when the visible month changes.
    */
-  onFocusDateChange?: (focusDate: ISODateString) => void;
+  onViewDateChange?: (viewDate: PlainDate) => void;
   /**
    * Ref exposing imperative calendar navigation.
    */
@@ -104,6 +89,15 @@ interface CalendarBaseProps {
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
+  /**
+   * Timezone used to determine today's date.
+   * @default browser timezone
+   */
+  timezoneID?: string;
+  /**
+   * Controlled visible month.
+   */
+  viewDate?: PlainDate;
   /**
    * First day of week, where 0 is Sunday.
    * @default 0
@@ -115,7 +109,7 @@ interface CalendarSingleProps extends CalendarBaseProps {
   /**
    * Default selected date for uncontrolled usage.
    */
-  defaultValue?: ISODateString;
+  defaultValue?: PlainDate;
   /**
    * Selection mode. Defaults to 'single'.
    */
@@ -123,11 +117,11 @@ interface CalendarSingleProps extends CalendarBaseProps {
   /**
    * Called when the selected date changes.
    */
-  onChange?: (value: ISODateString, valueAsDate: Date) => void;
+  onChange: (value: PlainDate) => void;
   /**
    * Controlled selected date.
    */
-  value?: ISODateString;
+  value?: PlainDate;
 }
 
 interface CalendarRangeProps extends CalendarBaseProps {
@@ -142,7 +136,7 @@ interface CalendarRangeProps extends CalendarBaseProps {
   /**
    * Called when the selected date range changes.
    */
-  onChange?: (value: DateRange) => void;
+  onChange: (value: DateRange) => void;
   /**
    * Controlled selected date range.
    */
@@ -154,7 +148,6 @@ export type CalendarProps = CalendarSingleProps | CalendarRangeProps;
 interface CalendarDay {
   date: PlainDate;
   dayNumber: number;
-  iso: ISODateString;
   isOutside: boolean;
 }
 
@@ -162,7 +155,6 @@ const styles = {
   root: css({
     display: 'inline-block',
     minW: '220px',
-    p: '3',
     color: 'fg',
     fontFamily: 'body',
   }),
@@ -275,9 +267,10 @@ const styles = {
       bg: 'bg.subtle',
     },
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
     _disabled: {
       cursor: 'not-allowed',
@@ -294,7 +287,7 @@ const styles = {
     bg: 'primary',
     color: 'fg.onPrimary',
     _hover: {
-      bg: 'primary.hover',
+      bg: 'primary',
     },
   }),
   dayDisabled: css({
@@ -318,9 +311,7 @@ function generateCalendarDays({
     return names[(index + weekStartsOn) % 7];
   });
   const daysInMonth = getDaysInMonth(year, month);
-  const firstOfMonth = plainDateFromISO(
-    `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-01` as ISODateString,
-  );
+  const firstOfMonth = plainDateCreate(year, month, 1);
   let startOffset = plainDateDayOfWeek(firstOfMonth) - weekStartsOn;
   if (startOffset < 0) {
     startOffset += 7;
@@ -332,16 +323,13 @@ function generateCalendarDays({
     const dayOffset = index - startOffset + 1;
     const isOutside = dayOffset < 1 || dayOffset > daysInMonth;
     const date = isOutside
-      ? plainDateAddDays(firstOfMonth, dayOffset - 1)
-      : plainDateFromISO(
-          `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(dayOffset).padStart(2, '0')}` as ISODateString,
-        );
+      ? firstOfMonth.add({days: dayOffset - 1})
+      : plainDateCreate(year, month, dayOffset);
 
     return {
       date,
       dayNumber: date.day,
       isOutside,
-      iso: plainDateToISO(date),
     };
   });
 
@@ -353,125 +341,125 @@ function generateCalendarDays({
   return {dayNames, weeks};
 }
 
-function isDateDisabled(
+function checkDateDisabled(
   date: PlainDate,
   options: {
-    dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
-    max?: ISODateString;
-    min?: ISODateString;
+    getIsDateDisabled?: (date: PlainDate) => boolean;
+    max?: PlainDate;
+    min?: PlainDate;
   },
 ): boolean {
-  if (
-    options.min != null &&
-    plainDateIsBefore(date, plainDateFromISO(options.min))
-  ) {
+  if (options.min != null && plainDateIsBefore(date, options.min)) {
     return true;
   }
 
-  if (
-    options.max != null &&
-    plainDateIsAfter(date, plainDateFromISO(options.max))
-  ) {
+  if (options.max != null && plainDateIsAfter(date, options.max)) {
     return true;
   }
 
-  return (
-    options.dateConstraints?.some(
-      constraint => !constraint(plainDateToDate(date)),
-    ) ?? false
+  return options.getIsDateDisabled?.(date) ?? false;
+}
+
+function plainDateFromDataAttribute(value: string): PlainDate {
+  return plainDateCreate(
+    parseInt(value.slice(0, 4)),
+    parseInt(value.slice(5, 7)),
+    parseInt(value.slice(8, 10)),
   );
 }
 
 function getSelectedTabDate({
   days,
+  getIsDisabled,
   month,
   selectedDate,
   today,
   year,
-  isDisabled,
 }: {
   days: CalendarDay[];
-  isDisabled: (date: PlainDate) => boolean;
+  getIsDisabled: (date: PlainDate) => boolean;
   month: number;
   selectedDate: PlainDate | null;
   today: PlainDate;
   year: number;
-}): ISODateString | null {
+}): PlainDate | null {
   if (
     selectedDate?.year === year &&
     selectedDate.month === month &&
-    !isDisabled(selectedDate)
+    !getIsDisabled(selectedDate)
   ) {
-    return plainDateToISO(selectedDate);
+    return selectedDate;
   }
 
-  if (today.year === year && today.month === month && !isDisabled(today)) {
-    return plainDateToISO(today);
+  if (today.year === year && today.month === month && !getIsDisabled(today)) {
+    return today;
   }
 
-  return days.find(day => !day.isOutside && !isDisabled(day.date))?.iso ?? null;
+  return (
+    days.find(day => !day.isOutside && !getIsDisabled(day.date))?.date ?? null
+  );
 }
 
 /**
  * A date picker calendar supporting single date and date range selection.
  */
-export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
-  const {
-    mode = 'single',
-    value,
-    defaultValue,
-    onChange,
-    numberOfMonths = 1,
-    min,
-    max,
-    dateConstraints,
-    focusDate: focusDateFromProps,
-    onFocusDateChange,
-    hasOutsideDays = true,
-    hasWeekNumbers = false,
-    hasVariableRowCount = false,
-    weekStartsOn = 0,
-    className,
-    'data-testid': dataTestId,
-    style,
-  } = props;
-
-  const today = useMemo(() => plainDateToday(), []);
+export function Calendar({
+  className,
+  'data-testid': dataTestId,
+  defaultValue,
+  getIsDateDisabled: getIsDateDisabledProp,
+  hasOutsideDays = true,
+  hasVariableRowCount = false,
+  hasWeekNumbers = false,
+  max,
+  min,
+  mode = 'single',
+  numberOfMonths = 1,
+  onChange,
+  onViewDateChange,
+  ref,
+  style,
+  timezoneID,
+  value,
+  viewDate: viewDateFromProps,
+  weekStartsOn = 0,
+}: CalendarProps): React.JSX.Element {
+  const effectiveTimezoneID = timezoneID ?? getBrowserTimezoneID();
+  const today = useMemo(
+    () => plainDateToday(effectiveTimezoneID),
+    [effectiveTimezoneID],
+  );
   const [internalValue, setInternalValue] = useState<
-    DateRange | ISODateString | undefined
+    DateRange | PlainDate | undefined
   >(defaultValue);
   const [rangeSelectionStart, setRangeSelectionStart] =
-    useState<ISODateString | null>(null);
-  const [hoveredDate, setHoveredDate] = useState<ISODateString | null>(null);
-  const [pendingFocus, setPendingFocus] = useState<ISODateString | null>(null);
+    useState<PlainDate | null>(null);
+  const [hoveredDate, setHoveredDate] = useState<PlainDate | null>(null);
+  const [pendingFocus, setPendingFocus] = useState<PlainDate | null>(null);
   const effectiveValue = value ?? internalValue;
-  const [internalFocusDate, setInternalFocusDate] = useState(() => {
-    if (focusDateFromProps != null) {
-      return plainDateFromISO(focusDateFromProps);
+  const isViewDateControlled =
+    viewDateFromProps != null && onViewDateChange != null;
+  const [internalViewDate, setInternalViewDate] = useState(() => {
+    if (viewDateFromProps != null) {
+      return viewDateFromProps;
     }
 
-    if (typeof effectiveValue === 'string') {
-      return plainDateFromISO(effectiveValue);
+    if (effectiveValue != null && 'year' in effectiveValue) {
+      return effectiveValue;
     }
 
-    if (effectiveValue != null) {
-      return plainDateFromISO(effectiveValue.start);
+    if (effectiveValue != null && 'start' in effectiveValue) {
+      return effectiveValue.start;
     }
 
     return today;
   });
-  const focusDate =
-    focusDateFromProps != null
-      ? plainDateFromISO(focusDateFromProps)
-      : internalFocusDate;
-  const baseMonth = useMemo(
-    () => plainDateSetFirstOfMonth(focusDate),
-    [focusDate],
-  );
+  const viewDate = isViewDateControlled ? viewDateFromProps : internalViewDate;
+  const baseMonth = useMemo(() => viewDate.with({day: 1}), [viewDate]);
   const visibleMonths = useMemo(
     () =>
       Array.from({length: numberOfMonths}, (_, index) =>
-        plainDateAddMonths(baseMonth, index),
+        baseMonth.add({months: index}),
       ),
     [baseMonth, numberOfMonths],
   );
@@ -484,80 +472,78 @@ export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
   );
 
   const canNavigatePrevious =
-    min == null ||
-    plainDateIsBefore(
-      plainDateSetFirstOfMonth(plainDateFromISO(min)),
-      plainDateSetFirstOfMonth(baseMonth),
-    );
+    min == null || plainDateIsBefore(min.with({day: 1}), baseMonth);
   const lastVisibleMonth = visibleMonths.at(-1) ?? baseMonth;
   const canNavigateNext =
-    max == null ||
-    plainDateIsAfter(
-      plainDateSetFirstOfMonth(plainDateFromISO(max)),
-      plainDateSetFirstOfMonth(lastVisibleMonth),
-    );
+    max == null || plainDateIsAfter(max.with({day: 1}), lastVisibleMonth);
 
   const navigateMonth = useCallback(
-    (delta: number, focusedDate?: ISODateString, offset = 7) => {
-      const nextMonth = plainDateAddMonths(baseMonth, delta);
-      const nextISO = plainDateToISO(nextMonth);
+    (delta: number, focusedDate?: PlainDate, offset = 7) => {
+      const nextMonth = baseMonth.add({months: delta});
 
       if (focusedDate != null) {
-        const targetDate = plainDateAddDays(
-          plainDateFromISO(focusedDate),
-          delta * offset,
-        );
-        setPendingFocus(plainDateToISO(targetDate));
+        setPendingFocus(focusedDate.add({days: delta * offset}));
       }
 
-      onFocusDateChange?.(nextISO);
-      if (focusDateFromProps == null) {
-        setInternalFocusDate(nextMonth);
+      onViewDateChange?.(nextMonth);
+      if (!isViewDateControlled) {
+        setInternalViewDate(nextMonth);
       }
     },
-    [baseMonth, focusDateFromProps, onFocusDateChange],
+    [baseMonth, isViewDateControlled, onViewDateChange],
   );
 
   useImperativeHandle(
     ref,
     () => ({
       navigateTo: date => {
-        onFocusDateChange?.(date);
-        if (focusDateFromProps == null) {
-          setInternalFocusDate(plainDateFromISO(date));
+        onViewDateChange?.(date);
+        if (!isViewDateControlled) {
+          setInternalViewDate(date);
         }
       },
     }),
-    [focusDateFromProps, onFocusDateChange],
+    [isViewDateControlled, onViewDateChange],
   );
 
   const handleDayClick = useCallback(
     (date: PlainDate) => {
-      const iso = plainDateToISO(date);
-
       if (mode === 'single') {
-        setInternalValue(iso);
-        (onChange as CalendarSingleProps['onChange'])?.(
-          iso,
-          plainDateToDate(date),
-        );
+        setInternalValue(date);
+        (onChange as CalendarSingleProps['onChange'])(date);
         return;
       }
 
       if (rangeSelectionStart == null) {
-        setRangeSelectionStart(iso);
+        setRangeSelectionStart(date);
         return;
       }
 
-      const startDate = plainDateFromISO(rangeSelectionStart);
-      const range = plainDateIsBefore(date, startDate)
-        ? {start: iso, end: rangeSelectionStart}
-        : {start: rangeSelectionStart, end: iso};
+      const range = plainDateIsBefore(date, rangeSelectionStart)
+        ? {start: date, end: rangeSelectionStart}
+        : {start: rangeSelectionStart, end: date};
       setInternalValue(range);
       setRangeSelectionStart(null);
-      (onChange as CalendarRangeProps['onChange'])?.(range);
+      (onChange as CalendarRangeProps['onChange'])(range);
     },
     [mode, onChange, rangeSelectionStart],
+  );
+
+  const handleNavigateNext = useCallback(
+    (focusedDate: PlainDate, offset: number) =>
+      navigateMonth(1, focusedDate, offset),
+    [navigateMonth],
+  );
+
+  const handleNavigatePrevious = useCallback(
+    (focusedDate: PlainDate, offset: number) =>
+      navigateMonth(-1, focusedDate, offset),
+    [navigateMonth],
+  );
+
+  const handlePendingFocusHandled = useCallback(
+    () => setPendingFocus(null),
+    [],
   );
 
   return (
@@ -601,27 +587,21 @@ export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
       <div className={styles.months}>
         {visibleMonths.map(month => (
           <MonthGrid
-            dateConstraints={dateConstraints}
+            getIsDateDisabled={getIsDateDisabledProp}
             hasOutsideDays={hasOutsideDays}
             hasVariableRowCount={hasVariableRowCount}
             hasWeekNumbers={hasWeekNumbers}
             hoveredDate={hoveredDate}
-            key={plainDateToISO(month)}
+            key={month.toString()}
             max={max}
             min={min}
             mode={mode}
             month={month}
             onDayClick={handleDayClick}
-            onDayHover={date =>
-              setHoveredDate(date == null ? null : plainDateToISO(date))
-            }
-            onNavigateNext={(focusedDate, offset) =>
-              navigateMonth(1, focusedDate, offset)
-            }
-            onNavigatePrevious={(focusedDate, offset) =>
-              navigateMonth(-1, focusedDate, offset)
-            }
-            onPendingFocusHandled={() => setPendingFocus(null)}
+            onDayHover={setHoveredDate}
+            onNavigateNext={handleNavigateNext}
+            onNavigatePrevious={handleNavigatePrevious}
+            onPendingFocusHandled={handlePendingFocusHandled}
             pendingFocus={pendingFocus}
             rangeSelectionStart={rangeSelectionStart}
             today={today}
@@ -635,88 +615,28 @@ export function Calendar({ref, ...props}: CalendarProps): React.JSX.Element {
 }
 
 interface MonthGridProps {
-  /**
-   * Custom date constraint functions.
-   */
-  dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
-  /**
-   * Whether to render outside-month days.
-   */
+  getIsDateDisabled?: (date: PlainDate) => boolean;
   hasOutsideDays: boolean;
-  /**
-   * Whether the grid uses variable row counts.
-   */
   hasVariableRowCount: boolean;
-  /**
-   * Whether to display ISO week numbers.
-   */
   hasWeekNumbers: boolean;
-  /**
-   * Currently hovered date, used for range preview.
-   */
-  hoveredDate: ISODateString | null;
-  /**
-   * Maximum selectable date.
-   */
-  max?: ISODateString;
-  /**
-   * Minimum selectable date.
-   */
-  min?: ISODateString;
-  /**
-   * Selection mode: single date or date range.
-   */
+  hoveredDate: PlainDate | null;
+  max?: PlainDate;
+  min?: PlainDate;
   mode: 'single' | 'range';
-  /**
-   * The month to render.
-   */
   month: PlainDate;
-  /**
-   * Called when a day is clicked.
-   */
   onDayClick: (date: PlainDate) => void;
-  /**
-   * Called when a day is hovered or unhovered.
-   */
   onDayHover: (date: PlainDate | null) => void;
-  /**
-   * Called when navigating past the last day in the grid.
-   */
-  onNavigateNext: (focusedDate: ISODateString, offset: number) => void;
-  /**
-   * Called when navigating before the first day in the grid.
-   */
-  onNavigatePrevious: (focusedDate: ISODateString, offset: number) => void;
-  /**
-   * Called after a pending focus target has been focused.
-   */
+  onNavigateNext: (focusedDate: PlainDate, offset: number) => void;
+  onNavigatePrevious: (focusedDate: PlainDate, offset: number) => void;
   onPendingFocusHandled: () => void;
-  /**
-   * Date that should receive focus after a navigation.
-   */
-  pendingFocus: ISODateString | null;
-  /**
-   * Start date of an in-progress range selection.
-   */
-  rangeSelectionStart: ISODateString | null;
-  /**
-   * Today's date, used for highlighting.
-   */
+  pendingFocus: PlainDate | null;
+  rangeSelectionStart: PlainDate | null;
   today: PlainDate;
-  /**
-   * Current selected value (single date or range).
-   */
-  value: DateRange | ISODateString | undefined;
-  /**
-   * First day of the week, where 0 is Sunday.
-   */
+  value: DateRange | PlainDate | undefined;
   weekStartsOn: DayOfWeek;
 }
 
-/**
- * Renders the day grid for a single month within the calendar.
- */
-function MonthGrid({
+const MonthGrid = memo(function MonthGrid({
   month,
   value,
   mode,
@@ -724,7 +644,7 @@ function MonthGrid({
   hoveredDate,
   min,
   max,
-  dateConstraints,
+  getIsDateDisabled: getIsDateDisabledProp,
   hasOutsideDays,
   hasWeekNumbers,
   hasVariableRowCount,
@@ -749,26 +669,29 @@ function MonthGrid({
   );
   const days = weeks.flat();
   const isDisabled = useCallback(
-    (date: PlainDate) => isDateDisabled(date, {min, max, dateConstraints}),
-    [dateConstraints, max, min],
+    (date: PlainDate) =>
+      checkDateDisabled(date, {
+        min,
+        max,
+        getIsDateDisabled: getIsDateDisabledProp,
+      }),
+    [getIsDateDisabledProp, max, min],
   );
   const selectedDate =
-    mode === 'single' && typeof value === 'string'
-      ? plainDateFromISO(value)
-      : null;
+    mode === 'single' && value != null && 'year' in value ? value : null;
   const tabbableDate = getSelectedTabDate({
     days,
-    isDisabled,
+    getIsDisabled: isDisabled,
     month: month.month,
     selectedDate,
     today,
     year: month.year,
   });
 
-  const getFocusedDate = useCallback((): ISODateString | null => {
+  const getFocusedDate = useCallback((): PlainDate | null => {
     const activeElement = document.activeElement as HTMLElement | null;
     const date = activeElement?.dataset.date;
-    return date == null ? null : (date as ISODateString);
+    return date == null ? null : plainDateFromDataAttribute(date);
   }, []);
 
   const {gridRef, handleKeyDown} = useGridFocus<HTMLDivElement>({
@@ -806,7 +729,7 @@ function MonthGrid({
     }
 
     const button = gridRef.current.querySelector<HTMLButtonElement>(
-      `button[data-date="${pendingFocus}"]`,
+      `button[data-date="${pendingFocus.toString()}"]`,
     );
     button?.focus();
     onPendingFocusHandled();
@@ -814,23 +737,25 @@ function MonthGrid({
 
   let rangeStart: PlainDate | null = null;
   let rangeEnd: PlainDate | null = null;
-  if (mode === 'range' && value != null && typeof value === 'object') {
-    rangeStart = plainDateFromISO(value.start);
-    rangeEnd = plainDateFromISO(value.end);
+  if (mode === 'range' && value != null && 'start' in value) {
+    rangeStart = value.start;
+    rangeEnd = value.end;
   }
   if (rangeSelectionStart != null) {
-    rangeStart = plainDateFromISO(rangeSelectionStart);
-    rangeEnd = rangeStart;
+    rangeStart = rangeSelectionStart;
+    rangeEnd = rangeSelectionStart;
   }
 
   let previewStart: PlainDate | null = null;
   let previewEnd: PlainDate | null = null;
   if (mode === 'range' && rangeSelectionStart != null && hoveredDate != null) {
-    const start = plainDateFromISO(rangeSelectionStart);
-    const hover = plainDateFromISO(hoveredDate);
-    if (!plainDateIsEqual(start, hover)) {
-      previewStart = plainDateIsBefore(hover, start) ? hover : start;
-      previewEnd = plainDateIsBefore(hover, start) ? start : hover;
+    if (!plainDateIsEqual(rangeSelectionStart, hoveredDate)) {
+      previewStart = plainDateIsBefore(hoveredDate, rangeSelectionStart)
+        ? hoveredDate
+        : rangeSelectionStart;
+      previewEnd = plainDateIsBefore(hoveredDate, rangeSelectionStart)
+        ? rangeSelectionStart
+        : hoveredDate;
     }
   }
 
@@ -862,7 +787,10 @@ function MonthGrid({
           const weekDate =
             week.find(day => !day.isOutside)?.date ?? week[0].date;
           return (
-            <div className={styles.weekRow} key={week[0].iso} role="row">
+            <div
+              className={styles.weekRow}
+              key={week[0].date.toString()}
+              role="row">
               {hasWeekNumbers ? (
                 <div className={styles.weekNumber}>
                   {plainDateGetWeekNumber(weekDate)}
@@ -874,8 +802,11 @@ function MonthGrid({
                   dayIndex={dayIndex}
                   hasOutsideDays={hasOutsideDays}
                   isDisabled={isDisabled(day.date)}
-                  isTabbable={tabbableDate === day.iso}
-                  key={day.iso}
+                  isTabbable={
+                    tabbableDate != null &&
+                    plainDateIsEqual(tabbableDate, day.date)
+                  }
+                  key={day.date.toString()}
                   mode={mode}
                   onDayClick={onDayClick}
                   onDayHover={onDayHover}
@@ -893,86 +824,27 @@ function MonthGrid({
       </div>
     </div>
   );
-}
+});
 
 interface DayCellProps {
-  /**
-   * Additional CSS class names for the cell.
-   */
-  className?: string;
-  /**
-   * Test ID for the cell.
-   */
-  'data-testid'?: string;
-  /**
-   * Calendar day data to render.
-   */
   day: CalendarDay;
-  /**
-   * Zero-based column index of this day in the week row.
-   */
   dayIndex: number;
-  /**
-   * Whether outside-month days are shown.
-   */
   hasOutsideDays: boolean;
-  /**
-   * Whether this day is disabled.
-   */
   isDisabled: boolean;
-  /**
-   * Whether this day is the tabbable cell in the grid.
-   */
   isTabbable: boolean;
-  /**
-   * Selection mode: single date or date range.
-   */
   mode: 'single' | 'range';
-  /**
-   * Called when a day is clicked.
-   */
   onDayClick: (date: PlainDate) => void;
-  /**
-   * Called when a day is hovered or unhovered.
-   */
   onDayHover: (date: PlainDate | null) => void;
-  /**
-   * End of the preview range highlight.
-   */
   previewEnd: PlainDate | null;
-  /**
-   * Start of the preview range highlight.
-   */
   previewStart: PlainDate | null;
-  /**
-   * End of the confirmed selected range.
-   */
   rangeEnd: PlainDate | null;
-  /**
-   * Start of the confirmed selected range.
-   */
   rangeStart: PlainDate | null;
-  /**
-   * Currently selected date in single mode.
-   */
   selectedDate: PlainDate | null;
-  /**
-   * Inline styles for the cell.
-   */
-  style?: CSSProperties;
-  /**
-   * Today's date, used for highlighting.
-   */
   today: PlainDate;
 }
 
-/**
- * Renders a single day cell within the month grid.
- */
-function DayCell({
-  className,
+const DayCell = memo(function DayCell({
   day,
-  'data-testid': dataTestId,
   dayIndex,
   mode,
   selectedDate,
@@ -981,7 +853,6 @@ function DayCell({
   previewStart,
   previewEnd,
   today,
-  style,
   hasOutsideDays,
   isDisabled,
   isTabbable,
@@ -989,13 +860,7 @@ function DayCell({
   onDayHover,
 }: DayCellProps): React.JSX.Element {
   if (day.isOutside && !hasOutsideDays) {
-    return (
-      <div
-        className={cx(styles.cell, className)}
-        data-testid={dataTestId}
-        style={style}
-      />
-    );
+    return <div className={styles.cell} />;
   }
 
   const effectivelyDisabled = isDisabled || day.isOutside;
@@ -1029,10 +894,7 @@ function DayCell({
   const isLastColumn = dayIndex === 6;
 
   return (
-    <div
-      className={cx(styles.cell, className)}
-      data-testid={dataTestId}
-      style={style}>
+    <div className={styles.cell}>
       {isInRange ? (
         <div
           className={cx(
@@ -1064,7 +926,7 @@ function DayCell({
             : undefined,
           effectivelyDisabled ? styles.dayDisabled : undefined,
         )}
-        data-date={day.iso}
+        data-date={day.date.toString()}
         disabled={isDisabled}
         onClick={() => {
           if (!effectivelyDisabled) {
@@ -1084,6 +946,6 @@ function DayCell({
       </button>
     </div>
   );
-}
+});
 
 Calendar.displayName = 'Calendar';

@@ -1,5 +1,4 @@
 import {
-  plainDateAddDays,
   plainDateFromInstant,
   plainDateIsAfter,
   plainDateIsBefore,
@@ -8,10 +7,6 @@ import {
 } from '../../internal/plainDate';
 import type {CalendarDayEvent, CalendarEvent} from './CalendarEvent';
 import type {Instant, ScheduleRange} from './types';
-
-export function getBrowserTimezoneID(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-}
 
 export function isDayEvent(event: CalendarEvent): event is CalendarDayEvent {
   return typeof event.start !== 'number';
@@ -42,7 +37,7 @@ export function enumerateDates(
   let current = start;
   while (plainDateIsBefore(current, endExclusive)) {
     dates.push(current);
-    current = plainDateAddDays(current, 1);
+    current = current.add({days: 1});
   }
   return dates;
 }
@@ -54,10 +49,7 @@ export function eventOverlapsRange(
 ): boolean {
   if (isDayEvent(event)) {
     const eventStart = plainDateToInstant(event.start, timezoneID);
-    const eventEnd = plainDateToInstant(
-      plainDateAddDays(event.end, 1),
-      timezoneID,
-    );
+    const eventEnd = plainDateToInstant(event.end.add({days: 1}), timezoneID);
     return eventStart < range.end && eventEnd > range.start;
   }
 

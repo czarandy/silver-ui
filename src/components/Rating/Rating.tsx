@@ -88,9 +88,10 @@ const styles = {
     borderWidth: 0,
     bg: 'transparent',
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
       borderRadius: 'sm',
     },
   }),

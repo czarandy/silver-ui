@@ -1,7 +1,14 @@
 import {Check, ChevronDown} from 'lucide-react';
-import {useState, type CSSProperties, type Ref} from 'react';
+import {
+  useRef,
+  useState,
+  type CSSProperties,
+  type KeyboardEvent,
+  type Ref,
+} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {mergeRefs} from '../../internal/mergeRefs';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {useTabsContext} from './TabsContext';
@@ -31,6 +38,15 @@ export interface TabMenuProps {
    */
   'data-testid'?: string;
   /**
+   * ID applied to the menu trigger tab.
+   */
+  id?: string;
+  /**
+   * Whether the menu trigger is disabled.
+   * @default false
+   */
+  isDisabled?: boolean;
+  /**
    * Trigger and menu heading label.
    */
   label: string;
@@ -55,10 +71,12 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '1',
+    mb: '-1px',
     px: '3',
     borderWidth: 0,
-    borderStyle: 'none',
-    borderRadius: 'md',
+    borderBottomWidth: 'emphasized',
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'transparent',
     bg: 'transparent',
     color: 'fg.muted',
     cursor: 'pointer',
@@ -69,14 +87,21 @@ const styles = {
     whiteSpace: 'nowrap',
     _hover: {bg: 'bg.subtle'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   triggerSelected: css({
+    borderBottomColor: 'fg',
     color: 'fg',
     fontWeight: 'semibold',
+  }),
+  triggerDisabled: css({
+    color: 'fg.disabled',
+    cursor: 'not-allowed',
+    _hover: {bg: 'transparent'},
   }),
   fill: css({flex: 1}),
   size: {
@@ -88,29 +113,12 @@ const styles = {
     display: 'inline-flex',
   }),
   chevronOpen: css({transform: 'rotate(180deg)'}),
-  indicator: css({
-    position: 'absolute',
-    bottom: '-2px',
-    insetInlineStart: '3',
-    insetInlineEnd: '3',
-    h: '0.5',
-    borderRadius: 'full',
-    bg: 'fg',
-  }),
   menu: css({
     display: 'flex',
     flexDirection: 'column',
     gap: '0.5',
     minW: '40',
     p: '1',
-  }),
-  heading: css({
-    px: '2',
-    py: '1',
-    color: 'fg.muted',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    fontWeight: 'semibold',
   }),
   item: css({
     display: 'flex',
@@ -129,9 +137,10 @@ const styles = {
     textAlign: 'start',
     _hover: {bg: 'bg.subtle'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '1px',
+      outlineOffset: 'focusOffsetTight',
     },
   }),
   itemSelected: css({fontWeight: 'medium'}),
@@ -157,6 +166,8 @@ const styles = {
 export function TabMenu({
   className,
   'data-testid': dataTestId,
+  id,
+  isDisabled = false,
   label,
   options,
   ref,
@@ -164,17 +175,72 @@ export function TabMenu({
 }: TabMenuProps): React.JSX.Element {
   const context = useTabsContext();
   const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const selectedOption = options.find(option => option.value === context.value);
   const triggerLabel = selectedOption?.label ?? label;
   const hasSelectedOption = selectedOption != null;
 
+  const focusMenuItem = (
+    event: KeyboardEvent<HTMLElement>,
+    nextIndex: number,
+  ) => {
+    const menu = event.currentTarget.closest<HTMLElement>('[role="menu"]');
+    const items = Array.from(
+      menu?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [],
+    );
+    items[nextIndex]?.focus();
+  };
+
+  const handleMenuKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    const menu = event.currentTarget.closest<HTMLElement>('[role="menu"]');
+    const items = Array.from(
+      menu?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [],
+    );
+    const activeIndex = items.indexOf(
+      document.activeElement as HTMLButtonElement,
+    );
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+      return;
+    }
+
+    if (items.length === 0) {
+      return;
+    }
+
+    if (event.key === 'Home') {
+      event.preventDefault();
+      focusMenuItem(event, 0);
+      return;
+    }
+
+    if (event.key === 'End') {
+      event.preventDefault();
+      focusMenuItem(event, items.length - 1);
+      return;
+    }
+
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
+      return;
+    }
+
+    event.preventDefault();
+
+    const currentIndex = activeIndex === -1 ? 0 : activeIndex;
+    const nextIndex =
+      event.key === 'ArrowDown'
+        ? (currentIndex + 1) % items.length
+        : (currentIndex - 1 + items.length) % items.length;
+    focusMenuItem(event, nextIndex);
+  };
+
   return (
     <Popover
       content={
-        <div className={styles.menu} role="menu">
-          <span className={styles.heading} role="presentation">
-            {label}
-          </span>
+        <div className={styles.menu}>
           {options.map(option => {
             const isSelected = option.value === context.value;
             return (
@@ -189,6 +255,7 @@ export function TabMenu({
                   context.onChange(option.value);
                   setIsOpen(false);
                 }}
+                onKeyDown={handleMenuKeyDown}
                 role="menuitem"
                 type="button">
                 <span className={styles.itemContent}>
@@ -211,20 +278,41 @@ export function TabMenu({
       }
       hasAutoFocus
       hasCloseButton={false}
+      isEnabled={!isDisabled}
       isOpen={isOpen}
       label={label}
-      onOpenChange={setIsOpen}>
+      onOpenChange={setIsOpen}
+      role="menu">
       <button
+        aria-disabled={isDisabled || undefined}
+        aria-selected={hasSelectedOption}
         className={cx(
           styles.trigger,
           styles.size[context.size],
           hasSelectedOption ? styles.triggerSelected : undefined,
+          isDisabled ? styles.triggerDisabled : undefined,
           context.layout === 'fill' ? styles.fill : undefined,
           className,
         )}
+        data-tab-disabled={isDisabled ? 'true' : undefined}
+        data-tab-value={
+          hasSelectedOption && !isDisabled ? context.value : undefined
+        }
         data-testid={dataTestId}
-        ref={ref}
+        disabled={isDisabled}
+        id={id}
+        onKeyDown={event => {
+          if (event.key !== 'ArrowDown') {
+            return;
+          }
+
+          event.preventDefault();
+          setIsOpen(true);
+        }}
+        ref={mergeRefs(triggerRef, ref)}
+        role="tab"
         style={style}
+        tabIndex={hasSelectedOption && !isDisabled ? 0 : -1}
         type="button">
         {triggerLabel}
         <span
@@ -234,9 +322,6 @@ export function TabMenu({
           )}>
           <Icon icon={ChevronDown} size="sm" />
         </span>
-        {hasSelectedOption ? (
-          <span aria-hidden="true" className={styles.indicator} />
-        ) : null}
       </button>
     </Popover>
   );

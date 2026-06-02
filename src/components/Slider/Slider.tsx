@@ -232,9 +232,10 @@ const styles = {
     transitionProperty: 'background-color, box-shadow',
     transitionTimingFunction: 'default',
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
     _hover: {
       '@media (hover: hover)': {

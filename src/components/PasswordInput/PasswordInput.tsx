@@ -1,12 +1,11 @@
 import {Eye, EyeOff} from 'lucide-react';
 import {useState, type Ref} from 'react';
-import {inputStyles} from '../Field';
-import {Icon} from '../Icon';
+import {Button} from '../Button';
 import {TextInput, type TextInputProps} from '../TextInput';
 
 export type PasswordInputProps = Omit<
   TextInputProps,
-  'endContent' | 'startIcon' | 'type'
+  'endContent' | 'hasClear' | 'startIcon' | 'type'
 > & {
   /**
    * Ref forwarded to the input element.
@@ -33,18 +32,15 @@ export function PasswordInput({
       className={className}
       data-testid={dataTestId}
       endContent={
-        <button
-          aria-label={isVisible ? 'Hide password' : 'Show password'}
-          className={inputStyles.clearButton}
-          disabled={isDisabled}
+        <Button
+          icon={isVisible ? EyeOff : Eye}
+          isDisabled={isDisabled}
+          isIconOnly
+          label={isVisible ? 'Hide password' : 'Show password'}
           onClick={() => setIsVisible(v => !v)}
-          type="button">
-          {isVisible ? (
-            <Icon icon={EyeOff} size="sm" />
-          ) : (
-            <Icon icon={Eye} size="sm" />
-          )}
-        </button>
+          size="sm"
+          variant="ghost"
+        />
       }
       isDisabled={isDisabled}
       ref={ref}

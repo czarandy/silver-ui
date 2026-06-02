@@ -1,20 +1,28 @@
 import {CalendarIcon, X} from 'lucide-react';
 import {
+  useCallback,
   useId,
-  useMemo,
+  useRef,
   useState,
+  type ChangeEvent,
   type CSSProperties,
+  type KeyboardEvent,
   type ReactNode,
   type Ref,
 } from 'react';
-import type {ISODateString} from '../../internal/dateTypes';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
+import {mergeRefs} from '../../internal/mergeRefs';
+import {parseDateInput} from '../../internal/parseDateInput';
 import {
-  plainDateFromISO,
   DATE_FORMAT_LONG,
   plainDateFormat,
+  plainDateIsAfter,
+  plainDateIsBefore,
+  type PlainDate,
 } from '../../internal/plainDate';
 import {Button} from '../Button';
-import {Calendar} from '../Calendar';
+import {Calendar, type CalendarHandle} from '../Calendar';
 import {
   Field,
   inputRecipe,
@@ -32,7 +40,11 @@ import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
-export type {ISODateString} from '../../internal/dateTypes';
+export type {PlainDate} from '../../internal/plainDate';
+
+const styles = {
+  wrapper: css({ps: '1', gap: '1'}),
+} as const;
 
 export type DateInputProps = {
   /**
@@ -44,13 +56,13 @@ export type DateInputProps = {
    */
   'data-testid'?: string;
   /**
-   * Predicate functions that constrain which dates are selectable.
-   */
-  dateConstraints?: ReadonlyArray<(date: Date) => boolean>;
-  /**
    * Supporting text rendered below the label.
    */
   description?: ReactNode;
+  /**
+   * Returns true for dates that should be disabled.
+   */
+  getIsDateDisabled?: (date: PlainDate) => boolean;
   /**
    * Whether to show a clear button when a value is selected.
    * @default false
@@ -84,22 +96,17 @@ export type DateInputProps = {
    */
   labelTooltip?: ReactNode;
   /**
-   * Maximum selectable date (ISO string).
+   * Maximum selectable date.
    */
-  max?: ISODateString;
+  max?: PlainDate;
   /**
-   * Minimum selectable date (ISO string).
+   * Minimum selectable date.
    */
-  min?: ISODateString;
-  /**
-   * Number of calendar months shown in the popover.
-   * @default 1
-   */
-  numberOfMonths?: 1 | 2;
+  min?: PlainDate;
   /**
    * Called when the selected date changes.
    */
-  onChange: (value: ISODateString | undefined) => void;
+  onChange: (value: PlainDate | undefined) => void;
   /**
    * Placeholder text shown when no date is selected.
    */
@@ -122,19 +129,38 @@ export type DateInputProps = {
    */
   style?: CSSProperties;
   /**
-   * Currently selected date (ISO string).
+   * Currently selected date.
    */
-  value: ISODateString | undefined;
+  value: PlainDate | undefined;
 } & FieldNecessity;
 
-function formatDate(value: ISODateString | undefined): string {
-  return value == null
-    ? ''
-    : plainDateFormat(plainDateFromISO(value), DATE_FORMAT_LONG);
+function formatDate(value: PlainDate | undefined): string {
+  return value == null ? '' : plainDateFormat(value, DATE_FORMAT_LONG);
+}
+
+function isDateAllowed(
+  date: PlainDate,
+  options: {
+    getIsDateDisabled?: (date: PlainDate) => boolean;
+    max?: PlainDate;
+    min?: PlainDate;
+  },
+): boolean {
+  if (options.min != null && plainDateIsBefore(date, options.min)) {
+    return false;
+  }
+  if (options.max != null && plainDateIsAfter(date, options.max)) {
+    return false;
+  }
+  if (options.getIsDateDisabled?.(date)) {
+    return false;
+  }
+  return true;
 }
 
 /**
- * A date picker input that opens a calendar popover for selecting a single date.
+ * A date picker input that combines a text input with a calendar popover.
+ * Users can type a date directly or select one from the calendar.
  */
 export function DateInput({
   label,
@@ -142,8 +168,7 @@ export function DateInput({
   onChange,
   min,
   max,
-  dateConstraints,
-  numberOfMonths = 1,
+  getIsDateDisabled,
   placeholder = 'Select a date',
   size = 'md',
   description,
@@ -166,10 +191,85 @@ export function DateInput({
     description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const calendarRef = useRef<CalendarHandle | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const displayValue = useMemo(() => formatDate(value), [value]);
+  const [pendingInput, setPendingInput] = useState<string | null>(null);
+
+  const displayValue = pendingInput ?? formatDate(value);
 
   const necessity: FieldNecessity = {isOptional, isRequired};
+
+  const handleCalendarChange = useCallback(
+    (nextValue: PlainDate) => {
+      onChange(nextValue);
+      setPendingInput(null);
+      setIsOpen(false);
+      inputRef.current?.focus();
+    },
+    [onChange],
+  );
+
+  const handleInputChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const text = event.target.value;
+      setPendingInput(text);
+
+      const parsed = parseDateInput(text);
+      if (
+        parsed != null &&
+        isDateAllowed(parsed, {min, max, getIsDateDisabled})
+      ) {
+        onChange(parsed);
+        calendarRef.current?.navigateTo(parsed);
+      }
+    },
+    [getIsDateDisabled, max, min, onChange],
+  );
+
+  const commitPendingInput = useCallback(() => {
+    if (pendingInput == null) {
+      return;
+    }
+
+    if (pendingInput.trim() === '') {
+      if (value != null) {
+        onChange(undefined);
+      }
+      setPendingInput(null);
+      return;
+    }
+
+    const parsed = parseDateInput(pendingInput);
+    if (
+      parsed != null &&
+      isDateAllowed(parsed, {min, max, getIsDateDisabled})
+    ) {
+      onChange(parsed);
+    }
+    setPendingInput(null);
+  }, [getIsDateDisabled, max, min, onChange, pendingInput, value]);
+
+  const handleBlur = useCallback(() => {
+    commitPendingInput();
+  }, [commitPendingInput]);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        commitPendingInput();
+      }
+    },
+    [commitPendingInput],
+  );
+
+  const handleClear = useCallback(() => {
+    onChange(undefined);
+    setPendingInput(null);
+    inputRef.current?.focus();
+  }, [onChange]);
 
   return (
     <Field
@@ -188,34 +288,36 @@ export function DateInput({
       }
       style={style}>
       <div
-        className={inputRecipe({
-          size,
-          status: status?.type,
-          isDisabled,
-        })}>
+        className={cx(
+          inputRecipe({
+            size,
+            status: status?.type,
+            isDisabled: isDisabled,
+          }),
+          styles.wrapper,
+        )}
+        ref={wrapperRef}>
         <Popover
           content={
             <Calendar
-              dateConstraints={dateConstraints}
-              focusDate={value}
+              getIsDateDisabled={getIsDateDisabled}
               max={max}
               min={min}
-              numberOfMonths={numberOfMonths}
-              onChange={nextValue => {
-                onChange(nextValue);
-                setIsOpen(false);
-              }}
+              onChange={handleCalendarChange}
+              ref={calendarRef}
               value={value}
+              viewDate={value}
             />
           }
           hasAutoFocus
-          isEnabled={!isDisabled && !isLoading}
+          isEnabled={!isDisabled}
           isOpen={isOpen}
           label={`Choose ${label}`}
-          onOpenChange={setIsOpen}>
+          onOpenChange={setIsOpen}
+          padding="3">
           <Button
             icon={CalendarIcon}
-            isDisabled={isDisabled || isLoading}
+            isDisabled={isDisabled}
             isIconOnly
             label={`Choose ${label}`}
             size="sm"
@@ -227,21 +329,24 @@ export function DateInput({
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || undefined}
           aria-required={isRequired ?? undefined}
+          autoComplete="off"
           className={inputStyles.control}
           data-testid={dataTestId}
-          disabled={isDisabled || isLoading}
+          disabled={isDisabled}
           id={inputId}
+          onBlur={handleBlur}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          readOnly
-          ref={ref}
+          ref={mergeRefs(ref, inputRef)}
           type="text"
           value={displayValue}
         />
-        {hasClear && value != null && !isDisabled ? (
+        {hasClear && value != null && !isDisabled && !isLoading ? (
           <button
             aria-label={`Clear ${label}`}
             className={inputStyles.clearButton}
-            onClick={() => onChange(undefined)}
+            onClick={handleClear}
             type="button">
             <Icon icon={X} size="sm" />
           </button>

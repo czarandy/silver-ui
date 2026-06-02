@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import type {ReactNode} from 'react';
 import {css, cx} from 'styled-system/css';
 import {
@@ -171,18 +172,18 @@ export function formatMonthTitle(date: PlainDate): string {
 }
 
 export function formatTime(instant: number, timezoneID: string): string {
-  return new Intl.DateTimeFormat(undefined, {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: timezoneID,
-  }).format(new Date(instant));
+  return Temporal.Instant.fromEpochMilliseconds(instant)
+    .toZonedDateTimeISO(timezoneID)
+    .toLocaleString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
 }
 
-export function formatHour(hour: number, timezoneID: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+export function formatHour(hour: number, _timezoneID: string): string {
+  return Temporal.PlainTime.from({hour}).toLocaleString(undefined, {
     hour: 'numeric',
-    timeZone: timezoneID,
-  }).format(new Date(Date.UTC(2026, 0, 1, hour)));
+  });
 }
 
 export function getEventTimeLabel(

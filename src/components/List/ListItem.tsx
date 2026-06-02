@@ -171,7 +171,6 @@ export function ListItem({
   target,
 }: ListItemProps): React.JSX.Element {
   const context = use(ListContext);
-  const density = context?.density ?? 'balanced';
   const hasDividers = context?.hasDividers ?? false;
   const listStyle = context?.listStyle ?? 'none';
   const hasMarkers = listStyle !== 'none';
@@ -186,7 +185,6 @@ export function ListItem({
         className,
       )}
       data-testid={dataTestId}
-      density={density === 'compact' ? 'compact' : 'default'}
       description={description}
       endContent={endContent}
       href={href}

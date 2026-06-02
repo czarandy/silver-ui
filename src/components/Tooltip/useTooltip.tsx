@@ -3,6 +3,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  type CSSProperties,
   type ReactNode,
   type RefCallback,
 } from 'react';
@@ -29,13 +30,17 @@ export interface UseTooltipOptions {
   placement?: LayerPlacement;
 }
 
+export interface TooltipRenderProps extends ContextRenderProps {
+  contentStyle?: CSSProperties;
+}
+
 export interface UseTooltipReturn {
   anchorId: string;
   describedBy: string;
   interactionRef: RefCallback<HTMLElement>;
   positionRef: RefCallback<HTMLElement>;
   ref: RefCallback<HTMLElement>;
-  renderTooltip: (children: ReactNode, props?: ContextRenderProps) => ReactNode;
+  renderTooltip: (children: ReactNode, props?: TooltipRenderProps) => ReactNode;
 }
 
 const styles = {
@@ -242,10 +247,12 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
   }, [clearTimeouts, isOpen, layer]);
 
   const renderTooltip = useCallback(
-    (children: ReactNode, props?: ContextRenderProps): ReactNode => {
+    (children: ReactNode, props?: TooltipRenderProps): ReactNode => {
       const renderPlacement = props?.placement ?? placement;
       return layer.render(
-        <div className={styles.tooltipContent}>{children}</div>,
+        <div className={styles.tooltipContent} style={props?.contentStyle}>
+          {children}
+        </div>,
         {
           placement: renderPlacement,
           alignment: props?.alignment ?? alignment,

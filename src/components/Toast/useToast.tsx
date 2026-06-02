@@ -1,4 +1,5 @@
 import {use, useCallback} from 'react';
+import {nowEpochMilliseconds} from '../../internal/time';
 import {ToastContext} from './ToastContext';
 import type {
   ShowToastFn,
@@ -23,7 +24,11 @@ export function useToast(): ShowToastFn {
         throw new Error('useToast must be used within a ToastViewport.');
       }
       const id = generateToastId();
-      const entry: ToastEntry = {createdAt: Date.now(), id, options};
+      const entry: ToastEntry = {
+        createdAt: nowEpochMilliseconds(),
+        id,
+        options,
+      };
       context.addToast(entry);
       return () => context.removeToast(id, 'manual');
     },

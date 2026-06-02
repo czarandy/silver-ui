@@ -58,9 +58,10 @@ const styles = {
     borderRadius: 'full',
     isolation: 'isolate',
     '&:has(input:focus-visible)': {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   input: css({
@@ -104,11 +105,6 @@ const styles = {
   labelDisabled: css({
     color: 'fg.disabled',
     cursor: 'not-allowed',
-  }),
-  startContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
   }),
   controlSize: {
     sm: css({w: '5', h: '5'}),
@@ -177,27 +173,18 @@ export function RadioGroupItem({
       </span>
     </span>
   );
-  const media =
-    startContent != null ? (
-      <>
-        {control}
-        <span className={styles.startContent}>{startContent}</span>
-      </>
-    ) : (
-      control
-    );
 
   return (
     <Item
       className={className}
       data-testid={dataTestId}
-      density={size === 'sm' ? 'compact' : 'default'}
       description={
         description != null ? (
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }
       endContent={endContent}
+      endContentPosition="inline"
       isDisabled={isDisabled}
       label={
         <label
@@ -209,9 +196,11 @@ export function RadioGroupItem({
           {label}
         </label>
       }
+      leadingContent={control}
       ref={ref}
-      startContent={media}
+      startContent={startContent}
       style={style}
+      width={context.orientation === 'horizontal' ? 'auto' : 'full'}
     />
   );
 }

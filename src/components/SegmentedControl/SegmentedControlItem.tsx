@@ -5,7 +5,7 @@ import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {useSegmentedControlContext} from './SegmentedControlContext';
 
-export interface SegmentedControlItemProps {
+export interface SegmentedControlItemProps<TValue extends string = string> {
   /**
    * Additional CSS class names applied to the segment.
    */
@@ -43,7 +43,7 @@ export interface SegmentedControlItemProps {
   /**
    * Unique value represented by this segment.
    */
-  value: string;
+  value: TValue;
 }
 
 const styles = {
@@ -67,9 +67,10 @@ const styles = {
       bg: 'bg.subtle',
     },
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   selected: css({
@@ -103,21 +104,18 @@ const styles = {
       px: '2',
       borderRadius: 'sm',
       fontSize: 'sm',
-      '--segmented-control-icon-size': '14px',
     }),
     md: css({
       h: '9',
       px: '3',
       borderRadius: 'sm',
       fontSize: 'sm',
-      '--segmented-control-icon-size': '16px',
     }),
     lg: css({
       h: '11',
       px: '3',
       borderRadius: 'md',
       fontSize: 'md',
-      '--segmented-control-icon-size': '18px',
     }),
   },
 } as const;
@@ -125,7 +123,7 @@ const styles = {
 /**
  * Individual segment within a `SegmentedControl`.
  */
-export function SegmentedControlItem({
+export function SegmentedControlItem<TValue extends string = string>({
   className,
   'data-testid': dataTestId,
   icon,
@@ -135,7 +133,7 @@ export function SegmentedControlItem({
   ref,
   style,
   value,
-}: SegmentedControlItemProps): React.JSX.Element {
+}: SegmentedControlItemProps<TValue>): React.JSX.Element {
   const context = useSegmentedControlContext();
   const isSelected = context.value === value;
   const isItemDisabled = context.isDisabled || isDisabled;
@@ -167,7 +165,7 @@ export function SegmentedControlItem({
       type="button">
       {icon != null ? (
         <span className={styles.icon}>
-          <Icon icon={icon} size="sm" />
+          <Icon icon={icon} size={context.size} />
         </span>
       ) : null}
       {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}

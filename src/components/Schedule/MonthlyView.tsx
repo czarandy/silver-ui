@@ -3,10 +3,8 @@
 import {css, cx} from 'styled-system/css';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
-  plainDateAddDays,
   plainDateFormat,
   plainDateIsEqual,
-  plainDateSetFirstOfMonth,
   plainDateSetStartOfWeek,
   type PlainDate,
 } from '../../internal/plainDate';
@@ -94,10 +92,10 @@ const weekdays = [
 ];
 
 function getMonthDays(date: PlainDate, weekCount: number): PlainDate[] {
-  const firstOfMonth = plainDateSetFirstOfMonth(date);
+  const firstOfMonth = date.with({day: 1});
   const firstVisibleDay = plainDateSetStartOfWeek(firstOfMonth);
   return Array.from({length: weekCount * 7}, (_, index) =>
-    plainDateAddDays(firstVisibleDay, index),
+    firstVisibleDay.add({days: index}),
   );
 }
 
@@ -125,11 +123,11 @@ function getGridCellName({
 function ScheduleMonthlyView({
   options,
 }: ScheduleViewComponentProps<ScheduleMonthlyViewOptions>): React.JSX.Element {
-  const {date, events, focusDate, timezoneID} = useScheduleContext();
-  const month = date.toPlainDate();
+  const {events, highlightDate, timezoneID, viewDate} = useScheduleContext();
+  const month = viewDate.toPlainDate();
   const title = formatMonthTitle(month);
   const days = getMonthDays(month, options.weekCount ?? 6);
-  const today = focusDate.toPlainDate();
+  const today = highlightDate.toPlainDate();
 
   return (
     <ScheduleFrame title={title} titleLabel={title}>
@@ -201,33 +199,11 @@ export function createScheduleMonthlyView({
     component: ScheduleMonthlyView,
     getDateRange: date => {
       const month = date.toPlainDate();
-      const firstVisible = plainDateSetStartOfWeek(
-        plainDateSetFirstOfMonth(month),
-      );
-      const end = plainDateAddDays(firstVisible, weekCount * 7);
+      const firstVisible = plainDateSetStartOfWeek(month.with({day: 1}));
+      const end = firstVisible.add({days: weekCount * 7});
       return [
-        date
-          .startOfDay()
-          .addDays(
-            Math.round(
-              (Date.UTC(
-                firstVisible.year,
-                firstVisible.month - 1,
-                firstVisible.day,
-              ) -
-                Date.UTC(month.year, month.month - 1, month.day)) /
-                86_400_000,
-            ),
-          ),
-        date
-          .startOfDay()
-          .addDays(
-            Math.round(
-              (Date.UTC(end.year, end.month - 1, end.day) -
-                Date.UTC(month.year, month.month - 1, month.day)) /
-                86_400_000,
-            ),
-          ),
+        date.startOfDay().addDays(month.until(firstVisible).days),
+        date.startOfDay().addDays(month.until(end).days),
       ];
     },
     getNextDateRange: date => ({

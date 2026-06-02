@@ -1,7 +1,7 @@
 import {createContext} from 'react';
 
 export interface AccordionContextValue {
-  isOpen: (value: string) => boolean;
+  getIsOpen: (value: string) => boolean;
   toggle: (value: string) => void;
 }
 

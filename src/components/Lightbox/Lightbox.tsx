@@ -4,6 +4,7 @@ import {ChevronLeft, ChevronRight, X} from 'lucide-react';
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -28,6 +29,10 @@ export interface LightboxMedia {
    * Optional caption shown below the media.
    */
   caption?: ReactNode;
+  /**
+   * Optional WebVTT captions source for video media.
+   */
+  captionsSrc?: string;
   /**
    * Media source URL.
    */
@@ -149,6 +154,9 @@ const styles = {
     transitionProperty: 'transform',
     transitionDuration: 'normal',
     transitionTimingFunction: 'default',
+    '@media (prefers-reduced-motion: reduce)': {
+      transitionDuration: '0ms',
+    },
   }),
   imageDragging: css({transitionProperty: 'none'}),
   video: css({
@@ -158,7 +166,8 @@ const styles = {
     outline: 'none',
   }),
   caption: css({
-    maxW: '150',
+    w: 'full',
+    maxW: 'min(90dvw, 48rem)',
     px: '3',
     pt: '2',
     color: 'fg.onPrimary',
@@ -190,6 +199,16 @@ const styles = {
     fontFamily: 'body',
     fontSize: 'md',
   }),
+  controlButton: css({
+    bg: 'overlay.scrim',
+    color: 'fg.onPrimary',
+    _hover: {
+      bg: 'overlay.scrim.strong',
+    },
+    _active: {
+      bg: 'overlay.scrim.strong',
+    },
+  }),
 } as const;
 
 function useScrollLock(isLocked: boolean): void {
@@ -203,6 +222,12 @@ function useScrollLock(isLocked: boolean): void {
       document.body.style.overflow = previousOverflow;
     };
   }, [isLocked]);
+}
+
+function isMediaArray(
+  media: LightboxMedia | ReadonlyArray<LightboxMedia>,
+): media is ReadonlyArray<LightboxMedia> {
+  return Array.isArray(media);
 }
 
 /**
@@ -231,13 +256,19 @@ export function Lightbox({
   const dragStartRef = useRef({x: 0, y: 0, panX: 0, panY: 0});
   const isControlled = indexFromProps !== undefined;
   const index = isControlled ? indexFromProps : uncontrolledIndex;
-  const mediaItems: ReadonlyArray<LightboxMedia> = Array.isArray(media)
-    ? media
-    : [media];
-  const currentIndex = Math.min(index, mediaItems.length - 1);
-  const currentItem = mediaItems[currentIndex] ?? mediaItems[0];
+  const mediaItems: ReadonlyArray<LightboxMedia> = useMemo(
+    () => (isMediaArray(media) ? media : [media]),
+    [media],
+  );
+  const currentIndex =
+    mediaItems.length === 0
+      ? 0
+      : Math.min(Math.max(index, 0), mediaItems.length - 1);
+  const currentItem =
+    mediaItems.length === 0 ? undefined : mediaItems[currentIndex];
+  const hasMedia = currentItem != null;
   const isGallery = mediaItems.length > 1;
-  const isVideo = (currentItem.type ?? 'image') === 'video';
+  const isVideo = (currentItem?.type ?? 'image') === 'video';
   const canPrev = isGallery && currentIndex > 0;
   const canNext = isGallery && currentIndex < mediaItems.length - 1;
   const imageTransform =
@@ -262,7 +293,26 @@ export function Lightbox({
     setZoom(1);
     // eslint-disable-next-line @eslint-react/set-state-in-effect
     setPan({x: 0, y: 0});
-  }, [currentIndex, currentItem.src]);
+  }, [currentIndex, currentItem?.src, isOpen]);
+
+  useEffect(() => {
+    if (!isGallery) {
+      return;
+    }
+
+    for (const nextIndex of [currentIndex - 1, currentIndex + 1]) {
+      if (nextIndex < 0 || nextIndex >= mediaItems.length) {
+        continue;
+      }
+      const item = mediaItems[nextIndex];
+      if (item.type === 'video') {
+        continue;
+      }
+
+      const image = new Image();
+      image.src = item.src;
+    }
+  }, [currentIndex, isGallery, mediaItems]);
 
   useIsomorphicLayoutEffect(() => {
     const dialog = dialogRef.current;
@@ -299,21 +349,23 @@ export function Lightbox({
     };
   }, [isDragging]);
 
-  const close = () => onOpenChange(false);
-  const goPrev = () => {
+  const close = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+  const goPrev = useCallback(() => {
     if (canPrev) {
       setIndex(currentIndex - 1);
     }
-  };
-  const goNext = () => {
+  }, [canPrev, currentIndex, setIndex]);
+  const goNext = useCallback(() => {
     if (canNext) {
       setIndex(currentIndex + 1);
     }
-  };
+  }, [canNext, currentIndex, setIndex]);
 
   return (
     <dialog
-      aria-label={currentItem.alt}
+      aria-label="Media lightbox"
       className={cx(styles.dialog, className)}
       data-testid={dataTestId}
       onCancel={event => {
@@ -339,86 +391,95 @@ export function Lightbox({
       <div className={styles.container}>
         <div className={styles.close}>
           <Button
+            className={styles.controlButton}
             icon={X}
             isIconOnly
             label="Close"
             onClick={close}
-            variant="secondary"
           />
         </div>
         {canPrev ? (
           <div className={cx(styles.nav, styles.prev)}>
             <Button
+              className={styles.controlButton}
               icon={ChevronLeft}
               isIconOnly
-              label="Previous image"
+              label="Previous"
               onClick={goPrev}
-              variant="secondary"
             />
           </div>
         ) : null}
-        <div className={styles.mediaGroup}>
-          {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- media viewport supports image zoom/pan gestures */}
-          <div
-            className={cx(
-              styles.mediaWrap,
-              !isVideo && hasZoom && zoom === 1 ? styles.zoomable : undefined,
-              !isVideo && zoom > 1 ? styles.zoomed : undefined,
-              isDragging ? styles.dragging : undefined,
-            )}
-            onDoubleClick={() => {
-              if (!hasZoom || isVideo) {
-                return;
-              }
-              setZoom(zoom === 1 ? 2 : 1);
-              setPan({x: 0, y: 0});
-            }}
-            onPointerDown={event => {
-              if (!hasZoom || isVideo || zoom <= 1) {
-                return;
-              }
-              setIsDragging(true);
-              dragStartRef.current = {
-                x: event.clientX,
-                y: event.clientY,
-                panX: pan.x,
-                panY: pan.y,
-              };
-            }}>
-            {isVideo ? (
-              <video
-                aria-label={currentItem.alt}
-                autoPlay={hasAutoPlay}
-                className={styles.video}
-                controls
-                src={currentItem.src}>
-                <track kind="captions" />
-              </video>
-            ) : (
-              <img
-                alt={currentItem.alt}
-                className={cx(
-                  styles.image,
-                  isDragging ? styles.imageDragging : undefined,
-                )}
-                draggable={false}
-                src={currentItem.src}
-                style={{transform: imageTransform}}
-              />
-            )}
+        {hasMedia ? (
+          <div className={styles.mediaGroup}>
+            {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- media viewport supports image zoom/pan gestures */}
+            <div
+              className={cx(
+                styles.mediaWrap,
+                !isVideo && hasZoom && zoom === 1 ? styles.zoomable : undefined,
+                !isVideo && zoom > 1 ? styles.zoomed : undefined,
+                isDragging ? styles.dragging : undefined,
+              )}
+              onDoubleClick={() => {
+                if (!hasZoom || isVideo) {
+                  return;
+                }
+                setZoom(zoom === 1 ? 2 : 1);
+                setPan({x: 0, y: 0});
+              }}
+              onPointerDown={event => {
+                if (!hasZoom || isVideo || zoom <= 1) {
+                  return;
+                }
+                setIsDragging(true);
+                dragStartRef.current = {
+                  x: event.clientX,
+                  y: event.clientY,
+                  panX: pan.x,
+                  panY: pan.y,
+                };
+              }}>
+              {isVideo ? (
+                // eslint-disable-next-line jsx-a11y-x/media-has-caption -- captions are rendered only when callers provide a real WebVTT source
+                <video
+                  aria-label={currentItem.alt}
+                  autoPlay={hasAutoPlay}
+                  className={styles.video}
+                  controls
+                  src={currentItem.src}>
+                  {currentItem.captionsSrc != null ? (
+                    <track
+                      kind="captions"
+                      label="Captions"
+                      src={currentItem.captionsSrc}
+                    />
+                  ) : null}
+                </video>
+              ) : (
+                <img
+                  alt={currentItem.alt}
+                  className={cx(
+                    styles.image,
+                    isDragging ? styles.imageDragging : undefined,
+                  )}
+                  draggable={false}
+                  src={currentItem.src}
+                  style={{transform: imageTransform}}
+                />
+              )}
+            </div>
+            {currentItem.caption != null ? (
+              <div className={styles.caption}>{currentItem.caption}</div>
+            ) : null}
           </div>
-          {currentItem.caption != null ? (
-            <div className={styles.caption}>{currentItem.caption}</div>
-          ) : null}
-        </div>
+        ) : null}
         {canNext ? (
           <div className={cx(styles.nav, styles.next)}>
             <Button
+              className={styles.controlButton}
               icon={ChevronRight}
               isIconOnly
-              label="Next image"
+              label="Next"
               onClick={goNext}
-              variant="secondary"
             />
           </div>
         ) : null}

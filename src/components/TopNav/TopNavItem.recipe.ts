@@ -17,9 +17,10 @@ export const topNavItemRecipe = cva({
     cursor: 'pointer',
     _hover: {bg: 'bg.hover'},
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   },
   variants: {

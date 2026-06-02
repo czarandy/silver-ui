@@ -1,5 +1,14 @@
-import type {Meta, StoryObj} from '@storybook/react-vite';
+import type {Decorator, Meta, StoryObj} from '@storybook/react-vite';
+import type {JSX} from 'react';
 import {Text} from './Text';
+
+const constrainWidth =
+  (maxWidth: number): Decorator =>
+  (Story): JSX.Element => (
+    <div style={{maxWidth}}>
+      <Story />
+    </div>
+  );
 
 const meta: Meta<typeof Text> = {
   title: 'Components/Text',
@@ -56,9 +65,8 @@ const meta: Meta<typeof Text> = {
     },
     as: {
       control: {type: 'select'},
-      options: ['span', 'p', 'div', 'label', 'h1', 'h2', 'h3'],
+      options: ['span', 'p', 'div', 'label'],
     },
-    hasCapsize: {control: 'boolean'},
     hasStrikethrough: {control: 'boolean'},
     hasTabularNumbers: {control: 'boolean'},
     children: {control: 'text'},
@@ -72,6 +80,20 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Body: Story = {};
+
+export const Large: Story = {
+  args: {
+    type: 'large',
+    children: 'Large text for introductory or emphasized paragraphs.',
+  },
+};
+
+export const Label: Story = {
+  args: {
+    type: 'label',
+    children: 'Field label',
+  },
+};
 
 export const Supporting: Story = {
   args: {
@@ -87,20 +109,42 @@ export const Code: Story = {
   },
 };
 
-export const SizeSmall: Story = {
-  args: {size: 'sm'},
+export const Bold: Story = {
+  args: {
+    weight: 'bold',
+    children: 'Bold text for strong emphasis.',
+  },
 };
 
-export const SizeLarge: Story = {
-  args: {size: 'lg'},
+export const Strikethrough: Story = {
+  args: {
+    hasStrikethrough: true,
+    children: 'This text has been struck through.',
+  },
 };
 
-export const SizeXL: Story = {
-  args: {size: 'xl'},
+export const TabularNumbers: Story = {
+  args: {
+    hasTabularNumbers: true,
+    display: 'block',
+  },
+  render: (args): JSX.Element => (
+    <div style={{textAlign: 'right', width: 120}}>
+      <Text {...args}>1,234.56</Text>
+      <Text {...args}>78,901.23</Text>
+      <Text {...args}>456.00</Text>
+    </div>
+  ),
 };
 
-export const SizeInherit: Story = {
-  args: {size: 'inherit'},
+export const TruncatedSingleLine: Story = {
+  args: {
+    as: 'p',
+    maxLines: 1,
+    children:
+      'This text is clamped to a single line with an ellipsis, demonstrating how overflow is handled when the content exceeds the available horizontal space.',
+  },
+  decorators: [constrainWidth(320)],
 };
 
 export const Truncated: Story = {
@@ -108,6 +152,7 @@ export const Truncated: Story = {
     as: 'p',
     maxLines: 2,
     children:
-      'This paragraph is intentionally long enough to demonstrate multiline clamping while preserving the full text for a truncation tooltip when the content overflows its container.',
+      'This paragraph is intentionally long enough to demonstrate multiline clamping while preserving the full text for a truncation tooltip when the content overflows its container. It continues with additional sentences to ensure the text reliably exceeds two lines across a range of viewport widths, including wider desktop screens where a single line can accommodate a significant amount of text before wrapping.',
   },
+  decorators: [constrainWidth(480)],
 };

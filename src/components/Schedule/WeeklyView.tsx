@@ -1,9 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
-import {
-  plainDateAddDays,
-  plainDateSetStartOfWeek,
-} from '../../internal/plainDate';
+import {plainDateSetStartOfWeek} from '../../internal/plainDate';
 import {TimeGridView} from './TimeGridView';
 import {useScheduleContext} from './context';
 import {enumerateDates, getScheduleRangeFromDates} from './dateMath';
@@ -64,7 +61,7 @@ export function createScheduleWeeklyView({
     getDateRange: date =>
       scheduleRangeToZonedDateTimeRange(
         getScheduleRangeFromDates({
-          endDate: plainDateAddDays(getWeekStart(date), 7),
+          endDate: getWeekStart(date).add({days: 7}),
           startDate: getWeekStart(date),
           timezoneID: date.timezoneID,
         }),

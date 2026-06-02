@@ -1791,13 +1791,17 @@ const tokens = {
     "value": "9999px",
     "variable": "var(--silver-radii-full)"
   },
-  "borderWidths": {
+  "borderWidths.default": {
     "value": "1px",
-    "variable": "var(--silver-border-widths)"
+    "variable": "var(--silver-border-widths-default)"
   },
   "borderWidths.emphasized": {
     "value": "2px",
     "variable": "var(--silver-border-widths-emphasized)"
+  },
+  "borderWidths.focus": {
+    "value": "2px",
+    "variable": "var(--silver-border-widths-focus)"
   },
   "breakpoints.sm": {
     "value": "640px",
@@ -2303,6 +2307,18 @@ const tokens = {
     "value": "var(--silver-spacing-5)",
     "variable": "var(--silver-spacing-component-lg)"
   },
+  "spacing.focusOffset": {
+    "value": "2px",
+    "variable": "var(--silver-spacing-focus-offset)"
+  },
+  "spacing.focusOffsetTight": {
+    "value": "1px",
+    "variable": "var(--silver-spacing-focus-offset-tight)"
+  },
+  "spacing.focusOffsetLoose": {
+    "value": "3px",
+    "variable": "var(--silver-spacing-focus-offset-loose)"
+  },
   "fontSizes.component.sm": {
     "value": "14px",
     "variable": "var(--silver-font-sizes-component-sm)"
@@ -2338,6 +2354,22 @@ const tokens = {
   "radii.component.lg": {
     "value": "var(--silver-radii-lg)",
     "variable": "var(--silver-radii-component-lg)"
+  },
+  "shadows.focus": {
+    "value": "0 0 0 var(--silver-border-widths-focus) var(--silver-colors-primary-subtle)",
+    "variable": "var(--silver-shadows-focus)"
+  },
+  "shadows.focus.error": {
+    "value": "0 0 0 var(--silver-border-widths-focus) var(--silver-colors-red-100)",
+    "variable": "var(--silver-shadows-focus\\.error)"
+  },
+  "shadows.focus.warning": {
+    "value": "0 0 0 var(--silver-border-widths-focus) var(--silver-colors-yellow-100)",
+    "variable": "var(--silver-shadows-focus\\.warning)"
+  },
+  "shadows.focus.success": {
+    "value": "0 0 0 var(--silver-border-widths-focus) var(--silver-colors-green-100)",
+    "variable": "var(--silver-shadows-focus\\.success)"
   },
   "spacing.-1": {
     "value": "calc(var(--silver-spacing-1) * -1)",
@@ -2490,6 +2522,18 @@ const tokens = {
   "spacing.component.-lg": {
     "value": "calc(var(--silver-spacing-component-lg) * -1)",
     "variable": "var(--silver-spacing-component-lg)"
+  },
+  "spacing.-focusOffset": {
+    "value": "calc(var(--silver-spacing-focus-offset) * -1)",
+    "variable": "var(--silver-spacing-focus-offset)"
+  },
+  "spacing.-focusOffsetTight": {
+    "value": "calc(var(--silver-spacing-focus-offset-tight) * -1)",
+    "variable": "var(--silver-spacing-focus-offset-tight)"
+  },
+  "spacing.-focusOffsetLoose": {
+    "value": "calc(var(--silver-spacing-focus-offset-loose) * -1)",
+    "variable": "var(--silver-spacing-focus-offset-loose)"
   },
   "colors.colorPalette": {
     "value": "var(--silver-colors-color-palette)",

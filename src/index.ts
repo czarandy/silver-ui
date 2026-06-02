@@ -130,10 +130,7 @@ export {
 } from './components/ButtonGroup';
 export {
   SegmentedControl,
-  SegmentedControlContext,
   SegmentedControlItem,
-  useSegmentedControlContext,
-  type SegmentedControlContextValue,
   type SegmentedControlItemProps,
   type SegmentedControlLayout,
   type SegmentedControlProps,
@@ -235,7 +232,6 @@ export {
 export {
   Item,
   type ItemAlign,
-  type ItemDensity,
   type ItemElement,
   type ItemProps,
 } from './components/Item';
@@ -485,11 +481,12 @@ export {
   dialogRecipe,
   useDialog,
   useDialogContext,
+  type DialogDismissBehavior,
   type DialogContextValue,
   type DialogOptions,
   type DialogPosition,
   type DialogProps,
-  type DialogPurpose,
+  type DialogRole,
   type DialogVariant,
   type DialogVariants,
   type UseDialogReturn,
@@ -516,7 +513,6 @@ export {
   type CalendarProps,
   type DateRange,
   type DayOfWeek,
-  type ISODateString,
 } from './components/Calendar';
 export {
   Field,
@@ -537,13 +533,10 @@ export {
   InputGroup,
   InputGroupContext,
   InputGroupText,
-  inputGroupRecipe,
   useInputGroup,
   type InputGroupContextValue,
   type InputGroupProps,
-  type InputGroupSize,
   type InputGroupTextProps,
-  type InputGroupVariants,
 } from './components/InputGroup';
 export {
   Select,
@@ -657,7 +650,6 @@ export {
   Heading,
   type HeadingLevel,
   type HeadingProps,
-  type HeadingType,
   Text,
   type TextColor,
   type TextProps,
@@ -674,13 +666,13 @@ export {
 export {DateInput, type DateInputProps} from './components/DateInput';
 export {
   TimeInput,
-  type ISOTimeString,
+  type PlainTime,
   type TimeInputProps,
 } from './components/TimeInput';
 export {
   DateTimeInput,
   type DateTimeInputProps,
-  type ISODateTimeString,
+  type PlainDateTime,
 } from './components/DateTimeInput';
 export {
   DateRangeInput,

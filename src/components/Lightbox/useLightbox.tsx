@@ -31,6 +31,7 @@ export interface UseLightboxReturn {
    * Returns trigger props that open at the given gallery index.
    */
   getTriggerProps: (index: number) => {
+    'aria-haspopup': 'dialog';
     onClick: () => void;
     onKeyDown: (event: React.KeyboardEvent) => void;
     role: 'button';
@@ -52,6 +53,7 @@ export interface UseLightboxReturn {
    * Trigger props that open the first item.
    */
   triggerProps: {
+    'aria-haspopup': 'dialog';
     onClick: () => void;
     onKeyDown: (event: React.KeyboardEvent) => void;
     role: 'button';
@@ -74,6 +76,7 @@ export function useLightbox(options: UseLightboxOptions): UseLightboxReturn {
   const close = useCallback(() => setIsOpen(false), []);
   const getTriggerProps = useCallback(
     (nextIndex: number) => ({
+      'aria-haspopup': 'dialog' as const,
       onClick: () => open(nextIndex),
       onKeyDown: (event: React.KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {

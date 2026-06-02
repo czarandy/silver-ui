@@ -27,7 +27,7 @@ Save your audits in a report in the repo root audits/ dir in a <ComponentName>.m
 - [x] MobileNav
 - [x] Pagination
 - [x] SideNav
-- [ ] Tabs
+- [x] Tabs
 - [x] TopNav
 
 ## Buttons & Actions
@@ -36,7 +36,7 @@ Save your audits in a report in the repo root audits/ dir in a <ComponentName>.m
 - [x] ButtonGroup
 - [ ] ContextMenu
 - [ ] DropdownMenu
-- [ ] SegmentedControl
+- [x] SegmentedControl
 - [x] ToggleButton
 
 ## Data Display
@@ -48,9 +48,9 @@ Save your audits in a report in the repo root audits/ dir in a <ComponentName>.m
 - [x] Blockquote
 - [x] Card
 - [x] Icon
-- [ ] Item
+- [x] Item
 - [x] Kbd
-- [ ] Lightbox
+- [x] Lightbox
 - [ ] List
 - [x] MetadataList
 - [ ] Table
@@ -62,27 +62,27 @@ Save your audits in a report in the repo root audits/ dir in a <ComponentName>.m
 
 ## Forms
 
-- [ ] CheckboxInput
+- [x] CheckboxInput
 - [ ] Combobox
-- [ ] DateInput
-- [ ] DateRangeInput
-- [ ] DateTimeInput
+- [x] DateInput
+- [x] DateRangeInput
+- [x] DateTimeInput
 - [x] Field
 - [ ] FileInput
-- [ ] InputGroup
+- [x] InputGroup
 - [ ] MultiSelect
-- [ ] NumberInput
-- [ ] PasswordInput
-- [ ] RadioGroup
+- [x] NumberInput
+- [x] PasswordInput
+- [x] RadioGroup
 - [x] Rating
 - [ ] SearchFilterInput
 - [ ] Select
 - [ ] Slider
 - [ ] Switch
-- [ ] TagsInput
+- [x] TagsInput
 - [ ] TextArea
 - [x] TextInput
-- [ ] TimeInput
+- [x] TimeInput
 
 ## Feedback & Status
 
@@ -104,5 +104,5 @@ Save your audits in a report in the repo root audits/ dir in a <ComponentName>.m
 
 ## Composite
 
-- [ ] Calendar
+- [x] Calendar
 - [ ] Schedule

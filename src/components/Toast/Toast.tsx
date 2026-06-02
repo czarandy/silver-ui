@@ -10,6 +10,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {nowMonotonicMilliseconds} from '../../internal/time';
 import {Button} from '../Button';
 import type {ToastDismissReason, ToastType} from './types';
 
@@ -140,7 +141,7 @@ export function Toast({
     if (timerRef.current != null) {
       clearTimeout(timerRef.current);
     }
-    startedAtRef.current = Date.now();
+    startedAtRef.current = nowMonotonicMilliseconds();
     timerRef.current = setTimeout(
       () => onDismiss('auto'),
       remainingRef.current,
@@ -158,7 +159,8 @@ export function Toast({
     }
     if (startedAtRef.current != null) {
       remainingRef.current = Math.max(
-        remainingRef.current - (Date.now() - startedAtRef.current),
+        remainingRef.current -
+          (nowMonotonicMilliseconds() - startedAtRef.current),
         1000,
       );
     }

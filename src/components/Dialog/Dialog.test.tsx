@@ -49,15 +49,11 @@ describe('Dialog', () => {
     expect(screen.getByTestId('dialog')).not.toHaveAttribute('open');
   });
 
-  it('calls onOpenChange(false) on backdrop click for info dialogs', () => {
+  it('calls onOpenChange(false) on backdrop click by default', () => {
     const onOpenChange = vi.fn();
 
     render(
-      <Dialog
-        isOpen
-        label="Preferences"
-        onOpenChange={onOpenChange}
-        purpose="info">
+      <Dialog isOpen label="Preferences" onOpenChange={onOpenChange}>
         Content
       </Dialog>,
     );
@@ -66,15 +62,15 @@ describe('Dialog', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
-  it('does not close on backdrop click for form dialogs', () => {
+  it('does not close on backdrop click when backdrop dismiss is disabled', () => {
     const onOpenChange = vi.fn();
 
     render(
       <Dialog
+        dismissBehavior={{isBackdropDismissEnabled: false}}
         isOpen
         label="Preferences"
-        onOpenChange={onOpenChange}
-        purpose="form">
+        onOpenChange={onOpenChange}>
         Content
       </Dialog>,
     );
@@ -83,15 +79,16 @@ describe('Dialog', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
-  it('uses alertdialog role and blocks escape for required dialogs', () => {
+  it('uses alertdialog role and blocks escape when escape dismiss is disabled', () => {
     const onOpenChange = vi.fn();
 
     render(
       <Dialog
+        dismissBehavior={{isEscapeDismissEnabled: false}}
         isOpen
         label="Preferences"
         onOpenChange={onOpenChange}
-        purpose="required">
+        role="alertdialog">
         Content
       </Dialog>,
     );
@@ -104,15 +101,11 @@ describe('Dialog', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
-  it('calls onOpenChange(false) on cancel when escape is allowed', () => {
+  it('calls onOpenChange(false) on cancel by default', () => {
     const onOpenChange = vi.fn();
 
     render(
-      <Dialog
-        isOpen
-        label="Preferences"
-        onOpenChange={onOpenChange}
-        purpose="form">
+      <Dialog isOpen label="Preferences" onOpenChange={onOpenChange}>
         Content
       </Dialog>,
     );
@@ -208,15 +201,16 @@ describe('useDialog', () => {
 });
 
 describe('Dialog additional', () => {
-  it('does not close on backdrop click for required dialogs', () => {
+  it('does not close on backdrop click when dismissBehavior is false', () => {
     const onOpenChange = vi.fn();
 
     render(
       <Dialog
+        dismissBehavior={false}
         isOpen
         label="Alert"
         onOpenChange={onOpenChange}
-        purpose="required">
+        role="alertdialog">
         Content
       </Dialog>,
     );

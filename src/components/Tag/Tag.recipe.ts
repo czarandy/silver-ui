@@ -98,9 +98,10 @@ export const tagRecipe = cva({
       true: {
         cursor: 'pointer',
         _focusVisible: {
-          outline: '2px solid',
+          outlineWidth: 'focus',
+          outlineStyle: 'solid',
           outlineColor: 'primary',
-          outlineOffset: '2px',
+          outlineOffset: 'focusOffset',
         },
       },
       false: {},

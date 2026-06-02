@@ -1,1 +1,1 @@
-export {TimeInput, type ISOTimeString, type TimeInputProps} from './TimeInput';
+export {TimeInput, type PlainTime, type TimeInputProps} from './TimeInput';

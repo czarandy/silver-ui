@@ -1,5 +1,4 @@
 import {
-  plainDateAddDays,
   plainDateFromInstant,
   plainDateToInstant,
   type PlainDate,
@@ -29,10 +28,7 @@ export function zonedDateTimeFromInstant(
 ): ZonedDateTime {
   return {
     addDays: days => {
-      const date = plainDateAddDays(
-        plainDateFromInstant(instant, timezoneID),
-        days,
-      );
+      const date = plainDateFromInstant(instant, timezoneID).add({days});
       return zonedDateTimeFromInstant(
         plainDateToInstant(date, timezoneID),
         timezoneID,

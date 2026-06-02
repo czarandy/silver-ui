@@ -17,6 +17,12 @@ export interface TabProps {
    */
   className?: string;
   /**
+   * ID of the tabpanel controlled by this tab. Use this for in-page tabs, and
+   * render the corresponding panel with `id={controls}`, `role="tabpanel"`,
+   * and `aria-labelledby` pointing to this tab's `id`.
+   */
+  controls?: string;
+  /**
    * Test ID applied to the tab.
    */
   'data-testid'?: string;
@@ -32,6 +38,17 @@ export interface TabProps {
    * Icon shown before the label.
    */
   icon?: IconComponent;
+  /**
+   * ID applied to the tab element. Provide this with `controls` when rendering
+   * your own tabpanel so the panel can reference the tab with
+   * `aria-labelledby`.
+   */
+  id?: string;
+  /**
+   * Whether the tab is disabled.
+   * @default false
+   */
+  isDisabled?: boolean;
   /**
    * Visible tab label.
    */
@@ -61,10 +78,12 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '1',
+    mb: '-1px',
     px: '3',
     borderWidth: 0,
-    borderStyle: 'none',
-    borderRadius: 'md',
+    borderBottomWidth: 'emphasized',
+    borderBottomStyle: 'solid',
+    borderBottomColor: 'transparent',
     bg: 'transparent',
     color: 'fg.muted',
     cursor: 'pointer',
@@ -74,21 +93,30 @@ const styles = {
     lineHeight: 'normal',
     textDecoration: 'none',
     whiteSpace: 'nowrap',
-    transitionProperty: 'color, background-color',
+    transitionProperty: 'color, background-color, border-color',
     transitionDuration: 'fast',
     transitionTimingFunction: 'default',
     _hover: {
       bg: 'bg.subtle',
     },
     _focusVisible: {
-      outline: '2px solid',
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
       outlineColor: 'primary',
-      outlineOffset: '2px',
+      outlineOffset: 'focusOffset',
     },
   }),
   selected: css({
+    borderBottomColor: 'fg',
     color: 'fg',
     fontWeight: 'semibold',
+  }),
+  disabled: css({
+    color: 'fg.disabled',
+    cursor: 'not-allowed',
+    _hover: {
+      bg: 'transparent',
+    },
   }),
   fill: css({
     flex: 1,
@@ -118,23 +146,10 @@ const styles = {
     alignItems: 'center',
     flexShrink: 0,
   }),
-  indicator: css({
-    position: 'absolute',
-    bottom: '-2px',
-    insetInlineStart: '3',
-    insetInlineEnd: '3',
-    h: '0.5',
-    borderRadius: 'full',
-    bg: 'fg',
-    opacity: 0,
-  }),
-  indicatorSelected: css({
-    opacity: 1,
-  }),
   size: {
-    sm: css({h: 'component.sm', '--tab-icon-size': '14px'}),
-    md: css({h: 'component.md', '--tab-icon-size': '16px'}),
-    lg: css({h: 'component.lg', '--tab-icon-size': '18px'}),
+    sm: css({h: 'component.sm'}),
+    md: css({h: 'component.md'}),
+    lg: css({h: 'component.lg'}),
   },
 } as const;
 
@@ -145,9 +160,12 @@ export function Tab({
   as,
   className,
   'data-testid': dataTestId,
+  controls,
   endContent,
   href,
+  id,
   icon,
+  isDisabled = false,
   label,
   ref,
   selectedIcon,
@@ -162,6 +180,7 @@ export function Tab({
     styles.root,
     styles.size[context.size],
     isSelected ? styles.selected : undefined,
+    isDisabled ? styles.disabled : undefined,
     context.layout === 'fill' ? styles.fill : undefined,
     className,
   );
@@ -169,7 +188,7 @@ export function Tab({
     <>
       {displayIcon != null ? (
         <span className={styles.icon}>
-          <Icon icon={displayIcon} size="sm" />
+          <Icon icon={displayIcon} size={context.size} />
         </span>
       ) : null}
       <span className={styles.label}>
@@ -181,26 +200,33 @@ export function Tab({
       {endContent != null ? (
         <span className={styles.endContent}>{endContent}</span>
       ) : null}
-      <span
-        aria-hidden="true"
-        className={cx(
-          styles.indicator,
-          isSelected ? styles.indicatorSelected : undefined,
-        )}
-      />
     </>
   );
 
   if (href != null) {
     return (
       <LinkComponent
-        aria-current={isSelected ? 'page' : undefined}
+        aria-controls={controls}
+        aria-disabled={isDisabled || undefined}
+        aria-selected={isSelected}
         className={rootClassName}
+        data-tab-disabled={isDisabled ? 'true' : undefined}
+        data-tab-value={isDisabled ? undefined : value}
         data-testid={dataTestId}
         href={href}
-        onClick={() => context.onChange(value)}
+        id={id}
+        onClick={event => {
+          if (isDisabled) {
+            event.preventDefault();
+            return;
+          }
+
+          context.onChange(value);
+        }}
         ref={ref as Ref<HTMLAnchorElement>}
+        role="tab"
         style={style}
+        tabIndex={isSelected && !isDisabled ? 0 : -1}
         to={LinkComponent === 'a' ? undefined : href}>
         {content}
       </LinkComponent>
@@ -209,12 +235,26 @@ export function Tab({
 
   return (
     <button
-      aria-current={isSelected ? 'page' : undefined}
+      aria-controls={controls}
+      aria-disabled={isDisabled || undefined}
+      aria-selected={isSelected}
       className={rootClassName}
+      data-tab-disabled={isDisabled ? 'true' : undefined}
+      data-tab-value={isDisabled ? undefined : value}
       data-testid={dataTestId}
-      onClick={() => context.onChange(value)}
+      disabled={isDisabled}
+      id={id}
+      onClick={() => {
+        if (isDisabled) {
+          return;
+        }
+
+        context.onChange(value);
+      }}
       ref={ref as Ref<HTMLButtonElement>}
+      role="tab"
       style={style}
+      tabIndex={isSelected && !isDisabled ? 0 : -1}
       type="button">
       {content}
     </button>
