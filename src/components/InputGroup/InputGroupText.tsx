@@ -18,7 +18,7 @@ const styles = {
     px: '3',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.300',
+    borderColor: 'border.emphasized',
     bg: 'bg.subtle',
     color: 'fg.muted',
     fontFamily: 'body',

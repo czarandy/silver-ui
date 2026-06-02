@@ -46,7 +46,7 @@ describe('InputGroup', () => {
     render(
       <InputGroup data-testid="price-group" label="Price">
         <InputGroupText>$</InputGroupText>
-        <TextInput isLabelHidden label="Amount" value="" />
+        <TextInput isLabelHidden label="Amount" onChange={() => {}} value="" />
       </InputGroup>,
     );
 
@@ -57,7 +57,7 @@ describe('InputGroup', () => {
     render(
       <InputGroup isDisabled label="Price">
         <InputGroupText>$</InputGroupText>
-        <TextInput isLabelHidden label="Amount" value="" />
+        <TextInput isLabelHidden label="Amount" onChange={() => {}} value="" />
       </InputGroup>,
     );
 

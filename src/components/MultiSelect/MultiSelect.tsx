@@ -10,9 +10,16 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Badge} from '../Badge';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
@@ -21,7 +28,7 @@ export interface MultiSelectOptionData {
   /**
    * Icon displayed before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the option is disabled.
    */
@@ -66,7 +73,7 @@ export type MultiSelectOption =
 
 export type MultiSelectTriggerDisplay = 'count' | 'labels' | 'badges';
 
-export interface MultiSelectProps {
+export type MultiSelectProps = {
   /**
    * Custom render function for selectable options.
    */
@@ -119,19 +126,13 @@ export interface MultiSelectProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -176,7 +177,7 @@ export interface MultiSelectProps {
   /**
    * Start icon rendered in the trigger.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Validation status displayed below the selector.
    */
@@ -194,7 +195,7 @@ export interface MultiSelectProps {
    * Selected option values.
    */
   value: string[];
-}
+} & FieldNecessity;
 
 const styles = {
   trigger: css({
@@ -249,7 +250,7 @@ const styles = {
     py: '1',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.300',
+    borderColor: 'border.emphasized',
     borderRadius: 'md',
     fontFamily: 'body',
     outline: 'none',
@@ -289,10 +290,10 @@ const styles = {
     h: '5',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.400',
+    borderColor: 'fg.muted',
     borderRadius: 'sm',
     bg: 'bg',
-    color: 'white',
+    color: 'fg.onPrimary',
   }),
   checkboxSelected: css({
     bg: 'primary',
@@ -315,7 +316,7 @@ const styles = {
   }),
   divider: css({
     h: '1px',
-    bg: 'silver-neutral.200',
+    bg: 'border',
     my: '1',
   }),
 } as const;
@@ -359,9 +360,10 @@ export function MultiSelect({
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   label,
+  labelIcon,
   labelTooltip,
   maxBadges = 3,
   onChange,
@@ -508,7 +510,9 @@ export function MultiSelect({
           {children == null ? (
             <>
               {normalized.icon != null ? (
-                <span className={styles.iconSlot}>{normalized.icon}</span>
+                <span className={styles.iconSlot}>
+                  <Icon color="secondary" icon={normalized.icon} size="sm" />
+                </span>
               ) : null}
               {normalized.label}
             </>
@@ -590,16 +594,15 @@ export function MultiSelect({
 
   const trigger = (
     <div
-      className={cx(
-        inputStyles.wrapper,
-        inputStyles.size[size],
-        status != null ? inputStyles.status[status.type] : undefined,
-        isDisabled ? inputStyles.wrapperDisabled : undefined,
-        className,
-      )}
-      style={style}>
+      className={inputRecipe({
+        size,
+        status: status?.type,
+        isDisabled,
+      })}>
       {startIcon != null ? (
-        <span className={styles.iconSlot}>{startIcon}</span>
+        <span className={styles.iconSlot}>
+          <Icon color="secondary" icon={startIcon} size="sm" />
+        </span>
       ) : null}
       <button
         aria-controls={`${inputId}-listbox`}
@@ -632,20 +635,24 @@ export function MultiSelect({
     </div>
   );
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       <Popover
         content={menu}
         hasAutoFocus={hasSearch}

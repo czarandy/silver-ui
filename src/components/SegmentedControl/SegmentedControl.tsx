@@ -72,7 +72,7 @@ const styles = {
     alignItems: 'center',
     gap: '0.5',
     p: '0.5',
-    bg: 'silver-neutral.100',
+    bg: 'surface.gray',
     borderRadius: 'md',
   }),
   fill: css({

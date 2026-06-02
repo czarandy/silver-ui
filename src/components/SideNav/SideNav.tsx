@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useCallback, useMemo, useState} from 'react';
 import {css} from 'styled-system/css';
+import {MobileNav} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
-import {MobileNav} from '../MobileNav';
 import {sideNavRecipe} from './SideNav.recipe';
 import {SideNavCollapseContext, useSideNavRenderMode} from './SideNavContext';
 import {SideNavCollapseButton} from './internal/SideNavCollapseButton';

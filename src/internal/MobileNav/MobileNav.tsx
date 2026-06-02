@@ -1,11 +1,11 @@
 import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useEffect, useMemo, useRef} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
-import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
-import {Button} from '../Button';
-import {Heading} from '../Text';
+import {useAppShellMobile} from '../../components/AppShell/AppShellMobileContext';
+import {Button} from '../../components/Button';
+import {cx} from '../cx';
+import {mergeRefs} from '../mergeRefs';
 import {mobileNavRecipe} from './MobileNav.recipe';
 
 export type MobileNavSide = 'start' | 'end';
@@ -52,15 +52,21 @@ export interface MobileNavProps {
    */
   side?: MobileNavSide;
   /**
+   * Maximum drawer width.
+   * @default 320
+   */
+  size?: number | string;
+  /**
    * Inline styles applied to the dialog element.
    */
   style?: CSSProperties;
-  /**
-   * Maximum drawer width in pixels.
-   * @default 320
-   */
-  width?: number;
 }
+
+function formatSize(value: number | string): string {
+  return typeof value === 'number' ? `${value}px` : value;
+}
+
+const CLOSE_BUTTON_SELECTOR = '[aria-label="Close navigation"]';
 
 const styles = {
   drawer: css({
@@ -103,7 +109,7 @@ const styles = {
     borderBlockEndColor: 'border',
     flexShrink: 0,
   }),
-  content: css({
+  body: css({
     flex: 1,
     overflowY: 'auto',
     overflowX: 'hidden',
@@ -111,9 +117,6 @@ const styles = {
   }),
 };
 
-/**
- * Slide-out drawer for mobile navigation, backed by a native dialog element.
- */
 export function MobileNav({
   children,
   className,
@@ -124,22 +127,23 @@ export function MobileNav({
   onOpenChange: onOpenChangeFromProps,
   ref,
   side = 'end',
+  size = 320,
   style,
-  width = 320,
 }: MobileNavProps): React.JSX.Element {
   const appShellMobile = useAppShellMobile();
   const isOpen = isOpenFromProps ?? appShellMobile.isMobileNavOpen;
-  const onOpenChange = useMemo(
-    () =>
-      onOpenChangeFromProps ??
-      ((isNavOpen: boolean) => {
-        if (isNavOpen) {
-          appShellMobile.openMobileNav();
-        } else {
-          appShellMobile.closeMobileNav();
-        }
-      }),
-    [appShellMobile, onOpenChangeFromProps],
+  const {openMobileNav, closeMobileNav} = appShellMobile;
+  const onOpenChange = useCallback(
+    (isNextOpen: boolean) => {
+      if (onOpenChangeFromProps != null) {
+        onOpenChangeFromProps(isNextOpen);
+      } else if (isNextOpen) {
+        openMobileNav();
+      } else {
+        closeMobileNav();
+      }
+    },
+    [openMobileNav, closeMobileNav, onOpenChangeFromProps],
   );
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -152,23 +156,33 @@ export function MobileNav({
 
     if (isOpen && !dialog.open) {
       dialog.showModal();
+
+      const firstFocusable = dialog.querySelector<HTMLElement>(
+        `a[href], button:not(${CLOSE_BUTTON_SELECTOR}):not([disabled])`,
+      );
+      if (firstFocusable != null) {
+        firstFocusable.focus();
+      }
     } else if (!isOpen && dialog.open) {
       dialog.close();
     }
   }, [isOpen]);
 
-  const setRef = (node: HTMLDialogElement | null) => {
-    dialogRef.current = node;
-
-    if (typeof ref === 'function') {
-      ref(node);
-    } else if (ref != null) {
-      ref.current = node;
+  useEffect(() => {
+    if (!isOpen) {
+      return;
     }
-  };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
+
+  const formattedSize = formatSize(size);
 
   return (
-    // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- native dialog backdrop clicks close the drawer
     <dialog
       aria-label={label ?? (typeof header === 'string' ? header : 'Navigation')}
       className={cx(mobileNavRecipe({isOpen}), className)}
@@ -182,7 +196,7 @@ export function MobileNav({
           onOpenChange(false);
         }
       }}
-      ref={setRef}
+      ref={mergeRefs(ref, dialogRef)}
       style={style}>
       <div
         className={cx(
@@ -190,13 +204,9 @@ export function MobileNav({
           side === 'start' ? styles.drawerStart : styles.drawerEnd,
           isOpen && styles.drawerOpen,
         )}
-        style={{maxWidth: width, width: '100vw'}}>
+        style={{maxWidth: formattedSize, width: '100vw'}}>
         <div className={styles.header}>
-          {typeof header === 'string' ? (
-            <Heading level={2}>{header}</Heading>
-          ) : (
-            (header ?? <span />)
-          )}
+          {header ?? <span />}
           <Button
             icon={X}
             isIconOnly
@@ -205,7 +215,7 @@ export function MobileNav({
             variant="ghost"
           />
         </div>
-        <div className={styles.content}>{children}</div>
+        <div className={styles.body}>{children}</div>
       </div>
     </dialog>
   );

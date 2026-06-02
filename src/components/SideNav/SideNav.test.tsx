@@ -44,7 +44,7 @@ describe('SideNav', () => {
     render(
       <SideNav header={<SideNavHeading heading="Silver" />}>
         <SideNavSection title="Main">
-          <SideNavItem href="/home" icon={<Home />} label="Home" />
+          <SideNavItem href="/home" icon={Home} label="Home" />
         </SideNavSection>
       </SideNav>,
     );
@@ -61,7 +61,7 @@ describe('SideNav', () => {
   it('marks selected items with aria-current', () => {
     render(
       <SideNav>
-        <SideNavItem href="/home" icon={<Home />} isSelected label="Home" />
+        <SideNavItem href="/home" icon={Home} isSelected label="Home" />
       </SideNav>,
     );
 
@@ -76,7 +76,7 @@ describe('SideNav', () => {
       <SideNav
         footer={<span data-testid="footer-content">Footer</span>}
         footerIcons={<span data-testid="footer-icons">Icons</span>}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -89,7 +89,7 @@ describe('SideNav', () => {
       <SideNav
         header={<SideNavHeading heading="Silver" />}
         topContent={<span data-testid="top-content">Search</span>}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -104,7 +104,7 @@ describe('SideNav', () => {
         data-testid="side-nav"
         ref={ref}
         style={{width: 300}}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -119,7 +119,7 @@ describe('SideNavItem', () => {
   it('renders as a button when no href is provided', () => {
     render(
       <SideNav>
-        <SideNavItem icon={<Home />} label="Action" onClick={() => {}} />
+        <SideNavItem icon={Home} label="Action" onClick={() => {}} />
       </SideNav>,
     );
 
@@ -133,7 +133,7 @@ describe('SideNavItem', () => {
 
     render(
       <SideNav>
-        <SideNavItem icon={<Home />} label="Action" onClick={onClick} />
+        <SideNavItem icon={Home} label="Action" onClick={onClick} />
       </SideNav>,
     );
 
@@ -145,7 +145,7 @@ describe('SideNavItem', () => {
     render(
       <SideNav>
         <SideNavItem
-          icon={<Home />}
+          icon={Home}
           isDisabled
           label="Disabled"
           onClick={() => {}}
@@ -161,7 +161,7 @@ describe('SideNavItem', () => {
       <SideNav>
         <SideNavItem
           href="/home"
-          icon={<Home />}
+          icon={Home}
           isDisabled
           label="Disabled Link"
         />
@@ -178,7 +178,7 @@ describe('SideNavItem', () => {
         <SideNavItem
           endContent={<span data-testid="badge">3</span>}
           href="/inbox"
-          icon={<Home />}
+          icon={Home}
           label="Inbox"
         />
       </SideNav>,
@@ -190,7 +190,7 @@ describe('SideNavItem', () => {
   it('renders nested children below the item', () => {
     render(
       <SideNav>
-        <SideNavItem icon={<Home />} label="Settings">
+        <SideNavItem icon={Home} label="Settings">
           <SideNavItem href="/general" label="General" />
           <SideNavItem href="/security" label="Security" />
         </SideNavItem>
@@ -208,7 +208,7 @@ describe('SideNavItem', () => {
         <SideNavItem
           className="custom-item"
           data-testid="nav-item"
-          icon={<Home />}
+          icon={Home}
           label="Home"
           ref={ref}
           style={{color: 'red'}}
@@ -226,7 +226,7 @@ describe('SideNavItem', () => {
     const ref = vi.fn<(el: HTMLElement | null) => void>();
     render(
       <SideNav>
-        <SideNavItem href="/home" icon={<Home />} label="Home" ref={ref} />
+        <SideNavItem href="/home" icon={Home} label="Home" ref={ref} />
       </SideNav>,
     );
 
@@ -236,12 +236,7 @@ describe('SideNavItem', () => {
   it('uses custom link component via as prop', () => {
     render(
       <SideNav>
-        <SideNavItem
-          as={CustomLink}
-          href="/home"
-          icon={<Home />}
-          label="Home"
-        />
+        <SideNavItem as={CustomLink} href="/home" icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -256,7 +251,7 @@ describe('SideNavItem', () => {
         <SideNavItem
           as={ToBasedRouterLink}
           href="/home"
-          icon={<Home />}
+          icon={Home}
           label="Home"
         />
       </SideNav>,
@@ -271,7 +266,7 @@ describe('SideNavItem', () => {
     render(
       <LinkProvider component={CustomLink}>
         <SideNav>
-          <SideNavItem href="/home" icon={<Home />} label="Home" />
+          <SideNavItem href="/home" icon={Home} label="Home" />
         </SideNav>
       </LinkProvider>,
     );
@@ -297,12 +292,7 @@ describe('SideNavItem', () => {
     render(
       <LinkProvider component={ProviderLink}>
         <SideNav>
-          <SideNavItem
-            as={CustomLink}
-            href="/home"
-            icon={<Home />}
-            label="Home"
-          />
+          <SideNavItem as={CustomLink} href="/home" icon={Home} label="Home" />
         </SideNav>
       </LinkProvider>,
     );
@@ -318,7 +308,7 @@ describe('SideNavSection', () => {
     render(
       <SideNav>
         <SideNavSection title="Main">
-          <SideNavItem icon={<Home />} label="Home" />
+          <SideNavItem icon={Home} label="Home" />
         </SideNavSection>
       </SideNav>,
     );
@@ -331,7 +321,7 @@ describe('SideNavSection', () => {
     render(
       <SideNav>
         <SideNavSection isHeaderHidden title="Hidden Section">
-          <SideNavItem icon={<Home />} label="Home" />
+          <SideNavItem icon={Home} label="Home" />
         </SideNavSection>
       </SideNav>,
     );
@@ -345,7 +335,7 @@ describe('SideNavSection', () => {
     render(
       <SideNav>
         <SideNavSection subtitle="Personal files" title="Documents">
-          <SideNavItem icon={<Home />} label="Home" />
+          <SideNavItem icon={Home} label="Home" />
         </SideNavSection>
       </SideNav>,
     );
@@ -363,7 +353,7 @@ describe('SideNavSection', () => {
             </button>
           }
           title="Projects">
-          <SideNavItem icon={<Home />} label="Home" />
+          <SideNavItem icon={Home} label="Home" />
         </SideNavSection>
       </SideNav>,
     );
@@ -381,7 +371,7 @@ describe('SideNavSection', () => {
           ref={ref}
           style={{padding: 8}}
           title="Main">
-          <SideNavItem icon={<Home />} label="Home" />
+          <SideNavItem icon={Home} label="Home" />
         </SideNavSection>
       </SideNav>,
     );
@@ -397,7 +387,7 @@ describe('SideNavHeading', () => {
   it('renders heading text', () => {
     render(
       <SideNav header={<SideNavHeading heading="Silver" />}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -408,7 +398,7 @@ describe('SideNavHeading', () => {
     render(
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -419,7 +409,7 @@ describe('SideNavHeading', () => {
     render(
       <SideNav
         header={<SideNavHeading heading="Silver" superheading="Acme Corp" />}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -435,7 +425,7 @@ describe('SideNavHeading', () => {
             logo={<span data-testid="logo">S</span>}
           />
         }>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -446,7 +436,7 @@ describe('SideNavHeading', () => {
     render(
       <SideNav
         header={<SideNavHeading heading="Silver" headingHref="/dashboard" />}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -459,7 +449,7 @@ describe('SideNavHeading', () => {
   it('renders as a link when href is provided', () => {
     render(
       <SideNav header={<SideNavHeading heading="Silver" href="/dashboard" />}>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -479,7 +469,7 @@ describe('SideNavHeading', () => {
             href="/fallback"
           />
         }>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -498,7 +488,7 @@ describe('SideNavHeading', () => {
             heading="Silver"
           />
         }>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -515,7 +505,7 @@ describe('SideNavHeading', () => {
             headingHref="/home"
           />
         }>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -529,7 +519,7 @@ describe('SideNavHeading', () => {
       <LinkProvider component={CustomLink}>
         <SideNav
           header={<SideNavHeading heading="Silver" headingHref="/home" />}>
-          <SideNavItem icon={<Home />} label="Home" />
+          <SideNavItem icon={Home} label="Home" />
         </SideNav>
       </LinkProvider>,
     );
@@ -552,7 +542,7 @@ describe('SideNavHeading', () => {
             style={{gap: 12}}
           />
         }>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -568,7 +558,7 @@ describe('SideNav collapsed state', () => {
     const user = userEvent.setup();
     render(
       <SideNav isCollapsible>
-        <SideNavItem href="/home" icon={<Home />} label="Home" />
+        <SideNavItem href="/home" icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -582,7 +572,7 @@ describe('SideNav collapsed state', () => {
   it('does not set aria-label when expanded', () => {
     render(
       <SideNav isCollapsible>
-        <SideNavItem href="/home" icon={<Home />} label="Home" />
+        <SideNavItem href="/home" icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -598,7 +588,7 @@ describe('SideNav collapsed state', () => {
         <SideNavItem
           endContent={<span data-testid="badge">3</span>}
           href="/inbox"
-          icon={<Home />}
+          icon={Home}
           label="Inbox"
         />
       </SideNav>,
@@ -614,7 +604,7 @@ describe('SideNav collapsed state', () => {
     render(
       <SideNav isCollapsible>
         <SideNavSection title="Main">
-          <SideNavItem icon={<Home />} label="Home" />
+          <SideNavItem icon={Home} label="Home" />
         </SideNavSection>
       </SideNav>,
     );
@@ -639,7 +629,7 @@ describe('SideNav collapsed state', () => {
           />
         }
         isCollapsible>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -663,7 +653,7 @@ describe('SideNav collapsed state', () => {
           />
         }
         isCollapsible>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -678,7 +668,7 @@ describe('SideNav collapsed state', () => {
   it('renders built-in collapse button when isCollapsible', () => {
     render(
       <SideNav isCollapsible>
-        <SideNavItem icon={<Home />} label="Home" />
+        <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -691,7 +681,7 @@ describe('SideNav collapsed state', () => {
     const user = userEvent.setup();
     render(
       <SideNav isCollapsible>
-        <SideNavItem href="/home" icon={<Home />} label="Home" />
+        <SideNavItem href="/home" icon={Home} label="Home" />
       </SideNav>,
     );
 
@@ -709,7 +699,7 @@ describe('SideNavItem collapsible', () => {
     const user = userEvent.setup();
     render(
       <SideNav>
-        <SideNavItem icon={<Home />} isCollapsible label="Settings">
+        <SideNavItem icon={Home} isCollapsible label="Settings">
           <SideNavItem href="/general" label="General" />
         </SideNavItem>
       </SideNav>,
@@ -727,7 +717,7 @@ describe('SideNavItem collapsible', () => {
     render(
       <SideNav>
         <SideNavItem
-          icon={<Home />}
+          icon={Home}
           isCollapsible
           isDefaultExpanded={false}
           label="Settings">
@@ -748,7 +738,7 @@ describe('SideNavItem collapsible', () => {
       <SideNav>
         <SideNavItem
           href="/settings"
-          icon={<Home />}
+          icon={Home}
           isCollapsible
           label="Settings">
           <SideNavItem href="/general" label="General" />
@@ -773,7 +763,7 @@ describe('SideNavItem collapsible', () => {
     const user = userEvent.setup();
     render(
       <SideNav isCollapsible>
-        <SideNavItem icon={<Home />} isCollapsible label="Settings">
+        <SideNavItem icon={Home} isCollapsible label="Settings">
           <SideNavItem href="/general" label="General" />
         </SideNavItem>
       </SideNav>,

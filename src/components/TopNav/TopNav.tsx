@@ -1,9 +1,9 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
+import {MobileNav, MobileNavToggle} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Divider} from '../Divider';
-import {MobileNav, MobileNavToggle} from '../MobileNav';
 import {topNavRecipe} from './TopNav.recipe';
 import {
   TopNavSlotContext,

@@ -1,6 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useCallback, useEffect, useId, useMemo, useRef, useState} from 'react';
 import {css} from 'styled-system/css';
+import {MobileNavToggle} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {
@@ -15,7 +16,6 @@ import {
   LayoutPanel,
   type SpacingStep,
 } from '../Layout';
-import {MobileNavToggle} from '../MobileNav';
 import {SideNavRenderContext} from '../SideNav';
 import {TopNavMobileContentContext, TopNavRenderContext} from '../TopNav';
 import {appShellRecipe} from './AppShell.recipe';

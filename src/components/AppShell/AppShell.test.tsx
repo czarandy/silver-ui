@@ -42,7 +42,7 @@ beforeEach(() => {
 const sideNav = (
   <SideNav>
     <SideNavSection title="Main">
-      <SideNavItem href="/home" icon={<Home />} label="Home" />
+      <SideNavItem href="/home" icon={Home} label="Home" />
     </SideNavSection>
   </SideNav>
 );

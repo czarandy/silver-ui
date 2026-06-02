@@ -366,15 +366,6 @@ export {
   type SpacingStep,
 } from './components/Layout';
 export {
-  MobileNav,
-  MobileNavToggle,
-  mobileNavRecipe,
-  type MobileNavProps,
-  type MobileNavSide,
-  type MobileNavToggleProps,
-  type MobileNavVariants,
-} from './components/MobileNav';
-export {
   SideNav,
   SideNavCollapseContext,
   SideNavHeading,

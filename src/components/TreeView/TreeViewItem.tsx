@@ -149,11 +149,11 @@ const styles = {
     transitionProperty: 'background-color',
     transitionTimingFunction: 'default',
     _active: {
-      bg: 'silver-neutral.100',
+      bg: 'bg.hover',
     },
     _hover: {
       '@media (hover: hover)': {
-        bg: 'silver-neutral.50',
+        bg: 'bg.subtle',
       },
     },
     '&:has(:focus-visible)': {

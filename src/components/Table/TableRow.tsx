@@ -35,22 +35,22 @@ const styles = {
   hover: css({
     _hover: {
       '@media (hover: hover)': {
-        bg: 'silver-neutral.50',
+        bg: 'bg.subtle',
       },
     },
   }),
   striped: css({
     _even: {
-      bg: 'silver-neutral.50',
+      bg: 'bg.subtle',
     },
   }),
   stripedHover: css({
     _even: {
-      bg: 'silver-neutral.50',
+      bg: 'bg.subtle',
     },
     _hover: {
       '@media (hover: hover)': {
-        bg: 'silver-neutral.100',
+        bg: 'bg.hover',
       },
     },
   }),

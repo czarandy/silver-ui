@@ -33,10 +33,10 @@ export const Default: Story = {
   render: () => (
     <ContextMenu
       items={[
-        {icon: <Pencil />, label: 'Rename'},
-        {icon: <Copy />, label: 'Duplicate'},
+        {icon: Pencil, label: 'Rename'},
+        {icon: Copy, label: 'Duplicate'},
         {type: 'divider'},
-        {icon: <Trash />, label: 'Delete'},
+        {icon: Trash, label: 'Delete'},
       ]}>
       <div className={styles.target}>
         <Text as="span" type="body">
@@ -53,14 +53,14 @@ export const Sections: Story = {
       items={[
         {
           items: [
-            {icon: <Pencil />, label: 'Rename'},
-            {icon: <Copy />, label: 'Duplicate'},
+            {icon: Pencil, label: 'Rename'},
+            {icon: Copy, label: 'Duplicate'},
           ],
           title: 'Edit',
           type: 'section',
         },
         {
-          items: [{icon: <Download />, label: 'Export'}],
+          items: [{icon: Download, label: 'Export'}],
           title: 'Share',
           type: 'section',
         },
@@ -79,10 +79,10 @@ export const CompoundContent: Story = {
     <ContextMenu
       menuContent={
         <>
-          <ContextMenuItem icon={<Pencil />} label="Rename" />
-          <ContextMenuItem icon={<Copy />} label="Duplicate" />
+          <ContextMenuItem icon={Pencil} label="Rename" />
+          <ContextMenuItem icon={Copy} label="Duplicate" />
           <Divider />
-          <ContextMenuItem icon={<Trash />} label="Delete" />
+          <ContextMenuItem icon={Trash} label="Delete" />
         </>
       }>
       <div className={styles.target}>

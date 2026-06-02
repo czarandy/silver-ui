@@ -12,15 +12,15 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {Field, type InputStatus} from '../Field';
+import {Field, type FieldNecessity, type InputStatus} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 
 export type CheckboxInputSize = 'sm' | 'md';
 export type CheckboxInputValue = boolean | 'indeterminate';
 
-export interface CheckboxInputProps {
+export type CheckboxInputProps = {
   /**
    * Additional CSS class names applied to the root element.
    */
@@ -49,20 +49,10 @@ export interface CheckboxInputProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
    * Whether the checkbox is read-only.
    * @default false
    */
   isReadOnly?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
   /**
    * Field label text.
    */
@@ -70,7 +60,7 @@ export interface CheckboxInputProps {
   /**
    * Optional content shown before the label.
    */
-  labelIcon?: ReactNode;
+  labelIcon?: IconComponent;
   /**
    * Called when the input loses focus.
    */
@@ -78,7 +68,7 @@ export interface CheckboxInputProps {
   /**
    * Called when the checked state changes.
    */
-  onChange?: (checked: boolean, event: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (checked: boolean, event: ChangeEvent<HTMLInputElement>) => void;
   /**
    * Called when the input receives focus.
    */
@@ -104,7 +94,7 @@ export interface CheckboxInputProps {
    * Current checked state: true, false, or 'indeterminate'.
    */
   value: CheckboxInputValue;
-}
+} & FieldNecessity;
 
 const styles = {
   root: css({
@@ -139,10 +129,10 @@ const styles = {
     justifyContent: 'center',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.400',
+    borderColor: 'border.emphasized',
     borderRadius: 'sm',
     bg: 'bg',
-    color: 'white',
+    color: 'fg.onPrimary',
     pointerEvents: 'none',
     _peerFocusVisible: {
       outline: '2px solid',
@@ -180,8 +170,8 @@ export function CheckboxInput({
   onChange,
   description,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isReadOnly = false,
   isLoading = false,
@@ -211,6 +201,8 @@ export function CheckboxInput({
     }
   }, [isIndeterminate]);
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <div className={cx(styles.root, className)} style={style}>
       <div className={styles.row}>
@@ -232,7 +224,7 @@ export function CheckboxInput({
                 event.preventDefault();
                 return;
               }
-              onChange?.(event.target.checked, event);
+              onChange(event.target.checked, event);
             }}
             onFocus={onFocus}
             readOnly={isReadOnly}
@@ -267,8 +259,7 @@ export function CheckboxInput({
             inputId={inputId}
             isDisabled={isDisabled}
             isLabelHidden={isLabelHidden}
-            isOptional={isOptional}
-            isRequired={isRequired}
+            {...necessity}
             label={label}
             labelIcon={labelIcon}
             status={

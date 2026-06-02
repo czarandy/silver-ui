@@ -50,9 +50,6 @@ const styles = {
     borderWidth: '1px',
     borderStyle: 'solid',
     borderColor: 'border',
-    _dark: {
-      borderColor: 'silver-neutral.700',
-    },
   }),
   content: css({
     p: '3',

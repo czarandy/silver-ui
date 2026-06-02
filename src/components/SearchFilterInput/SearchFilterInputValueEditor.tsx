@@ -282,9 +282,7 @@ function DateRelativeEditor({
         }
       }}
       options={options}
-      value={
-        filterValue?.type === 'date_relative' ? filterValue.value : undefined
-      }
+      value={filterValue?.type === 'date_relative' ? filterValue.value : null}
     />
   );
 }
@@ -387,7 +385,7 @@ function EnumEditor({
         label: item.label,
         value: item.value,
       }))}
-      value={filterValue?.type === 'enum' ? filterValue.value : undefined}
+      value={filterValue?.type === 'enum' ? filterValue.value : null}
     />
   );
 }

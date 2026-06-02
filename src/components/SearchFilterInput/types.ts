@@ -1,5 +1,6 @@
 import type {ComponentType, ReactNode} from 'react';
 import type {SearchableItem, SearchSource} from '../Combobox';
+import type {IconComponent} from '../Icon';
 
 export interface EmptyOperatorValue {
   readonly type: 'empty';
@@ -53,7 +54,7 @@ export interface DateRangeOperatorValue {
 }
 
 export interface EnumItem {
-  readonly icon?: ReactNode;
+  readonly icon?: IconComponent;
   readonly label: string;
   readonly value: string;
 }
@@ -223,7 +224,7 @@ export interface SearchFilterInputField {
   readonly defaultOperator?: string;
   readonly description?: string;
   readonly group?: string;
-  readonly icon?: ReactNode;
+  readonly icon?: IconComponent;
   readonly isValueMatchAllowed?: boolean;
   readonly key: string;
   readonly label: string;

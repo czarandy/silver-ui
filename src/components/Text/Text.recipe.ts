@@ -71,7 +71,7 @@ export const textRecipe = cva({
     color: {
       primary: {color: 'fg'},
       secondary: {color: 'fg.muted'},
-      disabled: {color: 'silver-neutral.400'},
+      disabled: {color: 'fg.disabled'},
       placeholder: {color: 'fg.muted'},
       active: {color: 'primary'},
       inherit: {color: 'inherit'},
@@ -177,7 +177,7 @@ export const headingRecipe = cva({
     color: {
       primary: {color: 'fg'},
       secondary: {color: 'fg.muted'},
-      disabled: {color: 'silver-neutral.400'},
+      disabled: {color: 'fg.disabled'},
       placeholder: {color: 'fg.muted'},
       active: {color: 'primary'},
       inherit: {color: 'inherit'},

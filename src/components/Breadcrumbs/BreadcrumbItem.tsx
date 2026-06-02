@@ -2,8 +2,6 @@
 
 import {
   use,
-  useEffect,
-  useRef,
   type CSSProperties,
   type MouseEvent,
   type ReactNode,
@@ -11,7 +9,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {mergeRefs} from '../../internal/mergeRefs';
+import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {BreadcrumbsContext} from './BreadcrumbsContext';
@@ -50,9 +48,9 @@ export interface BreadcrumbItemProps {
    */
   ref?: Ref<HTMLLIElement>;
   /**
-   * Icon or content rendered before the label.
+   * Icon rendered before the label.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Inline styles applied to the list item.
    */
@@ -116,10 +114,6 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     flexShrink: 0,
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   separator: css({
     display: 'var(--breadcrumb-separator-display)',
@@ -148,39 +142,15 @@ export function BreadcrumbItem({
 }: BreadcrumbItemProps): React.JSX.Element {
   const context = use(BreadcrumbsContext);
   const LinkComponent = useLinkComponent(as);
-  const itemRef = useRef<HTMLLIElement>(null);
   const isCurrent = isCurrentProp === true;
-  const isAutoCandidate = isCurrentProp == null;
   const isSupporting = context.variant === 'supporting';
-
-  useEffect(() => {
-    if (!isAutoCandidate) {
-      return;
-    }
-
-    const item = itemRef.current;
-    const list = item?.parentElement;
-    if (item == null || list == null) {
-      return;
-    }
-
-    const items = Array.from(list.children);
-    const isLast = items.length > 0 && items[items.length - 1] === item;
-    const hasExplicitCurrent = list.querySelector('[aria-current="page"]');
-
-    if (isLast && hasExplicitCurrent == null) {
-      item.setAttribute('aria-current', 'page');
-    }
-
-    return () => {
-      item.removeAttribute('aria-current');
-    };
-  }, [isAutoCandidate]);
 
   const content = (
     <>
       {startIcon != null ? (
-        <span className={styles.icon}>{startIcon}</span>
+        <span className={styles.icon}>
+          <Icon icon={startIcon} size="sm" />
+        </span>
       ) : null}
       {children}
     </>
@@ -197,7 +167,7 @@ export function BreadcrumbItem({
       <li
         className={itemClassName}
         data-testid={dataTestId}
-        ref={mergeRefs(ref, itemRef)}
+        ref={ref}
         style={style}>
         <span aria-hidden="true" className={styles.separator}>
           {context.separator}
@@ -218,7 +188,7 @@ export function BreadcrumbItem({
     <li
       className={itemClassName}
       data-testid={dataTestId}
-      ref={mergeRefs(ref, itemRef)}
+      ref={ref}
       style={style}>
       <span aria-hidden="true" className={styles.separator}>
         {context.separator}

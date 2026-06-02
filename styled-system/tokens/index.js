@@ -1827,21 +1827,121 @@ const tokens = {
     "value": "var(--silver-colors-silver-primary-100)",
     "variable": "var(--silver-colors-primary-subtle)"
   },
-  "colors.success.fg": {
+  "colors.destructive": {
+    "value": "var(--silver-colors-destructive)",
+    "variable": "var(--silver-colors-destructive)"
+  },
+  "colors.destructive.hover": {
+    "value": "var(--silver-colors-destructive-hover)",
+    "variable": "var(--silver-colors-destructive-hover)"
+  },
+  "colors.destructive.active": {
+    "value": "var(--silver-colors-destructive-active)",
+    "variable": "var(--silver-colors-destructive-active)"
+  },
+  "colors.destructive.fg": {
+    "value": "var(--silver-colors-white)",
+    "variable": "var(--silver-colors-destructive-fg)"
+  },
+  "colors.status.success.fg": {
     "value": "#108627",
-    "variable": "var(--silver-colors-success-fg)"
+    "variable": "var(--silver-colors-status-success-fg)"
   },
-  "colors.error.fg": {
+  "colors.status.success.border": {
+    "value": "var(--silver-colors-status-success-border)",
+    "variable": "var(--silver-colors-status-success-border)"
+  },
+  "colors.status.success.borderHover": {
+    "value": "var(--silver-colors-status-success-border-hover)",
+    "variable": "var(--silver-colors-status-success-border-hover)"
+  },
+  "colors.status.success.solid": {
+    "value": "var(--silver-colors-status-success-solid)",
+    "variable": "var(--silver-colors-status-success-solid)"
+  },
+  "colors.status.success.solidFg": {
+    "value": "var(--silver-colors-white)",
+    "variable": "var(--silver-colors-status-success-solid-fg)"
+  },
+  "colors.status.error.fg": {
     "value": "#d92644",
-    "variable": "var(--silver-colors-error-fg)"
+    "variable": "var(--silver-colors-status-error-fg)"
   },
-  "colors.warning.fg": {
-    "value": "#e8b00a",
-    "variable": "var(--silver-colors-warning-fg)"
+  "colors.status.error.border": {
+    "value": "var(--silver-colors-status-error-border)",
+    "variable": "var(--silver-colors-status-error-border)"
   },
-  "colors.info.fg": {
+  "colors.status.error.borderHover": {
+    "value": "var(--silver-colors-status-error-border-hover)",
+    "variable": "var(--silver-colors-status-error-border-hover)"
+  },
+  "colors.status.error.solid": {
+    "value": "var(--silver-colors-status-error-solid)",
+    "variable": "var(--silver-colors-status-error-solid)"
+  },
+  "colors.status.error.solidFg": {
+    "value": "var(--silver-colors-white)",
+    "variable": "var(--silver-colors-status-error-solid-fg)"
+  },
+  "colors.status.warning.fg": {
+    "value": "var(--silver-colors-yellow-500)",
+    "variable": "var(--silver-colors-status-warning-fg)"
+  },
+  "colors.status.warning.border": {
+    "value": "var(--silver-colors-status-warning-border)",
+    "variable": "var(--silver-colors-status-warning-border)"
+  },
+  "colors.status.warning.borderHover": {
+    "value": "var(--silver-colors-status-warning-border-hover)",
+    "variable": "var(--silver-colors-status-warning-border-hover)"
+  },
+  "colors.status.warning.solid": {
+    "value": "var(--silver-colors-status-warning-solid)",
+    "variable": "var(--silver-colors-status-warning-solid)"
+  },
+  "colors.status.warning.solidFg": {
+    "value": "var(--silver-colors-status-warning-solid-fg)",
+    "variable": "var(--silver-colors-status-warning-solid-fg)"
+  },
+  "colors.status.info.fg": {
     "value": "#0164e0",
-    "variable": "var(--silver-colors-info-fg)"
+    "variable": "var(--silver-colors-status-info-fg)"
+  },
+  "colors.status.info.solid": {
+    "value": "var(--silver-colors-primary)",
+    "variable": "var(--silver-colors-status-info-solid)"
+  },
+  "colors.status.info.solidFg": {
+    "value": "var(--silver-colors-fg-on-primary)",
+    "variable": "var(--silver-colors-status-info-solid-fg)"
+  },
+  "colors.status.neutral.solid": {
+    "value": "var(--silver-colors-status-neutral-solid)",
+    "variable": "var(--silver-colors-status-neutral-solid)"
+  },
+  "colors.status.neutral.solidFg": {
+    "value": "var(--silver-colors-white)",
+    "variable": "var(--silver-colors-status-neutral-solid-fg)"
+  },
+  "colors.status.disabled.solid": {
+    "value": "var(--silver-colors-status-disabled-solid)",
+    "variable": "var(--silver-colors-status-disabled-solid)"
+  },
+  "colors.status.disabled.solidFg": {
+    "value": "var(--silver-colors-white)",
+    "variable": "var(--silver-colors-status-disabled-solid-fg)"
+  },
+  "colors.presence.success": {
+    "value": "var(--silver-colors-presence-success)",
+    "variable": "var(--silver-colors-presence-success)"
+  },
+  "colors.presence.neutral": {
+    "value": "var(--silver-colors-presence-neutral)",
+    "variable": "var(--silver-colors-presence-neutral)"
+  },
+  "colors.presence.error": {
+    "value": "var(--silver-colors-presence-error)",
+    "variable": "var(--silver-colors-presence-error)"
   },
   "colors.fg": {
     "value": "var(--silver-colors-fg)",
@@ -1850,6 +1950,14 @@ const tokens = {
   "colors.fg.muted": {
     "value": "var(--silver-colors-fg-muted)",
     "variable": "var(--silver-colors-fg-muted)"
+  },
+  "colors.fg.disabled": {
+    "value": "var(--silver-colors-fg-disabled)",
+    "variable": "var(--silver-colors-fg-disabled)"
+  },
+  "colors.fg.onPrimary": {
+    "value": "var(--silver-colors-white)",
+    "variable": "var(--silver-colors-fg-on-primary)"
   },
   "colors.bg": {
     "value": "var(--silver-colors-bg)",
@@ -1862,6 +1970,14 @@ const tokens = {
   "colors.bg.hover": {
     "value": "var(--silver-colors-bg-hover)",
     "variable": "var(--silver-colors-bg-hover)"
+  },
+  "colors.bg.ghost.hover": {
+    "value": "var(--silver-colors-bg-ghost-hover)",
+    "variable": "var(--silver-colors-bg-ghost-hover)"
+  },
+  "colors.bg.ghost.active": {
+    "value": "var(--silver-colors-bg-ghost-active)",
+    "variable": "var(--silver-colors-bg-ghost-active)"
   },
   "colors.border": {
     "value": "var(--silver-colors-border)",
@@ -2012,19 +2128,19 @@ const tokens = {
     "variable": "var(--silver-colors-icon-accent)"
   },
   "colors.icon.success": {
-    "value": "var(--silver-colors-success-fg)",
+    "value": "var(--silver-colors-status-success-fg)",
     "variable": "var(--silver-colors-icon-success)"
   },
   "colors.icon.error": {
-    "value": "var(--silver-colors-error-fg)",
+    "value": "var(--silver-colors-status-error-fg)",
     "variable": "var(--silver-colors-icon-error)"
   },
   "colors.icon.warning": {
-    "value": "var(--silver-colors-warning-fg)",
+    "value": "var(--silver-colors-status-warning-fg)",
     "variable": "var(--silver-colors-icon-warning)"
   },
   "colors.icon.info": {
-    "value": "var(--silver-colors-info-fg)",
+    "value": "var(--silver-colors-status-info-fg)",
     "variable": "var(--silver-colors-icon-info)"
   },
   "colors.icon.blue": {
@@ -2052,7 +2168,7 @@ const tokens = {
     "variable": "var(--silver-colors-icon-teal)"
   },
   "colors.icon.yellow": {
-    "value": "var(--silver-colors-yellow-600)",
+    "value": "var(--silver-colors-yellow-500)",
     "variable": "var(--silver-colors-icon-yellow)"
   },
   "colors.icon.orange": {
@@ -2355,9 +2471,141 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-fg)",
     "variable": "var(--silver-colors-color-palette-fg)"
   },
+  "colors.colorPalette.success.fg": {
+    "value": "var(--silver-colors-color-palette-success-fg)",
+    "variable": "var(--silver-colors-color-palette-success-fg)"
+  },
+  "colors.colorPalette.success.border": {
+    "value": "var(--silver-colors-color-palette-success-border)",
+    "variable": "var(--silver-colors-color-palette-success-border)"
+  },
+  "colors.colorPalette.border": {
+    "value": "var(--silver-colors-color-palette-border)",
+    "variable": "var(--silver-colors-color-palette-border)"
+  },
+  "colors.colorPalette.success.borderHover": {
+    "value": "var(--silver-colors-color-palette-success-border-hover)",
+    "variable": "var(--silver-colors-color-palette-success-border-hover)"
+  },
+  "colors.colorPalette.borderHover": {
+    "value": "var(--silver-colors-color-palette-border-hover)",
+    "variable": "var(--silver-colors-color-palette-border-hover)"
+  },
+  "colors.colorPalette.success.solid": {
+    "value": "var(--silver-colors-color-palette-success-solid)",
+    "variable": "var(--silver-colors-color-palette-success-solid)"
+  },
+  "colors.colorPalette.solid": {
+    "value": "var(--silver-colors-color-palette-solid)",
+    "variable": "var(--silver-colors-color-palette-solid)"
+  },
+  "colors.colorPalette.success.solidFg": {
+    "value": "var(--silver-colors-color-palette-success-solid-fg)",
+    "variable": "var(--silver-colors-color-palette-success-solid-fg)"
+  },
+  "colors.colorPalette.solidFg": {
+    "value": "var(--silver-colors-color-palette-solid-fg)",
+    "variable": "var(--silver-colors-color-palette-solid-fg)"
+  },
+  "colors.colorPalette.error.fg": {
+    "value": "var(--silver-colors-color-palette-error-fg)",
+    "variable": "var(--silver-colors-color-palette-error-fg)"
+  },
+  "colors.colorPalette.error.border": {
+    "value": "var(--silver-colors-color-palette-error-border)",
+    "variable": "var(--silver-colors-color-palette-error-border)"
+  },
+  "colors.colorPalette.error.borderHover": {
+    "value": "var(--silver-colors-color-palette-error-border-hover)",
+    "variable": "var(--silver-colors-color-palette-error-border-hover)"
+  },
+  "colors.colorPalette.error.solid": {
+    "value": "var(--silver-colors-color-palette-error-solid)",
+    "variable": "var(--silver-colors-color-palette-error-solid)"
+  },
+  "colors.colorPalette.error.solidFg": {
+    "value": "var(--silver-colors-color-palette-error-solid-fg)",
+    "variable": "var(--silver-colors-color-palette-error-solid-fg)"
+  },
+  "colors.colorPalette.warning.fg": {
+    "value": "var(--silver-colors-color-palette-warning-fg)",
+    "variable": "var(--silver-colors-color-palette-warning-fg)"
+  },
+  "colors.colorPalette.warning.border": {
+    "value": "var(--silver-colors-color-palette-warning-border)",
+    "variable": "var(--silver-colors-color-palette-warning-border)"
+  },
+  "colors.colorPalette.warning.borderHover": {
+    "value": "var(--silver-colors-color-palette-warning-border-hover)",
+    "variable": "var(--silver-colors-color-palette-warning-border-hover)"
+  },
+  "colors.colorPalette.warning.solid": {
+    "value": "var(--silver-colors-color-palette-warning-solid)",
+    "variable": "var(--silver-colors-color-palette-warning-solid)"
+  },
+  "colors.colorPalette.warning.solidFg": {
+    "value": "var(--silver-colors-color-palette-warning-solid-fg)",
+    "variable": "var(--silver-colors-color-palette-warning-solid-fg)"
+  },
+  "colors.colorPalette.info.fg": {
+    "value": "var(--silver-colors-color-palette-info-fg)",
+    "variable": "var(--silver-colors-color-palette-info-fg)"
+  },
+  "colors.colorPalette.info.solid": {
+    "value": "var(--silver-colors-color-palette-info-solid)",
+    "variable": "var(--silver-colors-color-palette-info-solid)"
+  },
+  "colors.colorPalette.info.solidFg": {
+    "value": "var(--silver-colors-color-palette-info-solid-fg)",
+    "variable": "var(--silver-colors-color-palette-info-solid-fg)"
+  },
+  "colors.colorPalette.neutral.solid": {
+    "value": "var(--silver-colors-color-palette-neutral-solid)",
+    "variable": "var(--silver-colors-color-palette-neutral-solid)"
+  },
+  "colors.colorPalette.neutral.solidFg": {
+    "value": "var(--silver-colors-color-palette-neutral-solid-fg)",
+    "variable": "var(--silver-colors-color-palette-neutral-solid-fg)"
+  },
+  "colors.colorPalette.disabled.solid": {
+    "value": "var(--silver-colors-color-palette-disabled-solid)",
+    "variable": "var(--silver-colors-color-palette-disabled-solid)"
+  },
+  "colors.colorPalette.disabled.solidFg": {
+    "value": "var(--silver-colors-color-palette-disabled-solid-fg)",
+    "variable": "var(--silver-colors-color-palette-disabled-solid-fg)"
+  },
+  "colors.colorPalette.success": {
+    "value": "var(--silver-colors-color-palette-success)",
+    "variable": "var(--silver-colors-color-palette-success)"
+  },
+  "colors.colorPalette.neutral": {
+    "value": "var(--silver-colors-color-palette-neutral)",
+    "variable": "var(--silver-colors-color-palette-neutral)"
+  },
+  "colors.colorPalette.error": {
+    "value": "var(--silver-colors-color-palette-error)",
+    "variable": "var(--silver-colors-color-palette-error)"
+  },
   "colors.colorPalette.muted": {
     "value": "var(--silver-colors-color-palette-muted)",
     "variable": "var(--silver-colors-color-palette-muted)"
+  },
+  "colors.colorPalette.disabled": {
+    "value": "var(--silver-colors-color-palette-disabled)",
+    "variable": "var(--silver-colors-color-palette-disabled)"
+  },
+  "colors.colorPalette.onPrimary": {
+    "value": "var(--silver-colors-color-palette-on-primary)",
+    "variable": "var(--silver-colors-color-palette-on-primary)"
+  },
+  "colors.colorPalette.ghost.hover": {
+    "value": "var(--silver-colors-color-palette-ghost-hover)",
+    "variable": "var(--silver-colors-color-palette-ghost-hover)"
+  },
+  "colors.colorPalette.ghost.active": {
+    "value": "var(--silver-colors-color-palette-ghost-active)",
+    "variable": "var(--silver-colors-color-palette-ghost-active)"
   },
   "colors.colorPalette.emphasized": {
     "value": "var(--silver-colors-color-palette-emphasized)",
@@ -2495,21 +2743,9 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-tertiary)",
     "variable": "var(--silver-colors-color-palette-tertiary)"
   },
-  "colors.colorPalette.disabled": {
-    "value": "var(--silver-colors-color-palette-disabled)",
-    "variable": "var(--silver-colors-color-palette-disabled)"
-  },
   "colors.colorPalette.accent": {
     "value": "var(--silver-colors-color-palette-accent)",
     "variable": "var(--silver-colors-color-palette-accent)"
-  },
-  "colors.colorPalette.success": {
-    "value": "var(--silver-colors-color-palette-success)",
-    "variable": "var(--silver-colors-color-palette-success)"
-  },
-  "colors.colorPalette.error": {
-    "value": "var(--silver-colors-color-palette-error)",
-    "variable": "var(--silver-colors-color-palette-error)"
   },
   "colors.colorPalette.warning": {
     "value": "var(--silver-colors-color-palette-warning)",

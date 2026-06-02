@@ -6,6 +6,7 @@ import {useCallback, useId, useState} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
+import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
@@ -39,7 +40,7 @@ export interface SideNavItemProps {
   /**
    * Icon rendered before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the item can expand/collapse its children.
    * @default false
@@ -97,10 +98,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: 'var(--silver-sizes-icon-md)',
-    '& > svg': {
-      w: '1em',
-      h: '1em',
-    },
   }),
   collapsed: css({
     display: 'flex',
@@ -158,10 +155,6 @@ const styles = {
     transitionProperty: 'transform',
     transitionDuration: 'fast',
     transitionTimingFunction: 'default',
-    '& > svg': {
-      w: '1em',
-      h: '1em',
-    },
   }),
   chevronExpanded: css({
     transform: 'rotate(180deg)',
@@ -249,7 +242,7 @@ export function SideNavItem({
   const iconSlot =
     icon != null ? (
       <span aria-hidden="true" className={styles.icon}>
-        {icon}
+        <Icon icon={icon} size="sm" />
       </span>
     ) : undefined;
 
@@ -299,7 +292,7 @@ export function SideNavItem({
 
   const chevronSlot = isExpandable ? (
     <span className={cx(styles.chevron, isExpanded && styles.chevronExpanded)}>
-      <ChevronDown />
+      <Icon icon={ChevronDown} size="sm" />
     </span>
   ) : null;
 

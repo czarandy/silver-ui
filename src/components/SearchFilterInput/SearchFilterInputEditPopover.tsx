@@ -273,7 +273,7 @@ function NestedSubFilterRow({
               });
             }}
             options={operatorOptions}
-            value={subFilter.operator}
+            value={subFilter.operator ?? null}
           />
         </div>
       ) : null}
@@ -403,7 +403,7 @@ function NestedEditor({
             }
           }}
           options={operatorOptions}
-          value={partialFilter.operator}
+          value={partialFilter.operator ?? null}
         />
       ) : null}
       <div className={styles.nestedList}>
@@ -588,7 +588,7 @@ export function SearchFilterInputEditPopover({
                   label="Operator"
                   onChange={handleOperatorChange}
                   options={operatorOptions}
-                  value={partialFilter.operator}
+                  value={partialFilter.operator ?? null}
                 />
               </div>
             ) : null}

@@ -88,17 +88,118 @@ export default defineConfig({
             active: {value: '{colors.silver-primary.700}'},
             subtle: {value: '{colors.silver-primary.100}'},
           },
-          success: {
-            fg: {value: '#108627'},
+          destructive: {
+            DEFAULT: {
+              value: {base: '{colors.red.600}', _dark: '{colors.red.500}'},
+            },
+            hover: {
+              value: {base: '{colors.red.700}', _dark: '{colors.red.400}'},
+            },
+            active: {
+              value: {base: '{colors.red.800}', _dark: '{colors.red.300}'},
+            },
+            fg: {value: '{colors.white}'},
           },
-          error: {
-            fg: {value: '#d92644'},
+          status: {
+            success: {
+              fg: {value: '#108627'},
+              border: {
+                value: {
+                  base: '{colors.green.600}',
+                  _dark: '{colors.green.400}',
+                },
+              },
+              borderHover: {
+                value: {
+                  base: '{colors.green.700}',
+                  _dark: '{colors.green.300}',
+                },
+              },
+              solid: {
+                value: {
+                  base: '{colors.green.600}',
+                  _dark: '{colors.green.500}',
+                },
+              },
+              solidFg: {value: '{colors.white}'},
+            },
+            error: {
+              fg: {value: '#d92644'},
+              border: {
+                value: {base: '{colors.red.600}', _dark: '{colors.red.400}'},
+              },
+              borderHover: {
+                value: {base: '{colors.red.700}', _dark: '{colors.red.300}'},
+              },
+              solid: {
+                value: {base: '{colors.red.600}', _dark: '{colors.red.500}'},
+              },
+              solidFg: {value: '{colors.white}'},
+            },
+            warning: {
+              fg: {value: '{colors.yellow.500}'},
+              border: {
+                value: {
+                  base: '{colors.yellow.500}',
+                  _dark: '{colors.yellow.400}',
+                },
+              },
+              borderHover: {
+                value: {
+                  base: '{colors.yellow.600}',
+                  _dark: '{colors.yellow.300}',
+                },
+              },
+              solid: {
+                value: {
+                  base: '{colors.yellow.400}',
+                  _dark: '{colors.yellow.300}',
+                },
+              },
+              solidFg: {
+                value: {
+                  base: '{colors.yellow.950}',
+                  _dark: '{colors.yellow.950}',
+                },
+              },
+            },
+            info: {
+              fg: {value: '#0164e0'},
+              solid: {value: '{colors.primary}'},
+              solidFg: {value: '{colors.fg.onPrimary}'},
+            },
+            neutral: {
+              solid: {
+                value: {
+                  base: '{colors.silver-neutral.500}',
+                  _dark: '{colors.silver-neutral.400}',
+                },
+              },
+              solidFg: {value: '{colors.white}'},
+            },
+            disabled: {
+              solid: {
+                value: {
+                  base: '{colors.silver-neutral.400}',
+                  _dark: '{colors.silver-neutral.600}',
+                },
+              },
+              solidFg: {value: '{colors.white}'},
+            },
           },
-          warning: {
-            fg: {value: '#e8b00a'},
-          },
-          info: {
-            fg: {value: '#0164e0'},
+          presence: {
+            success: {
+              value: {base: '{colors.green.500}', _dark: '{colors.green.400}'},
+            },
+            neutral: {
+              value: {
+                base: '{colors.silver-neutral.500}',
+                _dark: '{colors.silver-neutral.400}',
+              },
+            },
+            error: {
+              value: {base: '{colors.red.600}', _dark: '{colors.red.400}'},
+            },
           },
           fg: {
             DEFAULT: {
@@ -113,6 +214,13 @@ export default defineConfig({
                 _dark: '{colors.silver-neutral.400}',
               },
             },
+            disabled: {
+              value: {
+                base: '{colors.silver-neutral.400}',
+                _dark: '{colors.silver-neutral.600}',
+              },
+            },
+            onPrimary: {value: '{colors.white}'},
           },
           bg: {
             DEFAULT: {
@@ -128,6 +236,20 @@ export default defineConfig({
               value: {
                 base: '{colors.silver-neutral.100}',
                 _dark: '{colors.silver-neutral.700}',
+              },
+            },
+            ghost: {
+              hover: {
+                value: {
+                  base: 'rgba(0, 0, 0, 0.06)',
+                  _dark: 'rgba(255, 255, 255, 0.08)',
+                },
+              },
+              active: {
+                value: {
+                  base: 'rgba(0, 0, 0, 0.1)',
+                  _dark: 'rgba(255, 255, 255, 0.12)',
+                },
               },
             },
           },
@@ -330,17 +452,17 @@ export default defineConfig({
               },
             },
             accent: {value: '{colors.primary}'},
-            success: {value: '{colors.success.fg}'},
-            error: {value: '{colors.error.fg}'},
-            warning: {value: '{colors.warning.fg}'},
-            info: {value: '{colors.info.fg}'},
+            success: {value: '{colors.status.success.fg}'},
+            error: {value: '{colors.status.error.fg}'},
+            warning: {value: '{colors.status.warning.fg}'},
+            info: {value: '{colors.status.info.fg}'},
             blue: {value: '{colors.blue.600}'},
             red: {value: '{colors.red.600}'},
             green: {value: '{colors.green.600}'},
             gray: {value: '{colors.silver-neutral.600}'},
             cyan: {value: '{colors.cyan.600}'},
             teal: {value: '{colors.teal.600}'},
-            yellow: {value: '{colors.yellow.600}'},
+            yellow: {value: '{colors.yellow.500}'},
             orange: {value: '{colors.orange.600}'},
             pink: {value: '{colors.pink.600}'},
             purple: {value: '{colors.purple.600}'},

@@ -1,6 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {RadioGroup} from './RadioGroup';
+import {RadioGroup, type RadioGroupProps} from './RadioGroup';
 import {RadioGroupItem} from './RadioGroupItem';
 
 function RadioGroupStory(args: React.ComponentProps<typeof RadioGroup>) {
@@ -19,7 +19,7 @@ function RadioGroupStory(args: React.ComponentProps<typeof RadioGroup>) {
   );
 }
 
-const meta: Meta<typeof RadioGroup> = {
+const meta = {
   title: 'Components/RadioGroup',
   component: RadioGroup,
   args: {
@@ -27,11 +27,11 @@ const meta: Meta<typeof RadioGroup> = {
     description: 'Choose one delivery channel.',
     value: 'email',
   },
-  render: args => <RadioGroupStory {...args} />,
-};
+  render: (args: RadioGroupProps) => <RadioGroupStory {...args} />,
+} satisfies Meta<RadioGroupProps>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<RadioGroupProps>;
 
 export const Default: Story = {};
 export const Horizontal: Story = {args: {orientation: 'horizontal'}};

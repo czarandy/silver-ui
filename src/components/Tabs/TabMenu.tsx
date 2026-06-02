@@ -1,8 +1,8 @@
 import {Check, ChevronDown} from 'lucide-react';
-import {useState, type CSSProperties, type ReactNode, type Ref} from 'react';
+import {useState, type CSSProperties, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {useTabsContext} from './TabsContext';
 
@@ -10,7 +10,7 @@ export interface TabMenuOption {
   /**
    * Icon rendered before the option label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Visible option label.
    */
@@ -193,7 +193,9 @@ export function TabMenu({
                 type="button">
                 <span className={styles.itemContent}>
                   {option.icon != null ? (
-                    <span className={styles.itemIcon}>{option.icon}</span>
+                    <span className={styles.itemIcon}>
+                      <Icon color="secondary" icon={option.icon} size="sm" />
+                    </span>
                   ) : null}
                   {option.label}
                 </span>

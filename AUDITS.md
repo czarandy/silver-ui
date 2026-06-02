@@ -22,9 +22,9 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 
 ## Navigation
 
-- [ ] Breadcrumbs
+- [x] Breadcrumbs
 - [x] Link
-- [ ] MobileNav
+- [x] MobileNav
 - [x] Pagination
 - [x] SideNav
 - [ ] Tabs
@@ -67,7 +67,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] DateInput
 - [ ] DateRangeInput
 - [ ] DateTimeInput
-- [ ] Field
+- [x] Field
 - [ ] FileInput
 - [ ] InputGroup
 - [ ] MultiSelect
@@ -81,7 +81,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] Switch
 - [ ] TagsInput
 - [ ] TextArea
-- [ ] TextInput
+- [x] TextInput
 - [ ] TimeInput
 
 ## Feedback & Status

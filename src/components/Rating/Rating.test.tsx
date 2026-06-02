@@ -76,6 +76,59 @@ describe('Rating', () => {
       expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
       expect(screen.getByRole('img')).toBeInTheDocument();
     });
+
+    it('does not render radiogroup when isDisabled is true with onChange', () => {
+      render(<Rating isDisabled onChange={vi.fn()} value={3} />);
+
+      expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+      expect(screen.getByRole('img')).toBeInTheDocument();
+    });
+
+    it('renders the correct number of radio inputs for custom count', () => {
+      render(<Rating count={10} onChange={vi.fn()} value={5} />);
+
+      expect(screen.getAllByRole('radio')).toHaveLength(10);
+    });
+
+    it('applies custom label to radiogroup aria-label', () => {
+      render(<Rating label="Quality" onChange={vi.fn()} value={3} />);
+
+      expect(
+        screen.getByRole('radiogroup', {name: 'Quality'}),
+      ).toBeInTheDocument();
+    });
+
+    it('uses unique name attributes to avoid radio group collisions', () => {
+      render(
+        <>
+          <Rating data-testid="a" label="Rating" onChange={vi.fn()} value={1} />
+          <Rating data-testid="b" label="Rating" onChange={vi.fn()} value={2} />
+        </>,
+      );
+
+      const radios = screen.getAllByRole('radio');
+      const nameA = radios[0].getAttribute('name');
+      const nameB = radios[5].getAttribute('name');
+      expect(nameA).toBeTruthy();
+      expect(nameB).toBeTruthy();
+      expect(nameA).not.toBe(nameB);
+    });
+
+    it('previews on hover without calling onChange', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(<Rating data-testid="rating" onChange={onChange} value={1} />);
+
+      /* eslint-disable testing-library/no-node-access -- need direct label access for hover */
+      const labels = screen.getByTestId('rating').querySelectorAll('label');
+      await user.hover(labels[3]);
+      /* eslint-enable testing-library/no-node-access */
+
+      expect(onChange).not.toHaveBeenCalled();
+
+      await user.unhover(screen.getByTestId('rating'));
+      expect(onChange).not.toHaveBeenCalled();
+    });
   });
 
   it('applies className, style, ref, and data-testid', () => {
@@ -95,5 +148,23 @@ describe('Rating', () => {
     expect(el).toHaveClass('custom');
     expect(el).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(el);
+  });
+
+  it('throws in dev for out-of-range value', () => {
+    expect(() => render(<Rating isReadOnly value={-1} />)).toThrow(
+      'Rating: value -1 is out of range [0, 5].',
+    );
+  });
+
+  it('throws in dev for count < 1', () => {
+    expect(() => render(<Rating count={0} isReadOnly value={0} />)).toThrow(
+      'Rating: count must be a positive integer, received 0.',
+    );
+  });
+
+  it('throws in dev for non-integer count', () => {
+    expect(() => render(<Rating count={3.5} isReadOnly value={2} />)).toThrow(
+      'Rating: count must be a positive integer, received 3.5.',
+    );
   });
 });

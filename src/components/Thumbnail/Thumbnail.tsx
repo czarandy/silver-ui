@@ -76,7 +76,7 @@ const styles = {
     aspectRatio: '1',
     borderRadius: 'md',
     overflow: 'hidden',
-    bg: 'silver-neutral.100',
+    bg: 'surface.gray',
   }),
   interactive: css({
     cursor: 'pointer',
@@ -123,7 +123,7 @@ const styles = {
     position: 'absolute',
     inset: 0,
     borderRadius: 'inherit',
-    boxShadow: 'inset 0 0 0 1px var(--silver-colors-silver-neutral-300)',
+    boxShadow: 'inset 0 0 0 1px token(colors.border.emphasized)',
     pointerEvents: 'none',
   }),
   remove: css({

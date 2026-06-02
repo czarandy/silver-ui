@@ -3,24 +3,36 @@ import {
   useId,
   type ChangeEvent,
   type CSSProperties,
+  type FocusEvent,
   type KeyboardEvent,
   type ReactNode,
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {
   getDescribedBy,
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {useInputGroup} from '../InputGroup';
 import {Spinner} from '../Spinner';
 
 export type TextInputType = 'email' | 'password' | 'text';
 
-export interface TextInputProps {
+export type TextInputProps = {
+  /**
+   * HTML autocomplete hint for the browser.
+   */
+  autoComplete?: string;
   /**
    * Additional CSS class names applied to the input wrapper.
    */
@@ -62,25 +74,25 @@ export interface TextInputProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   */
-  isRequired?: boolean;
-  /**
    * Field label.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip shown beside the label.
    */
   labelTooltip?: ReactNode;
   /**
+   * Called when the input loses focus.
+   */
+  onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  /**
    * Called with the next string value.
    */
-  onChange?: (
+  onChange: (
     value: string,
     event: ChangeEvent<HTMLInputElement> | null,
   ) => void;
@@ -88,6 +100,10 @@ export interface TextInputProps {
    * Called when Enter is pressed.
    */
   onEnter?: () => void;
+  /**
+   * Called when the input gains focus.
+   */
+  onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   /**
    * Keyboard event handler for the input.
    */
@@ -105,9 +121,9 @@ export interface TextInputProps {
    */
   size?: InputSize;
   /**
-   * Icon or content shown before the input.
+   * Icon shown before the input.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Status displayed on the field.
    */
@@ -123,30 +139,34 @@ export interface TextInputProps {
   /**
    * Controlled input value.
    */
-  value?: string;
-}
+  value: string;
+} & FieldNecessity;
 
 /**
  * Single-line text input field.
  */
 export function TextInput({
+  autoComplete,
   label,
-  value = '',
+  value,
   onChange,
+  onBlur,
+  onFocus,
   type = 'text',
   size = 'md',
   placeholder,
   description,
   endContent,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isLoading = false,
   hasClear = false,
   hasAutoFocus = false,
   htmlName,
   status,
+  labelIcon,
   labelTooltip,
   startIcon,
   onEnter,
@@ -167,22 +187,26 @@ export function TextInput({
   const inputWrapper = (
     <div
       className={cx(
-        inputStyles.wrapper,
-        inputStyles.size[size],
-        status != null ? inputStyles.status[status.type] : undefined,
-        effectiveDisabled ? inputStyles.wrapperDisabled : undefined,
-        className,
+        inputRecipe({
+          size,
+          status: status?.type,
+          isDisabled: effectiveDisabled,
+        }),
+        inputGroup != null ? className : undefined,
       )}
-      style={style}>
+      style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
-        <span className={inputStyles.iconSlot}>{startIcon}</span>
+        <span className={inputStyles.iconSlot}>
+          <Icon color="secondary" icon={startIcon} size="sm" />
+        </span>
       ) : null}
       <input
         aria-busy={isLoading || undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         aria-label={inputGroup != null ? label : undefined}
-        aria-required={isRequired || undefined}
+        aria-required={isRequired ?? undefined}
+        autoComplete={autoComplete}
         // eslint-disable-next-line jsx-a11y-x/no-autofocus
         autoFocus={hasAutoFocus}
         className={inputStyles.control}
@@ -190,15 +214,18 @@ export function TextInput({
         disabled={effectiveDisabled}
         id={inputId}
         name={htmlName}
-        onChange={event => onChange?.(event.target.value, event)}
+        onBlur={onBlur}
+        onChange={event => onChange(event.target.value, event)}
+        onFocus={onFocus}
         onKeyDown={event => {
-          if (event.key === 'Enter') {
+          if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
             onEnter?.();
           }
           onKeyDown?.(event);
         }}
         placeholder={placeholder}
         ref={ref}
+        required={isRequired ?? undefined}
         type={type}
         value={value}
       />
@@ -206,7 +233,7 @@ export function TextInput({
         <button
           aria-label={`Clear ${label}`}
           className={inputStyles.clearButton}
-          onClick={() => onChange?.('', null)}
+          onClick={() => onChange('', null)}
           type="button">
           <Icon icon={X} size="sm" />
         </button>
@@ -227,6 +254,7 @@ export function TextInput({
 
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
@@ -235,10 +263,12 @@ export function TextInput({
       isOptional={isOptional}
       isRequired={isRequired}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       {inputWrapper}
     </Field>
   );

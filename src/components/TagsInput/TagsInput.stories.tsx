@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Users} from 'lucide-react';
 import {useMemo, useState} from 'react';
 import {createStaticSource, type SearchableItem} from '../Combobox';
-import {TagsInput} from './TagsInput';
+import {TagsInput, type TagsInputProps} from './TagsInput';
 
 const people: SearchableItem[] = [
   {id: 'ada', label: 'Ada Lovelace'},
@@ -10,14 +10,14 @@ const people: SearchableItem[] = [
   {id: 'katherine', label: 'Katherine Johnson'},
 ];
 
-const meta: Meta<typeof TagsInput> = {
+const meta = {
   title: 'Components/TagsInput',
   component: TagsInput,
   args: {label: 'Team', placeholder: 'Search people'},
-};
+} satisfies Meta<TagsInputProps>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<TagsInputProps>;
 
 function TagsInputStory(args: React.ComponentProps<typeof TagsInput>) {
   const [value, setValue] = useState<SearchableItem[]>([people[0]]);
@@ -29,16 +29,16 @@ function TagsInputStory(args: React.ComponentProps<typeof TagsInput>) {
       hasEntriesOnFocus
       onChange={setValue}
       searchSource={source}
-      startIcon={<Users />}
+      startIcon={Users}
       value={value}
     />
   );
 }
 
 export const Default: Story = {
-  render: args => <TagsInputStory {...args} />,
+  render: (args: TagsInputProps) => <TagsInputStory {...args} />,
 };
 export const Creatable: Story = {
   args: {hasCreate: true, value: []},
-  render: args => <TagsInputStory {...args} />,
+  render: (args: TagsInputProps) => <TagsInputStory {...args} />,
 };

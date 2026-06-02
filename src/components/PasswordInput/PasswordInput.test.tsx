@@ -4,8 +4,10 @@ import {describe, expect, it, vi} from 'vitest';
 import {PasswordInput} from './PasswordInput';
 
 describe('PasswordInput', () => {
+  const noop = () => {};
+
   it('renders as a password input by default', () => {
-    render(<PasswordInput label="Password" />);
+    render(<PasswordInput label="Password" onChange={noop} value="" />);
     expect(screen.getByLabelText('Password')).toHaveAttribute(
       'type',
       'password',
@@ -14,7 +16,7 @@ describe('PasswordInput', () => {
 
   it('toggles visibility when the show/hide button is clicked', async () => {
     const user = userEvent.setup();
-    render(<PasswordInput label="Password" value="secret" />);
+    render(<PasswordInput label="Password" onChange={noop} value="secret" />);
 
     const input = screen.getByLabelText('Password');
     expect(input).toHaveAttribute('type', 'password');
@@ -36,7 +38,9 @@ describe('PasswordInput', () => {
   });
 
   it('disables the toggle button when the input is disabled', () => {
-    render(<PasswordInput isDisabled label="Password" />);
+    render(
+      <PasswordInput isDisabled label="Password" onChange={noop} value="" />,
+    );
     expect(screen.getByRole('button', {name: 'Show password'})).toBeDisabled();
   });
 });

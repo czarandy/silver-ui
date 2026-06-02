@@ -10,21 +10,21 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {formatFileSize} from '../../internal/formatFileSize';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {Field, type InputStatus} from '../Field';
+import {Field, type FieldNecessity, type InputStatus} from '../Field';
 import {
-  formatFileSize,
   getDescribedBy,
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 
 export type FileInputMode = 'dropzone' | 'input';
 
-export interface FileInputProps {
+export type FileInputProps = {
   /**
    * Comma-separated MIME types or file extensions the input accepts.
    */
@@ -67,19 +67,13 @@ export interface FileInputProps {
    */
   isMultiple?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label text.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -121,7 +115,7 @@ export interface FileInputProps {
    * Currently selected file(s).
    */
   value: File | File[] | null;
-}
+} & FieldNecessity;
 
 const styles = {
   surface: css({
@@ -133,11 +127,11 @@ const styles = {
     py: '2',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.300',
+    borderColor: 'border.emphasized',
     borderRadius: 'md',
     bg: 'bg',
     cursor: 'pointer',
-    _hover: {borderColor: 'silver-neutral.400'},
+    _hover: {borderColor: 'fg.muted'},
     _focusVisible: {
       outline: '2px solid',
       outlineColor: 'primary',
@@ -274,11 +268,12 @@ export function FileInput({
   placeholder,
   description,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isLoading = false,
   status: statusFromProps,
+  labelIcon,
   labelTooltip,
   className,
   'data-testid': dataTestId,
@@ -347,6 +342,8 @@ export function FileInput({
       }
     : {};
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
       description={description}
@@ -354,9 +351,9 @@ export function FileInput({
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}

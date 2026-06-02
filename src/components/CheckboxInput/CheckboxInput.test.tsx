@@ -15,7 +15,9 @@ describe('CheckboxInput', () => {
   });
 
   it('supports indeterminate state', () => {
-    render(<CheckboxInput label="Mixed" value="indeterminate" />);
+    render(
+      <CheckboxInput label="Mixed" onChange={() => {}} value="indeterminate" />,
+    );
 
     expect(screen.getByRole('checkbox', {name: 'Mixed'})).toHaveAttribute(
       'aria-checked',

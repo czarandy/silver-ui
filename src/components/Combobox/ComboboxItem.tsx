@@ -1,6 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';
 import type {SearchableItem} from './types';
 
@@ -20,7 +21,7 @@ export interface ComboboxItemProps<T extends SearchableItem = SearchableItem> {
   /**
    * Icon or avatar rendered before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the item is disabled.
    * @default false
@@ -51,10 +52,6 @@ const styles = {
     display: 'inline-flex',
     flexShrink: 0,
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   text: css({
     display: 'flex',
@@ -91,7 +88,11 @@ export function ComboboxItem<T extends SearchableItem>({
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      {icon != null ? <span className={styles.icon}>{icon}</span> : null}
+      {icon != null ? (
+        <span className={styles.icon}>
+          <Icon color="secondary" icon={icon} size="sm" />
+        </span>
+      ) : null}
       <span className={styles.text}>
         <Text as="span" color="inherit" type="label">
           {item.label}

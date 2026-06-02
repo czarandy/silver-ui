@@ -19,16 +19,16 @@ const groupedBorderEnd = {
 
 const statusStyles = {
   error: {
-    borderColor: 'red.600',
-    _focusWithin: {borderColor: 'red.600'},
+    borderColor: 'status.error.border',
+    _focusWithin: {borderColor: 'status.error.border'},
   },
   success: {
-    borderColor: 'green.600',
-    _focusWithin: {borderColor: 'green.600'},
+    borderColor: 'status.success.border',
+    _focusWithin: {borderColor: 'status.success.border'},
   },
   warning: {
-    borderColor: 'yellow.500',
-    _focusWithin: {borderColor: 'yellow.500'},
+    borderColor: 'status.warning.border',
+    _focusWithin: {borderColor: 'status.warning.border'},
   },
 } satisfies Record<InputStatusType, object>;
 
@@ -69,7 +69,7 @@ export const inputGroupRecipe = cva({
       px: '2',
       borderWidth: '1px',
       borderStyle: 'solid',
-      borderColor: 'silver-neutral.300',
+      borderColor: 'border.emphasized',
       borderRadius: 'md',
       bg: 'bg.subtle',
       color: 'fg.muted',
@@ -77,9 +77,6 @@ export const inputGroupRecipe = cva({
       fontSize: 'md',
       lineHeight: 'normal',
       whiteSpace: 'nowrap',
-      _dark: {
-        borderColor: 'silver-neutral.700',
-      },
     },
     [`${addonSelector}:not(:first-child)`]: groupedBorderStart,
     [`${addonSelector}:not(:last-child)`]: groupedBorderEnd,

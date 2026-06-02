@@ -32,7 +32,7 @@ const styles = {
     justifyContent: 'center',
     borderRadius: 'full',
     bg: 'primary',
-    color: 'white',
+    color: 'fg.onPrimary',
     flexShrink: 0,
     w: 'component.sm',
     h: 'component.sm',

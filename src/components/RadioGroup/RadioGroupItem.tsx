@@ -82,7 +82,7 @@ const styles = {
     boxSizing: 'border-box',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.400',
+    borderColor: 'border.emphasized',
     borderRadius: 'full',
     bg: 'bg',
     pointerEvents: 'none',
@@ -96,13 +96,13 @@ const styles = {
   }),
   dot: css({
     borderRadius: 'full',
-    bg: 'white',
+    bg: 'fg.onPrimary',
   }),
   label: css({
     cursor: 'pointer',
   }),
   labelDisabled: css({
-    color: 'silver-neutral.400',
+    color: 'fg.disabled',
     cursor: 'not-allowed',
   }),
   startContent: css({

@@ -10,9 +10,9 @@ import {
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
-import type {InputStatus, InputStatusType} from '../Field';
+import type {FieldNecessity, InputStatus, InputStatusType} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
@@ -20,7 +20,7 @@ import {Tooltip} from '../Tooltip';
 export type SwitchLabelPosition = 'end' | 'start';
 export type SwitchLabelSpacing = 'default' | 'spread';
 
-export interface SwitchProps {
+export type SwitchProps = {
   /**
    * Additional CSS class names applied to the field root.
    */
@@ -49,16 +49,6 @@ export interface SwitchProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Whether the switch is on.
    */
   isSelected: boolean;
@@ -69,7 +59,7 @@ export interface SwitchProps {
   /**
    * Content rendered before the label.
    */
-  labelIcon?: ReactNode;
+  labelIcon?: IconComponent;
   /**
    * Which side of the switch the label appears on.
    * @default 'end'
@@ -91,7 +81,7 @@ export interface SwitchProps {
   /**
    * Called when the checked state changes.
    */
-  onChange?: (checked: boolean, event: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (checked: boolean, event: ChangeEvent<HTMLInputElement>) => void;
   /**
    * Called when the switch receives focus.
    */
@@ -108,7 +98,7 @@ export interface SwitchProps {
    * Inline styles applied to the field root.
    */
   style?: CSSProperties;
-}
+} & FieldNecessity;
 
 const styles = {
   field: css({
@@ -144,7 +134,7 @@ const styles = {
     cursor: 'pointer',
   }),
   labelDisabled: css({
-    color: 'silver-neutral.400',
+    color: 'fg.disabled',
     cursor: 'not-allowed',
   }),
   labelIcon: css({
@@ -169,9 +159,9 @@ const styles = {
     borderRadius: 'md',
   }),
   statusColor: {
-    warning: css({bg: 'yellow.100', color: 'yellow.800'}),
-    error: css({bg: 'red.100', color: 'red.800'}),
-    success: css({bg: 'green.100', color: 'green.800'}),
+    warning: css({bg: 'surface.yellow', color: 'surface.yellow.fg'}),
+    error: css({bg: 'surface.red', color: 'surface.red.fg'}),
+    success: css({bg: 'surface.green', color: 'surface.green.fg'}),
   } satisfies Record<InputStatusType, string>,
   control: css({
     position: 'relative',
@@ -256,8 +246,8 @@ export function Switch({
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   label,
   labelIcon,
   labelTooltip,
@@ -294,7 +284,7 @@ export function Switch({
         disabled={isDisabled || isBusy}
         id={inputId}
         onBlur={onBlur}
-        onChange={event => onChange?.(event.target.checked, event)}
+        onChange={event => onChange(event.target.checked, event)}
         onFocus={onFocus}
         ref={ref}
         required={isRequired}
@@ -329,7 +319,9 @@ export function Switch({
         )}
         htmlFor={inputId}>
         {labelIcon != null ? (
-          <span className={styles.labelIcon}>{labelIcon}</span>
+          <span className={styles.labelIcon}>
+            <Icon color="secondary" icon={labelIcon} size="sm" />
+          </span>
         ) : null}
         <Text as="span" color="inherit" type="label">
           {label}

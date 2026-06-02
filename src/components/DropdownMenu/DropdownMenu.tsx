@@ -10,7 +10,7 @@ import {
 import {css} from 'styled-system/css';
 import {Button, type ButtonProps, type ButtonSize} from '../Button';
 import {Divider} from '../Divider';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Text} from '../Text';
 import {DropdownMenuContext} from './DropdownMenuContext';
@@ -24,7 +24,7 @@ export interface DropdownMenuItemData {
   /**
    * Icon rendered before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the item is disabled.
    */

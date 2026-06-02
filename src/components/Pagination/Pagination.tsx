@@ -104,7 +104,7 @@ const styles = {
     whiteSpace: 'nowrap',
   }),
   activePage: css({
-    bg: 'silver-neutral.100',
+    bg: 'bg.hover',
     fontWeight: 'medium',
   }),
 } as const;

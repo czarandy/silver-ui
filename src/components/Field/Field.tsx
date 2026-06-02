@@ -3,9 +3,10 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
+import {fieldLabelRecipe, fieldStatusRecipe} from './Field.recipe';
 import type {InputStatusType} from './types';
 
 export type FieldStatusVariant = 'attached' | 'detached';
@@ -25,7 +26,7 @@ export interface FieldStatus {
   type: InputStatusType;
 }
 
-export interface FieldProps {
+interface FieldBaseProps {
   /**
    * The form control rendered inside the field.
    */
@@ -61,23 +62,13 @@ export interface FieldProps {
    */
   isLabelHidden?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label text.
    */
   label: string;
   /**
-   * Optional content shown before the label.
+   * Optional icon shown before the label.
    */
-  labelIcon?: ReactNode;
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -101,27 +92,24 @@ export interface FieldProps {
   style?: CSSProperties;
 }
 
+export interface FieldNecessity {
+  /**
+   * Whether the field is optional. Cannot be `true` when `isRequired` is `true`.
+   */
+  isOptional?: boolean;
+  /**
+   * Whether the field is required. Cannot be `true` when `isOptional` is `true`.
+   */
+  isRequired?: boolean;
+}
+
+export type FieldProps = FieldBaseProps & FieldNecessity;
+
 const styles = {
   root: css({
     display: 'flex',
     flexDirection: 'column',
     gap: '1',
-  }),
-  label: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    w: 'fit-content',
-    color: 'fg.muted',
-    cursor: 'pointer',
-  }),
-  labelDisabled: css({
-    cursor: 'not-allowed',
-    color: 'silver-neutral.400',
-  }),
-  labelIcon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
   }),
   indicator: css({
     fontWeight: 'normal',
@@ -136,27 +124,6 @@ const styles = {
     flexDirection: 'column',
     isolation: 'isolate',
   }),
-  status: css({
-    fontFamily: 'body',
-    fontSize: 'sm',
-    lineHeight: 'normal',
-    px: '2',
-    py: '1.5',
-  }),
-  statusAttached: css({
-    mt: '-1',
-    pt: '2.5',
-    borderBottomRadius: 'md',
-  }),
-  statusDetached: css({
-    mt: '1',
-    borderRadius: 'md',
-  }),
-  statusColor: {
-    warning: css({bg: 'yellow.100', color: 'yellow.800'}),
-    error: css({bg: 'red.100', color: 'red.800'}),
-    success: css({bg: 'green.100', color: 'green.800'}),
-  } satisfies Record<InputStatusType, string>,
 } as const;
 
 /**
@@ -189,14 +156,9 @@ export function Field({
     (status?.message != null ? `${inputId}-status` : undefined);
   const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
   const labelNode = (
-    <label
-      className={cx(
-        styles.label,
-        isDisabled ? styles.labelDisabled : undefined,
-      )}
-      htmlFor={inputId}>
+    <label className={fieldLabelRecipe({isDisabled})} htmlFor={inputId}>
       {labelIcon != null ? (
-        <span className={styles.labelIcon}>{labelIcon}</span>
+        <Icon color="secondary" icon={labelIcon} size="sm" />
       ) : null}
       <Text as="span" color="inherit" type="label">
         {label}
@@ -231,13 +193,10 @@ export function Field({
     status?.message != null ? (
       <div
         aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-        className={cx(
-          styles.status,
-          statusVariant === 'attached'
-            ? styles.statusAttached
-            : styles.statusDetached,
-          styles.statusColor[status.type],
-        )}
+        className={fieldStatusRecipe({
+          statusType: status.type,
+          statusVariant,
+        })}
         id={resolvedStatusID}
         role={status.type === 'error' ? 'alert' : 'status'}>
         {status.message}

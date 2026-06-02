@@ -12,7 +12,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Field, type InputStatus} from '../Field';
+import {Field, type FieldNecessity, type InputStatus} from '../Field';
 import {Tooltip} from '../Tooltip';
 
 export type SliderOrientation = 'horizontal' | 'vertical';
@@ -29,7 +29,7 @@ export interface SliderMark {
   value: number;
 }
 
-export interface SliderBaseProps {
+export type SliderBaseProps = {
   /**
    * Additional CSS class names applied to the field root.
    */
@@ -57,16 +57,6 @@ export interface SliderBaseProps {
    * @default false
    */
   isLabelHidden?: boolean;
-  /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
   /**
    * Field label.
    */
@@ -116,13 +106,13 @@ export interface SliderBaseProps {
    * @default 'tooltip'
    */
   valueDisplay?: SliderValueDisplay;
-}
+} & FieldNecessity;
 
-export interface SliderSingleProps extends SliderBaseProps {
+export type SliderSingleProps = SliderBaseProps & {
   /**
    * Called when the value changes during pointer or keyboard interaction.
    */
-  onChange?: (value: number) => void;
+  onChange: (value: number) => void;
   /**
    * Called when pointer or keyboard interaction commits a value.
    */
@@ -131,9 +121,9 @@ export interface SliderSingleProps extends SliderBaseProps {
    * Current value.
    */
   value: number;
-}
+};
 
-export interface SliderRangeProps extends SliderBaseProps {
+export type SliderRangeProps = SliderBaseProps & {
   /**
    * Minimum number of steps between range thumbs.
    * @default 0
@@ -142,7 +132,7 @@ export interface SliderRangeProps extends SliderBaseProps {
   /**
    * Called when the range changes during pointer or keyboard interaction.
    */
-  onChange?: (value: [number, number]) => void;
+  onChange: (value: [number, number]) => void;
   /**
    * Called when pointer or keyboard interaction commits a range.
    */
@@ -151,7 +141,7 @@ export interface SliderRangeProps extends SliderBaseProps {
    * Current range.
    */
   value: [number, number];
-}
+};
 
 export type SliderProps = SliderRangeProps | SliderSingleProps;
 
@@ -334,8 +324,8 @@ export function Slider({
   formatValue,
   isDisabled = false,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   label,
   labelTooltip,
   marks,
@@ -435,11 +425,11 @@ export function Slider({
     (nextValues: number[]) => {
       pendingValuesRef.current = nextValues;
       if (isRange) {
-        (props.onChange as SliderRangeProps['onChange'])?.(
+        (props.onChange as SliderRangeProps['onChange'])(
           nextValues as [number, number],
         );
       } else {
-        (props.onChange as SliderSingleProps['onChange'])?.(nextValues[0]);
+        (props.onChange as SliderSingleProps['onChange'])(nextValues[0]);
       }
     },
     [isRange, props],
@@ -600,17 +590,16 @@ export function Slider({
       </span>
     ) : null;
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
       className={className}
       data-testid={dataTestId}
-      description={description}
-      descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
       labelTooltip={labelTooltip}
       ref={ref}

@@ -12,7 +12,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {ComboboxItem} from '../Combobox';
-import {Icon} from '../Icon';
+import type {IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Tag} from '../Tag';
 import {
@@ -142,9 +142,9 @@ export interface SearchFilterInputProps {
    */
   size?: SearchFilterInputSize;
   /**
-   * Icon or content shown before the input.
+   * Icon shown before the input.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Inline styles applied to the input wrapper.
    */
@@ -430,7 +430,7 @@ export function SearchFilterInput({
     return (
       <ComboboxItem
         description={field?.description}
-        icon={field?.icon ?? <Icon icon={Search} size="sm" />}
+        icon={field?.icon ?? Search}
         item={item}
       />
     );

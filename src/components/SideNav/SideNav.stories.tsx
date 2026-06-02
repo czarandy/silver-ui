@@ -42,8 +42,8 @@ export const Basic: Story = {
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/settings" icon={<Settings />} label="Settings" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/settings" icon={Settings} label="Settings" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -59,9 +59,9 @@ export const Collapsible: Story = {
         }
         isCollapsible>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
-          <SideNavItem href="/settings" icon={<Settings />} label="Settings" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
+          <SideNavItem href="/settings" icon={Settings} label="Settings" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -95,9 +95,9 @@ export const CollapsibleWithFooter: Story = {
         }
         isCollapsible>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
-          <SideNavItem href="/settings" icon={<Settings />} label="Settings" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
+          <SideNavItem href="/settings" icon={Settings} label="Settings" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -128,8 +128,8 @@ export const WithFooter: Story = {
         }
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -155,13 +155,9 @@ export const WithTopContent: Story = {
             />
           }>
           <SideNavSection title="Main">
-            <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-            <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
-            <SideNavItem
-              href="/settings"
-              icon={<Settings />}
-              label="Settings"
-            />
+            <SideNavItem href="/" icon={Home} isSelected label="Home" />
+            <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
+            <SideNavItem href="/settings" icon={Settings} label="Settings" />
           </SideNavSection>
         </SideNav>
       </div>
@@ -175,15 +171,15 @@ export const DisabledItems: Story = {
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
           <SideNavItem
             href="/settings"
-            icon={<Settings />}
+            icon={Settings}
             isDisabled
             label="Settings"
           />
-          <SideNavItem icon={<Archive />} isDisabled label="Archive" />
+          <SideNavItem icon={Archive} isDisabled label="Archive" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -199,17 +195,17 @@ export const WithEndContent: Story = {
           <SideNavItem
             endContent={<Badge label="3" />}
             href="/inbox"
-            icon={<Inbox />}
+            icon={Inbox}
             isSelected
             label="Inbox"
           />
           <SideNavItem
             endContent={<Badge label="12" />}
             href="/starred"
-            icon={<Star />}
+            icon={Star}
             label="Starred"
           />
-          <SideNavItem href="/trash" icon={<Trash />} label="Trash" />
+          <SideNavItem href="/trash" icon={Trash} label="Trash" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -222,18 +218,9 @@ export const ButtonItems: Story = {
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Actions">
-          <SideNavItem
-            icon={<Home />}
-            isSelected
-            label="Home"
-            onClick={() => {}}
-          />
-          <SideNavItem icon={<Search />} label="Search" onClick={() => {}} />
-          <SideNavItem
-            icon={<Settings />}
-            label="Settings"
-            onClick={() => {}}
-          />
+          <SideNavItem icon={Home} isSelected label="Home" onClick={() => {}} />
+          <SideNavItem icon={Search} label="Search" onClick={() => {}} />
+          <SideNavItem icon={Settings} label="Settings" onClick={() => {}} />
         </SideNavSection>
       </SideNav>
     </div>
@@ -246,17 +233,17 @@ export const MultipleSections: Story = {
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection isHeaderHidden title="Primary">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
         </SideNavSection>
         <SideNavSection subtitle="Personal files" title="Documents">
-          <SideNavItem href="/files" icon={<File />} label="All files" />
-          <SideNavItem href="/folders" icon={<Folder />} label="Folders" />
-          <SideNavItem href="/starred" icon={<Star />} label="Starred" />
+          <SideNavItem href="/files" icon={File} label="All files" />
+          <SideNavItem href="/folders" icon={Folder} label="Folders" />
+          <SideNavItem href="/starred" icon={Star} label="Starred" />
         </SideNavSection>
         <SideNavSection title="Team">
-          <SideNavItem href="/members" icon={<Users />} label="Members" />
-          <SideNavItem href="/settings" icon={<Settings />} label="Settings" />
+          <SideNavItem href="/members" icon={Users} label="Members" />
+          <SideNavItem href="/settings" icon={Settings} label="Settings" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -278,8 +265,8 @@ export const WithLogo: Story = {
           />
         }>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/settings" icon={<Settings />} label="Settings" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/settings" icon={Settings} label="Settings" />
         </SideNavSection>
       </SideNav>
     </div>
@@ -292,9 +279,9 @@ export const CollapsibleItems: Story = {
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-          <SideNavItem href="/inbox" icon={<Inbox />} label="Inbox" />
-          <SideNavItem icon={<Settings />} isCollapsible label="Settings">
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
+          <SideNavItem icon={Settings} isCollapsible label="Settings">
             <SideNavItem href="/general" label="General" />
             <SideNavItem href="/security" label="Security" />
             <SideNavItem href="/notifications" label="Notifications" />
@@ -311,16 +298,16 @@ export const CollapsibleWithLinks: Story = {
       <SideNav
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Main">
-          <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
           <SideNavItem
             href="/settings"
-            icon={<Settings />}
+            icon={Settings}
             isCollapsible
             label="Settings">
             <SideNavItem href="/general" label="General" />
             <SideNavItem href="/security" label="Security" />
           </SideNavItem>
-          <SideNavItem href="/team" icon={<Users />} isCollapsible label="Team">
+          <SideNavItem href="/team" icon={Users} isCollapsible label="Team">
             <SideNavItem href="/members" label="Members" />
             <SideNavItem href="/roles" label="Roles" />
           </SideNavItem>
@@ -334,13 +321,13 @@ export const Scrollable: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
-        footer={<SideNavItem icon={<Settings />} label="Settings" />}
+        footer={<SideNavItem icon={Settings} label="Settings" />}
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Pages">
           {Array.from({length: 20}, (_, i) => (
             <SideNavItem
               href={`/page-${i + 1}`}
-              icon={<File />}
+              icon={File}
               isSelected={i === 0}
               key={i}
               label={`Page ${i + 1}`}

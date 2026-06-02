@@ -1,20 +1,20 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {NumberInput} from '../NumberInput';
 import {TextInput} from '../TextInput';
-import {InputGroup} from './InputGroup';
+import {InputGroup, type InputGroupProps} from './InputGroup';
 import {InputGroupText} from './InputGroupText';
 
-const meta: Meta<typeof InputGroup> = {
+const meta = {
   title: 'Components/InputGroup',
   component: InputGroup,
   args: {label: 'Website', size: 'md'},
-};
+} satisfies Meta<InputGroupProps>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<InputGroupProps>;
 
 export const Default: Story = {
-  render: args => (
+  render: (args: InputGroupProps) => (
     <InputGroup {...args}>
       <InputGroupText>https://</InputGroupText>
       <TextInput
@@ -31,7 +31,7 @@ export const Default: Story = {
 
 export const Currency: Story = {
   args: {label: 'Price'},
-  render: args => (
+  render: (args: InputGroupProps) => (
     <InputGroup {...args}>
       <InputGroupText>$</InputGroupText>
       <NumberInput
@@ -53,7 +53,7 @@ export const WithStatus: Story = {
     label: 'Website',
     status: {message: 'Website is required', type: 'error'},
   },
-  render: args => (
+  render: (args: InputGroupProps) => (
     <InputGroup {...args}>
       <InputGroupText>https://</InputGroupText>
       <TextInput isLabelHidden label="URL" onChange={() => {}} value="" />

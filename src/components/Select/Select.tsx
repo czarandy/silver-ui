@@ -9,9 +9,16 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
@@ -19,7 +26,7 @@ export interface SelectOptionData {
   /**
    * Icon displayed before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the option is disabled.
    */
@@ -62,7 +69,7 @@ export type SelectOption =
   | SelectSection
   | string;
 
-export interface SelectProps {
+export type SelectProps = {
   /**
    * Custom render function for selectable options.
    */
@@ -110,19 +117,13 @@ export interface SelectProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -130,7 +131,7 @@ export interface SelectProps {
   /**
    * Called when selection changes.
    */
-  onChange?: (value: string | null) => void;
+  onChange: (value: string | null) => void;
   /**
    * Options to display.
    */
@@ -157,7 +158,7 @@ export interface SelectProps {
   /**
    * Start icon rendered in the trigger.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Validation status displayed below the selector.
    */
@@ -169,8 +170,8 @@ export interface SelectProps {
   /**
    * Selected option value.
    */
-  value?: string | null;
-}
+  value: string | null;
+} & FieldNecessity;
 
 const styles = {
   trigger: css({
@@ -222,7 +223,7 @@ const styles = {
     py: '1',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.300',
+    borderColor: 'border.emphasized',
     borderRadius: 'md',
     fontFamily: 'body',
     outline: 'none',
@@ -277,7 +278,7 @@ const styles = {
   }),
   divider: css({
     h: '1px',
-    bg: 'silver-neutral.200',
+    bg: 'border',
     my: '1',
   }),
 } as const;
@@ -318,9 +319,10 @@ export function Select({
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   label,
+  labelIcon,
   labelTooltip,
   onChange,
   options,
@@ -377,7 +379,7 @@ export function Select({
         disabled={normalized.isDisabled}
         key={normalized.value}
         onClick={() => {
-          onChange?.(normalized.value);
+          onChange(normalized.value);
           setIsOpen(false);
           setQuery('');
         }}
@@ -387,7 +389,9 @@ export function Select({
           {children == null ? (
             <>
               {normalized.icon != null ? (
-                <span className={styles.iconSlot}>{normalized.icon}</span>
+                <span className={styles.iconSlot}>
+                  <Icon color="secondary" icon={normalized.icon} size="sm" />
+                </span>
               ) : null}
               {normalized.label}
             </>
@@ -450,18 +454,19 @@ export function Select({
     </div>
   );
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   const trigger = (
     <div
-      className={cx(
-        inputStyles.wrapper,
-        inputStyles.size[size],
-        status != null ? inputStyles.status[status.type] : undefined,
-        isDisabled ? inputStyles.wrapperDisabled : undefined,
-        className,
-      )}
-      style={style}>
+      className={inputRecipe({
+        size,
+        status: status?.type,
+        isDisabled,
+      })}>
       {startIcon != null ? (
-        <span className={styles.iconSlot}>{startIcon}</span>
+        <span className={styles.iconSlot}>
+          <Icon color="secondary" icon={startIcon} size="sm" />
+        </span>
       ) : null}
       <button
         aria-controls={`${inputId}-listbox`}
@@ -489,7 +494,7 @@ export function Select({
         <button
           aria-label={`Clear ${label}`}
           className={inputStyles.clearButton}
-          onClick={() => onChange?.(null)}
+          onClick={() => onChange(null)}
           type="button">
           <Icon icon={X} size="sm" />
         </button>
@@ -502,18 +507,20 @@ export function Select({
 
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       <Popover
         content={menu}
         hasAutoFocus={hasSearch}

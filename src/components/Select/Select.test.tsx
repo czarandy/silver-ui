@@ -62,6 +62,7 @@ describe('Select', () => {
         hasSearch
         isDefaultOpen
         label="User"
+        onChange={() => {}}
         options={[{label: 'Ada Lovelace', value: 'ada'}]}
         value="ada">
         {option => (

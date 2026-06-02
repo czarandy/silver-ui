@@ -9,16 +9,24 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {
   getDescribedBy,
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
+import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 
-export interface TextAreaProps {
+export type TextAreaProps = {
   /**
    * Additional CSS class names applied to the textarea wrapper.
    */
@@ -61,19 +69,13 @@ export interface TextAreaProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -89,7 +91,7 @@ export interface TextAreaProps {
   /**
    * Called with the next string value.
    */
-  onChange?: (value: string, event: ChangeEvent<HTMLTextAreaElement>) => void;
+  onChange: (value: string, event: ChangeEvent<HTMLTextAreaElement>) => void;
   /**
    * Called when the textarea receives focus.
    */
@@ -117,9 +119,9 @@ export interface TextAreaProps {
    */
   size?: InputSize;
   /**
-   * Icon or content shown before the textarea.
+   * Icon shown before the textarea.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Validation status displayed below the textarea.
    */
@@ -131,8 +133,8 @@ export interface TextAreaProps {
   /**
    * Controlled textarea value.
    */
-  value?: string;
-}
+  value: string;
+} & FieldNecessity;
 
 const styles = {
   wrapper: css({
@@ -154,20 +156,21 @@ const styles = {
  */
 export function TextArea({
   label,
-  value = '',
+  value,
   onChange,
   rows = 3,
   size = 'md',
   description,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isLoading = false,
   hasSpellCheck = true,
   hasAutoFocus = false,
   htmlName,
   status,
+  labelIcon,
   labelTooltip,
   startIcon,
   placeholder,
@@ -188,38 +191,43 @@ export function TextArea({
   const describedBy = getDescribedBy(descriptionID, statusMessageID, counterID);
   const isOverLimit = maxLength != null && value.length > maxLength;
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       <div
         className={cx(
-          inputStyles.wrapper,
+          inputRecipe({
+            size,
+            status: status?.type,
+            isDisabled,
+          }),
           styles.wrapper,
-          inputStyles.size[size],
-          status != null ? inputStyles.status[status.type] : undefined,
-          isDisabled ? inputStyles.wrapperDisabled : undefined,
-          className,
-        )}
-        style={style}>
+        )}>
         {startIcon != null ? (
-          <span className={inputStyles.iconSlot}>{startIcon}</span>
+          <span className={inputStyles.iconSlot}>
+            <Icon color="secondary" icon={startIcon} size="sm" />
+          </span>
         ) : null}
         <textarea
           aria-busy={isLoading || undefined}
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || isOverLimit || undefined}
-          aria-required={isRequired || undefined}
+          aria-required={isRequired ?? undefined}
           // eslint-disable-next-line jsx-a11y-x/no-autofocus
           autoFocus={hasAutoFocus}
           className={cx(inputStyles.control, styles.textarea)}
@@ -228,7 +236,7 @@ export function TextArea({
           id={inputId}
           name={htmlName}
           onBlur={onBlur}
-          onChange={event => onChange?.(event.target.value, event)}
+          onChange={event => onChange(event.target.value, event)}
           onFocus={onFocus}
           onPaste={onPaste}
           placeholder={placeholder}

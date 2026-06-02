@@ -37,7 +37,15 @@ describe('Switch', () => {
   });
 
   it('applies disabled and loading states', () => {
-    render(<Switch isDisabled isLoading isSelected label="Notifications" />);
+    render(
+      <Switch
+        isDisabled
+        isLoading
+        isSelected
+        label="Notifications"
+        onChange={() => {}}
+      />,
+    );
 
     expect(screen.getByRole('switch', {name: 'Notifications'})).toBeDisabled();
     expect(screen.getByRole('status')).toHaveTextContent('Loading');

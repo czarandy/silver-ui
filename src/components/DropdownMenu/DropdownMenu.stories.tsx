@@ -15,19 +15,19 @@ type Story = StoryObj<typeof meta>;
 export const DataDriven: Story = {
   args: {
     items: [
-      {icon: <Edit />, label: 'Edit'},
-      {icon: <Archive />, label: 'Archive'},
+      {icon: Edit, label: 'Edit'},
+      {icon: Archive, label: 'Archive'},
       {type: 'divider'},
-      {icon: <Trash2 />, label: 'Delete'},
+      {icon: Trash2, label: 'Delete'},
     ],
   },
 };
 export const Compound: Story = {
   render: args => (
     <DropdownMenu {...args}>
-      <DropdownMenuItem icon={<Edit />} label="Edit" />
-      <DropdownMenuItem icon={<Archive />} label="Archive" />
-      <DropdownMenuItem icon={<Trash2 />} label="Delete" />
+      <DropdownMenuItem icon={Edit} label="Edit" />
+      <DropdownMenuItem icon={Archive} label="Archive" />
+      <DropdownMenuItem icon={Trash2} label="Delete" />
     </DropdownMenu>
   ),
 };

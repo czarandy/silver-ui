@@ -48,7 +48,7 @@ export const linkRecipe = cva({
         color: 'fg.muted',
       },
       disabled: {
-        color: 'silver-neutral.400',
+        color: 'fg.disabled',
       },
       placeholder: {
         color: 'fg.muted',

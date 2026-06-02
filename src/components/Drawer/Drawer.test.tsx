@@ -95,7 +95,7 @@ describe('Drawer', () => {
         isOpen
         label="Nav"
         onOpenChange={() => {}}
-        placement="left"
+        placement="start"
         size={400}>
         Content
       </Drawer>,

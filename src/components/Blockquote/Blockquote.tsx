@@ -36,7 +36,7 @@ const styles = {
   root: css({
     borderInlineStartWidth: '2px',
     borderInlineStartStyle: 'solid',
-    borderInlineStartColor: 'silver-neutral.300',
+    borderInlineStartColor: 'border.emphasized',
     ps: '4',
     color: 'fg.muted',
     m: 0,

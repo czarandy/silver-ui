@@ -12,16 +12,24 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {
   getDescribedBy,
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {useInputGroup} from '../InputGroup';
+import {Spinner} from '../Spinner';
 
-interface NumberInputBaseProps {
+type NumberInputBaseProps = {
   /**
    * HTML autocomplete attribute value.
    */
@@ -38,6 +46,10 @@ interface NumberInputBaseProps {
    * Supporting text displayed below the label.
    */
   description?: ReactNode;
+  /**
+   * Content rendered after the input, before the status icon.
+   */
+  endContent?: ReactNode;
   /**
    * Whether to focus the input on mount.
    * @default false
@@ -63,15 +75,10 @@ interface NumberInputBaseProps {
    */
   isLabelHidden?: boolean;
   /**
-   * Whether the field is optional.
+   * Whether the input is in a loading state.
    * @default false
    */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
+  isLoading?: boolean;
   /**
    * Field label.
    */
@@ -79,7 +86,7 @@ interface NumberInputBaseProps {
   /**
    * Icon rendered beside the label.
    */
-  labelIcon?: ReactNode;
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -122,9 +129,9 @@ interface NumberInputBaseProps {
    */
   size?: InputSize;
   /**
-   * Icon or content shown before the input.
+   * Icon shown before the input.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Validation status displayed below the input.
    */
@@ -144,10 +151,10 @@ interface NumberInputBaseProps {
   /**
    * Controlled numeric value.
    */
-  value?: number | null;
-}
+  value: number | null;
+} & FieldNecessity;
 
-interface NumberInputNonClearableProps extends NumberInputBaseProps {
+type NumberInputNonClearableProps = NumberInputBaseProps & {
   /**
    * Whether to show a clear button.
    */
@@ -156,9 +163,9 @@ interface NumberInputNonClearableProps extends NumberInputBaseProps {
    * Called when the numeric value changes.
    */
   onChange: (value: number) => void;
-}
+};
 
-interface NumberInputClearableProps extends NumberInputBaseProps {
+type NumberInputClearableProps = NumberInputBaseProps & {
   /**
    * Whether to show a clear button.
    */
@@ -167,7 +174,7 @@ interface NumberInputClearableProps extends NumberInputBaseProps {
    * Called when the numeric value changes or is cleared.
    */
   onChange: (value: number | null) => void;
-}
+};
 
 export type NumberInputProps =
   | NumberInputClearableProps
@@ -214,11 +221,13 @@ export function NumberInput({
   onChange,
   size = 'md',
   description,
+  endContent,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isIntegerOnly = false,
+  isLoading = false,
   hasClear,
   hasAutoFocus = false,
   htmlName,
@@ -260,24 +269,30 @@ export function NumberInput({
     pendingInput.trim() === '' ||
     parseNumberInput(pendingInput, {min, max, isIntegerOnly}) != null;
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   const inputWrapper = (
     <div
       className={cx(
-        inputStyles.wrapper,
-        inputStyles.size[size],
-        status != null ? inputStyles.status[status.type] : undefined,
-        effectiveDisabled ? inputStyles.wrapperDisabled : undefined,
-        className,
+        inputRecipe({
+          size,
+          status: status?.type,
+          isDisabled: effectiveDisabled,
+        }),
+        inputGroup != null ? className : undefined,
       )}
-      style={style}>
+      style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
-        <span className={inputStyles.iconSlot}>{startIcon}</span>
+        <span className={inputStyles.iconSlot}>
+          <Icon color="secondary" icon={startIcon} size="sm" />
+        </span>
       ) : null}
       <input
+        aria-busy={isLoading || undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || !isInputValid || undefined}
         aria-label={inputGroup != null ? label : undefined}
-        aria-required={isRequired || undefined}
+        aria-required={isRequired ?? undefined}
         autoComplete={autoComplete}
         // eslint-disable-next-line jsx-a11y-x/no-autofocus
         autoFocus={hasAutoFocus}
@@ -316,13 +331,14 @@ export function NumberInput({
         }}
         onFocus={onFocus}
         onKeyDown={event => {
-          if (event.key === 'Enter') {
+          if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
             onEnter?.();
           }
           onKeyDown?.(event);
         }}
         placeholder={placeholder}
         ref={ref}
+        required={isRequired ?? undefined}
         step={step ?? undefined}
         type="number"
         value={displayValue}
@@ -337,6 +353,8 @@ export function NumberInput({
           <Icon icon={X} size="sm" />
         </button>
       ) : null}
+      {endContent}
+      {isLoading ? <Spinner size="sm" /> : null}
       {status != null ? (
         <span className={inputStyles.iconSlot}>
           {getStatusIcon(status.type)}
@@ -351,19 +369,20 @@ export function NumberInput({
 
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
       labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       {inputWrapper}
     </Field>
   );

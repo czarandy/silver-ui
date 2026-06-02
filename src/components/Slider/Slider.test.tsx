@@ -9,8 +9,10 @@ function mockRect(element: Element, rect: Partial<DOMRect>): void {
 }
 
 describe('Slider', () => {
+  const noop = () => {};
+
   it('renders a labelled single-value slider', () => {
-    render(<Slider label="Volume" value={50} />);
+    render(<Slider label="Volume" onChange={noop} value={50} />);
 
     const slider = screen.getByRole('slider');
     expect(slider).toHaveAttribute('aria-label', 'Volume');
@@ -20,7 +22,7 @@ describe('Slider', () => {
   });
 
   it('renders labelled range thumbs', () => {
-    render(<Slider label="Price range" value={[20, 80]} />);
+    render(<Slider label="Price range" onChange={() => {}} value={[20, 80]} />);
 
     const sliders = screen.getAllByRole('slider');
     expect(sliders[0]).toHaveAttribute(
@@ -38,6 +40,7 @@ describe('Slider', () => {
       <Slider
         formatValue={value => `${value}F`}
         label="Temperature"
+        onChange={noop}
         value={72}
         valueDisplay="text"
       />,
@@ -51,6 +54,7 @@ describe('Slider', () => {
     render(
       <Slider
         label="Volume"
+        onChange={noop}
         orientation="vertical"
         status={{message: 'Too loud', type: 'error'}}
         value={50}

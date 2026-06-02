@@ -4,15 +4,15 @@ import {inputStyles} from '../Field';
 import {Icon} from '../Icon';
 import {TextInput, type TextInputProps} from '../TextInput';
 
-export interface PasswordInputProps extends Omit<
+export type PasswordInputProps = Omit<
   TextInputProps,
   'endContent' | 'startIcon' | 'type'
-> {
+> & {
   /**
    * Ref forwarded to the input element.
    */
   ref?: Ref<HTMLInputElement>;
-}
+};
 
 /**
  * Password input with a toggle to show or hide the entered value.

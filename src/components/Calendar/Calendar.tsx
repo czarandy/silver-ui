@@ -288,11 +288,11 @@ const styles = {
     opacity: 0.55,
   }),
   dayToday: css({
-    boxShadow: 'inset 0 0 0 1px token(colors.silver-neutral.400)',
+    boxShadow: 'inset 0 0 0 1px token(colors.border.emphasized)',
   }),
   daySelected: css({
     bg: 'primary',
-    color: 'white',
+    color: 'fg.onPrimary',
     _hover: {
       bg: 'primary.hover',
     },

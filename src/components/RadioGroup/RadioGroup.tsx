@@ -6,13 +6,13 @@ import {
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
-import {Field, type InputStatus} from '../Field';
+import {Field, type FieldNecessity, type InputStatus} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {RadioGroupContext, type RadioGroupSize} from './RadioGroupContext';
 
 export type RadioGroupOrientation = 'horizontal' | 'vertical';
 
-export interface RadioGroupProps {
+export type RadioGroupProps = {
   /**
    * Radio list items to render.
    */
@@ -39,16 +39,6 @@ export interface RadioGroupProps {
    * @default false
    */
   isLabelHidden?: boolean;
-  /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the radio group is required.
-   * @default false
-   */
-  isRequired?: boolean;
   /**
    * Label text for the radio group.
    */
@@ -87,7 +77,7 @@ export interface RadioGroupProps {
    * The currently selected value.
    */
   value: string;
-}
+} & FieldNecessity;
 
 const styles = {
   group: css({
@@ -115,8 +105,8 @@ export function RadioGroup({
   description,
   isDisabled = false,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   label,
   labelTooltip,
   onChange,
@@ -146,17 +136,16 @@ export function RadioGroup({
     [isDisabled, isRequired, nameId, onChange, size, status, value],
   );
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
       className={className}
       data-testid={dataTestId}
-      description={description}
-      descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
       labelTooltip={labelTooltip}
       ref={ref}
@@ -169,7 +158,7 @@ export function RadioGroup({
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         aria-label={label}
-        aria-required={isRequired || undefined}
+        aria-required={isRequired ?? undefined}
         className={
           orientation === 'vertical'
             ? `${styles.group} ${styles.vertical}`

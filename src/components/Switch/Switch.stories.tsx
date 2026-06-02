@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {VStack} from '../Stack';
-import {Switch} from './Switch';
+import {Switch, type SwitchProps} from './Switch';
 
-const meta: Meta<typeof Switch> = {
+const meta = {
   title: 'Components/Switch',
   component: Switch,
   args: {
@@ -11,10 +11,10 @@ const meta: Meta<typeof Switch> = {
     isSelected: true,
     label: 'Notifications',
   },
-};
+} satisfies Meta<SwitchProps>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<SwitchProps>;
 
 function SwitchStory(args: React.ComponentProps<typeof Switch>) {
   const [isSelected, setIsSelected] = useState(args.isSelected);
@@ -22,19 +22,24 @@ function SwitchStory(args: React.ComponentProps<typeof Switch>) {
 }
 
 export const Default: Story = {
-  render: args => <SwitchStory {...args} />,
+  render: (args: SwitchProps) => <SwitchStory {...args} />,
 };
 export const States: Story = {
   render: () => (
     <VStack gap={4}>
-      <Switch isSelected={false} label="Off" />
-      <Switch isSelected label="On" />
-      <Switch isDisabled isSelected={false} label="Disabled" />
-      <Switch isLoading isSelected label="Loading" />
+      <Switch isSelected={false} label="Off" onChange={() => {}} />
+      <Switch isSelected label="On" onChange={() => {}} />
+      <Switch
+        isDisabled
+        isSelected={false}
+        label="Disabled"
+        onChange={() => {}}
+      />
+      <Switch isLoading isSelected label="Loading" onChange={() => {}} />
     </VStack>
   ),
 };
 export const Error: Story = {
   args: {status: {message: 'This setting is required.', type: 'error'}},
-  render: args => <SwitchStory {...args} />,
+  render: (args: SwitchProps) => <SwitchStory {...args} />,
 };

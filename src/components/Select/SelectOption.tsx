@@ -1,6 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
 
 export interface SelectOptionProps {
@@ -23,7 +24,7 @@ export interface SelectOptionProps {
   /**
    * Icon displayed before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Primary label.
    */
@@ -48,10 +49,6 @@ const styles = {
     display: 'inline-flex',
     flexShrink: 0,
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
 } as const;
 
@@ -79,7 +76,11 @@ export function SelectOption({
       label={label}
       ref={ref}
       startContent={
-        icon != null ? <span className={styles.icon}>{icon}</span> : null
+        icon != null ? (
+          <span className={styles.icon}>
+            <Icon color="secondary" icon={icon} size="sm" />
+          </span>
+        ) : null
       }
       style={style}
     />

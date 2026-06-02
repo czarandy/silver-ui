@@ -1,5 +1,6 @@
-import {render, screen, waitFor} from '@testing-library/react';
+import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {Home} from 'lucide-react';
 import type {ReactNode, Ref} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {LinkProvider} from '../Link';
@@ -60,20 +61,18 @@ describe('Breadcrumbs', () => {
     expect(screen.getAllByText('>')).toHaveLength(3);
   });
 
-  it('auto-detects the last item as current', async () => {
+  it('marks an item as current when isCurrent is set', () => {
     render(
       <Breadcrumbs>
         <BreadcrumbItem href="/">Home</BreadcrumbItem>
-        <BreadcrumbItem data-testid="last-item">Last Item</BreadcrumbItem>
+        <BreadcrumbItem isCurrent>Last Item</BreadcrumbItem>
       </Breadcrumbs>,
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('last-item')).toHaveAttribute(
-        'aria-current',
-        'page',
-      );
-    });
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(
+      screen.getByText('Last Item').closest('[aria-current]'),
+    ).toHaveAttribute('aria-current', 'page');
   });
 
   it('uses custom link components from props or provider', () => {
@@ -113,5 +112,106 @@ describe('Breadcrumbs', () => {
     expect(nav).toHaveClass('custom-breadcrumbs');
     expect(nav).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
+  });
+
+  it('applies a custom label to the navigation landmark', () => {
+    render(
+      <Breadcrumbs label="File path">
+        <BreadcrumbItem href="/">Root</BreadcrumbItem>
+      </Breadcrumbs>,
+    );
+
+    expect(screen.getByRole('navigation')).toHaveAttribute(
+      'aria-label',
+      'File path',
+    );
+  });
+
+  it('renders items with the supporting variant', () => {
+    render(
+      <Breadcrumbs data-testid="nav" variant="supporting">
+        <BreadcrumbItem href="/">Home</BreadcrumbItem>
+        <BreadcrumbItem isCurrent>Page</BreadcrumbItem>
+      </Breadcrumbs>,
+    );
+
+    expect(screen.getByRole('link', {name: 'Home'})).toBeInTheDocument();
+    expect(screen.getByText('Page')).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('renders a startIcon on a breadcrumb item', () => {
+    render(
+      <Breadcrumbs>
+        <BreadcrumbItem data-testid="item" href="/" startIcon={Home}>
+          Home
+        </BreadcrumbItem>
+      </Breadcrumbs>,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying decorative svg presence
+    expect(screen.getByTestId('item').querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders onClick items as buttons with type="button"', () => {
+    const onClick = vi.fn();
+
+    render(
+      <Breadcrumbs>
+        <BreadcrumbItem onClick={onClick}>Projects</BreadcrumbItem>
+      </Breadcrumbs>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Projects'});
+    expect(button).toHaveAttribute('type', 'button');
+  });
+
+  it('forwards ref on BreadcrumbItem', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+
+    render(
+      <Breadcrumbs>
+        <BreadcrumbItem href="/" ref={ref}>
+          Home
+        </BreadcrumbItem>
+      </Breadcrumbs>,
+    );
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
+  });
+
+  it('applies className and style to BreadcrumbItem', () => {
+    render(
+      <Breadcrumbs>
+        <BreadcrumbItem
+          className="custom-item"
+          data-testid="item"
+          href="/"
+          style={{color: 'blue'}}>
+          Home
+        </BreadcrumbItem>
+      </Breadcrumbs>,
+    );
+
+    const item = screen.getByTestId('item');
+    expect(item).toHaveClass('custom-item');
+    expect(item).toHaveStyle({color: 'rgb(0, 0, 255)'});
+  });
+
+  it('does not auto-apply isCurrent when an explicit isCurrent exists', () => {
+    render(
+      <Breadcrumbs>
+        <BreadcrumbItem href="/">Home</BreadcrumbItem>
+        <BreadcrumbItem isCurrent>Projects</BreadcrumbItem>
+        <BreadcrumbItem href="/details">Details</BreadcrumbItem>
+      </Breadcrumbs>,
+    );
+
+    expect(screen.getByText('Projects')).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(screen.getByRole('link', {name: 'Details'})).not.toHaveAttribute(
+      'aria-current',
+    );
   });
 });

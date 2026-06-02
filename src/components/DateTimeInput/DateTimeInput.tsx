@@ -3,12 +3,18 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import type {ISODateString} from '../../internal/dateTypes';
 import {DateInput} from '../DateInput';
-import {Field, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
+import type {IconComponent} from '../Icon';
 import {TimeInput, type ISOTimeString} from '../TimeInput';
 
 export type ISODateTimeString = `${ISODateString}T${ISOTimeString}`;
 
-export interface DateTimeInputProps {
+export type DateTimeInputProps = {
   /**
    * Additional CSS class names applied to the root element.
    */
@@ -51,19 +57,13 @@ export interface DateTimeInputProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label text.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -105,8 +105,8 @@ export interface DateTimeInputProps {
   /**
    * Currently selected date-time (ISO string).
    */
-  value?: ISODateTimeString;
-}
+  value: ISODateTimeString | undefined;
+} & FieldNecessity;
 
 const styles = {
   row: css({
@@ -150,11 +150,12 @@ export function DateTimeInput({
   size = 'md',
   description,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isLoading = false,
   status,
+  labelIcon,
   labelTooltip,
   className,
   'data-testid': dataTestId,
@@ -166,15 +167,17 @@ export function DateTimeInput({
   const minParts = splitDateTime(min);
   const maxParts = splitDateTime(max);
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
       description={description}
       inputId={fieldId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={status}>
       <div

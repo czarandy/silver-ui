@@ -83,7 +83,7 @@ const styles = {
     borderInlineEndColor: 'border',
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.100',
+    borderBlockEndColor: 'border',
   }),
   timeRow: css({
     display: 'grid',
@@ -98,7 +98,7 @@ const styles = {
     borderInlineEndColor: 'border',
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.100',
+    borderBlockEndColor: 'border',
   }),
   events: css({
     display: 'flex',

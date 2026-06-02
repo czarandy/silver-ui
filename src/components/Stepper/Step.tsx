@@ -163,27 +163,27 @@ const styles = {
   indicatorActive: css({
     bg: 'primary',
     borderColor: 'primary',
-    color: 'white',
+    color: 'fg.onPrimary',
   }),
   indicatorCompleted: css({
     bg: 'primary',
     borderColor: 'primary',
-    color: 'white',
+    color: 'fg.onPrimary',
   }),
   indicatorUpcoming: css({
     bg: 'transparent',
-    borderColor: 'silver-neutral.300',
+    borderColor: 'border.emphasized',
     color: 'fg.muted',
   }),
   indicatorDisabled: css({
     bg: 'transparent',
     borderColor: 'border',
-    color: 'silver-neutral.400',
+    color: 'fg.disabled',
   }),
   indicatorError: css({
-    bg: 'red.600',
-    borderColor: 'red.600',
-    color: 'white',
+    bg: 'status.error.solid',
+    borderColor: 'status.error.solid',
+    color: 'status.error.solidFg',
   }),
   indicatorClickable: css({
     cursor: 'pointer',
@@ -231,10 +231,10 @@ const styles = {
     color: 'fg.muted',
   }),
   labelDisabled: css({
-    color: 'silver-neutral.400',
+    color: 'fg.disabled',
   }),
   labelError: css({
-    color: 'red.600',
+    color: 'status.error.fg',
   }),
   description: css({
     textAlign: 'center',
@@ -243,7 +243,7 @@ const styles = {
     textAlign: 'start',
   }),
   descriptionError: css({
-    color: 'red.600',
+    color: 'status.error.fg',
   }),
   buttonReset: css({
     bg: 'none',

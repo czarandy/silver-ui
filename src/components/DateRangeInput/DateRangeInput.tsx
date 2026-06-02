@@ -7,7 +7,6 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
 import type {DateRange, ISODateString} from '../../internal/dateTypes';
 import {
   DATE_FORMAT_SHORT_WITH_YEAR,
@@ -16,19 +15,26 @@ import {
 } from '../../internal/plainDate';
 import {Button} from '../Button';
 import {Calendar} from '../Calendar';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {
   getDescribedBy,
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
 export type {DateRange, ISODateString} from '../../internal/dateTypes';
 
-export interface DateRangeInputProps {
+export type DateRangeInputProps = {
   /**
    * Additional CSS class names applied to the input wrapper.
    */
@@ -66,19 +72,13 @@ export interface DateRangeInputProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label text.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -99,7 +99,7 @@ export interface DateRangeInputProps {
   /**
    * Called when the selected date range changes.
    */
-  onChange?: (value: DateRange | undefined) => void;
+  onChange: (value: DateRange | undefined) => void;
   /**
    * Placeholder text shown when no range is selected.
    */
@@ -124,8 +124,8 @@ export interface DateRangeInputProps {
   /**
    * Currently selected date range.
    */
-  value?: DateRange;
-}
+  value: DateRange | undefined;
+} & FieldNecessity;
 
 function formatRange(value: DateRange | undefined): string {
   if (value == null) {
@@ -149,12 +149,13 @@ export function DateRangeInput({
   size = 'md',
   description,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isLoading = false,
   hasClear = false,
   status,
+  labelIcon,
   labelTooltip,
   className,
   'data-testid': dataTestId,
@@ -169,29 +170,30 @@ export function DateRangeInput({
   const [isOpen, setIsOpen] = useState(false);
   const displayValue = useMemo(() => formatRange(value), [value]);
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       <div
-        className={cx(
-          inputStyles.wrapper,
-          inputStyles.size[size],
-          status != null ? inputStyles.status[status.type] : undefined,
-          isDisabled ? inputStyles.wrapperDisabled : undefined,
-          className,
-        )}
-        style={style}>
+        className={inputRecipe({
+          size,
+          status: status?.type,
+          isDisabled,
+        })}>
         <Popover
           content={
             <Calendar
@@ -201,7 +203,7 @@ export function DateRangeInput({
               mode="range"
               numberOfMonths={numberOfMonths}
               onChange={nextValue => {
-                onChange?.(nextValue);
+                onChange(nextValue);
                 setIsOpen(false);
               }}
               value={value}
@@ -225,7 +227,7 @@ export function DateRangeInput({
           aria-busy={isLoading || undefined}
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || undefined}
-          aria-required={isRequired || undefined}
+          aria-required={isRequired ?? undefined}
           className={inputStyles.control}
           data-testid={dataTestId}
           disabled={isDisabled || isLoading}
@@ -240,7 +242,7 @@ export function DateRangeInput({
           <button
             aria-label={`Clear ${label}`}
             className={inputStyles.clearButton}
-            onClick={() => onChange?.(undefined)}
+            onClick={() => onChange(undefined)}
             type="button">
             <Icon icon={X} size="sm" />
           </button>

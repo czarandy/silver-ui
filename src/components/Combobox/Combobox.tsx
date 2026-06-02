@@ -10,14 +10,21 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Tag} from '../Tag';
 import {BaseCombobox} from './BaseCombobox';
 import type {SearchableItem, SearchSource} from './types';
 
-export interface ComboboxProps<T extends SearchableItem = SearchableItem> {
+export type ComboboxProps<T extends SearchableItem = SearchableItem> = {
   /**
    * Additional CSS class names applied to the input wrapper.
    */
@@ -66,19 +73,13 @@ export interface ComboboxProps<T extends SearchableItem = SearchableItem> {
    */
   isLabelHidden?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -122,9 +123,9 @@ export interface ComboboxProps<T extends SearchableItem = SearchableItem> {
    */
   size?: InputSize;
   /**
-   * Icon or content shown before the input.
+   * Icon shown before the input.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Validation status displayed below the selector.
    */
@@ -137,7 +138,7 @@ export interface ComboboxProps<T extends SearchableItem = SearchableItem> {
    * Selected item.
    */
   value: T | null;
-}
+} & FieldNecessity;
 
 const styles = {
   wrapper: css({
@@ -171,9 +172,10 @@ export function Combobox<T extends SearchableItem>({
   hasEntriesOnFocus = false,
   isDisabled = false,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   label,
+  labelIcon,
   labelTooltip,
   maxMenuItems,
   onChange,
@@ -204,33 +206,38 @@ export function Combobox<T extends SearchableItem>({
     [status, statusMessageID],
   );
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       ref={ref}
-      status={fieldStatus}>
+      status={fieldStatus}
+      style={style}>
       <div
         className={cx(
-          inputStyles.wrapper,
-          inputStyles.size[size],
-          status != null ? inputStyles.status[status.type] : undefined,
-          isDisabled ? inputStyles.wrapperDisabled : undefined,
+          inputRecipe({
+            size,
+            status: status?.type,
+            isDisabled,
+          }),
           styles.wrapper,
-          className,
         )}
         data-testid={dataTestId}
-        ref={wrapperRef}
-        style={style}>
+        ref={wrapperRef}>
         {startIcon != null ? (
-          <span className={inputStyles.iconSlot}>{startIcon}</span>
+          <span className={inputStyles.iconSlot}>
+            <Icon color="secondary" icon={startIcon} size="sm" />
+          </span>
         ) : null}
         {showTag ? (
           <Tag

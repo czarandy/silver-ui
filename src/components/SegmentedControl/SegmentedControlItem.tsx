@@ -82,7 +82,7 @@ const styles = {
     },
   }),
   disabled: css({
-    color: 'silver-neutral.400',
+    color: 'fg.disabled',
     cursor: 'default',
     _hover: {
       bg: 'transparent',

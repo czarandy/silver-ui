@@ -7,10 +7,15 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Field, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {InputGroupContext} from './InputGroupContext';
 
-export interface InputGroupProps {
+export type InputGroupProps = {
   /**
    * Grouped input children to render side-by-side.
    */
@@ -38,16 +43,6 @@ export interface InputGroupProps {
    */
   isLabelHidden?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Label text for the input group.
    */
   label: string;
@@ -72,7 +67,7 @@ export interface InputGroupProps {
    * Inline styles applied to the group wrapper.
    */
   style?: CSSProperties;
-}
+} & FieldNecessity;
 
 const styles = {
   group: css({
@@ -117,8 +112,8 @@ export function InputGroup({
   description,
   isDisabled = false,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   size = 'md',
   status,
   labelTooltip,
@@ -133,6 +128,8 @@ export function InputGroup({
     [isDisabled, label],
   );
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <InputGroupContext value={contextValue}>
       <Field
@@ -140,8 +137,7 @@ export function InputGroup({
         inputId={inputId}
         isDisabled={isDisabled}
         isLabelHidden={isLabelHidden}
-        isOptional={isOptional}
-        isRequired={isRequired}
+        {...necessity}
         label={label}
         labelTooltip={labelTooltip}
         status={status}

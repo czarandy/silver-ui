@@ -1,6 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
 import {useDropdownMenuContext} from './DropdownMenuContext';
 
@@ -24,7 +25,7 @@ export interface DropdownMenuItemProps {
   /**
    * Icon rendered before the label.
    */
-  icon?: ReactNode;
+  icon?: IconComponent;
   /**
    * Whether the item is disabled.
    * @default false
@@ -74,10 +75,6 @@ const styles = {
     display: 'inline-flex',
     flexShrink: 0,
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
 } as const;
 
@@ -122,7 +119,11 @@ export function DropdownMenuItem({
         endContent={endContent}
         label={label}
         startContent={
-          icon != null ? <span className={styles.icon}>{icon}</span> : null
+          icon != null ? (
+            <span className={styles.icon}>
+              <Icon color="secondary" icon={icon} size="sm" />
+            </span>
+          ) : null
         }
       />
     </button>

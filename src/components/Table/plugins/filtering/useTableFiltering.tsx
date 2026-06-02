@@ -245,22 +245,34 @@ function NumberFilterControl({
 }): React.JSX.Element {
   const store = useFilterStore();
   const value = store.getConfig().filters[columnKey];
+  const sharedProps = {
+    isIntegerOnly: operatorValue.type === 'integer',
+    isLabelHidden: true as const,
+    label: `Filter ${header}`,
+    max: operatorValue.maxValue ?? null,
+    min: operatorValue.minValue ?? null,
+    placeholder: `Filter ${header}`,
+    size,
+    step: operatorValue.type === 'integer' ? 1 : null,
+    value: typeof value === 'number' ? value : null,
+  };
+  if (hasClear === false) {
+    return (
+      <NumberInput
+        {...sharedProps}
+        onChange={nextValue => {
+          store.getConfig().onFilterChange(columnKey, nextValue);
+        }}
+      />
+    );
+  }
   return (
     <NumberInput
+      {...sharedProps}
       hasClear
-      isIntegerOnly={operatorValue.type === 'integer'}
-      isLabelHidden
-      label={`Filter ${header}`}
-      max={operatorValue.maxValue ?? null}
-      min={operatorValue.minValue ?? null}
       onChange={nextValue => {
         store.getConfig().onFilterChange(columnKey, nextValue);
       }}
-      placeholder={`Filter ${header}`}
-      size={size}
-      step={operatorValue.type === 'integer' ? 1 : null}
-      value={typeof value === 'number' ? value : null}
-      {...(hasClear === false ? {hasClear: false} : {})}
     />
   );
 }

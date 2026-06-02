@@ -50,19 +50,19 @@ const styles = {
     boxSizing: 'border-box',
   }),
   success: css({
-    bg: 'green.500',
+    bg: 'presence.success',
   }),
   neutral: css({
-    bg: 'silver-neutral.500',
+    bg: 'presence.neutral',
   }),
   error: css({
-    bg: 'red.600',
+    bg: 'presence.error',
   }),
   icon: css({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    color: 'white',
+    color: 'fg.onPrimary',
     lineHeight: 0,
     '& > svg': {
       w: '100%',

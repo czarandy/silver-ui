@@ -43,4 +43,25 @@ describe('MobileNav', () => {
     await user.click(screen.getByRole('button', {name: 'Close navigation'}));
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
+
+  it('restores previous body overflow when closed', () => {
+    document.body.style.overflow = 'scroll';
+
+    const {rerender} = render(
+      <MobileNav header="Menu" isOpen onOpenChange={() => {}}>
+        Content
+      </MobileNav>,
+    );
+
+    expect(document.body).toHaveStyle({overflow: 'hidden'});
+
+    rerender(
+      <MobileNav header="Menu" isOpen={false} onOpenChange={() => {}}>
+        Content
+      </MobileNav>,
+    );
+
+    expect(document.body).toHaveStyle({overflow: 'scroll'});
+    document.body.style.overflow = '';
+  });
 });

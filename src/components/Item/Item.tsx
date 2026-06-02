@@ -156,7 +156,7 @@ const styles = {
     transitionDuration: 'fast',
     transitionTimingFunction: 'default',
     _hover: {bg: 'bg.subtle'},
-    _active: {bg: 'silver-neutral.100'},
+    _active: {bg: 'bg.hover'},
     '&:has(:focus-visible)': {
       outline: '2px solid',
       outlineColor: 'primary',

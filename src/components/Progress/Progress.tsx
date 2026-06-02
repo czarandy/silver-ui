@@ -96,7 +96,7 @@ const styles = {
     color: 'fg.muted',
   }),
   disabledText: css({
-    color: 'silver-neutral.400',
+    color: 'fg.disabled',
   }),
   valueLabel: css({
     color: 'fg.muted',
@@ -121,7 +121,7 @@ const styles = {
     h: '2',
     overflow: 'hidden',
     borderRadius: 'full',
-    bg: 'silver-neutral.100',
+    bg: 'bg.hover',
   }),
   fill: css({
     h: 'full',
@@ -144,11 +144,11 @@ const styles = {
   }),
   variant: {
     accent: css({bg: 'primary'}),
-    success: css({bg: 'green.600'}),
-    warning: css({bg: 'yellow.500'}),
-    error: css({bg: 'red.600'}),
-    neutral: css({bg: 'silver-neutral.500'}),
-    disabled: css({bg: 'silver-neutral.400'}),
+    success: css({bg: 'status.success.solid'}),
+    warning: css({bg: 'status.warning.solid'}),
+    error: css({bg: 'status.error.solid'}),
+    neutral: css({bg: 'status.neutral.solid'}),
+    disabled: css({bg: 'status.disabled.solid'}),
   },
 } as const;
 

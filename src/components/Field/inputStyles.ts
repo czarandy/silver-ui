@@ -1,8 +1,7 @@
-import {css} from 'styled-system/css';
-import type {InputSize, InputStatusType} from './types';
+import {css, cva, type RecipeVariantProps} from 'styled-system/css';
 
-export const inputStyles = {
-  wrapper: css({
+export const inputRecipe = cva({
+  base: {
     boxSizing: 'border-box',
     position: 'relative',
     zIndex: 1,
@@ -10,33 +9,62 @@ export const inputStyles = {
     alignItems: 'center',
     gap: '2',
     px: '3',
-    py: '1.5',
     borderWidth: '1px',
     borderStyle: 'solid',
-    borderColor: 'silver-neutral.300',
+    borderColor: 'border.emphasized',
     borderRadius: 'md',
     bg: 'bg',
     transitionProperty: 'border-color, box-shadow, opacity',
     transitionDuration: 'fast',
     transitionTimingFunction: 'default',
     _hover: {
-      borderColor: 'silver-neutral.400',
+      borderColor: 'fg.muted',
     },
     _focusWithin: {
       borderColor: 'primary',
       boxShadow: '0 0 0 2px token(colors.primary.subtle)',
     },
-    _dark: {
-      borderColor: 'silver-neutral.700',
-      _hover: {
-        borderColor: 'silver-neutral.600',
+  },
+  variants: {
+    size: {
+      sm: {minH: 'component.sm', py: '0.5'},
+      md: {minH: 'component.md', py: '1.5'},
+      lg: {minH: 'component.lg', py: '2'},
+    },
+    status: {
+      warning: {
+        borderColor: 'status.warning.border',
+        _hover: {borderColor: 'status.warning.borderHover'},
+        _focusWithin: {borderColor: 'status.warning.border'},
+      },
+      error: {
+        borderColor: 'status.error.border',
+        _hover: {borderColor: 'status.error.borderHover'},
+        _focusWithin: {borderColor: 'status.error.border'},
+      },
+      success: {
+        borderColor: 'status.success.border',
+        _hover: {borderColor: 'status.success.borderHover'},
+        _focusWithin: {borderColor: 'status.success.border'},
       },
     },
-  }),
-  wrapperDisabled: css({
-    cursor: 'not-allowed',
-    opacity: 0.55,
-  }),
+    isDisabled: {
+      true: {
+        cursor: 'not-allowed',
+        opacity: 0.55,
+      },
+      false: {},
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+    isDisabled: false,
+  },
+});
+
+export type InputVariants = RecipeVariantProps<typeof inputRecipe>;
+
+export const inputStyles = {
   control: css({
     display: 'block',
     flex: 1,
@@ -57,19 +85,12 @@ export const inputStyles = {
       cursor: 'not-allowed',
     },
   }),
-  controlInvalid: css({
-    color: 'fg.muted',
-  }),
   iconSlot: css({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
     color: 'fg.muted',
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
   clearButton: css({
     display: 'inline-flex',
@@ -88,28 +109,5 @@ export const inputStyles = {
       outlineColor: 'primary',
       outlineOffset: '2px',
     },
-    '& > svg': {
-      w: 'var(--silver-sizes-icon-sm)',
-      h: 'var(--silver-sizes-icon-sm)',
-    },
   }),
-  size: {
-    sm: css({minH: 'component.sm'}),
-    md: css({minH: 'component.md'}),
-    lg: css({minH: 'component.lg'}),
-  } satisfies Record<InputSize, string>,
-  status: {
-    warning: css({
-      borderColor: 'yellow.500',
-      _focusWithin: {borderColor: 'yellow.500'},
-    }),
-    error: css({
-      borderColor: 'red.600',
-      _focusWithin: {borderColor: 'red.600'},
-    }),
-    success: css({
-      borderColor: 'green.600',
-      _focusWithin: {borderColor: 'green.600'},
-    }),
-  } satisfies Record<InputStatusType, string>,
 } as const;

@@ -40,3 +40,17 @@ export const Sizes: Story = {
 export const CustomCount: Story = {
   args: {value: 7, count: 10, isReadOnly: true},
 };
+
+export const Empty: Story = {
+  args: {value: 0, onChange: () => {}},
+};
+
+export const CustomColors: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+      <Rating emptyColor="gray" filledColor="red" isReadOnly value={3} />
+      <Rating emptyColor="gray" filledColor="green" isReadOnly value={4} />
+      <Rating emptyColor="gray" filledColor="blue" isReadOnly value={2} />
+    </div>
+  ),
+};

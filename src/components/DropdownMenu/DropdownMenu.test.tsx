@@ -29,9 +29,9 @@ describe('DropdownMenu', () => {
       <DropdownMenu
         button={{label: 'Actions'}}
         items={[
-          {icon: <Edit />, label: 'Edit', onClick: onEdit},
+          {icon: Edit, label: 'Edit', onClick: onEdit},
           {type: 'divider'},
-          {icon: <Trash2 />, isDisabled: true, label: 'Delete'},
+          {icon: Trash2, isDisabled: true, label: 'Delete'},
         ]}
       />,
     );

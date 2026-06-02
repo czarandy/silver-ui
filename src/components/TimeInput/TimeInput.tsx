@@ -1,20 +1,26 @@
 import {Clock, X} from 'lucide-react';
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {cx} from '../../internal/cx';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {
   getDescribedBy,
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 
 export type ISOTimeString =
   | `${number}${number}:${number}${number}`
   | `${number}${number}:${number}${number}:${number}${number}`;
 
-export interface TimeInputProps {
+export type TimeInputProps = {
   /**
    * Additional CSS class names applied to the input wrapper.
    */
@@ -62,19 +68,13 @@ export interface TimeInputProps {
    */
   isLoading?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -90,7 +90,7 @@ export interface TimeInputProps {
   /**
    * Called when the time value changes.
    */
-  onChange?: (value: ISOTimeString | undefined) => void;
+  onChange: (value: ISOTimeString | undefined) => void;
   /**
    * Placeholder text.
    * @default 'Select a time'
@@ -120,8 +120,8 @@ export interface TimeInputProps {
   /**
    * Controlled time value in ISO format.
    */
-  value?: ISOTimeString;
-}
+  value: ISOTimeString | undefined;
+} & FieldNecessity;
 
 /**
  * Time picker input field with optional seconds granularity.
@@ -139,12 +139,13 @@ export function TimeInput({
   size = 'md',
   description,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   isDisabled = false,
   isLoading = false,
   htmlName,
   status,
+  labelIcon,
   labelTooltip,
   placeholder = 'Select a time',
   className,
@@ -158,29 +159,30 @@ export function TimeInput({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       <div
-        className={cx(
-          inputStyles.wrapper,
-          inputStyles.size[size],
-          status != null ? inputStyles.status[status.type] : undefined,
-          isDisabled ? inputStyles.wrapperDisabled : undefined,
-          className,
-        )}
-        style={style}>
+        className={inputRecipe({
+          size,
+          status: status?.type,
+          isDisabled,
+        })}>
         <span className={inputStyles.iconSlot}>
           <Icon icon={Clock} size="sm" />
         </span>
@@ -188,7 +190,7 @@ export function TimeInput({
           aria-busy={isLoading || undefined}
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || undefined}
-          aria-required={isRequired || undefined}
+          aria-required={isRequired ?? undefined}
           // eslint-disable-next-line jsx-a11y-x/no-autofocus
           autoFocus={hasAutoFocus}
           className={inputStyles.control}
@@ -199,7 +201,7 @@ export function TimeInput({
           min={min}
           name={htmlName}
           onChange={event =>
-            onChange?.(
+            onChange(
               event.target.value === ''
                 ? undefined
                 : (event.target.value as ISOTimeString),
@@ -215,7 +217,7 @@ export function TimeInput({
           <button
             aria-label={`Clear ${label}`}
             className={inputStyles.clearButton}
-            onClick={() => onChange?.(undefined)}
+            onClick={() => onChange(undefined)}
             type="button">
             <Icon icon={X} size="sm" />
           </button>

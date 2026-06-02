@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {User} from 'lucide-react';
 import {useMemo, useState} from 'react';
-import {Combobox} from './Combobox';
+import {Combobox, type ComboboxProps} from './Combobox';
 import {ComboboxItem} from './ComboboxItem';
 import {createStaticSource, type SearchableItem} from './types';
 
@@ -15,14 +15,14 @@ const people: SearchableItem<{role: string}>[] = [
   },
 ];
 
-const meta: Meta<typeof Combobox> = {
+const meta = {
   title: 'Components/Combobox',
   component: Combobox,
   args: {label: 'Assignee', placeholder: 'Search people'},
-};
+} satisfies Meta<ComboboxProps>;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<ComboboxProps>;
 
 function ComboboxStory(args: React.ComponentProps<typeof Combobox>) {
   const [value, setValue] = useState<SearchableItem | null>(null);
@@ -40,7 +40,7 @@ function ComboboxStory(args: React.ComponentProps<typeof Combobox>) {
 }
 
 export const Default: Story = {
-  render: args => <ComboboxStory {...args} />,
+  render: (args: ComboboxProps) => <ComboboxStory {...args} />,
 };
 
 function CustomItemsStory(args: React.ComponentProps<typeof Combobox>) {
@@ -57,7 +57,7 @@ function CustomItemsStory(args: React.ComponentProps<typeof Combobox>) {
       renderItem={item => (
         <ComboboxItem
           description={item.auxiliaryData?.role}
-          icon={<User />}
+          icon={User}
           item={item}
         />
       )}
@@ -68,5 +68,5 @@ function CustomItemsStory(args: React.ComponentProps<typeof Combobox>) {
 }
 
 export const CustomItems: Story = {
-  render: args => <CustomItemsStory {...args} />,
+  render: (args: ComboboxProps) => <CustomItemsStory {...args} />,
 };

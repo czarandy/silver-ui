@@ -15,9 +15,16 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {BaseCombobox} from '../Combobox';
 import type {SearchableItem, SearchSource} from '../Combobox';
-import {Field, inputStyles, type InputSize, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  inputStyles,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
-import {Icon} from '../Icon';
+import {Icon, type IconComponent} from '../Icon';
 import {Tag} from '../Tag';
 
 export type TagsInputChange<T extends SearchableItem> =
@@ -41,7 +48,7 @@ export interface TagsInputHandle {
   focus(): void;
 }
 
-export interface TagsInputProps<T extends SearchableItem = SearchableItem> {
+export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
   /**
    * Additional CSS class names applied to the input wrapper.
    */
@@ -103,19 +110,13 @@ export interface TagsInputProps<T extends SearchableItem = SearchableItem> {
    */
   isLabelHidden?: boolean;
   /**
-   * Whether the field is optional.
-   * @default false
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required.
-   * @default false
-   */
-  isRequired?: boolean;
-  /**
    * Field label.
    */
   label: string;
+  /**
+   * Icon shown before the label.
+   */
+  labelIcon?: IconComponent;
   /**
    * Tooltip content shown next to the label.
    */
@@ -171,9 +172,9 @@ export interface TagsInputProps<T extends SearchableItem = SearchableItem> {
    */
   size?: InputSize;
   /**
-   * Icon or content shown before the input.
+   * Icon shown before the input.
    */
-  startIcon?: ReactNode;
+  startIcon?: IconComponent;
   /**
    * Validation status displayed below the tags-input.
    */
@@ -191,7 +192,7 @@ export interface TagsInputProps<T extends SearchableItem = SearchableItem> {
    * Selected items.
    */
   value: T[];
-}
+} & FieldNecessity;
 
 const CREATABLE_ID_PREFIX = '__silver_create__';
 
@@ -242,9 +243,10 @@ export function TagsInput<T extends SearchableItem>({
   handleRef,
   isDisabled = false,
   isLabelHidden = false,
-  isOptional = false,
-  isRequired = false,
+  isOptional,
+  isRequired,
   label,
+  labelIcon,
   labelTooltip,
   maxEntries,
   maxMenuItems,
@@ -327,30 +329,34 @@ export function TagsInput<T extends SearchableItem>({
     );
   };
 
+  const necessity: FieldNecessity = {isOptional, isRequired};
+
   return (
     <Field
+      className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...necessity}
       label={label}
+      labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       ref={ref}
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
-      }>
+      }
+      style={style}>
       {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- container observes descendant focus entering/leaving the compound input */}
       <div
         className={cx(
-          inputStyles.wrapper,
-          inputStyles.size[size],
-          status != null ? inputStyles.status[status.type] : undefined,
-          isDisabled ? inputStyles.wrapperDisabled : undefined,
+          inputRecipe({
+            size,
+            status: status?.type,
+            isDisabled,
+          }),
           styles.wrapper,
-          className,
         )}
         data-testid={dataTestId}
         onBlur={event => {
@@ -363,10 +369,11 @@ export function TagsInput<T extends SearchableItem>({
             onFocus?.(event);
           }
         }}
-        ref={wrapperRef}
-        style={style}>
+        ref={wrapperRef}>
         {startIcon != null ? (
-          <span className={inputStyles.iconSlot}>{startIcon}</span>
+          <span className={inputStyles.iconSlot}>
+            <Icon color="secondary" icon={startIcon} size="sm" />
+          </span>
         ) : null}
         {value.map(item => (
           <span className={styles.tag} key={item.id}>

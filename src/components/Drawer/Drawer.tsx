@@ -1,16 +1,10 @@
-/* eslint-disable jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions */
-import {
-  useEffect,
-  useRef,
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
-} from 'react';
+import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useEffect, useRef} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 
-export type DrawerPlacement = 'left' | 'right' | 'top' | 'bottom';
+export type DrawerPlacement = 'start' | 'end' | 'top' | 'bottom';
 
 export interface DrawerProps {
   /**
@@ -39,7 +33,7 @@ export interface DrawerProps {
   onOpenChange: (isOpen: boolean) => void;
   /**
    * Edge of the viewport the drawer slides in from.
-   * @default 'right'
+   * @default 'end'
    */
   placement?: DrawerPlacement;
   /**
@@ -47,7 +41,7 @@ export interface DrawerProps {
    */
   ref?: Ref<HTMLElement>;
   /**
-   * Width (left/right) or height (top/bottom) of the drawer.
+   * Width (start/end) or height (top/bottom) of the drawer.
    */
   size?: number | string;
   /**
@@ -82,9 +76,9 @@ const styles = {
   open: css({
     display: 'flex',
   }),
-  left: css({
+  start: css({
     inset: 0,
-    mr: 'auto',
+    marginInlineEnd: 'auto',
     h: '100dvh',
     maxH: '100dvh',
     borderRadius: 0,
@@ -92,9 +86,9 @@ const styles = {
     borderInlineEndStyle: 'solid',
     borderInlineEndColor: 'border',
   }),
-  right: css({
+  end: css({
     inset: 0,
-    ml: 'auto',
+    marginInlineStart: 'auto',
     h: '100dvh',
     maxH: '100dvh',
     borderRadius: 0,
@@ -132,8 +126,8 @@ const styles = {
 } as const;
 
 const DEFAULT_SIZES: Record<DrawerPlacement, number | string> = {
-  left: 320,
-  right: 320,
+  start: 320,
+  end: 320,
   top: '40vh',
   bottom: '40vh',
 };
@@ -143,7 +137,7 @@ function getSizeStyle(
   size: number | string,
 ): CSSProperties {
   const formatted = formatSize(size);
-  if (placement === 'left' || placement === 'right') {
+  if (placement === 'start' || placement === 'end') {
     return {width: formatted, maxWidth: '100dvw'};
   }
   return {height: formatted, maxHeight: '100dvh'};
@@ -156,7 +150,7 @@ export function Drawer({
   isOpen,
   label,
   onOpenChange,
-  placement = 'right',
+  placement = 'end',
   size,
   children,
   className,
@@ -203,6 +197,7 @@ export function Drawer({
   const sizeStyle = getSizeStyle(placement, effectiveSize);
 
   return (
+    // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- native dialog backdrop clicks close the drawer
     <dialog
       aria-label={label}
       aria-modal="true"

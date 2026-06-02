@@ -1,7 +1,7 @@
 import {Menu} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
-import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
-import {Button} from '../Button';
+import {useAppShellMobile} from '../../components/AppShell/AppShellMobileContext';
+import {Button} from '../../components/Button';
 
 /**
  * Props for {@link MobileNavToggle}.

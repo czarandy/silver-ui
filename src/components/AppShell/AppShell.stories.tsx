@@ -31,8 +31,8 @@ type Story = StoryObj<typeof meta>;
 const sideNav = (
   <SideNav header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
     <SideNavSection title="Main">
-      <SideNavItem href="/" icon={<Home />} isSelected label="Home" />
-      <SideNavItem href="/settings" icon={<Settings />} label="Settings" />
+      <SideNavItem href="/" icon={Home} isSelected label="Home" />
+      <SideNavItem href="/settings" icon={Settings} label="Settings" />
     </SideNavSection>
   </SideNav>
 );

@@ -1,8 +1,15 @@
 import {Star} from 'lucide-react';
-import {useState, type CSSProperties, type ReactNode, type Ref} from 'react';
+import {
+  useState,
+  useId,
+  type CSSProperties,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import {css} from 'styled-system/css';
+import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
-import {Icon, type IconSize} from '../Icon';
+import {Icon, type IconColor, type IconSize} from '../Icon';
 
 export interface RatingProps {
   /**
@@ -18,6 +25,16 @@ export interface RatingProps {
    * Test ID applied to the rating root.
    */
   'data-testid'?: string;
+  /**
+   * Color of unfilled stars.
+   * @default 'disabled'
+   */
+  emptyColor?: IconColor;
+  /**
+   * Color of filled stars.
+   * @default 'yellow'
+   */
+  filledColor?: IconColor;
   /**
    * Whether the rating is disabled.
    * @default false
@@ -84,25 +101,7 @@ const styles = {
   readOnly: css({
     cursor: 'default',
   }),
-  filled: css({
-    color: 'yellow.400',
-    fill: 'currentColor',
-  }),
-  empty: css({
-    color: 'silver-neutral.300',
-  }),
   input: css({
-    position: 'absolute',
-    w: '1px',
-    h: '1px',
-    p: 0,
-    m: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    whiteSpace: 'nowrap',
-    borderWidth: 0,
-  }),
-  srOnly: css({
     position: 'absolute',
     w: '1px',
     h: '1px',
@@ -116,15 +115,17 @@ const styles = {
 } as const;
 
 function StarIcon({
+  color,
   isFilled,
   size,
 }: {
+  color: IconColor;
   isFilled: boolean;
   size: IconSize;
 }): ReactNode {
   return (
     <Icon
-      className={isFilled ? styles.filled : styles.empty}
+      color={color}
       fill={isFilled ? 'currentColor' : 'none'}
       icon={Star}
       size={size}
@@ -136,9 +137,11 @@ function StarIcon({
  * Star-based rating control supporting read-only and interactive modes.
  */
 export function Rating({
-  value,
+  value: valueFromProps,
   onChange,
   count = 5,
+  emptyColor = 'disabled',
+  filledColor = 'yellow',
   size = 'md',
   isReadOnly = false,
   isDisabled = false,
@@ -148,6 +151,22 @@ export function Rating({
   style,
   ref,
 }: RatingProps): React.JSX.Element {
+  if (process.env.NODE_ENV !== 'production') {
+    if (!Number.isInteger(count) || count < 1) {
+      throw new Error(
+        `Rating: count must be a positive integer, received ${count}.`,
+      );
+    }
+
+    if (valueFromProps < 0 || valueFromProps > count) {
+      throw new Error(
+        `Rating: value ${valueFromProps} is out of range [0, ${count}].`,
+      );
+    }
+  }
+
+  const value = Math.max(0, Math.min(count, Math.round(valueFromProps)));
+  const groupId = useId();
   const [hoverValue, setHoverValue] = useState<number | null>(null);
   const isInteractive = !isReadOnly && !isDisabled && onChange != null;
   const displayValue = isInteractive ? (hoverValue ?? value) : value;
@@ -167,7 +186,11 @@ export function Rating({
         style={style}>
         {Array.from({length: count}, (_, i) => (
           <span className={styles.readOnly} key={i}>
-            <StarIcon isFilled={i < value} size={size} />
+            <StarIcon
+              color={i < value ? filledColor : emptyColor}
+              isFilled={i < value}
+              size={size}
+            />
           </span>
         ))}
       </div>
@@ -195,15 +218,19 @@ export function Rating({
             <input
               checked={value === starValue}
               className={styles.input}
-              name={label}
+              name={groupId}
               onChange={() => onChange(starValue)}
               type="radio"
               value={starValue}
             />
-            <span className={styles.srOnly}>
+            <VisuallyHidden>
               {starValue} {starValue === 1 ? 'star' : 'stars'}
-            </span>
-            <StarIcon isFilled={i < displayValue} size={size} />
+            </VisuallyHidden>
+            <StarIcon
+              color={i < displayValue ? filledColor : emptyColor}
+              isFilled={i < displayValue}
+              size={size}
+            />
           </label>
         );
       })}

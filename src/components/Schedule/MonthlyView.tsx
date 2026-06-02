@@ -51,10 +51,10 @@ const styles = {
     p: '2',
     borderInlineEndWidth: '1px',
     borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'silver-neutral.100',
+    borderInlineEndColor: 'border',
     borderBlockEndWidth: '1px',
     borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'silver-neutral.100',
+    borderBlockEndColor: 'border',
   }),
   otherMonth: css({
     bg: 'bg.subtle',
@@ -71,7 +71,7 @@ const styles = {
   }),
   today: css({
     bg: 'primary',
-    color: 'white',
+    color: 'fg.onPrimary',
   }),
   events: css({
     display: 'flex',

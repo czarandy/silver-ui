@@ -29,7 +29,7 @@ function TabsStory(args: React.ComponentProps<typeof Tabs>) {
       <TabMenu
         label="More"
         options={[
-          {icon: <BarChart3 />, label: 'Analytics', value: 'analytics'},
+          {icon: BarChart3, label: 'Analytics', value: 'analytics'},
           {label: 'Reports', value: 'reports'},
         ]}
       />
