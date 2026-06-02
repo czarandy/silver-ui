@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Button} from '../Button';
 import {Card} from '../Card';
-import {HStack, VStack} from '../Stack';
-import {Heading, Text} from '../Text';
+import {VStack} from '../Stack';
+import {Text} from '../Text';
 import {Layout} from './Layout';
 import {LayoutContent} from './LayoutContent';
 import {LayoutFooter} from './LayoutFooter';
@@ -31,11 +31,7 @@ export const Basic: Story = {
             <Text type="body">Main content</Text>
           </LayoutContent>
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header" />}
         start={
           <LayoutPanel width={220}>
             <Text type="body">Start panel</Text>
@@ -82,11 +78,7 @@ export const AutoHeight: Story = {
             </VStack>
           </LayoutContent>
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header" />}
         height="auto"
       />
     </Card>
@@ -103,11 +95,7 @@ export const WithPadding: Story = {
             <Text type="body">Content with outer padding on the layout.</Text>
           </LayoutContent>
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header" />}
         padding={4}
       />
     </Card>
@@ -150,18 +138,12 @@ export const WithFooter: Story = {
           </LayoutContent>
         }
         footer={
-          <LayoutFooter>
-            <HStack gap={2} justify="end">
-              <Button label="Cancel" variant="ghost" />
-              <Button label="Save" variant="primary" />
-            </HStack>
-          </LayoutFooter>
+          <LayoutFooter
+            primaryButton={<Button label="Save" variant="primary" />}
+            secondaryButton={<Button label="Cancel" variant="ghost" />}
+          />
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header" />}
       />
     </Card>
   ),
@@ -183,18 +165,12 @@ export const AllSlots: Story = {
           </LayoutPanel>
         }
         footer={
-          <LayoutFooter>
-            <HStack gap={2} justify="end">
-              <Button label="Cancel" variant="ghost" />
-              <Button label="Save" variant="primary" />
-            </HStack>
-          </LayoutFooter>
+          <LayoutFooter
+            primaryButton={<Button label="Save" variant="primary" />}
+            secondaryButton={<Button label="Cancel" variant="ghost" />}
+          />
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header" />}
         start={
           <LayoutPanel width={180}>
             <Text type="body">Start panel</Text>
@@ -241,11 +217,7 @@ export const NoDividers: Story = {
           </LayoutContent>
         }
         hasDividers={false}
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header" />}
         start={
           <LayoutPanel width={200}>
             <Text type="body">Start panel</Text>
@@ -266,11 +238,7 @@ export const NonScrollableContent: Story = {
             <Text type="body">This content area does not scroll.</Text>
           </LayoutContent>
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header" />}
       />
     </Card>
   ),
@@ -288,11 +256,7 @@ export const ContentPadding: Story = {
             </Text>
           </LayoutContent>
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Header (default padding)</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Header (default padding)" />}
       />
     </Card>
   ),

@@ -231,6 +231,7 @@ export function TextArea({
           // eslint-disable-next-line jsx-a11y-x/no-autofocus
           autoFocus={hasAutoFocus}
           className={cx(inputStyles.control, styles.textarea)}
+          data-autofocus={hasAutoFocus || undefined}
           data-testid={dataTestId}
           disabled={isDisabled}
           id={inputId}

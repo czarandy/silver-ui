@@ -6,5 +6,9 @@ export {
   type DialogVariant,
 } from './Dialog';
 export {dialogRecipe, type DialogVariants} from './Dialog.recipe';
-export {DialogHeader, type DialogHeaderProps} from './DialogHeader';
+export {
+  DialogContext,
+  useDialogContext,
+  type DialogContextValue,
+} from './DialogContext';
 export {useDialog, type DialogOptions, type UseDialogReturn} from './useDialog';

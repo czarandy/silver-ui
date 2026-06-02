@@ -2,6 +2,7 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from '../Button';
+import {LayoutHeader} from '../Layout';
 import {Dialog} from './Dialog';
 import {useDialog} from './useDialog';
 
@@ -158,6 +159,19 @@ describe('Dialog', () => {
       expect(screen.getByRole('button', {name: 'First action'})).toHaveFocus();
     });
   });
+
+  it('prefers [data-autofocus] over dialog heading for initial focus', async () => {
+    render(
+      <Dialog isOpen label="Form" onOpenChange={() => {}}>
+        <LayoutHeader title="Form title" />
+        <input data-autofocus="true" data-testid="name-input" />
+      </Dialog>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('name-input')).toHaveFocus();
+    });
+  });
 });
 
 describe('useDialog', () => {
@@ -190,5 +204,93 @@ describe('useDialog', () => {
 
     await user.click(screen.getByRole('button', {name: 'Close'}));
     expect(screen.getByTestId('status')).toHaveTextContent('closed');
+  });
+});
+
+describe('Dialog additional', () => {
+  it('does not close on backdrop click for required dialogs', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <Dialog
+        isOpen
+        label="Alert"
+        onOpenChange={onOpenChange}
+        purpose="required">
+        Content
+      </Dialog>,
+    );
+
+    fireEvent.click(screen.getByRole('alertdialog'));
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('restores body overflow when closed', () => {
+    document.body.style.overflow = 'scroll';
+
+    const {rerender} = render(
+      <Dialog isOpen label="Test" onOpenChange={() => {}}>
+        Content
+      </Dialog>,
+    );
+
+    expect(document.body).toHaveStyle({overflow: 'hidden'});
+
+    rerender(
+      <Dialog isOpen={false} label="Test" onOpenChange={() => {}}>
+        Content
+      </Dialog>,
+    );
+
+    expect(document.body).toHaveStyle({overflow: 'scroll'});
+    document.body.style.overflow = '';
+  });
+});
+
+describe('LayoutHeader in Dialog', () => {
+  it('renders title and subtitle', () => {
+    render(
+      <Dialog isOpen label="Test" onOpenChange={() => {}}>
+        <LayoutHeader subtitle="Helper text" title="My Title" />
+      </Dialog>,
+    );
+
+    expect(screen.getByRole('heading', {name: 'My Title'})).toBeInTheDocument();
+    expect(screen.getByText('Helper text')).toBeInTheDocument();
+  });
+
+  it('renders a close button from dialog context', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+
+    render(
+      <Dialog isOpen label="Test" onOpenChange={onOpenChange}>
+        <LayoutHeader title="Title" />
+      </Dialog>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Close'}));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('does not render a close button outside dialog context', () => {
+    render(<LayoutHeader title="Title" />);
+
+    expect(
+      screen.queryByRole('button', {name: 'Close'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders startContent and endContent', () => {
+    render(
+      <LayoutHeader
+        endContent={<span data-testid="end">End</span>}
+        startContent={<span data-testid="start">Start</span>}
+        title="Title"
+      />,
+    );
+
+    expect(screen.getByTestId('start')).toBeInTheDocument();
+    expect(screen.getByTestId('end')).toBeInTheDocument();
   });
 });

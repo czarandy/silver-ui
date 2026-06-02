@@ -417,6 +417,7 @@ export function BaseCombobox<T extends SearchableItem>({
         // eslint-disable-next-line jsx-a11y-x/no-autofocus
         autoFocus={hasAutoFocus}
         className={cx(styles.input, className)}
+        data-autofocus={hasAutoFocus || undefined}
         data-testid={dataTestId}
         disabled={isDisabled}
         id={resolvedInputId}

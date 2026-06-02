@@ -16,7 +16,7 @@ const styles = {
     alignItems: 'center',
     flexShrink: 0,
     px: '3',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',
     bg: 'bg.subtle',

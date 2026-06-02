@@ -7,7 +7,7 @@ Audit each component for: performance problems, accessibility concerns, logic
 bugs, unclear API, missing tests, and missing stories. Check that important
 props have stories demonstrating them, and that key behavior is tested.
 
-Save your audits in a report in the repo root audits-codex/ dir in a <ComponentName>.md file
+Save your audits in a report in the repo root audits/ dir in a <ComponentName>.md file
 ```
 
 ## Layout & Structure
@@ -55,7 +55,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [x] MetadataList
 - [ ] Table
 - [x] Tag
-- [ ] Text
+- [x] Text
 - [ ] Thumbnail
 - [ ] Tooltip
 - [ ] TreeView
@@ -74,7 +74,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 - [ ] NumberInput
 - [ ] PasswordInput
 - [ ] RadioGroup
-- [ ] Rating
+- [x] Rating
 - [ ] SearchFilterInput
 - [ ] Select
 - [ ] Slider
@@ -96,8 +96,8 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 
 ## Overlays
 
-- [ ] AlertDialog
-- [ ] Dialog
+- [x] AlertDialog
+- [x] Dialog
 - [ ] Drawer
 - [ ] HoverCard
 - [ ] Popover

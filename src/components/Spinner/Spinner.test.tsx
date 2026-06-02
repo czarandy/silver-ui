@@ -42,7 +42,7 @@ describe('Spinner', () => {
     expect(screen.getByTestId('spinner')).toHaveClass('silver-c_primary');
 
     rerender(<Spinner data-testid="spinner" variant="onMedia" />);
-    expect(screen.getByTestId('spinner')).toHaveClass('silver-c_white');
+    expect(screen.getByTestId('spinner')).toHaveClass('silver-c_fg.onPrimary');
   });
 
   it('uses normal text color for the default visible label', () => {

@@ -167,7 +167,7 @@ const styles = {
     bg: 'bg.subtle',
   }),
   selected: css({
-    bg: 'primary.subtle',
+    bg: 'bg.selected',
   }),
   disabled: css({
     cursor: 'not-allowed',

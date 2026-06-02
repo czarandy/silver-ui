@@ -152,7 +152,13 @@ describe('Rating', () => {
 
   it('throws in dev for out-of-range value', () => {
     expect(() => render(<Rating isReadOnly value={-1} />)).toThrow(
-      'Rating: value -1 is out of range [0, 5].',
+      'Rating: value must be an integer in [0, 5], received -1.',
+    );
+  });
+
+  it('throws in dev for fractional value', () => {
+    expect(() => render(<Rating isReadOnly value={2.5} />)).toThrow(
+      'Rating: value must be an integer in [0, 5], received 2.5.',
     );
   });
 

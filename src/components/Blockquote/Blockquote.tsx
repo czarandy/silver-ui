@@ -34,7 +34,7 @@ export interface BlockquoteProps {
 
 const styles = {
   root: css({
-    borderInlineStartWidth: '2px',
+    borderInlineStartWidth: 'emphasized',
     borderInlineStartStyle: 'solid',
     borderInlineStartColor: 'border.emphasized',
     ps: '4',

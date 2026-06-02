@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 
-export type ToastType = 'error' | 'info';
+export type ToastType = 'error' | 'info' | 'success' | 'warning';
 export type ToastPosition = 'bottomEnd' | 'bottomStart' | 'topEnd' | 'topStart';
 export type ToastCollisionBehavior = 'ignore' | 'overwrite';
 export type ToastDismissReason = 'auto' | 'manual';

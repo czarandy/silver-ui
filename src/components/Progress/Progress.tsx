@@ -1,5 +1,6 @@
 import {useId, type CSSProperties, type Ref} from 'react';
 import {css} from 'styled-system/css';
+import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 
 export type ProgressVariant =
@@ -105,17 +106,6 @@ const styles = {
     lineHeight: 'normal',
     whiteSpace: 'nowrap',
   }),
-  visuallyHidden: css({
-    position: 'absolute',
-    w: '1px',
-    h: '1px',
-    p: 0,
-    m: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    whiteSpace: 'nowrap',
-    borderWidth: 0,
-  }),
   track: css({
     w: 'full',
     h: '2',
@@ -189,15 +179,18 @@ export function Progress({
       style={style}>
       {!isLabelHidden || showValueLabel ? (
         <div className={styles.header}>
-          <span
-            className={cx(
-              styles.label,
-              isLabelHidden ? styles.visuallyHidden : undefined,
-              isDisabled ? styles.disabledText : undefined,
-            )}
-            id={labelId}>
-            {label}
-          </span>
+          {isLabelHidden ? (
+            <VisuallyHidden id={labelId}>{label}</VisuallyHidden>
+          ) : (
+            <span
+              className={cx(
+                styles.label,
+                isDisabled ? styles.disabledText : undefined,
+              )}
+              id={labelId}>
+              {label}
+            </span>
+          )}
           {showValueLabel ? (
             <span
               className={cx(
@@ -209,9 +202,7 @@ export function Progress({
           ) : null}
         </div>
       ) : (
-        <span className={styles.visuallyHidden} id={labelId}>
-          {label}
-        </span>
+        <VisuallyHidden id={labelId}>{label}</VisuallyHidden>
       )}
 
       <div

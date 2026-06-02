@@ -197,7 +197,7 @@ const styles = {
     h: '6',
     p: '1',
     borderRadius: 'full',
-    bg: 'silver-neutral.300',
+    bg: 'track.emphasized',
     transitionProperty: 'background-color',
     transitionDuration: 'fast',
     transitionTimingFunction: 'default',

@@ -1,6 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
 import {css, cx} from 'styled-system/css';
+import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
@@ -9,6 +10,7 @@ import {Heading, Text} from '../Text';
 import {useScheduleContext} from './context';
 import {enumerateDates, eventOccursOnDate} from './dateMath';
 import {
+  eventColorClassName,
   getCategory,
   getEventTimeLabel,
   ScheduleFrame,
@@ -88,8 +90,7 @@ function ListEvent({event}: {event: CalendarEvent}): React.JSX.Element {
           aria-hidden="true"
           className={cx(
             sharedStyles.eventDot,
-            // event dot picks up vars from this class
-            sharedStyles.event,
+            eventColorClassName(category.color),
           )}
         />
         <Text>{event.title}</Text>
@@ -129,7 +130,7 @@ function ScheduleListView(
                   {plainDateFormat(day, {weekday: 'short'})}
                 </span>
                 <span className={styles.dayNumber}>{day.day}</span>
-                <span className={sharedStyles.visuallyHidden}>{fullDate}</span>
+                <VisuallyHidden>{fullDate}</VisuallyHidden>
               </Heading>
               <div className={styles.events}>
                 {dayEvents.length > 0 ? (

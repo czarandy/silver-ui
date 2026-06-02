@@ -10,6 +10,7 @@ import type {
   Ref,
 } from 'react';
 import {css} from 'styled-system/css';
+import {VisuallyHidden} from '../../internal';
 import {cx} from '../../internal/cx';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {useButtonGroup} from '../ButtonGroup/ButtonGroupContext';
@@ -228,17 +229,6 @@ const styles = {
     alignItems: 'center',
     color: 'inherit',
   }),
-  visuallyHidden: css({
-    position: 'absolute',
-    w: '1px',
-    h: '1px',
-    p: 0,
-    m: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    whiteSpace: 'nowrap',
-    borderWidth: 0,
-  }),
 } as const;
 
 export function Button({
@@ -358,9 +348,9 @@ export function Button({
           </span>
         ) : null}
       </span>
-      <span aria-live="polite" className={styles.visuallyHidden} role="status">
+      <VisuallyHidden aria-live="polite" role="status">
         {isLoading ? 'Loading' : ''}
-      </span>
+      </VisuallyHidden>
     </>
   );
 

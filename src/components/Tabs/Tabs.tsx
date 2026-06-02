@@ -66,7 +66,7 @@ const styles = {
     w: 'full',
   }),
   divider: css({
-    borderBlockEndWidth: '1px',
+    borderBlockEndWidth: 'default',
     borderBlockEndStyle: 'solid',
     borderBlockEndColor: 'border',
   }),

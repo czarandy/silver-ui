@@ -5,8 +5,7 @@ import {LayoutContent} from '../Layout/LayoutContent';
 import {LayoutFooter} from '../Layout/LayoutFooter';
 import {LayoutHeader} from '../Layout/LayoutHeader';
 import {LayoutPanel} from '../Layout/LayoutPanel';
-import {HStack} from '../Stack';
-import {Heading, Text} from '../Text';
+import {Text} from '../Text';
 import {Card} from './Card';
 
 const meta: Meta<typeof Card> = {
@@ -88,18 +87,12 @@ export const WithLayout: Story = {
           </LayoutContent>
         }
         footer={
-          <LayoutFooter>
-            <HStack gap={2} justify="end">
-              <Button label="Cancel" variant="ghost" />
-              <Button label="Save" variant="primary" />
-            </HStack>
-          </LayoutFooter>
+          <LayoutFooter
+            primaryButton={<Button label="Save" variant="primary" />}
+            secondaryButton={<Button label="Cancel" variant="ghost" />}
+          />
         }
-        header={
-          <LayoutHeader>
-            <Heading level={3}>Settings</Heading>
-          </LayoutHeader>
-        }
+        header={<LayoutHeader title="Settings" />}
         start={
           <LayoutPanel width={160}>
             <Text type="body">Sidebar</Text>

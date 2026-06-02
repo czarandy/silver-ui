@@ -28,7 +28,7 @@ export const spinnerRecipe = cva({
         color: 'primary',
       },
       onMedia: {
-        color: 'white',
+        color: 'fg.onPrimary',
       },
     },
     hasLabel: {

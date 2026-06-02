@@ -20,7 +20,7 @@ export const dialogRecipe = cva({
     overscrollBehavior: 'contain',
     opacity: 0,
     '&::backdrop': {
-      bg: 'rgba(0, 0, 0, 0.4)',
+      bg: 'overlay.scrim',
       backdropFilter: 'blur(2px)',
     },
     _focusVisible: {

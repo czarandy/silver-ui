@@ -12,7 +12,7 @@ export const avatarRecipe = cva({
     isGrouped: {
       true: {
         borderRadius: 'full',
-        borderWidth: '2px',
+        borderWidth: 'emphasized',
         borderStyle: 'solid',
         borderColor: 'bg',
         bg: 'bg',

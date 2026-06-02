@@ -158,9 +158,13 @@ export function Rating({
       );
     }
 
-    if (valueFromProps < 0 || valueFromProps > count) {
+    if (
+      valueFromProps < 0 ||
+      valueFromProps > count ||
+      !Number.isInteger(valueFromProps)
+    ) {
       throw new Error(
-        `Rating: value ${valueFromProps} is out of range [0, ${count}].`,
+        `Rating: value must be an integer in [0, ${count}], received ${valueFromProps}.`,
       );
     }
   }

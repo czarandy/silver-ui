@@ -87,12 +87,12 @@ const styles = {
   }),
   drawerStart: css({
     insetInlineStart: 0,
-    borderInlineEndWidth: '1px',
+    borderInlineEndWidth: 'default',
     transform: 'translateX(-100%)',
   }),
   drawerEnd: css({
     insetInlineEnd: 0,
-    borderInlineStartWidth: '1px',
+    borderInlineStartWidth: 'default',
     transform: 'translateX(100%)',
   }),
   drawerOpen: css({
@@ -104,7 +104,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBlockEndWidth: '1px',
+    borderBlockEndWidth: 'default',
     borderBlockEndStyle: 'solid',
     borderBlockEndColor: 'border',
     flexShrink: 0,

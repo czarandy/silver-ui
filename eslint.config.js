@@ -305,6 +305,17 @@ export default tseslint.config(
       'silver-ui/require-component-props': 'error',
     },
   },
+  // Color tokens — source must use semantic color tokens for dark-mode support
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}'],
+    plugins: {
+      'silver-ui': silverUiPlugin,
+    },
+    rules: {
+      'silver-ui/no-direct-color-tokens': 'error',
+    },
+  },
   // Testing Library — enforce best practices in test files
   {
     files: ['**/*.test.{ts,tsx}'],

@@ -6,10 +6,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import {Button} from '../Button';
-import {Heading, Text} from '../Text';
+import {LayoutHeader} from '../Layout';
 
 export interface DialogHeaderProps {
   /**
@@ -25,18 +23,13 @@ export interface DialogHeaderProps {
    */
   endContent?: ReactNode;
   /**
-   * Whether to render a bottom border divider.
-   * @default false
-   */
-  hasDivider?: boolean;
-  /**
    * Called when the close button is clicked.
    */
   onOpenChange?: (isOpen: boolean) => void;
   /**
    * Ref forwarded to the header element.
    */
-  ref?: Ref<HTMLDivElement>;
+  ref?: Ref<HTMLElement>;
   /**
    * Content rendered before the title.
    */
@@ -55,36 +48,9 @@ export interface DialogHeaderProps {
   title: string;
 }
 
-const styles = {
-  root: css({
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: '3',
-    p: '4',
-    flexShrink: 0,
-  }),
-  divider: css({
-    borderBlockEndWidth: '1px',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  title: css({
-    flex: 1,
-    minW: 0,
-    outline: 'none',
-  }),
-  actions: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    flexShrink: 0,
-  }),
-} as const;
-
 /**
  * A standard header for Dialog and Drawer, with title, optional subtitle,
- * and a close button.
+ * and a close button. Composes LayoutHeader internally.
  */
 export function DialogHeader({
   title,
@@ -92,57 +58,59 @@ export function DialogHeader({
   onOpenChange,
   startContent,
   endContent,
-  hasDivider = false,
   className,
   'data-testid': dataTestId,
   style,
   ref,
 }: DialogHeaderProps): React.JSX.Element {
-  const titleRef = useRef<HTMLHeadingElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    titleRef.current?.focus();
+    headerRef.current
+      ?.querySelector<HTMLElement>('[data-testid] h4, h1, h2, h3, h4, h5, h6')
+      ?.focus();
   }, []);
 
+  const closeButton =
+    onOpenChange != null ? (
+      <Button
+        icon={X}
+        isIconOnly
+        label="Close"
+        onClick={() => onOpenChange(false)}
+        tooltip="Close"
+        variant="ghost"
+      />
+    ) : null;
+
+  const combinedEndContent =
+    endContent != null || closeButton != null ? (
+      <>
+        {endContent}
+        {closeButton}
+      </>
+    ) : undefined;
+
   return (
-    <div
-      className={cx(
-        styles.root,
-        hasDivider ? styles.divider : undefined,
-        className,
-      )}
+    <LayoutHeader
+      className={className}
       data-testid={dataTestId}
-      ref={ref}
-      style={style}>
-      {startContent != null ? (
-        <div className={styles.actions}>{startContent}</div>
-      ) : null}
-      <div className={styles.title}>
-        <Heading level={2} ref={titleRef} tabIndex={-1}>
-          {title}
-        </Heading>
-        {subtitle != null ? (
-          <Text as="p" color="secondary" type="supporting">
-            {subtitle}
-          </Text>
-        ) : null}
-      </div>
-      {endContent != null || onOpenChange != null ? (
-        <div className={styles.actions}>
-          {endContent}
-          {onOpenChange != null ? (
-            <Button
-              icon={X}
-              isIconOnly
-              label="Close"
-              onClick={() => onOpenChange(false)}
-              tooltip="Close"
-              variant="ghost"
-            />
-          ) : null}
-        </div>
-      ) : null}
-    </div>
+      endContent={combinedEndContent}
+      padding={4}
+      ref={node => {
+        headerRef.current = node;
+
+        if (typeof ref === 'function') {
+          ref(node);
+        } else if (ref != null) {
+          ref.current = node;
+        }
+      }}
+      startContent={startContent}
+      style={style}
+      subtitle={subtitle}
+      title={title}
+    />
   );
 }
 

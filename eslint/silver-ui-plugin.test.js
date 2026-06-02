@@ -4,6 +4,7 @@ import plugin from './silver-ui-plugin.js';
 
 const requireComponentPropsRule = plugin.rules['require-component-props'];
 const booleanPropNamingRule = plugin.rules['boolean-prop-naming'];
+const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -305,6 +306,133 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
         {
           messageId: 'invalidBooleanParam',
           data: {name: 'active'},
+        },
+      ],
+    },
+  ],
+});
+
+tester.run('no-direct-color-tokens', noDirectColorTokensRule, {
+  valid: [
+    {
+      name: 'allows semantic color tokens',
+      code: `
+        const styles = {
+          root: css({
+            bg: 'bg.selected',
+            color: 'status.error.fg',
+            borderColor: 'surface.red.fg',
+            boxShadow: '0 0 0 2px token(colors.primary.subtle)',
+          }),
+        };
+      `,
+    },
+    {
+      name: 'allows semantic color token references in token helpers',
+      code: `
+        const style = {
+          backgroundColor: 'token(colors.bg.selected)',
+          color: 'token(colors.fg.onPrimary)',
+        };
+      `,
+    },
+    {
+      name: 'allows non-color strings',
+      code: `
+        const label = 'red alert';
+        const icon = 'icon.md';
+      `,
+    },
+  ],
+  invalid: [
+    {
+      name: 'reports primitive palette tokens',
+      code: `
+        const styles = {
+          root: css({
+            bg: 'red.600',
+            color: 'silver-neutral.200',
+          }),
+        };
+      `,
+      errors: [
+        {
+          messageId: 'directColor',
+          data: {color: 'red.600'},
+        },
+        {
+          messageId: 'directColor',
+          data: {color: 'silver-neutral.200'},
+        },
+      ],
+    },
+    {
+      name: 'reports primitive token helper references',
+      code: `
+        const style = {
+          backgroundColor: 'token(colors.blue.100)',
+        };
+      `,
+      errors: [
+        {
+          messageId: 'directColor',
+          data: {color: 'blue.100'},
+        },
+      ],
+    },
+    {
+      name: 'reports primitive css variable references',
+      code: `
+        const style = {
+          backgroundColor: 'var(--silver-colors-primary-50)',
+        };
+      `,
+      errors: [
+        {
+          messageId: 'directColor',
+          data: {color: 'var(--silver-colors-primary-50)'},
+        },
+      ],
+    },
+    {
+      name: 'reports raw color literals',
+      code: `
+        const styles = {
+          root: css({
+            bg: '#fff',
+            color: 'rgba(0, 0, 0, 0.4)',
+          }),
+        };
+      `,
+      errors: [
+        {
+          messageId: 'directColor',
+          data: {color: '#fff'},
+        },
+        {
+          messageId: 'directColor',
+          data: {color: 'rgba('},
+        },
+      ],
+    },
+    {
+      name: 'reports named primitive colors',
+      code: `
+        const styles = {
+          root: css({
+            bg: 'white',
+            color: '{colors.black}',
+          }),
+        };
+      `,
+      errors: [
+        {
+          messageId: 'directColor',
+          data: {color: 'white'},
+        },
+        {
+          messageId: 'directColor',
+          data: {color: 'colors.black'},
         },
       ],
     },

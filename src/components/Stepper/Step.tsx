@@ -157,7 +157,7 @@ const styles = {
     transitionTimingFunction: 'default',
     flexShrink: 0,
     userSelect: 'none',
-    borderWidth: '2px',
+    borderWidth: 'emphasized',
     borderStyle: 'solid',
   }),
   indicatorActive: css({
@@ -200,7 +200,7 @@ const styles = {
     bg: 'primary',
   }),
   connectorIncomplete: css({
-    bg: 'silver-neutral.300',
+    bg: 'track.emphasized',
   }),
   labelRow: css({
     display: 'flex',

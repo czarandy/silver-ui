@@ -188,7 +188,7 @@ const styles = {
   }),
   track: css({
     position: 'absolute',
-    bg: 'silver-neutral.200',
+    bg: 'track',
     borderRadius: 'full',
   }),
   trackHorizontal: css({
@@ -243,7 +243,7 @@ const styles = {
     },
   }),
   thumbDisabled: css({
-    bg: 'silver-neutral.300',
+    bg: 'track.disabled',
     cursor: 'not-allowed',
   }),
   thumbHorizontal: css({

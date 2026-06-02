@@ -1,11 +1,10 @@
 import type {CSSProperties, Ref} from 'react';
-import {css} from 'styled-system/css';
-import {Button, type ButtonProps} from '../Button';
+import {Button} from '../Button';
 import {Dialog} from '../Dialog';
-import {HStack, VStack} from '../Stack';
-import {Heading, Text} from '../Text';
+import {Layout, LayoutContent, LayoutFooter, LayoutHeader} from '../Layout';
+import {Text} from '../Text';
 
-export type AlertDialogActionVariant = NonNullable<ButtonProps['variant']>;
+export type AlertDialogActionVariant = 'destructive' | 'primary';
 
 export interface AlertDialogProps {
   /**
@@ -40,11 +39,6 @@ export interface AlertDialogProps {
    */
   isActionLoading?: boolean;
   /**
-   * Whether to render inline instead of as a modal.
-   * @default false
-   */
-  isInline?: boolean;
-  /**
    * Whether the dialog is open.
    */
   isOpen: boolean;
@@ -59,7 +53,7 @@ export interface AlertDialogProps {
   /**
    * Ref forwarded to the dialog element.
    */
-  ref?: Ref<HTMLElement>;
+  ref?: Ref<HTMLDialogElement>;
   /**
    * Inline styles applied to the dialog.
    */
@@ -75,10 +69,6 @@ export interface AlertDialogProps {
   width?: number | string;
 }
 
-const styles = {
-  content: css({p: '4'}),
-} as const;
-
 /**
  * A modal confirmation dialog for destructive or irreversible actions.
  */
@@ -90,7 +80,6 @@ export function AlertDialog({
   'data-testid': dataTestId,
   description,
   isActionLoading = false,
-  isInline = false,
   isOpen,
   onAction,
   onOpenChange,
@@ -103,7 +92,6 @@ export function AlertDialog({
     <Dialog
       className={className}
       data-testid={dataTestId}
-      isInline={isInline}
       isOpen={isOpen}
       label={title}
       onOpenChange={onOpenChange}
@@ -111,27 +99,36 @@ export function AlertDialog({
       ref={ref}
       style={style}
       width={width}>
-      <VStack className={styles.content} gap={4}>
-        <VStack gap={2}>
-          <Heading level={2}>{title}</Heading>
-          <Text as="p" color="secondary">
-            {description}
-          </Text>
-        </VStack>
-        <HStack gap={2} justify="end">
-          <Button
-            label={cancelLabel}
-            onClick={() => onOpenChange(false)}
-            variant="ghost"
+      <Layout
+        content={
+          <LayoutContent>
+            <Text as="p" color="secondary">
+              {description}
+            </Text>
+          </LayoutContent>
+        }
+        footer={
+          <LayoutFooter
+            primaryButton={
+              <Button
+                isLoading={isActionLoading}
+                label={actionLabel}
+                onClick={onAction}
+                variant={actionVariant}
+              />
+            }
+            secondaryButton={
+              <Button
+                label={cancelLabel}
+                onClick={() => onOpenChange(false)}
+                variant="ghost"
+              />
+            }
           />
-          <Button
-            isLoading={isActionLoading}
-            label={actionLabel}
-            onClick={onAction}
-            variant={actionVariant}
-          />
-        </HStack>
-      </VStack>
+        }
+        hasDividers
+        header={<LayoutHeader title={title} />}
+      />
     </Dialog>
   );
 }

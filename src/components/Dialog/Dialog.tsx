@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions */
 import {
   useEffect,
+  useMemo,
   useRef,
   type CSSProperties,
   type ReactNode,
@@ -9,6 +10,7 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
+import {DialogContext} from './DialogContext';
 
 export type DialogVariant = 'fullscreen' | 'standard';
 export type DialogPurpose = 'form' | 'info' | 'required';
@@ -33,11 +35,6 @@ export interface DialogProps {
    * Test ID applied to the dialog.
    */
   'data-testid'?: string;
-  /**
-   * Whether to render inline instead of as a modal.
-   * @default false
-   */
-  isInline?: boolean;
   /**
    * Whether the dialog is open.
    */
@@ -67,7 +64,7 @@ export interface DialogProps {
   /**
    * Ref forwarded to the dialog element.
    */
-  ref?: Ref<HTMLElement>;
+  ref?: Ref<HTMLDialogElement>;
   /**
    * Inline styles applied to the dialog.
    */
@@ -97,7 +94,7 @@ const styles = {
     flexDirection: 'column',
     overscrollBehavior: 'contain',
     _backdrop: {
-      bg: 'rgba(0, 0, 0, 0.45)',
+      bg: 'overlay.scrim',
       backdropFilter: 'blur(2px)',
     },
     _focusVisible: {
@@ -126,17 +123,6 @@ const styles = {
     overflow: 'hidden',
     borderRadius: 'inherit',
   }),
-  inline: css({
-    position: 'relative',
-    display: 'flex',
-    p: 0,
-    borderWidth: 0,
-    bg: 'bg',
-    color: 'fg',
-    borderRadius: 'md',
-    boxShadow: 'xl',
-    flexDirection: 'column',
-  }),
 } as const;
 
 function formatSize(value: number | string): string {
@@ -144,12 +130,11 @@ function formatSize(value: number | string): string {
 }
 
 /**
- * A modal or inline dialog surface with backdrop, focus management,
+ * A modal dialog surface with backdrop, focus management,
  * and configurable dismiss behavior.
  */
 export function Dialog({
   isOpen,
-  isInline = false,
   label,
   onOpenChange,
   width = 400,
@@ -162,17 +147,15 @@ export function Dialog({
   'data-testid': dataTestId,
   style,
   ref,
-}: DialogProps): React.JSX.Element | null {
+}: DialogProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const isFullscreen = variant === 'fullscreen';
   const allowEscape = purpose !== 'required';
   const allowBackdropClick = purpose === 'info';
+  const dialogContextValue = useMemo(() => ({onOpenChange}), [onOpenChange]);
 
   useEffect(() => {
-    if (isInline) {
-      return;
-    }
     const dialog = dialogRef.current;
     if (dialog == null) {
       return;
@@ -183,18 +166,19 @@ export function Dialog({
       if (!dialog.open) {
         dialog.showModal();
       }
-      dialog
-        .querySelector<HTMLElement>('[data-autofocus="true"], [autofocus]')
-        ?.focus();
+      const autofocusTarget =
+        dialog.querySelector<HTMLElement>('[data-autofocus="true"]') ??
+        dialog.querySelector<HTMLElement>('[data-dialog-autofocus="true"]');
+      autofocusTarget?.focus();
     } else if (dialog.open) {
       dialog.close();
       triggerRef.current?.focus();
       triggerRef.current = null;
     }
-  }, [isInline, isOpen]);
+  }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || isInline) {
+    if (!isOpen) {
       return;
     }
     const previousOverflow = document.body.style.overflow;
@@ -202,31 +186,7 @@ export function Dialog({
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [isInline, isOpen]);
-
-  if (isInline) {
-    if (!isOpen) {
-      return null;
-    }
-    return (
-      <div
-        aria-label={label}
-        className={cx(
-          styles.inline,
-          isFullscreen ? styles.fullscreen : undefined,
-          className,
-        )}
-        data-testid={dataTestId}
-        ref={ref as Ref<HTMLDivElement>}
-        style={{
-          width: isFullscreen ? undefined : formatSize(width),
-          maxHeight: isFullscreen ? undefined : formatSize(maxHeight),
-          ...style,
-        }}>
-        <div className={styles.inner}>{children}</div>
-      </div>
-    );
-  }
+  }, [isOpen]);
 
   const positionStyle =
     position != null && !isFullscreen
@@ -243,7 +203,6 @@ export function Dialog({
   return (
     <dialog
       aria-label={label}
-      aria-modal="true"
       className={cx(
         styles.root,
         isOpen ? styles.open : undefined,
@@ -262,7 +221,7 @@ export function Dialog({
           onOpenChange(false);
         }
       }}
-      ref={mergeRefs(ref as Ref<HTMLDialogElement>, dialogRef)}
+      ref={mergeRefs(ref, dialogRef)}
       role={purpose === 'required' ? 'alertdialog' : undefined}
       style={{
         width: isFullscreen ? undefined : formatSize(width),
@@ -270,7 +229,9 @@ export function Dialog({
         ...positionStyle,
         ...style,
       }}>
-      <div className={styles.inner}>{children}</div>
+      <DialogContext value={dialogContextValue}>
+        <div className={styles.inner}>{children}</div>
+      </DialogContext>
     </dialog>
   );
 }

@@ -47,7 +47,7 @@ const styles = {
     bg: 'bg',
     borderRadius: 'md',
     boxShadow: 'lg',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border',
   }),

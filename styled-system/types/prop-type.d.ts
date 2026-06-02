@@ -53,6 +53,7 @@ export interface UtilityValues {
 	marginInlineStart: "auto" | Tokens["spacing"];
 	spaceX: "auto" | Tokens["spacing"] | CssProperties["marginInlineStart"];
 	spaceY: "auto" | Tokens["spacing"] | CssProperties["marginBlockStart"];
+	outlineWidth: Tokens["borderWidths"];
 	outlineColor: Tokens["colors"];
 	outline: Tokens["borders"];
 	outlineOffset: Tokens["spacing"];
@@ -60,8 +61,10 @@ export interface UtilityValues {
 	focusVisibleRing: "outside" | "inside" | "mixed" | "none";
 	focusRingColor: Tokens["colors"];
 	focusRingOffset: Tokens["spacing"];
-	focusRingWidth: CssProperties["outlineWidth"];
+	focusRingWidth: Tokens["borderWidths"] | CssProperties["outlineWidth"];
 	focusRingStyle: CssProperties["outlineStyle"];
+	divideX: Tokens["borderWidths"];
+	divideY: Tokens["borderWidths"];
 	divideColor: Tokens["colors"];
 	divideStyle: CssProperties["borderStyle"];
 	width: "auto" | Tokens["sizes"] | "1/2" | "1/3" | "2/3" | "1/4" | "2/4" | "3/4" | "1/5" | "2/5" | "3/5" | "4/5" | "1/6" | "2/6" | "3/6" | "4/6" | "5/6" | "1/12" | "2/12" | "3/12" | "4/12" | "5/12" | "6/12" | "7/12" | "8/12" | "9/12" | "10/12" | "11/12" | "screen";
@@ -116,18 +119,29 @@ export interface UtilityValues {
 	borderEndEndRadius: Tokens["radii"];
 	borderEndRadius: Tokens["radii"] | CssProperties["borderRadius"];
 	border: Tokens["borders"];
+	borderWidth: Tokens["borderWidths"];
+	borderTopWidth: Tokens["borderWidths"];
+	borderLeftWidth: Tokens["borderWidths"];
+	borderRightWidth: Tokens["borderWidths"];
+	borderBottomWidth: Tokens["borderWidths"];
+	borderBlockStartWidth: Tokens["borderWidths"];
+	borderBlockEndWidth: Tokens["borderWidths"];
 	borderColor: Tokens["colors"];
 	borderInline: Tokens["borders"];
+	borderInlineWidth: Tokens["borderWidths"];
 	borderInlineColor: Tokens["colors"];
 	borderBlock: Tokens["borders"];
+	borderBlockWidth: Tokens["borderWidths"];
 	borderBlockColor: Tokens["colors"];
 	borderLeft: Tokens["borders"];
 	borderLeftColor: Tokens["colors"];
 	borderInlineStart: Tokens["borders"];
+	borderInlineStartWidth: Tokens["borderWidths"];
 	borderInlineStartColor: Tokens["colors"];
 	borderRight: Tokens["borders"];
 	borderRightColor: Tokens["colors"];
 	borderInlineEnd: Tokens["borders"];
+	borderInlineEndWidth: Tokens["borderWidths"];
 	borderInlineEndColor: Tokens["colors"];
 	borderTop: Tokens["borders"];
 	borderTopColor: Tokens["colors"];
@@ -152,7 +166,7 @@ export interface UtilityValues {
 	transitionProperty: "common" | "colors" | "size" | "position" | "background";
 	transition: "all" | "common" | "size" | "position" | "background" | "colors" | "opacity" | "shadow" | "transform";
 	animation: Tokens["animations"];
-	animationName: "spin" | "ping" | "pulse" | "bounce";
+	animationName: "spin" | "ping" | "pulse" | "bounce" | "skeleton-shimmer";
 	animationTimingFunction: Tokens["easings"];
 	animationDuration: Tokens["durations"];
 	animationDelay: Tokens["durations"];
@@ -201,10 +215,11 @@ export interface UtilityValues {
 	scrollSnapMarginRight: Tokens["spacing"];
 	fill: Tokens["colors"];
 	stroke: Tokens["colors"];
+	strokeWidth: Tokens["borderWidths"];
 	srOnly: boolean;
 	debug: boolean;
 	containerName: CssProperties["containerName"];
-	colorPalette: "current" | "black" | "white" | "transparent" | "rose" | "pink" | "fuchsia" | "purple" | "violet" | "indigo" | "sky" | "cyan" | "teal" | "emerald" | "lime" | "amber" | "orange" | "neutral" | "stone" | "zinc" | "gray" | "slate" | "silver-primary" | "silver-neutral" | "green" | "red" | "yellow" | "blue" | "primary" | "destructive" | "status" | "status.success" | "status.error" | "status.warning" | "status.info" | "status.neutral" | "status.disabled" | "presence" | "fg" | "bg" | "bg.ghost" | "border" | "surface" | "surface.blue" | "surface.cyan" | "surface.gray" | "surface.green" | "surface.orange" | "surface.pink" | "surface.purple" | "surface.red" | "surface.teal" | "surface.yellow" | "icon";
+	colorPalette: "current" | "black" | "white" | "transparent" | "rose" | "pink" | "fuchsia" | "purple" | "violet" | "indigo" | "sky" | "cyan" | "teal" | "emerald" | "lime" | "amber" | "orange" | "neutral" | "stone" | "zinc" | "gray" | "slate" | "silver-primary" | "silver-neutral" | "green" | "red" | "yellow" | "blue" | "primary" | "destructive" | "status" | "status.success" | "status.error" | "status.warning" | "status.info" | "status.neutral" | "status.disabled" | "presence" | "fg" | "bg" | "bg.ghost" | "border" | "track" | "overlay" | "overlay.scrim" | "skeleton" | "surface" | "surface.blue" | "surface.cyan" | "surface.gray" | "surface.green" | "surface.orange" | "surface.pink" | "surface.purple" | "surface.red" | "surface.teal" | "surface.yellow" | "icon";
 	textStyle: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl" | "8xl" | "9xl";
 }
 

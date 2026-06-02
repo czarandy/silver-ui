@@ -182,7 +182,7 @@ const styles = {
     position: 'relative',
   }),
   selected: css({
-    bg: 'primary.subtle',
+    bg: 'bg.selected',
   }),
   startContent: css({
     display: 'flex',

@@ -3,7 +3,7 @@ import {cva, type RecipeVariantProps} from 'styled-system/css';
 export const cardRecipe = cva({
   base: {
     borderRadius: 'lg',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'transparent',
   },

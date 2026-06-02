@@ -47,12 +47,12 @@ const styles = {
     spacious: css({fontSize: 'xs', px: '4', py: '3'}),
   },
   dividerBottom: css({
-    borderBottomWidth: '1px',
+    borderBottomWidth: 'default',
     borderBottomStyle: 'solid',
     borderBottomColor: 'border',
   }),
   dividerColumns: css({
-    borderInlineEndWidth: '1px',
+    borderInlineEndWidth: 'default',
     borderInlineEndStyle: 'solid',
     borderInlineEndColor: 'border',
     _last: {

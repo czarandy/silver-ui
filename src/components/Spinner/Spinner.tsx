@@ -58,7 +58,7 @@ const styles = {
     boxSizing: 'border-box',
     aspectRatio: 'square',
     borderRadius: 'full',
-    borderWidth: '2px',
+    borderWidth: 'emphasized',
     borderStyle: 'solid',
     borderColor: 'currentColor',
     borderTopColor: 'transparent',

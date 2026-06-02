@@ -9,13 +9,7 @@ import {
   unobserveResize,
 } from '../../internal/sharedResizeObserver';
 import {useMediaQuery} from '../../internal/useMediaQuery';
-import {
-  Layout,
-  LayoutContent,
-  LayoutHeader,
-  LayoutPanel,
-  type SpacingStep,
-} from '../Layout';
+import {Layout, LayoutContent, LayoutPanel, type SpacingStep} from '../Layout';
 import {SideNavRenderContext} from '../SideNav';
 import {TopNavMobileContentContext, TopNavRenderContext} from '../TopNav';
 import {appShellRecipe} from './AppShell.recipe';
@@ -289,7 +283,7 @@ export function AppShell({
   const headerContent =
     hasTopNav || banner != null ? (
       <div className={cx(isAuto && styles.headerSticky)} ref={headerRef}>
-        <LayoutHeader padding={0}>
+        <header style={{flexShrink: 0}}>
           {banner != null ? (
             <div className={styles.banner}>{banner}</div>
           ) : null}
@@ -298,7 +292,7 @@ export function AppShell({
               {topNavContent}
             </div>
           ) : null}
-        </LayoutHeader>
+        </header>
       </div>
     ) : undefined;
   const autoMobileTopBar =
@@ -306,7 +300,7 @@ export function AppShell({
     isBelowBreakpoint &&
     !hasTopNavContent &&
     hasSideNav ? (
-      <LayoutHeader padding={0}>
+      <header style={{flexShrink: 0}}>
         <div
           aria-label="Mobile navigation"
           className={styles.autoMobileTopBar}
@@ -318,7 +312,7 @@ export function AppShell({
           </SideNavRenderContext>
           <MobileNavToggle />
         </div>
-      </LayoutHeader>
+      </header>
     ) : undefined;
   const sideNavPanel = showSideNavInline ? (
     <LayoutPanel isScrollable={isFill} padding={0}>

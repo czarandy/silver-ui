@@ -67,7 +67,7 @@ export const inputGroupRecipe = cva({
       alignItems: 'center',
       flexShrink: 0,
       px: '2',
-      borderWidth: '1px',
+      borderWidth: 'default',
       borderStyle: 'solid',
       borderColor: 'border.emphasized',
       borderRadius: 'md',

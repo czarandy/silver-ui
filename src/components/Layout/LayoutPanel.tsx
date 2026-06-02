@@ -42,12 +42,12 @@ const styles = {
     overflow: 'auto',
   }),
   dividerEnd: css({
-    borderInlineEndWidth: '1px',
+    borderInlineEndWidth: 'default',
     borderInlineEndStyle: 'solid',
     borderInlineEndColor: 'border',
   }),
   dividerStart: css({
-    borderInlineStartWidth: '1px',
+    borderInlineStartWidth: 'default',
     borderInlineStartStyle: 'solid',
     borderInlineStartColor: 'border',
   }),

@@ -20,7 +20,7 @@ export const buttonGroupRecipe = cva({
           {
             borderTopLeftRadius: 0,
             borderBottomLeftRadius: 0,
-            borderInlineStartWidth: '1px',
+            borderInlineStartWidth: 'default',
             borderInlineStartStyle: 'solid',
             borderInlineStartColor: 'border',
           },
@@ -36,7 +36,7 @@ export const buttonGroupRecipe = cva({
           {
             borderTopLeftRadius: 0,
             borderTopRightRadius: 0,
-            borderBlockStartWidth: '1px',
+            borderBlockStartWidth: 'default',
             borderBlockStartStyle: 'solid',
             borderBlockStartColor: 'border',
           },

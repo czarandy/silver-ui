@@ -45,7 +45,7 @@ const styles = {
     px: '1',
     borderRadius: 'sm',
     bg: 'bg.subtle',
-    borderBottomWidth: '2px',
+    borderBottomWidth: 'emphasized',
     borderBottomStyle: 'solid',
     borderBottomColor: 'border',
     color: 'fg.muted',

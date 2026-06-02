@@ -12,8 +12,10 @@ describe('Layout', () => {
       <Layout
         content={<LayoutContent>Content</LayoutContent>}
         end={<LayoutPanel>End</LayoutPanel>}
-        footer={<LayoutFooter>Footer</LayoutFooter>}
-        header={<LayoutHeader>Header</LayoutHeader>}
+        footer={
+          <LayoutFooter primaryButton={<button type="button">Done</button>} />
+        }
+        header={<LayoutHeader title="Header" />}
         start={<LayoutPanel>Start</LayoutPanel>}
       />,
     );
@@ -22,7 +24,7 @@ describe('Layout', () => {
     expect(screen.getByText('Start')).toBeInTheDocument();
     expect(screen.getByText('Content')).toBeInTheDocument();
     expect(screen.getByText('End')).toBeInTheDocument();
-    expect(screen.getByText('Footer')).toBeInTheDocument();
+    expect(screen.getByText('Done')).toBeInTheDocument();
   });
 
   it('applies className, style, data-testid, and ref to the root', () => {
@@ -79,17 +81,19 @@ describe('Layout', () => {
     render(
       <Layout
         content={<LayoutContent>Content</LayoutContent>}
-        footer={<LayoutFooter data-testid="footer">Footer</LayoutFooter>}
+        footer={
+          <LayoutFooter
+            data-testid="footer"
+            primaryButton={<button type="button">Save</button>}
+          />
+        }
         hasDividers
-        header={<LayoutHeader data-testid="header">Header</LayoutHeader>}
+        header={<LayoutHeader data-testid="header" title="Header" />}
         start={<LayoutPanel data-testid="panel">Panel</LayoutPanel>}
       />,
     );
 
-    expect(screen.getByTestId('header')).toHaveAttribute(
-      'data-divider',
-      'true',
-    );
+    expect(screen.getByTestId('header')).toHaveClass('silver-bd-be-w_default');
     expect(screen.getByTestId('footer')).toHaveAttribute(
       'data-divider',
       'true',
@@ -167,32 +171,45 @@ describe('LayoutContent', () => {
 });
 
 describe('LayoutHeader', () => {
-  it('renders as a header element', () => {
-    render(<LayoutHeader data-testid="header">Header</LayoutHeader>);
+  it('renders as a header element with a title', () => {
+    render(<LayoutHeader data-testid="header" title="My Title" />);
 
     expect(screen.getByTestId('header').tagName).toBe('HEADER');
+    expect(screen.getByText('My Title')).toBeInTheDocument();
   });
 
-  it('adds data-divider when hasDividers is set on Layout', () => {
+  it('renders subtitle when provided', () => {
+    render(<LayoutHeader subtitle="Supporting text" title="Title" />);
+
+    expect(screen.getByText('Supporting text')).toBeInTheDocument();
+  });
+
+  it('renders startContent and endContent', () => {
     render(
-      <Layout
-        content={<LayoutContent>Content</LayoutContent>}
-        header={<LayoutHeader data-testid="header">Header</LayoutHeader>}
+      <LayoutHeader
+        endContent={<span data-testid="end">End</span>}
+        startContent={<span data-testid="start">Start</span>}
+        title="Title"
       />,
     );
 
-    expect(screen.getByTestId('header')).toHaveAttribute(
-      'data-divider',
-      'true',
+    expect(screen.getByTestId('start')).toBeInTheDocument();
+    expect(screen.getByTestId('end')).toBeInTheDocument();
+  });
+
+  it('adds divider class when hasDividers context is true', () => {
+    render(
+      <Layout
+        content={<LayoutContent>Content</LayoutContent>}
+        header={<LayoutHeader data-testid="header" title="Header" />}
+      />,
     );
+
+    expect(screen.getByTestId('header')).toHaveClass('silver-bd-be-w_default');
   });
 
   it('applies height as inline style', () => {
-    render(
-      <LayoutHeader data-testid="header" height={64}>
-        Header
-      </LayoutHeader>,
-    );
+    render(<LayoutHeader data-testid="header" height={64} title="Header" />);
 
     expect(screen.getByTestId('header')).toHaveStyle({height: '64px'});
   });
@@ -205,9 +222,9 @@ describe('LayoutHeader', () => {
         className="custom"
         data-testid="header"
         ref={ref}
-        style={{color: 'red'}}>
-        Header
-      </LayoutHeader>,
+        style={{color: 'red'}}
+        title="Header"
+      />,
     );
 
     const el = screen.getByTestId('header');
@@ -219,16 +236,50 @@ describe('LayoutHeader', () => {
 
 describe('LayoutFooter', () => {
   it('renders as a footer element', () => {
-    render(<LayoutFooter data-testid="footer">Footer</LayoutFooter>);
+    render(
+      <LayoutFooter
+        data-testid="footer"
+        primaryButton={<button type="button">Done</button>}
+      />,
+    );
 
     expect(screen.getByTestId('footer').tagName).toBe('FOOTER');
+    expect(screen.getByText('Done')).toBeInTheDocument();
+  });
+
+  it('renders primaryButton and secondaryButton', () => {
+    render(
+      <LayoutFooter
+        primaryButton={<button type="button">Save</button>}
+        secondaryButton={<button type="button">Cancel</button>}
+      />,
+    );
+
+    expect(screen.getByText('Save')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+  });
+
+  it('renders startContent', () => {
+    render(
+      <LayoutFooter
+        primaryButton={<button type="button">Save</button>}
+        startContent={<span data-testid="start">Help</span>}
+      />,
+    );
+
+    expect(screen.getByTestId('start')).toBeInTheDocument();
   });
 
   it('applies divider on the block-start edge when hasDividers is set', () => {
     render(
       <Layout
         content={<LayoutContent>Content</LayoutContent>}
-        footer={<LayoutFooter data-testid="footer">Footer</LayoutFooter>}
+        footer={
+          <LayoutFooter
+            data-testid="footer"
+            primaryButton={<button type="button">Save</button>}
+          />
+        }
       />,
     );
 
@@ -245,10 +296,10 @@ describe('LayoutFooter', () => {
       <LayoutFooter
         className="custom"
         data-testid="footer"
+        primaryButton={<button type="button">Done</button>}
         ref={ref}
-        style={{color: 'red'}}>
-        Footer
-      </LayoutFooter>,
+        style={{color: 'red'}}
+      />,
     );
 
     const el = screen.getByTestId('footer');
@@ -277,7 +328,7 @@ describe('LayoutPanel', () => {
       />,
     );
 
-    expect(screen.getByTestId('panel')).toHaveClass('silver-bd-e-w_1px');
+    expect(screen.getByTestId('panel')).toHaveClass('silver-bd-e-w_default');
   });
 
   it('adds the scrollable class when isScrollable is true', () => {

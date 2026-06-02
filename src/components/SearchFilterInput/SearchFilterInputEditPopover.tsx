@@ -89,7 +89,7 @@ const styles = {
     flexDirection: 'column',
     gap: '2',
     ps: '3',
-    borderInlineStartWidth: '1px',
+    borderInlineStartWidth: 'default',
     borderInlineStartStyle: 'solid',
     borderColor: 'border',
   }),

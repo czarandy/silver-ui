@@ -138,7 +138,7 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    bg: 'rgba(0, 0, 0, 0.35)',
+    bg: 'overlay.scrim.subtle',
     borderRadius: 'inherit',
     zIndex: 1,
   }),

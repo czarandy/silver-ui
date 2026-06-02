@@ -125,7 +125,7 @@ const styles = {
     gap: '2',
     px: '3',
     py: '2',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',
     borderRadius: 'md',
@@ -151,7 +151,7 @@ const styles = {
   }),
   active: css({
     borderColor: 'primary',
-    bg: 'primary.subtle',
+    bg: 'bg.selected',
   }),
   hiddenInput: css({
     position: 'absolute',

@@ -78,7 +78,7 @@ const styles = {
     counterIncrement: 'silver-list',
   }),
   withDivider: css({
-    borderBlockEndWidth: '1px',
+    borderBlockEndWidth: 'default',
     borderBlockEndStyle: 'solid',
     borderBlockEndColor: 'border',
     _last: {
@@ -108,7 +108,7 @@ const styles = {
     w: markerSize,
     h: markerSize,
     borderRadius: 'full',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'fg',
     bg: 'transparent',

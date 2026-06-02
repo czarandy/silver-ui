@@ -19,6 +19,83 @@ beforeAll(() => {
 });
 
 describe('Toast', () => {
+  it('renders available toast types with matching status styles', () => {
+    const {rerender} = render(
+      <Toast
+        autoHideDuration={5000}
+        body="Info"
+        data-testid="toast"
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="info"
+      />,
+    );
+
+    expect(screen.getByTestId('toast')).toHaveClass(
+      'silver-bg_status.info.solid',
+      'silver-c_status.info.solidFg',
+    );
+    expect(screen.getByTestId('toast')).toHaveAttribute('role', 'status');
+    expect(screen.getByTestId('toast')).toHaveAttribute('aria-live', 'polite');
+
+    rerender(
+      <Toast
+        autoHideDuration={5000}
+        body="Success"
+        data-testid="toast"
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="success"
+      />,
+    );
+    expect(screen.getByTestId('toast')).toHaveClass(
+      'silver-bg_status.success.solid',
+      'silver-c_status.success.solidFg',
+    );
+    expect(screen.getByTestId('toast')).toHaveAttribute('role', 'status');
+    expect(screen.getByTestId('toast')).toHaveAttribute('aria-live', 'polite');
+
+    rerender(
+      <Toast
+        autoHideDuration={5000}
+        body="Warning"
+        data-testid="toast"
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="warning"
+      />,
+    );
+    expect(screen.getByTestId('toast')).toHaveClass(
+      'silver-bg_status.warning.solid',
+      'silver-c_status.warning.solidFg',
+    );
+    expect(screen.getByTestId('toast')).toHaveAttribute('role', 'alert');
+    expect(screen.getByTestId('toast')).toHaveAttribute(
+      'aria-live',
+      'assertive',
+    );
+
+    rerender(
+      <Toast
+        autoHideDuration={5000}
+        body="Error"
+        data-testid="toast"
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="error"
+      />,
+    );
+    expect(screen.getByTestId('toast')).toHaveClass(
+      'silver-bg_status.error.solid',
+      'silver-c_status.error.solidFg',
+    );
+    expect(screen.getByTestId('toast')).toHaveAttribute('role', 'alert');
+    expect(screen.getByTestId('toast')).toHaveAttribute(
+      'aria-live',
+      'assertive',
+    );
+  });
+
   it('renders a dismissable toast', async () => {
     const user = userEvent.setup();
     const onDismiss = vi.fn();

@@ -9,7 +9,7 @@ export const inputRecipe = cva({
     alignItems: 'center',
     gap: '2',
     px: '3',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',
     borderRadius: 'md',

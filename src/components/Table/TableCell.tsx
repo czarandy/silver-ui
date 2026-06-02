@@ -52,7 +52,7 @@ const styles = {
     spacious: css({fontSize: 'sm', px: '4', py: '3'}),
   },
   dividerColumns: css({
-    borderInlineEndWidth: '1px',
+    borderInlineEndWidth: 'default',
     borderInlineEndStyle: 'solid',
     borderInlineEndColor: 'border',
     _last: {
@@ -60,7 +60,7 @@ const styles = {
     },
   }),
   dividerRows: css({
-    borderBottomWidth: '1px',
+    borderBottomWidth: 'default',
     borderBottomStyle: 'solid',
     borderBottomColor: 'border',
   }),

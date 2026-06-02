@@ -78,7 +78,7 @@ const styles = {
     mt: 'auto',
     p: '2',
     gap: '2',
-    borderBlockStartWidth: '1px',
+    borderBlockStartWidth: 'default',
     borderBlockStartStyle: 'solid',
     borderBlockStartColor: 'border',
   }),

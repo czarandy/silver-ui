@@ -44,6 +44,14 @@ export const Error: Story = {
   args: {body: 'Unable to save', type: 'error'},
   render: args => <Toast {...args} onDismiss={() => {}} />,
 };
+export const Success: Story = {
+  args: {body: 'Saved successfully', type: 'success'},
+  render: args => <Toast {...args} onDismiss={() => {}} />,
+};
+export const Warning: Story = {
+  args: {body: 'Storage almost full', type: 'warning'},
+  render: args => <Toast {...args} onDismiss={() => {}} />,
+};
 export const WithViewport: Story = {
   render: () => (
     <ToastViewport isTopLayer={false}>

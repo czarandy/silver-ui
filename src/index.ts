@@ -481,10 +481,11 @@ export {
 } from './components/Popover';
 export {
   Dialog,
-  DialogHeader,
+  DialogContext,
   dialogRecipe,
   useDialog,
-  type DialogHeaderProps,
+  useDialogContext,
+  type DialogContextValue,
   type DialogOptions,
   type DialogPosition,
   type DialogProps,

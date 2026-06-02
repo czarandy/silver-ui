@@ -77,6 +77,6 @@ export const Day: Story = {
   ),
 };
 
-export const List: Story = {
+export const ListView: Story = {
   render: () => <ScheduleStory view={createScheduleListView({days: 7})} />,
 };

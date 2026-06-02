@@ -297,6 +297,7 @@ export function NumberInput({
         // eslint-disable-next-line jsx-a11y-x/no-autofocus
         autoFocus={hasAutoFocus}
         className={inputStyles.control}
+        data-autofocus={hasAutoFocus || undefined}
         data-testid={dataTestId}
         disabled={effectiveDisabled}
         id={inputId}

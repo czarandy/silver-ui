@@ -80,7 +80,7 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     boxSizing: 'border-box',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',
     borderRadius: 'full',

@@ -80,8 +80,10 @@ const styles = {
       transitionDuration: '0.01ms',
     },
   }),
-  info: css({bg: 'silver-neutral.950', color: 'white'}),
-  error: css({bg: 'red.700', color: 'white'}),
+  info: css({bg: 'status.info.solid', color: 'status.info.solidFg'}),
+  error: css({bg: 'status.error.solid', color: 'status.error.solidFg'}),
+  success: css({bg: 'status.success.solid', color: 'status.success.solidFg'}),
+  warning: css({bg: 'status.warning.solid', color: 'status.warning.solidFg'}),
   exiting: css({
     opacity: 0,
     transform: 'translateY(-8px)',
@@ -104,6 +106,11 @@ const styles = {
     me: '-1',
   }),
 } as const;
+
+const assertiveTypes: Partial<Record<ToastType, true>> = {
+  error: true,
+  warning: true,
+};
 
 /**
  * An individual toast notification.
@@ -178,10 +185,10 @@ export function Toast({
   return (
     <div
       aria-atomic="true"
-      aria-live={type === 'error' ? 'assertive' : 'polite'}
+      aria-live={assertiveTypes[type] ? 'assertive' : 'polite'}
       className={cx(
         styles.root,
-        type === 'error' ? styles.error : styles.info,
+        styles[type],
         isExiting ? styles.exiting : undefined,
         className,
       )}
@@ -191,7 +198,7 @@ export function Toast({
       onMouseEnter={pauseTimer}
       onMouseLeave={resumeTimer}
       ref={ref}
-      role={type === 'error' ? 'alert' : 'status'}
+      role={assertiveTypes[type] ? 'alert' : 'status'}
       style={style}>
       <div className={styles.inner}>
         <div className={styles.content}>{body}</div>

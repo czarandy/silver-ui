@@ -1,8 +1,12 @@
-import type {JSX, ReactNode, Ref} from 'react';
+import type {ComponentPropsWithoutRef, JSX, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
+import {cx} from './cx';
 
-export interface VisuallyHiddenProps {
-  children: ReactNode;
+export interface VisuallyHiddenProps extends Omit<
+  ComponentPropsWithoutRef<'span'>,
+  'ref'
+> {
+  children?: ReactNode;
   ref?: Ref<HTMLSpanElement>;
 }
 
@@ -22,10 +26,12 @@ const styles = {
 
 export function VisuallyHidden({
   children,
+  className,
   ref,
+  ...props
 }: VisuallyHiddenProps): JSX.Element {
   return (
-    <span className={styles.root} ref={ref}>
+    <span className={cx(styles.root, className)} ref={ref} {...props}>
       {children}
     </span>
   );

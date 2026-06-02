@@ -1791,6 +1791,14 @@ const tokens = {
     "value": "9999px",
     "variable": "var(--silver-radii-full)"
   },
+  "borderWidths": {
+    "value": "1px",
+    "variable": "var(--silver-border-widths)"
+  },
+  "borderWidths.emphasized": {
+    "value": "2px",
+    "variable": "var(--silver-border-widths-emphasized)"
+  },
   "breakpoints.sm": {
     "value": "640px",
     "variable": "var(--silver-breakpoints-sm)"
@@ -1971,6 +1979,10 @@ const tokens = {
     "value": "var(--silver-colors-bg-hover)",
     "variable": "var(--silver-colors-bg-hover)"
   },
+  "colors.bg.selected": {
+    "value": "var(--silver-colors-primary-subtle)",
+    "variable": "var(--silver-colors-bg-selected)"
+  },
   "colors.bg.ghost.hover": {
     "value": "var(--silver-colors-bg-ghost-hover)",
     "variable": "var(--silver-colors-bg-ghost-hover)"
@@ -1987,6 +1999,38 @@ const tokens = {
     "value": "var(--silver-colors-border-emphasized)",
     "variable": "var(--silver-colors-border-emphasized)"
   },
+  "colors.track": {
+    "value": "var(--silver-colors-track)",
+    "variable": "var(--silver-colors-track)"
+  },
+  "colors.track.emphasized": {
+    "value": "var(--silver-colors-track-emphasized)",
+    "variable": "var(--silver-colors-track-emphasized)"
+  },
+  "colors.track.disabled": {
+    "value": "var(--silver-colors-track-disabled)",
+    "variable": "var(--silver-colors-track-disabled)"
+  },
+  "colors.overlay.scrim": {
+    "value": "rgba(0, 0, 0, 0.45)",
+    "variable": "var(--silver-colors-overlay-scrim)"
+  },
+  "colors.overlay.scrim.subtle": {
+    "value": "rgba(0, 0, 0, 0.35)",
+    "variable": "var(--silver-colors-overlay-scrim-subtle)"
+  },
+  "colors.overlay.scrim.strong": {
+    "value": "rgba(0, 0, 0, 0.76)",
+    "variable": "var(--silver-colors-overlay-scrim-strong)"
+  },
+  "colors.skeleton": {
+    "value": "var(--silver-colors-skeleton)",
+    "variable": "var(--silver-colors-skeleton)"
+  },
+  "colors.skeleton.shimmer": {
+    "value": "var(--silver-colors-skeleton-shimmer)",
+    "variable": "var(--silver-colors-skeleton-shimmer)"
+  },
   "colors.surface.blue": {
     "value": "var(--silver-colors-surface-blue)",
     "variable": "var(--silver-colors-surface-blue)"
@@ -1998,6 +2042,10 @@ const tokens = {
   "colors.surface.blue.hover": {
     "value": "var(--silver-colors-surface-blue-hover)",
     "variable": "var(--silver-colors-surface-blue-hover)"
+  },
+  "colors.surface.blue.accent": {
+    "value": "var(--silver-colors-surface-blue-accent)",
+    "variable": "var(--silver-colors-surface-blue-accent)"
   },
   "colors.surface.cyan": {
     "value": "var(--silver-colors-surface-cyan)",
@@ -2011,6 +2059,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-cyan-hover)",
     "variable": "var(--silver-colors-surface-cyan-hover)"
   },
+  "colors.surface.cyan.accent": {
+    "value": "var(--silver-colors-surface-cyan-accent)",
+    "variable": "var(--silver-colors-surface-cyan-accent)"
+  },
   "colors.surface.gray": {
     "value": "var(--silver-colors-surface-gray)",
     "variable": "var(--silver-colors-surface-gray)"
@@ -2022,6 +2074,10 @@ const tokens = {
   "colors.surface.gray.hover": {
     "value": "var(--silver-colors-surface-gray-hover)",
     "variable": "var(--silver-colors-surface-gray-hover)"
+  },
+  "colors.surface.gray.accent": {
+    "value": "var(--silver-colors-surface-gray-accent)",
+    "variable": "var(--silver-colors-surface-gray-accent)"
   },
   "colors.surface.green": {
     "value": "var(--silver-colors-surface-green)",
@@ -2035,6 +2091,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-green-hover)",
     "variable": "var(--silver-colors-surface-green-hover)"
   },
+  "colors.surface.green.accent": {
+    "value": "var(--silver-colors-surface-green-accent)",
+    "variable": "var(--silver-colors-surface-green-accent)"
+  },
   "colors.surface.orange": {
     "value": "var(--silver-colors-surface-orange)",
     "variable": "var(--silver-colors-surface-orange)"
@@ -2046,6 +2106,10 @@ const tokens = {
   "colors.surface.orange.hover": {
     "value": "var(--silver-colors-surface-orange-hover)",
     "variable": "var(--silver-colors-surface-orange-hover)"
+  },
+  "colors.surface.orange.accent": {
+    "value": "var(--silver-colors-surface-orange-accent)",
+    "variable": "var(--silver-colors-surface-orange-accent)"
   },
   "colors.surface.pink": {
     "value": "var(--silver-colors-surface-pink)",
@@ -2059,6 +2123,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-pink-hover)",
     "variable": "var(--silver-colors-surface-pink-hover)"
   },
+  "colors.surface.pink.accent": {
+    "value": "var(--silver-colors-surface-pink-accent)",
+    "variable": "var(--silver-colors-surface-pink-accent)"
+  },
   "colors.surface.purple": {
     "value": "var(--silver-colors-surface-purple)",
     "variable": "var(--silver-colors-surface-purple)"
@@ -2070,6 +2138,10 @@ const tokens = {
   "colors.surface.purple.hover": {
     "value": "var(--silver-colors-surface-purple-hover)",
     "variable": "var(--silver-colors-surface-purple-hover)"
+  },
+  "colors.surface.purple.accent": {
+    "value": "var(--silver-colors-surface-purple-accent)",
+    "variable": "var(--silver-colors-surface-purple-accent)"
   },
   "colors.surface.red": {
     "value": "var(--silver-colors-surface-red)",
@@ -2083,6 +2155,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-red-hover)",
     "variable": "var(--silver-colors-surface-red-hover)"
   },
+  "colors.surface.red.accent": {
+    "value": "var(--silver-colors-surface-red-accent)",
+    "variable": "var(--silver-colors-surface-red-accent)"
+  },
   "colors.surface.teal": {
     "value": "var(--silver-colors-surface-teal)",
     "variable": "var(--silver-colors-surface-teal)"
@@ -2095,6 +2171,10 @@ const tokens = {
     "value": "var(--silver-colors-surface-teal-hover)",
     "variable": "var(--silver-colors-surface-teal-hover)"
   },
+  "colors.surface.teal.accent": {
+    "value": "var(--silver-colors-surface-teal-accent)",
+    "variable": "var(--silver-colors-surface-teal-accent)"
+  },
   "colors.surface.yellow": {
     "value": "var(--silver-colors-surface-yellow)",
     "variable": "var(--silver-colors-surface-yellow)"
@@ -2106,6 +2186,10 @@ const tokens = {
   "colors.surface.yellow.hover": {
     "value": "var(--silver-colors-surface-yellow-hover)",
     "variable": "var(--silver-colors-surface-yellow-hover)"
+  },
+  "colors.surface.yellow.accent": {
+    "value": "var(--silver-colors-surface-yellow-accent)",
+    "variable": "var(--silver-colors-surface-yellow-accent)"
   },
   "colors.icon.primary": {
     "value": "var(--silver-colors-fg)",
@@ -2599,6 +2683,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-on-primary)",
     "variable": "var(--silver-colors-color-palette-on-primary)"
   },
+  "colors.colorPalette.selected": {
+    "value": "var(--silver-colors-color-palette-selected)",
+    "variable": "var(--silver-colors-color-palette-selected)"
+  },
   "colors.colorPalette.ghost.hover": {
     "value": "var(--silver-colors-color-palette-ghost-hover)",
     "variable": "var(--silver-colors-color-palette-ghost-hover)"
@@ -2610,6 +2698,26 @@ const tokens = {
   "colors.colorPalette.emphasized": {
     "value": "var(--silver-colors-color-palette-emphasized)",
     "variable": "var(--silver-colors-color-palette-emphasized)"
+  },
+  "colors.colorPalette.scrim": {
+    "value": "var(--silver-colors-color-palette-scrim)",
+    "variable": "var(--silver-colors-color-palette-scrim)"
+  },
+  "colors.colorPalette.scrim.subtle": {
+    "value": "var(--silver-colors-color-palette-scrim-subtle)",
+    "variable": "var(--silver-colors-color-palette-scrim-subtle)"
+  },
+  "colors.colorPalette.scrim.strong": {
+    "value": "var(--silver-colors-color-palette-scrim-strong)",
+    "variable": "var(--silver-colors-color-palette-scrim-strong)"
+  },
+  "colors.colorPalette.strong": {
+    "value": "var(--silver-colors-color-palette-strong)",
+    "variable": "var(--silver-colors-color-palette-strong)"
+  },
+  "colors.colorPalette.shimmer": {
+    "value": "var(--silver-colors-color-palette-shimmer)",
+    "variable": "var(--silver-colors-color-palette-shimmer)"
   },
   "colors.colorPalette.blue": {
     "value": "var(--silver-colors-color-palette-blue)",
@@ -2623,6 +2731,14 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-blue-hover)",
     "variable": "var(--silver-colors-color-palette-blue-hover)"
   },
+  "colors.colorPalette.blue.accent": {
+    "value": "var(--silver-colors-color-palette-blue-accent)",
+    "variable": "var(--silver-colors-color-palette-blue-accent)"
+  },
+  "colors.colorPalette.accent": {
+    "value": "var(--silver-colors-color-palette-accent)",
+    "variable": "var(--silver-colors-color-palette-accent)"
+  },
   "colors.colorPalette.cyan": {
     "value": "var(--silver-colors-color-palette-cyan)",
     "variable": "var(--silver-colors-color-palette-cyan)"
@@ -2634,6 +2750,10 @@ const tokens = {
   "colors.colorPalette.cyan.hover": {
     "value": "var(--silver-colors-color-palette-cyan-hover)",
     "variable": "var(--silver-colors-color-palette-cyan-hover)"
+  },
+  "colors.colorPalette.cyan.accent": {
+    "value": "var(--silver-colors-color-palette-cyan-accent)",
+    "variable": "var(--silver-colors-color-palette-cyan-accent)"
   },
   "colors.colorPalette.gray": {
     "value": "var(--silver-colors-color-palette-gray)",
@@ -2647,6 +2767,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-gray-hover)",
     "variable": "var(--silver-colors-color-palette-gray-hover)"
   },
+  "colors.colorPalette.gray.accent": {
+    "value": "var(--silver-colors-color-palette-gray-accent)",
+    "variable": "var(--silver-colors-color-palette-gray-accent)"
+  },
   "colors.colorPalette.green": {
     "value": "var(--silver-colors-color-palette-green)",
     "variable": "var(--silver-colors-color-palette-green)"
@@ -2658,6 +2782,10 @@ const tokens = {
   "colors.colorPalette.green.hover": {
     "value": "var(--silver-colors-color-palette-green-hover)",
     "variable": "var(--silver-colors-color-palette-green-hover)"
+  },
+  "colors.colorPalette.green.accent": {
+    "value": "var(--silver-colors-color-palette-green-accent)",
+    "variable": "var(--silver-colors-color-palette-green-accent)"
   },
   "colors.colorPalette.orange": {
     "value": "var(--silver-colors-color-palette-orange)",
@@ -2671,6 +2799,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-orange-hover)",
     "variable": "var(--silver-colors-color-palette-orange-hover)"
   },
+  "colors.colorPalette.orange.accent": {
+    "value": "var(--silver-colors-color-palette-orange-accent)",
+    "variable": "var(--silver-colors-color-palette-orange-accent)"
+  },
   "colors.colorPalette.pink": {
     "value": "var(--silver-colors-color-palette-pink)",
     "variable": "var(--silver-colors-color-palette-pink)"
@@ -2682,6 +2814,10 @@ const tokens = {
   "colors.colorPalette.pink.hover": {
     "value": "var(--silver-colors-color-palette-pink-hover)",
     "variable": "var(--silver-colors-color-palette-pink-hover)"
+  },
+  "colors.colorPalette.pink.accent": {
+    "value": "var(--silver-colors-color-palette-pink-accent)",
+    "variable": "var(--silver-colors-color-palette-pink-accent)"
   },
   "colors.colorPalette.purple": {
     "value": "var(--silver-colors-color-palette-purple)",
@@ -2695,6 +2831,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-purple-hover)",
     "variable": "var(--silver-colors-color-palette-purple-hover)"
   },
+  "colors.colorPalette.purple.accent": {
+    "value": "var(--silver-colors-color-palette-purple-accent)",
+    "variable": "var(--silver-colors-color-palette-purple-accent)"
+  },
   "colors.colorPalette.red": {
     "value": "var(--silver-colors-color-palette-red)",
     "variable": "var(--silver-colors-color-palette-red)"
@@ -2706,6 +2846,10 @@ const tokens = {
   "colors.colorPalette.red.hover": {
     "value": "var(--silver-colors-color-palette-red-hover)",
     "variable": "var(--silver-colors-color-palette-red-hover)"
+  },
+  "colors.colorPalette.red.accent": {
+    "value": "var(--silver-colors-color-palette-red-accent)",
+    "variable": "var(--silver-colors-color-palette-red-accent)"
   },
   "colors.colorPalette.teal": {
     "value": "var(--silver-colors-color-palette-teal)",
@@ -2719,6 +2863,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-teal-hover)",
     "variable": "var(--silver-colors-color-palette-teal-hover)"
   },
+  "colors.colorPalette.teal.accent": {
+    "value": "var(--silver-colors-color-palette-teal-accent)",
+    "variable": "var(--silver-colors-color-palette-teal-accent)"
+  },
   "colors.colorPalette.yellow": {
     "value": "var(--silver-colors-color-palette-yellow)",
     "variable": "var(--silver-colors-color-palette-yellow)"
@@ -2731,6 +2879,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-yellow-hover)",
     "variable": "var(--silver-colors-color-palette-yellow-hover)"
   },
+  "colors.colorPalette.yellow.accent": {
+    "value": "var(--silver-colors-color-palette-yellow-accent)",
+    "variable": "var(--silver-colors-color-palette-yellow-accent)"
+  },
   "colors.colorPalette.primary": {
     "value": "var(--silver-colors-color-palette-primary)",
     "variable": "var(--silver-colors-color-palette-primary)"
@@ -2742,10 +2894,6 @@ const tokens = {
   "colors.colorPalette.tertiary": {
     "value": "var(--silver-colors-color-palette-tertiary)",
     "variable": "var(--silver-colors-color-palette-tertiary)"
-  },
-  "colors.colorPalette.accent": {
-    "value": "var(--silver-colors-color-palette-accent)",
-    "variable": "var(--silver-colors-color-palette-accent)"
   },
   "colors.colorPalette.warning": {
     "value": "var(--silver-colors-color-palette-warning)",

@@ -15,7 +15,7 @@ export const mobileNavRecipe = cva({
     overflow: 'hidden',
     display: 'none',
     '&::backdrop': {
-      bg: 'rgba(0, 0, 0, 0.4)',
+      bg: 'overlay.scrim',
       backdropFilter: 'blur(2px)',
     },
   },

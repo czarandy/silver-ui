@@ -90,7 +90,7 @@ export function useTableSelection<T extends Record<string, unknown>>(
             style: {
               ...props.htmlProps.style,
               backgroundColor: isSelected
-                ? 'var(--silver-colors-primary-50)'
+                ? 'token(colors.bg.selected)'
                 : props.htmlProps.style?.backgroundColor,
             },
           },

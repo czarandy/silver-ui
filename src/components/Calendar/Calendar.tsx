@@ -234,7 +234,7 @@ const styles = {
     position: 'absolute',
     insetBlock: '2px',
     insetInline: 0,
-    bg: 'primary.subtle',
+    bg: 'bg.selected',
   }),
   previewBackground: css({
     position: 'absolute',

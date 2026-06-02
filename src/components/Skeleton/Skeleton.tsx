@@ -48,12 +48,14 @@ const staggerTime = 100;
 
 const styles = {
   root: css({
-    bg: 'silver-neutral.200',
-    opacity: 0.35,
-    animation: 'pulse',
+    bg: 'skeleton',
+    backgroundImage:
+      'linear-gradient(90deg, token(colors.skeleton) 0%, token(colors.skeleton.shimmer) 50%, token(colors.skeleton) 100%)',
+    backgroundSize: '200% 100%',
+    animation: 'skeleton-shimmer 1.4s ease-in-out infinite',
     '@media (prefers-reduced-motion: reduce)': {
       animation: 'none',
-      opacity: 0.55,
+      backgroundImage: 'none',
     },
   }),
   radius: {

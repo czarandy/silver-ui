@@ -4,6 +4,7 @@
  * Rules:
  * - silver-ui/require-component-props: Components must accept className, style, ref, and data-testid
  * - silver-ui/boolean-prop-naming: Boolean props must start with is or has
+ * - silver-ui/no-direct-color-tokens: Source must use semantic color tokens instead of primitive color tokens
  */
 
 const requireComponentProps = {
@@ -233,6 +234,98 @@ const booleanPropNaming = {
   },
 };
 
+const primitiveColorFamilies = [
+  'silver-neutral',
+  'silver-primary',
+  'red',
+  'green',
+  'yellow',
+  'blue',
+  'cyan',
+  'teal',
+  'orange',
+  'pink',
+  'purple',
+].join('|');
+
+const primitiveColorTokenPattern = new RegExp(
+  `(?:^|[^A-Za-z0-9_-])((?:${primitiveColorFamilies})\\.(?:50|[1-9][0-9]{2}))(?:$|[^A-Za-z0-9_-])`,
+);
+const primitiveColorCssVarPattern = /var\(--silver-colors-[^)]+\)/;
+const rawColorPattern = /#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/;
+const namedColorPattern = /^(?:white|black)$/;
+const namedColorReferencePattern = /\bcolors\.(?:white|black)\b/;
+
+function findDirectColor(value) {
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const primitiveColorTokenMatch = primitiveColorTokenPattern.exec(value);
+  if (primitiveColorTokenMatch != null) {
+    return primitiveColorTokenMatch[1];
+  }
+
+  const primitiveColorCssVarMatch = primitiveColorCssVarPattern.exec(value);
+  if (primitiveColorCssVarMatch != null) {
+    return primitiveColorCssVarMatch[0];
+  }
+
+  const rawColorMatch = rawColorPattern.exec(value);
+  if (rawColorMatch != null) {
+    return rawColorMatch[0];
+  }
+
+  if (namedColorPattern.test(value)) {
+    return value;
+  }
+
+  const namedColorReferenceMatch = namedColorReferencePattern.exec(value);
+  if (namedColorReferenceMatch != null) {
+    return namedColorReferenceMatch[0];
+  }
+
+  return null;
+}
+
+const noDirectColorTokens = {
+  meta: {
+    type: 'problem',
+    docs: {
+      description:
+        'Disallow primitive or raw color values in source; use semantic color tokens instead',
+    },
+    messages: {
+      directColor:
+        'Use a semantic color token instead of direct color "{{color}}".',
+    },
+    schema: [],
+  },
+  create(context) {
+    function checkString(node, value) {
+      const color = findDirectColor(value);
+      if (color == null) {
+        return;
+      }
+
+      context.report({
+        node,
+        messageId: 'directColor',
+        data: {color},
+      });
+    }
+
+    return {
+      Literal(node) {
+        checkString(node, node.value);
+      },
+      TemplateElement(node) {
+        checkString(node, node.value.cooked);
+      },
+    };
+  },
+};
+
 const plugin = {
   meta: {
     name: 'eslint-plugin-silver-ui',
@@ -240,6 +333,7 @@ const plugin = {
   },
   rules: {
     'boolean-prop-naming': booleanPropNaming,
+    'no-direct-color-tokens': noDirectColorTokens,
     'require-component-props': requireComponentProps,
   },
 };

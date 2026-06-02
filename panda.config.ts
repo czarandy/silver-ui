@@ -79,6 +79,10 @@ export default defineConfig({
           lg: {value: '0.5rem'},
           full: {value: '9999px'},
         },
+        borderWidths: {
+          DEFAULT: {value: '1px'},
+          emphasized: {value: '2px'},
+        },
       },
       semanticTokens: {
         colors: {
@@ -238,6 +242,7 @@ export default defineConfig({
                 _dark: '{colors.silver-neutral.700}',
               },
             },
+            selected: {value: '{colors.primary.subtle}'},
             ghost: {
               hover: {
                 value: {
@@ -267,6 +272,47 @@ export default defineConfig({
               },
             },
           },
+          track: {
+            DEFAULT: {
+              value: {
+                base: '{colors.silver-neutral.200}',
+                _dark: '{colors.silver-neutral.700}',
+              },
+            },
+            emphasized: {
+              value: {
+                base: '{colors.silver-neutral.300}',
+                _dark: '{colors.silver-neutral.600}',
+              },
+            },
+            disabled: {
+              value: {
+                base: '{colors.silver-neutral.300}',
+                _dark: '{colors.silver-neutral.700}',
+              },
+            },
+          },
+          overlay: {
+            scrim: {
+              DEFAULT: {value: 'rgba(0, 0, 0, 0.45)'},
+              subtle: {value: 'rgba(0, 0, 0, 0.35)'},
+              strong: {value: 'rgba(0, 0, 0, 0.76)'},
+            },
+          },
+          skeleton: {
+            DEFAULT: {
+              value: {
+                base: '{colors.silver-neutral.200}',
+                _dark: '{colors.silver-neutral.700}',
+              },
+            },
+            shimmer: {
+              value: {
+                base: '{colors.silver-neutral.100}',
+                _dark: '{colors.silver-neutral.600}',
+              },
+            },
+          },
           surface: {
             blue: {
               DEFAULT: {
@@ -278,6 +324,9 @@ export default defineConfig({
               hover: {
                 value: {base: '{colors.blue.200}', _dark: '{colors.blue.800}'},
               },
+              accent: {
+                value: {base: '{colors.blue.600}', _dark: '{colors.blue.400}'},
+              },
             },
             cyan: {
               DEFAULT: {
@@ -288,6 +337,9 @@ export default defineConfig({
               },
               hover: {
                 value: {base: '{colors.cyan.200}', _dark: '{colors.cyan.800}'},
+              },
+              accent: {
+                value: {base: '{colors.cyan.600}', _dark: '{colors.cyan.400}'},
               },
             },
             gray: {
@@ -307,6 +359,12 @@ export default defineConfig({
                 value: {
                   base: '{colors.silver-neutral.200}',
                   _dark: '{colors.silver-neutral.700}',
+                },
+              },
+              accent: {
+                value: {
+                  base: '{colors.silver-neutral.600}',
+                  _dark: '{colors.silver-neutral.400}',
                 },
               },
             },
@@ -329,6 +387,12 @@ export default defineConfig({
                   _dark: '{colors.green.800}',
                 },
               },
+              accent: {
+                value: {
+                  base: '{colors.green.600}',
+                  _dark: '{colors.green.400}',
+                },
+              },
             },
             orange: {
               DEFAULT: {
@@ -349,6 +413,12 @@ export default defineConfig({
                   _dark: '{colors.orange.800}',
                 },
               },
+              accent: {
+                value: {
+                  base: '{colors.orange.600}',
+                  _dark: '{colors.orange.400}',
+                },
+              },
             },
             pink: {
               DEFAULT: {
@@ -364,6 +434,12 @@ export default defineConfig({
                 value: {
                   base: '{colors.pink.200}',
                   _dark: '{colors.pink.800}',
+                },
+              },
+              accent: {
+                value: {
+                  base: '{colors.pink.600}',
+                  _dark: '{colors.pink.400}',
                 },
               },
             },
@@ -386,6 +462,12 @@ export default defineConfig({
                   _dark: '{colors.purple.800}',
                 },
               },
+              accent: {
+                value: {
+                  base: '{colors.purple.600}',
+                  _dark: '{colors.purple.400}',
+                },
+              },
             },
             red: {
               DEFAULT: {
@@ -396,6 +478,9 @@ export default defineConfig({
               },
               hover: {
                 value: {base: '{colors.red.200}', _dark: '{colors.red.800}'},
+              },
+              accent: {
+                value: {base: '{colors.red.600}', _dark: '{colors.red.400}'},
               },
             },
             teal: {
@@ -413,6 +498,9 @@ export default defineConfig({
                   base: '{colors.teal.200}',
                   _dark: '{colors.teal.800}',
                 },
+              },
+              accent: {
+                value: {base: '{colors.teal.600}', _dark: '{colors.teal.400}'},
               },
             },
             yellow: {
@@ -432,6 +520,12 @@ export default defineConfig({
                 value: {
                   base: '{colors.yellow.200}',
                   _dark: '{colors.yellow.800}',
+                },
+              },
+              accent: {
+                value: {
+                  base: '{colors.yellow.600}',
+                  _dark: '{colors.yellow.400}',
                 },
               },
             },
@@ -505,6 +599,12 @@ export default defineConfig({
             md: {value: '{radii.md}'},
             lg: {value: '{radii.lg}'},
           },
+        },
+      },
+      keyframes: {
+        'skeleton-shimmer': {
+          '0%': {backgroundPosition: '200% 0'},
+          '100%': {backgroundPosition: '-200% 0'},
         },
       },
     },

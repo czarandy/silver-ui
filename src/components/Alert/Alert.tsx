@@ -127,9 +127,9 @@ const styles = {
   }),
   body: css({
     bg: 'bg',
-    borderBlockEndWidth: '1px',
+    borderBlockEndWidth: 'default',
     borderColor: 'border',
-    borderInlineWidth: '1px',
+    borderInlineWidth: 'default',
     borderStyle: 'solid',
     px: '4',
     py: '3',

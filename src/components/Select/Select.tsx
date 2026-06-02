@@ -221,7 +221,7 @@ const styles = {
     w: 'full',
     px: '2',
     py: '1',
-    borderWidth: '1px',
+    borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',
     borderRadius: 'md',
