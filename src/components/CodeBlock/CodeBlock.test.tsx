@@ -1,9 +1,13 @@
-import {render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {CodeBlock} from './CodeBlock';
 
 describe('CodeBlock', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders read-only code in a pre/code block', () => {
     render(<CodeBlock code="const value = 1;" data-testid="code-block" />);
 
@@ -11,30 +15,21 @@ describe('CodeBlock', () => {
     expect(screen.getByText('const value = 1;')).toBeInTheDocument();
   });
 
-  it('renders a title and language label', () => {
-    render(
-      <CodeBlock
-        code="const value = 1;"
-        language="typescript"
-        title="Example"
-      />,
-    );
-
-    expect(screen.getByText('Example - typescript')).toBeInTheDocument();
-  });
-
-  it('can hide the language label', () => {
-    render(
-      <CodeBlock
-        code="const value = 1;"
-        hasLanguageLabel={false}
-        language="typescript"
-        title="Example"
-      />,
-    );
+  it('renders a title', () => {
+    render(<CodeBlock code="const value = 1;" title="Example" />);
 
     expect(screen.getByText('Example')).toBeInTheDocument();
-    expect(screen.queryByText(/typescript/)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('region', {name: 'Example code block'}),
+    ).toBeInTheDocument();
+  });
+
+  it('supports an accessible region label override', () => {
+    render(<CodeBlock code="const value = 1;" label="Install command" />);
+
+    expect(
+      screen.getByRole('region', {name: 'Install command'}),
+    ).toBeInTheDocument();
   });
 
   it('renders line numbers when requested', () => {
@@ -44,7 +39,89 @@ describe('CodeBlock', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('marks highlighted lines with data-line attributes', () => {
+  it('renders empty code as an empty code block', () => {
+    render(<CodeBlock code="" data-testid="code-block" />);
+
+    expect(screen.getByTestId('code-block-code')).toHaveTextContent('\u200b');
+  });
+
+  it('applies maxHeight to the scroll container', () => {
+    render(
+      <CodeBlock
+        code={'one\ntwo\nthree'}
+        data-testid="code-block"
+        maxHeight={120}
+      />,
+    );
+
+    expect(screen.getByTestId('code-block-scroll')).toHaveStyle({
+      maxHeight: '120px',
+    });
+  });
+
+  it('makes the scroll container keyboard-focusable and labeled', () => {
+    render(<CodeBlock code="const value = 1;" label="Example" />);
+
+    expect(
+      screen.getByRole('region', {name: 'Example scroll area'}),
+    ).toHaveAttribute('tabIndex', '0');
+  });
+
+  it('marks wrapped code content', () => {
+    render(
+      <CodeBlock code="const value = 1;" data-testid="code-block" isWrapped />,
+    );
+
+    expect(screen.getByTestId('code-block-code')).toHaveAttribute(
+      'data-wrapped',
+    );
+  });
+
+  it('marks section container and small size variants', () => {
+    render(
+      <CodeBlock
+        code="const value = 1;"
+        container="section"
+        data-testid="code-block"
+        size="sm"
+      />,
+    );
+
+    const root = screen.getByTestId('code-block');
+    expect(root).toHaveAttribute('data-container', 'section');
+    expect(root).toHaveAttribute('data-size', 'sm');
+  });
+
+  it('applies width to the root element', () => {
+    render(<CodeBlock code="const value = 1;" label="Example" width="100%" />);
+
+    expect(screen.getByRole('region', {name: 'Example'})).toHaveStyle({
+      width: '100%',
+    });
+  });
+
+  it('forwards className, style, and ref to the root element', () => {
+    let refNode: HTMLDivElement | null = null;
+
+    render(
+      <CodeBlock
+        className="custom-code-block"
+        code="const value = 1;"
+        label="Example"
+        ref={node => {
+          refNode = node;
+        }}
+        style={{marginTop: 12}}
+      />,
+    );
+
+    const root = screen.getByRole('region', {name: 'Example'});
+    expect(root).toHaveClass('custom-code-block');
+    expect(root).toHaveStyle({marginTop: '12px'});
+    expect(refNode).toBe(root);
+  });
+
+  it('marks highlighted lines', () => {
     render(
       <CodeBlock
         code={'one\ntwo'}
@@ -53,7 +130,8 @@ describe('CodeBlock', () => {
       />,
     );
 
-    expect(screen.getByText('two')).toHaveAttribute('data-line', '2');
+    expect(screen.getByText('one')).not.toHaveAttribute('data-highlighted');
+    expect(screen.getByText('two')).toHaveAttribute('data-highlighted');
   });
 
   it('copies code when the copy button is clicked', async () => {
@@ -67,11 +145,57 @@ describe('CodeBlock', () => {
 
     render(<CodeBlock code="copy me" onCopy={onCopy} />);
 
-    await user.click(screen.getByRole('button', {name: 'Copy code'}));
+    const copyButton = screen.getByRole('button', {name: 'Copy code'});
+    expect(copyButton).toHaveAttribute('aria-describedby');
+
+    await user.click(copyButton);
 
     expect(writeText).toHaveBeenCalledWith('copy me');
     expect(onCopy).toHaveBeenCalledOnce();
     expect(screen.getByRole('button', {name: 'Copied'})).toBeInTheDocument();
+  });
+
+  it('keeps the copy state unchanged when clipboard writing fails', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('Denied'));
+    const onCopy = vi.fn();
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {writeText},
+    });
+
+    render(<CodeBlock code="copy me" onCopy={onCopy} />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Copy code'}));
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('copy me');
+    });
+    expect(onCopy).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', {name: 'Copy code'})).toBeInTheDocument();
+  });
+
+  it('resets copied state after two seconds', async () => {
+    vi.useFakeTimers();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {writeText},
+    });
+
+    render(<CodeBlock code="copy me" />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Copy code'}));
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole('button', {name: 'Copied'})).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(screen.getByRole('button', {name: 'Copy code'})).toBeInTheDocument();
   });
 
   it('can hide the copy button', () => {

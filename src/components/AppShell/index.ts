@@ -4,7 +4,6 @@ export {
   type AppShellHeight,
   type AppShellProps,
   type AppShellVariant,
-  type MobileNavConfig,
 } from './AppShell';
 export {
   AppShellMobileContext,

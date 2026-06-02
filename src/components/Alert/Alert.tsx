@@ -6,11 +6,19 @@ import {
   X,
   XCircle,
 } from 'lucide-react';
-import {useState, type CSSProperties, type ReactNode, type Ref} from 'react';
+import {
+  useId,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import {css} from 'styled-system/css';
+import {token} from 'styled-system/tokens';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
 import {Icon} from '../Icon';
+import type {SpacingStep} from '../Layout/types';
 import {Text} from '../Text';
 import {alertHeaderRecipe, alertRecipe} from './Alert.recipe';
 
@@ -62,6 +70,11 @@ export interface AlertProps {
    */
   onDismiss?: () => void;
   /**
+   * Inner padding step.
+   * @default 4
+   */
+  padding?: SpacingStep;
+  /**
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLDivElement>;
@@ -88,7 +101,7 @@ const statusRole: Record<AlertStatus, 'alert' | 'status'> = {
 
 const defaultIcons: Record<AlertStatus, ReactNode> = {
   error: <Icon color="error" icon={XCircle} />,
-  info: <Icon color="accent" icon={Info} />,
+  info: <Icon color="info" icon={Info} />,
   success: <Icon color="success" icon={CheckCircle2} />,
   warning: <Icon color="warning" icon={TriangleAlert} />,
 };
@@ -144,18 +157,20 @@ export function Alert({
   isDefaultExpanded = false,
   isDismissable = false,
   onDismiss,
+  padding,
   ref,
   status,
   style,
   title,
 }: AlertProps): React.JSX.Element | null {
+  const bodyId = useId();
   const [isDismissed, setIsDismissed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
   const hasChildren = children != null;
   const showContent = hasChildren && isExpanded;
   const showEndArea = endContent != null || isDismissable || hasChildren;
   const isSingleLine =
-    description == null && (endContent != null || isDismissable);
+    description == null && (endContent != null || isDismissable || hasChildren);
 
   if (isDismissed) {
     return null;
@@ -193,6 +208,8 @@ export function Alert({
             {endContent}
             {hasChildren ? (
               <Button
+                aria-controls={bodyId}
+                aria-expanded={isExpanded}
                 className={isExpanded ? styles.chevronExpanded : undefined}
                 icon={ChevronDown}
                 isIconOnly
@@ -223,7 +240,11 @@ export function Alert({
           className={cx(
             styles.body,
             container === 'card' ? styles.bodyCard : undefined,
-          )}>
+          )}
+          id={bodyId}
+          style={
+            padding != null ? {padding: token(`spacing.${padding}`)} : undefined
+          }>
           {children}
         </div>
       ) : null}

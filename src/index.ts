@@ -326,7 +326,6 @@ export {
   type AppShellProps,
   type AppShellVariant,
   type AppShellVariants,
-  type MobileNavConfig,
 } from './components/AppShell';
 export {
   AspectRatio,

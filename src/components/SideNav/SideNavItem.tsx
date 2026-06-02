@@ -87,7 +87,7 @@ const styles = {
     py: '0.5',
   }),
   navItemSelected: css({
-    bg: 'bg.subtle',
+    bg: 'bg.hover',
     color: 'fg',
     fontWeight: 'semibold',
   }),
@@ -116,7 +116,7 @@ const styles = {
     bg: 'transparent',
     borderWidth: 0,
     cursor: 'pointer',
-    _hover: {bg: 'bg.subtle'},
+    _hover: {bg: 'bg.hover'},
     _focusVisible: {
       outline: '2px solid',
       outlineColor: 'primary',
@@ -124,7 +124,7 @@ const styles = {
     },
   }),
   collapsedSelected: css({
-    bg: 'bg.subtle',
+    bg: 'bg.hover',
     color: 'fg',
   }),
   collapsedDisabled: css({
@@ -139,7 +139,7 @@ const styles = {
     w: '100%',
     cursor: 'pointer',
     borderRadius: 'md',
-    _hover: {bg: 'bg.subtle'},
+    _hover: {bg: 'bg.hover'},
     _focusVisible: {
       outline: '2px solid',
       outlineColor: 'primary',
@@ -178,7 +178,7 @@ const styles = {
     borderRadius: 'md',
     cursor: 'pointer',
     color: 'fg.muted',
-    _hover: {bg: 'bg.subtle'},
+    _hover: {bg: 'bg.hover'},
     _focusVisible: {
       outline: '2px solid',
       outlineColor: 'primary',

@@ -12,7 +12,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 
 ## Layout & Structure
 
-- [ ] AppShell
+- [x] AppShell
 - [x] AspectRatio
 - [x] Center
 - [x] Collapsible
@@ -86,7 +86,7 @@ Save your audits in a report in the repo root audits-codex/ dir in a <ComponentN
 
 ## Feedback & Status
 
-- [ ] Alert
+- [x] Alert
 - [ ] EmptyState
 - [ ] Progress
 - [ ] Skeleton

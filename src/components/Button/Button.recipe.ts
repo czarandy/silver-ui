@@ -56,8 +56,8 @@ export const buttonRecipe = cva({
       ghost: {
         color: 'fg',
         bg: 'transparent',
-        _hover: {bg: 'bg.subtle'},
-        _active: {bg: 'silver-neutral.100'},
+        _hover: {bg: 'rgba(0, 0, 0, 0.06)'},
+        _active: {bg: 'rgba(0, 0, 0, 0.1)'},
       },
       destructive: {
         bg: 'red.600',

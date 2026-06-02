@@ -34,10 +34,10 @@ export const alertHeaderRecipe = cva({
       false: {},
     },
     status: {
-      error: {bg: 'red.50'},
-      info: {bg: 'blue.50'},
-      success: {bg: 'green.50'},
-      warning: {bg: 'yellow.50'},
+      error: {bg: 'red.100'},
+      info: {bg: 'blue.100'},
+      success: {bg: 'green.100'},
+      warning: {bg: 'yellow.100'},
     },
   },
   compoundVariants: [

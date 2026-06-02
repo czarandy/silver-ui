@@ -204,7 +204,7 @@ export interface UtilityValues {
 	srOnly: boolean;
 	debug: boolean;
 	containerName: CssProperties["containerName"];
-	colorPalette: "current" | "black" | "white" | "transparent" | "rose" | "pink" | "fuchsia" | "purple" | "violet" | "indigo" | "blue" | "sky" | "cyan" | "teal" | "emerald" | "green" | "lime" | "yellow" | "amber" | "orange" | "red" | "neutral" | "stone" | "zinc" | "gray" | "slate" | "silver-primary" | "silver-neutral" | "primary" | "fg" | "bg" | "border" | "surface" | "surface.blue" | "surface.cyan" | "surface.gray" | "surface.green" | "surface.orange" | "surface.pink" | "surface.purple" | "surface.red" | "surface.teal" | "surface.yellow" | "icon";
+	colorPalette: "current" | "black" | "white" | "transparent" | "rose" | "pink" | "fuchsia" | "purple" | "violet" | "indigo" | "sky" | "cyan" | "teal" | "emerald" | "lime" | "amber" | "orange" | "neutral" | "stone" | "zinc" | "gray" | "slate" | "silver-primary" | "silver-neutral" | "green" | "red" | "yellow" | "blue" | "primary" | "success" | "error" | "warning" | "info" | "fg" | "bg" | "border" | "surface" | "surface.blue" | "surface.cyan" | "surface.gray" | "surface.green" | "surface.orange" | "surface.pink" | "surface.purple" | "surface.red" | "surface.teal" | "surface.yellow" | "icon";
 	textStyle: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl" | "8xl" | "9xl";
 }
 

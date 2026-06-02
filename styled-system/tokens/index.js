@@ -955,50 +955,6 @@ const tokens = {
     "value": "#1e1b4b",
     "variable": "var(--silver-colors-indigo-950)"
   },
-  "colors.blue.50": {
-    "value": "#eff6ff",
-    "variable": "var(--silver-colors-blue-50)"
-  },
-  "colors.blue.100": {
-    "value": "#dbeafe",
-    "variable": "var(--silver-colors-blue-100)"
-  },
-  "colors.blue.200": {
-    "value": "#bfdbfe",
-    "variable": "var(--silver-colors-blue-200)"
-  },
-  "colors.blue.300": {
-    "value": "#93c5fd",
-    "variable": "var(--silver-colors-blue-300)"
-  },
-  "colors.blue.400": {
-    "value": "#60a5fa",
-    "variable": "var(--silver-colors-blue-400)"
-  },
-  "colors.blue.500": {
-    "value": "#3b82f6",
-    "variable": "var(--silver-colors-blue-500)"
-  },
-  "colors.blue.600": {
-    "value": "#2563eb",
-    "variable": "var(--silver-colors-blue-600)"
-  },
-  "colors.blue.700": {
-    "value": "#1d4ed8",
-    "variable": "var(--silver-colors-blue-700)"
-  },
-  "colors.blue.800": {
-    "value": "#1e40af",
-    "variable": "var(--silver-colors-blue-800)"
-  },
-  "colors.blue.900": {
-    "value": "#1e3a8a",
-    "variable": "var(--silver-colors-blue-900)"
-  },
-  "colors.blue.950": {
-    "value": "#172554",
-    "variable": "var(--silver-colors-blue-950)"
-  },
   "colors.sky.50": {
     "value": "#f0f9ff",
     "variable": "var(--silver-colors-sky-50)"
@@ -1175,50 +1131,6 @@ const tokens = {
     "value": "#022c22",
     "variable": "var(--silver-colors-emerald-950)"
   },
-  "colors.green.50": {
-    "value": "#f0fdf4",
-    "variable": "var(--silver-colors-green-50)"
-  },
-  "colors.green.100": {
-    "value": "#dcfce7",
-    "variable": "var(--silver-colors-green-100)"
-  },
-  "colors.green.200": {
-    "value": "#bbf7d0",
-    "variable": "var(--silver-colors-green-200)"
-  },
-  "colors.green.300": {
-    "value": "#86efac",
-    "variable": "var(--silver-colors-green-300)"
-  },
-  "colors.green.400": {
-    "value": "#4ade80",
-    "variable": "var(--silver-colors-green-400)"
-  },
-  "colors.green.500": {
-    "value": "#22c55e",
-    "variable": "var(--silver-colors-green-500)"
-  },
-  "colors.green.600": {
-    "value": "#16a34a",
-    "variable": "var(--silver-colors-green-600)"
-  },
-  "colors.green.700": {
-    "value": "#15803d",
-    "variable": "var(--silver-colors-green-700)"
-  },
-  "colors.green.800": {
-    "value": "#166534",
-    "variable": "var(--silver-colors-green-800)"
-  },
-  "colors.green.900": {
-    "value": "#14532d",
-    "variable": "var(--silver-colors-green-900)"
-  },
-  "colors.green.950": {
-    "value": "#052e16",
-    "variable": "var(--silver-colors-green-950)"
-  },
   "colors.lime.50": {
     "value": "#f7fee7",
     "variable": "var(--silver-colors-lime-50)"
@@ -1262,50 +1174,6 @@ const tokens = {
   "colors.lime.950": {
     "value": "#1a2e05",
     "variable": "var(--silver-colors-lime-950)"
-  },
-  "colors.yellow.50": {
-    "value": "#fefce8",
-    "variable": "var(--silver-colors-yellow-50)"
-  },
-  "colors.yellow.100": {
-    "value": "#fef9c3",
-    "variable": "var(--silver-colors-yellow-100)"
-  },
-  "colors.yellow.200": {
-    "value": "#fef08a",
-    "variable": "var(--silver-colors-yellow-200)"
-  },
-  "colors.yellow.300": {
-    "value": "#fde047",
-    "variable": "var(--silver-colors-yellow-300)"
-  },
-  "colors.yellow.400": {
-    "value": "#facc15",
-    "variable": "var(--silver-colors-yellow-400)"
-  },
-  "colors.yellow.500": {
-    "value": "#eab308",
-    "variable": "var(--silver-colors-yellow-500)"
-  },
-  "colors.yellow.600": {
-    "value": "#ca8a04",
-    "variable": "var(--silver-colors-yellow-600)"
-  },
-  "colors.yellow.700": {
-    "value": "#a16207",
-    "variable": "var(--silver-colors-yellow-700)"
-  },
-  "colors.yellow.800": {
-    "value": "#854d0e",
-    "variable": "var(--silver-colors-yellow-800)"
-  },
-  "colors.yellow.900": {
-    "value": "#713f12",
-    "variable": "var(--silver-colors-yellow-900)"
-  },
-  "colors.yellow.950": {
-    "value": "#422006",
-    "variable": "var(--silver-colors-yellow-950)"
   },
   "colors.amber.50": {
     "value": "#fffbeb",
@@ -1394,50 +1262,6 @@ const tokens = {
   "colors.orange.950": {
     "value": "#431407",
     "variable": "var(--silver-colors-orange-950)"
-  },
-  "colors.red.50": {
-    "value": "#fef2f2",
-    "variable": "var(--silver-colors-red-50)"
-  },
-  "colors.red.100": {
-    "value": "#fee2e2",
-    "variable": "var(--silver-colors-red-100)"
-  },
-  "colors.red.200": {
-    "value": "#fecaca",
-    "variable": "var(--silver-colors-red-200)"
-  },
-  "colors.red.300": {
-    "value": "#fca5a5",
-    "variable": "var(--silver-colors-red-300)"
-  },
-  "colors.red.400": {
-    "value": "#f87171",
-    "variable": "var(--silver-colors-red-400)"
-  },
-  "colors.red.500": {
-    "value": "#ef4444",
-    "variable": "var(--silver-colors-red-500)"
-  },
-  "colors.red.600": {
-    "value": "#dc2626",
-    "variable": "var(--silver-colors-red-600)"
-  },
-  "colors.red.700": {
-    "value": "#b91c1c",
-    "variable": "var(--silver-colors-red-700)"
-  },
-  "colors.red.800": {
-    "value": "#991b1b",
-    "variable": "var(--silver-colors-red-800)"
-  },
-  "colors.red.900": {
-    "value": "#7f1d1d",
-    "variable": "var(--silver-colors-red-900)"
-  },
-  "colors.red.950": {
-    "value": "#450a0a",
-    "variable": "var(--silver-colors-red-950)"
   },
   "colors.neutral.50": {
     "value": "#fafafa",
@@ -1739,6 +1563,182 @@ const tokens = {
     "value": "#22272d",
     "variable": "var(--silver-colors-silver-neutral-900)"
   },
+  "colors.green.50": {
+    "value": "#e4f3e8",
+    "variable": "var(--silver-colors-green-50)"
+  },
+  "colors.green.100": {
+    "value": "#cbe9d3",
+    "variable": "var(--silver-colors-green-100)"
+  },
+  "colors.green.200": {
+    "value": "#a3d7b1",
+    "variable": "var(--silver-colors-green-200)"
+  },
+  "colors.green.300": {
+    "value": "#7ac58e",
+    "variable": "var(--silver-colors-green-300)"
+  },
+  "colors.green.400": {
+    "value": "#6abe80",
+    "variable": "var(--silver-colors-green-400)"
+  },
+  "colors.green.500": {
+    "value": "#65c37e",
+    "variable": "var(--silver-colors-green-500)"
+  },
+  "colors.green.600": {
+    "value": "#44af60",
+    "variable": "var(--silver-colors-green-600)"
+  },
+  "colors.green.700": {
+    "value": "#368a4c",
+    "variable": "var(--silver-colors-green-700)"
+  },
+  "colors.green.800": {
+    "value": "#286638",
+    "variable": "var(--silver-colors-green-800)"
+  },
+  "colors.green.900": {
+    "value": "#1b4426",
+    "variable": "var(--silver-colors-green-900)"
+  },
+  "colors.green.950": {
+    "value": "#052e16",
+    "variable": "var(--silver-colors-green-950)"
+  },
+  "colors.red.50": {
+    "value": "#fceef0",
+    "variable": "var(--silver-colors-red-50)"
+  },
+  "colors.red.100": {
+    "value": "#f9d1d8",
+    "variable": "var(--silver-colors-red-100)"
+  },
+  "colors.red.200": {
+    "value": "#f1bcc5",
+    "variable": "var(--silver-colors-red-200)"
+  },
+  "colors.red.300": {
+    "value": "#e28d9b",
+    "variable": "var(--silver-colors-red-300)"
+  },
+  "colors.red.400": {
+    "value": "#da4e65",
+    "variable": "var(--silver-colors-red-400)"
+  },
+  "colors.red.500": {
+    "value": "#d92644",
+    "variable": "var(--silver-colors-red-500)"
+  },
+  "colors.red.600": {
+    "value": "#e31a3b",
+    "variable": "var(--silver-colors-red-600)"
+  },
+  "colors.red.700": {
+    "value": "#842e3d",
+    "variable": "var(--silver-colors-red-700)"
+  },
+  "colors.red.800": {
+    "value": "#6b2e38",
+    "variable": "var(--silver-colors-red-800)"
+  },
+  "colors.red.900": {
+    "value": "#562b32",
+    "variable": "var(--silver-colors-red-900)"
+  },
+  "colors.red.950": {
+    "value": "#450a0a",
+    "variable": "var(--silver-colors-red-950)"
+  },
+  "colors.yellow.50": {
+    "value": "#fcf8ee",
+    "variable": "var(--silver-colors-yellow-50)"
+  },
+  "colors.yellow.100": {
+    "value": "#f9edcc",
+    "variable": "var(--silver-colors-yellow-100)"
+  },
+  "colors.yellow.200": {
+    "value": "#efe1be",
+    "variable": "var(--silver-colors-yellow-200)"
+  },
+  "colors.yellow.300": {
+    "value": "#dfc990",
+    "variable": "var(--silver-colors-yellow-300)"
+  },
+  "colors.yellow.400": {
+    "value": "#d4b054",
+    "variable": "var(--silver-colors-yellow-400)"
+  },
+  "colors.yellow.500": {
+    "value": "#d9a626",
+    "variable": "var(--silver-colors-yellow-500)"
+  },
+  "colors.yellow.600": {
+    "value": "#ab872b",
+    "variable": "var(--silver-colors-yellow-600)"
+  },
+  "colors.yellow.700": {
+    "value": "#846c2e",
+    "variable": "var(--silver-colors-yellow-700)"
+  },
+  "colors.yellow.800": {
+    "value": "#6b5a2e",
+    "variable": "var(--silver-colors-yellow-800)"
+  },
+  "colors.yellow.900": {
+    "value": "#51461f",
+    "variable": "var(--silver-colors-yellow-900)"
+  },
+  "colors.yellow.950": {
+    "value": "#422006",
+    "variable": "var(--silver-colors-yellow-950)"
+  },
+  "colors.blue.50": {
+    "value": "#eef5fc",
+    "variable": "var(--silver-colors-blue-50)"
+  },
+  "colors.blue.100": {
+    "value": "#cce6fe",
+    "variable": "var(--silver-colors-blue-100)"
+  },
+  "colors.blue.200": {
+    "value": "#bed5ef",
+    "variable": "var(--silver-colors-blue-200)"
+  },
+  "colors.blue.300": {
+    "value": "#90b6df",
+    "variable": "var(--silver-colors-blue-300)"
+  },
+  "colors.blue.400": {
+    "value": "#5492d4",
+    "variable": "var(--silver-colors-blue-400)"
+  },
+  "colors.blue.500": {
+    "value": "#267dd9",
+    "variable": "var(--silver-colors-blue-500)"
+  },
+  "colors.blue.600": {
+    "value": "#2b69ab",
+    "variable": "var(--silver-colors-blue-600)"
+  },
+  "colors.blue.700": {
+    "value": "#2e5884",
+    "variable": "var(--silver-colors-blue-700)"
+  },
+  "colors.blue.800": {
+    "value": "#2e4b6b",
+    "variable": "var(--silver-colors-blue-800)"
+  },
+  "colors.blue.900": {
+    "value": "#1a3d5d",
+    "variable": "var(--silver-colors-blue-900)"
+  },
+  "colors.blue.950": {
+    "value": "#172554",
+    "variable": "var(--silver-colors-blue-950)"
+  },
   "fonts.sans": {
     "value": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
     "variable": "var(--silver-fonts-sans)"
@@ -1827,6 +1827,22 @@ const tokens = {
     "value": "var(--silver-colors-silver-primary-100)",
     "variable": "var(--silver-colors-primary-subtle)"
   },
+  "colors.success.fg": {
+    "value": "#108627",
+    "variable": "var(--silver-colors-success-fg)"
+  },
+  "colors.error.fg": {
+    "value": "#d92644",
+    "variable": "var(--silver-colors-error-fg)"
+  },
+  "colors.warning.fg": {
+    "value": "#e8b00a",
+    "variable": "var(--silver-colors-warning-fg)"
+  },
+  "colors.info.fg": {
+    "value": "#0164e0",
+    "variable": "var(--silver-colors-info-fg)"
+  },
   "colors.fg": {
     "value": "var(--silver-colors-fg)",
     "variable": "var(--silver-colors-fg)"
@@ -1842,6 +1858,10 @@ const tokens = {
   "colors.bg.subtle": {
     "value": "var(--silver-colors-bg-subtle)",
     "variable": "var(--silver-colors-bg-subtle)"
+  },
+  "colors.bg.hover": {
+    "value": "var(--silver-colors-bg-hover)",
+    "variable": "var(--silver-colors-bg-hover)"
   },
   "colors.border": {
     "value": "var(--silver-colors-border)",
@@ -1992,16 +2012,20 @@ const tokens = {
     "variable": "var(--silver-colors-icon-accent)"
   },
   "colors.icon.success": {
-    "value": "var(--silver-colors-green-600)",
+    "value": "var(--silver-colors-success-fg)",
     "variable": "var(--silver-colors-icon-success)"
   },
   "colors.icon.error": {
-    "value": "var(--silver-colors-red-600)",
+    "value": "var(--silver-colors-error-fg)",
     "variable": "var(--silver-colors-icon-error)"
   },
   "colors.icon.warning": {
-    "value": "var(--silver-colors-yellow-600)",
+    "value": "var(--silver-colors-warning-fg)",
     "variable": "var(--silver-colors-icon-warning)"
+  },
+  "colors.icon.info": {
+    "value": "var(--silver-colors-info-fg)",
+    "variable": "var(--silver-colors-icon-info)"
   },
   "colors.icon.blue": {
     "value": "var(--silver-colors-blue-600)",
@@ -2327,6 +2351,10 @@ const tokens = {
     "value": "var(--silver-colors-color-palette-subtle)",
     "variable": "var(--silver-colors-color-palette-subtle)"
   },
+  "colors.colorPalette.fg": {
+    "value": "var(--silver-colors-color-palette-fg)",
+    "variable": "var(--silver-colors-color-palette-fg)"
+  },
   "colors.colorPalette.muted": {
     "value": "var(--silver-colors-color-palette-muted)",
     "variable": "var(--silver-colors-color-palette-muted)"
@@ -2342,10 +2370,6 @@ const tokens = {
   "colors.colorPalette.blue.fg": {
     "value": "var(--silver-colors-color-palette-blue-fg)",
     "variable": "var(--silver-colors-color-palette-blue-fg)"
-  },
-  "colors.colorPalette.fg": {
-    "value": "var(--silver-colors-color-palette-fg)",
-    "variable": "var(--silver-colors-color-palette-fg)"
   },
   "colors.colorPalette.blue.hover": {
     "value": "var(--silver-colors-color-palette-blue-hover)",
@@ -2490,6 +2514,10 @@ const tokens = {
   "colors.colorPalette.warning": {
     "value": "var(--silver-colors-color-palette-warning)",
     "variable": "var(--silver-colors-color-palette-warning)"
+  },
+  "colors.colorPalette.info": {
+    "value": "var(--silver-colors-color-palette-info)",
+    "variable": "var(--silver-colors-color-palette-info)"
   }
 }
 

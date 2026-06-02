@@ -1,4 +1,4 @@
-import type {ComponentPropsWithRef} from 'react';
+import type {ComponentPropsWithRef, ElementType} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {layoutRegionRecipe} from './Layout.recipe';
@@ -9,6 +9,10 @@ import type {SpacingStep} from './types';
  * between panels and stretches to fill the available height.
  */
 export interface LayoutContentProps extends ComponentPropsWithRef<'div'> {
+  /**
+   * HTML element to render. Default is `div`.
+   */
+  as?: ElementType;
   /**
    * Test ID applied to the root element.
    */
@@ -45,6 +49,7 @@ const styles = {
  * between panels and stretches to fill the available height.
  */
 export function LayoutContent({
+  as: Element = 'div',
   children,
   className,
   'data-testid': dataTestId,
@@ -57,7 +62,7 @@ export function LayoutContent({
   ...rest
 }: LayoutContentProps): React.JSX.Element {
   return (
-    <div
+    <Element
       {...rest}
       aria-label={label}
       className={cx(
@@ -71,7 +76,7 @@ export function LayoutContent({
       role={role ?? (label != null ? 'region' : undefined)}
       style={style}>
       {children}
-    </div>
+    </Element>
   );
 }
 

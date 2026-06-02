@@ -1,13 +1,13 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {useTopNavRenderMode} from './TopNavContext';
+import {topNavItemRecipe} from './TopNavItem.recipe';
 
 export interface TopNavItemProps {
   /**
@@ -75,48 +75,6 @@ export interface TopNavItemProps {
   target?: string;
 }
 
-const styles = {
-  item: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '2',
-    minH: '8',
-    px: '3',
-    py: '1.5',
-    borderRadius: 'md',
-    color: 'fg.muted',
-    textDecoration: 'none',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    fontWeight: 'medium',
-    cursor: 'pointer',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outline: '2px solid',
-      outlineColor: 'primary',
-      outlineOffset: '2px',
-    },
-  }),
-  drawer: css({
-    display: 'flex',
-    w: '100%',
-  }),
-  selected: css({
-    bg: 'bg.subtle',
-    color: 'fg',
-    fontWeight: 'semibold',
-  }),
-  disabled: css({
-    opacity: 0.5,
-    cursor: 'not-allowed',
-    pointerEvents: 'none',
-  }),
-  iconOnly: css({
-    px: '2',
-    aspectRatio: 'square',
-  }),
-};
-
 /**
  * A single navigation link inside a TopNav. Supports icons, selected
  * state, and adapts to drawer layout on mobile.
@@ -143,30 +101,15 @@ export function TopNavItem({
   const {closeMobileNav} = useAppShellMobile();
   const isDrawer = renderMode === 'drawer';
 
-  const content = (
-    <>
-      {icon != null ? (
-        <Icon aria-hidden="true" color="inherit" icon={icon} size="md" />
-      ) : null}
-      {!isIconOnly ? (children ?? label) : null}
-    </>
-  );
-
-  const sharedClassName = cx(
-    styles.item,
-    isDrawer && styles.drawer,
-    isSelected && styles.selected,
-    isDisabled && styles.disabled,
-    isIconOnly && styles.iconOnly,
-    className,
-  );
-
   return (
     <LinkComponent
       aria-current={isSelected ? 'page' : undefined}
       aria-disabled={isDisabled || undefined}
       aria-label={isIconOnly ? label : undefined}
-      className={sharedClassName}
+      className={cx(
+        topNavItemRecipe({isSelected, isDisabled, isIconOnly, isDrawer}),
+        className,
+      )}
       data-testid={dataTestId}
       href={href}
       onClick={event => {
@@ -187,7 +130,10 @@ export function TopNavItem({
       tabIndex={isDisabled ? -1 : undefined}
       target={target}
       to={LinkComponent === 'a' ? undefined : href}>
-      {content}
+      {icon != null ? (
+        <Icon aria-hidden="true" color="inherit" icon={icon} size="md" />
+      ) : null}
+      {!isIconOnly ? (children ?? label) : null}
     </LinkComponent>
   );
 }

@@ -3,6 +3,43 @@ import {generateColorScale} from './src/theme/generate-color-scale';
 
 const primary = generateColorScale('#547A95');
 const neutral = generateColorScale('#6A7B8C');
+const green = generateColorScale('#65c37e');
+const red = {
+  50: {value: '#fceef0'},
+  100: {value: '#f9d1d8'},
+  200: {value: '#f1bcc5'},
+  300: {value: '#e28d9b'},
+  400: {value: '#da4e65'},
+  500: {value: '#d92644'},
+  600: {value: '#e31a3b'},
+  700: {value: '#842e3d'},
+  800: {value: '#6b2e38'},
+  900: {value: '#562b32'},
+};
+const yellow = {
+  50: {value: '#fcf8ee'},
+  100: {value: '#f9edcc'},
+  200: {value: '#efe1be'},
+  300: {value: '#dfc990'},
+  400: {value: '#d4b054'},
+  500: {value: '#d9a626'},
+  600: {value: '#ab872b'},
+  700: {value: '#846c2e'},
+  800: {value: '#6b5a2e'},
+  900: {value: '#51461f'},
+};
+const blue = {
+  50: {value: '#eef5fc'},
+  100: {value: '#cce6fe'},
+  200: {value: '#bed5ef'},
+  300: {value: '#90b6df'},
+  400: {value: '#5492d4'},
+  500: {value: '#267dd9'},
+  600: {value: '#2b69ab'},
+  700: {value: '#2e5884'},
+  800: {value: '#2e4b6b'},
+  900: {value: '#1a3d5d'},
+};
 
 export default defineConfig({
   preflight: true,
@@ -27,6 +64,10 @@ export default defineConfig({
         colors: {
           'silver-primary': primary,
           'silver-neutral': neutral,
+          green,
+          red,
+          yellow,
+          blue,
         },
         fonts: {
           body: {value: 'system-ui, -apple-system, sans-serif'},
@@ -46,6 +87,18 @@ export default defineConfig({
             hover: {value: '{colors.silver-primary.600}'},
             active: {value: '{colors.silver-primary.700}'},
             subtle: {value: '{colors.silver-primary.100}'},
+          },
+          success: {
+            fg: {value: '#108627'},
+          },
+          error: {
+            fg: {value: '#d92644'},
+          },
+          warning: {
+            fg: {value: '#e8b00a'},
+          },
+          info: {
+            fg: {value: '#0164e0'},
           },
           fg: {
             DEFAULT: {
@@ -69,6 +122,12 @@ export default defineConfig({
               value: {
                 base: '{colors.silver-neutral.50}',
                 _dark: '{colors.silver-neutral.800}',
+              },
+            },
+            hover: {
+              value: {
+                base: '{colors.silver-neutral.100}',
+                _dark: '{colors.silver-neutral.700}',
               },
             },
           },
@@ -271,9 +330,10 @@ export default defineConfig({
               },
             },
             accent: {value: '{colors.primary}'},
-            success: {value: '{colors.green.600}'},
-            error: {value: '{colors.red.600}'},
-            warning: {value: '{colors.yellow.600}'},
+            success: {value: '{colors.success.fg}'},
+            error: {value: '{colors.error.fg}'},
+            warning: {value: '{colors.warning.fg}'},
+            info: {value: '{colors.info.fg}'},
             blue: {value: '{colors.blue.600}'},
             red: {value: '{colors.red.600}'},
             green: {value: '{colors.green.600}'},

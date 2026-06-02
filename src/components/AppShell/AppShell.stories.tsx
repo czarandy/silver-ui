@@ -11,7 +11,7 @@ const meta: Meta<typeof AppShell> = {
   args: {
     contentPadding: 4,
     height: 'fill',
-    variant: 'elevated',
+    variant: 'default',
   },
   argTypes: {
     height: {
@@ -20,7 +20,7 @@ const meta: Meta<typeof AppShell> = {
     },
     variant: {
       control: {type: 'select'},
-      options: ['wash', 'surface', 'section', 'elevated'],
+      options: ['default', 'section'],
     },
   },
 };
@@ -45,6 +45,18 @@ const topNav = (
     <TopNavItem href="/docs" label="Docs" />
     <TopNavItem href="/components" label="Components" />
   </TopNav>
+);
+
+const longContent = (
+  <div>
+    <h2>Dashboard</h2>
+    {Array.from({length: 20}, (_, i) => (
+      <p key={i}>
+        Content paragraph {i + 1}. This content is long enough to trigger
+        scrolling behavior within the shell.
+      </p>
+    ))}
+  </div>
 );
 
 export const Basic: Story = {
@@ -72,6 +84,66 @@ export const WithBanner: Story = {
       <div>
         <h2>Settings</h2>
         <p>Banner content appears above the top navigation.</p>
+      </div>
+    </AppShell>
+  ),
+};
+
+export const AutoHeight: Story = {
+  args: {height: 'auto'},
+  render: args => (
+    <AppShell {...args} sideNav={sideNav} topNav={topNav}>
+      {longContent}
+    </AppShell>
+  ),
+};
+
+export const SideNavOnly: Story = {
+  render: args => (
+    <AppShell {...args} sideNav={sideNav}>
+      <div>
+        <h2>Dashboard</h2>
+        <p>
+          This shell has a side nav but no top nav. On mobile, an auto-generated
+          top bar with a toggle button appears.
+        </p>
+      </div>
+    </AppShell>
+  ),
+};
+
+export const ContentOnly: Story = {
+  render: args => (
+    <AppShell {...args}>
+      <div>
+        <h2>Minimal Shell</h2>
+        <p>No side nav, top nav, or banner — just content in a layout shell.</p>
+      </div>
+    </AppShell>
+  ),
+};
+
+export const VariantSection: Story = {
+  args: {variant: 'section'},
+  render: args => (
+    <AppShell {...args} sideNav={sideNav} topNav={topNav}>
+      <div>
+        <h2>Section Variant</h2>
+        <p>Dividers separate the navigation and content areas.</p>
+      </div>
+    </AppShell>
+  ),
+};
+
+export const MobileNavDisabled: Story = {
+  render: args => (
+    <AppShell {...args} isMobileNavDisabled sideNav={sideNav} topNav={topNav}>
+      <div>
+        <h2>Mobile Nav Disabled</h2>
+        <p>
+          Resize the viewport below the breakpoint — no mobile toggle or drawer
+          will appear.
+        </p>
       </div>
     </AppShell>
   ),

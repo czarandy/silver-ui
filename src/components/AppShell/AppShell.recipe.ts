@@ -16,23 +16,17 @@ export const appShellRecipe = cva({
       },
     },
     variant: {
-      wash: {
+      default: {
         bg: 'bg.subtle',
-      },
-      surface: {
-        bg: 'bg',
       },
       section: {
         bg: 'bg',
-      },
-      elevated: {
-        bg: 'bg.subtle',
       },
     },
   },
   defaultVariants: {
     height: 'fill',
-    variant: 'elevated',
+    variant: 'default',
   },
 });
 

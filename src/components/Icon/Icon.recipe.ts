@@ -29,6 +29,7 @@ export const iconRecipe = cva({
       success: {color: 'icon.success'},
       error: {color: 'icon.error'},
       warning: {color: 'icon.warning'},
+      info: {color: 'icon.info'},
       inherit: {color: 'currentColor'},
       blue: {color: 'icon.blue'},
       red: {color: 'icon.red'},

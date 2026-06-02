@@ -11,6 +11,7 @@ export type IconColor =
   | 'error'
   | 'gray'
   | 'green'
+  | 'info'
   | 'inherit'
   | 'orange'
   | 'pink'

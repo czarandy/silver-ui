@@ -35,7 +35,7 @@ export function useSlotPresence(initialValue = false): {
     const observer = new MutationObserver(() => {
       setHasContent(hasChildContent(node));
     });
-    observer.observe(node, {childList: true, subtree: true});
+    observer.observe(node, {childList: true});
     observerRef.current = observer;
   }, []);
 

@@ -73,6 +73,7 @@
 - [x] ToggleButton
 - [x] Tooltip
 - [x] TopNav
+- [x] CodeBlock
 
 ## Tier 2 — Very common (3/4 libraries)
 
@@ -87,7 +88,6 @@
 
 ## Tier 3 — Common (2/4 libraries)
 
-- [ ] CodeBlock
 - [ ] ColorPicker
 - [ ] Fieldset
 - [ ] Menubar

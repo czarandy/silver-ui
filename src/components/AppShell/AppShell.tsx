@@ -1,12 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {
-  isValidElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import {useCallback, useEffect, useId, useMemo, useRef, useState} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
@@ -33,39 +26,12 @@ import {
 import {useSlotPresence} from './useSlotPresence';
 
 export type AppShellBreakpoint = 'sm' | 'md' | 'lg' | 'none';
-export type AppShellVariant = 'wash' | 'surface' | 'section' | 'elevated';
+export type AppShellVariant = 'default' | 'section';
 export type AppShellHeight = 'fill' | 'auto';
 
-export interface MobileNavConfig {
-  /**
-   * Breakpoint below which mobile navigation is used. Default is `md`.
-   */
-  breakpoint?: AppShellBreakpoint;
-  /**
-   * Custom drawer content for the generated mobile navigation.
-   */
-  content?: ReactNode;
-  /**
-   * Whether AppShell should render an automatic mobile nav toggle.
-   */
-  hasToggle?: boolean;
-  /**
-   * Initial mobile-layout hint for server-rendered apps.
-   */
-  isDefaultMobile?: boolean;
-  /**
-   * Controlled open state for the generated mobile nav.
-   */
-  isOpen?: boolean;
-  /**
-   * Called when the generated mobile nav requests an open-state change.
-   */
-  onOpenChange?: (isOpen: boolean) => void;
-}
-
 /**
- * Application-level layout shell with top navigation, side navigation, banner,
- * skip-to-content support, and responsive mobile navigation.
+ * Application-level layout shell with top navigation, side navigation,
+ * banner, skip-to-content support, and responsive mobile navigation.
  */
 export interface AppShellProps {
   /**
@@ -98,9 +64,10 @@ export interface AppShellProps {
    */
   isMobileNavDisabled?: boolean;
   /**
-   * Mobile navigation configuration or a fully custom mobile navigation node.
+   * Breakpoint below which mobile navigation is used.
+   * @default 'md'
    */
-  mobileNav?: MobileNavConfig | ReactNode;
+  mobileBreakpoint?: AppShellBreakpoint;
   /**
    * Ref forwarded to the root element.
    */
@@ -129,8 +96,6 @@ const BREAKPOINT_VALUES: Record<AppShellBreakpoint, number> = {
   lg: 1024,
   none: 0,
 };
-
-const MAIN_CONTENT_ID = 'silver-app-shell-main';
 
 const styles = {
   skipLink: css({
@@ -200,14 +165,11 @@ const styles = {
     position: 'absolute',
     inset: 0,
     bg: 'bg',
-    borderStartStartRadius: 'lg',
+    borderStartStartRadius: '2xl',
     pointerEvents: 'none',
   }),
   contentSurface: css({
     bg: 'bg',
-  }),
-  contentWash: css({
-    bg: 'bg.subtle',
   }),
   contentTransparent: css({
     bg: 'transparent',
@@ -234,45 +196,23 @@ export function AppShell({
   'data-testid': dataTestId,
   height = 'fill',
   isMobileNavDisabled = false,
-  mobileNav,
+  mobileBreakpoint = 'md',
   ref,
   sideNav,
   style,
   topNav,
-  variant = 'elevated',
+  variant = 'default',
 }: AppShellProps): React.JSX.Element {
-  const mobileNavConfig: MobileNavConfig | null =
-    mobileNav != null &&
-    typeof mobileNav === 'object' &&
-    !isValidElement(mobileNav)
-      ? (mobileNav as MobileNavConfig)
-      : null;
-  const mobileNavReactNode: ReactNode | null =
-    mobileNav != null &&
-    (isValidElement(mobileNav) || typeof mobileNav === 'string')
-      ? mobileNav
-      : null;
-  const mobileNavConfigContent = mobileNavConfig?.content ?? null;
-  const mobileNavHasToggle = mobileNavConfig?.hasToggle !== false;
-  const breakpoint = mobileNavConfig?.breakpoint ?? 'md';
+  const mainContentId = useId();
   const breakpointQuery =
-    breakpoint === 'none'
+    mobileBreakpoint === 'none'
       ? '(max-width: 0px)'
-      : `(max-width: ${BREAKPOINT_VALUES[breakpoint]}px)`;
+      : `(max-width: ${BREAKPOINT_VALUES[mobileBreakpoint]}px)`;
   const isBelowBreakpoint = useMediaQuery(breakpointQuery);
-  const [uncontrolledMobileOpen, setUncontrolledMobileOpen] = useState(false);
-  const isMobileNavOpen = mobileNavConfig?.isOpen ?? uncontrolledMobileOpen;
-  const isControlled = mobileNavConfig?.isOpen !== undefined;
-  const setMobileNavOpen = useCallback(
-    (isOpen: boolean) => {
-      if (!isControlled) {
-        setUncontrolledMobileOpen(isOpen);
-      }
-
-      mobileNavConfig?.onOpenChange?.(isOpen);
-    },
-    [isControlled, mobileNavConfig],
-  );
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const setMobileNavOpen = useCallback((isOpen: boolean) => {
+    setIsMobileNavOpen(isOpen);
+  }, []);
   const {ref: topNavPresenceRef, hasContent: hasTopNavContent} =
     useSlotPresence(topNav != null);
   const {ref: sideNavPresenceRef, hasContent: hasSideNavContent} =
@@ -280,8 +220,7 @@ export function AppShell({
   const hasTopNav = topNav != null;
   const hasSideNav = sideNav != null;
   const hasNavContent = hasTopNavContent || hasSideNavContent;
-  const mobileNavEnabled =
-    !isMobileNavDisabled && hasNavContent && mobileNavReactNode == null;
+  const mobileNavEnabled = !isMobileNavDisabled && hasNavContent;
   const showSideNavInline = hasSideNav && !isBelowBreakpoint;
   const isAuto = height === 'auto';
   const isFill = height === 'fill';
@@ -310,7 +249,7 @@ export function AppShell({
   const mobileContextValue = useMemo<AppShellMobileContextValue>(
     () => ({
       closeMobileNav: () => setMobileNavOpen(false),
-      hasAutoToggle: mobileNavHasToggle,
+      hasAutoToggle: true,
       isMobile: isBelowBreakpoint,
       isMobileNavEnabled: mobileNavEnabled,
       isMobileNavOpen,
@@ -318,35 +257,23 @@ export function AppShell({
       toggleMobileNav: () =>
         mobileNavEnabled && setMobileNavOpen(!isMobileNavOpen),
     }),
-    [
-      isBelowBreakpoint,
-      isMobileNavOpen,
-      mobileNavEnabled,
-      mobileNavHasToggle,
-      setMobileNavOpen,
-    ],
+    [isBelowBreakpoint, isMobileNavOpen, mobileNavEnabled, setMobileNavOpen],
   );
 
-  const mobileContentValue = useMemo(
-    () =>
-      hasSideNavContent && mobileNavHasToggle ? (
-        <SideNavRenderContext value="drawer-content">
-          <div className={styles.slotContents} ref={sideNavPresenceRef}>
-            {sideNav}
-          </div>
-        </SideNavRenderContext>
-      ) : null,
-    [hasSideNavContent, mobileNavHasToggle, sideNav, sideNavPresenceRef],
-  );
-  const drawerMobileContentValue = useMemo(
-    () =>
-      hasSideNavContent ? (
-        <SideNavRenderContext value="drawer-content">
-          {sideNav}
-        </SideNavRenderContext>
-      ) : null,
-    [hasSideNavContent, sideNav],
-  );
+  /* eslint-disable @eslint-react/no-unstable-context-value -- sideNav ReactNode prop prevents stable memoization */
+  const mobileContentValue = hasSideNavContent ? (
+    <SideNavRenderContext value="drawer-content">
+      <div className={styles.slotContents} ref={sideNavPresenceRef}>
+        {sideNav}
+      </div>
+    </SideNavRenderContext>
+  ) : null;
+  const drawerMobileContentValue = hasSideNavContent ? (
+    <SideNavRenderContext value="drawer-content">
+      {sideNav}
+    </SideNavRenderContext>
+  ) : null;
+  /* eslint-enable @eslint-react/no-unstable-context-value */
   const topNavContent =
     hasTopNav && isBelowBreakpoint && !isMobileNavDisabled ? (
       <TopNavMobileContentContext value={mobileContentValue}>
@@ -376,7 +303,6 @@ export function AppShell({
     ) : undefined;
   const autoMobileTopBar =
     !isMobileNavDisabled &&
-    mobileNavHasToggle &&
     isBelowBreakpoint &&
     !hasTopNavContent &&
     hasSideNav ? (
@@ -408,25 +334,23 @@ export function AppShell({
       sideNavPanel
     );
   const contentClassName =
-    variant === 'wash'
-      ? styles.contentWash
-      : variant === 'elevated' && hasTopNavContent && showSideNavInline
-        ? styles.contentTransparent
-        : variant === 'surface' || variant === 'elevated'
-          ? styles.contentSurface
-          : undefined;
+    variant === 'default' && hasTopNavContent && showSideNavInline
+      ? styles.contentTransparent
+      : variant === 'default'
+        ? styles.contentSurface
+        : undefined;
   const mainInner = (
     <LayoutContent
+      as="main"
       className={contentClassName}
-      id={MAIN_CONTENT_ID}
+      id={mainContentId}
       isScrollable={isFill}
-      padding={contentPadding ?? 0}
-      role="main">
+      padding={contentPadding ?? 0}>
       {children}
     </LayoutContent>
   );
   const shouldElevateWithCorner =
-    variant === 'elevated' && hasTopNavContent && showSideNavInline;
+    variant === 'default' && hasTopNavContent && showSideNavInline;
   const mainContent = shouldElevateWithCorner ? (
     <div className={styles.elevatedWrapper}>
       <div className={styles.elevatedBackdrop} />
@@ -447,7 +371,7 @@ export function AppShell({
         <a
           className={styles.skipLink}
           data-testid="skip-to-content"
-          href={`#${MAIN_CONTENT_ID}`}>
+          href={`#${mainContentId}`}>
           Skip to content
         </a>
         <Layout
@@ -463,12 +387,7 @@ export function AppShell({
           padding={0}
           start={sideNavContent}
         />
-        {mobileNavReactNode}
-        {mobileNavConfigContent}
-        {isBelowBreakpoint &&
-        !isMobileNavDisabled &&
-        mobileNavReactNode == null &&
-        mobileNavConfigContent == null ? (
+        {isBelowBreakpoint && !isMobileNavDisabled ? (
           <>
             {hasSideNav && !hasTopNavContent ? (
               <SideNavRenderContext value="drawer">
