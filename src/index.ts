@@ -1,6 +1,23 @@
 export {Button, type ButtonProps, type ButtonSize} from './components/Button';
 export {buttonRecipe, type ButtonVariants} from './components/Button';
 export {
+  Theme,
+  type ThemeColorTokens,
+  type ThemeColorValue,
+  type ThemeFontSizeTokens,
+  type ThemeFontTokens,
+  type ThemeMode,
+  type ThemePaletteName,
+  type ThemePaletteReference,
+  type ThemePaletteStep,
+  type ThemeProps,
+  type ThemeRadiusTokens,
+  type ThemeShadowTokens,
+  type ThemeSizeTokens,
+  type ThemeSpacingTokens,
+  type ThemeTokens,
+} from './components/Theme';
+export {
   BaseTable,
   capitalize,
   defaultCellRenderer,

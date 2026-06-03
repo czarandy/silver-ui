@@ -1,10 +1,12 @@
 import {defineConfig} from '@pandacss/dev';
 import {generateColorScale} from './src/theme/generate-color-scale';
 
-const primary = generateColorScale('#547A95');
-const neutral = generateColorScale('#6A7B8C');
-const green = generateColorScale('#65c37e');
-const teal = generateColorScale('#89dbd9');
+const gray = {
+  ...generateColorScale('#6a7b8c'),
+  50: {value: '#f1f4f7'},
+};
+const green = generateColorScale('#26a332');
+const teal = generateColorScale('#1ca49e');
 const red = {
   50: {value: '#fceef0'},
   100: {value: '#f9d1d8'},
@@ -17,30 +19,12 @@ const red = {
   800: {value: '#6b2e38'},
   900: {value: '#562b32'},
 };
-const yellow = {
-  50: {value: '#fcf8ee'},
-  100: {value: '#f9edcc'},
-  200: {value: '#efe1be'},
-  300: {value: '#dfc990'},
-  400: {value: '#d4b054'},
-  500: {value: '#d9a626'},
-  600: {value: '#ab872b'},
-  700: {value: '#846c2e'},
-  800: {value: '#6b5a2e'},
-  900: {value: '#51461f'},
-};
-const blue = {
-  50: {value: '#eef5fc'},
-  100: {value: '#cce6fe'},
-  200: {value: '#bed5ef'},
-  300: {value: '#90b6df'},
-  400: {value: '#5492d4'},
-  500: {value: '#267dd9'},
-  600: {value: '#2b69ab'},
-  700: {value: '#2e5884'},
-  800: {value: '#2e4b6b'},
-  900: {value: '#1a3d5d'},
-};
+const yellow = generateColorScale('#f0aa00');
+const blue = generateColorScale('#4a98ff');
+const cyan = generateColorScale('#40b9dd');
+const orange = generateColorScale('#eb6d02');
+const pink = generateColorScale('#d951a8');
+const purple = generateColorScale('#7952ff');
 
 export default defineConfig({
   preflight: true,
@@ -63,12 +47,15 @@ export default defineConfig({
     extend: {
       tokens: {
         colors: {
-          'silver-primary': primary,
-          'silver-neutral': neutral,
+          gray,
           green,
           red,
           yellow,
           blue,
+          cyan,
+          orange,
+          pink,
+          purple,
           teal,
         },
         fonts: {
@@ -90,10 +77,10 @@ export default defineConfig({
       semanticTokens: {
         colors: {
           primary: {
-            DEFAULT: {value: '{colors.silver-primary.500}'},
-            hover: {value: '{colors.silver-primary.600}'},
-            active: {value: '{colors.silver-primary.700}'},
-            subtle: {value: '{colors.silver-primary.100}'},
+            DEFAULT: {value: '{colors.teal.500}'},
+            hover: {value: '{colors.teal.600}'},
+            active: {value: '{colors.teal.700}'},
+            subtle: {value: '{colors.teal.100}'},
           },
           destructive: {
             DEFAULT: {
@@ -109,7 +96,7 @@ export default defineConfig({
           },
           status: {
             success: {
-              fg: {value: '#108627'},
+              fg: {value: '{colors.green.600}'},
               border: {
                 value: {
                   base: '{colors.green.600}',
@@ -131,7 +118,7 @@ export default defineConfig({
               solidFg: {value: '{colors.white}'},
             },
             error: {
-              fg: {value: '#d92644'},
+              fg: {value: '{colors.red.500}'},
               border: {
                 value: {base: '{colors.red.600}', _dark: '{colors.red.400}'},
               },
@@ -166,15 +153,15 @@ export default defineConfig({
               solidFg: {value: '{colors.white}'},
             },
             info: {
-              fg: {value: '#0164e0'},
+              fg: {value: '{colors.blue.700}'},
               solid: {value: '{colors.primary}'},
               solidFg: {value: '{colors.fg.onPrimary}'},
             },
             neutral: {
               solid: {
                 value: {
-                  base: '{colors.silver-neutral.500}',
-                  _dark: '{colors.silver-neutral.400}',
+                  base: '{colors.gray.500}',
+                  _dark: '{colors.gray.400}',
                 },
               },
               solidFg: {value: '{colors.white}'},
@@ -182,8 +169,8 @@ export default defineConfig({
             disabled: {
               solid: {
                 value: {
-                  base: '{colors.silver-neutral.400}',
-                  _dark: '{colors.silver-neutral.600}',
+                  base: '{colors.gray.400}',
+                  _dark: '{colors.gray.600}',
                 },
               },
               solidFg: {value: '{colors.white}'},
@@ -195,8 +182,8 @@ export default defineConfig({
             },
             neutral: {
               value: {
-                base: '{colors.silver-neutral.500}',
-                _dark: '{colors.silver-neutral.400}',
+                base: '{colors.gray.500}',
+                _dark: '{colors.gray.400}',
               },
             },
             error: {
@@ -206,38 +193,38 @@ export default defineConfig({
           fg: {
             DEFAULT: {
               value: {
-                base: '{colors.silver-neutral.900}',
-                _dark: '{colors.silver-neutral.50}',
+                base: '{colors.gray.900}',
+                _dark: '{colors.gray.50}',
               },
             },
             muted: {
               value: {
-                base: '{colors.silver-neutral.600}',
-                _dark: '{colors.silver-neutral.400}',
+                base: '{colors.gray.600}',
+                _dark: '{colors.gray.400}',
               },
             },
             disabled: {
               value: {
-                base: '{colors.silver-neutral.400}',
-                _dark: '{colors.silver-neutral.600}',
+                base: '{colors.gray.400}',
+                _dark: '{colors.gray.600}',
               },
             },
             onPrimary: {value: '{colors.white}'},
           },
           bg: {
             DEFAULT: {
-              value: {base: '#ffffff', _dark: '{colors.silver-neutral.900}'},
+              value: {base: '{colors.white}', _dark: '{colors.gray.900}'},
             },
             subtle: {
               value: {
-                base: '{colors.silver-neutral.50}',
-                _dark: '{colors.silver-neutral.800}',
+                base: '{colors.gray.50}',
+                _dark: '{colors.gray.800}',
               },
             },
             hover: {
               value: {
-                base: '{colors.silver-neutral.100}',
-                _dark: '{colors.silver-neutral.700}',
+                base: '{colors.gray.100}',
+                _dark: '{colors.gray.700}',
               },
             },
             selected: {value: '{colors.primary.subtle}'},
@@ -259,34 +246,34 @@ export default defineConfig({
           border: {
             DEFAULT: {
               value: {
-                base: '{colors.silver-neutral.100}',
-                _dark: '{colors.silver-neutral.700}',
+                base: '{colors.gray.100}',
+                _dark: '{colors.gray.700}',
               },
             },
             emphasized: {
               value: {
-                base: '{colors.silver-neutral.200}',
-                _dark: '{colors.silver-neutral.600}',
+                base: '{colors.gray.200}',
+                _dark: '{colors.gray.600}',
               },
             },
           },
           track: {
             DEFAULT: {
               value: {
-                base: '{colors.silver-neutral.200}',
-                _dark: '{colors.silver-neutral.700}',
+                base: '{colors.gray.200}',
+                _dark: '{colors.gray.700}',
               },
             },
             emphasized: {
               value: {
-                base: '{colors.silver-neutral.300}',
-                _dark: '{colors.silver-neutral.600}',
+                base: '{colors.gray.300}',
+                _dark: '{colors.gray.600}',
               },
             },
             disabled: {
               value: {
-                base: '{colors.silver-neutral.300}',
-                _dark: '{colors.silver-neutral.700}',
+                base: '{colors.gray.300}',
+                _dark: '{colors.gray.700}',
               },
             },
           },
@@ -300,14 +287,14 @@ export default defineConfig({
           skeleton: {
             DEFAULT: {
               value: {
-                base: '{colors.silver-neutral.100}',
-                _dark: '{colors.silver-neutral.600}',
+                base: '{colors.gray.100}',
+                _dark: '{colors.gray.600}',
               },
             },
             shimmer: {
               value: {
-                base: '{colors.silver-neutral.50}',
-                _dark: '{colors.silver-neutral.500}',
+                base: '{colors.gray.50}',
+                _dark: '{colors.gray.500}',
               },
             },
           },
@@ -323,7 +310,7 @@ export default defineConfig({
                 value: {base: '{colors.blue.200}', _dark: '{colors.blue.800}'},
               },
               accent: {
-                value: {base: '{colors.blue.600}', _dark: '{colors.blue.400}'},
+                value: {base: '{colors.blue.700}', _dark: '{colors.blue.500}'},
               },
             },
             cyan: {
@@ -337,32 +324,32 @@ export default defineConfig({
                 value: {base: '{colors.cyan.200}', _dark: '{colors.cyan.800}'},
               },
               accent: {
-                value: {base: '{colors.cyan.600}', _dark: '{colors.cyan.400}'},
+                value: {base: '{colors.cyan.600}', _dark: '{colors.cyan.700}'},
               },
             },
             gray: {
               DEFAULT: {
                 value: {
-                  base: '{colors.silver-neutral.50}',
-                  _dark: '{colors.silver-neutral.800}',
+                  base: '{colors.gray.50}',
+                  _dark: '{colors.gray.800}',
                 },
               },
               fg: {
                 value: {
-                  base: '{colors.silver-neutral.900}',
-                  _dark: '{colors.silver-neutral.100}',
+                  base: '{colors.gray.900}',
+                  _dark: '{colors.gray.100}',
                 },
               },
               hover: {
                 value: {
-                  base: '{colors.silver-neutral.100}',
-                  _dark: '{colors.silver-neutral.700}',
+                  base: '{colors.gray.100}',
+                  _dark: '{colors.gray.700}',
                 },
               },
               accent: {
                 value: {
-                  base: '{colors.silver-neutral.600}',
-                  _dark: '{colors.silver-neutral.400}',
+                  base: '{colors.gray.600}',
+                  _dark: '{colors.gray.400}',
                 },
               },
             },
@@ -413,8 +400,8 @@ export default defineConfig({
               },
               accent: {
                 value: {
-                  base: '{colors.orange.600}',
-                  _dark: '{colors.orange.400}',
+                  base: '{colors.orange.500}',
+                  _dark: '{colors.orange.700}',
                 },
               },
             },
@@ -437,7 +424,7 @@ export default defineConfig({
               accent: {
                 value: {
                   base: '{colors.pink.600}',
-                  _dark: '{colors.pink.400}',
+                  _dark: '{colors.pink.600}',
                 },
               },
             },
@@ -462,8 +449,8 @@ export default defineConfig({
               },
               accent: {
                 value: {
-                  base: '{colors.purple.600}',
-                  _dark: '{colors.purple.400}',
+                  base: '{colors.purple.300}',
+                  _dark: '{colors.purple.500}',
                 },
               },
             },
@@ -498,7 +485,7 @@ export default defineConfig({
                 },
               },
               accent: {
-                value: {base: '{colors.teal.700}', _dark: '{colors.teal.400}'},
+                value: {base: '{colors.teal.500}', _dark: '{colors.teal.700}'},
               },
             },
             yellow: {
@@ -523,7 +510,7 @@ export default defineConfig({
               accent: {
                 value: {
                   base: '{colors.yellow.600}',
-                  _dark: '{colors.yellow.400}',
+                  _dark: '{colors.yellow.700}',
                 },
               },
             },
@@ -533,14 +520,14 @@ export default defineConfig({
             secondary: {value: '{colors.fg.muted}'},
             tertiary: {
               value: {
-                base: '{colors.silver-neutral.500}',
-                _dark: '{colors.silver-neutral.500}',
+                base: '{colors.gray.500}',
+                _dark: '{colors.gray.500}',
               },
             },
             disabled: {
               value: {
-                base: '{colors.silver-neutral.400}',
-                _dark: '{colors.silver-neutral.600}',
+                base: '{colors.gray.400}',
+                _dark: '{colors.gray.600}',
               },
             },
             accent: {value: '{colors.primary}'},
@@ -548,16 +535,22 @@ export default defineConfig({
             error: {value: '{colors.status.error.fg}'},
             warning: {value: '{colors.status.warning.fg}'},
             info: {value: '{colors.status.info.fg}'},
-            blue: {value: '{colors.blue.600}'},
+            blue: {
+              value: {base: '{colors.blue.700}', _dark: '{colors.blue.500}'},
+            },
             red: {value: '{colors.red.600}'},
             green: {value: '{colors.green.600}'},
-            gray: {value: '{colors.silver-neutral.600}'},
-            cyan: {value: '{colors.cyan.600}'},
-            teal: {value: '{colors.teal.600}'},
+            gray: {value: '{colors.gray.600}'},
+            cyan: {
+              value: {base: '{colors.cyan.600}', _dark: '{colors.cyan.500}'},
+            },
+            teal: {value: '{colors.teal.500}'},
             yellow: {value: '{colors.yellow.500}'},
-            orange: {value: '{colors.orange.600}'},
-            pink: {value: '{colors.pink.600}'},
-            purple: {value: '{colors.purple.600}'},
+            orange: {value: '{colors.orange.500}'},
+            pink: {
+              value: {base: '{colors.pink.600}', _dark: '{colors.pink.500}'},
+            },
+            purple: {value: '{colors.purple.700}'},
           },
         },
         sizes: {

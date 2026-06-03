@@ -12,7 +12,6 @@ Table is a complex, plugin-based data table component supporting configurable de
 
 ### High
 
-- **`areRowPropsEqual` shallow comparison of `item` can miss nested mutations:** The memoization comparator for `MemoizedDataRow` (lines 170-193 in `BaseTable.tsx`) does a shallow key comparison of the `item` object. If a row's data object has nested objects or arrays as values, mutations inside those nested values will not trigger re-renders. This is documented behavior for `React.memo`, but since data table cells often display derived values from nested objects, this could lead to stale rendering in real-world usage. A `renderCell` function referencing nested data would also not re-render since the check is on `item` keys only.
 - **Plugin error swallowing via `console.error`:** In `BaseTable.tsx`, plugin exceptions in `applyPlugins` and `transformTableContext` are caught and logged with `console.error`, then silently swallowed. While this prevents the entire table from crashing, it masks bugs during development. Consider at minimum rethrowing in development mode.
 
 ### Medium
@@ -33,7 +32,6 @@ Table is a complex, plugin-based data table component supporting configurable de
 
 ## Recommendations
 
-- Document the shallow comparison behavior of `areRowPropsEqual` and recommend consumers use immutable data patterns.
 - Consider adding development-mode re-throw for plugin errors in `applyPlugins`.
 - Evaluate whether the `@js-temporal/polyfill` import can be made lazy or optional to reduce bundle size for consumers who do not use Temporal types.
 - Add an ARIA live region or `aria-live="polite"` announcement when sort state changes for better screen reader support.

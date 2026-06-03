@@ -219,7 +219,7 @@ export interface UtilityValues {
 	srOnly: boolean;
 	debug: boolean;
 	containerName: CssProperties["containerName"];
-	colorPalette: "current" | "black" | "white" | "transparent" | "rose" | "pink" | "fuchsia" | "purple" | "violet" | "indigo" | "sky" | "cyan" | "emerald" | "lime" | "amber" | "orange" | "neutral" | "stone" | "zinc" | "gray" | "slate" | "silver-primary" | "silver-neutral" | "green" | "red" | "yellow" | "blue" | "teal" | "primary" | "destructive" | "status" | "status.success" | "status.error" | "status.warning" | "status.info" | "status.neutral" | "status.disabled" | "presence" | "fg" | "bg" | "bg.ghost" | "border" | "track" | "overlay" | "overlay.scrim" | "skeleton" | "surface" | "surface.blue" | "surface.cyan" | "surface.gray" | "surface.green" | "surface.orange" | "surface.pink" | "surface.purple" | "surface.red" | "surface.teal" | "surface.yellow" | "icon";
+	colorPalette: "current" | "black" | "white" | "transparent" | "rose" | "fuchsia" | "violet" | "indigo" | "sky" | "emerald" | "lime" | "amber" | "neutral" | "stone" | "zinc" | "slate" | "gray" | "green" | "red" | "yellow" | "blue" | "cyan" | "orange" | "pink" | "purple" | "teal" | "primary" | "destructive" | "status" | "status.success" | "status.error" | "status.warning" | "status.info" | "status.neutral" | "status.disabled" | "presence" | "fg" | "bg" | "bg.ghost" | "border" | "track" | "overlay" | "overlay.scrim" | "skeleton" | "surface" | "surface.blue" | "surface.cyan" | "surface.gray" | "surface.green" | "surface.orange" | "surface.pink" | "surface.purple" | "surface.red" | "surface.teal" | "surface.yellow" | "icon";
 	textStyle: "xs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | "6xl" | "7xl" | "8xl" | "9xl";
 }
 

@@ -40,6 +40,11 @@ const preview: Preview = {
       },
     },
     layout: 'fullscreen',
+    options: {
+      storySort: {
+        order: ['Components', ['Theme']],
+      },
+    },
   },
   globalTypes: {
     theme: {

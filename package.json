@@ -51,7 +51,7 @@
     "typecheck": "tsc --noEmit",
     "check:exports": "pnpm build && publint",
     "clean": "rm -rf dist storybook-static",
-    "swatches": "node scripts/generate-theme-swatches.js"
+    "theme": "npx tsx scripts/generate-theme.ts"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

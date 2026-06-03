@@ -6,6 +6,9 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {kbdRecipe} from './Kbd.recipe';
+
+export type KbdSize = 'sm' | 'md' | 'lg';
 
 export interface KbdProps {
   /**
@@ -28,6 +31,12 @@ export interface KbdProps {
    */
   ref?: Ref<HTMLElement>;
   /**
+   * Size of the key badges.
+   *
+   * @default 'md'
+   */
+  size?: KbdSize;
+  /**
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
@@ -37,29 +46,12 @@ const styles = {
   root: css({
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '1',
     flexShrink: 0,
     verticalAlign: 'bottom',
   }),
-  key: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minW: '5',
-    h: '5',
-    px: '1',
-    borderRadius: 'sm',
-    bg: 'bg.subtle',
-    borderBottomWidth: 'emphasized',
-    borderBottomStyle: 'solid',
-    borderBottomColor: 'border',
-    color: 'fg.muted',
-    fontFamily: 'body',
-    fontSize: 'xs',
-    fontWeight: 'medium',
-    lineHeight: 'none',
-    userSelect: 'none',
-  }),
+  rootSm: css({gap: '0.5'}),
+  rootMd: css({gap: '1'}),
+  rootLg: css({gap: '1.5'}),
 } as const;
 
 const keyDisplay: Record<string, string> = {
@@ -144,6 +136,7 @@ export function Kbd({
   'data-testid': dataTestId,
   keys,
   ref,
+  size = 'md',
   style,
 }: KbdProps): React.JSX.Element {
   const isMac = useIsMac();
@@ -170,15 +163,22 @@ export function Kbd({
     };
   }, [keys, isMac]);
 
+  const gapStyle =
+    size === 'sm'
+      ? styles.rootSm
+      : size === 'lg'
+        ? styles.rootLg
+        : styles.rootMd;
+
   return (
     <kbd
       aria-label={ariaLabel}
-      className={cx(styles.root, className)}
+      className={cx(styles.root, gapStyle, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       {keyedParts.map(part => (
-        <kbd className={styles.key} key={part.id}>
+        <kbd className={kbdRecipe({size})} key={part.id}>
           {part.display}
         </kbd>
       ))}

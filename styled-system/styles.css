@@ -402,17 +402,6 @@
     --silver-colors-rose-800: #9f1239;
     --silver-colors-rose-900: #881337;
     --silver-colors-rose-950: #4c0519;
-    --silver-colors-pink-50: #fdf2f8;
-    --silver-colors-pink-100: #fce7f3;
-    --silver-colors-pink-200: #fbcfe8;
-    --silver-colors-pink-300: #f9a8d4;
-    --silver-colors-pink-400: #f472b6;
-    --silver-colors-pink-500: #ec4899;
-    --silver-colors-pink-600: #db2777;
-    --silver-colors-pink-700: #be185d;
-    --silver-colors-pink-800: #9d174d;
-    --silver-colors-pink-900: #831843;
-    --silver-colors-pink-950: #500724;
     --silver-colors-fuchsia-50: #fdf4ff;
     --silver-colors-fuchsia-100: #fae8ff;
     --silver-colors-fuchsia-200: #f5d0fe;
@@ -424,17 +413,6 @@
     --silver-colors-fuchsia-800: #86198f;
     --silver-colors-fuchsia-900: #701a75;
     --silver-colors-fuchsia-950: #4a044e;
-    --silver-colors-purple-50: #faf5ff;
-    --silver-colors-purple-100: #f3e8ff;
-    --silver-colors-purple-200: #e9d5ff;
-    --silver-colors-purple-300: #d8b4fe;
-    --silver-colors-purple-400: #c084fc;
-    --silver-colors-purple-500: #a855f7;
-    --silver-colors-purple-600: #9333ea;
-    --silver-colors-purple-700: #7e22ce;
-    --silver-colors-purple-800: #6b21a8;
-    --silver-colors-purple-900: #581c87;
-    --silver-colors-purple-950: #3b0764;
     --silver-colors-violet-50: #f5f3ff;
     --silver-colors-violet-100: #ede9fe;
     --silver-colors-violet-200: #ddd6fe;
@@ -468,17 +446,6 @@
     --silver-colors-sky-800: #075985;
     --silver-colors-sky-900: #0c4a6e;
     --silver-colors-sky-950: #082f49;
-    --silver-colors-cyan-50: #ecfeff;
-    --silver-colors-cyan-100: #cffafe;
-    --silver-colors-cyan-200: #a5f3fc;
-    --silver-colors-cyan-300: #67e8f9;
-    --silver-colors-cyan-400: #22d3ee;
-    --silver-colors-cyan-500: #06b6d4;
-    --silver-colors-cyan-600: #0891b2;
-    --silver-colors-cyan-700: #0e7490;
-    --silver-colors-cyan-800: #155e75;
-    --silver-colors-cyan-900: #164e63;
-    --silver-colors-cyan-950: #083344;
     --silver-colors-emerald-50: #ecfdf5;
     --silver-colors-emerald-100: #d1fae5;
     --silver-colors-emerald-200: #a7f3d0;
@@ -512,17 +479,6 @@
     --silver-colors-amber-800: #92400e;
     --silver-colors-amber-900: #78350f;
     --silver-colors-amber-950: #451a03;
-    --silver-colors-orange-50: #fff7ed;
-    --silver-colors-orange-100: #ffedd5;
-    --silver-colors-orange-200: #fed7aa;
-    --silver-colors-orange-300: #fdba74;
-    --silver-colors-orange-400: #fb923c;
-    --silver-colors-orange-500: #f97316;
-    --silver-colors-orange-600: #ea580c;
-    --silver-colors-orange-700: #c2410c;
-    --silver-colors-orange-800: #9a3412;
-    --silver-colors-orange-900: #7c2d12;
-    --silver-colors-orange-950: #431407;
     --silver-colors-neutral-50: #fafafa;
     --silver-colors-neutral-100: #f5f5f5;
     --silver-colors-neutral-200: #e5e5e5;
@@ -556,17 +512,6 @@
     --silver-colors-zinc-800: #27272a;
     --silver-colors-zinc-900: #18181b;
     --silver-colors-zinc-950: #09090b;
-    --silver-colors-gray-50: #f9fafb;
-    --silver-colors-gray-100: #f3f4f6;
-    --silver-colors-gray-200: #e5e7eb;
-    --silver-colors-gray-300: #d1d5db;
-    --silver-colors-gray-400: #9ca3af;
-    --silver-colors-gray-500: #6b7280;
-    --silver-colors-gray-600: #4b5563;
-    --silver-colors-gray-700: #374151;
-    --silver-colors-gray-800: #1f2937;
-    --silver-colors-gray-900: #111827;
-    --silver-colors-gray-950: #030712;
     --silver-colors-slate-50: #f8fafc;
     --silver-colors-slate-100: #f1f5f9;
     --silver-colors-slate-200: #e2e8f0;
@@ -578,36 +523,27 @@
     --silver-colors-slate-800: #1e293b;
     --silver-colors-slate-900: #0f172a;
     --silver-colors-slate-950: #020617;
-    --silver-colors-silver-primary-50: #e6ecf0;
-    --silver-colors-silver-primary-100: #d0dbe3;
-    --silver-colors-silver-primary-200: #a8bccb;
-    --silver-colors-silver-primary-300: #7a9ab0;
-    --silver-colors-silver-primary-400: #5d819b;
-    --silver-colors-silver-primary-500: #547A95;
-    --silver-colors-silver-primary-600: #45647a;
-    --silver-colors-silver-primary-700: #374f61;
-    --silver-colors-silver-primary-800: #283b48;
-    --silver-colors-silver-primary-900: #1b2730;
-    --silver-colors-silver-neutral-50: #e9ebee;
-    --silver-colors-silver-neutral-100: #d5d9de;
-    --silver-colors-silver-neutral-200: #b1bac3;
-    --silver-colors-silver-neutral-300: #8a97a4;
-    --silver-colors-silver-neutral-400: #708090;
-    --silver-colors-silver-neutral-500: #6A7B8C;
-    --silver-colors-silver-neutral-600: #576573;
-    --silver-colors-silver-neutral-700: #45505b;
-    --silver-colors-silver-neutral-800: #333b43;
-    --silver-colors-silver-neutral-900: #22272d;
-    --silver-colors-green-50: #e4f3e8;
-    --silver-colors-green-100: #cbe9d3;
-    --silver-colors-green-200: #a3d7b1;
-    --silver-colors-green-300: #7ac58e;
-    --silver-colors-green-400: #6abe80;
-    --silver-colors-green-500: #65c37e;
-    --silver-colors-green-600: #44af60;
-    --silver-colors-green-700: #368a4c;
-    --silver-colors-green-800: #286638;
-    --silver-colors-green-900: #1b4426;
+    --silver-colors-gray-50: #f1f4f7;
+    --silver-colors-gray-100: #d5d9de;
+    --silver-colors-gray-200: #b1bac3;
+    --silver-colors-gray-300: #8a97a4;
+    --silver-colors-gray-400: #708090;
+    --silver-colors-gray-500: #6a7b8c;
+    --silver-colors-gray-600: #576573;
+    --silver-colors-gray-700: #45505b;
+    --silver-colors-gray-800: #333b43;
+    --silver-colors-gray-900: #22272d;
+    --silver-colors-gray-950: #030712;
+    --silver-colors-green-50: #e0f6e2;
+    --silver-colors-green-100: #c4eec8;
+    --silver-colors-green-200: #91e098;
+    --silver-colors-green-300: #54cf60;
+    --silver-colors-green-400: #33b33f;
+    --silver-colors-green-500: #26a332;
+    --silver-colors-green-600: #1f8629;
+    --silver-colors-green-700: #196a21;
+    --silver-colors-green-800: #124e18;
+    --silver-colors-green-900: #0c3410;
     --silver-colors-green-950: #052e16;
     --silver-colors-red-50: #fceef0;
     --silver-colors-red-100: #f9d1d8;
@@ -620,38 +556,82 @@
     --silver-colors-red-800: #6b2e38;
     --silver-colors-red-900: #562b32;
     --silver-colors-red-950: #450a0a;
-    --silver-colors-yellow-50: #fcf8ee;
-    --silver-colors-yellow-100: #f9edcc;
-    --silver-colors-yellow-200: #efe1be;
-    --silver-colors-yellow-300: #dfc990;
-    --silver-colors-yellow-400: #d4b054;
-    --silver-colors-yellow-500: #d9a626;
-    --silver-colors-yellow-600: #ab872b;
-    --silver-colors-yellow-700: #846c2e;
-    --silver-colors-yellow-800: #6b5a2e;
-    --silver-colors-yellow-900: #51461f;
+    --silver-colors-yellow-50: #fdf3da;
+    --silver-colors-yellow-100: #fbe7b7;
+    --silver-colors-yellow-200: #f8d47b;
+    --silver-colors-yellow-300: #f4bd37;
+    --silver-colors-yellow-400: #efad0d;
+    --silver-colors-yellow-500: #f0aa00;
+    --silver-colors-yellow-600: #c58b00;
+    --silver-colors-yellow-700: #9c6e00;
+    --silver-colors-yellow-800: #735200;
+    --silver-colors-yellow-900: #4d3600;
     --silver-colors-yellow-950: #422006;
-    --silver-colors-blue-50: #eef5fc;
-    --silver-colors-blue-100: #cce6fe;
-    --silver-colors-blue-200: #bed5ef;
-    --silver-colors-blue-300: #90b6df;
-    --silver-colors-blue-400: #5492d4;
-    --silver-colors-blue-500: #267dd9;
-    --silver-colors-blue-600: #2b69ab;
-    --silver-colors-blue-700: #2e5884;
-    --silver-colors-blue-800: #2e4b6b;
-    --silver-colors-blue-900: #1a3d5d;
+    --silver-colors-blue-50: #dae9fd;
+    --silver-colors-blue-100: #bad6fb;
+    --silver-colors-blue-200: #87b8f9;
+    --silver-colors-blue-300: #5b9ef6;
+    --silver-colors-blue-400: #3487f4;
+    --silver-colors-blue-500: #4a98ff;
+    --silver-colors-blue-600: #0f76ff;
+    --silver-colors-blue-700: #005cd6;
+    --silver-colors-blue-800: #00449e;
+    --silver-colors-blue-900: #002d69;
     --silver-colors-blue-950: #172554;
-    --silver-colors-teal-50: #e3f5f5;
-    --silver-colors-teal-100: #cbedec;
-    --silver-colors-teal-200: #a6e0de;
-    --silver-colors-teal-300: #8ed7d5;
-    --silver-colors-teal-400: #61c7c5;
-    --silver-colors-teal-500: #89dbd9;
-    --silver-colors-teal-600: #58ccc9;
-    --silver-colors-teal-700: #36b1ae;
-    --silver-colors-teal-800: #288381;
-    --silver-colors-teal-900: #1b5756;
+    --silver-colors-cyan-50: #dff2f8;
+    --silver-colors-cyan-100: #c3e7f1;
+    --silver-colors-cyan-200: #92d3e6;
+    --silver-colors-cyan-300: #60bfdb;
+    --silver-colors-cyan-400: #48b5d5;
+    --silver-colors-cyan-500: #40b9dd;
+    --silver-colors-cyan-600: #23a1c6;
+    --silver-colors-cyan-700: #1c809d;
+    --silver-colors-cyan-800: #155e74;
+    --silver-colors-cyan-900: #0e3f4d;
+    --silver-colors-cyan-950: #083344;
+    --silver-colors-orange-50: #fdeada;
+    --silver-colors-orange-100: #fbd7b8;
+    --silver-colors-orange-200: #f7b57c;
+    --silver-colors-orange-300: #f38e38;
+    --silver-colors-orange-400: #eb740e;
+    --silver-colors-orange-500: #eb6d02;
+    --silver-colors-orange-600: #c15902;
+    --silver-colors-orange-700: #994701;
+    --silver-colors-orange-800: #713401;
+    --silver-colors-orange-900: #4b2301;
+    --silver-colors-orange-950: #431407;
+    --silver-colors-pink-50: #f7e0ef;
+    --silver-colors-pink-100: #efc5e0;
+    --silver-colors-pink-200: #e397c8;
+    --silver-colors-pink-300: #d76ab0;
+    --silver-colors-pink-400: #d256a5;
+    --silver-colors-pink-500: #d951a8;
+    --silver-colors-pink-600: #c92c90;
+    --silver-colors-pink-700: #9f2372;
+    --silver-colors-pink-800: #751a54;
+    --silver-colors-pink-900: #4e1138;
+    --silver-colors-pink-950: #500724;
+    --silver-colors-purple-50: #e2dbfd;
+    --silver-colors-purple-100: #c9bbfb;
+    --silver-colors-purple-200: #a289f9;
+    --silver-colors-purple-300: #8260f7;
+    --silver-colors-purple-400: #5f34f4;
+    --silver-colors-purple-500: #7952ff;
+    --silver-colors-purple-600: #4a15ff;
+    --silver-colors-purple-700: #3100db;
+    --silver-colors-purple-800: #2400a2;
+    --silver-colors-purple-900: #18006c;
+    --silver-colors-purple-950: #3b0764;
+    --silver-colors-teal-50: #dff8f7;
+    --silver-colors-teal-100: #c0f1ef;
+    --silver-colors-teal-200: #8be5e1;
+    --silver-colors-teal-300: #4ad7d1;
+    --silver-colors-teal-400: #29b9b3;
+    --silver-colors-teal-500: #1ca49e;
+    --silver-colors-teal-600: #178682;
+    --silver-colors-teal-700: #126b67;
+    --silver-colors-teal-800: #0d4f4c;
+    --silver-colors-teal-900: #093433;
     --silver-colors-teal-950: #042f2e;
     --silver-fonts-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --silver-fonts-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
@@ -674,20 +654,20 @@
     --silver-breakpoints-lg: 1024px;
     --silver-breakpoints-xl: 1280px;
     --silver-breakpoints-2xl: 1536px;
-    --silver-colors-primary: var(--silver-colors-silver-primary-500);
-    --silver-colors-primary-hover: var(--silver-colors-silver-primary-600);
-    --silver-colors-primary-active: var(--silver-colors-silver-primary-700);
-    --silver-colors-primary-subtle: var(--silver-colors-silver-primary-100);
+    --silver-colors-primary: var(--silver-colors-teal-500);
+    --silver-colors-primary-hover: var(--silver-colors-teal-600);
+    --silver-colors-primary-active: var(--silver-colors-teal-700);
+    --silver-colors-primary-subtle: var(--silver-colors-teal-100);
     --silver-colors-destructive: var(--silver-colors-red-600);
     --silver-colors-destructive-hover: var(--silver-colors-red-700);
     --silver-colors-destructive-active: var(--silver-colors-red-800);
     --silver-colors-destructive-fg: var(--silver-colors-white);
-    --silver-colors-status-success-fg: #108627;
+    --silver-colors-status-success-fg: var(--silver-colors-green-600);
     --silver-colors-status-success-border: var(--silver-colors-green-600);
     --silver-colors-status-success-border-hover: var(--silver-colors-green-700);
     --silver-colors-status-success-solid: var(--silver-colors-green-600);
     --silver-colors-status-success-solid-fg: var(--silver-colors-white);
-    --silver-colors-status-error-fg: #d92644;
+    --silver-colors-status-error-fg: var(--silver-colors-red-500);
     --silver-colors-status-error-border: var(--silver-colors-red-600);
     --silver-colors-status-error-border-hover: var(--silver-colors-red-700);
     --silver-colors-status-error-solid: var(--silver-colors-red-600);
@@ -697,48 +677,48 @@
     --silver-colors-status-warning-border-hover: var(--silver-colors-yellow-600);
     --silver-colors-status-warning-solid: var(--silver-colors-yellow-500);
     --silver-colors-status-warning-solid-fg: var(--silver-colors-white);
-    --silver-colors-status-info-fg: #0164e0;
+    --silver-colors-status-info-fg: var(--silver-colors-blue-700);
     --silver-colors-status-info-solid: var(--silver-colors-primary);
     --silver-colors-status-info-solid-fg: var(--silver-colors-fg-on-primary);
-    --silver-colors-status-neutral-solid: var(--silver-colors-silver-neutral-500);
+    --silver-colors-status-neutral-solid: var(--silver-colors-gray-500);
     --silver-colors-status-neutral-solid-fg: var(--silver-colors-white);
-    --silver-colors-status-disabled-solid: var(--silver-colors-silver-neutral-400);
+    --silver-colors-status-disabled-solid: var(--silver-colors-gray-400);
     --silver-colors-status-disabled-solid-fg: var(--silver-colors-white);
     --silver-colors-presence-success: var(--silver-colors-green-500);
-    --silver-colors-presence-neutral: var(--silver-colors-silver-neutral-500);
+    --silver-colors-presence-neutral: var(--silver-colors-gray-500);
     --silver-colors-presence-error: var(--silver-colors-red-600);
-    --silver-colors-fg: var(--silver-colors-silver-neutral-900);
-    --silver-colors-fg-muted: var(--silver-colors-silver-neutral-600);
-    --silver-colors-fg-disabled: var(--silver-colors-silver-neutral-400);
+    --silver-colors-fg: var(--silver-colors-gray-900);
+    --silver-colors-fg-muted: var(--silver-colors-gray-600);
+    --silver-colors-fg-disabled: var(--silver-colors-gray-400);
     --silver-colors-fg-on-primary: var(--silver-colors-white);
-    --silver-colors-bg: #ffffff;
-    --silver-colors-bg-subtle: var(--silver-colors-silver-neutral-50);
-    --silver-colors-bg-hover: var(--silver-colors-silver-neutral-100);
+    --silver-colors-bg: var(--silver-colors-white);
+    --silver-colors-bg-subtle: var(--silver-colors-gray-50);
+    --silver-colors-bg-hover: var(--silver-colors-gray-100);
     --silver-colors-bg-selected: var(--silver-colors-primary-subtle);
     --silver-colors-bg-ghost-hover: rgba(0, 0, 0, 0.06);
     --silver-colors-bg-ghost-active: rgba(0, 0, 0, 0.1);
-    --silver-colors-border: var(--silver-colors-silver-neutral-100);
-    --silver-colors-border-emphasized: var(--silver-colors-silver-neutral-200);
-    --silver-colors-track: var(--silver-colors-silver-neutral-200);
-    --silver-colors-track-emphasized: var(--silver-colors-silver-neutral-300);
-    --silver-colors-track-disabled: var(--silver-colors-silver-neutral-300);
+    --silver-colors-border: var(--silver-colors-gray-100);
+    --silver-colors-border-emphasized: var(--silver-colors-gray-200);
+    --silver-colors-track: var(--silver-colors-gray-200);
+    --silver-colors-track-emphasized: var(--silver-colors-gray-300);
+    --silver-colors-track-disabled: var(--silver-colors-gray-300);
     --silver-colors-overlay-scrim: rgba(0, 0, 0, 0.45);
     --silver-colors-overlay-scrim-subtle: rgba(0, 0, 0, 0.35);
     --silver-colors-overlay-scrim-strong: rgba(0, 0, 0, 0.76);
-    --silver-colors-skeleton: var(--silver-colors-silver-neutral-100);
-    --silver-colors-skeleton-shimmer: var(--silver-colors-silver-neutral-50);
+    --silver-colors-skeleton: var(--silver-colors-gray-100);
+    --silver-colors-skeleton-shimmer: var(--silver-colors-gray-50);
     --silver-colors-surface-blue: var(--silver-colors-blue-100);
     --silver-colors-surface-blue-fg: var(--silver-colors-blue-800);
     --silver-colors-surface-blue-hover: var(--silver-colors-blue-200);
-    --silver-colors-surface-blue-accent: var(--silver-colors-blue-600);
+    --silver-colors-surface-blue-accent: var(--silver-colors-blue-700);
     --silver-colors-surface-cyan: var(--silver-colors-cyan-100);
     --silver-colors-surface-cyan-fg: var(--silver-colors-cyan-800);
     --silver-colors-surface-cyan-hover: var(--silver-colors-cyan-200);
     --silver-colors-surface-cyan-accent: var(--silver-colors-cyan-600);
-    --silver-colors-surface-gray: var(--silver-colors-silver-neutral-50);
-    --silver-colors-surface-gray-fg: var(--silver-colors-silver-neutral-900);
-    --silver-colors-surface-gray-hover: var(--silver-colors-silver-neutral-100);
-    --silver-colors-surface-gray-accent: var(--silver-colors-silver-neutral-600);
+    --silver-colors-surface-gray: var(--silver-colors-gray-50);
+    --silver-colors-surface-gray-fg: var(--silver-colors-gray-900);
+    --silver-colors-surface-gray-hover: var(--silver-colors-gray-100);
+    --silver-colors-surface-gray-accent: var(--silver-colors-gray-600);
     --silver-colors-surface-green: var(--silver-colors-green-100);
     --silver-colors-surface-green-fg: var(--silver-colors-green-900);
     --silver-colors-surface-green-hover: var(--silver-colors-green-200);
@@ -746,7 +726,7 @@
     --silver-colors-surface-orange: var(--silver-colors-orange-100);
     --silver-colors-surface-orange-fg: var(--silver-colors-orange-800);
     --silver-colors-surface-orange-hover: var(--silver-colors-orange-200);
-    --silver-colors-surface-orange-accent: var(--silver-colors-orange-600);
+    --silver-colors-surface-orange-accent: var(--silver-colors-orange-500);
     --silver-colors-surface-pink: var(--silver-colors-pink-100);
     --silver-colors-surface-pink-fg: var(--silver-colors-pink-800);
     --silver-colors-surface-pink-hover: var(--silver-colors-pink-200);
@@ -754,7 +734,7 @@
     --silver-colors-surface-purple: var(--silver-colors-purple-100);
     --silver-colors-surface-purple-fg: var(--silver-colors-purple-800);
     --silver-colors-surface-purple-hover: var(--silver-colors-purple-200);
-    --silver-colors-surface-purple-accent: var(--silver-colors-purple-600);
+    --silver-colors-surface-purple-accent: var(--silver-colors-purple-300);
     --silver-colors-surface-red: var(--silver-colors-red-100);
     --silver-colors-surface-red-fg: var(--silver-colors-red-800);
     --silver-colors-surface-red-hover: var(--silver-colors-red-200);
@@ -762,30 +742,30 @@
     --silver-colors-surface-teal: var(--silver-colors-teal-100);
     --silver-colors-surface-teal-fg: var(--silver-colors-teal-800);
     --silver-colors-surface-teal-hover: var(--silver-colors-teal-200);
-    --silver-colors-surface-teal-accent: var(--silver-colors-teal-700);
+    --silver-colors-surface-teal-accent: var(--silver-colors-teal-500);
     --silver-colors-surface-yellow: var(--silver-colors-yellow-100);
     --silver-colors-surface-yellow-fg: var(--silver-colors-yellow-800);
     --silver-colors-surface-yellow-hover: var(--silver-colors-yellow-200);
     --silver-colors-surface-yellow-accent: var(--silver-colors-yellow-600);
     --silver-colors-icon-primary: var(--silver-colors-fg);
     --silver-colors-icon-secondary: var(--silver-colors-fg-muted);
-    --silver-colors-icon-tertiary: var(--silver-colors-silver-neutral-500);
-    --silver-colors-icon-disabled: var(--silver-colors-silver-neutral-400);
+    --silver-colors-icon-tertiary: var(--silver-colors-gray-500);
+    --silver-colors-icon-disabled: var(--silver-colors-gray-400);
     --silver-colors-icon-accent: var(--silver-colors-primary);
     --silver-colors-icon-success: var(--silver-colors-status-success-fg);
     --silver-colors-icon-error: var(--silver-colors-status-error-fg);
     --silver-colors-icon-warning: var(--silver-colors-status-warning-fg);
     --silver-colors-icon-info: var(--silver-colors-status-info-fg);
-    --silver-colors-icon-blue: var(--silver-colors-blue-600);
+    --silver-colors-icon-blue: var(--silver-colors-blue-700);
     --silver-colors-icon-red: var(--silver-colors-red-600);
     --silver-colors-icon-green: var(--silver-colors-green-600);
-    --silver-colors-icon-gray: var(--silver-colors-silver-neutral-600);
+    --silver-colors-icon-gray: var(--silver-colors-gray-600);
     --silver-colors-icon-cyan: var(--silver-colors-cyan-600);
-    --silver-colors-icon-teal: var(--silver-colors-teal-600);
+    --silver-colors-icon-teal: var(--silver-colors-teal-500);
     --silver-colors-icon-yellow: var(--silver-colors-yellow-500);
-    --silver-colors-icon-orange: var(--silver-colors-orange-600);
+    --silver-colors-icon-orange: var(--silver-colors-orange-500);
     --silver-colors-icon-pink: var(--silver-colors-pink-600);
-    --silver-colors-icon-purple: var(--silver-colors-purple-600);
+    --silver-colors-icon-purple: var(--silver-colors-purple-700);
     --silver-sizes-component-sm: var(--silver-sizes-8);
     --silver-sizes-component-md: var(--silver-sizes-10);
     --silver-sizes-component-lg: var(--silver-sizes-12);
@@ -826,38 +806,38 @@
     --silver-colors-status-warning-border: var(--silver-colors-yellow-400);
     --silver-colors-status-warning-border-hover: var(--silver-colors-yellow-300);
     --silver-colors-status-warning-solid: var(--silver-colors-yellow-400);
-    --silver-colors-status-neutral-solid: var(--silver-colors-silver-neutral-400);
-    --silver-colors-status-disabled-solid: var(--silver-colors-silver-neutral-600);
+    --silver-colors-status-neutral-solid: var(--silver-colors-gray-400);
+    --silver-colors-status-disabled-solid: var(--silver-colors-gray-600);
     --silver-colors-presence-success: var(--silver-colors-green-400);
-    --silver-colors-presence-neutral: var(--silver-colors-silver-neutral-400);
+    --silver-colors-presence-neutral: var(--silver-colors-gray-400);
     --silver-colors-presence-error: var(--silver-colors-red-400);
-    --silver-colors-fg: var(--silver-colors-silver-neutral-50);
-    --silver-colors-fg-muted: var(--silver-colors-silver-neutral-400);
-    --silver-colors-fg-disabled: var(--silver-colors-silver-neutral-600);
-    --silver-colors-bg: var(--silver-colors-silver-neutral-900);
-    --silver-colors-bg-subtle: var(--silver-colors-silver-neutral-800);
-    --silver-colors-bg-hover: var(--silver-colors-silver-neutral-700);
+    --silver-colors-fg: var(--silver-colors-gray-50);
+    --silver-colors-fg-muted: var(--silver-colors-gray-400);
+    --silver-colors-fg-disabled: var(--silver-colors-gray-600);
+    --silver-colors-bg: var(--silver-colors-gray-900);
+    --silver-colors-bg-subtle: var(--silver-colors-gray-800);
+    --silver-colors-bg-hover: var(--silver-colors-gray-700);
     --silver-colors-bg-ghost-hover: rgba(255, 255, 255, 0.08);
     --silver-colors-bg-ghost-active: rgba(255, 255, 255, 0.12);
-    --silver-colors-border: var(--silver-colors-silver-neutral-700);
-    --silver-colors-border-emphasized: var(--silver-colors-silver-neutral-600);
-    --silver-colors-track: var(--silver-colors-silver-neutral-700);
-    --silver-colors-track-emphasized: var(--silver-colors-silver-neutral-600);
-    --silver-colors-track-disabled: var(--silver-colors-silver-neutral-700);
-    --silver-colors-skeleton: var(--silver-colors-silver-neutral-600);
-    --silver-colors-skeleton-shimmer: var(--silver-colors-silver-neutral-500);
+    --silver-colors-border: var(--silver-colors-gray-700);
+    --silver-colors-border-emphasized: var(--silver-colors-gray-600);
+    --silver-colors-track: var(--silver-colors-gray-700);
+    --silver-colors-track-emphasized: var(--silver-colors-gray-600);
+    --silver-colors-track-disabled: var(--silver-colors-gray-700);
+    --silver-colors-skeleton: var(--silver-colors-gray-600);
+    --silver-colors-skeleton-shimmer: var(--silver-colors-gray-500);
     --silver-colors-surface-blue: var(--silver-colors-blue-900);
     --silver-colors-surface-blue-fg: var(--silver-colors-blue-200);
     --silver-colors-surface-blue-hover: var(--silver-colors-blue-800);
-    --silver-colors-surface-blue-accent: var(--silver-colors-blue-400);
+    --silver-colors-surface-blue-accent: var(--silver-colors-blue-500);
     --silver-colors-surface-cyan: var(--silver-colors-cyan-900);
     --silver-colors-surface-cyan-fg: var(--silver-colors-cyan-200);
     --silver-colors-surface-cyan-hover: var(--silver-colors-cyan-800);
-    --silver-colors-surface-cyan-accent: var(--silver-colors-cyan-400);
-    --silver-colors-surface-gray: var(--silver-colors-silver-neutral-800);
-    --silver-colors-surface-gray-fg: var(--silver-colors-silver-neutral-100);
-    --silver-colors-surface-gray-hover: var(--silver-colors-silver-neutral-700);
-    --silver-colors-surface-gray-accent: var(--silver-colors-silver-neutral-400);
+    --silver-colors-surface-cyan-accent: var(--silver-colors-cyan-700);
+    --silver-colors-surface-gray: var(--silver-colors-gray-800);
+    --silver-colors-surface-gray-fg: var(--silver-colors-gray-100);
+    --silver-colors-surface-gray-hover: var(--silver-colors-gray-700);
+    --silver-colors-surface-gray-accent: var(--silver-colors-gray-400);
     --silver-colors-surface-green: var(--silver-colors-green-900);
     --silver-colors-surface-green-fg: var(--silver-colors-green-200);
     --silver-colors-surface-green-hover: var(--silver-colors-green-800);
@@ -865,15 +845,15 @@
     --silver-colors-surface-orange: var(--silver-colors-orange-900);
     --silver-colors-surface-orange-fg: var(--silver-colors-orange-200);
     --silver-colors-surface-orange-hover: var(--silver-colors-orange-800);
-    --silver-colors-surface-orange-accent: var(--silver-colors-orange-400);
+    --silver-colors-surface-orange-accent: var(--silver-colors-orange-700);
     --silver-colors-surface-pink: var(--silver-colors-pink-900);
     --silver-colors-surface-pink-fg: var(--silver-colors-pink-200);
     --silver-colors-surface-pink-hover: var(--silver-colors-pink-800);
-    --silver-colors-surface-pink-accent: var(--silver-colors-pink-400);
+    --silver-colors-surface-pink-accent: var(--silver-colors-pink-600);
     --silver-colors-surface-purple: var(--silver-colors-purple-900);
     --silver-colors-surface-purple-fg: var(--silver-colors-purple-200);
     --silver-colors-surface-purple-hover: var(--silver-colors-purple-800);
-    --silver-colors-surface-purple-accent: var(--silver-colors-purple-400);
+    --silver-colors-surface-purple-accent: var(--silver-colors-purple-500);
     --silver-colors-surface-red: var(--silver-colors-red-900);
     --silver-colors-surface-red-fg: var(--silver-colors-red-200);
     --silver-colors-surface-red-hover: var(--silver-colors-red-800);
@@ -881,13 +861,16 @@
     --silver-colors-surface-teal: var(--silver-colors-teal-900);
     --silver-colors-surface-teal-fg: var(--silver-colors-teal-200);
     --silver-colors-surface-teal-hover: var(--silver-colors-teal-800);
-    --silver-colors-surface-teal-accent: var(--silver-colors-teal-400);
+    --silver-colors-surface-teal-accent: var(--silver-colors-teal-700);
     --silver-colors-surface-yellow: var(--silver-colors-yellow-900);
     --silver-colors-surface-yellow-fg: var(--silver-colors-yellow-200);
     --silver-colors-surface-yellow-hover: var(--silver-colors-yellow-800);
-    --silver-colors-surface-yellow-accent: var(--silver-colors-yellow-400);
-    --silver-colors-icon-tertiary: var(--silver-colors-silver-neutral-500);
-    --silver-colors-icon-disabled: var(--silver-colors-silver-neutral-600)
+    --silver-colors-surface-yellow-accent: var(--silver-colors-yellow-700);
+    --silver-colors-icon-tertiary: var(--silver-colors-gray-500);
+    --silver-colors-icon-disabled: var(--silver-colors-gray-600);
+    --silver-colors-icon-blue: var(--silver-colors-blue-500);
+    --silver-colors-icon-cyan: var(--silver-colors-cyan-500);
+    --silver-colors-icon-pink: var(--silver-colors-pink-500)
 }
 
   @keyframes spin {
@@ -936,6 +919,38 @@
 
   .silver-all_unset {
     all: unset;
+}
+
+  .silver---silver-text-color_token\(colors\.surface\.red\.fg\) {
+    --silver-text-color: var(--silver-colors-surface-red-fg);
+}
+
+  .silver---silver-text-color-muted_token\(colors\.surface\.red\.fg\) {
+    --silver-text-color-muted: var(--silver-colors-surface-red-fg);
+}
+
+  .silver---silver-text-color_token\(colors\.surface\.blue\.fg\) {
+    --silver-text-color: var(--silver-colors-surface-blue-fg);
+}
+
+  .silver---silver-text-color-muted_token\(colors\.surface\.blue\.fg\) {
+    --silver-text-color-muted: var(--silver-colors-surface-blue-fg);
+}
+
+  .silver---silver-text-color_token\(colors\.surface\.green\.fg\) {
+    --silver-text-color: var(--silver-colors-surface-green-fg);
+}
+
+  .silver---silver-text-color-muted_token\(colors\.surface\.green\.fg\) {
+    --silver-text-color-muted: var(--silver-colors-surface-green-fg);
+}
+
+  .silver---silver-text-color_token\(colors\.surface\.yellow\.fg\) {
+    --silver-text-color: var(--silver-colors-surface-yellow-fg);
+}
+
+  .silver---silver-text-color-muted_token\(colors\.surface\.yellow\.fg\) {
+    --silver-text-color-muted: var(--silver-colors-surface-yellow-fg);
 }
 
   .silver---breadcrumb-separator-display_flex {
@@ -1226,6 +1241,10 @@
     --spinner-size: var(--silver-sizes-icon-lg);
 }
 
+  .silver---spinner-size_2\.25rem {
+    --spinner-size: 2.25rem;
+}
+
   .silver---silver-text-color_currentColor {
     --silver-text-color: currentColor;
 }
@@ -1418,16 +1437,16 @@
     background: var(--silver-colors-bg-hover);
 }
 
-  .silver-anim_pulse_1\.5s_ease-in-out_infinite {
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
   .silver-bg_status\.neutral\.solid {
     background: var(--silver-colors-status-neutral-solid);
 }
 
   .silver-bg_status\.disabled\.solid {
     background: var(--silver-colors-status-disabled-solid);
+}
+
+  .silver-anim_pulse_1\.5s_ease-in-out_infinite {
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
   .silver-bg_fg\.onPrimary {
@@ -1782,8 +1801,16 @@
     gap: var(--silver-spacing-6);
 }
 
+  .silver-px_0\.5 {
+    padding-inline: var(--silver-spacing-0\.5);
+}
+
   .silver-px_1 {
     padding-inline: var(--silver-spacing-1);
+}
+
+  .silver-px_1\.5 {
+    padding-inline: var(--silver-spacing-1\.5);
 }
 
   .silver-td_underline {
@@ -2027,6 +2054,22 @@
     border-top-right-radius: var(--silver-radii-lg);
 }
 
+  .silver-c_surface\.red\.fg {
+    color: var(--silver-colors-surface-red-fg);
+}
+
+  .silver-c_surface\.blue\.fg {
+    color: var(--silver-colors-surface-blue-fg);
+}
+
+  .silver-c_surface\.green\.fg {
+    color: var(--silver-colors-surface-green-fg);
+}
+
+  .silver-c_surface\.yellow\.fg {
+    color: var(--silver-colors-surface-yellow-fg);
+}
+
   .silver-bdr-b_lg {
     border-bottom-left-radius: var(--silver-radii-lg);
     border-bottom-right-radius: var(--silver-radii-lg);
@@ -2201,16 +2244,8 @@
     color: var(--silver-colors-status-error-solid-fg);
 }
 
-  .silver-c_surface\.blue\.fg {
-    color: var(--silver-colors-surface-blue-fg);
-}
-
   .silver-c_surface\.cyan\.fg {
     color: var(--silver-colors-surface-cyan-fg);
-}
-
-  .silver-c_surface\.green\.fg {
-    color: var(--silver-colors-surface-green-fg);
 }
 
   .silver-c_surface\.orange\.fg {
@@ -2225,16 +2260,8 @@
     color: var(--silver-colors-surface-purple-fg);
 }
 
-  .silver-c_surface\.red\.fg {
-    color: var(--silver-colors-surface-red-fg);
-}
-
   .silver-c_surface\.teal\.fg {
     color: var(--silver-colors-surface-teal-fg);
-}
-
-  .silver-c_surface\.yellow\.fg {
-    color: var(--silver-colors-surface-yellow-fg);
 }
 
   .silver-flex-d_row {
@@ -2634,6 +2661,10 @@
     cursor: inherit;
 }
 
+  .silver-fs_2xs {
+    font-size: var(--silver-font-sizes-2xs);
+}
+
   .silver-va_bottom {
     vertical-align: bottom;
 }
@@ -2809,13 +2840,18 @@
     page: 0;
 }
 
-  .silver-ai_baseline {
-    align-items: baseline;
-}
-
   .silver-trs-prop_width {
     --transition-prop: width;
     transition-property: width;
+}
+
+  .silver-trs-dur_0s {
+    --transition-duration: 0s;
+    transition-duration: 0s;
+}
+
+  .silver-ai_baseline {
+    align-items: baseline;
 }
 
   .silver-cg_4 {
@@ -3310,10 +3346,6 @@
     text-align: inherit;
 }
 
-  .silver-fs_2xs {
-    font-size: var(--silver-font-sizes-2xs);
-}
-
   .silver-min-w_0 {
     min-width: var(--silver-sizes-0);
 }
@@ -3710,14 +3742,6 @@
     max-width: var(--silver-sizes-full);
 }
 
-  .silver-max-w_80 {
-    max-width: var(--silver-sizes-80);
-}
-
-  .silver-min-w_5 {
-    min-width: var(--silver-sizes-5);
-}
-
   .silver-bd-b-w_emphasized {
     border-bottom-width: var(--silver-border-widths-emphasized);
 }
@@ -3728,6 +3752,26 @@
 
   .silver-bd-b-c_border {
     border-bottom-color: var(--silver-colors-border);
+}
+
+  .silver-min-w_4 {
+    min-width: var(--silver-sizes-4);
+}
+
+  .silver-h_4 {
+    height: var(--silver-sizes-4);
+}
+
+  .silver-min-w_5 {
+    min-width: var(--silver-sizes-5);
+}
+
+  .silver-min-w_6 {
+    min-width: var(--silver-sizes-6);
+}
+
+  .silver-max-w_80 {
+    max-width: var(--silver-sizes-80);
 }
 
   .silver-min-h_100\% {
@@ -3814,12 +3858,12 @@
     width: var(--silver-sizes-5);
 }
 
-  .silver-min-w_12 {
-    min-width: var(--silver-sizes-12);
-}
-
   .silver-w_40\% {
     width: 40%;
+}
+
+  .silver-min-w_12 {
+    min-width: var(--silver-sizes-12);
 }
 
   .silver-w_6 {
@@ -4030,10 +4074,6 @@
     height: 10rem;
 }
 
-  .silver-min-w_6 {
-    min-width: var(--silver-sizes-6);
-}
-
   .silver-min-h_12 {
     min-height: var(--silver-sizes-12);
 }
@@ -4052,10 +4092,6 @@
 
   .silver-pt_3 {
     padding-top: var(--silver-spacing-3);
-}
-
-  .silver-h_4 {
-    height: var(--silver-sizes-4);
 }
 
   .silver-max-lines_1 {
@@ -4088,6 +4124,14 @@
 
   .silver-min-h_10 {
     min-height: var(--silver-sizes-10);
+}
+
+  .silver-pt_1px {
+    padding-top: 1px;
+}
+
+  .silver-pb_0\.5 {
+    padding-bottom: var(--silver-spacing-0\.5);
 }
 
   .silver-w_anchor-size\(width\) {

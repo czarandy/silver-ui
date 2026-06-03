@@ -34,10 +34,30 @@ export const alertHeaderRecipe = cva({
       false: {},
     },
     status: {
-      error: {bg: 'surface.red'},
-      info: {bg: 'surface.blue'},
-      success: {bg: 'surface.green'},
-      warning: {bg: 'surface.yellow'},
+      error: {
+        bg: 'surface.red',
+        color: 'surface.red.fg',
+        '--silver-text-color': 'token(colors.surface.red.fg)',
+        '--silver-text-color-muted': 'token(colors.surface.red.fg)',
+      },
+      info: {
+        bg: 'surface.blue',
+        color: 'surface.blue.fg',
+        '--silver-text-color': 'token(colors.surface.blue.fg)',
+        '--silver-text-color-muted': 'token(colors.surface.blue.fg)',
+      },
+      success: {
+        bg: 'surface.green',
+        color: 'surface.green.fg',
+        '--silver-text-color': 'token(colors.surface.green.fg)',
+        '--silver-text-color-muted': 'token(colors.surface.green.fg)',
+      },
+      warning: {
+        bg: 'surface.yellow',
+        color: 'surface.yellow.fg',
+        '--silver-text-color': 'token(colors.surface.yellow.fg)',
+        '--silver-text-color-muted': 'token(colors.surface.yellow.fg)',
+      },
     },
   },
   compoundVariants: [

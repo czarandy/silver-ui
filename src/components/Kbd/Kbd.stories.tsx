@@ -2,6 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {css} from 'styled-system/css';
 import {Text} from '../Text';
 import {Kbd} from './Kbd';
+import {kbdRecipe} from './Kbd.recipe';
 
 const styles = {
   list: css({
@@ -18,6 +19,14 @@ const styles = {
   }),
 } as const;
 
+const styledKbd = css({
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '1',
+  flexShrink: 0,
+  verticalAlign: 'bottom',
+});
+
 const meta = {
   title: 'Components/Kbd',
   component: Kbd,
@@ -30,6 +39,31 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const Sizes: Story = {
+  render: () => (
+    <div className={styles.list}>
+      <div className={styles.row}>
+        <Text as="span" type="body">
+          Small
+        </Text>
+        <Kbd keys="mod+k" size="sm" />
+      </div>
+      <div className={styles.row}>
+        <Text as="span" type="body">
+          Medium (default)
+        </Text>
+        <Kbd keys="mod+k" size="md" />
+      </div>
+      <div className={styles.row}>
+        <Text as="span" type="body">
+          Large
+        </Text>
+        <Kbd keys="mod+k" size="lg" />
+      </div>
+    </div>
+  ),
+};
 
 export const SingleKey: Story = {
   args: {
@@ -67,14 +101,39 @@ export const AllSpecialKeys: Story = {
 };
 
 export const PlatformAdaptive: Story = {
-  args: {
-    keys: 'mod+k',
-  },
+  render: () => (
+    <div className={styles.list}>
+      <div className={styles.row}>
+        <Text as="span" type="body">
+          Mac
+        </Text>
+        <kbd aria-label="Command+K" className={styledKbd}>
+          <kbd className={kbdRecipe({size: 'md'})}>⌘</kbd>
+          <kbd className={kbdRecipe({size: 'md'})}>K</kbd>
+        </kbd>
+      </div>
+      <div className={styles.row}>
+        <Text as="span" type="body">
+          Non-Mac
+        </Text>
+        <kbd aria-label="Control+K" className={styledKbd}>
+          <kbd className={kbdRecipe({size: 'md'})}>Ctrl</kbd>
+          <kbd className={kbdRecipe({size: 'md'})}>K</kbd>
+        </kbd>
+      </div>
+      <div className={styles.row}>
+        <Text as="span" type="body">
+          Live (your platform)
+        </Text>
+        <Kbd keys="mod+k" />
+      </div>
+    </div>
+  ),
   parameters: {
     docs: {
       description: {
         story:
-          'The `mod` key renders as ⌘ (Command) on Mac and Ctrl on other platforms. Try viewing this story on different platforms to see the difference.',
+          'The `mod` key renders as ⌘ (Command) on Mac and Ctrl on other platforms.',
       },
     },
   },
