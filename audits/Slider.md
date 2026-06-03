@@ -12,7 +12,7 @@ Slider control supporting both single-value and range (dual-thumb) modes. Featur
 
 ### High
 
-- **`emitChange` depends on the full `props` spread, causing stale closures.** The `emitChange` callback (line 431) lists `[isRange, props]` in its dependency array. Because `props` is the rest-spread object from destructuring, it is a new object on every render. This means `emitChange` is recreated every render, which cascades to `updateValue`, `handlePointerDown`, `handlePointerMove`, and `handleKeyDown` all being recreated. While functionally correct, it defeats memoization. The fix is to extract `props.onChange` and `props.onChangeEnd` into stable refs or named variables and depend on those instead. The same issue affects `emitChangeEnd`.
+None
 
 ### Medium
 
@@ -33,7 +33,6 @@ Slider control supporting both single-value and range (dual-thumb) modes. Featur
 
 ## Recommendations
 
-1. Extract `onChange` and `onChangeEnd` from the rest `props` into named variables and reference them directly in `emitChange`/`emitChangeEnd` dependency arrays. This eliminates unnecessary re-creation of the entire callback chain on every render.
-2. Assign `id={inputId}` to the first thumb even in range mode so the Field label click focuses it.
-3. Add a story for `onChangeEnd` demonstrating the live-change vs. commit distinction.
-4. Add a test for `description` rendering and `ref` forwarding.
+1. Assign `id={inputId}` to the first thumb even in range mode so the Field label click focuses it.
+2. Add a story for `onChangeEnd` demonstrating the live-change vs. commit distinction.
+3. Add a test for `description` rendering and `ref` forwarding.

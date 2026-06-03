@@ -39,4 +39,22 @@ describe('Field', () => {
     expect(field).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
+
+  it('does not pass htmlFor to span when labelAs is span', () => {
+    const {container} = render(
+      <Field
+        inputId="group1"
+        label="Options"
+        labelAs="span"
+        labelId="opt-label">
+        <div aria-labelledby="opt-label" role="radiogroup" />
+      </Field>,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const labelSpan = container.querySelector('#opt-label');
+    expect(labelSpan).not.toBeNull();
+    expect(labelSpan?.tagName).toBe('SPAN');
+    expect(labelSpan).not.toHaveAttribute('for');
+  });
 });

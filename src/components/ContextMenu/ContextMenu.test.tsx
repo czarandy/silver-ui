@@ -1,4 +1,4 @@
-import {fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {Divider} from '../Divider';
@@ -223,5 +223,60 @@ describe('ContextMenu', () => {
     fireEvent.keyDown(screen.getByRole('menu', {hidden: true}), {key: 'Enter'});
 
     expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('clamps menu position to stay within the viewport', () => {
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      value: 800,
+    });
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      value: 600,
+    });
+
+    render(
+      <ContextMenu items={[{label: 'Copy'}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    const menu = screen.getByRole('menu', {hidden: true});
+    vi.spyOn(menu, 'getBoundingClientRect').mockReturnValue({
+      bottom: 0,
+      height: 200,
+      left: 0,
+      right: 0,
+      toJSON: () => {},
+      top: 0,
+      width: 160,
+      x: 0,
+      y: 0,
+    });
+
+    const originalRAF = window.requestAnimationFrame;
+    const pendingCallbacks: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = (cb: FrameRequestCallback) => {
+      pendingCallbacks.push(cb);
+      return pendingCallbacks.length;
+    };
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'), {
+      clientX: 750,
+      clientY: 500,
+    });
+
+    window.requestAnimationFrame = originalRAF;
+
+    act(() => {
+      for (const cb of pendingCallbacks) {
+        cb(0);
+      }
+    });
+
+    expect(menu).toHaveStyle({
+      left: `${800 - 160 - 4}px`,
+      top: `${600 - 200 - 4}px`,
+    });
   });
 });

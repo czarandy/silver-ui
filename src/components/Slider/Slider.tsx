@@ -355,6 +355,8 @@ export function Slider({
   const isRange = Array.isArray(value);
   const isHorizontal = orientation === 'horizontal';
   const values = useMemo(() => (isRange ? value : [value]), [isRange, value]);
+  const onChange = props.onChange;
+  const onChangeEnd = 'onChangeEnd' in props ? props.onChangeEnd : undefined;
   const minStepsBetweenThumbs =
     isRange && 'minStepsBetweenThumbs' in props
       ? (props.minStepsBetweenThumbs ?? 0)
@@ -432,29 +434,27 @@ export function Slider({
     (nextValues: number[]) => {
       pendingValuesRef.current = nextValues;
       if (isRange) {
-        (props.onChange as SliderRangeProps['onChange'])(
+        (onChange as SliderRangeProps['onChange'])(
           nextValues as [number, number],
         );
       } else {
-        (props.onChange as SliderSingleProps['onChange'])(nextValues[0]);
+        (onChange as SliderSingleProps['onChange'])(nextValues[0]);
       }
     },
-    [isRange, props],
+    [isRange, onChange],
   );
 
   const emitChangeEnd = useCallback(
     (nextValues: number[]) => {
       if (isRange) {
-        (props.onChangeEnd as SliderRangeProps['onChangeEnd'])?.(
+        (onChangeEnd as SliderRangeProps['onChangeEnd'])?.(
           nextValues as [number, number],
         );
       } else {
-        (props.onChangeEnd as SliderSingleProps['onChangeEnd'])?.(
-          nextValues[0],
-        );
+        (onChangeEnd as SliderSingleProps['onChangeEnd'])?.(nextValues[0]);
       }
     },
-    [isRange, props],
+    [isRange, onChangeEnd],
   );
 
   const updateValue = useCallback(

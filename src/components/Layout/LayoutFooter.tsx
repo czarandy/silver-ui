@@ -5,10 +5,7 @@ import {layoutRegionRecipe} from './Layout.recipe';
 import {useLayoutDivider} from './LayoutContext';
 import type {SpacingStep} from './types';
 
-/**
- * Footer landmark region within a Layout with structured action slots.
- */
-export interface LayoutFooterProps {
+interface LayoutFooterBaseProps {
   /**
    * Additional CSS class names applied to the footer.
    */
@@ -30,13 +27,31 @@ export interface LayoutFooterProps {
    */
   padding?: SpacingStep;
   /**
-   * Primary action button, rendered rightmost.
-   */
-  primaryButton: ReactNode;
-  /**
    * Ref forwarded to the footer element.
    */
   ref?: Ref<HTMLElement>;
+  /**
+   * Inline styles applied to the footer.
+   */
+  style?: CSSProperties;
+}
+
+interface LayoutFooterCustomProps extends LayoutFooterBaseProps {
+  /**
+   * Custom footer content rendered inside the footer shell.
+   */
+  children: ReactNode;
+  primaryButton?: never;
+  secondaryButton?: never;
+  startContent?: never;
+}
+
+interface LayoutFooterActionsProps extends LayoutFooterBaseProps {
+  children?: never;
+  /**
+   * Primary action button, rendered rightmost.
+   */
+  primaryButton: ReactNode;
   /**
    * Secondary action button, rendered left of the primary button.
    */
@@ -45,11 +60,15 @@ export interface LayoutFooterProps {
    * Content rendered at the start (left) of the footer.
    */
   startContent?: ReactNode;
-  /**
-   * Inline styles applied to the footer.
-   */
-  style?: CSSProperties;
 }
+
+/**
+ * Footer landmark region within a Layout. Use action slots for the standard
+ * footer layout, or children for a custom footer inside the same shell.
+ */
+export type LayoutFooterProps =
+  | LayoutFooterActionsProps
+  | LayoutFooterCustomProps;
 
 const styles = {
   root: css({
@@ -66,6 +85,9 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: '3',
+  }),
+  customInner: css({
+    boxSizing: 'border-box',
   }),
   start: css({
     display: 'flex',
@@ -84,9 +106,10 @@ const styles = {
 };
 
 /**
- * Footer landmark region within a Layout with structured action slots.
+ * Footer landmark region within a Layout.
  */
 export function LayoutFooter({
+  children,
   className,
   'data-testid': dataTestId,
   height,
@@ -101,6 +124,7 @@ export function LayoutFooter({
   const dividerContext = useLayoutDivider();
   const hasDivider = dividerContext?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
+  const isCustom = children != null;
 
   return (
     <footer
@@ -110,14 +134,24 @@ export function LayoutFooter({
       data-testid={dataTestId}
       ref={ref}
       style={rootStyle}>
-      <div className={cx(styles.inner, layoutRegionRecipe({padding}))}>
-        {startContent != null ? (
-          <div className={styles.start}>{startContent}</div>
-        ) : null}
-        <div className={styles.actions}>
-          {secondaryButton}
-          {primaryButton}
-        </div>
+      <div
+        className={cx(
+          isCustom ? styles.customInner : styles.inner,
+          layoutRegionRecipe({padding}),
+        )}>
+        {isCustom ? (
+          children
+        ) : (
+          <>
+            {startContent != null ? (
+              <div className={styles.start}>{startContent}</div>
+            ) : null}
+            <div className={styles.actions}>
+              {secondaryButton}
+              {primaryButton}
+            </div>
+          </>
+        )}
       </div>
     </footer>
   );

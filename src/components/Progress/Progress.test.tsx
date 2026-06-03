@@ -107,4 +107,45 @@ describe('Progress', () => {
     render(<Progress hasValueLabel label="Progress" max={0} value={0} />);
     expect(screen.getByText('0%')).toBeInTheDocument();
   });
+
+  it('applies variant classes to the fill', () => {
+    const {rerender} = render(
+      <Progress label="Progress" value={50} variant="success" />,
+    );
+    // eslint-disable-next-line testing-library/no-node-access -- verifying fill element class
+    const fill = screen.getByRole('progressbar').firstElementChild;
+    if (fill == null) {
+      throw new Error('Expected progress fill to render');
+    }
+    expect(fill).toHaveClass('silver-bg_status.success.solid');
+
+    rerender(<Progress label="Progress" value={50} variant="error" />);
+    expect(fill).toHaveClass('silver-bg_status.error.solid');
+
+    rerender(<Progress label="Progress" value={50} variant="warning" />);
+    expect(fill).toHaveClass('silver-bg_status.warning.solid');
+
+    rerender(<Progress label="Progress" value={50} variant="neutral" />);
+    expect(fill).toHaveClass('silver-bg_status.neutral.solid');
+
+    rerender(<Progress label="Progress" value={50} />);
+    expect(fill).toHaveClass('silver-bg_status.info.solid');
+  });
+
+  it('applies disabled styling and aria-disabled', () => {
+    render(<Progress hasValueLabel isDisabled label="Progress" value={50} />);
+
+    const bar = screen.getByRole('progressbar');
+    expect(bar).toHaveAttribute('aria-disabled', 'true');
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying fill element class
+    const fill = bar.firstElementChild;
+    if (fill == null) {
+      throw new Error('Expected progress fill to render');
+    }
+    expect(fill).toHaveClass('silver-bg_status.disabled.solid');
+
+    expect(screen.getByText('Progress')).toHaveClass('silver-c_fg.disabled');
+    expect(screen.getByText('50%')).toHaveClass('silver-c_fg.disabled');
+  });
 });

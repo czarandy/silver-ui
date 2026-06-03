@@ -289,6 +289,27 @@ describe('LayoutFooter', () => {
     );
   });
 
+  it('renders custom children while preserving the layout divider shell', () => {
+    render(
+      <Layout
+        content={<LayoutContent>Content</LayoutContent>}
+        footer={
+          <LayoutFooter data-testid="footer">
+            <div data-testid="custom-footer">Custom footer</div>
+          </LayoutFooter>
+        }
+      />,
+    );
+
+    expect(screen.getByTestId('custom-footer')).toHaveTextContent(
+      'Custom footer',
+    );
+    expect(screen.getByTestId('footer')).toHaveAttribute(
+      'data-divider',
+      'true',
+    );
+  });
+
   it('forwards className, style, ref, and data-testid', () => {
     const ref = vi.fn<(element: HTMLElement | null) => void>();
 

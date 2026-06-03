@@ -1,7 +1,8 @@
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Heading, type HeadingLevel, Text} from '../Text';
+import {emptyStateRecipe} from './EmptyState.recipe';
 
 export interface EmptyStateProps {
   /**
@@ -49,22 +50,6 @@ export interface EmptyStateProps {
 }
 
 const styles = {
-  root: css({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    gap: '4',
-    w: 'full',
-    px: '6',
-    py: '8',
-  }),
-  compact: css({
-    gap: '2',
-    px: '4',
-    py: '4',
-  }),
   illustration: css({
     display: 'inline-flex',
     color: 'fg.muted',
@@ -90,9 +75,6 @@ const styles = {
     gap: '2',
     mt: '1',
   }),
-  actionsCompact: css({
-    flexDirection: 'column',
-  }),
 } as const;
 
 /**
@@ -110,13 +92,12 @@ export function EmptyState({
   style,
   title,
 }: EmptyStateProps): React.JSX.Element {
+  const headingId = useId();
+
   return (
     <div
-      className={cx(
-        styles.root,
-        isCompact ? styles.compact : undefined,
-        className,
-      )}
+      aria-labelledby={headingId}
+      className={cx(emptyStateRecipe({isCompact}), className)}
       data-testid={dataTestId}
       ref={ref}
       role="region"
@@ -127,22 +108,16 @@ export function EmptyState({
         </div>
       ) : null}
       <div className={styles.text}>
-        <Heading level={headingLevel}>{title}</Heading>
+        <Heading id={headingId} level={headingLevel}>
+          {title}
+        </Heading>
         {description != null ? (
           <Text as="p" color="secondary">
             {description}
           </Text>
         ) : null}
       </div>
-      {actions != null ? (
-        <div
-          className={cx(
-            styles.actions,
-            isCompact ? styles.actionsCompact : undefined,
-          )}>
-          {actions}
-        </div>
-      ) : null}
+      {actions != null ? <div className={styles.actions}>{actions}</div> : null}
     </div>
   );
 }

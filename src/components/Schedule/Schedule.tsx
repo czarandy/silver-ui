@@ -89,24 +89,14 @@ interface EventRecord {
   value: ReadonlyArray<CalendarEvent>;
 }
 
-const eventLoaderCache = new WeakMap<
-  Exclude<ScheduleEventSource, ReadonlyArray<CalendarEvent>>,
-  Map<string, EventRecord>
->();
-
 function readAsyncEvents(
   loader: Exclude<ScheduleEventSource, ReadonlyArray<CalendarEvent>>,
   start: Instant,
   end: Instant,
+  cache: Map<string, EventRecord>,
 ): ReadonlyArray<CalendarEvent> {
-  let loaderCache = eventLoaderCache.get(loader);
-  if (loaderCache == null) {
-    loaderCache = new Map();
-    eventLoaderCache.set(loader, loaderCache);
-  }
-
   const key = `${start}:${end}`;
-  let record = loaderCache.get(key);
+  let record = cache.get(key);
   if (record == null) {
     record = {
       error: null,
@@ -129,7 +119,7 @@ function readAsyncEvents(
       status: 'pending',
       value: [],
     };
-    loaderCache.set(key, record);
+    cache.set(key, record);
   }
 
   if (record.status === 'pending') {
@@ -151,10 +141,11 @@ function resolveEvents(
   eventSource: ScheduleEventSource,
   range: ScheduleRange,
   timezoneID: string,
+  eventCache: Map<string, EventRecord>,
 ): ReadonlyArray<CalendarEvent> {
   const events =
     typeof eventSource === 'function'
-      ? readAsyncEvents(eventSource, range.start, range.end)
+      ? readAsyncEvents(eventSource, range.start, range.end, eventCache)
       : eventSource;
   return sortEvents(
     events.filter(event => eventOverlapsRange(event, range, timezoneID)),
@@ -177,6 +168,7 @@ function getRange<Options extends ScheduleViewOptions>(
 
 function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories,
+  eventCache,
   eventSource,
   highlightDate,
   isLoading,
@@ -190,6 +182,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   viewDate,
 }: {
   categories: ReadonlyArray<ScheduleCategory>;
+  eventCache: Map<string, EventRecord>;
   eventSource: ScheduleEventSource;
   highlightDate: ZonedDateTime;
   isLoading: boolean;
@@ -207,7 +200,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   const contextValue = useMemo(() => {
     const events = isLoading
       ? []
-      : resolveEvents(eventSource, range, viewDate.timezoneID);
+      : resolveEvents(eventSource, range, viewDate.timezoneID, eventCache);
     return {
       categories,
       events,
@@ -226,6 +219,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
     };
   }, [
     categories,
+    eventCache,
     eventSource,
     highlightDate,
     isLoading,
@@ -265,6 +259,11 @@ export function Schedule({
   viewDate,
 }: ScheduleProps): React.JSX.Element {
   const timezoneID = timezoneIDFromProps ?? getBrowserTimezoneID();
+  // Instance-scoped cache for async event loading. Unlike the previous
+  // module-level WeakMap keyed on loader function identity, this cache belongs
+  // to each Schedule instance so unstable (inline) loader references do not
+  // defeat caching or leak memory.
+  const [eventCache] = useState(() => new Map<string, EventRecord>());
   const [internalHighlightDate] = useState<Instant>(() =>
     nowEpochMilliseconds(),
   );
@@ -320,6 +319,7 @@ export function Schedule({
         fallback={
           <ScheduleViewContent
             categories={categories}
+            eventCache={eventCache}
             eventSource={[]}
             highlightDate={highlightZonedDateTime}
             isLoading
@@ -335,6 +335,7 @@ export function Schedule({
         }>
         <ScheduleViewContent
           categories={categories}
+          eventCache={eventCache}
           eventSource={events}
           highlightDate={highlightZonedDateTime}
           isLoading={false}

@@ -159,6 +159,8 @@ export {
 } from './components/Pagination';
 export {
   Progress,
+  progressFillRecipe,
+  type ProgressFillVariants,
   type ProgressProps,
   type ProgressVariant,
 } from './components/Progress';
@@ -435,7 +437,12 @@ export {
   type SkeletonProps,
   type SkeletonRadius,
 } from './components/Skeleton';
-export {EmptyState, type EmptyStateProps} from './components/EmptyState';
+export {
+  EmptyState,
+  emptyStateRecipe,
+  type EmptyStateProps,
+  type EmptyStateVariants,
+} from './components/EmptyState';
 export {
   Switch,
   type SwitchLabelPosition,

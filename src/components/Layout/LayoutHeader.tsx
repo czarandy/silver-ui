@@ -12,6 +12,10 @@ import type {SpacingStep} from './types';
 /**
  * Header landmark region within a Layout with a structured title,
  * optional subtitle, and start/end content slots.
+ *
+ * When rendered inside a Dialog, a close button is automatically
+ * appended after `endContent`. The button calls `onOpenChange(false)`
+ * on the parent Dialog and the title receives initial focus.
  */
 export interface LayoutHeaderProps {
   /**
@@ -98,6 +102,10 @@ const styles = {
 /**
  * Header landmark region within a Layout with a structured title,
  * optional subtitle, and start/end content slots.
+ *
+ * When rendered inside a Dialog, a close button is automatically
+ * appended after `endContent`. The button calls `onOpenChange(false)`
+ * on the parent Dialog and the title receives initial focus.
  */
 export function LayoutHeader({
   className,

@@ -217,6 +217,52 @@ describe('Schedule', () => {
     );
   });
 
+  it('does not re-fetch when an inline loader creates a new reference on re-render', async () => {
+    const fetchFn = vi.fn(async (_start: Instant, _end: Instant) => {
+      await Promise.resolve();
+      return [
+        createEventFromISO({
+          end: '2026-05-13T18:00:00.000Z',
+          id: 'inline-async',
+          start: '2026-05-13T17:00:00.000Z',
+          title: 'Inline event',
+        }),
+      ] as CalendarEvent[];
+    });
+
+    function Fixture({count}: {count: number}): React.JSX.Element {
+      return (
+        <Schedule
+          categories={categories}
+          data-testid={`schedule-${count}`}
+          events={async (start, end) => fetchFn(start, end)}
+          timezoneID="UTC"
+          view={createScheduleDayView()}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    const {rerender} = render(<Fixture count={0} />);
+
+    await waitFor(() => expect(fetchFn).toHaveBeenCalledTimes(1));
+    expect(
+      await screen.findByTestId('schedule-event-inline-async'),
+    ).toBeInTheDocument();
+
+    rerender(<Fixture count={1} />);
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId('schedule-event-inline-async'),
+      ).toBeInTheDocument();
+    });
+
+    // Should still only have been called once since the cache is
+    // instance-scoped and keyed by date range, not by function identity.
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
   it('preserves unknown category labels while defaulting uncategorized events', () => {
     render(
       <Schedule

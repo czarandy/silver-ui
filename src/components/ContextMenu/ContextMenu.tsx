@@ -185,9 +185,24 @@ export function ContextMenu({
       menuRef.current?.showPopover();
       setIsOpen(true);
       onOpenChange?.(true);
-      if (hasAutoFocus) {
-        requestAnimationFrame(focusFirstItem);
-      }
+      requestAnimationFrame(() => {
+        if (menuRef.current != null) {
+          const rect = menuRef.current.getBoundingClientRect();
+          const margin = 4;
+          const clampedX = Math.min(x, window.innerWidth - rect.width - margin);
+          const clampedY = Math.min(
+            y,
+            window.innerHeight - rect.height - margin,
+          );
+          setPosition({
+            x: Math.max(0, clampedX),
+            y: Math.max(0, clampedY),
+          });
+        }
+        if (hasAutoFocus) {
+          focusFirstItem();
+        }
+      });
     },
     [focusFirstItem, hasAutoFocus, onOpenChange],
   );

@@ -170,7 +170,7 @@ export function Field({
   const labelNode = (
     <LabelComponent
       className={fieldLabelRecipe({isDisabled})}
-      htmlFor={LabelComponent === 'label' ? inputId : undefined}
+      {...(LabelComponent === 'label' ? {htmlFor: inputId} : undefined)}
       id={labelId}>
       {labelIcon != null ? (
         <Icon color="secondary" icon={labelIcon} size="sm" />

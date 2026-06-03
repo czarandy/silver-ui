@@ -12,7 +12,7 @@ A foundational form field wrapper that renders a label, optional description, a 
 
 ### High
 
-- **`htmlFor` is applied unconditionally to `<span>` when `labelAs="span"`.** When `labelAs` is `'span'`, the code sets `htmlFor={undefined}` (because `LabelComponent === 'label'` is false). This is correct -- but the `htmlFor` prop is still passed to the `<span>` element, which is an invalid HTML attribute for `<span>`. React will pass it through to the DOM, causing a console warning and invalid HTML. The prop should be omitted entirely when `labelAs` is `'span'`.
+None
 
 ### Medium
 
@@ -30,8 +30,7 @@ A foundational form field wrapper that renders a label, optional description, a 
 
 ## Recommendations
 
-1. **Fix the `htmlFor` on `<span>`** by conditionally omitting it: use `{...(LabelComponent === 'label' ? { htmlFor: inputId } : {})}` or separate the rendering paths.
-2. Add significantly more stories to demonstrate all states of this foundational component, especially since other component audits reference Field behavior.
-3. Add comprehensive tests for `isLabelHidden`, `labelAs`, `statusVariant`, and necessity indicator text.
-4. Consider using a discriminated union for `FieldNecessity` to make `isOptional` and `isRequired` truly mutually exclusive at the type level.
-5. Remove the `data-testid={undefined}` on the description element.
+1. Add significantly more stories to demonstrate all states of this foundational component, especially since other component audits reference Field behavior.
+2. Add comprehensive tests for `isLabelHidden`, `labelAs`, `statusVariant`, and necessity indicator text.
+3. Consider using a discriminated union for `FieldNecessity` to make `isOptional` and `isRequired` truly mutually exclusive at the type level.
+4. Remove the `data-testid={undefined}` on the description element.

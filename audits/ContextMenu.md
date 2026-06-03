@@ -12,7 +12,7 @@ ContextMenu provides a right-click context menu using the Popover API (`popover=
 
 ### High
 
-- **Menu can overflow the viewport with no repositioning.** The menu is positioned at `position: fixed` using the raw `clientX`/`clientY` of the right-click event. If the user right-clicks near the bottom or right edge of the viewport, the menu will be clipped or extend off-screen. There is no boundary detection or repositioning logic. This is a usability problem in practice.
+None
 
 ### Medium
 
@@ -31,8 +31,7 @@ ContextMenu provides a right-click context menu using the Popover API (`popover=
 
 ## Recommendations
 
-1. Implement viewport boundary detection to reposition the menu when it would overflow. Consider using `getBoundingClientRect()` on the menu after positioning to adjust.
-2. Add an `aria-label` prop to the trigger, or derive one from context. At minimum, document that consumers should ensure `children` provides accessible text.
-3. Return focus to the trigger element when closing the menu via `Escape` key.
-4. Add `_focusVisible` styling to the trigger wrapper, or reconsider the `display: contents` approach for keyboard accessibility.
-5. Add tests for `hasAutoFocus={false}`, `menuWidth`, and outside-click closing with `onOpenChange`.
+1. Add an `aria-label` prop to the trigger, or derive one from context. At minimum, document that consumers should ensure `children` provides accessible text.
+2. Return focus to the trigger element when closing the menu via `Escape` key.
+3. Add `_focusVisible` styling to the trigger wrapper, or reconsider the `display: contents` approach for keyboard accessibility.
+4. Add tests for `hasAutoFocus={false}`, `menuWidth`, and outside-click closing with `onOpenChange`.

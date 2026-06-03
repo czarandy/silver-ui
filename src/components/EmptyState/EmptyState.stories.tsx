@@ -1,7 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Inbox} from 'lucide-react';
 import {Button} from '../Button';
-import {HStack} from '../Stack';
 import {EmptyState} from './EmptyState';
 
 const meta: Meta<typeof EmptyState> = {
@@ -37,10 +36,10 @@ export const WithAction: Story = {
 export const MultipleActions: Story = {
   args: {
     actions: (
-      <HStack gap={2}>
+      <>
         <Button label="Create project" variant="primary" />
         <Button label="Import" variant="secondary" />
-      </HStack>
+      </>
     ),
   },
 };
@@ -52,10 +51,10 @@ export const Compact: Story = {
 export const CompactWithActions: Story = {
   args: {
     actions: (
-      <HStack gap={2}>
+      <>
         <Button label="Create project" variant="primary" />
         <Button label="Import" variant="secondary" />
-      </HStack>
+      </>
     ),
     isCompact: true,
   },

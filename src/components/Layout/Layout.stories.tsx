@@ -149,6 +149,41 @@ export const WithFooter: Story = {
   ),
 };
 
+export const CustomFooter: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Main content</Text>
+          </LayoutContent>
+        }
+        footer={
+          <LayoutFooter>
+            <div
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                gap: 12,
+                justifyContent: 'space-between',
+              }}>
+              <Text color="secondary" type="body">
+                Autosaved 2 minutes ago
+              </Text>
+              <div style={{display: 'flex', gap: 8}}>
+                <Button label="Discard" variant="ghost" />
+                <Button label="Publish" variant="primary" />
+              </div>
+            </div>
+          </LayoutFooter>
+        }
+        header={<LayoutHeader title="Header" />}
+      />
+    </Card>
+  ),
+};
+
 export const AllSlots: Story = {
   render: args => (
     <Card style={{height: 420}}>

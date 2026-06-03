@@ -23,7 +23,15 @@ describe('EmptyState', () => {
     expect(screen.getByRole('button', {name: 'Create'})).toBeInTheDocument();
   });
 
-  it('applies className, style, data-testid, and ref', () => {
+  it('labels the region with the heading via aria-labelledby', () => {
+    render(<EmptyState title="No items" />);
+
+    const region = screen.getByRole('region');
+    const heading = screen.getByRole('heading', {name: 'No items'});
+    expect(region).toHaveAttribute('aria-labelledby', heading.id);
+  });
+
+  it('forwards className, style, data-testid, and ref', () => {
     const ref = vi.fn<(el: HTMLDivElement | null) => void>();
 
     render(
@@ -89,7 +97,7 @@ describe('EmptyState', () => {
     expect(screen.getByRole('heading', {name: 'No items'})).toBeInTheDocument();
   });
 
-  it('renders in compact mode', () => {
+  it('applies compact styling', () => {
     render(
       <EmptyState
         actions={<Button label="Create" />}
@@ -99,7 +107,10 @@ describe('EmptyState', () => {
       />,
     );
 
-    expect(screen.getByTestId('empty')).toBeInTheDocument();
+    const root = screen.getByTestId('empty');
+    expect(root).toHaveClass('silver-gap_2');
+    expect(root).toHaveClass('silver-px_4');
+    expect(root).toHaveClass('silver-py_4');
     expect(screen.getByRole('button', {name: 'Create'})).toBeInTheDocument();
   });
 });

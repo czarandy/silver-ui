@@ -7,7 +7,7 @@ const meta: Meta<typeof Spinner> = {
   argTypes: {
     size: {
       control: {type: 'select'},
-      options: ['sm', 'md', 'lg'],
+      options: ['sm', 'md', 'lg', 'xl'],
     },
     variant: {
       control: {type: 'select'},
@@ -34,6 +34,7 @@ export const Sizes: Story = {
       <Spinner size="sm" />
       <Spinner size="md" />
       <Spinner size="lg" />
+      <Spinner size="xl" />
     </div>
   ),
 };
@@ -44,6 +45,7 @@ export const SizesWithLabels: Story = {
       <Spinner label="Small" size="sm" />
       <Spinner label="Medium" size="md" />
       <Spinner label="Large" size="lg" />
+      <Spinner label="Extra Large" size="xl" />
     </div>
   ),
 };

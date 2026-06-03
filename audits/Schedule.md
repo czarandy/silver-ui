@@ -12,7 +12,6 @@ Schedule is a read-only calendar shell supporting day, week, month, and list vie
 
 ### High
 
-- **Global `eventLoaderCache` uses `WeakMap` keyed on loader function reference**: The async event loading cache (`eventLoaderCache`) is a module-level `WeakMap` keyed on the loader function. If a consumer creates a new loader function on every render (common with inline arrow functions), each render creates a new cache entry, defeating caching entirely and causing redundant network requests. The stories correctly use `useMemo` for the loader, but this is an easy mistake for consumers. Additionally, the cache never evicts entries for old date ranges, which is a memory leak for long-lived loader functions.
 - **`readAsyncEvents` throws promises for Suspense without error boundary guidance**: The async loading mechanism throws promises to trigger Suspense boundaries. If a consumer does not wrap the Schedule in a Suspense boundary, React will crash with an unhelpful error. The component does wrap its content in `<Suspense>` internally, but the `readAsyncEvents` function is called inside `resolveEvents` which is called in `ScheduleViewContent` render, which is correctly inside the Suspense boundary. However, the error path (`status === 'rejected'`) throws an error that will propagate to the nearest error boundary, and there is no built-in error boundary or `onError` callback.
 
 ### Medium
@@ -41,7 +40,6 @@ Schedule is a read-only calendar shell supporting day, week, month, and list vie
 
 - **Performance priority**: Move `getTimedEventLayouts` computation outside the hour loop in `TimeGridView` to compute once per day. Pre-group events by date in monthly view.
 - **Memoize `range`** in `ScheduleViewContent` to prevent unnecessary context re-renders.
-- **Document the async loading contract**: Make it clear that loader functions must be referentially stable (wrapped in `useMemo`/`useCallback`) to benefit from caching. Consider adding a warning in development mode when a new loader is detected on re-render.
 - **Add `weekStartsOn` to monthly view** for consistency with weekly view and Calendar.
 - **Consider a built-in error fallback** for async event loading, or at minimum an `onError` prop.
 - The test coverage is excellent (35+ tests covering filtering, async loading, categories, loading state, error handling, list/week/day/month views, ARIA grid structure, event sizing, time labels, current time, navigation, plugins, view selectors, date math, and zoned date-time utilities). Stories are comprehensive with 16 stories covering all views, async events, plugins, categories, timezones, edge cases, and current-time scenarios.

@@ -22,6 +22,9 @@ export const spinnerRecipe = cva({
       lg: {
         '--spinner-size': 'var(--silver-sizes-icon-lg)',
       },
+      xl: {
+        '--spinner-size': '2.25rem',
+      },
     },
     variant: {
       default: {

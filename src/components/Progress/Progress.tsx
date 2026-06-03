@@ -2,6 +2,7 @@ import {useId, type CSSProperties, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
+import {progressFillRecipe} from './Progress.recipe';
 
 export type ProgressVariant =
   | 'error'
@@ -73,7 +74,7 @@ export interface ProgressProps {
   value?: number;
   /**
    * Semantic color variant.
-   * @default 'accent'
+   * @default 'info'
    */
   variant?: ProgressVariant;
 }
@@ -99,9 +100,6 @@ const styles = {
     fontWeight: 'medium',
     lineHeight: 'normal',
   }),
-  mutedText: css({
-    color: 'fg.muted',
-  }),
   disabledText: css({
     color: 'fg.disabled',
   }),
@@ -119,33 +117,6 @@ const styles = {
     borderRadius: 'full',
     bg: 'bg.hover',
   }),
-  fill: css({
-    h: 'full',
-    borderRadius: 'full',
-    transitionProperty: 'width',
-    transitionDuration: 'normal',
-    transitionTimingFunction: 'default',
-    '@media (prefers-reduced-motion: reduce)': {
-      transitionDuration: '0s',
-    },
-  }),
-  indeterminateFill: css({
-    h: 'full',
-    w: '40%',
-    borderRadius: 'full',
-    animation: 'pulse 1.5s ease-in-out infinite',
-    '@media (prefers-reduced-motion: reduce)': {
-      animation: 'pulse 3s ease-in-out infinite',
-    },
-  }),
-  variant: {
-    error: css({bg: 'status.error.solid'}),
-    info: css({bg: 'status.info.solid'}),
-    neutral: css({bg: 'status.neutral.solid'}),
-    success: css({bg: 'status.success.solid'}),
-    warning: css({bg: 'status.warning.solid'}),
-    disabled: css({bg: 'status.disabled.solid'}),
-  },
 } as const;
 
 function defaultFormatValueLabel(value: number, max: number): string {
@@ -184,7 +155,6 @@ export function Progress({
   const percentage = max > 0 ? (clampedValue / max) * 100 : 0;
   const valueText = formatValueLabel(clampedValue, max);
   const showValueLabel = hasValueLabel && !isIndeterminate;
-  const fillVariant = isDisabled ? 'disabled' : variant;
 
   return (
     <div
@@ -221,6 +191,7 @@ export function Progress({
       )}
 
       <div
+        aria-disabled={isDisabled || undefined}
         aria-labelledby={labelId}
         aria-valuemax={isIndeterminate ? undefined : max}
         aria-valuemin={isIndeterminate ? undefined : 0}
@@ -229,10 +200,7 @@ export function Progress({
         className={styles.track}
         role={isIndeterminate ? 'progressbar' : roleProp}>
         <div
-          className={cx(
-            isIndeterminate ? styles.indeterminateFill : styles.fill,
-            styles.variant[fillVariant],
-          )}
+          className={progressFillRecipe({variant, isDisabled, isIndeterminate})}
           style={isIndeterminate ? undefined : {width: `${percentage}%`}}
         />
       </div>

@@ -33,6 +33,11 @@ describe('Spinner', () => {
     expect(screen.getByTestId('spinner')).toHaveClass(
       'silver---spinner-size_var(--silver-sizes-icon-lg)',
     );
+
+    rerender(<Spinner data-testid="spinner" size="xl" />);
+    expect(screen.getByTestId('spinner')).toHaveClass(
+      'silver---spinner-size_2.25rem',
+    );
   });
 
   it('renders available variants', () => {
