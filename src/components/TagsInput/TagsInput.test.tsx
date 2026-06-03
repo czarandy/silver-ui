@@ -116,6 +116,22 @@ describe('TagsInput', () => {
     });
   });
 
+  it('uses tighter vertical padding for selected tags in the small size', () => {
+    render(
+      <TagsInput
+        data-testid="tags"
+        label="Team"
+        onChange={() => {}}
+        searchSource={emptySource}
+        size="sm"
+        value={[items[0]]}
+      />,
+    );
+
+    expect(screen.getByTestId('tags')).toHaveClass('silver-pt_1px');
+    expect(screen.getByTestId('tags')).toHaveClass('silver-pb_0.5');
+  });
+
   it('removes last tag on backspace when input is empty', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -358,5 +374,47 @@ describe('TagsInput', () => {
 
     fireEvent.focusOut(wrapper, {relatedTarget: document.body});
     expect(hidePopover).toHaveBeenCalled();
+  });
+
+  it('re-bootstraps results after selecting an item with hasEntriesOnFocus', async () => {
+    const user = userEvent.setup();
+    const source = createStaticSource(items);
+
+    function Controlled(): React.JSX.Element {
+      const [value, setValue] = useState<SearchableItem[]>([]);
+      return (
+        <TagsInput
+          debounceMs={0}
+          hasEntriesOnFocus
+          label="Team"
+          onChange={setValue}
+          searchSource={source}
+          value={value}
+        />
+      );
+    }
+
+    render(<Controlled />);
+
+    const input = screen.getByRole('combobox', {name: 'Team'});
+    await user.click(input);
+    await act(async () => {
+      await tick();
+    });
+
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+
+    await user.click(screen.getByText('Ada Lovelace'));
+    await act(async () => {
+      await tick();
+    });
+
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    const options = screen.getAllByRole('option', {hidden: true});
+    const optionLabels = options.map(o => o.textContent);
+    expect(optionLabels).not.toContain('Ada Lovelace');
+    expect(optionLabels).toContain('Grace Hopper');
+    expect(optionLabels).toContain('Katherine Johnson');
   });
 });

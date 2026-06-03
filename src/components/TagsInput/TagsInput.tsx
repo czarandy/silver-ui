@@ -217,9 +217,13 @@ const styles = {
     h: 'auto',
   }),
   wrapperWithTags: css({
-    py: '1',
     rowGap: '1',
   }),
+  wrapperWithTagsSize: {
+    sm: css({pt: '1px', pb: '0.5'}),
+    md: css({py: '1'}),
+    lg: css({py: '1'}),
+  },
   layerPopover: css({
     w: 'anchor-size(width)',
   }),
@@ -497,6 +501,9 @@ export function TagsInput<T extends SearchableItem>({
           }),
           styles.wrapper,
           value.length > 0 && !isTruncated ? styles.wrapperWithTags : undefined,
+          value.length > 0 && !isTruncated
+            ? styles.wrapperWithTagsSize[size]
+            : undefined,
           isTruncated ? styles.truncatedWrapper : undefined,
           isTruncated ? styles.truncatedSize[size] : undefined,
         )}

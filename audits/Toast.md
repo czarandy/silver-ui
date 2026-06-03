@@ -12,7 +12,6 @@ Toast is a comprehensive notification system consisting of four parts: `Toast` (
 
 ### High
 
-- **`useToast` throws lazily inside the returned callback, not at hook call time.** The hook calls `use(ToastContext)` which returns `null` if no provider exists, but does not throw until the returned function is actually called (`if (context == null) { throw ... }`). This means a component can call `useToast()` outside a `ToastViewport` without error, and only crash at runtime when the user triggers a toast. The error should be thrown at hook call time (during render) so it is caught immediately during development.
 - **`eslint-disable jsx-a11y-x/no-static-element-interactions` at the top of `Toast.tsx`.** This file-level disable suppresses accessibility lint warnings for the entire file. The disable is needed because `onMouseEnter`/`onMouseLeave`/`onFocusCapture`/`onBlurCapture` are on a `<div>`. However, file-level disables are overly broad. Consider using a line-level disable or restructuring to avoid the warning.
 
 ### Medium
@@ -37,10 +36,9 @@ Toast is a comprehensive notification system consisting of four parts: `Toast` (
 
 ## Recommendations
 
-1. Move the context-null check in `useToast` to the hook body (render time) rather than the returned callback, so missing providers are caught during development immediately.
-2. Stabilize the `onDismiss` reference in `ToastViewport` using `useCallback` or a ref-based pattern to prevent timer resets on re-renders.
-3. Use the existing `mergeRefs` utility for the viewport ref instead of manual ref handling.
-4. Replace the file-level eslint-disable with a targeted line-level disable.
-5. Add stories for `uniqueID`/`collisionBehavior`, `maxVisible`, `inset`, and `isTopLayer={false}`.
-6. Add tests for `maxVisible` and `inset` props.
-7. Consider syncing the exit animation timeout with the CSS transition duration via a shared constant.
+1. Stabilize the `onDismiss` reference in `ToastViewport` using `useCallback` or a ref-based pattern to prevent timer resets on re-renders.
+2. Use the existing `mergeRefs` utility for the viewport ref instead of manual ref handling.
+3. Replace the file-level eslint-disable with a targeted line-level disable.
+4. Add stories for `uniqueID`/`collisionBehavior`, `maxVisible`, `inset`, and `isTopLayer={false}`.
+5. Add tests for `maxVisible` and `inset` props.
+6. Consider syncing the exit animation timeout with the CSS transition duration via a shared constant.

@@ -237,6 +237,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
   const [hasSearched, setHasSearched] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const pointerActiveRef = useRef(false);
+  const selectingRef = useRef(false);
 
   const setOpen = useCallback(
     (isNextOpen: boolean) => {
@@ -350,11 +351,17 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       setResults([]);
       setHasSearched(false);
       setIsLoading(false);
-      setOpen(false);
       onChange(item);
+      selectingRef.current = true;
       inputRef.current?.focus();
+      selectingRef.current = false;
+      if (hasEntriesOnFocus) {
+        void runSearch('', 'bootstrap');
+      } else {
+        setOpen(false);
+      }
     },
-    [onChange, searchSource, setOpen],
+    [hasEntriesOnFocus, onChange, runSearch, searchSource, setOpen],
   );
 
   useEffect(() => {
@@ -444,6 +451,9 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         id={resolvedInputId}
         onChange={event => updateQuery(event.target.value)}
         onFocus={() => {
+          if (selectingRef.current) {
+            return;
+          }
           if (hasEntriesOnFocus && query === '' && results.length === 0) {
             void runSearch('', 'bootstrap');
           } else if (results.length > 0) {

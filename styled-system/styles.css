@@ -725,8 +725,8 @@
     --silver-colors-overlay-scrim: rgba(0, 0, 0, 0.45);
     --silver-colors-overlay-scrim-subtle: rgba(0, 0, 0, 0.35);
     --silver-colors-overlay-scrim-strong: rgba(0, 0, 0, 0.76);
-    --silver-colors-skeleton: var(--silver-colors-silver-neutral-200);
-    --silver-colors-skeleton-shimmer: var(--silver-colors-silver-neutral-100);
+    --silver-colors-skeleton: var(--silver-colors-silver-neutral-100);
+    --silver-colors-skeleton-shimmer: var(--silver-colors-silver-neutral-50);
     --silver-colors-surface-blue: var(--silver-colors-blue-100);
     --silver-colors-surface-blue-fg: var(--silver-colors-blue-800);
     --silver-colors-surface-blue-hover: var(--silver-colors-blue-200);
@@ -844,8 +844,8 @@
     --silver-colors-track: var(--silver-colors-silver-neutral-700);
     --silver-colors-track-emphasized: var(--silver-colors-silver-neutral-600);
     --silver-colors-track-disabled: var(--silver-colors-silver-neutral-700);
-    --silver-colors-skeleton: var(--silver-colors-silver-neutral-700);
-    --silver-colors-skeleton-shimmer: var(--silver-colors-silver-neutral-600);
+    --silver-colors-skeleton: var(--silver-colors-silver-neutral-600);
+    --silver-colors-skeleton-shimmer: var(--silver-colors-silver-neutral-500);
     --silver-colors-surface-blue: var(--silver-colors-blue-900);
     --silver-colors-surface-blue-fg: var(--silver-colors-blue-200);
     --silver-colors-surface-blue-hover: var(--silver-colors-blue-800);
