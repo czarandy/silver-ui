@@ -1,9 +1,10 @@
 name: Publish to npm
 
 # Publishes when a GitHub Release is published (the local scripts/release.sh
-# driver creates that release). Runs from a clean runner so the npm token never
-# lives on a developer machine, and uses --provenance so npm shows a verified
-# "built from this source" badge.
+# driver creates that release). Authenticates to npm via OIDC "trusted
+# publishing" — no token or secret. npm verifies the request came from this
+# repo's publish.yml workflow (configured on the package's npm settings page)
+# and mints a short-lived credential. Provenance is generated automatically.
 on:
   release:
     types: [published]
@@ -13,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # required for npm provenance
+      id-token: write # required for OIDC trusted publishing + provenance
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +26,10 @@ jobs:
           node-version: 22
           cache: pnpm
           registry-url: https://registry.npmjs.org
+
+      # OIDC trusted publishing requires npm >= 11.5.1, newer than the npm
+      # bundled with Node 22. Upgrade the global npm used for the publish step.
+      - run: npm install -g npm@latest
 
       - run: pnpm install --frozen-lockfile
 
@@ -47,13 +52,12 @@ jobs:
           fi
 
       # Pre-releases go to the 'next' dist-tag so `npm install pkg` never grabs
-      # them by default; stable releases go to 'latest'.
+      # them by default; stable releases go to 'latest'. No NODE_AUTH_TOKEN:
+      # OIDC trusted publishing handles auth, and provenance is automatic.
       - name: Publish
         run: |
           if [ "${{ github.event.release.prerelease }}" = "true" ]; then
-            npm publish --provenance --access public --tag next
+            npm publish --access public --tag next
           else
-            npm publish --provenance --access public
+            npm publish --access public
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

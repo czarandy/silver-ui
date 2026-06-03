@@ -1,74 +1,13 @@
 # silver-ui
 
-A React component library with CSS variable theming, built with [Panda CSS](https://panda-css.com/).
+[![npm version](https://img.shields.io/npm/v/silver-ui.svg)](https://www.npmjs.com/package/silver-ui)
+[![license](https://img.shields.io/npm/l/silver-ui.svg)](./LICENSE)
+
+A complete, themeable React component library, built with [Panda CSS](https://panda-css.com/).
 
 [Storybook](https://silver-ui-eight.vercel.app/) — browse and interact with all components.
 
 ## Installation
-
-silver-ui is not published to npm yet. Until it is, consume a local build by
-copying the full build output into your app:
-
-```bash
-pnpm build
-rm -rf path/to/app/src/vendor/silver-ui
-mkdir -p path/to/app/src/vendor/silver-ui
-cp -R dist/* path/to/app/src/vendor/silver-ui/
-```
-
-Copy the whole `dist/` directory, not only `index.js`; component entry points
-share generated chunks.
-
-The vendored build expects your app to install silver-ui's runtime
-dependencies:
-
-```bash
-npm install lucide-react
-# or
-pnpm add lucide-react
-# or
-yarn add lucide-react
-```
-
-Then import from the vendored ESM files. Use component subpaths for smaller JS
-bundles:
-
-```tsx
-import './vendor/silver-ui/styles.css';
-import {Button} from './vendor/silver-ui/components/Button/index.js';
-
-function App() {
-  return <Button label="Click me" />;
-}
-```
-
-The root vendored entry is also available when convenience matters more than
-bundle size:
-
-```tsx
-import './vendor/silver-ui/styles.css';
-import {Button} from './vendor/silver-ui/index.js';
-```
-
-The JS bundle uses the standard React ecosystem pattern
-`process.env.NODE_ENV` for development-only validation. Most app bundlers
-(Vite, Webpack, Next.js, Remix, etc.) replace this automatically. If you copy
-the file into a setup that does not perform that replacement, configure your
-bundler to define it. For example:
-
-```ts
-import {defineConfig} from 'vite';
-
-export default defineConfig({
-  define: {
-    'process.env.NODE_ENV': JSON.stringify(
-      process.env.NODE_ENV ?? 'development',
-    ),
-  },
-});
-```
-
-Once silver-ui is published, install it from npm:
 
 ```bash
 npm install silver-ui
@@ -78,13 +17,8 @@ pnpm add silver-ui
 yarn add silver-ui
 ```
 
-The npm package exposes the same tree-shakeable component subpaths:
-
-```tsx
-import 'silver-ui/styles.css';
-import {Button} from 'silver-ui/Button';
-import {SideNav, SideNavItem} from 'silver-ui/SideNav';
-```
+silver-ui requires **React 19+** as a peer dependency. Its other runtime
+dependencies (`lucide-react`, `@js-temporal/polyfill`) install automatically.
 
 ## Usage
 
@@ -181,13 +115,12 @@ scoped theming examples, and per-instance overrides.
 - **Tag** — removable label for categories or filters
 - **Text / Heading** — typography primitives with size, color, and truncation
 - **Thumbnail** — image preview with fallback and remove action
-- **Tooltip** — informational popup on hover or focus
 - **TreeView** — hierarchical expandable tree
 
 ### Forms
 
 - **CheckboxInput** — checkbox with label and description
-- **AutocompleteInput** — searchable autocomplete input
+- **AutocompleteInput** — searchable autocomplete input (combobox)
 - **DateInput** — date picker field
 - **DateRangeInput** — date range picker field
 - **DateTimeInput** — combined date and time picker
@@ -225,6 +158,7 @@ scoped theming examples, and per-instance overrides.
 - **Drawer** — slide-in panel from screen edge
 - **HoverCard** — rich content popup on hover
 - **Popover** — anchored popup with arbitrary content
+- **Tooltip** — informational popup on hover or focus
 
 ### Composite
 
@@ -237,8 +171,8 @@ scoped theming examples, and per-instance overrides.
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) >= 18
-- [pnpm](https://pnpm.io/) >= 9
+- [Node.js](https://nodejs.org/) >= 22
+- [pnpm](https://pnpm.io/) >= 11 (`corepack enable` uses the version pinned in `package.json`)
 
 ### Setup
 

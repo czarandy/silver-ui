@@ -6,11 +6,13 @@ Releases use a **two-stage flow**:
    cuts the release — runs checks, builds, bumps the version, creates the git
    commit + tag, pushes, and creates a GitHub Release.
 2. **In CI**, the [`publish.yml`](.github/workflows/publish.yml) workflow fires
-   on the published release and runs `npm publish --provenance` from a clean
-   runner.
+   on the published release and runs `npm publish` from a clean runner.
 
-The npm token lives only as a GitHub secret — never on a developer machine — and
-every published version gets a verified [provenance](https://docs.npmjs.com/generating-provenance-statements)
+CI authenticates to npm with [OIDC **trusted publishing**](https://docs.npmjs.com/trusted-publishers) —
+**there is no npm token anywhere**, nothing to rotate, and nothing to expire.
+npm verifies the publish request came from this repo's `publish.yml` workflow
+and mints a short-lived credential. Every published version also gets an
+automatic, verified [provenance](https://docs.npmjs.com/generating-provenance-statements)
 badge linking it back to the exact commit and build.
 
 ## Prerequisites
@@ -18,40 +20,8 @@ badge linking it back to the exact commit and build.
 - Node.js >= 22
 - pnpm (`corepack enable` to use the version pinned in `package.json`)
 - [GitHub CLI](https://cli.github.com/) (`gh`), authenticated via `gh auth login`
-- An npm account ([npmjs.com/signup](https://www.npmjs.com/signup)) with publish
-  rights to the package
-
-## One-time setup
-
-### 1. Confirm the package name is available
-
-The current name in `package.json` is `silver-ui`. Check it:
-
-```bash
-npm view silver-ui
-```
-
-If the name is taken, scope it under your npm username (e.g.
-`@yourusername/silver-ui`) by updating the `"name"` field in `package.json`.
-The publish workflow already passes `--access public`, so scoped packages
-publish publicly without extra config.
-
-### 2. Create an npm access token
-
-Generate a **Granular Access Token** at
-[npmjs.com/settings/~/tokens](https://www.npmjs.com/settings/~/tokens), scoped
-with read/write to this package (and the "Packages and scopes" permission).
-
-### 3. Add it as a GitHub secret
-
-In the GitHub repo, go to **Settings → Secrets and variables → Actions → New
-repository secret** and add it as:
-
-- Name: `NPM_TOKEN`
-- Value: the token from step 2
-
-That's the only secret CI needs. Provenance uses GitHub's OIDC
-(`id-token: write`), which the workflow already requests — no extra token.
+- Push access to the repo (cutting a release requires no npm credentials locally —
+  CI publishes via the configured trusted publisher)
 
 ## Cutting a release
 
@@ -100,11 +70,6 @@ pnpm release patch --preid=rc   # use a different pre-release identifier
 pnpm release --dry-run          # run all checks + build, but do NOT bump/tag/push/release
 ```
 
-> **First release note:** `package.json` is at `0.1.0`. Picking `patch` makes the
-> first published version `0.1.1`. If you want `0.1.0` itself to be the first
-> release, set `RELEASE_TYPE` accordingly — or temporarily create the tag/release
-> at `v0.1.0` by hand. After the first publish, `pnpm release` handles everything.
-
 ## Pre-releases
 
 Choosing `prerelease` (or passing it as an argument) produces a version like
@@ -124,8 +89,10 @@ npm install silver-ui@next
   `build`, and `publint` on a clean checkout;
 - **verifies the release tag matches `package.json`'s version**, so a mistagged
   release can't publish the wrong thing;
-- publishes with `--provenance --access public`, adding `--tag next` for
-  pre-releases.
+- upgrades to npm `>= 11.5.1` (required for OIDC; newer than the npm bundled with
+  Node 22);
+- publishes with `--access public` over OIDC, adding `--tag next` for
+  pre-releases. Auth and provenance are automatic — no token.
 
 ## Consuming the published package
 
@@ -146,8 +113,14 @@ import {Button} from 'silver-ui/Button';
 
 ## Troubleshooting
 
-- **CI publish failed with `E403` / "you do not have permission"** — the
-  `NPM_TOKEN` secret is missing, expired, or lacks write access to the package.
+- **CI publish failed with `E403` / "you do not have permission" or an OIDC
+  auth error** — the trusted publisher config on npm doesn't match this run.
+  Confirm the org (`czarandy`), repo (`silver-ui`), and workflow filename
+  (`publish.yml`) on the package's **Settings → Trusted Publisher** page exactly
+  match, and that the job has `permissions: id-token: write`.
+- **`npm error Unsupported OIDC` / auth ignored** — the runner's npm is older
+  than 11.5.1. The workflow upgrades npm before publishing; make sure that step
+  is present.
 - **`E409` / "cannot publish over previously published version"** — the version
   in `package.json` already exists on npm. Cut a new release; npm versions are
   immutable.

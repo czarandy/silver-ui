@@ -6,9 +6,9 @@
 #   1. (here) preflight -> checks -> build -> bump version -> tag -> push ->
 #      create a GitHub Release.
 #   2. (CI) .github/workflows/publish.yml runs on the published release and does
-#      the actual `npm publish --provenance` from a clean runner. The npm token
-#      never touches your machine, and the package gets a verified provenance
-#      badge.
+#      the actual `npm publish` from a clean runner, authenticating via OIDC
+#      "trusted publishing" — no npm token anywhere. The package gets an
+#      automatic, verified provenance badge.
 #
 # So this script never publishes to npm itself — it cuts the release that CI
 # publishes. The local checks/build are a fast-fail gate; CI re-runs them.
