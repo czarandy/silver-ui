@@ -2,7 +2,7 @@
   "name": "silver-ui",
   "version": "0.1.0",
   "packageManager": "pnpm@11.3.0",
-  "description": "A React component library with CSS variable theming",
+  "description": "A complete, themeable React component library",
   "license": "MIT",
   "type": "module",
   "sideEffects": [
@@ -51,7 +51,8 @@
     "typecheck": "tsc --noEmit",
     "check:exports": "pnpm build && publint",
     "clean": "rm -rf dist storybook-static",
-    "theme": "npx tsx scripts/generate-theme.ts"
+    "theme": "npx tsx scripts/generate-theme.ts",
+    "release": "bash scripts/release.sh"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
