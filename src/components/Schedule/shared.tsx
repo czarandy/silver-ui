@@ -253,7 +253,7 @@ export function formatListRangeTitle(start: PlainDate, end: PlainDate): string {
     : formatWeekTitle(start, end);
 }
 
-export function formatTime(instant: number, timezoneID: string): string {
+function formatTime(instant: number, timezoneID: string): string {
   return Temporal.Instant.fromEpochMilliseconds(instant)
     .toZonedDateTimeISO(timezoneID)
     .toLocaleString(undefined, {
@@ -293,7 +293,7 @@ export function getEventTimeLabel(
   return `${formatTime(event.start, timezoneID)} - ${formatTime(event.end, timezoneID)}`;
 }
 
-export function getEventStartTimeLabel(
+function getEventStartTimeLabel(
   event: CalendarEvent,
   timezoneID: string,
 ): string | null {
@@ -444,13 +444,4 @@ export function ScheduleFrame({
       {children}
     </section>
   );
-}
-
-export function plainDateFromEventStart(
-  event: CalendarEvent,
-  timezoneID: string,
-): PlainDate {
-  return isDayEvent(event)
-    ? event.start
-    : plainDateFromInstant(event.start, timezoneID);
 }

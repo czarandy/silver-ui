@@ -17,7 +17,3 @@ export function useTopNavRenderMode(): TopNavRenderMode {
 export function useTopNavMobileContent(): ReactNode {
   return use(TopNavMobileContentContext);
 }
-
-export function useTopNavSlot(): TopNavSlot {
-  return use(TopNavSlotContext);
-}

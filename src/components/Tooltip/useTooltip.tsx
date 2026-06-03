@@ -2,25 +2,22 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   type CSSProperties,
   type ReactNode,
   type RefCallback,
 } from 'react';
 import {css, cx} from 'styled-system/css';
 import {
-  useLayer,
-  type ContextRenderProps,
-  type LayerAlignment,
-  type LayerPlacement,
+  useHoverLayer,
+  type HoverLayerFocusTrigger,
+} from '../../internal/useHoverLayer';
+import type {
+  ContextRenderProps,
+  LayerAlignment,
+  LayerPlacement,
 } from '../../internal/useLayer';
 
-export type TooltipFocusTrigger = 'auto' | 'always' | 'never';
-
-const isTouchDevice =
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(hover: none)').matches;
+export type TooltipFocusTrigger = HoverLayerFocusTrigger;
 
 export interface UseTooltipOptions {
   alignment?: LayerAlignment;
@@ -95,20 +92,6 @@ const styles = {
   },
 } as const;
 
-function isFocusable(element: HTMLElement): boolean {
-  if (element.hasAttribute('tabindex')) {
-    return element.tabIndex >= 0;
-  }
-
-  if (
-    ['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(element.tagName)
-  ) {
-    return !(element as HTMLButtonElement).disabled;
-  }
-
-  return element.isContentEditable;
-}
-
 export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
   const {
     placement = 'above',
@@ -121,79 +104,20 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     onHide,
   } = options;
 
-  const layer = useLayer({onShow, onHide});
-  const showTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const triggerRef = useRef<HTMLElement | null>(null);
-
-  const clearTimeouts = useCallback(() => {
-    if (showTimeoutRef.current != null) {
-      clearTimeout(showTimeoutRef.current);
-      showTimeoutRef.current = null;
-    }
-
-    if (hideTimeoutRef.current != null) {
-      clearTimeout(hideTimeoutRef.current);
-      hideTimeoutRef.current = null;
-    }
-  }, []);
-
-  const scheduleShow = useCallback(() => {
-    if (!isEnabled) {
-      return;
-    }
-
-    clearTimeouts();
-    showTimeoutRef.current = setTimeout(() => {
-      layer.show();
-    }, delay);
-  }, [clearTimeouts, delay, isEnabled, layer]);
-
-  const scheduleHide = useCallback(() => {
-    clearTimeouts();
-
-    if (hideDelay > 0) {
-      hideTimeoutRef.current = setTimeout(() => {
-        layer.hide();
-      }, hideDelay);
-      return;
-    }
-
-    layer.hide();
-  }, [clearTimeouts, hideDelay, layer]);
-
-  const handleMouseEnter = useCallback(() => {
-    if (isTouchDevice) {
-      return;
-    }
-
-    scheduleShow();
-  }, [scheduleShow]);
-
-  const handleMouseLeave = useCallback(() => {
-    scheduleHide();
-  }, [scheduleHide]);
-
-  const handleFocusIn = useCallback(
-    (event: Event) => {
-      if (!isEnabled) {
-        return;
-      }
-
+  const hoverLayer = useHoverLayer({
+    delay,
+    focusTrigger,
+    hideDelay,
+    isEnabled,
+    onFocusIn: event => {
       const target = event.target as HTMLElement;
-      if (!target.matches(':focus-visible')) {
-        return;
-      }
-
-      clearTimeouts();
-      layer.show();
+      return target.matches(':focus-visible');
     },
-    [clearTimeouts, isEnabled, layer],
-  );
+    onHide,
+    onShow,
+  });
 
-  const handleFocusOut = useCallback(() => {
-    scheduleHide();
-  }, [scheduleHide]);
+  const {interactionRef, layer, ref} = hoverLayer;
 
   useEffect(() => {
     if (!layer.isOpen) {
@@ -209,81 +133,6 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [layer, layer.isOpen]);
-
-  const handlersRef = useRef({
-    mouseEnter: handleMouseEnter,
-    mouseLeave: handleMouseLeave,
-    focusIn: handleFocusIn,
-    focusOut: handleFocusOut,
-  });
-  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
-  handlersRef.current = {
-    mouseEnter: handleMouseEnter,
-    mouseLeave: handleMouseLeave,
-    focusIn: handleFocusIn,
-    focusOut: handleFocusOut,
-  };
-
-  const stableMouseEnter = useCallback(() => {
-    handlersRef.current.mouseEnter();
-  }, []);
-  const stableMouseLeave = useCallback(() => {
-    handlersRef.current.mouseLeave();
-  }, []);
-  const stableFocusIn = useCallback((e: Event) => {
-    handlersRef.current.focusIn(e);
-  }, []);
-  const stableFocusOut = useCallback(() => {
-    handlersRef.current.focusOut();
-  }, []);
-
-  const interactionRef: RefCallback<HTMLElement> = useCallback(
-    element => {
-      if (triggerRef.current != null) {
-        triggerRef.current.removeEventListener('mouseenter', stableMouseEnter);
-        triggerRef.current.removeEventListener('mouseleave', stableMouseLeave);
-        triggerRef.current.removeEventListener('focusin', stableFocusIn);
-        triggerRef.current.removeEventListener('focusout', stableFocusOut);
-      }
-
-      if (element != null) {
-        element.addEventListener('mouseenter', stableMouseEnter);
-        element.addEventListener('mouseleave', stableMouseLeave);
-
-        const shouldAttachFocus =
-          focusTrigger === 'always' ||
-          (focusTrigger === 'auto' && isFocusable(element));
-
-        if (shouldAttachFocus) {
-          element.addEventListener('focusin', stableFocusIn);
-          element.addEventListener('focusout', stableFocusOut);
-        }
-      }
-
-      triggerRef.current = element;
-    },
-    [
-      focusTrigger,
-      stableFocusIn,
-      stableFocusOut,
-      stableMouseEnter,
-      stableMouseLeave,
-    ],
-  );
-
-  const ref: RefCallback<HTMLElement> = useCallback(
-    element => {
-      layer.ref(element);
-      interactionRef(element);
-    },
-    [interactionRef, layer],
-  );
-
-  useEffect(() => {
-    return () => {
-      clearTimeouts();
-    };
-  }, [clearTimeouts]);
 
   const renderTooltip = useCallback(
     (children: ReactNode, props?: TooltipRenderProps): ReactNode => {

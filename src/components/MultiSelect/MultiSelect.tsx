@@ -1,18 +1,18 @@
 import {Check, ChevronDown, X} from 'lucide-react';
 import {
-  useId,
   useCallback,
   useMemo,
-  useRef,
-  useState,
   type CSSProperties,
-  type MouseEvent,
   type ReactNode,
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {useListboxNavigation} from '../../internal/useListboxNavigation';
+import {
+  renderSelectListboxOptions,
+  useSelectListbox,
+  type SelectListboxOptionData,
+} from '../../internal/useSelectListbox';
 import {Badge} from '../Badge';
 import {
   Field,
@@ -22,13 +22,12 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 
-export interface MultiSelectOptionData {
+export interface MultiSelectOptionData extends SelectListboxOptionData {
   /**
    * Icon displayed before the label.
    */
@@ -334,30 +333,6 @@ const styles = {
   }),
 } as const;
 
-function normalizeOption(
-  option: string | MultiSelectOptionData,
-): MultiSelectOptionData {
-  return typeof option === 'string'
-    ? {label: option, value: option}
-    : {...option, label: option.label ?? option.value};
-}
-
-function getSelectableOptions(
-  options: ReadonlyArray<MultiSelectOption>,
-): MultiSelectOptionData[] {
-  return options.flatMap(option => {
-    if (typeof option === 'string') {
-      return [normalizeOption(option)];
-    }
-    if ('type' in option) {
-      return option.type === 'section'
-        ? option.options.map(normalizeOption)
-        : [];
-    }
-    return [normalizeOption(option)];
-  });
-}
-
 /**
  * Multi-select dropdown field with checkbox-style options.
  */
@@ -392,50 +367,7 @@ export function MultiSelect({
   triggerDisplay = 'count',
   value,
 }: MultiSelectProps): React.JSX.Element {
-  const inputId = useId();
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
-  const statusMessageID = getStatusMessageID(inputId, status);
-  const describedBy = getDescribedBy(descriptionID, statusMessageID);
-  const [isOpen, setIsOpen] = useState(isDefaultOpen);
-  const [query, setQuery] = useState('');
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const listboxId = `${inputId}-listbox`;
   const selectedValues = useMemo(() => new Set(value), [value]);
-  const selectableOptions = useMemo(
-    () => getSelectableOptions(options),
-    [options],
-  );
-  const selectedOptions = useMemo(
-    () => selectableOptions.filter(option => selectedValues.has(option.value)),
-    [selectableOptions, selectedValues],
-  );
-  const filteredValues = useMemo(() => {
-    if (query.trim() === '') {
-      return new Set(selectableOptions.map(option => option.value));
-    }
-    const lowerQuery = query.toLowerCase();
-    return new Set(
-      selectableOptions
-        .filter(option =>
-          (option.label ?? option.value).toLowerCase().includes(lowerQuery),
-        )
-        .map(option => option.value),
-    );
-  }, [query, selectableOptions]);
-  const visibleSelectableOptions = useMemo(
-    () => selectableOptions.filter(option => filteredValues.has(option.value)),
-    [filteredValues, selectableOptions],
-  );
-  const enabledVisibleOptions = useMemo(
-    () => visibleSelectableOptions.filter(option => option.isDisabled !== true),
-    [visibleSelectableOptions],
-  );
-  const isInteractionDisabled = isDisabled || isLoading;
-  const allSelected =
-    enabledVisibleOptions.length > 0 &&
-    enabledVisibleOptions.every(option => selectedValues.has(option.value));
-
   const commitChange = useCallback(
     (nextValue: string[]) => {
       onChange(nextValue);
@@ -444,24 +376,68 @@ export function MultiSelect({
   );
 
   const toggleValue = useCallback(
-    (optionValue: string) => {
-      const option = selectableOptions.find(
-        selectableOption => selectableOption.value === optionValue,
-      );
-      if (option?.isDisabled === true) {
-        return;
+    (option: MultiSelectOptionData): boolean => {
+      if (option.isDisabled === true) {
+        return false;
       }
 
       const nextValues = new Set(value);
-      if (nextValues.has(optionValue)) {
-        nextValues.delete(optionValue);
+      if (nextValues.has(option.value)) {
+        nextValues.delete(option.value);
       } else {
-        nextValues.add(optionValue);
+        nextValues.add(option.value);
       }
       commitChange(Array.from(nextValues));
+      return true;
     },
-    [commitChange, selectableOptions, value],
+    [commitChange, value],
   );
+
+  const {
+    activeDescendantId,
+    describedBy,
+    descriptionID,
+    filteredValues,
+    getOptionId,
+    handleKeyboardNavigation,
+    handleOptionClick,
+    handleOptionMouseEnter,
+    highlightedValue,
+    inputId,
+    isInteractionDisabled,
+    isOpen,
+    listboxId,
+    query,
+    selectableOptions,
+    setHighlightedValue,
+    setIsOpen,
+    setQuery,
+    statusMessageID,
+    triggerRef,
+    visibleSelectableOptions,
+  } = useSelectListbox({
+    description,
+    isDefaultOpen,
+    isDisabled,
+    isLoading,
+    onCommitOption: toggleValue,
+    options,
+    selectedValues,
+    shouldClearOnCommit: false,
+    status,
+  });
+
+  const selectedOptions = useMemo(
+    () => selectableOptions.filter(option => selectedValues.has(option.value)),
+    [selectableOptions, selectedValues],
+  );
+  const enabledVisibleOptions = useMemo(
+    () => visibleSelectableOptions.filter(option => option.isDisabled !== true),
+    [visibleSelectableOptions],
+  );
+  const allSelected =
+    enabledVisibleOptions.length > 0 &&
+    enabledVisibleOptions.every(option => selectedValues.has(option.value));
 
   const toggleAll = useCallback(() => {
     if (allSelected) {
@@ -480,46 +456,6 @@ export function MultiSelect({
     }
     commitChange(Array.from(nextValues));
   }, [allSelected, commitChange, enabledVisibleOptions, value]);
-
-  const {
-    activeDescendantId,
-    getOptionId,
-    handleKeyboardNavigation,
-    highlightedValue,
-    setHighlightedValue,
-  } = useListboxNavigation({
-    inputId,
-    isDisabled: isInteractionDisabled,
-    isOpen,
-    onCommit: toggleValue,
-    onOpenChange: setIsOpen,
-    options: visibleSelectableOptions,
-    selectedValues,
-    shouldClearOnCommit: false,
-  });
-
-  const handleOptionClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const optionValue = event.currentTarget.dataset.value;
-      if (optionValue != null) {
-        toggleValue(optionValue);
-      }
-    },
-    [toggleValue],
-  );
-
-  const handleOptionMouseEnter = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const optionValue = event.currentTarget.dataset.value;
-      const option = selectableOptions.find(
-        selectableOption => selectableOption.value === optionValue,
-      );
-      if (option != null && !option.isDisabled) {
-        setHighlightedValue(option.value);
-      }
-    },
-    [selectableOptions, setHighlightedValue],
-  );
 
   const renderTriggerValue = (): ReactNode => {
     if (selectedOptions.length === 0) {
@@ -559,12 +495,11 @@ export function MultiSelect({
   };
 
   const renderOption = (option: MultiSelectOptionData): ReactNode => {
-    const normalized = normalizeOption(option);
-    if (!filteredValues.has(normalized.value)) {
+    if (!filteredValues.has(option.value)) {
       return null;
     }
-    const isSelected = selectedValues.has(normalized.value);
-    const isHighlighted = highlightedValue === normalized.value;
+    const isSelected = selectedValues.has(option.value);
+    const isHighlighted = highlightedValue === option.value;
     return (
       <button
         aria-selected={isSelected}
@@ -572,10 +507,10 @@ export function MultiSelect({
           styles.option,
           isHighlighted ? styles.optionHighlighted : undefined,
         )}
-        data-value={normalized.value}
-        disabled={normalized.isDisabled}
-        id={getOptionId(normalized.value)}
-        key={normalized.value}
+        data-value={option.value}
+        disabled={option.isDisabled}
+        id={getOptionId(option.value)}
+        key={option.value}
         onClick={handleOptionClick}
         onMouseEnter={handleOptionMouseEnter}
         role="option"
@@ -592,67 +527,28 @@ export function MultiSelect({
         <span className={styles.optionContent}>
           {children == null ? (
             <>
-              {normalized.icon != null ? (
+              {option.icon != null ? (
                 <span className={styles.iconSlot}>
-                  <Icon color="secondary" icon={normalized.icon} size="sm" />
+                  <Icon color="secondary" icon={option.icon} size="sm" />
                 </span>
               ) : null}
-              {normalized.label}
+              {option.label}
             </>
           ) : (
-            children(normalized)
+            children(option)
           )}
         </span>
       </button>
     );
   };
 
-  const optionNodes: ReactNode[] = [];
-  let dividerCount = 0;
-  let sectionCount = 0;
-  for (const option of options) {
-    if (typeof option === 'string') {
-      optionNodes.push(renderOption(normalizeOption(option)));
-    } else if ('type' in option) {
-      if (option.type === 'divider') {
-        dividerCount += 1;
-        optionNodes.push(
-          <div
-            className={styles.divider}
-            key={`divider-${dividerCount}`}
-            role="separator"
-          />,
-        );
-      } else {
-        const sectionKey =
-          option.title ??
-          option.options.map(sectionOption => sectionOption.value).join('|');
-        sectionCount += 1;
-        const sectionHeadingId =
-          option.title == null
-            ? undefined
-            : `${inputId}-section-${sectionKey.replace(
-                /[^a-zA-Z0-9_-]/g,
-                '-',
-              )}-${sectionCount}`;
-        optionNodes.push(
-          <div
-            aria-labelledby={sectionHeadingId}
-            key={`section-${sectionKey}-${sectionCount}`}
-            role="group">
-            {option.title != null ? (
-              <div className={styles.sectionHeading} id={sectionHeadingId}>
-                {option.title}
-              </div>
-            ) : null}
-            {option.options.map(renderOption)}
-          </div>,
-        );
-      }
-    } else {
-      optionNodes.push(renderOption(normalizeOption(option)));
-    }
-  }
+  const optionNodes = renderSelectListboxOptions({
+    dividerClassName: styles.divider,
+    inputId,
+    options,
+    renderOption,
+    sectionHeadingClassName: styles.sectionHeading,
+  });
 
   const menu = (
     <>

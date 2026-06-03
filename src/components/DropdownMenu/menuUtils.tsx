@@ -6,7 +6,7 @@ import {Text} from '../Text';
 import {DropdownMenuItem} from './DropdownMenuItem';
 import type {DropdownMenuOption} from './types';
 
-export const menuStyles = {
+const menuStyles = {
   section: css({
     display: 'flex',
     flexDirection: 'column',

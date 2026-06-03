@@ -20,7 +20,7 @@ interface ToggleButtonGroupContextValue {
   size?: ButtonSize;
 }
 
-export const ToggleButtonGroupContext =
+const ToggleButtonGroupContext =
   createContext<ToggleButtonGroupContextValue | null>(null);
 
 ToggleButtonGroupContext.displayName = 'ToggleButtonGroupContext';

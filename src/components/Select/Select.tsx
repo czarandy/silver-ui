@@ -1,18 +1,18 @@
 import {Check, ChevronDown, X} from 'lucide-react';
 import {
-  useId,
   useCallback,
   useMemo,
-  useRef,
-  useState,
   type CSSProperties,
-  type MouseEvent,
   type ReactNode,
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {useListboxNavigation} from '../../internal/useListboxNavigation';
+import {
+  renderSelectListboxOptions,
+  useSelectListbox,
+  type SelectListboxOptionData,
+} from '../../internal/useSelectListbox';
 import {
   Field,
   inputRecipe,
@@ -21,12 +21,11 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
-export interface SelectOptionData {
+export interface SelectOptionData extends SelectListboxOptionData {
   /**
    * Icon displayed before the label.
    */
@@ -291,28 +290,6 @@ const styles = {
   }),
 } as const;
 
-function normalizeOption(option: string | SelectOptionData): SelectOptionData {
-  return typeof option === 'string'
-    ? {label: option, value: option}
-    : {...option, label: option.label ?? option.value};
-}
-
-function getSelectableOptions(
-  options: ReadonlyArray<SelectOptionDefinition>,
-): SelectOptionData[] {
-  return options.flatMap(option => {
-    if (typeof option === 'string') {
-      return [normalizeOption(option)];
-    }
-    if ('type' in option) {
-      return option.type === 'section'
-        ? option.options.map(normalizeOption)
-        : [];
-    }
-    return [normalizeOption(option)];
-  });
-}
-
 /**
  * Single-select dropdown field.
  */
@@ -342,106 +319,59 @@ export function Select({
   style,
   value,
 }: SelectProps): React.JSX.Element {
-  const inputId = useId();
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
-  const statusMessageID = getStatusMessageID(inputId, status);
-  const describedBy = getDescribedBy(descriptionID, statusMessageID);
-  const [isOpen, setIsOpen] = useState(false);
-  const [query, setQuery] = useState('');
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const listboxId = `${inputId}-listbox`;
-  const selectableOptions = useMemo(
-    () => getSelectableOptions(options),
-    [options],
-  );
-  const selectedOption = useMemo(
-    () => selectableOptions.find(option => option.value === value),
-    [selectableOptions, value],
-  );
   const selectedValues = useMemo(
     () => (value == null ? new Set<string>() : new Set([value])),
     [value],
   );
-  const optionByValue = useMemo(
-    () => new Map(selectableOptions.map(option => [option.value, option])),
-    [selectableOptions],
-  );
-  const filteredValues = useMemo(() => {
-    if (query.trim() === '') {
-      return new Set(selectableOptions.map(option => option.value));
-    }
-    const lowerQuery = query.toLowerCase();
-    return new Set(
-      selectableOptions
-        .filter(option =>
-          (option.label ?? option.value).toLowerCase().includes(lowerQuery),
-        )
-        .map(option => option.value),
-    );
-  }, [query, selectableOptions]);
-  const visibleSelectableOptions = useMemo(
-    () => selectableOptions.filter(option => filteredValues.has(option.value)),
-    [filteredValues, selectableOptions],
-  );
-  const isInteractionDisabled = isDisabled || isLoading;
 
   const commitOption = useCallback(
-    (option: SelectOptionData): void => {
+    (option: SelectOptionData): boolean => {
       if (option.isDisabled) {
-        return;
+        return false;
       }
 
       onChange(option.value);
-      setIsOpen(false);
-      setQuery('');
+      return true;
     },
     [onChange],
   );
 
   const {
     activeDescendantId,
+    describedBy,
+    descriptionID,
+    filteredValues,
     getOptionId,
     handleKeyboardNavigation,
+    handleOptionClick,
+    handleOptionMouseEnter,
     highlightedValue,
-    setHighlightedValue,
-  } = useListboxNavigation({
     inputId,
-    isDisabled: isInteractionDisabled,
+    isInteractionDisabled,
     isOpen,
-    onCommit: optionValue => {
-      const option = optionByValue.get(optionValue);
-      if (option != null) {
-        commitOption(option);
-      }
-    },
-    onOpenChange: setIsOpen,
-    options: visibleSelectableOptions,
+    listboxId,
+    query,
+    selectableOptions,
+    setHighlightedValue,
+    setIsOpen,
+    setQuery,
+    statusMessageID,
+    triggerRef,
+  } = useSelectListbox({
+    clearQueryOnCommit: true,
+    closeOnCommit: true,
+    description,
+    isDisabled,
+    isLoading,
+    onCommitOption: commitOption,
+    options,
     selectedValues,
+    status,
   });
 
-  const handleOptionClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const optionValue = event.currentTarget.dataset.value;
-      const option =
-        optionValue == null ? undefined : optionByValue.get(optionValue);
-      if (option != null) {
-        commitOption(option);
-      }
-    },
-    [commitOption, optionByValue],
-  );
-
-  const handleOptionMouseEnter = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const optionValue = event.currentTarget.dataset.value;
-      const option =
-        optionValue == null ? undefined : optionByValue.get(optionValue);
-      if (option != null && !option.isDisabled) {
-        setHighlightedValue(option.value);
-      }
-    },
-    [optionByValue, setHighlightedValue],
+  const selectedOption = useMemo(
+    () => selectableOptions.find(option => option.value === value),
+    [selectableOptions, value],
   );
 
   const renderOption = useCallback(
@@ -501,56 +431,13 @@ export function Select({
     ],
   );
 
-  const optionNodes: ReactNode[] = [];
-  let dividerCount = 0;
-  let sectionCount = 0;
-  for (const option of options) {
-    if (typeof option === 'string') {
-      optionNodes.push(renderOption(normalizeOption(option)));
-    } else if ('type' in option) {
-      if (option.type === 'divider') {
-        dividerCount += 1;
-        optionNodes.push(
-          <div
-            className={styles.divider}
-            key={`divider-${dividerCount}`}
-            role="separator"
-          />,
-        );
-      } else {
-        const sectionKey =
-          option.title ??
-          option.options.map(sectionOption => sectionOption.value).join('|');
-        sectionCount += 1;
-        const sectionHeadingId =
-          option.title == null
-            ? undefined
-            : `${inputId}-section-${sectionKey.replace(
-                /[^a-zA-Z0-9_-]/g,
-                '-',
-              )}-${sectionCount}`;
-        const sectionOptionNodes: ReactNode[] = [];
-        for (const sectionOption of option.options) {
-          sectionOptionNodes.push(renderOption(normalizeOption(sectionOption)));
-        }
-        optionNodes.push(
-          <div
-            aria-labelledby={sectionHeadingId}
-            key={`section-${sectionKey}-${sectionCount}`}
-            role="group">
-            {option.title != null ? (
-              <div className={styles.sectionHeading} id={sectionHeadingId}>
-                {option.title}
-              </div>
-            ) : null}
-            {sectionOptionNodes}
-          </div>,
-        );
-      }
-    } else {
-      optionNodes.push(renderOption(normalizeOption(option)));
-    }
-  }
+  const optionNodes = renderSelectListboxOptions({
+    dividerClassName: styles.divider,
+    inputId,
+    options,
+    renderOption,
+    sectionHeadingClassName: styles.sectionHeading,
+  });
 
   const menu = (
     <>

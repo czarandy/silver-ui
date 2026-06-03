@@ -30,10 +30,6 @@ export function useLayoutArea(): LayoutArea {
   return use(LayoutAreaContext);
 }
 
-export function useLayoutSlots(): LayoutSlots {
-  return use(LayoutSlotsContext);
-}
-
 export function useLayoutDivider(): LayoutDividerContextValue | null {
   return use(LayoutDividerContext);
 }

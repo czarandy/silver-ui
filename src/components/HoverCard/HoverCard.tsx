@@ -1,7 +1,5 @@
-import {useRef, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {css, cx} from 'styled-system/css';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
+import type {CSSProperties, ReactNode, Ref} from 'react';
+import {HoverLayerTrigger} from '../../internal/HoverLayerTrigger';
 import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
 import {useHoverCard, type HoverCardFocusTrigger} from './useHoverCard';
 
@@ -69,30 +67,6 @@ export interface HoverCardProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  wrapperContents: css({
-    display: 'contents',
-  }),
-  wrapperInline: css({
-    display: 'inline',
-  }),
-  hoverIndication: css({
-    textDecorationLine: 'underline',
-    textDecorationStyle: 'dashed',
-    textDecorationColor: 'fg.muted',
-    textUnderlineOffset: '2px',
-  }),
-} as const;
-
-function isTextOnly(children: ReactNode): boolean {
-  return typeof children === 'string' || typeof children === 'number';
-}
-
-function mergeIds(...ids: (string | undefined | null)[]): string | undefined {
-  const filtered = ids.filter(Boolean);
-  return filtered.length > 0 ? filtered.join(' ') : undefined;
-}
-
 /**
  * A floating card that appears on hover or focus of a trigger element.
  */
@@ -111,11 +85,6 @@ export function HoverCard({
   ref,
   'data-testid': dataTestId,
 }: HoverCardProps): React.JSX.Element {
-  const wrapperRef = useRef<HTMLSpanElement>(null);
-  const textOnly = isTextOnly(children);
-  const showHoverIndication =
-    hasHoverIndication === true || (hasHoverIndication === 'auto' && textOnly);
-
   const hoverCard = useHoverCard({
     alignment,
     delay,
@@ -125,65 +94,19 @@ export function HoverCard({
     placement,
   });
 
-  useIsomorphicLayoutEffect(() => {
-    if (textOnly) {
-      return;
-    }
-
-    const firstChild = wrapperRef.current?.firstElementChild;
-    if (!(firstChild instanceof HTMLElement)) {
-      return;
-    }
-
-    hoverCard.ref(firstChild);
-    const existingDescribedBy = firstChild.getAttribute('aria-describedby');
-    firstChild.setAttribute(
-      'aria-describedby',
-      mergeIds(existingDescribedBy, hoverCard.describedBy) ?? '',
-    );
-
-    return () => {
-      hoverCard.ref(null);
-      if (existingDescribedBy != null) {
-        firstChild.setAttribute('aria-describedby', existingDescribedBy);
-      } else {
-        firstChild.removeAttribute('aria-describedby');
-      }
-    };
-  }, [hoverCard, textOnly]);
-
-  const renderedHoverCard = hoverCard.renderHoverCard(content);
-
-  if (textOnly) {
-    return (
-      <>
-        <span
-          aria-describedby={hoverCard.describedBy}
-          className={cx(
-            styles.wrapperInline,
-            showHoverIndication ? styles.hoverIndication : undefined,
-            className,
-          )}
-          data-testid={dataTestId}
-          ref={mergeRefs(hoverCard.ref, ref)}
-          style={style}
-          // Text triggers need keyboard access.
-          // eslint-disable-next-line jsx-a11y-x/no-noninteractive-tabindex
-          tabIndex={0}>
-          {children}
-        </span>
-        {renderedHoverCard}
-      </>
-    );
-  }
-
   return (
-    <>
-      <span className={styles.wrapperContents} ref={wrapperRef}>
-        {children}
-      </span>
-      {renderedHoverCard}
-    </>
+    <HoverLayerTrigger
+      className={className}
+      data-testid={dataTestId}
+      describedBy={hoverCard.describedBy}
+      hasHoverIndication={hasHoverIndication}
+      layer={hoverCard.renderHoverCard(content)}
+      shouldForwardNonTextWrapperProps={false}
+      style={style}
+      triggerRef={hoverCard.ref}
+      wrapperRef={ref}>
+      {children}
+    </HoverLayerTrigger>
   );
 }
 
