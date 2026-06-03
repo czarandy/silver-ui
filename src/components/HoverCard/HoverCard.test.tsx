@@ -10,11 +10,25 @@ const hidePopoverMock = vi.fn();
 beforeAll(() => {
   HTMLElement.prototype.showPopover = showPopoverMock;
   HTMLElement.prototype.hidePopover = hidePopoverMock;
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: vi.fn().mockReturnValue({
+      addEventListener: vi.fn(),
+      addListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+      matches: false,
+      media: '(hover: none)',
+      onchange: null,
+      removeEventListener: vi.fn(),
+      removeListener: vi.fn(),
+    }),
+  });
 });
 
 afterAll(() => {
   Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
   Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+  Reflect.deleteProperty(window, 'matchMedia');
 });
 
 describe('HoverCard', () => {

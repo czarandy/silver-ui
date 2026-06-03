@@ -47,7 +47,9 @@ describe('Spinner', () => {
 
   it('uses normal text color for the default visible label', () => {
     render(<Spinner label="Fetching data" />);
-    expect(screen.getByText('Fetching data')).toHaveClass('silver-c_fg');
+    expect(screen.getByText('Fetching data')).toHaveClass(
+      'silver-c_var(--silver-text-color,_var(--silver-colors-fg))',
+    );
   });
 
   it('uses inherited color for the on media visible label', () => {
