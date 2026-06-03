@@ -131,7 +131,7 @@ const columns: TableColumn<TaskRow>[] = [
                 : 'neutral'
         }
         label={item.status}
-        size="sm"
+        size="lg"
       />
     ),
     sortable: true,
@@ -575,7 +575,7 @@ export const CustomCellRendering: Story = {
                     : 'neutral'
               }
               label={item.priority}
-              size="sm"
+              size="lg"
             />
           ),
         },

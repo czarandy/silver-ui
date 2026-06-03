@@ -12,7 +12,7 @@ AppShell is a comprehensive application-level layout shell providing top navigat
 
 ### High
 
-- **Stale closure in `toggleMobileNav`**: The `toggleMobileNav` callback in the `mobileContextValue` memo captures `isMobileNavOpen` directly via closure (`setMobileNavOpen(!isMobileNavOpen)`). If a consumer calls `toggleMobileNav` twice in the same render cycle or synchronously in rapid succession, the second call will use the stale value. This should use the functional updater form `setIsMobileNavOpen(prev => !prev)` instead. The `mobileContextValue` memo's dependency array correctly lists `isMobileNavOpen`, but double-toggle within a single tick will still fail.
+None
 
 ### Medium
 
@@ -30,8 +30,7 @@ AppShell is a comprehensive application-level layout shell providing top navigat
 
 ## Recommendations
 
-1. Fix the stale closure issue in `toggleMobileNav` by using `setIsMobileNavOpen(prev => !prev)` and invoking `mobileNavEnabled` check before the toggle.
-2. Add stories for `mobileBreakpoint` variations and `contentPadding`.
-3. Add a test that verifies `contentPadding` propagates to the main content area.
-4. Consider removing the unnecessary `useCallback` wrapper around `setMobileNavOpen`.
-5. Document the multiple-render-context pattern for sideNav with inline comments explaining the lifecycle.
+1. Add stories for `mobileBreakpoint` variations and `contentPadding`.
+2. Add a test that verifies `contentPadding` propagates to the main content area.
+3. Consider removing the unnecessary `useCallback` wrapper around `setMobileNavOpen`.
+4. Document the multiple-render-context pattern for sideNav with inline comments explaining the lifecycle.

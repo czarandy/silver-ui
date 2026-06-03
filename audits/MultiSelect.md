@@ -13,7 +13,6 @@ MultiSelect is a multi-value dropdown selector with checkbox-style options. It s
 ### High
 
 - **No recipe file -- all styles inline**: MultiSelect defines all its styles as inline `css()` calls rather than using a `cva` recipe. This is inconsistent with the project pattern (e.g., InputGroup, NumberInput, and others use `.recipe.ts` files). While functional, it means consumers cannot override variant styles through the recipe system and the component cannot benefit from recipe-level theming.
-- **Search input is inside the listbox**: The `<input type="search">` element is rendered as a direct child of the `<div role="listbox">`. According to WAI-ARIA, a listbox should only contain elements with `role="option"` (or `role="group"` wrapping options). Placing an `<input>` inside the listbox is an ARIA violation that can confuse assistive technologies. The search input should be a sibling of the listbox, not a child.
 
 ### Medium
 
@@ -32,8 +31,7 @@ MultiSelect is a multi-value dropdown selector with checkbox-style options. It s
 
 ## Recommendations
 
-1. Move the search input outside the `role="listbox"` div to fix the ARIA violation. Place it as a sibling above the listbox.
-2. Consider extracting styles into a `.recipe.ts` file with `cva` for consistency with other components, even if there are no variant-driven styles.
-3. Remove the `commitChange` wrapper or add the intended validation/transformation logic to justify its existence.
-4. Add stories for `isRequired`, `isOptional`, `labelIcon`, and `isDefaultOpen` to improve documentation coverage.
-5. The component is otherwise well-built with excellent keyboard navigation, proper ARIA attributes on the combobox trigger, disabled option handling, and thorough test coverage of core interactions.
+1. Consider extracting styles into a `.recipe.ts` file with `cva` for consistency with other components, even if there are no variant-driven styles.
+2. Remove the `commitChange` wrapper or add the intended validation/transformation logic to justify its existence.
+3. Add stories for `isRequired`, `isOptional`, `labelIcon`, and `isDefaultOpen` to improve documentation coverage.
+4. The component is otherwise well-built with excellent keyboard navigation, proper ARIA attributes on the combobox trigger, disabled option handling, and thorough test coverage of core interactions.

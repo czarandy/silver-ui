@@ -12,7 +12,7 @@ A controlled checkbox input supporting checked, unchecked, and indeterminate sta
 
 ### High
 
-- **`isLabelHidden` hides the entire interactive control.** When `isLabelHidden` is true, the component wraps the _entire_ `<Item>` (including the checkbox control itself) in `<VisuallyHidden>`, which applies `clipPath: 'inset(50%)'`, `w: 1px`, `h: 1px`. This makes the checkbox completely invisible _and_ nearly impossible to interact with via pointer. The intent is likely to hide only the label text while keeping the control visible and operable. The current behavior effectively hides the whole component from sighted users. (Field.tsx does this correctly -- it only hides the label and description.)
+None
 
 ### Medium
 
@@ -30,7 +30,6 @@ A controlled checkbox input supporting checked, unchecked, and indeterminate sta
 
 ## Recommendations
 
-1. **Fix `isLabelHidden` immediately.** It should only hide the label/description, not the control. Restructure to wrap only the `labelNode` in `VisuallyHidden`, similar to how `Field.tsx` handles it.
-2. **Verify the `_peerFocusVisible` selector works.** If Panda CSS requires an explicit `peer` className on the input, add `className={cx('peer', styles.input)}` to the input element.
-3. Add stories for `labelTooltip`, `labelIcon`, and `isLabelHidden`.
-4. Add a test for `isLabelHidden` to verify the checkbox remains interactive.
+1. **Verify the `_peerFocusVisible` selector works.** If Panda CSS requires an explicit `peer` className on the input, add `className={cx('peer', styles.input)}` to the input element.
+2. Add stories for `labelTooltip`, `labelIcon`, and `isLabelHidden`.
+3. Add a test for `isLabelHidden` to verify the checkbox remains interactive.

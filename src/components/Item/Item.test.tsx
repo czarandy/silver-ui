@@ -105,10 +105,24 @@ describe('Item', () => {
   });
 
   it('sets selected and disabled state attributes on the root', () => {
-    render(<Item data-testid="item" isDisabled isSelected label="Selected" />);
+    render(
+      <Item
+        data-testid="item"
+        isDisabled
+        isSelected
+        label="Selected"
+        role="option"
+      />,
+    );
 
     expect(screen.getByTestId('item')).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByTestId('item')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('does not set aria-selected without a selectable role', () => {
+    render(<Item data-testid="item" isSelected label="Selected" />);
+
+    expect(screen.getByTestId('item')).not.toHaveAttribute('aria-selected');
   });
 
   it('applies selected styling', () => {

@@ -1,4 +1,9 @@
-import {useMemo, type CSSProperties, type Ref} from 'react';
+import {
+  useMemo,
+  useSyncExternalStore,
+  type CSSProperties,
+  type Ref,
+} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 
@@ -87,17 +92,12 @@ const keyLabel: Record<string, string> = {
   up: 'Up Arrow',
 };
 
-let cachedIsMac: boolean | undefined;
+const subscribePlatform = (): (() => void) => () => {};
 
-function detectMac(): boolean {
-  if (cachedIsMac !== undefined) {
-    return cachedIsMac;
-  }
-
+function getIsMacSnapshot(): boolean {
   if (typeof navigator === 'undefined') {
     return false;
   }
-
   const userAgentData =
     'userAgentData' in navigator ? navigator.userAgentData : null;
   if (
@@ -105,16 +105,21 @@ function detectMac(): boolean {
     typeof userAgentData === 'object' &&
     'platform' in userAgentData
   ) {
-    cachedIsMac = /mac/i.test(String(userAgentData.platform));
-  } else {
-    cachedIsMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+    return /mac/i.test(String(userAgentData.platform));
   }
-
-  return cachedIsMac;
+  return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 }
 
-export function resetPlatformCache(): void {
-  cachedIsMac = undefined;
+function getServerSnapshot(): boolean {
+  return false;
+}
+
+function useIsMac(): boolean {
+  return useSyncExternalStore(
+    subscribePlatform,
+    getIsMacSnapshot,
+    getServerSnapshot,
+  );
 }
 
 function getKeyDisplay(key: string, isMac: boolean): string {
@@ -141,7 +146,7 @@ export function Kbd({
   ref,
   style,
 }: KbdProps): React.JSX.Element {
-  const isMac = detectMac();
+  const isMac = useIsMac();
   const {keyedParts, ariaLabel} = useMemo(() => {
     const parts = keys
       .split('+')

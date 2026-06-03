@@ -23,13 +23,14 @@ function generateToastId(): string {
 export function useToast(): ShowToastFn {
   const context = use(ToastContext);
 
+  if (context == null) {
+    throw new Error(
+      'useToast must be used within a ToastViewport. Add <ToastViewport> near your app root to enable toast notifications.',
+    );
+  }
+
   return useCallback(
     (options: ToastOptions): ToastDismissFn => {
-      if (context == null) {
-        throw new Error(
-          'useToast must be used within a ToastViewport. Add <ToastViewport> near your app root to enable toast notifications.',
-        );
-      }
       const id = generateToastId();
       const entry: ToastEntry = {
         createdAt: nowEpochMilliseconds(),

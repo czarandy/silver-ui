@@ -148,7 +148,11 @@ function fromInputString(value: string): PlainTime | undefined {
   if (value === '') {
     return undefined;
   }
-  return Temporal.PlainTime.from(value);
+  try {
+    return Temporal.PlainTime.from(value);
+  } catch {
+    return undefined;
+  }
 }
 
 /**

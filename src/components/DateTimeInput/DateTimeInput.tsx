@@ -139,6 +139,20 @@ function combineDateTime(
   return resolvedDate.toPlainDateTime(resolvedTime);
 }
 
+function clampTime(
+  time: PlainTime,
+  min: PlainTime | undefined,
+  max: PlainTime | undefined,
+): PlainTime {
+  if (min != null && Temporal.PlainTime.compare(time, min) < 0) {
+    return min;
+  }
+  if (max != null && Temporal.PlainTime.compare(time, max) > 0) {
+    return max;
+  }
+  return time;
+}
+
 /**
  * A combined date and time input with calendar popover and time fields.
  */
@@ -171,9 +185,27 @@ export function DateTimeInput({
   const maxParts = useMemo(() => splitDateTime(max), [max]);
 
   const handleDateChange = useCallback(
-    (nextDate: PlainDate | undefined) =>
-      onChange(combineDateTime(nextDate, time)),
-    [onChange, time],
+    (nextDate: PlainDate | undefined) => {
+      if (nextDate == null || time == null) {
+        onChange(combineDateTime(nextDate, time));
+        return;
+      }
+      const effectiveTimeMin =
+        min != null && nextDate.equals(min.toPlainDate())
+          ? min.toPlainTime()
+          : undefined;
+      const effectiveTimeMax =
+        max != null && nextDate.equals(max.toPlainDate())
+          ? max.toPlainTime()
+          : undefined;
+      onChange(
+        combineDateTime(
+          nextDate,
+          clampTime(time, effectiveTimeMin, effectiveTimeMax),
+        ),
+      );
+    },
+    [onChange, time, min, max],
   );
   const handleTimeChange = useCallback(
     (nextTime: PlainTime | undefined) =>

@@ -86,7 +86,7 @@ describe('Table', () => {
     expect(
       screen.getByRole('columnheader', {name: 'Name'}),
     ).toBeInTheDocument();
-    expect(screen.getByText('Name')).toHaveClass('silver-fs_sm');
+    expect(screen.getByText('Name')).toHaveClass('silver-fs_md');
     expect(screen.getByRole('cell', {name: 'Alice'})).toBeInTheDocument();
     expect(screen.getByRole('cell', {name: '24'})).toBeInTheDocument();
 

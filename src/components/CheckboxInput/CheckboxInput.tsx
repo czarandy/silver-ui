@@ -292,13 +292,8 @@ export function CheckboxInput({
     </span>
   );
 
-  const labelNode = (
-    <label
-      className={cx(
-        styles.label,
-        isDisabled ? styles.labelDisabled : undefined,
-      )}
-      htmlFor={inputId}>
+  const labelContent = (
+    <>
       {labelIcon != null ? (
         <Icon color="secondary" icon={labelIcon} size="sm" />
       ) : null}
@@ -316,6 +311,21 @@ export function CheckboxInput({
           </span>
         </Tooltip>
       ) : null}
+    </>
+  );
+
+  const labelNode = (
+    <label
+      className={cx(
+        styles.label,
+        isDisabled ? styles.labelDisabled : undefined,
+      )}
+      htmlFor={inputId}>
+      {isLabelHidden ? (
+        <VisuallyHidden>{labelContent}</VisuallyHidden>
+      ) : (
+        labelContent
+      )}
     </label>
   );
 
@@ -351,7 +361,7 @@ export function CheckboxInput({
 
   return (
     <div className={cx(styles.root, className)} style={style}>
-      {isLabelHidden ? <VisuallyHidden>{item}</VisuallyHidden> : item}
+      {item}
       {statusNode}
     </div>
   );

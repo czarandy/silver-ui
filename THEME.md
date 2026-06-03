@@ -75,12 +75,12 @@ automatically to theme mode.
 
 The main brand color used for buttons, links, focus rings, and selected states.
 
-| Variable                         | Light                              | Dark |
-| -------------------------------- | ---------------------------------- | ---- |
-| `--silver-colors-primary`        | ![](swatches/547a95.svg) `#547A95` | same |
-| `--silver-colors-primary-hover`  | ![](swatches/45647a.svg) `#45647a` | same |
-| `--silver-colors-primary-active` | ![](swatches/374f61.svg) `#374f61` | same |
-| `--silver-colors-primary-subtle` | ![](swatches/d0dbe3.svg) `#d0dbe3` | same |
+| Variable                         | Light                              | Dark                               |
+| -------------------------------- | ---------------------------------- | ---------------------------------- |
+| `--silver-colors-primary`        | ![](swatches/547a95.svg) `#547A95` | ![](swatches/547a95.svg) `#547A95` |
+| `--silver-colors-primary-hover`  | ![](swatches/45647a.svg) `#45647a` | ![](swatches/45647a.svg) `#45647a` |
+| `--silver-colors-primary-active` | ![](swatches/374f61.svg) `#374f61` | ![](swatches/374f61.svg) `#374f61` |
+| `--silver-colors-primary-subtle` | ![](swatches/d0dbe3.svg) `#d0dbe3` | ![](swatches/d0dbe3.svg) `#d0dbe3` |
 
 ### Destructive colors
 
@@ -91,7 +91,7 @@ Used for destructive actions (delete buttons, error confirmations).
 | `--silver-colors-destructive`        | ![](swatches/e31a3b.svg) `#e31a3b` | ![](swatches/d92644.svg) `#d92644` |
 | `--silver-colors-destructive-hover`  | ![](swatches/842e3d.svg) `#842e3d` | ![](swatches/da4e65.svg) `#da4e65` |
 | `--silver-colors-destructive-active` | ![](swatches/6b2e38.svg) `#6b2e38` | ![](swatches/e28d9b.svg) `#e28d9b` |
-| `--silver-colors-destructive-fg`     | ![](swatches/fff.svg) `#fff`       | same                               |
+| `--silver-colors-destructive-fg`     | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
 
 ### Foreground colors
 
@@ -102,7 +102,7 @@ Text and icon colors.
 | `--silver-colors-fg`            | ![](swatches/22272d.svg) `#22272d` | ![](swatches/e9ebee.svg) `#e9ebee` |
 | `--silver-colors-fg-muted`      | ![](swatches/576573.svg) `#576573` | ![](swatches/b1bac3.svg) `#b1bac3` |
 | `--silver-colors-fg-disabled`   | ![](swatches/b1bac3.svg) `#b1bac3` | ![](swatches/576573.svg) `#576573` |
-| `--silver-colors-fg-on-primary` | ![](swatches/fff.svg) `#fff`       | same                               |
+| `--silver-colors-fg-on-primary` | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
 
 ### Background colors
 
@@ -113,7 +113,7 @@ Surface and container backgrounds.
 | `--silver-colors-bg`              | ![](swatches/ffffff.svg) `#ffffff` | ![](swatches/22272d.svg) `#22272d` |
 | `--silver-colors-bg-subtle`       | ![](swatches/e9ebee.svg) `#e9ebee` | ![](swatches/333b43.svg) `#333b43` |
 | `--silver-colors-bg-hover`        | ![](swatches/d5d9de.svg) `#d5d9de` | ![](swatches/45505b.svg) `#45505b` |
-| `--silver-colors-bg-selected`     | primary subtle                     | same                               |
+| `--silver-colors-bg-selected`     | ![](swatches/d0dbe3.svg) `#d0dbe3` | ![](swatches/d0dbe3.svg) `#d0dbe3` |
 | `--silver-colors-bg-ghost-hover`  | `rgba(0,0,0,0.06)`                 | `rgba(255,255,255,0.08)`           |
 | `--silver-colors-bg-ghost-active` | `rgba(0,0,0,0.1)`                  | `rgba(255,255,255,0.12)`           |
 
@@ -157,37 +157,37 @@ Loading placeholder pulse animation.
 
 Used by Alert, Badge, Toast, Stepper, and form validation states.
 
-| Variable                                   | Light                              | Dark        |
-| ------------------------------------------ | ---------------------------------- | ----------- |
-| `--silver-colors-status-success-fg`        | ![](swatches/108627.svg) `#108627` | same        |
-| `--silver-colors-status-success-border`    | green 600                          | green 400   |
-| `--silver-colors-status-success-solid`     | green 600                          | green 500   |
-| `--silver-colors-status-success-solid-fg`  | ![](swatches/fff.svg) `#fff`       | same        |
-| `--silver-colors-status-error-fg`          | ![](swatches/d92644.svg) `#d92644` | same        |
-| `--silver-colors-status-error-border`      | red 600                            | red 400     |
-| `--silver-colors-status-error-solid`       | red 600                            | red 500     |
-| `--silver-colors-status-error-solid-fg`    | ![](swatches/fff.svg) `#fff`       | same        |
-| `--silver-colors-status-warning-fg`        | yellow 500                         | same        |
-| `--silver-colors-status-warning-border`    | yellow 500                         | yellow 400  |
-| `--silver-colors-status-warning-solid`     | yellow 500                         | yellow 400  |
-| `--silver-colors-status-warning-solid-fg`  | ![](swatches/fff.svg) `#fff`       | same        |
-| `--silver-colors-status-info-fg`           | ![](swatches/0164e0.svg) `#0164e0` | same        |
-| `--silver-colors-status-info-solid`        | primary                            | same        |
-| `--silver-colors-status-info-solid-fg`     | fg on-primary                      | same        |
-| `--silver-colors-status-neutral-solid`     | neutral 500                        | neutral 400 |
-| `--silver-colors-status-neutral-solid-fg`  | ![](swatches/fff.svg) `#fff`       | same        |
-| `--silver-colors-status-disabled-solid`    | neutral 400                        | neutral 600 |
-| `--silver-colors-status-disabled-solid-fg` | ![](swatches/fff.svg) `#fff`       | same        |
+| Variable                                   | Light                              | Dark                               |
+| ------------------------------------------ | ---------------------------------- | ---------------------------------- |
+| `--silver-colors-status-success-fg`        | ![](swatches/108627.svg) `#108627` | ![](swatches/108627.svg) `#108627` |
+| `--silver-colors-status-success-border`    | ![](swatches/44af60.svg) `#44af60` | ![](swatches/6abe80.svg) `#6abe80` |
+| `--silver-colors-status-success-solid`     | ![](swatches/44af60.svg) `#44af60` | ![](swatches/65c37e.svg) `#65c37e` |
+| `--silver-colors-status-success-solid-fg`  | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
+| `--silver-colors-status-error-fg`          | ![](swatches/d92644.svg) `#d92644` | ![](swatches/d92644.svg) `#d92644` |
+| `--silver-colors-status-error-border`      | ![](swatches/e31a3b.svg) `#e31a3b` | ![](swatches/da4e65.svg) `#da4e65` |
+| `--silver-colors-status-error-solid`       | ![](swatches/e31a3b.svg) `#e31a3b` | ![](swatches/d92644.svg) `#d92644` |
+| `--silver-colors-status-error-solid-fg`    | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
+| `--silver-colors-status-warning-fg`        | ![](swatches/d9a626.svg) `#d9a626` | ![](swatches/d9a626.svg) `#d9a626` |
+| `--silver-colors-status-warning-border`    | ![](swatches/d9a626.svg) `#d9a626` | ![](swatches/d4b054.svg) `#d4b054` |
+| `--silver-colors-status-warning-solid`     | ![](swatches/d9a626.svg) `#d9a626` | ![](swatches/d4b054.svg) `#d4b054` |
+| `--silver-colors-status-warning-solid-fg`  | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
+| `--silver-colors-status-info-fg`           | ![](swatches/0164e0.svg) `#0164e0` | ![](swatches/0164e0.svg) `#0164e0` |
+| `--silver-colors-status-info-solid`        | ![](swatches/547a95.svg) `#547A95` | ![](swatches/547a95.svg) `#547A95` |
+| `--silver-colors-status-info-solid-fg`     | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
+| `--silver-colors-status-neutral-solid`     | ![](swatches/6a7b8c.svg) `#6A7B8C` | ![](swatches/708090.svg) `#708090` |
+| `--silver-colors-status-neutral-solid-fg`  | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
+| `--silver-colors-status-disabled-solid`    | ![](swatches/708090.svg) `#708090` | ![](swatches/576573.svg) `#576573` |
+| `--silver-colors-status-disabled-solid-fg` | ![](swatches/fff.svg) `#fff`       | ![](swatches/fff.svg) `#fff`       |
 
 ### Presence colors
 
 Online/offline/error indicators on avatars.
 
-| Variable                           | Light       | Dark        |
-| ---------------------------------- | ----------- | ----------- |
-| `--silver-colors-presence-success` | green 500   | green 400   |
-| `--silver-colors-presence-neutral` | neutral 500 | neutral 400 |
-| `--silver-colors-presence-error`   | red 600     | red 400     |
+| Variable                           | Light                              | Dark                               |
+| ---------------------------------- | ---------------------------------- | ---------------------------------- |
+| `--silver-colors-presence-success` | ![](swatches/65c37e.svg) `#65c37e` | ![](swatches/6abe80.svg) `#6abe80` |
+| `--silver-colors-presence-neutral` | ![](swatches/6a7b8c.svg) `#6A7B8C` | ![](swatches/708090.svg) `#708090` |
+| `--silver-colors-presence-error`   | ![](swatches/e31a3b.svg) `#e31a3b` | ![](swatches/da4e65.svg) `#da4e65` |
 
 ### Surface colors
 
@@ -200,30 +200,30 @@ Available colors: `blue`, `cyan`, `gray`, `green`, `orange`, `pink`, `purple`,
 
 Example variables for `blue`:
 
-| Variable                              | Light    | Dark     |
-| ------------------------------------- | -------- | -------- |
-| `--silver-colors-surface-blue`        | blue 100 | blue 900 |
-| `--silver-colors-surface-blue-fg`     | blue 800 | blue 200 |
-| `--silver-colors-surface-blue-hover`  | blue 200 | blue 800 |
-| `--silver-colors-surface-blue-accent` | blue 600 | blue 400 |
+| Variable                              | Light                              | Dark                               |
+| ------------------------------------- | ---------------------------------- | ---------------------------------- |
+| `--silver-colors-surface-blue`        | ![](swatches/cce6fe.svg) `#cce6fe` | ![](swatches/1a3d5d.svg) `#1a3d5d` |
+| `--silver-colors-surface-blue-fg`     | ![](swatches/2e4b6b.svg) `#2e4b6b` | ![](swatches/bed5ef.svg) `#bed5ef` |
+| `--silver-colors-surface-blue-hover`  | ![](swatches/bed5ef.svg) `#bed5ef` | ![](swatches/2e4b6b.svg) `#2e4b6b` |
+| `--silver-colors-surface-blue-accent` | ![](swatches/2b69ab.svg) `#2b69ab` | ![](swatches/5492d4.svg) `#5492d4` |
 
 ### Icon colors
 
 Semantic icon color tokens. Components like Icon use these, but they resolve to
 other semantic tokens so overriding the source token is usually sufficient.
 
-| Variable                                                                         | Resolves to         |
-| -------------------------------------------------------------------------------- | ------------------- |
-| `--silver-colors-icon-primary`                                                   | `fg`                |
-| `--silver-colors-icon-secondary`                                                 | `fg.muted`          |
-| `--silver-colors-icon-tertiary`                                                  | neutral 500         |
-| `--silver-colors-icon-disabled`                                                  | neutral 400 / 600   |
-| `--silver-colors-icon-accent`                                                    | `primary`           |
-| `--silver-colors-icon-success`                                                   | `status.success.fg` |
-| `--silver-colors-icon-error`                                                     | `status.error.fg`   |
-| `--silver-colors-icon-warning`                                                   | `status.warning.fg` |
-| `--silver-colors-icon-info`                                                      | `status.info.fg`    |
-| `--silver-colors-icon-{blue,red,green,gray,cyan,teal,yellow,orange,pink,purple}` | color 600           |
+| Variable                                                                         | Resolves to                                    |
+| -------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `--silver-colors-icon-primary`                                                   | `fg`                                           |
+| `--silver-colors-icon-secondary`                                                 | `fg.muted`                                     |
+| `--silver-colors-icon-tertiary`                                                  | ![](swatches/6a7b8c.svg) `#6A7B8C`             |
+| `--silver-colors-icon-disabled`                                                  | ![](swatches/708090.svg) `#708090` / `#576573` |
+| `--silver-colors-icon-accent`                                                    | `primary`                                      |
+| `--silver-colors-icon-success`                                                   | `status.success.fg`                            |
+| `--silver-colors-icon-error`                                                     | `status.error.fg`                              |
+| `--silver-colors-icon-warning`                                                   | `status.warning.fg`                            |
+| `--silver-colors-icon-info`                                                      | `status.info.fg`                               |
+| `--silver-colors-icon-{blue,red,green,gray,cyan,teal,yellow,orange,pink,purple}` | per-color 600 step                             |
 
 ---
 

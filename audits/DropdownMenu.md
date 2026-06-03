@@ -12,7 +12,9 @@ DropdownMenu is a button-triggered menu for grouped actions, built on top of the
 
 ### High
 
-- **Trigger button does not set `aria-haspopup` or `aria-expanded`.** The `Button` rendered as the trigger (line 183-191) does not receive `aria-haspopup="menu"` or `aria-expanded={isOpen}`. Screen reader users have no indication that this button opens a menu or what its current state is. The Popover component may handle some of this, but the Button's own ARIA attributes are not set. This is a significant accessibility gap.
+None
+
+**Note:** A previously reported issue about the trigger button not setting `aria-haspopup` or `aria-expanded` was a false positive -- the Popover component already handles these attributes imperatively via `attachTrigger`.
 
 ### Medium
 
@@ -32,9 +34,8 @@ DropdownMenu is a button-triggered menu for grouped actions, built on top of the
 
 ## Recommendations
 
-1. Pass `aria-haspopup="menu"` and `aria-expanded={isOpen}` to the trigger Button. This is a critical accessibility fix.
-2. Either omit `endContent` from `DropdownMenuButtonProps` or merge the consumer's `endContent` with the chevron instead of overriding it.
-3. Add keyboard navigation tests for arrow keys, Home/End, Escape, and character search within the DropdownMenu test suite.
-4. Add a dev-mode warning when neither `items` nor `children` is provided.
-5. Consider using a label-specific selector or data attribute for type-ahead search instead of `textContent`, to avoid matching description text.
-6. Add stories for controlled state, `hasChevron={false}`, and `hasAutoFocus={false}`.
+1. Either omit `endContent` from `DropdownMenuButtonProps` or merge the consumer's `endContent` with the chevron instead of overriding it.
+2. Add keyboard navigation tests for arrow keys, Home/End, Escape, and character search within the DropdownMenu test suite.
+3. Add a dev-mode warning when neither `items` nor `children` is provided.
+4. Consider using a label-specific selector or data attribute for type-ahead search instead of `textContent`, to avoid matching description text.
+5. Add stories for controlled state, `hasChevron={false}`, and `hasAutoFocus={false}`.

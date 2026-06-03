@@ -15,6 +15,14 @@ import type {LinkComponent as LinkComponentType} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Text} from '../Text';
 
+const SELECTABLE_ROLES = new Set([
+  'option',
+  'tab',
+  'row',
+  'gridcell',
+  'treeitem',
+]);
+
 export type ItemAlign = 'center' | 'start';
 export type ItemElement = 'div' | 'li' | 'span';
 
@@ -366,7 +374,13 @@ export function Item({
         isDisabled ? styles.disabledContent : undefined,
       )}
       href={href}
-      onClick={onClick}
+      onClick={(e: MouseEvent<HTMLElement>) => {
+        if (isDisabled) {
+          e.preventDefault();
+          return;
+        }
+        onClick?.(e);
+      }}
       ref={undefined}
       rel={linkRel}
       tabIndex={isDisabled ? -1 : undefined}
@@ -399,7 +413,11 @@ export function Item({
   return (
     <Component
       aria-disabled={isDisabled || undefined}
-      aria-selected={isSelected || undefined}
+      aria-selected={
+        isSelected && role != null && SELECTABLE_ROLES.has(role)
+          ? true
+          : undefined
+      }
       className={cx(
         styles.root,
         width === 'full' ? styles.widthFull : undefined,

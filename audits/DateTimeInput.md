@@ -8,7 +8,7 @@ A compound input composing `DateInput` and `TimeInput` side by side within a sin
 
 ### Critical
 
-- **Time min/max constraint logic is incomplete.** The component only applies time constraints when the selected date equals the min/max date boundary. This is correct for boundary days, but it completely ignores time constraints on intermediate days. However, the more serious problem: when the user changes the **date** to match a boundary date, the existing time value is not validated against the newly applicable time constraint. For example: if `min` is `2026-05-01T08:00` and the user has selected `2026-05-02T06:00` (valid because May 2 has no time constraint), then changes the date to `2026-05-01`, the resulting `PlainDateTime` becomes `2026-05-01T06:00`, which violates the minimum. The component fires `onChange` with this invalid value.
+None
 
 ### High
 
@@ -31,8 +31,7 @@ A compound input composing `DateInput` and `TimeInput` side by side within a sin
 
 ## Recommendations
 
-1. **Fix the time constraint validation** to reject invalid date-time combinations when the date is changed to a boundary date.
-2. Reconsider the `Temporal.Now` fallback behavior -- consider requiring both date and time before emitting a value, or visually showing the auto-filled value.
-3. Fix the outer `<label>` to associate with at least one input, or use `labelAs="span"` with `aria-labelledby` on a group element.
-4. Add a `hasClear` prop to allow clearing the value.
-5. Add comprehensive stories and tests for constraint behavior, sizes, and optional/required states.
+1. Reconsider the `Temporal.Now` fallback behavior -- consider requiring both date and time before emitting a value, or visually showing the auto-filled value.
+2. Fix the outer `<label>` to associate with at least one input, or use `labelAs="span"` with `aria-labelledby` on a group element.
+3. Add a `hasClear` prop to allow clearing the value.
+4. Add comprehensive stories and tests for constraint behavior, sizes, and optional/required states.

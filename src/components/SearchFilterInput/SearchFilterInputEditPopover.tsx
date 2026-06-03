@@ -459,17 +459,22 @@ export function SearchFilterInputEditPopover({
   const isNestedType = operatorValue?.type === 'nested';
 
   useEffect(() => {
+    let innerFrame: number | undefined;
     const frame = requestAnimationFrame(() => {
-      const innerFrame = requestAnimationFrame(() => {
+      innerFrame = requestAnimationFrame(() => {
         valueEditorRef.current
           ?.querySelector<HTMLElement>(
             'input:not([disabled]), button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
           )
           ?.focus();
       });
-      return () => cancelAnimationFrame(innerFrame);
     });
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      if (innerFrame != null) {
+        cancelAnimationFrame(innerFrame);
+      }
+    };
   }, []);
 
   useEffect(() => {

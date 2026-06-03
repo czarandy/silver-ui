@@ -219,14 +219,15 @@ export function Link({
       aria-label={getAriaLabel(label, opensInNewTab)}
       className={cx(linkRecipe({color, hasUnderline, size, weight}), className)}
       data-testid={dataTestId}
-      href={href}
+      href={isDisabled ? undefined : href}
       onClick={handleClick}
       ref={ref}
-      rel={rel}
+      rel={isDisabled ? undefined : rel}
+      role={isDisabled && hrefFromProps != null ? 'link' : undefined}
       style={style}
       tabIndex={isDisabled ? -1 : undefined}
-      target={target}
-      to={Component === 'a' ? undefined : href}>
+      target={isDisabled ? undefined : target}
+      to={isDisabled ? undefined : Component === 'a' ? undefined : href}>
       {children}
       {opensInNewTab && label == null ? (
         <>

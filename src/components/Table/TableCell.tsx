@@ -48,9 +48,9 @@ const styles = {
     maxWidth: 0,
   }),
   density: {
-    balanced: css({fontSize: 'sm', px: '3', py: '2'}),
-    compact: css({fontSize: 'sm', px: '2', py: '1'}),
-    spacious: css({fontSize: 'sm', px: '4', py: '3'}),
+    balanced: css({fontSize: 'md', px: '3', py: '2'}),
+    compact: css({fontSize: 'md', px: '2', py: '1'}),
+    spacious: css({fontSize: 'md', px: '4', py: '3'}),
   },
   dividerColumns: css({
     borderInlineEndWidth: 'default',

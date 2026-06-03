@@ -300,14 +300,14 @@ export default defineConfig({
           skeleton: {
             DEFAULT: {
               value: {
-                base: '{colors.silver-neutral.200}',
-                _dark: '{colors.silver-neutral.700}',
+                base: '{colors.silver-neutral.100}',
+                _dark: '{colors.silver-neutral.600}',
               },
             },
             shimmer: {
               value: {
-                base: '{colors.silver-neutral.100}',
-                _dark: '{colors.silver-neutral.600}',
+                base: '{colors.silver-neutral.50}',
+                _dark: '{colors.silver-neutral.500}',
               },
             },
           },

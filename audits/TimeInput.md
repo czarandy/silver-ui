@@ -12,7 +12,7 @@ Time picker input field using the native `<input type="time">` element with Temp
 
 ### High
 
-- **`fromInputString` throws on invalid input.** The `fromInputString` function (line 147) calls `Temporal.PlainTime.from(value)` without a try/catch. If the browser produces an unexpected string format or the user somehow enters an invalid time string, this will throw an unhandled exception and crash the component. While `<input type="time">` typically produces well-formed values, edge cases exist (e.g., some browsers on certain locales, or programmatic value setting). Wrap in try/catch and call `onChange(undefined)` on parse failure.
+None
 
 ### Medium
 
@@ -34,9 +34,8 @@ Time picker input field using the native `<input type="time">` element with Temp
 
 ## Recommendations
 
-1. Wrap `Temporal.PlainTime.from(value)` in `fromInputString` with a try/catch to prevent crashes from unexpected input formats.
-2. Significantly expand test coverage. At minimum add tests for: `hasClear` button, `isDisabled`, `isLoading` (aria-busy + spinner), `status` (aria-invalid), `hasSeconds`, `ref` forwarding, and `data-testid`.
-3. Either remove the `placeholder` prop or document that it may not be visible in browsers with native time input UI.
-4. Consider adding `onBlur`/`onFocus` callbacks for parity with other input components.
-5. Document the `step`/`hasSeconds` interaction in JSDoc or stories.
-6. Consider whether hiding the native time picker indicator is desirable without providing an alternative UI.
+1. Significantly expand test coverage. At minimum add tests for: `hasClear` button, `isDisabled`, `isLoading` (aria-busy + spinner), `status` (aria-invalid), `hasSeconds`, `ref` forwarding, and `data-testid`.
+2. Either remove the `placeholder` prop or document that it may not be visible in browsers with native time input UI.
+3. Consider adding `onBlur`/`onFocus` callbacks for parity with other input components.
+4. Document the `step`/`hasSeconds` interaction in JSDoc or stories.
+5. Consider whether hiding the native time picker indicator is desirable without providing an alternative UI.

@@ -655,12 +655,7 @@ export function MultiSelect({
   }
 
   const menu = (
-    <div
-      aria-label={`${label} options`}
-      aria-multiselectable="true"
-      className={styles.menu}
-      id={listboxId}
-      role="listbox">
+    <>
       {hasSearch ? (
         <input
           aria-activedescendant={activeDescendantId}
@@ -678,26 +673,33 @@ export function MultiSelect({
           value={query}
         />
       ) : null}
-      {hasSelectAll ? (
-        <button
-          aria-selected={allSelected}
-          className={styles.option}
-          onClick={toggleAll}
-          role="option"
-          type="button">
-          <span
-            aria-hidden="true"
-            className={cx(
-              styles.checkbox,
-              allSelected ? styles.checkboxSelected : undefined,
-            )}>
-            {allSelected ? <Icon icon={Check} size="sm" /> : null}
-          </span>
-          <span className={styles.optionContent}>{selectAllLabel}</span>
-        </button>
-      ) : null}
-      {optionNodes}
-    </div>
+      <div
+        aria-label={`${label} options`}
+        aria-multiselectable="true"
+        className={styles.menu}
+        id={listboxId}
+        role="listbox">
+        {hasSelectAll ? (
+          <button
+            aria-selected={allSelected}
+            className={styles.option}
+            onClick={toggleAll}
+            role="option"
+            type="button">
+            <span
+              aria-hidden="true"
+              className={cx(
+                styles.checkbox,
+                allSelected ? styles.checkboxSelected : undefined,
+              )}>
+              {allSelected ? <Icon icon={Check} size="sm" /> : null}
+            </span>
+            <span className={styles.optionContent}>{selectAllLabel}</span>
+          </button>
+        ) : null}
+        {optionNodes}
+      </div>
+    </>
   );
 
   const trigger = (

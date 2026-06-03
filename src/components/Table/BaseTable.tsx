@@ -288,7 +288,7 @@ function BaseTableInner<T extends Record<string, unknown>>({
         <Text
           color="secondary"
           maxLines={1}
-          size="sm"
+          size="md"
           type="body"
           weight="semibold">
           {resolvedContent}

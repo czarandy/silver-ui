@@ -12,7 +12,7 @@ Kbd displays keyboard shortcuts as styled key badges. It parses a `+`-delimited 
 
 ### High
 
-- **Module-level mutable cache (`cachedIsMac`) breaks SSR and test isolation.** The `cachedIsMac` variable (line 90) is a module-level singleton that is set once and never cleared except by the exported `resetPlatformCache()`. In SSR environments, the cache will be set to `false` (since `navigator` is undefined) on the server and then remain `false` on the client hydration, causing Mac users to see "Ctrl" instead of the command symbol. The `resetPlatformCache` function helps with tests but doesn't solve the SSR mismatch. Consider using a ref or state-based approach, or detecting platform per-render in the component (the computation is trivial).
+None
 
 ### Medium
 

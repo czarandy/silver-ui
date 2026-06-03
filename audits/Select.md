@@ -12,7 +12,7 @@ Single-select dropdown field built on custom listbox navigation with popover-bas
 
 ### High
 
-- **Search input placed inside the `role="listbox"` container.** The `<input type="search">` for filtering is rendered as a direct child of the `<div role="listbox">`. ARIA spec requires listbox children to be `role="option"` (or groups thereof). Screen readers may not announce the search input correctly or may skip it entirely. The search input should be placed outside the listbox or the listbox should be restructured so the search is a sibling.
+None
 
 ### Medium
 
@@ -31,8 +31,7 @@ Single-select dropdown field built on custom listbox navigation with popover-bas
 
 ## Recommendations
 
-1. Move the search `<input>` outside of the `role="listbox"` container. A common pattern is to place it in the popover but above/before the listbox.
-2. Replace `<button role="option">` with `<div role="option">` to avoid conflicting role semantics.
-3. Add a story for disabled options to demonstrate partial-disable behavior.
-4. Add a test for ref forwarding to the combobox button.
-5. Consider debouncing the search filter for very large option sets to avoid blocking the main thread during rapid typing.
+1. Replace `<button role="option">` with `<div role="option">` to avoid conflicting role semantics.
+2. Add a story for disabled options to demonstrate partial-disable behavior.
+3. Add a test for ref forwarding to the combobox button.
+4. Consider debouncing the search filter for very large option sets to avoid blocking the main thread during rapid typing.

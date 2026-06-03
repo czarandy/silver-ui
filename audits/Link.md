@@ -12,7 +12,7 @@ Link is a polymorphic anchor component with built-in accessibility for external 
 
 ### High
 
-- **Disabled links remain in the accessibility tree as links**: When `isDisabled` is true, the component renders `aria-disabled="true"` and `tabIndex={-1}`, but the element is still an `<a>` tag with an `href`. Screen readers will still announce it as a link. The WAI-ARIA recommendation for truly disabled links is to either remove the `href` entirely or switch to a `<span>` with `role="link"`. The current approach may confuse assistive technology users who expect to be able to activate the link.
+None
 
 ### Medium
 
@@ -29,7 +29,6 @@ Link is a polymorphic anchor component with built-in accessibility for external 
 
 ## Recommendations
 
-- Reconsider the disabled link implementation. Either render a `<span role="link">` when disabled, or remove the `href` attribute to truly prevent navigation at the HTML level.
 - Align `LinkComponentProps` with all ARIA attributes accepted by `Link` to prevent type mismatches with custom link components.
 - The test suite is comprehensive (33 tests) covering all major behaviors: href, fallback href, disabled state, external links, tooltips, custom components, LinkProvider, ARIA attributes, className/style, refs, and keyboard interaction.
 - Stories are thorough with 22 stories covering all color variants, weights, sizes, underline, external links, disabled states, tooltips, custom components, and inline usage.

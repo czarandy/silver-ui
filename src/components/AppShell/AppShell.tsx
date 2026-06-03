@@ -249,8 +249,11 @@ export function AppShell({
       isMobileNavEnabled: mobileNavEnabled,
       isMobileNavOpen,
       openMobileNav: () => mobileNavEnabled && setMobileNavOpen(true),
-      toggleMobileNav: () =>
-        mobileNavEnabled && setMobileNavOpen(!isMobileNavOpen),
+      toggleMobileNav: () => {
+        if (mobileNavEnabled) {
+          setIsMobileNavOpen(prev => !prev);
+        }
+      },
     }),
     [isBelowBreakpoint, isMobileNavOpen, mobileNavEnabled, setMobileNavOpen],
   );

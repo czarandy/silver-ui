@@ -553,11 +553,7 @@ export function Select({
   }
 
   const menu = (
-    <div
-      aria-label={`${label} options`}
-      className={styles.menu}
-      id={listboxId}
-      role="listbox">
+    <>
       {hasSearch ? (
         <input
           aria-activedescendant={activeDescendantId}
@@ -575,8 +571,14 @@ export function Select({
           value={query}
         />
       ) : null}
-      {optionNodes}
-    </div>
+      <div
+        aria-label={`${label} options`}
+        className={styles.menu}
+        id={listboxId}
+        role="listbox">
+        {optionNodes}
+      </div>
+    </>
   );
 
   const necessity: FieldNecessity = {isOptional, isRequired};

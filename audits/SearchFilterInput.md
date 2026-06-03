@@ -13,7 +13,6 @@ SearchFilterInput is a complex structured search control where each tag represen
 ### High
 
 - **`onEnter` prop is accepted but silently unused in `SearchFilterInputValueEditor`**: At line 635 of `SearchFilterInputValueEditor.tsx`, the `onEnter` prop is consumed via a bare `void onEnter;` statement, meaning it is never actually wired up to any input's Enter key handler. The `SearchFilterInputEditPopover` passes `onEnter={handleSave}` (line 628), expecting that pressing Enter in the value editor would save the filter. Instead, the Enter key is only handled by the popover-level `onKeyDown` handler (line 570-584), which works but is a separate mechanism. This means the `onEnter` prop on `SearchFilterInputValueEditor` is dead code.
-- **Memory leak potential in `useEffect` for auto-focus**: In `SearchFilterInputEditPopover.tsx` (lines 461-473), the effect uses nested `requestAnimationFrame` calls. The inner frame's cleanup `return () => cancelAnimationFrame(innerFrame)` is inside the outer callback, not the effect cleanup function. The effect's cleanup only cancels the outer frame. If the outer frame fires but the component unmounts before the inner frame fires, the inner frame will execute on an unmounted component.
 
 ### Medium
 
@@ -39,10 +38,9 @@ SearchFilterInput is a complex structured search control where each tag represen
 ## Recommendations
 
 1. Wire up the `onEnter` prop in `SearchFilterInputValueEditor` or remove it from the interface to avoid dead code confusion.
-2. Fix the `useEffect` cleanup in `SearchFilterInputEditPopover` to properly cancel the inner `requestAnimationFrame`.
-3. Add integration tests for the core interactive flows: adding a filter, editing a filter, removing a filter, and the save/cancel/delete actions in the edit popover.
-4. Consider using stable IDs for filter tags (e.g., based on field+operator+value hash) rather than array indices.
-5. Wrap `handleTagClick`, `renderTag`, and `renderItem` in `useCallback`/`useMemo` to prevent unnecessary re-renders.
-6. Fix the stale closure in `syncToParent` by using a ref for `partialFilter` or restructuring the callback.
-7. Add stories for `components`, `handleRef`, `timezoneID`, and `onBlur`/`onFocus` to improve documentation coverage.
-8. Despite these issues, the component is impressively comprehensive: it supports 13+ filter value types, nested filters, custom editors/tags, entity photos, combobox aliases, content search, and a well-structured configuration system. The type safety through discriminated unions is excellent.
+2. Add integration tests for the core interactive flows: adding a filter, editing a filter, removing a filter, and the save/cancel/delete actions in the edit popover.
+3. Consider using stable IDs for filter tags (e.g., based on field+operator+value hash) rather than array indices.
+4. Wrap `handleTagClick`, `renderTag`, and `renderItem` in `useCallback`/`useMemo` to prevent unnecessary re-renders.
+5. Fix the stale closure in `syncToParent` by using a ref for `partialFilter` or restructuring the callback.
+6. Add stories for `components`, `handleRef`, `timezoneID`, and `onBlur`/`onFocus` to improve documentation coverage.
+7. Despite these issues, the component is impressively comprehensive: it supports 13+ filter value types, nested filters, custom editors/tags, entity photos, combobox aliases, content search, and a well-structured configuration system. The type safety through discriminated unions is excellent.
