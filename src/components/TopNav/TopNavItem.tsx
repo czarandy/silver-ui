@@ -6,6 +6,7 @@ import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
+import {Text} from '../Text';
 import {useTopNavRenderMode} from './TopNavContext';
 import {topNavItemRecipe} from './TopNavItem.recipe';
 
@@ -100,6 +101,11 @@ export function TopNavItem({
   const renderMode = useTopNavRenderMode();
   const {closeMobileNav} = useAppShellMobile();
   const isDrawer = renderMode === 'drawer';
+  const labelContent = children ?? (
+    <Text color="inherit" size="md" type="body" weight="inherit">
+      {label}
+    </Text>
+  );
 
   return (
     <LinkComponent
@@ -133,7 +139,7 @@ export function TopNavItem({
       {icon != null ? (
         <Icon aria-hidden="true" color="inherit" icon={icon} size="md" />
       ) : null}
-      {!isIconOnly ? (children ?? label) : null}
+      {!isIconOnly ? labelContent : null}
     </LinkComponent>
   );
 }

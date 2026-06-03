@@ -184,7 +184,10 @@ export function DropdownMenu({
         {...button}
         data-testid={dataTestId}
         endContent={
-          hasChevron ? <Icon icon={ChevronDown} size="sm" /> : undefined
+          <>
+            {button.endContent}
+            {hasChevron ? <Icon icon={ChevronDown} size="sm" /> : null}
+          </>
         }
         onClick={onClick}
         ref={ref}

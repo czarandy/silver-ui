@@ -152,6 +152,11 @@ interface ButtonBaseProps {
    */
   size?: ButtonSize;
   /**
+   * Arbitrary content rendered before the label (after the icon, if present).
+   * Hidden in icon-only mode.
+   */
+  startContent?: ReactNode;
+  /**
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
@@ -224,6 +229,11 @@ const styles = {
     alignItems: 'center',
     color: 'inherit',
   }),
+  startContent: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    color: 'inherit',
+  }),
   loadingIndicator: css({
     display: 'inline-flex',
     alignItems: 'center',
@@ -262,6 +272,7 @@ export function Button({
   icon,
   isIconOnly = false,
   endContent,
+  startContent,
   tooltip,
   onClick,
   onKeyDown,
@@ -280,7 +291,11 @@ export function Button({
   const ariaLabel =
     ariaLabelProp ??
     getAriaLabel(
-      isIconOnly || isLoading || endContent != null || opensInNewTab
+      isIconOnly ||
+        isLoading ||
+        startContent != null ||
+        endContent != null ||
+        opensInNewTab
         ? label
         : undefined,
       opensInNewTab,
@@ -339,6 +354,9 @@ export function Button({
           <span aria-hidden="true" className={styles.icon}>
             <Icon icon={icon} size={size} />
           </span>
+        ) : null}
+        {!isIconOnly && startContent != null ? (
+          <span className={styles.startContent}>{startContent}</span>
         ) : null}
         {!isIconOnly && <span className={styles.label}>{label}</span>}
         {!isIconOnly && endContent != null ? (

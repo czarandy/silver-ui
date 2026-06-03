@@ -173,4 +173,21 @@ describe('DropdownMenu', () => {
     await user.click(screen.getByRole('button', {name: 'Actions'}));
     expect(screen.getByText('⌘E')).toBeInTheDocument();
   });
+
+  it('renders button endContent alongside the chevron', () => {
+    render(
+      <DropdownMenu
+        button={{
+          endContent: <span data-testid="btn-end">99</span>,
+          label: 'Inbox',
+        }}
+        items={[{label: 'Edit'}]}
+      />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Inbox'});
+    expect(screen.getByTestId('btn-end')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying chevron SVG is also present
+    expect(button.querySelector('svg')).toBeInTheDocument();
+  });
 });

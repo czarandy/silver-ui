@@ -326,11 +326,11 @@ selects, etc.). Override these to change the size system globally.
 
 #### Component font sizes
 
-| Variable                           | Value  |
-| ---------------------------------- | ------ |
-| `--silver-font-sizes-component-sm` | `14px` |
-| `--silver-font-sizes-component-md` | `14px` |
-| `--silver-font-sizes-component-lg` | `14px` |
+| Variable                           | Value             |
+| ---------------------------------- | ----------------- |
+| `--silver-font-sizes-component-sm` | `0.875rem` (14px) |
+| `--silver-font-sizes-component-md` | `1rem` (16px)     |
+| `--silver-font-sizes-component-lg` | `1rem` (16px)     |
 
 ---
 

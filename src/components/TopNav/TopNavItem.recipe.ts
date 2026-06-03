@@ -12,7 +12,7 @@ export const topNavItemRecipe = cva({
     color: 'fg.muted',
     textDecoration: 'none',
     fontFamily: 'body',
-    fontSize: 'sm',
+    fontSize: 'md',
     fontWeight: 'medium',
     cursor: 'pointer',
     _hover: {bg: 'bg.hover'},

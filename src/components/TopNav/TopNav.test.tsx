@@ -116,6 +116,7 @@ describe('TopNavItem', () => {
       'aria-current',
       'page',
     );
+    expect(screen.getByText('Home')).toHaveClass('silver-fs_md');
   });
 
   it('marks disabled items with aria-disabled and tabIndex -1', () => {

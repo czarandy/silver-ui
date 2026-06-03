@@ -1,6 +1,6 @@
 # Component Audits
 
-For each component in the list below that isn't checked off ([ ]), spin up a separate subagent to perform an audit, following these steps:
+For each component in the list below that isn't checked off ([ ]), spin up a separate Opus subagent to perform an audit, following these steps:
 
 ```
 Audit each component for: performance problems, accessibility concerns, logic
@@ -11,101 +11,103 @@ The report should contain all the issues sorted by severity (highest to lowest).
 
 Save your audits in a report in the repo root audits/ dir in a <ComponentName>.md file
 Then update this file to check off the completed item.
+
+Be thorough and complete in this audit, it is important.
 ```
 
 ## Layout & Structure
 
-- [ ] AppShell
-- [ ] AspectRatio
-- [ ] Center
-- [ ] Collapsible
-- [ ] Divider
-- [ ] Layout
-- [ ] Stack
+- [x] AppShell
+- [x] AspectRatio
+- [x] Center
+- [x] Collapsible
+- [x] Divider
+- [x] Layout
+- [x] Stack
 
 ## Navigation
 
-- [ ] Breadcrumbs
-- [ ] Link
-- [ ] MobileNav
-- [ ] Pagination
-- [ ] SideNav
-- [ ] Tabs
-- [ ] TopNav
+- [x] Breadcrumbs
+- [x] Link
+- [x] MobileNav
+- [x] Pagination
+- [x] SideNav
+- [x] Tabs
+- [x] TopNav
 
 ## Buttons & Actions
 
-- [ ] Button
-- [ ] ButtonGroup
-- [ ] ContextMenu
-- [ ] DropdownMenu
-- [ ] SegmentedControl
-- [ ] ToggleButton
+- [x] Button
+- [x] ButtonGroup
+- [x] ContextMenu
+- [x] DropdownMenu
+- [x] SegmentedControl
+- [x] ToggleButton
 
 ## Data Display
 
-- [ ] Accordion
-- [ ] Avatar
-- [ ] AvatarGroup
-- [ ] Badge
-- [ ] Blockquote
-- [ ] Card
-- [ ] Icon
-- [ ] Item
-- [ ] Kbd
-- [ ] Lightbox
-- [ ] List
-- [ ] MetadataList
-- [ ] Table
-- [ ] Tag
-- [ ] Text
-- [ ] Thumbnail
-- [ ] Tooltip
-- [ ] TreeView
+- [x] Accordion
+- [x] Avatar
+- [x] AvatarGroup
+- [x] Badge
+- [x] Blockquote
+- [x] Card
+- [x] Icon
+- [x] Item
+- [x] Kbd
+- [x] Lightbox
+- [x] List
+- [x] MetadataList
+- [x] Table
+- [x] Tag
+- [x] Text
+- [x] Thumbnail
+- [x] Tooltip
+- [x] TreeView
 
 ## Forms
 
-- [ ] CheckboxInput
-- [ ] AutocompleteInput
-- [ ] DateInput
-- [ ] DateRangeInput
-- [ ] DateTimeInput
-- [ ] Field
-- [ ] FileInput
-- [ ] InputGroup
-- [ ] MultiSelect
-- [ ] NumberInput
-- [ ] PasswordInput
-- [ ] RadioGroup
-- [ ] Rating
-- [ ] SearchFilterInput
-- [ ] Select
-- [ ] Slider
-- [ ] Switch
-- [ ] TagsInput
-- [ ] TextArea
-- [ ] TextInput
-- [ ] TimeInput
+- [x] CheckboxInput
+- [x] AutocompleteInput
+- [x] DateInput
+- [x] DateRangeInput
+- [x] DateTimeInput
+- [x] Field
+- [x] FileInput
+- [x] InputGroup
+- [x] MultiSelect
+- [x] NumberInput
+- [x] PasswordInput
+- [x] RadioGroup
+- [x] Rating
+- [x] SearchFilterInput
+- [x] Select
+- [x] Slider
+- [x] Switch
+- [x] TagsInput
+- [x] TextArea
+- [x] TextInput
+- [x] TimeInput
 
 ## Feedback & Status
 
-- [ ] Alert
-- [ ] EmptyState
-- [ ] Progress
-- [ ] Skeleton
-- [ ] Spinner
-- [ ] Stepper
-- [ ] Toast
+- [x] Alert
+- [x] EmptyState
+- [x] Progress
+- [x] Skeleton
+- [x] Spinner
+- [x] Stepper
+- [x] Toast
 
 ## Overlays
 
-- [ ] AlertDialog
-- [ ] Dialog
-- [ ] Drawer
-- [ ] HoverCard
-- [ ] Popover
+- [x] AlertDialog
+- [x] Dialog
+- [x] Drawer
+- [x] HoverCard
+- [x] Popover
 
 ## Composite
 
-- [ ] Calendar
-- [ ] Schedule
+- [x] Calendar
+- [x] Schedule

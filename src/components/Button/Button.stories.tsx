@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Inbox, Plus, Settings} from 'lucide-react';
+import {css} from 'styled-system/css';
 import {Icon} from '../Icon';
 import {Button} from './Button';
 
@@ -128,4 +129,44 @@ export const DisabledWithTooltip: Story = {
     label: 'Unavailable',
     tooltip: 'This action is not available for your current role.',
   },
+};
+
+export const WithStartContent: Story = {
+  render: () => (
+    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+      <Button
+        label="Status"
+        startContent={
+          <span
+            className={css({
+              w: '2',
+              h: '2',
+              borderRadius: 'full',
+              bg: 'green',
+            })}
+          />
+        }
+      />
+      <Button
+        label="Inbox"
+        startContent={<Icon icon={Inbox} />}
+        variant="primary"
+      />
+      <Button
+        endContent={<Icon icon={Settings} />}
+        label="Configure"
+        startContent={
+          <span
+            className={css({
+              w: '2',
+              h: '2',
+              borderRadius: 'full',
+              bg: 'orange',
+            })}
+          />
+        }
+        variant="secondary"
+      />
+    </div>
+  ),
 };

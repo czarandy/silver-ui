@@ -2320,15 +2320,15 @@ const tokens = {
     "variable": "var(--silver-spacing-focus-offset-loose)"
   },
   "fontSizes.component.sm": {
-    "value": "14px",
+    "value": "var(--silver-font-sizes-sm)",
     "variable": "var(--silver-font-sizes-component-sm)"
   },
   "fontSizes.component.md": {
-    "value": "14px",
+    "value": "var(--silver-font-sizes-md)",
     "variable": "var(--silver-font-sizes-component-md)"
   },
   "fontSizes.component.lg": {
-    "value": "14px",
+    "value": "var(--silver-font-sizes-md)",
     "variable": "var(--silver-font-sizes-component-lg)"
   },
   "fontSizes.icon.sm": {

@@ -584,9 +584,9 @@ export default defineConfig({
         },
         fontSizes: {
           component: {
-            sm: {value: '14px'},
-            md: {value: '14px'},
-            lg: {value: '14px'},
+            sm: {value: '{fontSizes.sm}'},
+            md: {value: '{fontSizes.md}'},
+            lg: {value: '{fontSizes.md}'},
           },
           icon: {
             sm: {value: '{sizes.icon.sm}'},

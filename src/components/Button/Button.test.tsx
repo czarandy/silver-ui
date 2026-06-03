@@ -83,6 +83,63 @@ describe('Button', () => {
     expect(screen.getByTestId('end')).toBeInTheDocument();
   });
 
+  it('renders startContent before the label', () => {
+    render(
+      <Button
+        label="Status"
+        startContent={<span data-testid="start">●</span>}
+      />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Status'});
+    expect(button).toHaveAttribute('aria-label', 'Status');
+    expect(button).toHaveTextContent('Status');
+    expect(screen.getByTestId('start')).toBeInTheDocument();
+  });
+
+  it('renders startContent between icon and label', () => {
+    render(
+      <Button
+        icon={Home}
+        label="Dashboard"
+        startContent={<span data-testid="start">★</span>}
+      />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Dashboard'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    expect(button.querySelector('svg')).toBeInTheDocument();
+    const startContent = screen.getByTestId('start');
+    expect(startContent).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying DOM order
+    const icon = button.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying DOM order
+    const iconSpan = icon?.closest('span');
+    expect(iconSpan).toBeInTheDocument();
+    if (iconSpan == null) {
+      throw new Error('Expected icon wrapper span to exist.');
+    }
+    expect(iconSpan.compareDocumentPosition(startContent)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it('does not render startContent for icon-only buttons', () => {
+    render(
+      <Button
+        icon={Home}
+        isIconOnly
+        label="Settings"
+        startContent={<span data-testid="start">●</span>}
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    expect(screen.getByRole('button').querySelector('svg')).toBeInTheDocument();
+    expect(screen.queryByTestId('start')).not.toBeInTheDocument();
+  });
+
   it('does not render endContent for icon-only buttons', () => {
     render(
       <Button

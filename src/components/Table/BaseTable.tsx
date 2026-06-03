@@ -282,6 +282,20 @@ function BaseTableInner<T extends Record<string, unknown>>({
       typeof resolvedContent === 'string' && resolvedContent.length > 0
         ? resolvedContent
         : undefined;
+    const renderedContent =
+      typeof resolvedContent === 'string' ||
+      typeof resolvedContent === 'number' ? (
+        <Text
+          color="secondary"
+          maxLines={1}
+          size="sm"
+          type="body"
+          weight="semibold">
+          {resolvedContent}
+        </Text>
+      ) : (
+        resolvedContent
+      );
     const hasSlots =
       headerCellProps.before != null ||
       headerCellProps.after != null ||
@@ -302,10 +316,10 @@ function BaseTableInner<T extends Record<string, unknown>>({
           <>
             {headerCellProps.before}
             {headerCellProps.after == null ? (
-              resolvedContent
+              renderedContent
             ) : (
               <div className={styles.headerLabelRow}>
-                {resolvedContent}
+                {renderedContent}
                 {headerCellProps.after}
               </div>
             )}
@@ -313,7 +327,7 @@ function BaseTableInner<T extends Record<string, unknown>>({
             {headerCellProps.below}
           </>
         ) : (
-          resolvedContent
+          renderedContent
         )}
       </HeaderCellComponent>
     );
