@@ -1,0 +1,59 @@
+name: Publish to npm
+
+# Publishes when a GitHub Release is published (the local scripts/release.sh
+# driver creates that release). Runs from a clean runner so the npm token never
+# lives on a developer machine, and uses --provenance so npm shows a verified
+# "built from this source" badge.
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # required for npm provenance
+    steps:
+      - uses: actions/checkout@v4
+
+      # Use the pnpm version pinned in package.json's "packageManager" field.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      # Re-run the same gates the local driver ran, on a clean checkout.
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm lint
+      - run: pnpm build
+      - run: pnpm exec publint
+
+      # Sanity check: the tag being released must match package.json's version,
+      # so a mistagged release can never publish the wrong version.
+      - name: Verify tag matches package.json version
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          TAG="${GITHUB_REF_NAME}"
+          if [ "$PKG_VERSION" != "$TAG" ]; then
+            echo "::error::Tag $TAG does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      # Pre-releases go to the 'next' dist-tag so `npm install pkg` never grabs
+      # them by default; stable releases go to 'latest'.
+      - name: Publish
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            npm publish --provenance --access public --tag next
+          else
+            npm publish --provenance --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
