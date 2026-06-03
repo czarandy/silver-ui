@@ -70,6 +70,28 @@ pnpm release patch --preid=rc   # use a different pre-release identifier
 pnpm release --dry-run          # run all checks + build, but do NOT bump/tag/push/release
 ```
 
+### Release notes
+
+The release notes live on the GitHub Release (independent of the npm publish).
+By default the script auto-generates a changelog from the merged PRs and commits
+since the previous tag.
+
+In an interactive run, the script **asks whether you want to edit the
+auto-generated notes** before submitting. Answer yes and it opens the generated
+changelog in `$EDITOR` so you can add a human summary on top; whatever you save
+becomes the release body.
+
+To choose the notes source up front (and skip the prompt):
+
+```bash
+pnpm release patch --edit                     # always open the changelog in $EDITOR to refine
+pnpm release patch --notes="One-line summary" # use this exact text as the notes
+pnpm release patch --notes-file=NOTES.md      # use a file's contents as the notes
+```
+
+You can always edit the notes afterward on the GitHub Releases page — it won't
+re-trigger a publish.
+
 ## Pre-releases
 
 Choosing `prerelease` (or passing it as an argument) produces a version like

@@ -21,6 +21,11 @@
 #   scripts/release.sh --dry-run       # run every check + build but do NOT bump/tag/push/release
 #   scripts/release.sh patch --preid=rc # use a different pre-release identifier
 #
+# Release notes (default: auto-generated changelog from merged PRs/commits):
+#   scripts/release.sh patch --edit                    # edit the auto-generated changelog in $EDITOR first
+#   scripts/release.sh patch --notes="Fixes the X bug" # use this exact text as the notes
+#   scripts/release.sh patch --notes-file=NOTES.md     # use a file as the notes
+#
 set -euo pipefail
 
 # --- locate repo root so the script works from anywhere ---------------------
@@ -40,16 +45,31 @@ RELEASE_TYPE=""
 ASSUME_YES=0
 DRY_RUN=0
 PREID="beta"
+NOTES_TEXT=""    # --notes "..."        : use this exact text as the release body
+NOTES_FILE=""    # --notes-file PATH    : use a file as the release body
+EDIT_NOTES=0     # --edit               : open $EDITOR on the auto-generated changelog first
+NOTES_TMP=""     # temp file for --edit (cleaned up on exit)
 
 for arg in "$@"; do
   case "$arg" in
     patch|minor|major|prerelease|premajor|preminor|prepatch) RELEASE_TYPE="$arg" ;;
-    --yes|-y)        ASSUME_YES=1 ;;
-    --dry-run)       DRY_RUN=1 ;;
-    --preid=*)       PREID="${arg#*=}" ;;
+    --yes|-y)         ASSUME_YES=1 ;;
+    --dry-run)        DRY_RUN=1 ;;
+    --preid=*)        PREID="${arg#*=}" ;;
+    --notes=*)        NOTES_TEXT="${arg#*=}" ;;
+    --notes-file=*)   NOTES_FILE="${arg#*=}" ;;
+    --edit|--edit-notes) EDIT_NOTES=1 ;;
     *) die "Unknown argument: $arg" ;;
   esac
 done
+
+trap '[ -n "$NOTES_TMP" ] && rm -f "$NOTES_TMP"' EXIT
+
+# Notes sources are mutually exclusive; default (none set) auto-generates them.
+if [ -n "$NOTES_FILE" ] && [ -n "$NOTES_TEXT" ]; then
+  die "Use only one of --notes or --notes-file."
+fi
+[ -n "$NOTES_FILE" ] && [ ! -f "$NOTES_FILE" ] && die "Notes file not found: $NOTES_FILE"
 
 confirm() {
   # confirm "message"  -> returns 0 if yes
@@ -205,8 +225,32 @@ ok "Pushed commit and tag to origin"
 
 # 3. Create the GitHub Release. This is what triggers the publish workflow.
 #    Marking a pre-release tells CI to publish under the 'next' dist-tag.
-GH_FLAGS=(--title "$NEW_TAG" --generate-notes)
+GH_FLAGS=(--title "$NEW_TAG")
 [ "$IS_PRERELEASE" -eq 1 ] && GH_FLAGS+=(--prerelease)
+
+# In an interactive run with no notes source chosen, offer to edit them.
+if [ "$ASSUME_YES" -eq 0 ] && [ "$EDIT_NOTES" -eq 0 ] \
+   && [ -z "$NOTES_FILE" ] && [ -z "$NOTES_TEXT" ]; then
+  confirm "Edit the auto-generated release notes before submitting?" && EDIT_NOTES=1
+fi
+
+# Release notes, in priority order: explicit file > inline text > edit the
+# auto-generated changelog > plain auto-generated changelog.
+if [ -n "$NOTES_FILE" ]; then
+  GH_FLAGS+=(--notes-file "$NOTES_FILE")
+elif [ -n "$NOTES_TEXT" ]; then
+  GH_FLAGS+=(--notes "$NOTES_TEXT")
+elif [ "$EDIT_NOTES" -eq 1 ]; then
+  NOTES_TMP="$(mktemp)"
+  info "Pre-filling the auto-generated changelog for editing"
+  # The tag is already pushed, so GitHub can diff it against the previous tag.
+  gh api --method POST "repos/{owner}/{repo}/releases/generate-notes" \
+    -f tag_name="$NEW_TAG" --jq '.body' >"$NOTES_TMP" 2>/dev/null || true
+  "${EDITOR:-${VISUAL:-vi}}" "$NOTES_TMP"
+  GH_FLAGS+=(--notes-file "$NOTES_TMP")
+else
+  GH_FLAGS+=(--generate-notes)
+fi
 
 info "Creating GitHub Release $NEW_TAG"
 if ! gh release create "$NEW_TAG" "${GH_FLAGS[@]}"; then
