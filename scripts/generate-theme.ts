@@ -95,7 +95,7 @@ const semanticTokens: TokenDef[] = [
   ['primary', v('teal.500'), v('teal.500')],
   ['primary-hover', v('teal.600'), v('teal.600')],
   ['primary-active', v('teal.700'), v('teal.700')],
-  ['primary-subtle', v('teal.100'), v('teal.100')],
+  ['primary-subtle', v('teal.100'), v('teal.900')],
   // Destructive
   ['destructive', v('red.600'), v('red.500')],
   ['destructive-hover', v('red.700'), v('red.400')],
@@ -103,19 +103,19 @@ const semanticTokens: TokenDef[] = [
   ['destructive-fg', literal('#fff'), literal('#fff')],
   // Foreground
   ['fg', v('gray.900'), v('gray.50')],
-  ['fg-muted', v('gray.600'), v('gray.400')],
-  ['fg-disabled', v('gray.400'), v('gray.600')],
+  ['fg-muted', v('gray.600'), v('gray.200')],
+  ['fg-disabled', v('gray.200'), v('gray.600')],
   ['fg-on-primary', literal('#fff'), literal('#fff')],
   // Background
   ['bg', literal('#ffffff'), v('gray.900')],
   ['bg-subtle', v('gray.50'), v('gray.800')],
-  ['bg-hover', v('gray.100'), v('gray.700')],
-  ['bg-selected', v('teal.100'), v('teal.100')],
+  ['bg-hover', v('gray.50'), v('gray.900')],
+  ['bg-selected', v('teal.100'), v('teal.900')],
   // Border
-  ['border', v('gray.100'), v('gray.700')],
-  ['border-emphasized', v('gray.200'), v('gray.600')],
+  ['border', v('gray.100'), v('gray.900')],
+  ['border-emphasized', v('gray.100'), v('gray.700')],
   // Track
-  ['track', v('gray.200'), v('gray.700')],
+  ['track', v('gray.100'), v('gray.700')],
   ['track-emphasized', v('gray.300'), v('gray.600')],
   ['track-disabled', v('gray.300'), v('gray.700')],
   // Skeleton
@@ -158,13 +158,13 @@ const semanticTokens: TokenDef[] = [
   ['icon-blue', v('blue.700'), v('blue.500')],
   ['icon-red', v('red.600'), v('red.600')],
   ['icon-green', v('green.600'), v('green.600')],
-  ['icon-gray', v('gray.600'), v('gray.600')],
+  ['icon-gray', v('gray.600'), v('gray.200')],
   ['icon-cyan', v('cyan.600'), v('cyan.500')],
   ['icon-teal', v('teal.500'), v('teal.500')],
-  ['icon-yellow', v('yellow.500'), v('yellow.500')],
+  ['icon-yellow', v('yellow.300'), v('yellow.200')],
   ['icon-orange', v('orange.500'), v('orange.500')],
   ['icon-pink', v('pink.600'), v('pink.500')],
-  ['icon-purple', v('purple.700'), v('purple.700')],
+  ['icon-purple', v('purple.700'), v('purple.500')],
 ];
 
 // Surface tokens follow a consistent pattern
@@ -189,7 +189,7 @@ surfaceConfigs.push(
     palette: 'blue',
     pattern: [
       ['', '100', '900'],
-      ['-fg', '800', '200'],
+      ['-fg', '800', '100'],
       ['-hover', '200', '800'],
       ['-accent', '700', '500'],
     ],
@@ -231,7 +231,7 @@ surfaceConfigs.push(
       ['', '100', '900'],
       ['-fg', '800', '200'],
       ['-hover', '200', '800'],
-      ['-accent', '600', '600'],
+      ['-accent', '500', '600'],
     ],
   },
   {
@@ -241,7 +241,7 @@ surfaceConfigs.push(
       ['', '100', '900'],
       ['-fg', '800', '200'],
       ['-hover', '200', '800'],
-      ['-accent', '300', '500'],
+      ['-accent', '200', '500'],
     ],
   },
   {
@@ -249,7 +249,7 @@ surfaceConfigs.push(
     palette: 'teal',
     pattern: [
       ['', '100', '900'],
-      ['-fg', '800', '200'],
+      ['-fg', '800', '300'],
       ['-hover', '200', '800'],
       ['-accent', '500', '700'],
     ],
@@ -259,7 +259,7 @@ surfaceConfigs.push(
     palette: 'yellow',
     pattern: [
       ['', '100', '900'],
-      ['-fg', '800', '200'],
+      ['-fg', '800', '400'],
       ['-hover', '200', '800'],
       ['-accent', '600', '700'],
     ],

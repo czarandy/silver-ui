@@ -1,5 +1,7 @@
 import {
+  Fragment,
   createElement,
+  useId,
   type CSSProperties,
   type ElementType,
   type HTMLAttributes,
@@ -215,6 +217,11 @@ export interface ThemeTokens {
   spacing?: ThemeSpacingTokens;
 }
 
+export interface ThemeModeTokens {
+  dark?: ThemeTokens;
+  light?: ThemeTokens;
+}
+
 export interface ThemeProps extends HTMLAttributes<HTMLElement> {
   /**
    * HTML element type to render.
@@ -241,6 +248,10 @@ export interface ThemeProps extends HTMLAttributes<HTMLElement> {
   ref?: Ref<HTMLElement>;
   /**
    * Friendly token overrides mapped to Silver CSS custom properties.
+   */
+  themes?: ThemeModeTokens;
+  /**
+   * Friendly token overrides applied in every mode.
    */
   tokens?: ThemeTokens;
 }
@@ -462,7 +473,16 @@ function createThemeStyle(
   tokens: ThemeTokens | undefined,
   style: CSSProperties | undefined,
 ): CSSProperties {
-  const themeStyle: CSSProperties & ThemeCssVariables = {};
+  return {
+    ...createThemeVariables(tokens),
+    ...style,
+  };
+}
+
+function createThemeVariables(
+  tokens: ThemeTokens | undefined,
+): ThemeCssVariables {
+  const themeStyle: ThemeCssVariables = {};
 
   assignTokenVariables(
     themeStyle,
@@ -477,10 +497,50 @@ function createThemeStyle(
   assignTokenVariables(themeStyle, tokens?.sizes, sizeTokenVariables);
   assignTokenVariables(themeStyle, tokens?.spacing, spacingTokenVariables);
 
-  return {
-    ...themeStyle,
-    ...style,
-  };
+  return themeStyle;
+}
+
+function sanitizeThemeClassName(id: string): string {
+  return `silver-theme-${id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+}
+
+function serializeThemeVariables(variables: ThemeCssVariables): string {
+  return Object.entries(variables)
+    .map(
+      ([name, value]) =>
+        `${name}: ${String(value).replace(/<\/style/gi, '<\\/style')};`,
+    )
+    .join('');
+}
+
+function createThemeCss(
+  className: string,
+  tokens: ThemeModeTokens,
+  mode: ThemeMode,
+): string | undefined {
+  const baseTokens =
+    mode === 'dark'
+      ? (tokens.dark ?? tokens.light)
+      : (tokens.light ?? tokens.dark);
+
+  if (baseTokens == null) {
+    return undefined;
+  }
+
+  const selector = `.${className}`;
+  const baseCss = `${selector}{${serializeThemeVariables(createThemeVariables(baseTokens))}}`;
+
+  if (mode !== 'system' || tokens.dark == null) {
+    return baseCss;
+  }
+
+  const darkVariables = serializeThemeVariables(
+    createThemeVariables(tokens.dark),
+  );
+  const darkSelector = `.${className}[data-theme="dark"],[data-theme="dark"] .${className}`;
+  const darkCss = `${darkSelector}{${darkVariables}}`;
+
+  return `${baseCss}@media (prefers-color-scheme: dark){${selector}{${darkVariables}}}${darkCss}`;
 }
 
 /**
@@ -494,22 +554,41 @@ export function Theme({
   mode = 'system',
   ref,
   style,
+  themes,
   tokens,
   ...htmlProps
 }: ThemeProps): React.JSX.Element {
+  const themeId = useId();
+  const themeClassName =
+    themes == null ? undefined : sanitizeThemeClassName(themeId);
+  const themeCss =
+    themes != null && themeClassName != null
+      ? createThemeCss(themeClassName, themes, mode)
+      : undefined;
   const themeStyle = createThemeStyle(tokens, style);
 
   return createElement(
     Element,
     {
       ...htmlProps,
-      className: cx(className),
+      className: cx(themeClassName, className),
       'data-testid': dataTestId,
       'data-theme': mode === 'system' ? undefined : mode,
       ref,
       style: themeStyle,
     },
-    children,
+    themeCss == null
+      ? children
+      : createElement(
+          Fragment,
+          null,
+          createElement(
+            'style',
+            dataTestId == null ? null : {'data-testid': `${dataTestId}-styles`},
+            themeCss,
+          ),
+          children,
+        ),
   );
 }
 

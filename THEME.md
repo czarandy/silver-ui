@@ -289,7 +289,7 @@ The main brand color used for buttons, links, focus rings, and selected states.
 | `--silver-colors-primary`        | ![](swatches/1ca49e.svg) teal-500 | ![](swatches/1ca49e.svg) teal-500 |
 | `--silver-colors-primary-hover`  | ![](swatches/178682.svg) teal-600 | ![](swatches/178682.svg) teal-600 |
 | `--silver-colors-primary-active` | ![](swatches/126b67.svg) teal-700 | ![](swatches/126b67.svg) teal-700 |
-| `--silver-colors-primary-subtle` | ![](swatches/c0f1ef.svg) teal-100 | ![](swatches/c0f1ef.svg) teal-100 |
+| `--silver-colors-primary-subtle` | ![](swatches/c0f1ef.svg) teal-100 | ![](swatches/093433.svg) teal-900 |
 
 ### Destructive colors
 
@@ -309,8 +309,8 @@ Text and icon colors.
 | Variable                        | Light                             | Dark                              |
 | ------------------------------- | --------------------------------- | --------------------------------- |
 | `--silver-colors-fg`            | ![](swatches/22272d.svg) gray-900 | ![](swatches/f1f4f7.svg) gray-50  |
-| `--silver-colors-fg-muted`      | ![](swatches/576573.svg) gray-600 | ![](swatches/708090.svg) gray-400 |
-| `--silver-colors-fg-disabled`   | ![](swatches/708090.svg) gray-400 | ![](swatches/576573.svg) gray-600 |
+| `--silver-colors-fg-muted`      | ![](swatches/576573.svg) gray-600 | ![](swatches/b1bac3.svg) gray-200 |
+| `--silver-colors-fg-disabled`   | ![](swatches/b1bac3.svg) gray-200 | ![](swatches/576573.svg) gray-600 |
 | `--silver-colors-fg-on-primary` | ![](swatches/fff.svg) #fff        | ![](swatches/fff.svg) #fff        |
 
 ### Background colors
@@ -321,8 +321,8 @@ Surface and container backgrounds.
 | --------------------------------- | --------------------------------- | --------------------------------- |
 | `--silver-colors-bg`              | ![](swatches/ffffff.svg) #ffffff  | ![](swatches/22272d.svg) gray-900 |
 | `--silver-colors-bg-subtle`       | ![](swatches/f1f4f7.svg) gray-50  | ![](swatches/333b43.svg) gray-800 |
-| `--silver-colors-bg-hover`        | ![](swatches/d5d9de.svg) gray-100 | ![](swatches/45505b.svg) gray-700 |
-| `--silver-colors-bg-selected`     | ![](swatches/c0f1ef.svg) teal-100 | ![](swatches/c0f1ef.svg) teal-100 |
+| `--silver-colors-bg-hover`        | ![](swatches/f1f4f7.svg) gray-50  | ![](swatches/22272d.svg) gray-900 |
+| `--silver-colors-bg-selected`     | ![](swatches/c0f1ef.svg) teal-100 | ![](swatches/093433.svg) teal-900 |
 | `--silver-colors-bg-ghost-hover`  | `rgba(0,0,0,0.06)`                | `rgba(255,255,255,0.08)`          |
 | `--silver-colors-bg-ghost-active` | `rgba(0,0,0,0.1)`                 | `rgba(255,255,255,0.12)`          |
 
@@ -330,8 +330,8 @@ Surface and container backgrounds.
 
 | Variable                            | Light                             | Dark                              |
 | ----------------------------------- | --------------------------------- | --------------------------------- |
-| `--silver-colors-border`            | ![](swatches/d5d9de.svg) gray-100 | ![](swatches/45505b.svg) gray-700 |
-| `--silver-colors-border-emphasized` | ![](swatches/b1bac3.svg) gray-200 | ![](swatches/576573.svg) gray-600 |
+| `--silver-colors-border`            | ![](swatches/d5d9de.svg) gray-100 | ![](swatches/22272d.svg) gray-900 |
+| `--silver-colors-border-emphasized` | ![](swatches/d5d9de.svg) gray-100 | ![](swatches/45505b.svg) gray-700 |
 
 ### Track colors
 
@@ -339,7 +339,7 @@ Slider tracks, progress bars, and similar range indicators.
 
 | Variable                           | Light                             | Dark                              |
 | ---------------------------------- | --------------------------------- | --------------------------------- |
-| `--silver-colors-track`            | ![](swatches/b1bac3.svg) gray-200 | ![](swatches/45505b.svg) gray-700 |
+| `--silver-colors-track`            | ![](swatches/d5d9de.svg) gray-100 | ![](swatches/45505b.svg) gray-700 |
 | `--silver-colors-track-emphasized` | ![](swatches/8a97a4.svg) gray-300 | ![](swatches/576573.svg) gray-600 |
 | `--silver-colors-track-disabled`   | ![](swatches/8a97a4.svg) gray-300 | ![](swatches/45505b.svg) gray-700 |
 
@@ -407,7 +407,7 @@ Each color has four sub-tokens: default (background), `fg` (text), `hover`, and
 | Variable                                | Light                               | Dark                                |
 | --------------------------------------- | ----------------------------------- | ----------------------------------- |
 | `--silver-colors-surface-blue`          | ![](swatches/bad6fb.svg) blue-100   | ![](swatches/002d69.svg) blue-900   |
-| `--silver-colors-surface-blue-fg`       | ![](swatches/00449e.svg) blue-800   | ![](swatches/87b8f9.svg) blue-200   |
+| `--silver-colors-surface-blue-fg`       | ![](swatches/00449e.svg) blue-800   | ![](swatches/bad6fb.svg) blue-100   |
 | `--silver-colors-surface-blue-hover`    | ![](swatches/87b8f9.svg) blue-200   | ![](swatches/00449e.svg) blue-800   |
 | `--silver-colors-surface-blue-accent`   | ![](swatches/005cd6.svg) blue-700   | ![](swatches/4a98ff.svg) blue-500   |
 | `--silver-colors-surface-cyan`          | ![](swatches/c3e7f1.svg) cyan-100   | ![](swatches/0e3f4d.svg) cyan-900   |
@@ -429,21 +429,21 @@ Each color has four sub-tokens: default (background), `fg` (text), `hover`, and
 | `--silver-colors-surface-pink`          | ![](swatches/efc5e0.svg) pink-100   | ![](swatches/4e1138.svg) pink-900   |
 | `--silver-colors-surface-pink-fg`       | ![](swatches/751a54.svg) pink-800   | ![](swatches/e397c8.svg) pink-200   |
 | `--silver-colors-surface-pink-hover`    | ![](swatches/e397c8.svg) pink-200   | ![](swatches/751a54.svg) pink-800   |
-| `--silver-colors-surface-pink-accent`   | ![](swatches/c92c90.svg) pink-600   | ![](swatches/c92c90.svg) pink-600   |
+| `--silver-colors-surface-pink-accent`   | ![](swatches/d951a8.svg) pink-500   | ![](swatches/c92c90.svg) pink-600   |
 | `--silver-colors-surface-purple`        | ![](swatches/c9bbfb.svg) purple-100 | ![](swatches/18006c.svg) purple-900 |
 | `--silver-colors-surface-purple-fg`     | ![](swatches/2400a2.svg) purple-800 | ![](swatches/a289f9.svg) purple-200 |
 | `--silver-colors-surface-purple-hover`  | ![](swatches/a289f9.svg) purple-200 | ![](swatches/2400a2.svg) purple-800 |
-| `--silver-colors-surface-purple-accent` | ![](swatches/8260f7.svg) purple-300 | ![](swatches/7952ff.svg) purple-500 |
+| `--silver-colors-surface-purple-accent` | ![](swatches/a289f9.svg) purple-200 | ![](swatches/7952ff.svg) purple-500 |
 | `--silver-colors-surface-red`           | ![](swatches/f9d1d8.svg) red-100    | ![](swatches/562b32.svg) red-900    |
 | `--silver-colors-surface-red-fg`        | ![](swatches/6b2e38.svg) red-800    | ![](swatches/f1bcc5.svg) red-200    |
 | `--silver-colors-surface-red-hover`     | ![](swatches/f1bcc5.svg) red-200    | ![](swatches/6b2e38.svg) red-800    |
 | `--silver-colors-surface-red-accent`    | ![](swatches/e31a3b.svg) red-600    | ![](swatches/da4e65.svg) red-400    |
 | `--silver-colors-surface-teal`          | ![](swatches/c0f1ef.svg) teal-100   | ![](swatches/093433.svg) teal-900   |
-| `--silver-colors-surface-teal-fg`       | ![](swatches/0d4f4c.svg) teal-800   | ![](swatches/8be5e1.svg) teal-200   |
+| `--silver-colors-surface-teal-fg`       | ![](swatches/0d4f4c.svg) teal-800   | ![](swatches/4ad7d1.svg) teal-300   |
 | `--silver-colors-surface-teal-hover`    | ![](swatches/8be5e1.svg) teal-200   | ![](swatches/0d4f4c.svg) teal-800   |
 | `--silver-colors-surface-teal-accent`   | ![](swatches/1ca49e.svg) teal-500   | ![](swatches/126b67.svg) teal-700   |
 | `--silver-colors-surface-yellow`        | ![](swatches/fbe7b7.svg) yellow-100 | ![](swatches/4d3600.svg) yellow-900 |
-| `--silver-colors-surface-yellow-fg`     | ![](swatches/735200.svg) yellow-800 | ![](swatches/f8d47b.svg) yellow-200 |
+| `--silver-colors-surface-yellow-fg`     | ![](swatches/735200.svg) yellow-800 | ![](swatches/efad0d.svg) yellow-400 |
 | `--silver-colors-surface-yellow-hover`  | ![](swatches/f8d47b.svg) yellow-200 | ![](swatches/735200.svg) yellow-800 |
 | `--silver-colors-surface-yellow-accent` | ![](swatches/c58b00.svg) yellow-600 | ![](swatches/9c6e00.svg) yellow-700 |
 
@@ -466,13 +466,13 @@ other semantic tokens so overriding the source token is usually sufficient.
 | `--silver-colors-icon-blue`      | ![](swatches/005cd6.svg) blue-700   | ![](swatches/4a98ff.svg) blue-500   |
 | `--silver-colors-icon-red`       | ![](swatches/e31a3b.svg) red-600    | ![](swatches/e31a3b.svg) red-600    |
 | `--silver-colors-icon-green`     | ![](swatches/1f8629.svg) green-600  | ![](swatches/1f8629.svg) green-600  |
-| `--silver-colors-icon-gray`      | ![](swatches/576573.svg) gray-600   | ![](swatches/576573.svg) gray-600   |
+| `--silver-colors-icon-gray`      | ![](swatches/576573.svg) gray-600   | ![](swatches/b1bac3.svg) gray-200   |
 | `--silver-colors-icon-cyan`      | ![](swatches/23a1c6.svg) cyan-600   | ![](swatches/40b9dd.svg) cyan-500   |
 | `--silver-colors-icon-teal`      | ![](swatches/1ca49e.svg) teal-500   | ![](swatches/1ca49e.svg) teal-500   |
-| `--silver-colors-icon-yellow`    | ![](swatches/f0aa00.svg) yellow-500 | ![](swatches/f0aa00.svg) yellow-500 |
+| `--silver-colors-icon-yellow`    | ![](swatches/f4bd37.svg) yellow-300 | ![](swatches/f8d47b.svg) yellow-200 |
 | `--silver-colors-icon-orange`    | ![](swatches/eb6d02.svg) orange-500 | ![](swatches/eb6d02.svg) orange-500 |
 | `--silver-colors-icon-pink`      | ![](swatches/c92c90.svg) pink-600   | ![](swatches/d951a8.svg) pink-500   |
-| `--silver-colors-icon-purple`    | ![](swatches/3100db.svg) purple-700 | ![](swatches/3100db.svg) purple-700 |
+| `--silver-colors-icon-purple`    | ![](swatches/3100db.svg) purple-700 | ![](swatches/7952ff.svg) purple-500 |
 
 ---
 

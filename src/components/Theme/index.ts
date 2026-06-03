@@ -5,6 +5,7 @@ export {
   type ThemeFontSizeTokens,
   type ThemeFontTokens,
   type ThemeMode,
+  type ThemeModeTokens,
   type ThemePaletteName,
   type ThemePaletteReference,
   type ThemePaletteStep,

@@ -53,7 +53,7 @@ describe('List', () => {
       </List>,
     );
 
-    expect(screen.getByTestId('item')).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByTestId('item')).toHaveClass('silver-bg_bg.selected');
     expect(screen.getByText('Supporting text')).toBeInTheDocument();
     expect(screen.getByTestId('start')).toBeInTheDocument();
     expect(screen.getByTestId('end')).toBeInTheDocument();

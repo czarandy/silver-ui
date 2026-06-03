@@ -148,34 +148,61 @@ export const PrimaryColor: Story = {
 export const NeutralTheme: Story = {
   render: () => (
     <Theme
-      tokens={{
-        colors: {
-          bg: '#ffffff',
-          bgHover: '#f5f5f5',
-          bgSelected: '#f1f1f1',
-          bgSubtle: '#f1f1f1',
-          border: '#ebebeb',
-          borderEmphasized: '#d4d4d4',
-          destructive: '#facecb',
-          destructiveActive: '#e6bab8',
-          destructiveFg: '#a50c25',
-          destructiveHover: '#f8bab5',
-          fg: '#171717',
-          fgDisabled: '#a3a3a3',
-          fgMuted: '#737373',
-          fgOnPrimary: '#ffffff',
-          primary: '#262626',
-          primaryActive: '#0a0a0a',
-          primaryHover: '#171717',
-          primarySubtle: '#f1f1f1',
+      themes={{
+        dark: {
+          colors: {
+            bg: '#1b1b1b',
+            bgHover: '#525252',
+            bgSelected: '#262626',
+            bgSubtle: '#262626',
+            border: '#ffffff1a',
+            borderEmphasized: '#525252',
+            fg: '#fafafa',
+            fgDisabled: '#525252',
+            fgMuted: '#a3a3a3',
+            fgOnPrimary: '#171717',
+            primary: '#ebebeb',
+            primaryActive: '#d4d4d4',
+            primaryHover: '#f5f5f5',
+            primarySubtle: '#262626',
+            surfaceGray: '#ffffff1a',
+            surfaceGrayFg: '#e5e5e5',
+            surfaceGrayHover: '#262626',
+          },
+          fonts: {
+            body: 'Figtree, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          },
+          radii: {
+            componentLg: '0.75rem',
+            componentMd: '0.625rem',
+            componentSm: '0.375rem',
+          },
         },
-        fonts: {
-          body: 'Figtree, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        },
-        radii: {
-          componentLg: '0.75rem',
-          componentMd: '0.625rem',
-          componentSm: '0.375rem',
+        light: {
+          colors: {
+            bg: '#ffffff',
+            bgHover: '#f5f5f5',
+            bgSelected: '#f1f1f1',
+            bgSubtle: '#f1f1f1',
+            border: '#ebebeb',
+            borderEmphasized: '#d4d4d4',
+            fg: '#171717',
+            fgDisabled: '#a3a3a3',
+            fgMuted: '#737373',
+            fgOnPrimary: '#ffffff',
+            primary: '#262626',
+            primaryActive: '#0a0a0a',
+            primaryHover: '#171717',
+            primarySubtle: '#f1f1f1',
+          },
+          fonts: {
+            body: 'Figtree, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          },
+          radii: {
+            componentLg: '0.75rem',
+            componentMd: '0.625rem',
+            componentSm: '0.375rem',
+          },
         },
       }}>
       <ThemePreview>
@@ -188,34 +215,66 @@ export const NeutralTheme: Story = {
 export const DailyTheme: Story = {
   render: () => (
     <Theme
-      tokens={{
-        colors: {
-          bg: '#ffffff',
-          bgHover: '#e6e3de',
-          bgSelected: '#1779fa40',
-          bgSubtle: '#f8f4ed',
-          border: '#e6e3de',
-          borderEmphasized: '#85817a',
-          destructive: '#fd000040',
-          destructiveActive: '#fd000073',
-          destructiveFg: '#fd0000',
-          destructiveHover: '#fd00005a',
-          fg: '#292724',
-          fgDisabled: '#c9c6c1',
-          fgMuted: '#85817a',
-          fgOnPrimary: '#ffffff',
-          primary: '#292724',
-          primaryActive: '#121110',
-          primaryHover: '#1a1917',
-          primarySubtle: '#1779fa40',
+      themes={{
+        dark: {
+          colors: {
+            bg: '#1a1917',
+            bgHover: '#3a3733',
+            bgSelected: '#1779fa40',
+            bgSubtle: '#121110',
+            border: '#f8f4ed1a',
+            borderEmphasized: '#5c5955',
+            destructive: '#ff5c5c',
+            destructiveActive: '#ff8a8a',
+            destructiveFg: '#ffffff',
+            destructiveHover: '#ff7373',
+            fg: '#f8f4ed',
+            fgDisabled: '#5c5955',
+            fgMuted: '#a19d96',
+            fgOnPrimary: '#292724',
+            primary: '#f8f4ed',
+            primaryActive: '#c9c6c1',
+            primaryHover: '#e6e3de',
+            primarySubtle: '#1779fa40',
+          },
+          fonts: {
+            body: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          },
+          radii: {
+            componentLg: '18px',
+            componentMd: '12px',
+            componentSm: '6px',
+          },
         },
-        fonts: {
-          body: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        },
-        radii: {
-          componentLg: '18px',
-          componentMd: '12px',
-          componentSm: '6px',
+        light: {
+          colors: {
+            bg: '#ffffff',
+            bgHover: '#e6e3de',
+            bgSelected: '#1779fa40',
+            bgSubtle: '#f8f4ed',
+            border: '#e6e3de',
+            borderEmphasized: '#85817a',
+            destructive: '#fd0000',
+            destructiveActive: '#b80000',
+            destructiveFg: '#ffffff',
+            destructiveHover: '#d90000',
+            fg: '#292724',
+            fgDisabled: '#c9c6c1',
+            fgMuted: '#85817a',
+            fgOnPrimary: '#ffffff',
+            primary: '#292724',
+            primaryActive: '#121110',
+            primaryHover: '#1a1917',
+            primarySubtle: '#1779fa40',
+          },
+          fonts: {
+            body: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          },
+          radii: {
+            componentLg: '18px',
+            componentMd: '12px',
+            componentSm: '6px',
+          },
         },
       }}>
       <ThemePreview>
@@ -225,39 +284,74 @@ export const DailyTheme: Story = {
   ),
 };
 
-export const SolarizedLightTheme: Story = {
+export const SolarizedTheme: Story = {
   render: () => (
     <Theme
-      tokens={{
-        colors: {
-          bg: '#fdf6e3',
-          bgHover: '#e3dcc3',
-          bgSelected: '#d7e9ef',
-          bgSubtle: '#eee8d5',
-          border: '#d6cfb7',
-          borderEmphasized: '#93a1a1',
-          destructive: '#f4d8d1',
-          destructiveActive: '#e7aaa1',
-          destructiveFg: '#dc322f',
-          destructiveHover: '#edc5bd',
-          fg: '#586e75',
-          fgDisabled: '#93a1a1',
-          fgMuted: '#657b83',
-          fgOnPrimary: '#fdf6e3',
-          primary: '#268bd2',
-          primaryActive: '#1d6fa7',
-          primaryHover: '#217ebf',
-          primarySubtle: '#d7e9ef',
-          surfaceGray: '#e7dec3',
-          surfaceGrayHover: '#ddd4b9',
+      themes={{
+        dark: {
+          colors: {
+            bg: '#002b36',
+            bgHover: '#164450',
+            bgSelected: '#073642',
+            bgSubtle: '#073642',
+            border: '#164450',
+            borderEmphasized: '#586e75',
+            destructive: '#dc322f',
+            destructiveActive: '#ff6f6b',
+            destructiveFg: '#fdf6e3',
+            destructiveHover: '#e24b48',
+            fg: '#839496',
+            fgDisabled: '#586e75',
+            fgMuted: '#93a1a1',
+            fgOnPrimary: '#002b36',
+            primary: '#268bd2',
+            primaryActive: '#5aa6da',
+            primaryHover: '#3a98d8',
+            primarySubtle: '#073642',
+            surfaceGray: '#073642',
+            surfaceGrayFg: '#93a1a1',
+            surfaceGrayHover: '#0b4652',
+          },
+          fonts: {
+            body: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          },
+          radii: {
+            componentLg: '0.5rem',
+            componentMd: '0.375rem',
+            componentSm: '0.25rem',
+          },
         },
-        fonts: {
-          body: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        },
-        radii: {
-          componentLg: '0.5rem',
-          componentMd: '0.375rem',
-          componentSm: '0.25rem',
+        light: {
+          colors: {
+            bg: '#fdf6e3',
+            bgHover: '#e3dcc3',
+            bgSelected: '#d7e9ef',
+            bgSubtle: '#eee8d5',
+            border: '#d6cfb7',
+            borderEmphasized: '#93a1a1',
+            destructive: '#dc322f',
+            destructiveActive: '#a92826',
+            destructiveFg: '#fdf6e3',
+            destructiveHover: '#c72d2a',
+            fg: '#586e75',
+            fgDisabled: '#93a1a1',
+            fgMuted: '#657b83',
+            fgOnPrimary: '#fdf6e3',
+            primary: '#268bd2',
+            primaryActive: '#1d6fa7',
+            primaryHover: '#217ebf',
+            primarySubtle: '#d7e9ef',
+            surfaceGray: '#e7dec3',
+            surfaceGrayHover: '#ddd4b9',
+          },
+          fonts: {
+            body: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          },
+          radii: {
+            componentLg: '0.5rem',
+            componentMd: '0.375rem',
+            componentSm: '0.25rem',
+          },
         },
       }}>
       <ThemePreview>

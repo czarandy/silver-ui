@@ -1748,15 +1748,15 @@ const tokens = {
     "variable": "var(--silver-colors-primary)"
   },
   "colors.primary.hover": {
-    "value": "var(--silver-colors-teal-600)",
+    "value": "var(--silver-colors-primary-hover)",
     "variable": "var(--silver-colors-primary-hover)"
   },
   "colors.primary.active": {
-    "value": "var(--silver-colors-teal-700)",
+    "value": "var(--silver-colors-primary-active)",
     "variable": "var(--silver-colors-primary-active)"
   },
   "colors.primary.subtle": {
-    "value": "var(--silver-colors-teal-100)",
+    "value": "var(--silver-colors-primary-subtle)",
     "variable": "var(--silver-colors-primary-subtle)"
   },
   "colors.destructive": {
@@ -2164,7 +2164,7 @@ const tokens = {
     "variable": "var(--silver-colors-icon-green)"
   },
   "colors.icon.gray": {
-    "value": "var(--silver-colors-gray-600)",
+    "value": "var(--silver-colors-icon-gray)",
     "variable": "var(--silver-colors-icon-gray)"
   },
   "colors.icon.cyan": {
@@ -2176,7 +2176,7 @@ const tokens = {
     "variable": "var(--silver-colors-icon-teal)"
   },
   "colors.icon.yellow": {
-    "value": "var(--silver-colors-yellow-500)",
+    "value": "var(--silver-colors-icon-yellow)",
     "variable": "var(--silver-colors-icon-yellow)"
   },
   "colors.icon.orange": {
@@ -2188,7 +2188,7 @@ const tokens = {
     "variable": "var(--silver-colors-icon-pink)"
   },
   "colors.icon.purple": {
-    "value": "var(--silver-colors-purple-700)",
+    "value": "var(--silver-colors-icon-purple)",
     "variable": "var(--silver-colors-icon-purple)"
   },
   "sizes.component.sm": {

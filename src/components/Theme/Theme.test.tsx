@@ -140,6 +140,67 @@ describe('Theme', () => {
     );
   });
 
+  it('uses themes for mode-aware variables', () => {
+    render(
+      <Theme
+        data-testid="theme"
+        themes={{
+          dark: {
+            colors: {
+              bg: '#002b36',
+              primary: '#268bd2',
+            },
+          },
+          light: {
+            colors: {
+              bg: '#fdf6e3',
+              primary: '#268bd2',
+            },
+          },
+        }}>
+        Content
+      </Theme>,
+    );
+
+    const theme = screen.getByTestId('theme');
+    const styleElement = screen.getByTestId('theme-styles');
+    expect(theme.style.getPropertyValue('--silver-colors-bg')).toBe('');
+    expect(styleElement).toHaveTextContent('--silver-colors-bg: #fdf6e3;');
+    expect(styleElement).toHaveTextContent(
+      '@media (prefers-color-scheme: dark)',
+    );
+    expect(styleElement).toHaveTextContent('--silver-colors-bg: #002b36;');
+  });
+
+  it('layers universal tokens inline on top of mode-aware themes', () => {
+    render(
+      <Theme
+        data-testid="theme"
+        themes={{
+          light: {
+            colors: {
+              bg: '#fdf6e3',
+            },
+          },
+        }}
+        tokens={{
+          colors: {
+            primary: 'purple-500',
+          },
+        }}>
+        Content
+      </Theme>,
+    );
+
+    const theme = screen.getByTestId('theme');
+    expect(theme.style.getPropertyValue('--silver-colors-primary')).toBe(
+      'var(--silver-colors-purple-500)',
+    );
+    expect(screen.getByTestId('theme-styles')).toHaveTextContent(
+      '--silver-colors-bg: #fdf6e3;',
+    );
+  });
+
   it('supports className, style, data-testid, custom element, and ref', () => {
     const ref = vi.fn<(element: HTMLElement | null) => void>();
 

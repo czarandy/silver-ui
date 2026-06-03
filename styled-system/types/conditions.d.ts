@@ -180,7 +180,7 @@ export interface Conditions {
 	"_landscape": string
 	/** `@media (orientation: portrait)` */
 	"_portrait": string
-	/** `@media (prefers-color-scheme: dark) &:is([data-theme=dark] *, [data-theme=dark])` */
+	/** `@media (prefers-color-scheme: dark) &:where([data-theme=dark])` */
 	"_dark": string
 	/** `.light &` */
 	"_light": string
