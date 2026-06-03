@@ -1,12 +1,9 @@
 export {
   Select,
   type SelectDivider,
-  type SelectOption,
   type SelectOptionData,
+  type SelectOptionDefinition,
   type SelectProps,
   type SelectSection,
 } from './Select';
-export {
-  SelectOption as SelectOptionLayout,
-  type SelectOptionProps,
-} from './SelectOption';
+export {SelectOption, type SelectOptionProps} from './SelectOption';

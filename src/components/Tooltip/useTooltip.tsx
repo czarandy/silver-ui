@@ -17,14 +17,17 @@ import {
 
 export type TooltipFocusTrigger = 'auto' | 'always' | 'never';
 
+const isTouchDevice =
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(hover: none)').matches;
+
 export interface UseTooltipOptions {
   alignment?: LayerAlignment;
   delay?: number;
   focusTrigger?: TooltipFocusTrigger;
   hideDelay?: number;
-  isDefaultOpen?: boolean;
   isEnabled?: boolean;
-  isOpen?: boolean;
   onHide?: () => void;
   onShow?: () => void;
   placement?: LayerPlacement;
@@ -35,11 +38,33 @@ export interface TooltipRenderProps extends ContextRenderProps {
 }
 
 export interface UseTooltipReturn {
+  /**
+   * ID of the anchor element, used for CSS anchor positioning.
+   */
   anchorId: string;
+  /**
+   * ID of the tooltip element. Pass to `aria-describedby` on the trigger.
+   */
   describedBy: string;
+  /**
+   * Attaches hover/focus/keyboard listeners only.
+   * Use when another element handles positioning (e.g., a wrapper provides the anchor).
+   */
   interactionRef: RefCallback<HTMLElement>;
+  /**
+   * Attaches CSS anchor positioning only.
+   * Use when another element handles interaction listeners.
+   */
   positionRef: RefCallback<HTMLElement>;
+  /**
+   * Combined ref that attaches both positioning and interaction.
+   * Use this for the common case where one element is both the anchor and trigger.
+   * Do not combine with `interactionRef` or `positionRef` — use one or the other.
+   */
   ref: RefCallback<HTMLElement>;
+  /**
+   * Renders the tooltip content into the layer.
+   */
   renderTooltip: (children: ReactNode, props?: TooltipRenderProps) => ReactNode;
 }
 
@@ -52,6 +77,9 @@ const styles = {
     fontSize: 'sm',
     lineHeight: 'normal',
     boxShadow: 'md',
+    '--silver-text-color': 'currentColor',
+    '--silver-text-color-muted':
+      'color-mix(in srgb, currentColor 70%, transparent)',
   }),
   tooltipContent: css({
     px: '2',
@@ -89,8 +117,6 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     hideDelay = 0,
     focusTrigger = 'auto',
     isEnabled = true,
-    isOpen,
-    isDefaultOpen = false,
     onShow,
     onHide,
   } = options;
@@ -113,7 +139,7 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
   }, []);
 
   const scheduleShow = useCallback(() => {
-    if (!isEnabled || isOpen === false) {
+    if (!isEnabled) {
       return;
     }
 
@@ -121,13 +147,9 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     showTimeoutRef.current = setTimeout(() => {
       layer.show();
     }, delay);
-  }, [clearTimeouts, delay, isEnabled, isOpen, layer]);
+  }, [clearTimeouts, delay, isEnabled, layer]);
 
   const scheduleHide = useCallback(() => {
-    if (isOpen === true) {
-      return;
-    }
-
     clearTimeouts();
 
     if (hideDelay > 0) {
@@ -138,14 +160,10 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     }
 
     layer.hide();
-  }, [clearTimeouts, hideDelay, isOpen, layer]);
+  }, [clearTimeouts, hideDelay, layer]);
 
   const handleMouseEnter = useCallback(() => {
-    if (
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(hover: none)').matches
-    ) {
+    if (isTouchDevice) {
       return;
     }
 
@@ -177,26 +195,68 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     scheduleHide();
   }, [scheduleHide]);
 
+  useEffect(() => {
+    if (!layer.isOpen) {
+      return;
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        layer.hide();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [layer, layer.isOpen]);
+
+  const handlersRef = useRef({
+    mouseEnter: handleMouseEnter,
+    mouseLeave: handleMouseLeave,
+    focusIn: handleFocusIn,
+    focusOut: handleFocusOut,
+  });
+  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
+  handlersRef.current = {
+    mouseEnter: handleMouseEnter,
+    mouseLeave: handleMouseLeave,
+    focusIn: handleFocusIn,
+    focusOut: handleFocusOut,
+  };
+
+  const stableMouseEnter = useCallback(() => {
+    handlersRef.current.mouseEnter();
+  }, []);
+  const stableMouseLeave = useCallback(() => {
+    handlersRef.current.mouseLeave();
+  }, []);
+  const stableFocusIn = useCallback((e: Event) => {
+    handlersRef.current.focusIn(e);
+  }, []);
+  const stableFocusOut = useCallback(() => {
+    handlersRef.current.focusOut();
+  }, []);
+
   const interactionRef: RefCallback<HTMLElement> = useCallback(
     element => {
       if (triggerRef.current != null) {
-        triggerRef.current.removeEventListener('mouseenter', handleMouseEnter);
-        triggerRef.current.removeEventListener('mouseleave', handleMouseLeave);
-        triggerRef.current.removeEventListener('focusin', handleFocusIn);
-        triggerRef.current.removeEventListener('focusout', handleFocusOut);
+        triggerRef.current.removeEventListener('mouseenter', stableMouseEnter);
+        triggerRef.current.removeEventListener('mouseleave', stableMouseLeave);
+        triggerRef.current.removeEventListener('focusin', stableFocusIn);
+        triggerRef.current.removeEventListener('focusout', stableFocusOut);
       }
 
       if (element != null) {
-        element.addEventListener('mouseenter', handleMouseEnter);
-        element.addEventListener('mouseleave', handleMouseLeave);
+        element.addEventListener('mouseenter', stableMouseEnter);
+        element.addEventListener('mouseleave', stableMouseLeave);
 
         const shouldAttachFocus =
           focusTrigger === 'always' ||
           (focusTrigger === 'auto' && isFocusable(element));
 
         if (shouldAttachFocus) {
-          element.addEventListener('focusin', handleFocusIn);
-          element.addEventListener('focusout', handleFocusOut);
+          element.addEventListener('focusin', stableFocusIn);
+          element.addEventListener('focusout', stableFocusOut);
         }
       }
 
@@ -204,10 +264,10 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     },
     [
       focusTrigger,
-      handleFocusIn,
-      handleFocusOut,
-      handleMouseEnter,
-      handleMouseLeave,
+      stableFocusIn,
+      stableFocusOut,
+      stableMouseEnter,
+      stableMouseLeave,
     ],
   );
 
@@ -224,27 +284,6 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
       clearTimeouts();
     };
   }, [clearTimeouts]);
-
-  useEffect(() => {
-    if (isDefaultOpen) {
-      layer.show();
-    }
-  }, [isDefaultOpen, layer]);
-
-  useEffect(() => {
-    if (isOpen === undefined) {
-      return;
-    }
-
-    clearTimeouts();
-
-    if (isOpen) {
-      layer.show();
-      return;
-    }
-
-    layer.hide();
-  }, [clearTimeouts, isOpen, layer]);
 
   const renderTooltip = useCallback(
     (children: ReactNode, props?: TooltipRenderProps): ReactNode => {

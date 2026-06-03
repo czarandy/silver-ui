@@ -62,7 +62,6 @@ const styles = {
     bg: 'bg',
     color: 'fg',
     boxShadow: 'xl',
-    display: 'flex',
     flexDirection: 'column',
     overscrollBehavior: 'contain',
     _backdrop: {

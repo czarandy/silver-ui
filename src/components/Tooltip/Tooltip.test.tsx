@@ -1,7 +1,8 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
-import {useRef} from 'react';
+import {useCallback} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Tooltip} from './Tooltip';
+import {useTooltip} from './useTooltip';
 
 const popoverOpenState = new WeakMap<HTMLElement, boolean>();
 const showPopoverMock = vi.fn(function (this: HTMLElement) {
@@ -61,22 +62,6 @@ describe('Tooltip', () => {
     expect(screen.getByRole('button', {name: 'Trigger'})).toBeInTheDocument();
   });
 
-  it('calls onOpenChange when shown via hover', async () => {
-    const onOpenChange = vi.fn();
-
-    render(
-      <Tooltip content="Tooltip text" delay={0} onOpenChange={onOpenChange}>
-        <button type="button">Trigger</button>
-      </Tooltip>,
-    );
-
-    fireEvent.mouseEnter(screen.getByRole('button', {name: 'Trigger'}));
-
-    await waitFor(() => {
-      expect(onOpenChange).toHaveBeenCalledWith(true);
-    });
-  });
-
   it('sets aria-describedby on element children', () => {
     render(
       <Tooltip content="Tooltip text">
@@ -100,50 +85,90 @@ describe('Tooltip', () => {
     expect(trigger).toHaveAttribute('aria-describedby');
   });
 
-  it('supports controlled open state', async () => {
+  it('hides tooltip on mouse leave', async () => {
     showPopoverMock.mockClear();
-    const {rerender} = render(
-      <Tooltip content="Controlled tooltip" isOpen={false}>
+    hidePopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0}>
         <button type="button">Trigger</button>
       </Tooltip>,
     );
+
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    fireEvent.mouseEnter(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+
+    fireEvent.mouseLeave(trigger);
+
+    await waitFor(() => {
+      expect(hidePopoverMock).toHaveBeenCalled();
+    });
+  });
+
+  it('dismisses tooltip on Escape key', async () => {
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    fireEvent.mouseEnter(screen.getByRole('button', {name: 'Trigger'}));
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+
+    fireEvent.keyDown(document, {key: 'Escape'});
+
+    await waitFor(() => {
+      expect(hidePopoverMock).toHaveBeenCalled();
+    });
+  });
+
+  it('does not show tooltip when isEnabled is false', async () => {
+    showPopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0} isEnabled={false}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    fireEvent.mouseEnter(screen.getByRole('button', {name: 'Trigger'}));
+
+    await new Promise(resolve => {
+      setTimeout(resolve, 50);
+    });
 
     expect(showPopoverMock).not.toHaveBeenCalled();
-
-    rerender(
-      <Tooltip content="Controlled tooltip" isOpen>
-        <button type="button">Trigger</button>
-      </Tooltip>,
-    );
-
-    await waitFor(() => {
-      expect(showPopoverMock).toHaveBeenCalled();
-    });
   });
 
-  it('shows on mount when isDefaultOpen is true', async () => {
-    showPopoverMock.mockClear();
-    render(
-      <Tooltip content="Default open tooltip" isDefaultOpen>
-        <button type="button">Trigger</button>
-      </Tooltip>,
-    );
-
-    await waitFor(() => {
-      expect(showPopoverMock).toHaveBeenCalled();
-    });
-  });
-
-  it('attaches to an external anchor ref', () => {
+  it('useTooltip hook attaches to a ref', () => {
     function Fixture(): React.JSX.Element {
-      const ref = useRef<HTMLButtonElement>(null);
+      const handleShow = useCallback(() => {}, []);
+      const handleHide = useCallback(() => {}, []);
+      const tooltip = useTooltip({
+        placement: 'above',
+        onShow: handleShow,
+        onHide: handleHide,
+      });
 
       return (
         <>
-          <button ref={ref} type="button">
+          <button
+            aria-describedby={tooltip.describedBy}
+            ref={tooltip.ref}
+            type="button">
             External trigger
           </button>
-          <Tooltip anchorRef={ref} content="External tooltip" />
+          {tooltip.renderTooltip('Hook tooltip')}
         </>
       );
     }

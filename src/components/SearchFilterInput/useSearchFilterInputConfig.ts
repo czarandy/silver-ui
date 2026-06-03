@@ -1,4 +1,6 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {useMemo} from 'react';
+import {nowEpochMilliseconds} from '../../internal/time';
 import type {
   DateTimeRangePart,
   EnumItem,
@@ -18,7 +20,7 @@ type FieldType =
 
 type FieldTypeToJS = {
   boolean: boolean;
-  date: Date | number;
+  date: Temporal.Instant | number;
   enum: string;
   enum_list: ReadonlyArray<string>;
   number: number;
@@ -248,8 +250,14 @@ function operatorsFor(definition: FieldDefinition): {
   }
 }
 
-function toUnixSeconds(value: Date | number): number {
-  return value instanceof Date ? Math.floor(value.getTime() / 1000) : value;
+function nowUnixSeconds(): number {
+  return Math.floor(nowEpochMilliseconds() / 1000);
+}
+
+function toUnixSeconds(value: Temporal.Instant | number): number {
+  return value instanceof Temporal.Instant
+    ? Math.floor(value.epochMilliseconds / 1000)
+    : value;
 }
 
 function toStringArray(value: unknown): string[] | null {
@@ -265,7 +273,7 @@ function toStringArray(value: unknown): string[] | null {
 function resolveRangePart(part: DateTimeRangePart): number {
   switch (part.type) {
     case 'NOW':
-      return Math.floor(Date.now() / 1000);
+      return nowUnixSeconds();
     case 'ABSOLUTE':
       return part.unixSeconds;
     case 'RELATIVE': {
@@ -281,9 +289,7 @@ function resolveRangePart(part: DateTimeRangePart): number {
         Extract<DateTimeRangePart, {type: 'RELATIVE'}>['unit'],
         number
       >;
-      return Math.floor(
-        Date.now() / 1000 - part.backValue * multipliers[part.unit],
-      );
+      return nowUnixSeconds() - part.backValue * multipliers[part.unit];
     }
   }
 }
@@ -352,7 +358,10 @@ function matchesFilter(
       }
     }
     case 'date_absolute': {
-      if (!(fieldValue instanceof Date) && typeof fieldValue !== 'number') {
+      if (
+        !(fieldValue instanceof Temporal.Instant) &&
+        typeof fieldValue !== 'number'
+      ) {
         return false;
       }
       const unixSeconds = toUnixSeconds(fieldValue);
@@ -363,7 +372,10 @@ function matchesFilter(
           : true;
     }
     case 'date_range': {
-      if (!(fieldValue instanceof Date) && typeof fieldValue !== 'number') {
+      if (
+        !(fieldValue instanceof Temporal.Instant) &&
+        typeof fieldValue !== 'number'
+      ) {
         return false;
       }
       const unixSeconds = toUnixSeconds(fieldValue);

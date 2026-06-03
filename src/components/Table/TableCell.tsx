@@ -45,6 +45,7 @@ export interface TableCellProps {
 const styles = {
   base: css({
     boxSizing: 'border-box',
+    maxWidth: 0,
   }),
   density: {
     balanced: css({fontSize: 'sm', px: '3', py: '2'}),
@@ -63,6 +64,9 @@ const styles = {
     borderBottomWidth: 'default',
     borderBottomStyle: 'solid',
     borderBottomColor: 'border',
+    'tbody > tr:last-child > &': {
+      borderBottomWidth: 0,
+    },
   }),
   truncate: css({
     overflow: 'hidden',
@@ -75,8 +79,10 @@ const styles = {
     top: css({verticalAlign: 'top'}),
   },
   wrap: css({
-    overflowWrap: 'anywhere',
+    overflow: 'hidden',
+    overflowWrap: 'break-word',
     whiteSpace: 'normal',
+    wordBreak: 'break-word',
   }),
 } as const;
 

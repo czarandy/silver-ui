@@ -1,18 +1,20 @@
 import {render, screen} from '@testing-library/react';
 import {Check} from 'lucide-react';
+import type {SVGProps} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Badge} from './Badge';
 import {badgeRecipe} from './Badge.recipe';
 
+function BadgeIcon(props: SVGProps<SVGSVGElement>): React.JSX.Element {
+  return <Check {...props} data-testid="badge-icon" />;
+}
+
 describe('Badge', () => {
   it('renders a label and icon', () => {
-    render(<Badge data-testid="badge" icon={Check} label="Active" />);
+    render(<Badge data-testid="badge" icon={BadgeIcon} label="Active" />);
 
     expect(screen.getByText('Active')).toBeInTheDocument();
-    // eslint-disable-next-line testing-library/no-node-access -- verifying decorative svg presence
-    expect(
-      screen.getByTestId('badge').querySelector('svg'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('badge-icon')).toBeInTheDocument();
   });
 
   it('applies the neutral color by default', () => {

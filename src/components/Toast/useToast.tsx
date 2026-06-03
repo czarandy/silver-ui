@@ -15,13 +15,20 @@ function generateToastId(): string {
   return `silver-toast-${toastIdCounter}`;
 }
 
+/**
+ * Returns a function that shows a toast notification.
+ * Must be called within a `ToastViewport` provider.
+ * The returned function accepts `ToastOptions` and returns a dismiss callback.
+ */
 export function useToast(): ShowToastFn {
   const context = use(ToastContext);
 
   return useCallback(
     (options: ToastOptions): ToastDismissFn => {
       if (context == null) {
-        throw new Error('useToast must be used within a ToastViewport.');
+        throw new Error(
+          'useToast must be used within a ToastViewport. Add <ToastViewport> near your app root to enable toast notifications.',
+        );
       }
       const id = generateToastId();
       const entry: ToastEntry = {

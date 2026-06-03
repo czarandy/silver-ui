@@ -1,7 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Users} from 'lucide-react';
 import {useMemo, useState} from 'react';
-import {createStaticSource, type SearchableItem} from '../Combobox';
+import {
+  createStaticSource,
+  type SearchableItem,
+  type SearchSource,
+} from '../AutocompleteInput';
 import {TagsInput, type TagsInputProps} from './TagsInput';
 
 const people: SearchableItem[] = [
@@ -11,6 +15,33 @@ const people: SearchableItem[] = [
   {id: 'margaret', label: 'Margaret Hamilton'},
   {id: 'hedy', label: 'Hedy Lamarr'},
 ];
+
+function createAsyncSource<T extends SearchableItem>(
+  items: T[],
+  delayMs = 700,
+): SearchSource<T> {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return {
+    bootstrap: () => items.slice(0, 5),
+    cancel: () => {
+      if (timeout != null) {
+        clearTimeout(timeout);
+      }
+    },
+    search: async query =>
+      new Promise(resolve => {
+        timeout = setTimeout(() => {
+          const normalizedQuery = query.trim().toLowerCase();
+          resolve(
+            items.filter(item =>
+              item.label.toLowerCase().includes(normalizedQuery),
+            ),
+          );
+        }, delayMs);
+      }),
+  };
+}
 
 function TagsInputStory(
   args: React.ComponentProps<typeof TagsInput>,
@@ -57,7 +88,7 @@ function EmptyTagsInputStory(
 const meta = {
   title: 'Components/TagsInput',
   component: TagsInput,
-  args: {label: 'Team', placeholder: 'Search people'},
+  args: {label: 'Team', onChange: () => {}, placeholder: 'Search people'},
   render: (args: TagsInputProps): React.JSX.Element => (
     <TagsInputStory {...args} />
   ),
@@ -80,6 +111,32 @@ export const Creatable: Story = {
 
 export const WithClear: Story = {
   args: {hasClear: true},
+};
+
+function AsyncSearchStory(
+  args: React.ComponentProps<typeof TagsInput>,
+): React.JSX.Element {
+  const [value, setValue] = useState<SearchableItem[]>([]);
+  const source = useMemo(() => createAsyncSource(people), []);
+  return (
+    <TagsInput
+      {...args}
+      debounceMs={0}
+      onChange={(items, change) => {
+        setValue(items);
+        args.onChange(items, change);
+      }}
+      searchSource={source}
+      startIcon={Users}
+      value={value}
+    />
+  );
+}
+
+export const AsyncSearch: Story = {
+  render: (args: TagsInputProps): React.JSX.Element => (
+    <AsyncSearchStory {...args} />
+  ),
 };
 
 export const MaxEntries: Story = {
@@ -140,5 +197,62 @@ function OverflowInlineStory(
 export const OverflowInline: Story = {
   render: (args: TagsInputProps): React.JSX.Element => (
     <OverflowInlineStory {...args} />
+  ),
+};
+
+function OverflowBehaviorsStory(
+  args: React.ComponentProps<typeof TagsInput>,
+): React.JSX.Element {
+  const [inlineValue, setInlineValue] = useState<SearchableItem[]>(
+    people.slice(0, 5),
+  );
+  const [popoverValue, setPopoverValue] = useState<SearchableItem[]>(
+    people.slice(0, 5),
+  );
+  const source = useMemo(() => createStaticSource(people), []);
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gap: 24,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+        maxWidth: 720,
+      }}>
+      <TagsInput
+        {...args}
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Inline overflow"
+        onChange={(items, change) => {
+          setInlineValue(items);
+          args.onChange(items, change);
+        }}
+        searchSource={source}
+        startIcon={Users}
+        tagOverflowBehavior="unfocusedInline"
+        value={inlineValue}
+      />
+      <TagsInput
+        {...args}
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Popover overflow"
+        onChange={(items, change) => {
+          setPopoverValue(items);
+          args.onChange(items, change);
+        }}
+        searchSource={source}
+        startIcon={Users}
+        tagOverflowBehavior="unfocusedLayer"
+        value={popoverValue}
+      />
+    </div>
+  );
+}
+
+export const OverflowBehaviors: Story = {
+  render: (args: TagsInputProps): React.JSX.Element => (
+    <OverflowBehaviorsStory {...args} />
   ),
 };

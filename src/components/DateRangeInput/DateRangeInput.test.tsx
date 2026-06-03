@@ -100,7 +100,7 @@ describe('DateRangeInput', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not disable the input when isLoading is true', () => {
+  it('does not disable the input or calendar button when isLoading is true', () => {
     render(
       <DateRangeInput
         isLoading
@@ -111,6 +111,7 @@ describe('DateRangeInput', () => {
     );
 
     expect(screen.getByRole('textbox', {name: 'Window'})).toBeEnabled();
+    expect(screen.getByRole('button', {name: 'Choose Window'})).toBeEnabled();
   });
 
   it('renders error status with aria-invalid', () => {

@@ -50,7 +50,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "check:exports": "pnpm build && publint",
-    "clean": "rm -rf dist storybook-static"
+    "clean": "rm -rf dist storybook-static",
+    "swatches": "node scripts/generate-theme-swatches.js"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

@@ -12,7 +12,13 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {formatFileSize} from '../../internal/formatFileSize';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {Field, type FieldNecessity, type InputStatus} from '../Field';
+import {
+  Field,
+  inputRecipe,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from '../Field';
 import {
   getDescribedBy,
   getStatusIcon,
@@ -24,7 +30,7 @@ import {Text} from '../Text';
 
 export type FileInputMode = 'dropzone' | 'input';
 
-export type FileInputProps = {
+interface FileInputBaseProps {
   /**
    * Comma-separated MIME types or file extensions the input accepts.
    */
@@ -42,11 +48,6 @@ export type FileInputProps = {
    */
   description?: ReactNode;
   /**
-   * Whether to show a clear button when files are selected.
-   * @default false
-   */
-  hasClear?: boolean;
-  /**
    * Whether the input is disabled.
    * @default false
    */
@@ -62,11 +63,6 @@ export type FileInputProps = {
    */
   isLoading?: boolean;
   /**
-   * Whether multiple files can be selected.
-   * @default false
-   */
-  isMultiple?: boolean;
-  /**
    * Field label text.
    */
   label: string;
@@ -79,10 +75,6 @@ export type FileInputProps = {
    */
   labelTooltip?: ReactNode;
   /**
-   * Maximum number of files allowed when isMultiple is true.
-   */
-  maxFiles?: number;
-  /**
    * Maximum file size in bytes.
    */
   maxSize?: number;
@@ -92,10 +84,6 @@ export type FileInputProps = {
    */
   mode?: FileInputMode;
   /**
-   * Called when the selected files change.
-   */
-  onChange: (files: File | File[] | null) => void;
-  /**
    * Placeholder text shown when no file is selected.
    */
   placeholder?: string;
@@ -104,6 +92,11 @@ export type FileInputProps = {
    */
   ref?: Ref<HTMLInputElement>;
   /**
+   * Visual size of the input.
+   * @default 'md'
+   */
+  size?: InputSize;
+  /**
    * Validation status displayed below the input.
    */
   status?: InputStatus;
@@ -111,11 +104,48 @@ export type FileInputProps = {
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
+}
+
+interface FileInputSingleProps extends FileInputBaseProps {
   /**
-   * Currently selected file(s).
+   * Whether multiple files can be selected.
    */
-  value: File | File[] | null;
-} & FieldNecessity;
+  isMultiple?: false;
+  /**
+   * Maximum number of files allowed. Only applicable when isMultiple is true.
+   */
+  maxFiles?: undefined;
+  /**
+   * Called when the selected file changes.
+   */
+  onChange: (file: File | null) => void;
+  /**
+   * Currently selected file.
+   */
+  value: File | null;
+}
+
+interface FileInputMultipleProps extends FileInputBaseProps {
+  /**
+   * Whether multiple files can be selected.
+   */
+  isMultiple: true;
+  /**
+   * Maximum number of files allowed.
+   */
+  maxFiles?: number;
+  /**
+   * Called when the selected files change.
+   */
+  onChange: (files: File[]) => void;
+  /**
+   * Currently selected files.
+   */
+  value: File[];
+}
+
+export type FileInputProps = (FileInputMultipleProps | FileInputSingleProps) &
+  FieldNecessity;
 
 const styles = {
   surface: css({
@@ -124,7 +154,6 @@ const styles = {
     alignItems: 'center',
     gap: '2',
     px: '3',
-    py: '2',
     borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',
@@ -143,8 +172,12 @@ const styles = {
     minH: '32',
     flexDirection: 'column',
     justifyContent: 'center',
+    alignItems: 'center',
     borderStyle: 'dashed',
     textAlign: 'center',
+    '& > *': {
+      flex: 'none',
+    },
   }),
   disabled: css({
     cursor: 'not-allowed',
@@ -173,10 +206,6 @@ const styles = {
     whiteSpace: 'nowrap',
   }),
   icon: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
-  }),
-  statusIcon: css({
     display: 'inline-flex',
     color: 'fg.muted',
   }),
@@ -249,9 +278,10 @@ function getFileNames(value: File | File[] | null): string | null {
   if (value == null) {
     return null;
   }
-  return Array.isArray(value)
-    ? value.map(file => file.name).join(', ')
-    : value.name;
+  if (Array.isArray(value)) {
+    return value.length === 0 ? null : value.map(file => file.name).join(', ');
+  }
+  return value.name;
 }
 
 /**
@@ -273,6 +303,7 @@ export function FileInput({
   isRequired,
   isDisabled = false,
   isLoading = false,
+  size = 'md',
   status: statusFromProps,
   labelIcon,
   labelTooltip,
@@ -310,11 +341,22 @@ export function FileInput({
       maxSize,
     });
     setValidationError(result.error);
-    if (result.files.length === 0) {
-      onChange(null);
-      return;
+    if (isMultiple) {
+      (onChange as (files: File[]) => void)(result.files);
+    } else if (result.files.length === 0) {
+      (onChange as (file: File | null) => void)(null);
+    } else {
+      (onChange as (file: File | null) => void)(result.files[0]);
     }
-    onChange(isMultiple ? result.files : result.files[0]);
+  };
+
+  const handleClear = () => {
+    setValidationError(null);
+    if (isMultiple) {
+      (onChange as (files: File[]) => void)([]);
+    } else {
+      (onChange as (file: File | null) => void)(null);
+    }
   };
 
   const dragProps = isDropzone
@@ -338,7 +380,9 @@ export function FileInput({
         onDrop: (event: DragEvent<HTMLDivElement>) => {
           event.preventDefault();
           setIsDragOver(false);
-          handleFiles(Array.from(event.dataTransfer.files));
+          if (!isDisabled) {
+            handleFiles(Array.from(event.dataTransfer.files));
+          }
         },
       }
     : {};
@@ -365,7 +409,9 @@ export function FileInput({
         aria-disabled={isDisabled || undefined}
         className={cx(
           styles.surface,
-          isDropzone ? styles.dropzone : undefined,
+          isDropzone
+            ? styles.dropzone
+            : inputRecipe({size, status: status?.type, isDisabled}),
           isDisabled ? styles.disabled : undefined,
           isDragOver ? styles.active : undefined,
           className,
@@ -388,6 +434,7 @@ export function FileInput({
         <input
           accept={accept}
           aria-describedby={describedBy}
+          aria-invalid={status?.type === 'error' || undefined}
           className={styles.hiddenInput}
           data-testid={dataTestId}
           disabled={isDisabled}
@@ -420,17 +467,14 @@ export function FileInput({
             className={styles.clearButton}
             onClick={event => {
               event.stopPropagation();
-              setValidationError(null);
-              onChange(null);
+              handleClear();
             }}
             type="button">
             <Icon icon={X} size="sm" />
           </button>
         ) : null}
         {status != null && !isDropzone ? (
-          <span className={styles.statusIcon}>
-            {getStatusIcon(status.type)}
-          </span>
+          <span className={styles.icon}>{getStatusIcon(status.type)}</span>
         ) : null}
       </div>
     </Field>

@@ -13,10 +13,11 @@ import {
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
+import {OverflowList} from '../../internal/OverflowList';
 import {cx} from '../../internal/cx';
-import {useOverflowCount} from '../../internal/useOverflowCount';
-import {BaseCombobox} from '../Combobox';
-import type {SearchableItem, SearchSource} from '../Combobox';
+import {useLayer} from '../../internal/useLayer';
+import {BaseAutocompleteInput} from '../AutocompleteInput';
+import type {SearchableItem, SearchSource} from '../AutocompleteInput';
 import {
   Field,
   inputRecipe,
@@ -112,6 +113,12 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    * @default false
    */
   isLabelHidden?: boolean;
+  /**
+   * Whether the input is read-only. Prevents typing and hides the clear
+   * button without applying disabled opacity.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label.
    */
@@ -209,10 +216,22 @@ const styles = {
     alignItems: 'center',
     h: 'auto',
   }),
+  wrapperWithTags: css({
+    py: '1',
+    rowGap: '1',
+  }),
+  layerPopover: css({
+    w: 'anchor-size(width)',
+  }),
   truncatedWrapper: css({
     flexWrap: 'nowrap',
     overflow: 'hidden',
   }),
+  truncatedSize: {
+    sm: css({h: 'component.sm'}),
+    md: css({h: 'component.md'}),
+    lg: css({h: 'component.lg'}),
+  },
   tag: css({flexShrink: 0}),
   input: css({
     minW: '10',
@@ -268,6 +287,7 @@ export function TagsInput<T extends SearchableItem>({
   handleRef,
   isDisabled = false,
   isLabelHidden = false,
+  isReadOnly = false,
   isOptional,
   isRequired,
   label,
@@ -300,6 +320,9 @@ export function TagsInput<T extends SearchableItem>({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isFocusedWithin, setIsFocusedWithin] = useState(false);
   const [announcement, setAnnouncement] = useState('');
+  const isLayerMode = tagOverflowBehavior === 'unfocusedLayer';
+  const layer = useLayer();
+  const layerContentRef = useRef<HTMLDivElement>(null);
   const selectedIDsRef = useRef(new Set<string>());
   // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern: synchronous, idempotent sync with props
   selectedIDsRef.current = new Set(value.map(item => item.id));
@@ -309,7 +332,32 @@ export function TagsInput<T extends SearchableItem>({
   isAtMaxRef.current = isAtMax;
   const isTruncated =
     !isFocusedWithin && tagOverflowBehavior !== 'none' && value.length > 0;
-  const overflow = useOverflowCount(isTruncated);
+
+  const placeholderRef = useCallback(
+    (element: HTMLElement | null) => {
+      if (isLayerMode) {
+        layer.ref(element);
+      }
+    },
+    [isLayerMode, layer],
+  );
+
+  const isFocusInTagsInput = useCallback(
+    (target: EventTarget | null): boolean => {
+      if (!(target instanceof Node)) {
+        return false;
+      }
+      if (wrapperRef.current?.contains(target)) {
+        return true;
+      }
+      if (layerContentRef.current?.contains(target)) {
+        return true;
+      }
+      const popoverElement = document.getElementById(layer.id);
+      return popoverElement?.contains(target) ?? false;
+    },
+    [layer.id],
+  );
 
   const filteredSource = useMemo<SearchSource<T>>(
     () => ({
@@ -380,29 +428,44 @@ export function TagsInput<T extends SearchableItem>({
 
   const handleFocus = useCallback(
     (event: FocusEvent<HTMLDivElement>) => {
-      if (!event.currentTarget.contains(event.relatedTarget)) {
-        setIsFocusedWithin(true);
+      const comingFromOutside = !isFocusInTagsInput(event.relatedTarget);
+      setIsFocusedWithin(true);
+      if (isLayerMode) {
+        layer.show();
+      }
+      if (comingFromOutside) {
         onFocus?.(event);
       }
     },
-    [onFocus],
+    [isFocusInTagsInput, isLayerMode, layer, onFocus],
   );
 
   const handleBlur = useCallback(
     (event: FocusEvent<HTMLDivElement>) => {
-      if (!event.currentTarget.contains(event.relatedTarget)) {
+      if (!isFocusInTagsInput(event.relatedTarget)) {
         setIsFocusedWithin(false);
+        if (isLayerMode) {
+          layer.hide();
+        }
         onBlur?.(event);
       }
     },
-    [onBlur],
+    [isFocusInTagsInput, isLayerMode, layer, onBlur],
   );
 
-  const handleWrapperClick = useCallback(() => {
+  const handleWrapperPointerDown = useCallback(() => {
     if (!isDisabled) {
-      inputRef.current?.focus();
+      if (isLayerMode) {
+        layer.show();
+        setIsFocusedWithin(true);
+      }
+      document.addEventListener(
+        'click',
+        () => requestAnimationFrame(() => inputRef.current?.focus()),
+        {once: true},
+      );
     }
-  }, [isDisabled]);
+  }, [isDisabled, isLayerMode, layer]);
 
   const necessity: FieldNecessity = {isOptional, isRequired};
 
@@ -421,24 +484,9 @@ export function TagsInput<T extends SearchableItem>({
     </span>
   ));
 
-  return (
-    <Field
-      className={className}
-      description={description}
-      descriptionID={descriptionID}
-      inputId={inputId}
-      isDisabled={isDisabled}
-      isLabelHidden={isLabelHidden}
-      {...necessity}
-      label={label}
-      labelIcon={labelIcon}
-      labelTooltip={labelTooltip}
-      ref={ref}
-      status={
-        status == null ? undefined : {...status, messageID: statusMessageID}
-      }
-      style={style}>
-      {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- click delegates to inner input for focus convenience */}
+  const wrapperContent = (
+    <>
+      {/* eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- pointerdown delegates to inner input for focus convenience */}
       <div
         aria-label={label}
         className={cx(
@@ -448,12 +496,14 @@ export function TagsInput<T extends SearchableItem>({
             isDisabled,
           }),
           styles.wrapper,
+          value.length > 0 && !isTruncated ? styles.wrapperWithTags : undefined,
           isTruncated ? styles.truncatedWrapper : undefined,
+          isTruncated ? styles.truncatedSize[size] : undefined,
         )}
         data-testid={dataTestId}
         onBlur={handleBlur}
-        onClick={handleWrapperClick}
         onFocus={handleFocus}
+        onPointerDown={handleWrapperPointerDown}
         ref={wrapperRef}
         role="group">
         {startIcon != null ? (
@@ -462,27 +512,20 @@ export function TagsInput<T extends SearchableItem>({
           </span>
         ) : null}
         {isTruncated ? (
-          <div
-            ref={overflow.ref}
-            style={{
-              display: 'flex',
-              flexWrap: 'nowrap',
-              gap: 'inherit',
-              overflow: 'hidden',
-              flex: 1,
-              alignItems: 'center',
-            }}>
-            {tokens}
-            {overflow.count > 0 ? (
-              <span className={styles.overflowText} data-overflow-ignore="">
-                +{overflow.count} more
+          <OverflowList
+            behavior="observeParent"
+            gap={4}
+            overflowRenderer={overflowItems => (
+              <span className={styles.overflowText}>
+                +{overflowItems.length} more
               </span>
-            ) : null}
-          </div>
+            )}>
+            {tokens}
+          </OverflowList>
         ) : (
           tokens
         )}
-        <BaseCombobox
+        <BaseAutocompleteInput
           anchorRef={wrapperRef}
           ariaDescribedBy={describedBy}
           className={cx(
@@ -494,7 +537,7 @@ export function TagsInput<T extends SearchableItem>({
           hasAutoFocus={hasAutoFocus}
           hasEntriesOnFocus={hasEntriesOnFocus}
           inputId={inputId}
-          isDisabled={isDisabled || isAtMax}
+          isDisabled={isDisabled || isReadOnly || isAtMax}
           maxMenuItems={maxMenuItems}
           onChange={item => {
             if (item == null) {
@@ -546,7 +589,7 @@ export function TagsInput<T extends SearchableItem>({
         {endContent != null ? (
           <span className={styles.endContent}>{endContent}</span>
         ) : null}
-        {hasClear && value.length > 0 && !isDisabled ? (
+        {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
           <button
             aria-label={`Clear ${label}`}
             className={inputStyles.clearButton}
@@ -566,6 +609,87 @@ export function TagsInput<T extends SearchableItem>({
           {announcement}
         </span>
       </div>
+    </>
+  );
+
+  const popoverOverrideStyle: CSSProperties = {
+    positionArea: undefined,
+    positionTryFallbacks: undefined,
+    top: 'anchor(top)',
+    left: 'anchor(start)',
+  };
+
+  const inputContent = isLayerMode ? (
+    <>
+      <div
+        className={cx(
+          inputRecipe({
+            size,
+            status: status?.type,
+            isDisabled,
+          }),
+          styles.wrapper,
+          isTruncated ? styles.truncatedWrapper : undefined,
+          styles.truncatedSize[size],
+        )}
+        onPointerDown={handleWrapperPointerDown}
+        ref={placeholderRef}>
+        {isTruncated ? (
+          <>
+            {startIcon != null ? (
+              <span className={inputStyles.iconSlot}>
+                <Icon color="secondary" icon={startIcon} size="sm" />
+              </span>
+            ) : null}
+            <OverflowList
+              behavior="observeParent"
+              gap={4}
+              overflowRenderer={overflowItems => (
+                <span className={styles.overflowText}>
+                  +{overflowItems.length} more
+                </span>
+              )}>
+              {tokens}
+            </OverflowList>
+          </>
+        ) : null}
+      </div>
+      {layer.render(
+        <div
+          data-testid={dataTestId == null ? undefined : `${dataTestId}-layer`}
+          ref={layerContentRef}>
+          {wrapperContent}
+        </div>,
+        {
+          alignment: 'start',
+          className: styles.layerPopover,
+          placement: 'below',
+          style: popoverOverrideStyle,
+        },
+      )}
+    </>
+  ) : (
+    wrapperContent
+  );
+
+  return (
+    <Field
+      className={className}
+      description={description}
+      descriptionID={descriptionID}
+      inputId={inputId}
+      isDisabled={isDisabled}
+      isLabelHidden={isLabelHidden}
+      {...necessity}
+      label={label}
+      labelIcon={labelIcon}
+      labelTooltip={labelTooltip}
+      ref={ref}
+      status={
+        status == null ? undefined : {...status, messageID: statusMessageID}
+      }
+      style={style}>
+      {inputContent}
     </Field>
   );
 }

@@ -1,4 +1,4 @@
-import {memo, type ReactElement, type ReactNode, type Ref} from 'react';
+import {memo, useRef, type ReactElement, type ReactNode, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {EmptyState} from '../EmptyState';
@@ -46,6 +46,21 @@ const styles = {
 } as const;
 
 const EMPTY_PLUGINS: TablePlugin<Record<string, unknown>>[] = [];
+
+function areArraysShallowEqual<T>(previous: T[], next: T[]): boolean {
+  if (previous === next) {
+    return true;
+  }
+  if (previous.length !== next.length) {
+    return false;
+  }
+  for (let index = 0; index < previous.length; index++) {
+    if (previous[index] !== next[index]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 function applyPlugins<TPlugin, TProps, TArgs extends unknown[]>(
   plugins: TPlugin[],
@@ -210,12 +225,23 @@ function BaseTableInner<T extends Record<string, unknown>>({
 
   const baseColumns =
     columnsProp ?? (data == null ? [] : generateColumns(data));
-  const columns = applyPlugins(
+  const transformedColumns = applyPlugins(
     plugins,
     plugin => plugin.transformColumns,
     baseColumns,
   );
+  /* eslint-disable @eslint-react/refs -- render-time memoization keeps row props stable before children render */
+  const columnsRef = useRef(transformedColumns);
+  const areColumnsStable = areArraysShallowEqual(
+    columnsRef.current,
+    transformedColumns,
+  );
+  if (!areColumnsStable) {
+    columnsRef.current = transformedColumns;
+  }
+  const columns = columnsRef.current;
   const widths = resolveColumnWidths(columns);
+  /* eslint-enable @eslint-react/refs */
 
   const tableRenderProps = applyPlugins(
     plugins,

@@ -1,6 +1,6 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {useRef} from 'react';
-import {beforeAll, afterAll, describe, expect, it, vi} from 'vitest';
+import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from '../Button';
 import {Popover} from './Popover';
 
@@ -33,13 +33,9 @@ describe('Popover', () => {
 
   it('opens when the trigger is clicked', async () => {
     showPopoverMock.mockClear();
-    const onOpenChange = vi.fn();
 
     render(
-      <Popover
-        content={<div>Popover content</div>}
-        label="Actions"
-        onOpenChange={onOpenChange}>
+      <Popover content={<div>Popover content</div>} label="Actions">
         <Button label="Open" />
       </Popover>,
     );
@@ -48,8 +44,66 @@ describe('Popover', () => {
 
     await waitFor(() => {
       expect(showPopoverMock).toHaveBeenCalled();
-      expect(onOpenChange).toHaveBeenCalledWith(true);
     });
+  });
+
+  it('closes when the trigger is clicked again', async () => {
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <Popover content={<div>Popover content</div>} label="Actions">
+        <Button label="Toggle" />
+      </Popover>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Toggle'});
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      expect(hidePopoverMock).toHaveBeenCalled();
+    });
+  });
+
+  it('supports controlled isOpen', async () => {
+    showPopoverMock.mockClear();
+
+    const {rerender} = render(
+      <Popover content={<div>Content</div>} isOpen={false} label="Actions">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    expect(showPopoverMock).not.toHaveBeenCalled();
+
+    rerender(
+      <Popover content={<div>Content</div>} isOpen label="Actions">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+  });
+
+  it('does not open when isEnabled is false', () => {
+    showPopoverMock.mockClear();
+
+    render(
+      <Popover content={<div>Content</div>} isEnabled={false} label="Actions">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
+    expect(showPopoverMock).not.toHaveBeenCalled();
   });
 
   it('attaches to an external anchor ref', () => {
@@ -92,5 +146,17 @@ describe('Popover', () => {
     const popover = screen.getByTestId('popover');
     expect(popover).toHaveClass('custom-popover');
     expect(popover).toHaveStyle({color: 'rgb(255, 0, 0)'});
+  });
+
+  it('forwards ref to the content element', () => {
+    const ref = vi.fn<(el: HTMLDivElement | null) => void>();
+
+    render(
+      <Popover content={<div>Content</div>} label="Actions" ref={ref}>
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 });

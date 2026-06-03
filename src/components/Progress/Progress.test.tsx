@@ -1,15 +1,20 @@
 import {render, screen} from '@testing-library/react';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {Progress} from './Progress';
 
 describe('Progress', () => {
-  it('renders determinate progress as a meter', () => {
+  it('renders determinate progress with progressbar role by default', () => {
     render(<Progress label="Progress" value={50} />);
-    const meter = screen.getByRole('meter');
-    expect(meter).toHaveAttribute('aria-valuenow', '50');
-    expect(meter).toHaveAttribute('aria-valuemin', '0');
-    expect(meter).toHaveAttribute('aria-valuemax', '100');
-    expect(meter).toHaveAttribute('aria-valuetext', '50%');
+    const bar = screen.getByRole('progressbar');
+    expect(bar).toHaveAttribute('aria-valuenow', '50');
+    expect(bar).toHaveAttribute('aria-valuemin', '0');
+    expect(bar).toHaveAttribute('aria-valuemax', '100');
+    expect(bar).toHaveAttribute('aria-valuetext', '50%');
+  });
+
+  it('supports meter role for gauge use cases', () => {
+    render(<Progress label="Disk usage" role="meter" value={60} />);
+    expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '60');
   });
 
   it('renders visible label by default', () => {
@@ -28,18 +33,33 @@ describe('Progress', () => {
       />,
     );
     expect(screen.getByText('3 GB / 5 GB')).toBeInTheDocument();
-    expect(screen.getByRole('meter')).toHaveAttribute(
+    expect(screen.getByRole('progressbar')).toHaveAttribute(
       'aria-valuetext',
       '3 GB / 5 GB',
     );
   });
 
+  it('formats default percentage for non-trivial values', () => {
+    render(<Progress hasValueLabel label="Progress" max={3} value={1} />);
+    expect(screen.getByText('33%')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toHaveAttribute(
+      'aria-valuetext',
+      '33%',
+    );
+  });
+
   it('clamps value to the valid range', () => {
     const {rerender} = render(<Progress label="Over" max={100} value={150} />);
-    expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '100');
+    expect(screen.getByRole('progressbar')).toHaveAttribute(
+      'aria-valuenow',
+      '100',
+    );
 
     rerender(<Progress label="Under" max={100} value={-10} />);
-    expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '0');
+    expect(screen.getByRole('progressbar')).toHaveAttribute(
+      'aria-valuenow',
+      '0',
+    );
   });
 
   it('renders indeterminate progress as a progressbar', () => {
@@ -57,8 +77,34 @@ describe('Progress', () => {
     expect(screen.queryByText('50%')).not.toBeInTheDocument();
   });
 
-  it('passes data-testid to the root', () => {
-    render(<Progress data-testid="my-progress" label="Progress" value={50} />);
-    expect(screen.getByTestId('my-progress')).toBeInTheDocument();
+  it('keeps label accessible when isLabelHidden is true', () => {
+    render(<Progress isLabelHidden label="Storage used" value={50} />);
+
+    expect(screen.getByText('Storage used')).toBeInTheDocument();
+  });
+
+  it('forwards className, style, data-testid, and ref', () => {
+    const ref = vi.fn<(el: HTMLDivElement | null) => void>();
+
+    render(
+      <Progress
+        className="custom-progress"
+        data-testid="my-progress"
+        label="Progress"
+        ref={ref}
+        style={{maxWidth: 300}}
+        value={50}
+      />,
+    );
+
+    const root = screen.getByTestId('my-progress');
+    expect(root).toHaveClass('custom-progress');
+    expect(root).toHaveStyle({maxWidth: '300px'});
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+
+  it('degrades gracefully when max is 0', () => {
+    render(<Progress hasValueLabel label="Progress" max={0} value={0} />);
+    expect(screen.getByText('0%')).toBeInTheDocument();
   });
 });

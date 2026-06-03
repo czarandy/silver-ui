@@ -40,6 +40,27 @@ describe('CheckboxInput', () => {
     expect(screen.getByRole('checkbox', {name: 'Accept'})).toBeDisabled();
   });
 
+  it('does not block changes when isLoading is true', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <CheckboxInput
+        isLoading
+        label="Accept"
+        onChange={onChange}
+        value={false}
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox', {name: 'Accept'});
+    expect(checkbox).toBeEnabled();
+    expect(checkbox).toHaveAttribute('aria-busy', 'true');
+
+    await user.click(checkbox);
+    expect(onChange).toHaveBeenCalledWith(true, expect.any(Object));
+  });
+
   it('blocks changes when isReadOnly is true', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

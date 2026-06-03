@@ -4,6 +4,11 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon} from '../Icon';
 import {Text} from '../Text';
+import {
+  stepConnectorRecipe,
+  stepIndicatorRecipe,
+  stepLabelRecipe,
+} from './Step.recipe';
 import {useStepperContext} from './StepperContext';
 
 export type StepState =
@@ -95,14 +100,6 @@ const styles = {
     minW: '6',
     h: '7',
   }),
-  horizontalConnectorLine: css({
-    h: '0.5',
-    w: 'full',
-    borderRadius: 'full',
-    transitionProperty: 'background-color',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-  }),
   verticalRoot: css({
     display: 'flex',
     flexDirection: 'row',
@@ -126,82 +123,12 @@ const styles = {
     justifyContent: 'center',
     py: '1',
   }),
-  verticalConnectorLine: css({
-    w: '0.5',
-    h: 'full',
-    borderRadius: 'full',
-    transitionProperty: 'background-color',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-  }),
   verticalContent: css({
     display: 'flex',
     flexDirection: 'column',
     ps: '3',
     pb: '6',
     flex: 1,
-  }),
-  indicator: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: '7',
-    h: '7',
-    borderRadius: 'full',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    fontWeight: 'semibold',
-    lineHeight: 'none',
-    transitionProperty: 'background-color, color, border-color, opacity',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    flexShrink: 0,
-    userSelect: 'none',
-    borderWidth: 'emphasized',
-    borderStyle: 'solid',
-  }),
-  indicatorActive: css({
-    bg: 'primary',
-    borderColor: 'primary',
-    color: 'fg.onPrimary',
-  }),
-  indicatorCompleted: css({
-    bg: 'primary',
-    borderColor: 'primary',
-    color: 'fg.onPrimary',
-  }),
-  indicatorUpcoming: css({
-    bg: 'transparent',
-    borderColor: 'border.emphasized',
-    color: 'fg.muted',
-  }),
-  indicatorDisabled: css({
-    bg: 'transparent',
-    borderColor: 'border',
-    color: 'fg.disabled',
-  }),
-  indicatorError: css({
-    bg: 'status.error.solid',
-    borderColor: 'status.error.solid',
-    color: 'status.error.solidFg',
-  }),
-  indicatorClickable: css({
-    cursor: 'pointer',
-    _hover: {
-      opacity: 0.85,
-    },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  connectorCompleted: css({
-    bg: 'primary',
-  }),
-  connectorIncomplete: css({
-    bg: 'track.emphasized',
   }),
   labelRow: css({
     display: 'flex',
@@ -214,28 +141,6 @@ const styles = {
     alignItems: 'flex-start',
     maxW: 'none',
     pt: '0.5',
-  }),
-  label: css({
-    textAlign: 'center',
-  }),
-  labelVertical: css({
-    textAlign: 'start',
-  }),
-  labelActive: css({
-    color: 'fg',
-    fontWeight: 'semibold',
-  }),
-  labelCompleted: css({
-    color: 'fg',
-  }),
-  labelUpcoming: css({
-    color: 'fg.muted',
-  }),
-  labelDisabled: css({
-    color: 'fg.disabled',
-  }),
-  labelError: css({
-    color: 'status.error.fg',
   }),
   description: css({
     textAlign: 'center',
@@ -272,44 +177,16 @@ function getStepState({
   if (hasError) {
     return 'error';
   }
-
   if (isDisabled) {
     return 'disabled';
   }
-
   if (isActive) {
     return 'active';
   }
-
   if (isCompleted) {
     return 'completed';
   }
-
   return 'upcoming';
-}
-
-function getLabelClassName(state: StepState, isVertical: boolean): string {
-  return cx(
-    styles.label,
-    isVertical ? styles.labelVertical : undefined,
-    state === 'error' ? styles.labelError : undefined,
-    state === 'disabled' ? styles.labelDisabled : undefined,
-    state === 'active' ? styles.labelActive : undefined,
-    state === 'completed' ? styles.labelCompleted : undefined,
-    state === 'upcoming' ? styles.labelUpcoming : undefined,
-  );
-}
-
-function getIndicatorClassName(state: StepState, isClickable: boolean): string {
-  return cx(
-    styles.indicator,
-    state === 'error' ? styles.indicatorError : undefined,
-    state === 'disabled' ? styles.indicatorDisabled : undefined,
-    state === 'active' ? styles.indicatorActive : undefined,
-    state === 'completed' ? styles.indicatorCompleted : undefined,
-    state === 'upcoming' ? styles.indicatorUpcoming : undefined,
-    isClickable ? styles.indicatorClickable : undefined,
-  );
 }
 
 /**
@@ -336,10 +213,12 @@ export function Step({
   const isVertical = orientation === 'vertical';
   const isClickable = isNonLinear && !isDisabled && (isCompleted || isActive);
   const state = getStepState({hasError, isActive, isCompleted, isDisabled});
-  const connectorClassName = cx(
-    isVertical ? styles.verticalConnectorLine : styles.horizontalConnectorLine,
-    isCompleted ? styles.connectorCompleted : styles.connectorIncomplete,
-  );
+
+  const connectorClassName = stepConnectorRecipe({
+    isCompleted,
+    orientation,
+  });
+
   const defaultIndicatorContent = isCompleted ? (
     <Icon color="inherit" icon={Check} size="sm" />
   ) : (
@@ -357,16 +236,25 @@ export function Step({
     }
   };
 
+  const stepLabel = hasError
+    ? `Go to step ${step + 1}: ${label} (error)`
+    : `Go to step ${step + 1}: ${label}`;
+
   const indicator = isClickable ? (
     <button
-      aria-label={`Go to step ${step + 1}: ${label}`}
-      className={cx(styles.buttonReset, getIndicatorClassName(state, true))}
+      aria-label={stepLabel}
+      className={cx(
+        styles.buttonReset,
+        stepIndicatorRecipe({state, isClickable: true}),
+      )}
       onClick={handleClick}
       type="button">
       {indicatorContent}
     </button>
   ) : (
-    <div aria-hidden="true" className={getIndicatorClassName(state, false)}>
+    <div
+      aria-hidden="true"
+      className={stepIndicatorRecipe({state, isClickable: false})}>
       {indicatorContent}
     </div>
   );
@@ -379,7 +267,7 @@ export function Step({
       )}>
       <Text
         as="span"
-        className={getLabelClassName(state, isVertical)}
+        className={stepLabelRecipe({state, orientation})}
         color="inherit"
         type="label">
         {label}

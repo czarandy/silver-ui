@@ -28,7 +28,6 @@ function SchedulePaginationControls(): React.JSX.Element {
         isIconOnly
         label={previousDateLabel}
         onClick={onPreviousDate}
-        variant="ghost"
       />
       <Button label="Today" onClick={onToday} size="sm" />
       <Button
@@ -36,7 +35,6 @@ function SchedulePaginationControls(): React.JSX.Element {
         isIconOnly
         label={nextDateLabel}
         onClick={onNextDate}
-        variant="ghost"
       />
     </ButtonGroup>
   );
@@ -58,8 +56,8 @@ function createSchedulePaginationPlugin({
             endContent,
             startContent: (
               <>
-                {startContent}
                 {controls}
+                {startContent}
               </>
             ),
           }

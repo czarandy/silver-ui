@@ -113,9 +113,7 @@ const styles = {
   anchor: css({
     display: 'inline-flex',
   }),
-  content: css({
-    minW: 'anchor-size(width)',
-  }),
+  content: css({}),
   gap: {
     above: css({mb: '1'}),
     below: css({mt: '1'}),
@@ -240,7 +238,7 @@ export function Popover({
 
     popover.triggerRef(anchor);
     const trigger = findTriggerButton(anchor);
-    if (trigger == null) {
+    if (trigger == null || !isEnabled) {
       return () => {
         popover.triggerRef(null);
       };
@@ -251,7 +249,7 @@ export function Popover({
       popover.triggerRef(null);
       detach();
     };
-  }, [anchorRef, attachTrigger, popover]);
+  }, [anchorRef, attachTrigger, isEnabled, popover]);
 
   useIsomorphicLayoutEffect(() => {
     if (!isControlled) {
@@ -283,7 +281,12 @@ export function Popover({
       style={{...paddingStyle, ...widthStyle, ...style}}>
       {content}
     </div>,
-    {placement, alignment, className: styles.gap[placement]},
+    {
+      placement,
+      alignment,
+      className: styles.gap[placement],
+      style: {minWidth: 'anchor-size(width)'},
+    },
   );
 
   if (anchorRef != null && children == null) {

@@ -258,7 +258,7 @@ export function CheckboxInput({
         name={htmlName}
         onBlur={onBlur}
         onChange={event => {
-          if (isReadOnly || isLoading) {
+          if (isReadOnly) {
             event.preventDefault();
             return;
           }

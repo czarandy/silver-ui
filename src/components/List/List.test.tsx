@@ -85,4 +85,123 @@ describe('List', () => {
       '/docs',
     );
   });
+
+  it('renders disc markers by default', () => {
+    render(
+      <List data-testid="list">
+        <ListItem label="Item" />
+      </List>,
+    );
+
+    expect(screen.getByTestId('list')).toBeInTheDocument();
+  });
+
+  it('renders circle markers', () => {
+    render(
+      <List data-testid="list" listStyle="circle">
+        <ListItem label="Item" />
+      </List>,
+    );
+
+    expect(screen.getByTestId('list')).toBeInTheDocument();
+  });
+
+  it('renders disabled list items', () => {
+    render(
+      <List>
+        <ListItem isDisabled label="Disabled item" onClick={() => {}} />
+      </List>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Disabled item'})).toBeDisabled();
+  });
+
+  it('prevents clicks on disabled items', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <List>
+        <ListItem isDisabled label="Disabled" onClick={onClick} />
+      </List>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Disabled'}));
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('forwards data-testid to the list element', () => {
+    render(
+      <List data-testid="my-list">
+        <ListItem label="Item" />
+      </List>,
+    );
+
+    expect(screen.getByTestId('my-list')).toBeInTheDocument();
+  });
+
+  it('forwards className, style, and ref on List', () => {
+    const ref =
+      vi.fn<(el: HTMLUListElement | HTMLOListElement | null) => void>();
+
+    render(
+      <List
+        className="custom-list"
+        data-testid="list"
+        ref={ref}
+        style={{maxWidth: 400}}>
+        <ListItem label="Item" />
+      </List>,
+    );
+
+    const list = screen.getByTestId('list');
+    expect(list).toHaveClass('custom-list');
+    expect(list).toHaveStyle({maxWidth: '400px'});
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
+  });
+
+  it('forwards className, style, and ref on ListItem', () => {
+    const ref = vi.fn<(el: HTMLLIElement | null) => void>();
+
+    render(
+      <List>
+        <ListItem
+          className="custom-item"
+          data-testid="item"
+          label="Item"
+          ref={ref}
+          style={{color: 'red'}}
+        />
+      </List>,
+    );
+
+    const item = screen.getByTestId('item');
+    expect(item).toHaveClass('custom-item');
+    expect(item).toHaveStyle({color: 'rgb(255, 0, 0)'});
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLLIElement));
+  });
+
+  it('renders link items with target and rel', () => {
+    render(
+      <List>
+        <ListItem
+          href="https://example.com"
+          label="External"
+          rel="noopener noreferrer"
+          target="_blank"
+        />
+      </List>,
+    );
+
+    const link = screen.getByRole('link', {name: 'External'});
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('renders ListItem outside of List context with defaults', () => {
+    render(<ListItem data-testid="standalone" label="Standalone" />);
+
+    expect(screen.getByTestId('standalone')).toBeInTheDocument();
+    expect(screen.getByText('Standalone')).toBeInTheDocument();
+  });
 });

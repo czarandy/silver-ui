@@ -21,7 +21,7 @@ export interface ScheduleViewSelectorOption<
 export interface ScheduleViewSelectorPluginOptions<
   View extends ScheduleViewBase = ScheduleView,
 > {
-  onChangeView: (view: View) => void;
+  onChangeView?: (view: View) => void;
   position?: SchedulePluginPosition;
 }
 
@@ -29,24 +29,35 @@ function ScheduleViewSelectorControl<View extends ScheduleViewBase>({
   onChangeView,
   options,
 }: {
-  onChangeView: (view: View) => void;
+  onChangeView?: (view: View) => void;
   options: ReadonlyArray<ScheduleViewSelectorOption<View>>;
 }): React.JSX.Element {
   const {view} = useScheduleContext();
   const currentOption = options.find(option => option.view === view);
 
   return (
-    <DropdownMenu button={{label: currentOption?.label ?? 'View', size: 'sm'}}>
+    <DropdownMenu
+      button={{
+        isDisabled: onChangeView == null,
+        label: currentOption?.label ?? 'View',
+        size: 'sm',
+      }}
+      menuWidth={160}>
       {options.map(option => (
         <DropdownMenuItem
           endContent={
             option.view === view ? (
-              <Icon color="primary" icon={Check} size="sm" />
+              <Icon
+                color="primary"
+                data-testid="schedule-view-selector-selected-icon"
+                icon={Check}
+                size="sm"
+              />
             ) : null
           }
           key={option.label}
           label={option.label}
-          onClick={() => onChangeView(option.view)}
+          onClick={() => onChangeView?.(option.view)}
         />
       ))}
     </DropdownMenu>
@@ -55,7 +66,10 @@ function ScheduleViewSelectorControl<View extends ScheduleViewBase>({
 
 function createScheduleViewSelectorPlugin<View extends ScheduleViewBase>(
   options: ReadonlyArray<ScheduleViewSelectorOption<View>>,
-  {onChangeView, position = 'end'}: ScheduleViewSelectorPluginOptions<View>,
+  {
+    onChangeView,
+    position = 'end',
+  }: ScheduleViewSelectorPluginOptions<View> = {},
 ): SchedulePlugin {
   return {
     renderHeader(
@@ -96,9 +110,9 @@ function createScheduleViewSelectorPlugin<View extends ScheduleViewBase>(
 
 export function useScheduleViewSelectorPlugin<View extends ScheduleViewBase>(
   options: ReadonlyArray<ScheduleViewSelectorOption<View>>,
-  pluginOptions: ScheduleViewSelectorPluginOptions<View>,
+  pluginOptions: ScheduleViewSelectorPluginOptions<View> = {},
 ): SchedulePlugin {
-  const {onChangeView, position} = pluginOptions;
+  const {onChangeView, position = 'end'} = pluginOptions;
   return useMemo(
     () => createScheduleViewSelectorPlugin(options, {onChangeView, position}),
     [onChangeView, options, position],

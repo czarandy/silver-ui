@@ -1,7 +1,10 @@
 import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, expect, it, vi} from 'vitest';
-import {Slider} from './Slider';
+import {useState} from 'react';
+import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
+import {Slider, type SliderRangeProps, type SliderSingleProps} from './Slider';
+
+const popoverOpenState = new WeakMap<HTMLElement, boolean>();
 
 function mockRect(element: Element, rect: Partial<DOMRect>): void {
   element.getBoundingClientRect = () =>
@@ -10,6 +13,64 @@ function mockRect(element: Element, rect: Partial<DOMRect>): void {
 
 describe('Slider', () => {
   const noop = () => {};
+
+  beforeAll(() => {
+    HTMLElement.prototype.showPopover = function (this: HTMLElement) {
+      popoverOpenState.set(this, true);
+    };
+    HTMLElement.prototype.hidePopover = function (this: HTMLElement) {
+      popoverOpenState.set(this, false);
+    };
+  });
+
+  afterAll(() => {
+    Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+    Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+  });
+
+  function ControlledSingleSlider({
+    onChange,
+    value: initialValue,
+    ...props
+  }: Omit<SliderSingleProps, 'onChange' | 'value'> & {
+    onChange?: (value: number) => void;
+    value: number;
+  }): React.JSX.Element {
+    const [value, setValue] = useState<number>(initialValue);
+
+    return (
+      <Slider
+        {...props}
+        onChange={(nextValue: number) => {
+          setValue(nextValue);
+          onChange?.(nextValue);
+        }}
+        value={value}
+      />
+    );
+  }
+
+  function ControlledRangeSlider({
+    onChange,
+    value: initialValue,
+    ...props
+  }: Omit<SliderRangeProps, 'onChange' | 'value'> & {
+    onChange?: (value: [number, number]) => void;
+    value: [number, number];
+  }): React.JSX.Element {
+    const [value, setValue] = useState<[number, number]>(initialValue);
+
+    return (
+      <Slider
+        {...props}
+        onChange={(nextValue: [number, number]) => {
+          setValue(nextValue);
+          onChange?.(nextValue);
+        }}
+        value={value}
+      />
+    );
+  }
 
   it('renders a labelled single-value slider', () => {
     render(<Slider label="Volume" onChange={noop} value={50} />);
@@ -111,6 +172,34 @@ describe('Slider', () => {
     expect(onChangeEnd).toHaveBeenCalledWith(55);
   });
 
+  it('handles Home, End, PageUp, and PageDown keyboard shortcuts', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <ControlledSingleSlider
+        label="Volume"
+        onChange={onChange}
+        step={5}
+        value={50}
+      />,
+    );
+
+    const slider = screen.getByRole('slider');
+    act(() => {
+      slider.focus();
+    });
+
+    await user.keyboard('{Home}');
+    await user.keyboard('{End}');
+    await user.keyboard('{PageDown}');
+    await user.keyboard('{PageUp}');
+
+    expect(onChange).toHaveBeenNthCalledWith(1, 0);
+    expect(onChange).toHaveBeenNthCalledWith(2, 100);
+    expect(onChange).toHaveBeenNthCalledWith(3, 50);
+    expect(onChange).toHaveBeenNthCalledWith(4, 100);
+  });
+
   it('enforces range thumb spacing', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -161,6 +250,178 @@ describe('Slider', () => {
 
     expect(onChange).toHaveBeenCalledWith(50);
     expect(onChangeEnd).toHaveBeenCalledWith(50);
+  });
+
+  it('updates while dragging with pointerMove', () => {
+    const onChange = vi.fn();
+    render(
+      <ControlledSingleSlider
+        label="Volume"
+        max={100}
+        min={0}
+        onChange={onChange}
+        value={20}
+        valueDisplay="none"
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: 40, clientY: 10, pointerId: 1});
+    fireEvent.pointerMove(track, {clientX: 150, clientY: 10, pointerId: 1});
+
+    expect(onChange).toHaveBeenNthCalledWith(1, 20);
+    expect(onChange).toHaveBeenNthCalledWith(2, 75);
+  });
+
+  it('does not move focus to the thumb during pointer interaction', () => {
+    render(
+      <Slider label="Volume" onChange={noop} value={50} valueDisplay="none" />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: 100, clientY: 10, pointerId: 1});
+
+    expect(screen.getByRole('slider')).not.toHaveFocus();
+  });
+
+  it('updates from vertical pointer interaction using inverted y-axis math', () => {
+    const onChange = vi.fn();
+    render(
+      <ControlledSingleSlider
+        label="Level"
+        max={100}
+        min={0}
+        onChange={onChange}
+        orientation="vertical"
+        value={50}
+        valueDisplay="none"
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {height: 200, width: 20});
+
+    fireEvent.pointerDown(track, {clientX: 10, clientY: 150, pointerId: 1});
+    fireEvent.pointerMove(track, {clientX: 10, clientY: 50, pointerId: 1});
+
+    expect(onChange).toHaveBeenNthCalledWith(1, 25);
+    expect(onChange).toHaveBeenNthCalledWith(2, 75);
+  });
+
+  it('updates the closest range thumb from pointer interaction', () => {
+    const onChange = vi.fn();
+    render(
+      <ControlledRangeSlider
+        label="Range"
+        max={100}
+        min={0}
+        onChange={onChange}
+        value={[20, 80]}
+        valueDisplay="none"
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: 140, clientY: 10, pointerId: 1});
+    fireEvent.pointerMove(track, {clientX: 120, clientY: 10, pointerId: 1});
+
+    expect(onChange).toHaveBeenNthCalledWith(1, [20, 70]);
+    expect(onChange).toHaveBeenNthCalledWith(2, [20, 60]);
+  });
+
+  it('shows tooltip content while dragging', () => {
+    render(
+      <Slider
+        formatValue={value => `${value}%`}
+        label="Volume"
+        onChange={noop}
+        value={50}
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: 100, clientY: 10, pointerId: 1});
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      '50%',
+    );
+  });
+
+  it('commits the pending value on pointer cancel', () => {
+    const onChangeEnd = vi.fn();
+    render(
+      <ControlledSingleSlider
+        label="Volume"
+        max={100}
+        min={0}
+        onChangeEnd={onChangeEnd}
+        value={20}
+        valueDisplay="none"
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: 40, clientY: 10, pointerId: 1});
+    fireEvent.pointerMove(track, {clientX: 160, clientY: 10, pointerId: 1});
+    fireEvent.pointerCancel(track, {clientX: 160, clientY: 10, pointerId: 1});
+
+    expect(onChangeEnd).toHaveBeenCalledWith(80);
+  });
+
+  it('clamps pointer values outside the track bounds', () => {
+    const onChange = vi.fn();
+    render(
+      <Slider
+        label="Volume"
+        max={100}
+        min={0}
+        onChange={onChange}
+        value={50}
+        valueDisplay="none"
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: -100, clientY: 10, pointerId: 1});
+    fireEvent.pointerUp(track, {clientX: -100, clientY: 10, pointerId: 1});
+    fireEvent.pointerDown(track, {clientX: 300, clientY: 10, pointerId: 2});
+
+    expect(onChange).toHaveBeenNthCalledWith(1, 0);
+    expect(onChange).toHaveBeenNthCalledWith(2, 100);
+  });
+
+  it('uses raw pointer values when step is zero', () => {
+    const onChange = vi.fn();
+    render(
+      <Slider
+        label="Volume"
+        max={100}
+        min={0}
+        onChange={onChange}
+        step={0}
+        value={50}
+        valueDisplay="none"
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: 67, clientY: 10, pointerId: 1});
+
+    expect(onChange).toHaveBeenCalledWith(33.5);
   });
 
   it('snaps to clicked marks', () => {

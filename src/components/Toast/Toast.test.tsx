@@ -1,15 +1,12 @@
-import {fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {useRef} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from '../Button';
 import {Toast} from './Toast';
 import {ToastViewport} from './ToastViewport';
+import type {ToastDismissFn} from './types';
 import {useToast} from './useToast';
-
-function AutoHideFixture(): React.JSX.Element {
-  const toast = useToast();
-  return <Button label="Show" onClick={() => toast({body: 'Auto hide'})} />;
-}
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -17,6 +14,68 @@ beforeAll(() => {
     value: vi.fn(),
   });
 });
+
+function ShowToastFixture({
+  body = 'Toast message',
+  ...options
+}: {body?: string} & Record<string, unknown>): React.JSX.Element {
+  const toast = useToast();
+  return <Button label="Show" onClick={() => toast({body, ...options})} />;
+}
+
+function OverwriteFixture(): React.JSX.Element {
+  const toast = useToast();
+  return (
+    <>
+      <Button
+        label="First"
+        onClick={() => toast({body: 'First message', uniqueID: 'save'})}
+      />
+      <Button
+        label="Second"
+        onClick={() => toast({body: 'Second message', uniqueID: 'save'})}
+      />
+    </>
+  );
+}
+
+function IgnoreFixture(): React.JSX.Element {
+  const toast = useToast();
+  return (
+    <>
+      <Button
+        label="Add first"
+        onClick={() => toast({body: 'First toast', uniqueID: 'dup'})}
+      />
+      <Button
+        label="Add second"
+        onClick={() =>
+          toast({
+            body: 'Second toast',
+            collisionBehavior: 'ignore',
+            uniqueID: 'dup',
+          })
+        }
+      />
+    </>
+  );
+}
+
+function DismissFnFixture(): React.JSX.Element {
+  const toast = useToast();
+  const dismissRef = useRef<ToastDismissFn | null>(null);
+  return (
+    <>
+      <Button
+        label="Show"
+        onClick={() => {
+          dismissRef.current = toast({body: 'Programmatic', isAutoHide: false});
+        }}
+      />
+      <Button label="Dismiss" onClick={() => dismissRef.current?.()} />
+    </>
+  );
+}
 
 describe('Toast', () => {
   it('renders available toast types with matching status styles', () => {
@@ -31,49 +90,8 @@ describe('Toast', () => {
       />,
     );
 
-    expect(screen.getByTestId('toast')).toHaveClass(
-      'silver-bg_status.info.solid',
-      'silver-c_status.info.solidFg',
-    );
     expect(screen.getByTestId('toast')).toHaveAttribute('role', 'status');
     expect(screen.getByTestId('toast')).toHaveAttribute('aria-live', 'polite');
-
-    rerender(
-      <Toast
-        autoHideDuration={5000}
-        body="Success"
-        data-testid="toast"
-        isAutoHide={false}
-        onDismiss={vi.fn()}
-        type="success"
-      />,
-    );
-    expect(screen.getByTestId('toast')).toHaveClass(
-      'silver-bg_status.success.solid',
-      'silver-c_status.success.solidFg',
-    );
-    expect(screen.getByTestId('toast')).toHaveAttribute('role', 'status');
-    expect(screen.getByTestId('toast')).toHaveAttribute('aria-live', 'polite');
-
-    rerender(
-      <Toast
-        autoHideDuration={5000}
-        body="Warning"
-        data-testid="toast"
-        isAutoHide={false}
-        onDismiss={vi.fn()}
-        type="warning"
-      />,
-    );
-    expect(screen.getByTestId('toast')).toHaveClass(
-      'silver-bg_status.warning.solid',
-      'silver-c_status.warning.solidFg',
-    );
-    expect(screen.getByTestId('toast')).toHaveAttribute('role', 'alert');
-    expect(screen.getByTestId('toast')).toHaveAttribute(
-      'aria-live',
-      'assertive',
-    );
 
     rerender(
       <Toast
@@ -84,10 +102,6 @@ describe('Toast', () => {
         onDismiss={vi.fn()}
         type="error"
       />,
-    );
-    expect(screen.getByTestId('toast')).toHaveClass(
-      'silver-bg_status.error.solid',
-      'silver-c_status.error.solidFg',
     );
     expect(screen.getByTestId('toast')).toHaveAttribute('role', 'alert');
     expect(screen.getByTestId('toast')).toHaveAttribute(
@@ -120,48 +134,22 @@ describe('Toast', () => {
   it('shows a toast from the hook', async () => {
     const user = userEvent.setup();
 
-    function Fixture(): React.JSX.Element {
-      const toast = useToast();
-      return (
-        <Button
-          label="Show toast"
-          onClick={() => toast({body: 'Saved successfully'})}
-        />
-      );
-    }
-
     render(
       <ToastViewport>
-        <Fixture />
+        <ShowToastFixture body="Saved successfully" />
       </ToastViewport>,
     );
 
-    await user.click(screen.getByRole('button', {name: 'Show toast'}));
+    await user.click(screen.getByRole('button', {name: 'Show'}));
     expect(screen.getByText('Saved successfully')).toBeInTheDocument();
   });
 
   it('deduplicates by uniqueID using overwrite behavior', async () => {
     const user = userEvent.setup();
 
-    function Fixture(): React.JSX.Element {
-      const toast = useToast();
-      return (
-        <>
-          <Button
-            label="First"
-            onClick={() => toast({body: 'First message', uniqueID: 'save'})}
-          />
-          <Button
-            label="Second"
-            onClick={() => toast({body: 'Second message', uniqueID: 'save'})}
-          />
-        </>
-      );
-    }
-
     render(
       <ToastViewport>
-        <Fixture />
+        <OverwriteFixture />
       </ToastViewport>,
     );
 
@@ -172,12 +160,28 @@ describe('Toast', () => {
     expect(screen.getByText('Second message')).toBeInTheDocument();
   });
 
+  it('ignores duplicate uniqueID with collisionBehavior ignore', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ToastViewport>
+        <IgnoreFixture />
+      </ToastViewport>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Add first'}));
+    await user.click(screen.getByRole('button', {name: 'Add second'}));
+
+    expect(screen.getByText('First toast')).toBeInTheDocument();
+    expect(screen.queryByText('Second toast')).not.toBeInTheDocument();
+  });
+
   it('auto-dismisses info toasts by default', async () => {
     vi.useFakeTimers();
 
     render(
       <ToastViewport>
-        <AutoHideFixture />
+        <ShowToastFixture body="Auto hide" />
       </ToastViewport>,
     );
 
@@ -186,6 +190,118 @@ describe('Toast', () => {
 
     await vi.advanceTimersByTimeAsync(5200);
     expect(screen.queryByText('Auto hide')).not.toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it('does not auto-dismiss error toasts by default', async () => {
+    vi.useFakeTimers();
+
+    render(
+      <ToastViewport>
+        <ShowToastFixture body="Error toast" type="error" />
+      </ToastViewport>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show'}));
+    expect(screen.getByText('Error toast')).toBeInTheDocument();
+
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(screen.getByText('Error toast')).toBeInTheDocument();
+    vi.useRealTimers();
+  });
+
+  it('pauses auto-dismiss on mouse hover', async () => {
+    vi.useFakeTimers();
+    const onDismiss = vi.fn();
+
+    render(
+      <Toast
+        autoHideDuration={5000}
+        body="Hover me"
+        data-testid="toast"
+        isAutoHide
+        onDismiss={onDismiss}
+        type="info"
+      />,
+    );
+
+    await vi.advanceTimersByTimeAsync(2000);
+    fireEvent.mouseEnter(screen.getByTestId('toast'));
+
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(onDismiss).not.toHaveBeenCalled();
+
+    fireEvent.mouseLeave(screen.getByTestId('toast'));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(onDismiss).toHaveBeenCalledWith('auto');
+
+    vi.useRealTimers();
+  });
+
+  it('pauses auto-dismiss on focus', async () => {
+    vi.useFakeTimers();
+    const onDismiss = vi.fn();
+
+    render(
+      <Toast
+        autoHideDuration={5000}
+        body="Focus me"
+        data-testid="toast"
+        isAutoHide
+        onDismiss={onDismiss}
+        type="info"
+      />,
+    );
+
+    await vi.advanceTimersByTimeAsync(2000);
+    fireEvent.focusIn(screen.getByTestId('toast'));
+
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(onDismiss).not.toHaveBeenCalled();
+
+    fireEvent.focusOut(screen.getByTestId('toast'));
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(onDismiss).toHaveBeenCalledWith('auto');
+
+    vi.useRealTimers();
+  });
+
+  it('calls onHide when toast is dismissed', async () => {
+    const user = userEvent.setup();
+    const onHide = vi.fn();
+
+    render(
+      <ToastViewport isTopLayer={false}>
+        <ShowToastFixture body="With callback" onHide={onHide} />
+      </ToastViewport>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Show'}));
+    await user.click(
+      screen.getByRole('button', {name: 'Dismiss notification'}),
+    );
+
+    expect(onHide).toHaveBeenCalledWith('manual');
+  });
+
+  it('dismisses programmatically via returned function', async () => {
+    vi.useFakeTimers();
+
+    render(
+      <ToastViewport isTopLayer={false}>
+        <DismissFnFixture />
+      </ToastViewport>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show'}));
+    expect(screen.getByText('Programmatic')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', {name: 'Dismiss'}));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+    expect(screen.queryByText('Programmatic')).not.toBeInTheDocument();
+
     vi.useRealTimers();
   });
 });

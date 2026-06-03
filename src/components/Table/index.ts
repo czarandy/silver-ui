@@ -13,7 +13,6 @@ export {
 export {Table, type TableProps} from './Table';
 export {TableBody, type TableBodyProps} from './TableBody';
 export {TableCell, type TableCellProps} from './TableCell';
-export {TableContext, useTableContext} from './TableContext';
 export {TableFooter, type TableFooterProps} from './TableFooter';
 export {TableHeader, type TableHeaderProps} from './TableHeader';
 export {TableHeaderCell, type TableHeaderCellProps} from './TableHeaderCell';

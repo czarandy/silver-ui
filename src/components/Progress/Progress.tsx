@@ -4,11 +4,11 @@ import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 
 export type ProgressVariant =
-  | 'accent'
-  | 'success'
-  | 'warning'
+  | 'error'
+  | 'info'
   | 'neutral'
-  | 'error';
+  | 'success'
+  | 'warning';
 
 export interface ProgressProps {
   /**
@@ -56,6 +56,12 @@ export interface ProgressProps {
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * ARIA role for the progress indicator. Use 'progressbar' for task
+   * completion and 'meter' for static gauges.
+   * @default 'progressbar'
+   */
+  role?: 'meter' | 'progressbar';
   /**
    * Inline styles applied to the root element.
    */
@@ -133,16 +139,19 @@ const styles = {
     },
   }),
   variant: {
-    accent: css({bg: 'primary'}),
+    error: css({bg: 'status.error.solid'}),
+    info: css({bg: 'status.info.solid'}),
+    neutral: css({bg: 'status.neutral.solid'}),
     success: css({bg: 'status.success.solid'}),
     warning: css({bg: 'status.warning.solid'}),
-    error: css({bg: 'status.error.solid'}),
-    neutral: css({bg: 'status.neutral.solid'}),
     disabled: css({bg: 'status.disabled.solid'}),
   },
 } as const;
 
 function defaultFormatValueLabel(value: number, max: number): string {
+  if (max <= 0) {
+    return '0%';
+  }
   return `${Math.round((value / max) * 100)}%`;
 }
 
@@ -160,11 +169,17 @@ export function Progress({
   label,
   max = 100,
   ref,
+  role: roleProp = 'progressbar',
   style,
   value = 0,
-  variant = 'accent',
+  variant = 'info',
 }: ProgressProps): React.JSX.Element {
   const labelId = useId();
+
+  if (process.env.NODE_ENV !== 'production' && max <= 0) {
+    console.warn('Progress: `max` must be greater than 0.');
+  }
+
   const clampedValue = Math.min(Math.max(0, value), max);
   const percentage = max > 0 ? (clampedValue / max) * 100 : 0;
   const valueText = formatValueLabel(clampedValue, max);
@@ -212,7 +227,7 @@ export function Progress({
         aria-valuenow={isIndeterminate ? undefined : clampedValue}
         aria-valuetext={isIndeterminate ? undefined : valueText}
         className={styles.track}
-        role={isIndeterminate ? 'progressbar' : 'meter'}>
+        role={isIndeterminate ? 'progressbar' : roleProp}>
         <div
           className={cx(
             isIndeterminate ? styles.indeterminateFill : styles.fill,

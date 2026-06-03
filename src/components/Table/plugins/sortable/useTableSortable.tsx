@@ -47,11 +47,18 @@ const styles = {
       outlineColor: 'primary',
       outlineOffset: 'focusOffset',
     },
+    '&:is(:hover, [data-hover]) [data-table-sort-icon-state="inactive"], &:is(:focus-visible, [data-focus-visible]) [data-table-sort-icon-state="inactive"]':
+      {
+        opacity: 1,
+      },
   }),
   icon: css({
     display: 'inline-flex',
     flexShrink: 0,
     color: 'fg.muted',
+  }),
+  iconInactive: css({
+    opacity: 0.35,
   }),
   iconActive: css({
     color: 'primary',
@@ -178,7 +185,11 @@ function SortHeaderButton<T extends Record<string, unknown>>({
       type="button">
       <span className={styles.label}>{children}</span>
       <span
-        className={`${styles.icon} ${direction == null ? '' : styles.iconActive}`}>
+        className={`${styles.icon} ${
+          direction == null ? styles.iconInactive : styles.iconActive
+        }`}
+        data-table-sort-icon-state={direction == null ? 'inactive' : 'active'}
+        data-testid={`table-sort-icon-${sortKey}`}>
         <Icon icon={SortIcon} size="sm" />
       </span>
       {rank == null ? null : (

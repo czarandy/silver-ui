@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useRef,
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
-} from 'react';
+import {useRef, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {css, cx} from 'styled-system/css';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
@@ -56,22 +50,10 @@ export interface HoverCardProps {
    */
   hideDelay?: number;
   /**
-   * Whether to open on initial mount.
-   */
-  isDefaultOpen?: boolean;
-  /**
    * Whether hover/focus interactions are enabled.
    * @default true
    */
   isEnabled?: boolean;
-  /**
-   * Controlled open state.
-   */
-  isOpen?: boolean;
-  /**
-   * Callback fired when open state changes.
-   */
-  onOpenChange?: (isOpen: boolean) => void;
   /**
    * Position relative to the trigger.
    * @default 'above'
@@ -123,10 +105,7 @@ export function HoverCard({
   hideDelay = 200,
   focusTrigger = 'auto',
   isEnabled = true,
-  onOpenChange,
   hasHoverIndication = 'auto',
-  isOpen,
-  isDefaultOpen,
   className,
   style,
   ref,
@@ -137,19 +116,12 @@ export function HoverCard({
   const showHoverIndication =
     hasHoverIndication === true || (hasHoverIndication === 'auto' && textOnly);
 
-  const handleShow = useCallback(() => onOpenChange?.(true), [onOpenChange]);
-  const handleHide = useCallback(() => onOpenChange?.(false), [onOpenChange]);
-
   const hoverCard = useHoverCard({
     alignment,
     delay,
     focusTrigger,
     hideDelay,
-    isDefaultOpen,
     isEnabled,
-    isOpen,
-    onHide: handleHide,
-    onShow: handleShow,
     placement,
   });
 

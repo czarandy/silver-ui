@@ -7,9 +7,9 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {ListContext, type ListDensity, type ListStyle} from './ListContext';
+import {ListContext, type ListStyle} from './ListContext';
 
-export type {ListDensity, ListStyle};
+export type {ListStyle};
 
 export interface ListProps {
   /**
@@ -24,11 +24,6 @@ export interface ListProps {
    * Test ID applied to the list element.
    */
   'data-testid'?: string;
-  /**
-   * Spacing density for list items.
-   * @default 'balanced'
-   */
-  density?: ListDensity;
   /**
    * Whether to show dividers between list items.
    * @default false
@@ -89,7 +84,6 @@ export function List({
   children,
   className,
   'data-testid': dataTestId,
-  density = 'balanced',
   hasDividers = false,
   header,
   listStyle = 'none',
@@ -105,8 +99,8 @@ export function List({
       ? `silver-list ${start - 1}`
       : undefined;
   const contextValue = useMemo(
-    () => ({density, hasDividers, listStyle}),
-    [density, hasDividers, listStyle],
+    () => ({hasDividers, listStyle}),
+    [hasDividers, listStyle],
   );
 
   const listElement = (

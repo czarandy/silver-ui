@@ -36,6 +36,7 @@ const styles = {
     boxSizing: 'border-box',
     color: 'fg.muted',
     fontWeight: 'semibold',
+    maxWidth: 0,
     overflow: 'hidden',
     textAlign: 'start',
     textOverflow: 'ellipsis',

@@ -1,8 +1,12 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {Search} from 'lucide-react';
+import {Search, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {TextInput} from './TextInput';
+
+function SearchIcon(props: LucideProps): React.JSX.Element {
+  return <Search {...props} data-testid="search-icon" />;
+}
 
 describe('TextInput', () => {
   const noop = () => {};
@@ -174,15 +178,12 @@ describe('TextInput', () => {
         data-testid="input"
         label="Search"
         onChange={noop}
-        startIcon={Search}
+        startIcon={SearchIcon}
         value=""
       />,
     );
 
-    // eslint-disable-next-line testing-library/no-node-access -- verifying decorative svg in wrapper
-    expect(
-      screen.getByTestId('input').parentElement?.querySelector('svg'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('search-icon')).toBeInTheDocument();
   });
 
   it('renders endContent', () => {

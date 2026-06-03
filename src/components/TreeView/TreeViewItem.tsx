@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y-x/no-noninteractive-element-to-interactive-role, jsx-a11y-x/no-static-element-interactions, silver-ui/require-component-props -- internal recursive tree item */
 
 import {ChevronRight} from 'lucide-react';
-import {useCallback, useId, useMemo, type ReactNode} from 'react';
+import {useCallback, useId, useRef, type ReactNode, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon} from '../Icon';
@@ -13,6 +13,10 @@ interface TreeViewItemProps {
    * Whether each ancestor at the corresponding level is the last sibling.
    */
   ancestorsIsLast: ReadonlyArray<boolean>;
+  /**
+   * Plain-text label used for generated control labels.
+   */
+  ariaLabel?: string;
   /**
    * Spacing density for the item.
    */
@@ -47,6 +51,10 @@ interface TreeViewItemProps {
    */
   isExpanded: boolean;
   /**
+   * Whether this item currently owns roving focus.
+   */
+  isFocused: boolean;
+  /**
    * Whether this item is the last sibling at its level.
    */
   isLast: boolean;
@@ -68,9 +76,24 @@ interface TreeViewItemProps {
    */
   onClick?: (event: React.MouseEvent) => void;
   /**
+   * Called when the item receives focus.
+   */
+  onFocusItem: (id: string, isFocusVisible?: boolean) => void;
+  /**
+   * Called for tree keyboard navigation.
+   */
+  onItemKeyDown: (
+    event: React.KeyboardEvent<HTMLLIElement>,
+    id: string,
+  ) => void;
+  /**
    * Called when the expand/collapse toggle is activated.
    */
   onToggle?: (id: string) => void;
+  /**
+   * Ref forwarded to the treeitem element.
+   */
+  ref?: Ref<HTMLLIElement>;
   /**
    * Pre-rendered child items.
    */
@@ -79,6 +102,10 @@ interface TreeViewItemProps {
    * Content rendered before the label.
    */
   startContent?: React.ReactNode;
+  /**
+   * Roving tab index for this treeitem.
+   */
+  tabIndex: 0 | -1;
   /**
    * Link target attribute (e.g. '_blank').
    */
@@ -156,12 +183,6 @@ const styles = {
         bg: 'bg.subtle',
       },
     },
-    '&:has(:focus-visible)': {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
   }),
   invisibleAction: css({
     all: 'unset',
@@ -184,6 +205,12 @@ const styles = {
   }),
   selected: css({
     bg: 'bg.selected',
+  }),
+  focused: css({
+    outlineWidth: 'focus',
+    outlineStyle: 'solid',
+    outlineColor: 'primary',
+    outlineOffset: 'focusOffset',
   }),
   startContent: css({
     display: 'flex',
@@ -229,6 +256,7 @@ const styles = {
     p: 0,
     w: 'full',
     listStyleType: 'none',
+    outline: 'none',
   }),
 } as const;
 
@@ -236,6 +264,7 @@ const styles = {
  * Renders a single tree item with toggle, branch lines, and optional link or button action.
  */
 export function TreeViewItem({
+  ariaLabel,
   ancestorsIsLast,
   density,
   description,
@@ -245,56 +274,91 @@ export function TreeViewItem({
   id,
   isDisabled = false,
   isExpanded,
+  isFocused,
   isLast: _isLast,
   isSelected = false,
   label,
   nestedLevel,
   onClick,
+  onFocusItem,
+  onItemKeyDown,
   onToggle,
+  ref,
   renderedChildren,
   startContent,
+  tabIndex,
   target,
 }: TreeViewItemProps): React.JSX.Element {
   const labelId = useId();
   const descriptionId = useId();
+  const actionRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
   const isInteractive = onClick != null || href != null;
   const togglesOnRow = hasChildren && onClick == null && onToggle != null;
+  const textLabel =
+    ariaLabel ??
+    (typeof label === 'string' || typeof label === 'number'
+      ? String(label)
+      : id);
 
-  const handleToggle = useMemo(
-    () =>
-      hasChildren && onToggle != null
-        ? (event: React.MouseEvent) => {
-            event.stopPropagation();
-            onToggle(id);
-          }
-        : undefined,
-    [hasChildren, id, onToggle],
+  const handleToggle = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onToggle?.(id);
+    },
+    [id, onToggle],
   );
 
-  const handleRowClick = useMemo(() => {
+  const handleRowClick = useCallback(() => {
     if (!togglesOnRow) {
-      return undefined;
+      return;
     }
 
-    return () => {
-      if (isDisabled) {
-        return;
-      }
-      onToggle(id);
-    };
+    if (isDisabled) {
+      return;
+    }
+    onToggle(id);
   }, [id, isDisabled, onToggle, togglesOnRow]);
 
   const handleRowKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (handleRowClick == null) {
-        return;
-      }
+    (event: React.KeyboardEvent<HTMLLIElement>) => {
+      event.stopPropagation();
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        handleRowClick();
+        if (togglesOnRow) {
+          handleRowClick();
+          return;
+        }
+        actionRef.current?.click();
+        return;
       }
+      onItemKeyDown(event, id);
     },
-    [handleRowClick],
+    [handleRowClick, id, onItemKeyDown, togglesOnRow],
+  );
+
+  const handleFocus = useCallback(
+    (event: React.FocusEvent<HTMLLIElement>) => {
+      if (event.currentTarget !== event.target) {
+        return;
+      }
+      onFocusItem(id, event.currentTarget.matches(':focus-visible'));
+    },
+    [id, onFocusItem],
+  );
+
+  const handlePointerDown = useCallback(() => {
+    onFocusItem(id, false);
+  }, [id, onFocusItem]);
+
+  const handleDisabledLinkClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!isDisabled) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [isDisabled],
   );
 
   const labelAndDescription = (
@@ -323,10 +387,10 @@ export function TreeViewItem({
   const toggle = hasChildren ? (
     onClick != null ? (
       <button
-        aria-expanded={isExpanded}
-        aria-label="Toggle children"
+        aria-label={`Toggle ${textLabel} children`}
         className={styles.toggleButton}
         onClick={handleToggle}
+        tabIndex={-1}
         type="button">
         {toggleIcon}
       </button>
@@ -348,7 +412,9 @@ export function TreeViewItem({
           aria-labelledby={labelId}
           className={styles.invisibleAction}
           href={href}
-          tabIndex={isDisabled ? -1 : undefined}
+          onClick={handleDisabledLinkClick}
+          ref={actionRef as Ref<HTMLAnchorElement>}
+          tabIndex={-1}
           target={target}>
           {labelAndDescription}
         </a>
@@ -359,6 +425,8 @@ export function TreeViewItem({
           className={styles.invisibleAction}
           disabled={isDisabled}
           onClick={onClick}
+          ref={actionRef as Ref<HTMLButtonElement>}
+          tabIndex={-1}
           type="button">
           {labelAndDescription}
         </button>
@@ -377,11 +445,17 @@ export function TreeViewItem({
 
   return (
     <li
+      aria-describedby={description == null ? undefined : descriptionId}
       aria-disabled={isDisabled || undefined}
       aria-expanded={hasChildren ? isExpanded : undefined}
+      aria-labelledby={labelId}
       aria-selected={isSelected || undefined}
       className={styles.wrapper}
-      role="treeitem">
+      onFocus={handleFocus}
+      onKeyDown={handleRowKeyDown}
+      ref={ref}
+      role="treeitem"
+      tabIndex={isDisabled ? -1 : tabIndex}>
       <div className={styles.treeBranches}>
         <TreeViewBranches
           ancestorsIsLast={ancestorsIsLast}
@@ -389,6 +463,7 @@ export function TreeViewItem({
         />
       </div>
       <div className={styles.rowWrapper}>
+        {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard interaction is handled by the parent treeitem for roving focus. */}
         <div
           className={cx(
             'silver-tree-view-item',
@@ -397,12 +472,12 @@ export function TreeViewItem({
             isInteractive || togglesOnRow ? styles.interactive : undefined,
             isDisabled ? styles.disabled : undefined,
             isSelected ? styles.selected : undefined,
+            isFocused ? styles.focused : undefined,
           )}
           onClick={handleRowClick}
-          onKeyDown={handleRowKeyDown}
-          role={togglesOnRow ? 'button' : undefined}
+          onPointerDown={handlePointerDown}
           style={{marginLeft}}
-          tabIndex={togglesOnRow && !isDisabled ? 0 : undefined}>
+          tabIndex={undefined}>
           {content}
         </div>
       </div>

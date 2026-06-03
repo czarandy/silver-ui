@@ -7,6 +7,7 @@
 - [x] AlertDialog
 - [x] AppShell
 - [x] AspectRatio
+- [x] AutocompleteInput
 - [x] Avatar
 - [x] AvatarGroup
 - [x] Badge
@@ -19,7 +20,6 @@
 - [x] Center
 - [x] CheckboxInput
 - [x] Collapsible
-- [x] Combobox
 - [x] ContextMenu
 - [x] DateInput
 - [x] DateRangeInput
@@ -95,5 +95,5 @@
 
 ## Tier 4 — Composite (depend on earlier components)
 
-- [ ] CommandPalette (needs Dialog + Combobox)
+- [ ] CommandPalette (needs Dialog + AutocompleteInput)
 - [ ] Markdown (needs List, Table, CodeBlock)

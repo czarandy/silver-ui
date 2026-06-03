@@ -178,6 +178,12 @@ const styles = {
       outlineColor: 'primary',
       outlineOffset: 'focusOffset',
     },
+    '& [data-switch-track][data-selected="true"]': {
+      bg: 'primary',
+    },
+    '&:has(input:active:not(:disabled)) [data-switch-track]': {
+      bg: 'primary.active',
+    },
   }),
   input: css({
     position: 'absolute',
@@ -223,7 +229,7 @@ const styles = {
     bg: 'bg',
     color: 'primary',
     transform: 'translateX(0)',
-    transitionProperty: 'transform, width, height',
+    transitionProperty: 'transform',
     transitionDuration: 'fast',
     transitionTimingFunction: 'default',
     '@media (prefers-reduced-motion: reduce)': {
@@ -231,9 +237,7 @@ const styles = {
     },
   }),
   thumbOn: css({
-    w: '5',
-    h: '5',
-    transform: 'translateX(14px)',
+    transform: 'translateX(16px)',
   }),
 } as const;
 
@@ -267,7 +271,6 @@ export function Switch({
     description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
-  const isBusy = isLoading;
   const requirednessText = isOptional
     ? 'Optional'
     : isRequired
@@ -276,13 +279,13 @@ export function Switch({
   const control = (
     <span className={styles.control}>
       <input
-        aria-busy={isBusy || undefined}
+        aria-busy={isLoading || undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         checked={isSelected}
         className={styles.input}
         data-testid={dataTestId}
-        disabled={isDisabled || isBusy}
+        disabled={isDisabled}
         id={inputId}
         onBlur={onBlur}
         onChange={event => onChange(event.target.checked, event)}
@@ -298,13 +301,15 @@ export function Switch({
           styles.track,
           isSelected ? styles.trackOn : undefined,
           isDisabled ? styles.trackDisabled : undefined,
-        )}>
+        )}
+        data-selected={isSelected ? 'true' : undefined}
+        data-switch-track="">
         <span
           className={cx(styles.thumb, isSelected ? styles.thumbOn : undefined)}>
-          {isBusy ? <Spinner size="sm" /> : null}
+          {isLoading ? <Spinner size="sm" /> : null}
         </span>
       </span>
-      {isBusy ? (
+      {isLoading ? (
         <VisuallyHidden>
           <span role="status">Loading</span>
         </VisuallyHidden>

@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
+import {css, cva} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
@@ -34,7 +34,7 @@ export interface DropdownMenuItemProps {
   /**
    * Item label.
    */
-  label: ReactNode;
+  label: string;
   /**
    * Called when the item is selected.
    */
@@ -49,8 +49,8 @@ export interface DropdownMenuItemProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  root: css({
+const menuItemRecipe = cva({
+  base: {
     all: 'unset',
     boxSizing: 'border-box',
     display: 'block',
@@ -71,7 +71,29 @@ const styles = {
       opacity: 0.5,
       cursor: 'not-allowed',
     },
-  }),
+  },
+  variants: {
+    size: {
+      sm: {
+        minH: 'component.sm',
+        '& > *': {py: '0.5', px: '1.5', gap: '1.5'},
+      },
+      md: {
+        minH: 'component.md',
+        '& > *': {py: '1.5', px: '2'},
+      },
+      lg: {
+        minH: 'component.lg',
+        '& > *': {py: '2.5', px: '2.5', gap: '2.5'},
+      },
+    },
+  },
+  defaultVariants: {
+    size: 'md',
+  },
+});
+
+const styles = {
   icon: css({
     display: 'inline-flex',
     flexShrink: 0,
@@ -95,16 +117,14 @@ export function DropdownMenuItem({
   style,
 }: DropdownMenuItemProps): React.JSX.Element {
   const context = useDropdownMenuContext();
+  const menuSize = context?.menuSize ?? 'md';
 
   return (
     <button
-      className={cx(styles.root, className)}
+      className={cx(menuItemRecipe({size: menuSize}), className)}
       data-testid={dataTestId}
       disabled={isDisabled}
       onClick={() => {
-        if (isDisabled) {
-          return;
-        }
         onClick?.();
         context?.closeMenu();
       }}

@@ -13,7 +13,6 @@ export {
   Table,
   TableBody,
   TableCell,
-  TableContext,
   TableFooter,
   TableHeader,
   TableHeaderCell,
@@ -23,7 +22,6 @@ export {
   useTableColumnResize,
   useTableColumnSettings,
   useTableColumnSettingsState,
-  useTableContext,
   useTableFiltering,
   useTableFilterState,
   useTablePagination,
@@ -238,7 +236,6 @@ export {
 export {
   List,
   ListItem,
-  type ListDensity,
   type ListItemProps,
   type ListProps,
   type ListStyle,
@@ -540,10 +537,10 @@ export {
 } from './components/InputGroup';
 export {
   Select,
-  SelectOptionLayout,
+  SelectOption,
   type SelectDivider,
-  type SelectOption,
   type SelectOptionData,
+  type SelectOptionDefinition,
   type SelectOptionProps,
   type SelectProps,
   type SelectSection,
@@ -566,17 +563,17 @@ export {
   type TagVariants,
 } from './components/Tag';
 export {
-  BaseCombobox,
+  BaseAutocompleteInput,
   createStaticSource,
-  Combobox,
-  ComboboxItem,
-  type BaseComboboxProps,
+  AutocompleteInput,
+  AutocompleteInputItem,
+  type BaseAutocompleteInputProps,
   type CreateStaticSourceOptions,
   type SearchableItem,
   type SearchSource,
-  type ComboboxItemProps,
-  type ComboboxProps,
-} from './components/Combobox';
+  type AutocompleteInputItemProps,
+  type AutocompleteInputProps,
+} from './components/AutocompleteInput';
 export {
   TagsInput,
   type TagsInputChange,

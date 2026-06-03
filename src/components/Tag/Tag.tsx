@@ -91,6 +91,10 @@ export interface TagProps {
    */
   size?: TagSize;
   /**
+   * Content rendered before the icon and label.
+   */
+  startContent?: ReactNode;
+  /**
    * Inline styles applied to the tag.
    */
   style?: CSSProperties;
@@ -166,14 +170,22 @@ function TagContent({
   onRemove,
   isDisabled,
   size = 'md',
+  startContent,
 }: Pick<
   TagProps,
-  'endContent' | 'icon' | 'isDisabled' | 'isLabelHidden' | 'label' | 'size'
+  | 'endContent'
+  | 'icon'
+  | 'isDisabled'
+  | 'isLabelHidden'
+  | 'label'
+  | 'size'
+  | 'startContent'
 > & {
   onRemove?: (event: MouseEvent<HTMLButtonElement>) => void;
 }): React.JSX.Element {
   return (
     <>
+      {startContent}
       {icon != null ? (
         <Icon aria-hidden="true" color="inherit" icon={icon} size={size} />
       ) : null}
@@ -218,6 +230,7 @@ export function Tag({
   onRemove,
   ref,
   size = 'md',
+  startContent,
   style,
   tooltip,
 }: TagProps): React.JSX.Element {
@@ -247,6 +260,7 @@ export function Tag({
           href={href}
           isDisabled={isDisabled}
           onClick={onClick}>
+          {startContent}
           {icon != null ? (
             <Icon aria-hidden="true" color="inherit" icon={icon} size={size} />
           ) : null}
@@ -286,6 +300,7 @@ export function Tag({
           isLabelHidden={isLabelHidden}
           label={label}
           size={size}
+          startContent={startContent}
         />
       </Link>
     );
@@ -297,6 +312,7 @@ export function Tag({
           disabled={isDisabled}
           onClick={onClick}
           type="button">
+          {startContent}
           {icon != null ? (
             <Icon aria-hidden="true" color="inherit" icon={icon} size={size} />
           ) : null}
@@ -335,6 +351,7 @@ export function Tag({
           isLabelHidden={isLabelHidden}
           label={label}
           size={size}
+          startContent={startContent}
         />
       </button>
     );
@@ -349,6 +366,7 @@ export function Tag({
           label={label}
           onRemove={onRemove}
           size={size}
+          startContent={startContent}
         />
       </span>
     );

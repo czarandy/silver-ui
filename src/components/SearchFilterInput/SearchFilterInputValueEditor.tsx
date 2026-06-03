@@ -9,11 +9,11 @@ import {
 } from '../../internal/plainDate';
 import {getBrowserTimezoneID} from '../../internal/time';
 import {
-  Combobox,
+  AutocompleteInput,
   createStaticSource,
   type SearchableItem,
   type SearchSource,
-} from '../Combobox';
+} from '../AutocompleteInput';
 import {DateInput} from '../DateInput';
 import {NumberInput} from '../NumberInput';
 import {Select} from '../Select';
@@ -63,7 +63,7 @@ function StringEditor({
     const selectedItem: SearchableItem | null =
       currentValue === '' ? null : {id: currentValue, label: currentValue};
     return (
-      <Combobox
+      <AutocompleteInput
         debounceMs={150}
         isLabelHidden
         label="Value"

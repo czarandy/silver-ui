@@ -220,7 +220,7 @@ export function DateRangeInput({
             />
           }
           hasAutoFocus
-          isEnabled={!isDisabled && !isLoading}
+          isEnabled={!isDisabled}
           isOpen={isOpen}
           label={`Choose ${label}`}
           onOpenChange={setIsOpen}

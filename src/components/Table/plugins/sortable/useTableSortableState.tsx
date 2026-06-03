@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {useCallback, useMemo, useState} from 'react';
 import type {TableSortState, UseTableSortableConfig} from './useTableSortable';
 
@@ -27,8 +28,14 @@ export interface UseTableSortableStateResult<
 }
 
 function stringifySortable(value: unknown): string {
-  if (value instanceof Date) {
-    return value.toISOString();
+  if (
+    value instanceof Temporal.Instant ||
+    value instanceof Temporal.PlainDate ||
+    value instanceof Temporal.PlainDateTime ||
+    value instanceof Temporal.PlainTime ||
+    value instanceof Temporal.ZonedDateTime
+  ) {
+    return value.toString();
   }
   if (
     typeof value === 'bigint' ||

@@ -1,4 +1,3 @@
-/* eslint-disable @eslint-react/no-array-index-key, @typescript-eslint/no-base-to-string */
 import {
   useCallback,
   useEffect,
@@ -16,7 +15,6 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import type {ButtonSize} from '../Button';
-import {Divider} from '../Divider';
 import {
   DropdownMenuContext,
   DropdownMenuItem,
@@ -26,19 +24,23 @@ import {
   type DropdownMenuOption,
   type DropdownMenuSection,
 } from '../DropdownMenu';
-import {Text} from '../Text';
+import {
+  formatMenuWidth,
+  renderMenuItems,
+  useMenuKeyboard,
+} from '../DropdownMenu/menuUtils';
 
+export type ContextMenuSize = ButtonSize;
 export type ContextMenuItemData = DropdownMenuItemData;
+export type ContextMenuItemProps = DropdownMenuItemProps;
 export type ContextMenuDivider = DropdownMenuDivider;
 export type ContextMenuSection = DropdownMenuSection;
 export type ContextMenuOption = DropdownMenuOption;
-export type ContextMenuSize = ButtonSize;
-export type ContextMenuItemProps = DropdownMenuItemProps;
 export const ContextMenuItem = DropdownMenuItem;
 
 interface ContextMenuBaseProps {
   /**
-   * Trigger area. Right-click this content to open the menu.
+   * The region that triggers the context menu on right-click.
    */
   children: ReactNode;
   /**
@@ -50,17 +52,17 @@ interface ContextMenuBaseProps {
    */
   'data-testid'?: string;
   /**
-   * Whether to focus the first menu item when the menu opens.
+   * Whether to auto-focus the first menu item on open.
    * @default true
    */
   hasAutoFocus?: boolean;
   /**
-   * Whether right-click should use the native browser context menu instead.
+   * Whether the context menu is disabled.
    * @default false
    */
   isDisabled?: boolean;
   /**
-   * Menu surface width.
+   * Width of the menu surface.
    * @default 160
    */
   menuWidth?: number | string;
@@ -84,24 +86,12 @@ interface ContextMenuBaseProps {
 }
 
 interface ContextMenuDataProps extends ContextMenuBaseProps {
-  /**
-   * Data-driven menu items.
-   */
   items: ReadonlyArray<ContextMenuOption>;
-  /**
-   * Compound menu content. Use this instead of items.
-   */
-  menuContent?: undefined;
+  menuContent?: never;
 }
 
 interface ContextMenuCompoundProps extends ContextMenuBaseProps {
-  /**
-   * Data-driven menu items. Use this instead of menuContent.
-   */
-  items?: undefined;
-  /**
-   * Compound menu content.
-   */
+  items?: never;
   menuContent: ReactNode;
 }
 
@@ -109,10 +99,10 @@ export type ContextMenuProps = ContextMenuDataProps | ContextMenuCompoundProps;
 
 const styles = {
   trigger: css({
-    outline: 'none',
+    display: 'contents',
   }),
   menu: css({
-    display: 'flex',
+    display: 'none',
     flexDirection: 'column',
     gap: '0.5',
     maxH: '80',
@@ -122,30 +112,15 @@ const styles = {
     p: '1',
     borderWidth: 0,
     borderRadius: 'md',
-    bg: 'bg.overlay',
+    _open: {
+      display: 'flex',
+    },
+    bg: 'bg',
     boxShadow: 'lg',
-  }),
-  section: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-  }),
-  heading: css({
-    px: '2',
-    py: '1',
-    userSelect: 'none',
-  }),
-  divider: css({
-    my: '1',
+    borderStyle: 'solid',
+    borderColor: 'border',
   }),
 } as const;
-
-function formatWidth(value: number | string | undefined): string | undefined {
-  if (value == null) {
-    return undefined;
-  }
-  return typeof value === 'number' ? `${value}px` : value;
-}
 
 function isPopoverOpen(element: HTMLElement | null): boolean {
   if (element == null) {
@@ -159,55 +134,6 @@ function isPopoverOpen(element: HTMLElement | null): boolean {
   } catch {
     return false;
   }
-}
-
-function renderItems(items: ReadonlyArray<ContextMenuOption>): ReactNode {
-  return items.map((item, index) => {
-    if ('type' in item && item.type === 'divider') {
-      return <Divider className={styles.divider} key={`divider-${index}`} />;
-    }
-
-    if ('type' in item) {
-      return (
-        <div
-          aria-label={item.title}
-          className={styles.section}
-          key={`section-${item.title ?? index}`}
-          role="group">
-          {item.title != null ? (
-            <Text
-              as="span"
-              className={styles.heading}
-              color="secondary"
-              type="supporting">
-              {item.title}
-            </Text>
-          ) : null}
-          {item.items.map(sectionItem => (
-            <DropdownMenuItem
-              description={sectionItem.description}
-              icon={sectionItem.icon}
-              isDisabled={sectionItem.isDisabled}
-              key={String(sectionItem.label)}
-              label={sectionItem.label}
-              onClick={sectionItem.onClick}
-            />
-          ))}
-        </div>
-      );
-    }
-
-    return (
-      <DropdownMenuItem
-        description={item.description}
-        icon={item.icon}
-        isDisabled={item.isDisabled}
-        key={String(item.label)}
-        label={item.label}
-        onClick={item.onClick}
-      />
-    );
-  });
 }
 
 /**
@@ -328,65 +254,12 @@ export function ContextMenu({
     [isDisabled, show],
   );
 
-  const getMenuItems = useCallback(() => {
-    return menuRef.current == null
-      ? []
-      : Array.from(
-          menuRef.current.querySelectorAll<HTMLElement>(
-            '[role="menuitem"]:not(:disabled):not([aria-disabled="true"])',
-          ),
-        );
-  }, []);
+  const handleMenuKeyDown = useMenuKeyboard(menuRef, hide);
 
-  const handleMenuKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      const menuItems = getMenuItems();
-      const currentIndex = menuItems.findIndex(
-        item => item === document.activeElement,
-      );
-      let nextIndex: number;
-
-      switch (event.key) {
-        case 'ArrowDown':
-          nextIndex =
-            currentIndex === -1
-              ? 0
-              : Math.min(currentIndex + 1, menuItems.length - 1);
-          break;
-        case 'ArrowUp':
-          nextIndex =
-            currentIndex === -1
-              ? menuItems.length - 1
-              : Math.max(currentIndex - 1, 0);
-          break;
-        case 'Home':
-          nextIndex = 0;
-          break;
-        case 'End':
-          nextIndex = menuItems.length - 1;
-          break;
-        case 'Escape':
-          event.preventDefault();
-          hide();
-          return;
-        case 'Enter':
-        case ' ':
-          if (document.activeElement instanceof HTMLElement) {
-            event.preventDefault();
-            document.activeElement.click();
-          }
-          return;
-        default:
-          return;
-      }
-
-      event.preventDefault();
-      menuItems[nextIndex]?.focus();
-    },
-    [getMenuItems, hide],
+  const menuNode = useMemo(
+    (): ReactNode => (items == null ? menuContent : renderMenuItems(items)),
+    [items, menuContent],
   );
-
-  const menuNode = items == null ? menuContent : renderItems(items);
 
   return (
     <>
@@ -404,6 +277,7 @@ export function ContextMenu({
         {children}
       </div>
       <div
+        aria-label="Context menu"
         className={cx(styles.menu, className)}
         id={menuId}
         onKeyDown={handleMenuKeyDown}
@@ -414,7 +288,7 @@ export function ContextMenu({
           left: position.x,
           position: 'fixed',
           top: position.y,
-          width: formatWidth(menuWidth),
+          width: formatMenuWidth(menuWidth),
           ...style,
         }}
         tabIndex={-1}>

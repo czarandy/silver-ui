@@ -1,70 +1,27 @@
-/* eslint-disable @eslint-react/no-array-index-key, @typescript-eslint/no-base-to-string */
 import {ChevronDown} from 'lucide-react';
 import {
+  useCallback,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
+import {css, cx} from 'styled-system/css';
 import {Button, type ButtonProps, type ButtonSize} from '../Button';
-import {Divider} from '../Divider';
-import {Icon, type IconComponent} from '../Icon';
+import {Icon} from '../Icon';
 import {Popover} from '../Popover';
-import {Text} from '../Text';
 import {DropdownMenuContext} from './DropdownMenuContext';
-import {DropdownMenuItem} from './DropdownMenuItem';
+import {formatMenuWidth, renderMenuItems, useMenuKeyboard} from './menuUtils';
+import type {DropdownMenuOption} from './types';
 
-export interface DropdownMenuItemData {
-  /**
-   * Supporting text shown below the label.
-   */
-  description?: ReactNode;
-  /**
-   * Icon rendered before the label.
-   */
-  icon?: IconComponent;
-  /**
-   * Whether the item is disabled.
-   */
-  isDisabled?: boolean;
-  /**
-   * Item label.
-   */
-  label: ReactNode;
-  /**
-   * Called when the item is selected.
-   */
-  onClick?: () => void;
-}
-
-export interface DropdownMenuDivider {
-  /**
-   * Discriminant indicating a visual divider.
-   */
-  type: 'divider';
-}
-
-export interface DropdownMenuSection {
-  /**
-   * Menu items belonging to this section.
-   */
-  items: ReadonlyArray<DropdownMenuItemData>;
-  /**
-   * Optional heading displayed above the section items.
-   */
-  title?: string;
-  /**
-   * Discriminant indicating a grouped section.
-   */
-  type: 'section';
-}
-
-export type DropdownMenuOption =
-  | DropdownMenuDivider
-  | DropdownMenuItemData
-  | DropdownMenuSection;
+export type {
+  DropdownMenuDivider,
+  DropdownMenuItemData,
+  DropdownMenuOption,
+  DropdownMenuSection,
+} from './types';
 
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
   ? Omit<T, K>
@@ -78,7 +35,7 @@ export interface DropdownMenuProps {
    */
   button?: DropdownMenuButtonProps;
   /**
-   * Compound menu children. Used when items is omitted.
+   * Compound menu content (alternative to `items`).
    */
   children?: ReactNode;
   /**
@@ -90,12 +47,12 @@ export interface DropdownMenuProps {
    */
   'data-testid'?: string;
   /**
-   * Whether to autofocus menu content after opening.
+   * Whether to auto-focus the first menu item on open.
    * @default true
    */
   hasAutoFocus?: boolean;
   /**
-   * Whether to render a chevron in the trigger.
+   * Whether to show a chevron on the trigger button.
    * @default true
    */
   hasChevron?: boolean;
@@ -108,11 +65,11 @@ export interface DropdownMenuProps {
    */
   items?: ReadonlyArray<DropdownMenuOption>;
   /**
-   * Menu surface width.
+   * Width of the menu surface.
    */
   menuWidth?: number | string;
   /**
-   * Called when the trigger is clicked.
+   * Click handler for the trigger button.
    */
   onClick?: () => void;
   /**
@@ -122,7 +79,7 @@ export interface DropdownMenuProps {
   /**
    * Ref forwarded to the trigger button.
    */
-  ref?: Ref<HTMLElement>;
+  ref?: Ref<HTMLButtonElement>;
   /**
    * Inline styles applied to the menu surface.
    */
@@ -138,76 +95,7 @@ const styles = {
     overflowY: 'auto',
     p: '1',
   }),
-  section: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-  }),
-  heading: css({
-    px: '2',
-    py: '1',
-    userSelect: 'none',
-  }),
-  divider: css({
-    my: '1',
-  }),
 } as const;
-
-function formatWidth(value: number | string | undefined): string | undefined {
-  if (value == null) {
-    return undefined;
-  }
-  return typeof value === 'number' ? `${value}px` : value;
-}
-
-function renderItems(items: ReadonlyArray<DropdownMenuOption>): ReactNode {
-  return items.map((item, index) => {
-    if ('type' in item && item.type === 'divider') {
-      return <Divider className={styles.divider} key={`divider-${index}`} />;
-    }
-
-    if ('type' in item) {
-      return (
-        <div
-          aria-label={item.title}
-          className={styles.section}
-          key={`section-${item.title ?? index}`}
-          role="group">
-          {item.title != null ? (
-            <Text
-              as="span"
-              className={styles.heading}
-              color="secondary"
-              type="supporting">
-              {item.title}
-            </Text>
-          ) : null}
-          {item.items.map(sectionItem => (
-            <DropdownMenuItem
-              description={sectionItem.description}
-              icon={sectionItem.icon}
-              isDisabled={sectionItem.isDisabled}
-              key={String(sectionItem.label)}
-              label={sectionItem.label}
-              onClick={sectionItem.onClick}
-            />
-          ))}
-        </div>
-      );
-    }
-
-    return (
-      <DropdownMenuItem
-        description={item.description}
-        icon={item.icon}
-        isDisabled={item.isDisabled}
-        key={String(item.label)}
-        label={item.label}
-        onClick={item.onClick}
-      />
-    );
-  });
-}
 
 const defaultButton = {label: 'Menu'} satisfies DropdownMenuButtonProps;
 
@@ -219,8 +107,8 @@ export function DropdownMenu({
   children,
   className,
   'data-testid': dataTestId,
-  hasChevron = true,
   hasAutoFocus = true,
+  hasChevron = true,
   isMenuOpen,
   items,
   menuWidth,
@@ -233,54 +121,73 @@ export function DropdownMenu({
   const isControlled = isMenuOpen !== undefined;
   const isOpen = isControlled ? isMenuOpen : internalOpen;
   const menuSize: ButtonSize = button.size ?? 'md';
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (items != null && children != null) {
+      throw new Error(
+        'DropdownMenu: pass either `items` or `children`, not both.',
+      );
+    }
+  }
+
+  const hide = useCallback(() => {
+    if (isControlled) {
+      onOpenChange?.(false);
+    } else {
+      setInternalOpen(false);
+    }
+  }, [isControlled, onOpenChange]);
+
+  const handleMenuKeyDown = useMenuKeyboard(menuRef, hide);
+
   const contextValue = useMemo(
     () => ({
-      closeMenu: () => {
-        if (isControlled) {
-          onOpenChange?.(false);
-        } else {
-          setInternalOpen(false);
-        }
-      },
+      closeMenu: hide,
       menuSize,
     }),
-    [isControlled, menuSize, onOpenChange],
+    [hide, menuSize],
   );
-  const menuContent = items == null ? children : renderItems(items);
+
+  const menuNode = useMemo(
+    (): ReactNode => (items == null ? children : renderMenuItems(items)),
+    [items, children],
+  );
 
   return (
     <Popover
-      className={className}
       content={
         <DropdownMenuContext value={contextValue}>
-          <div className={styles.menu} role="menu">
-            {menuContent}
+          {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- keyboard handler captures events for the parent role="menu" element */}
+          <div
+            className={cx(styles.menu, className)}
+            onKeyDown={handleMenuKeyDown}
+            ref={menuRef}
+            tabIndex={-1}>
+            {menuNode}
           </div>
         </DropdownMenuContext>
       }
       hasAutoFocus={hasAutoFocus}
       hasCloseButton={false}
       isOpen={isOpen}
-      onOpenChange={nextOpen => {
+      onOpenChange={(isNextOpen: boolean): void => {
         if (isControlled) {
-          onOpenChange?.(nextOpen);
+          onOpenChange?.(isNextOpen);
         } else {
-          setInternalOpen(nextOpen);
+          setInternalOpen(isNextOpen);
         }
       }}
-      style={{width: formatWidth(menuWidth), ...style}}>
+      role="menu"
+      style={{width: formatMenuWidth(menuWidth), ...style}}>
       <Button
         {...button}
         data-testid={dataTestId}
         endContent={
-          button.endContent ??
-          (hasChevron && !button.isIconOnly ? (
-            <Icon icon={ChevronDown} size="sm" />
-          ) : undefined)
+          hasChevron ? <Icon icon={ChevronDown} size="sm" /> : undefined
         }
         onClick={onClick}
         ref={ref}
-        tooltip={isOpen ? undefined : button.tooltip}
       />
     </Popover>
   );

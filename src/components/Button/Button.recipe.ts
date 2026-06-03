@@ -69,6 +69,15 @@ export const buttonRecipe = cva({
           outlineColor: 'destructive',
         },
       },
+      onSolid: {
+        color: 'inherit',
+        bg: 'transparent',
+        _hover: {bg: 'color-mix(in srgb, currentColor 15%, transparent)'},
+        _active: {bg: 'color-mix(in srgb, currentColor 20%, transparent)'},
+        _focusVisible: {
+          outlineColor: 'currentColor',
+        },
+      },
     },
     size: {
       sm: {

@@ -1,0 +1,438 @@
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {Search, User} from 'lucide-react';
+import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
+import {AutocompleteInput} from './AutocompleteInput';
+import {AutocompleteInputItem} from './AutocompleteInputItem';
+import {BaseAutocompleteInput} from './BaseAutocompleteInput';
+import {
+  createStaticSource,
+  type SearchableItem,
+  type SearchSource,
+} from './types';
+
+const items: SearchableItem[] = [
+  {id: 'ada', label: 'Ada Lovelace'},
+  {id: 'grace', label: 'Grace Hopper'},
+  {id: 'katherine', label: 'Katherine Johnson'},
+];
+
+beforeAll(() => {
+  Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+    configurable: true,
+    value(this: HTMLElement) {
+      this.setAttribute('popover-open', '');
+    },
+  });
+  Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
+    configurable: true,
+    value(this: HTMLElement) {
+      this.removeAttribute('popover-open');
+    },
+  });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+describe('AutocompleteInput', () => {
+  it('selects a searched item', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+    await user.click(screen.getByText('Grace Hopper'));
+
+    expect(onChange).toHaveBeenCalledWith(items[1]);
+  });
+
+  it('clears the selected item', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSource(items)}
+        value={items[0]}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Clear Assignee'}));
+
+    expect(onChange).toHaveBeenCalledWith(null);
+  });
+
+  it('navigates results with the keyboard and closes with Escape', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onOpenChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={onChange}
+        onOpenChange={onOpenChange}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'a');
+
+    expect(
+      screen.getByRole('listbox', {hidden: true, name: 'Search results'}),
+    ).toBeInTheDocument();
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+
+    await user.keyboard('{ArrowDown}');
+    await user.keyboard('{ArrowDown}');
+    await user.keyboard('{ArrowUp}');
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith(items[1]);
+
+    await user.type(input, 'a');
+    await user.keyboard('{Escape}');
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('debounces search calls', async () => {
+    vi.useFakeTimers();
+    const search = vi.fn(() => []);
+    const source: SearchSource = {
+      bootstrap: vi.fn(() => []),
+      search,
+    };
+
+    render(
+      <AutocompleteInput
+        debounceMs={300}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={source}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    fireEvent.change(input, {target: {value: 'a'}});
+    fireEvent.change(input, {target: {value: 'ad'}});
+    fireEvent.change(input, {target: {value: 'ada'}});
+
+    expect(search).not.toHaveBeenCalled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledWith('ada');
+  });
+
+  it('shows loading and async search results', async () => {
+    const user = userEvent.setup();
+    let resolveSearch: (value: SearchableItem[]) => void = () => {};
+    const search = vi.fn(
+      async () =>
+        new Promise<SearchableItem[]>(resolve => {
+          resolveSearch = resolve;
+        }),
+    );
+    const source: SearchSource = {
+      bootstrap: () => [],
+      search,
+    };
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={source}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+    expect(screen.getByRole('status', {name: 'Loading'})).toBeInTheDocument();
+
+    act(() => {
+      resolveSearch([items[1]]);
+    });
+
+    expect(await screen.findByText('Grace Hopper')).toBeInTheDocument();
+  });
+
+  it('does not open or search when disabled', async () => {
+    const user = userEvent.setup();
+    const source = {
+      bootstrap: vi.fn(() => items),
+      search: vi.fn(() => items),
+    };
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        isDisabled
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={source}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    expect(input).toBeDisabled();
+
+    await user.click(input);
+    await user.keyboard('a');
+
+    expect(source.bootstrap).not.toHaveBeenCalled();
+    expect(source.search).not.toHaveBeenCalled();
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('shows entries on focus', async () => {
+    const user = userEvent.setup();
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Assignee'}));
+
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+  });
+
+  it('defers opening focus results until the initiating pointer click completes', async () => {
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+
+    fireEvent.pointerDown(input);
+    fireEvent.focus(input);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.pointerUp(input);
+    fireEvent.click(input);
+
+    await waitFor(() => {
+      expect(input).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
+  it('renders custom empty text for empty results', async () => {
+    const user = userEvent.setup();
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        emptySearchResultsText="No matching people"
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'zzz');
+
+    expect(screen.getByText('No matching people')).toBeInTheDocument();
+  });
+
+  it('limits the number of rendered menu items', async () => {
+    const user = userEvent.setup();
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Assignee"
+        maxMenuItems={1}
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Assignee'}));
+
+    expect(screen.getAllByRole('option', {hidden: true})).toHaveLength(1);
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.queryByText('Grace Hopper')).not.toBeInTheDocument();
+  });
+
+  it('calls onQueryChange and onOpenChange', async () => {
+    const user = userEvent.setup();
+    const onQueryChange = vi.fn();
+    const onOpenChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        onOpenChange={onOpenChange}
+        onQueryChange={onQueryChange}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+
+    expect(onQueryChange).toHaveBeenLastCalledWith('gr');
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it('renders custom items and a start icon', async () => {
+    const user = userEvent.setup();
+    const {container} = render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        renderItem={item => (
+          <AutocompleteInputItem
+            description="Engineer"
+            icon={User}
+            item={item}
+          />
+        )}
+        searchSource={createStaticSource(items)}
+        startIcon={Search}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+
+    expect(screen.getByText('Engineer')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- lucide icons are decorative SVGs
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders validation status and hides clear button when hasClear is false', () => {
+    render(
+      <AutocompleteInput
+        hasClear={false}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        status={{message: 'Select an assignee', type: 'error'}}
+        value={items[0]}
+      />,
+    );
+
+    expect(screen.getByText('Select an assignee')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {name: 'Clear Assignee'}),
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('BaseAutocompleteInput', () => {
+  it('can be used directly', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <BaseAutocompleteInput
+        debounceMs={0}
+        onChange={onChange}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox'), 'ada');
+    await user.click(screen.getByText('Ada Lovelace'));
+
+    expect(onChange).toHaveBeenCalledWith(items[0]);
+  });
+});
+
+describe('AutocompleteInputItem', () => {
+  it('renders label, description, icon, and passthrough props', () => {
+    const ref = vi.fn();
+    const {container} = render(
+      <AutocompleteInputItem
+        className="custom-item"
+        data-testid="item"
+        description="Mathematician"
+        icon={User}
+        item={items[0]}
+        ref={ref}
+        style={{color: 'red'}}
+      />,
+    );
+
+    const item = screen.getByTestId('item');
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getByText('Mathematician')).toBeInTheDocument();
+    expect(item).toHaveClass('custom-item');
+    expect(item).toHaveStyle({color: 'rgb(255, 0, 0)'});
+    expect(ref).toHaveBeenCalledWith(item);
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- lucide icons are decorative SVGs
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders custom item element content', () => {
+    render(
+      <AutocompleteInputItem
+        item={{
+          element: <span data-testid="custom-element">Custom</span>,
+          id: 'custom',
+          label: 'Custom',
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId('custom-element')).toBeInTheDocument();
+  });
+});
+
+describe('createStaticSource', () => {
+  it('searches item keywords', () => {
+    const source = createStaticSource(items, {
+      keywords: item => (item.id === 'ada' ? ['analytical engine'] : []),
+    });
+
+    expect(source.search('engine')).toEqual([items[0]]);
+  });
+});

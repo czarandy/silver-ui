@@ -149,6 +149,9 @@ const styles = {
     alignSelf: 'flex-end',
     mt: '1',
   }),
+  counterOverLimit: css({
+    color: 'status.error.fg',
+  }),
 } as const;
 
 /**
@@ -256,8 +259,11 @@ export function TextArea({
       {maxLength != null ? (
         <Text
           as="span"
-          className={styles.counter}
-          color={isOverLimit ? 'active' : 'secondary'}
+          className={cx(
+            styles.counter,
+            isOverLimit ? styles.counterOverLimit : undefined,
+          )}
+          color="secondary"
           id={counterID}
           type="supporting">
           {value.length}/{maxLength}

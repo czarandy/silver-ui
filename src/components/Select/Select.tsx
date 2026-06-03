@@ -1,14 +1,18 @@
 import {Check, ChevronDown, X} from 'lucide-react';
 import {
   useId,
+  useCallback,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
+  type MouseEvent,
   type ReactNode,
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {useListboxNavigation} from '../../internal/useListboxNavigation';
 import {
   Field,
   inputRecipe,
@@ -63,17 +67,13 @@ export interface SelectSection {
   type: 'section';
 }
 
-export type SelectOption =
+export type SelectOptionDefinition =
   | SelectDivider
   | SelectOptionData
   | SelectSection
   | string;
 
 export type SelectProps = {
-  /**
-   * Custom render function for selectable options.
-   */
-  children?: (option: SelectOptionData) => ReactNode;
   /**
    * Additional CSS class names applied to the trigger wrapper.
    */
@@ -96,11 +96,6 @@ export type SelectProps = {
    * @default false
    */
   hasSearch?: boolean;
-  /**
-   * Whether the selector starts open.
-   * @default false
-   */
-  isDefaultOpen?: boolean;
   /**
    * Whether the selector is disabled.
    * @default false
@@ -135,7 +130,7 @@ export type SelectProps = {
   /**
    * Options to display.
    */
-  options: ReadonlyArray<SelectOption>;
+  options: ReadonlyArray<SelectOptionDefinition>;
   /**
    * Placeholder shown when no option is selected.
    * @default 'Select...'
@@ -145,6 +140,10 @@ export type SelectProps = {
    * Ref forwarded to the combobox button.
    */
   ref?: Ref<HTMLButtonElement>;
+  /**
+   * Custom render function for selectable options.
+   */
+  renderOption?: (option: SelectOptionData) => ReactNode;
   /**
    * Search input placeholder.
    * @default 'Search...'
@@ -174,6 +173,12 @@ export type SelectProps = {
 } & FieldNecessity;
 
 const styles = {
+  wrapper: css({
+    cursor: 'pointer',
+  }),
+  wrapperDisabled: css({
+    cursor: 'not-allowed',
+  }),
   trigger: css({
     display: 'flex',
     alignItems: 'center',
@@ -187,6 +192,7 @@ const styles = {
     color: 'inherit',
     cursor: 'pointer',
     fontFamily: 'body',
+    outline: 'none',
     textAlign: 'start',
     _disabled: {
       cursor: 'not-allowed',
@@ -259,6 +265,7 @@ const styles = {
     },
   }),
   optionSelected: css({fontWeight: 'medium'}),
+  optionHighlighted: css({bg: 'bg.subtle'}),
   optionContent: css({
     display: 'inline-flex',
     alignItems: 'center',
@@ -291,7 +298,7 @@ function normalizeOption(option: string | SelectOptionData): SelectOptionData {
 }
 
 function getSelectableOptions(
-  options: ReadonlyArray<SelectOption>,
+  options: ReadonlyArray<SelectOptionDefinition>,
 ): SelectOptionData[] {
   return options.flatMap(option => {
     if (typeof option === 'string') {
@@ -310,13 +317,11 @@ function getSelectableOptions(
  * Single-select dropdown field.
  */
 export function Select({
-  children,
   className,
   'data-testid': dataTestId,
   description,
   hasClear = false,
   hasSearch = false,
-  isDefaultOpen = false,
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
@@ -329,6 +334,7 @@ export function Select({
   options,
   placeholder = 'Select...',
   ref,
+  renderOption: renderOptionProp,
   searchPlaceholder = 'Search...',
   size = 'md',
   startIcon,
@@ -341,14 +347,25 @@ export function Select({
     description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
-  const [isOpen, setIsOpen] = useState(isDefaultOpen);
+  const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const listboxId = `${inputId}-listbox`;
   const selectableOptions = useMemo(
     () => getSelectableOptions(options),
     [options],
   );
-  const selectedOption = selectableOptions.find(
-    option => option.value === value,
+  const selectedOption = useMemo(
+    () => selectableOptions.find(option => option.value === value),
+    [selectableOptions, value],
+  );
+  const selectedValues = useMemo(
+    () => (value == null ? new Set<string>() : new Set([value])),
+    [value],
+  );
+  const optionByValue = useMemo(
+    () => new Map(selectableOptions.map(option => [option.value, option])),
+    [selectableOptions],
   );
   const filteredValues = useMemo(() => {
     if (query.trim() === '') {
@@ -363,74 +380,170 @@ export function Select({
         .map(option => option.value),
     );
   }, [query, selectableOptions]);
+  const visibleSelectableOptions = useMemo(
+    () => selectableOptions.filter(option => filteredValues.has(option.value)),
+    [filteredValues, selectableOptions],
+  );
+  const isInteractionDisabled = isDisabled || isLoading;
 
-  const renderOption = (option: SelectOptionData): ReactNode => {
-    if (!filteredValues.has(option.value)) {
-      return null;
-    }
-    const normalized = normalizeOption(option);
-    const isSelected = normalized.value === value;
-    return (
-      <button
-        aria-selected={isSelected}
-        className={cx(
-          styles.option,
-          isSelected ? styles.optionSelected : undefined,
-        )}
-        disabled={normalized.isDisabled}
-        key={normalized.value}
-        onClick={() => {
-          onChange(normalized.value);
-          setIsOpen(false);
-          setQuery('');
-        }}
-        role="option"
-        type="button">
-        <span className={styles.optionContent}>
-          {children == null ? (
-            <>
-              {normalized.icon != null ? (
-                <span className={styles.iconSlot}>
-                  <Icon color="secondary" icon={normalized.icon} size="sm" />
-                </span>
-              ) : null}
-              {normalized.label}
-            </>
-          ) : (
-            children(normalized)
+  const commitOption = useCallback(
+    (option: SelectOptionData): void => {
+      if (option.isDisabled) {
+        return;
+      }
+
+      onChange(option.value);
+      setIsOpen(false);
+      setQuery('');
+    },
+    [onChange],
+  );
+
+  const {
+    activeDescendantId,
+    getOptionId,
+    handleKeyboardNavigation,
+    highlightedValue,
+    setHighlightedValue,
+  } = useListboxNavigation({
+    inputId,
+    isDisabled: isInteractionDisabled,
+    isOpen,
+    onCommit: optionValue => {
+      const option = optionByValue.get(optionValue);
+      if (option != null) {
+        commitOption(option);
+      }
+    },
+    onOpenChange: setIsOpen,
+    options: visibleSelectableOptions,
+    selectedValues,
+  });
+
+  const handleOptionClick = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const optionValue = event.currentTarget.dataset.value;
+      const option =
+        optionValue == null ? undefined : optionByValue.get(optionValue);
+      if (option != null) {
+        commitOption(option);
+      }
+    },
+    [commitOption, optionByValue],
+  );
+
+  const handleOptionMouseEnter = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const optionValue = event.currentTarget.dataset.value;
+      const option =
+        optionValue == null ? undefined : optionByValue.get(optionValue);
+      if (option != null && !option.isDisabled) {
+        setHighlightedValue(option.value);
+      }
+    },
+    [optionByValue, setHighlightedValue],
+  );
+
+  const renderOption = useCallback(
+    (option: SelectOptionData): ReactNode => {
+      if (!filteredValues.has(option.value)) {
+        return null;
+      }
+      const isSelected = option.value === value;
+      const isHighlighted = option.value === highlightedValue;
+      return (
+        <button
+          aria-selected={isSelected}
+          className={cx(
+            styles.option,
+            isSelected ? styles.optionSelected : undefined,
+            isHighlighted ? styles.optionHighlighted : undefined,
           )}
-        </span>
-        {isSelected ? (
-          <span className={styles.check}>
-            <Icon color="accent" icon={Check} size="sm" />
+          data-value={option.value}
+          disabled={option.isDisabled}
+          id={getOptionId(option.value)}
+          key={option.value}
+          onClick={handleOptionClick}
+          onMouseEnter={handleOptionMouseEnter}
+          role="option"
+          tabIndex={isHighlighted ? 0 : -1}
+          type="button">
+          <span className={styles.optionContent}>
+            {renderOptionProp == null ? (
+              <>
+                {option.icon != null ? (
+                  <span className={styles.iconSlot}>
+                    <Icon color="secondary" icon={option.icon} size="sm" />
+                  </span>
+                ) : null}
+                {option.label}
+              </>
+            ) : (
+              renderOptionProp(option)
+            )}
           </span>
-        ) : null}
-      </button>
-    );
-  };
+          {isSelected ? (
+            <span className={styles.check}>
+              <Icon color="accent" icon={Check} size="sm" />
+            </span>
+          ) : null}
+        </button>
+      );
+    },
+    [
+      filteredValues,
+      getOptionId,
+      handleOptionClick,
+      handleOptionMouseEnter,
+      highlightedValue,
+      renderOptionProp,
+      value,
+    ],
+  );
 
   const optionNodes: ReactNode[] = [];
+  let dividerCount = 0;
+  let sectionCount = 0;
   for (const option of options) {
     if (typeof option === 'string') {
       optionNodes.push(renderOption(normalizeOption(option)));
     } else if ('type' in option) {
       if (option.type === 'divider') {
+        dividerCount += 1;
         optionNodes.push(
-          <div className={styles.divider} key="divider" role="separator" />,
+          <div
+            className={styles.divider}
+            key={`divider-${dividerCount}`}
+            role="separator"
+          />,
         );
       } else {
         const sectionKey =
           option.title ??
           option.options.map(sectionOption => sectionOption.value).join('|');
+        sectionCount += 1;
+        const sectionHeadingId =
+          option.title == null
+            ? undefined
+            : `${inputId}-section-${sectionKey.replace(
+                /[^a-zA-Z0-9_-]/g,
+                '-',
+              )}-${sectionCount}`;
+        const sectionOptionNodes: ReactNode[] = [];
+        for (const sectionOption of option.options) {
+          sectionOptionNodes.push(renderOption(normalizeOption(sectionOption)));
+        }
         optionNodes.push(
           <div
-            aria-label={option.title}
-            key={`section-${sectionKey}`}
+            aria-labelledby={sectionHeadingId}
+            key={`section-${sectionKey}-${sectionCount}`}
             role="group">
             {option.title != null ? (
-              <div className={styles.sectionHeading}>{option.title}</div>
+              <div className={styles.sectionHeading} id={sectionHeadingId}>
+                {option.title}
+              </div>
             ) : null}
-            {option.options.map(renderOption)}
+            {sectionOptionNodes}
           </div>,
         );
       }
@@ -440,12 +553,23 @@ export function Select({
   }
 
   const menu = (
-    <div aria-label={`${label} options`} className={styles.menu} role="listbox">
+    <div
+      aria-label={`${label} options`}
+      className={styles.menu}
+      id={listboxId}
+      role="listbox">
       {hasSearch ? (
         <input
+          aria-activedescendant={activeDescendantId}
+          aria-autocomplete="list"
+          aria-controls={listboxId}
           aria-label={`Search ${label}`}
           className={styles.search}
-          onChange={event => setQuery(event.target.value)}
+          onChange={event => {
+            setQuery(event.target.value);
+            setHighlightedValue(null);
+          }}
+          onKeyDown={handleKeyboardNavigation}
           placeholder={searchPlaceholder}
           type="search"
           value={query}
@@ -458,27 +582,41 @@ export function Select({
   const necessity: FieldNecessity = {isOptional, isRequired};
 
   const trigger = (
+    // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- mouse clicks anywhere on the visual input delegate to the inner combobox button; keyboard handling stays on that button.
     <div
-      className={inputRecipe({
-        size,
-        status: status?.type,
-        isDisabled,
-      })}>
+      className={cx(
+        inputRecipe({
+          size,
+          status: status?.type,
+          isDisabled,
+        }),
+        styles.wrapper,
+        isInteractionDisabled ? styles.wrapperDisabled : undefined,
+      )}
+      onClick={() => {
+        if (!isInteractionDisabled) {
+          setIsOpen(currentIsOpen => !currentIsOpen);
+        }
+      }}
+      ref={triggerRef}>
       {startIcon != null ? (
         <span className={styles.iconSlot}>
           <Icon color="secondary" icon={startIcon} size="sm" />
         </span>
       ) : null}
       <button
-        aria-controls={`${inputId}-listbox`}
+        aria-activedescendant={activeDescendantId}
+        aria-busy={isLoading || undefined}
+        aria-controls={listboxId}
         aria-describedby={describedBy}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
         className={styles.trigger}
         data-testid={dataTestId}
-        disabled={isDisabled || isLoading}
+        disabled={isInteractionDisabled}
         id={inputId}
+        onKeyDown={handleKeyboardNavigation}
         ref={ref}
         role="combobox"
         type="button">
@@ -495,7 +633,10 @@ export function Select({
         <button
           aria-label={`Clear ${label}`}
           className={inputStyles.clearButton}
-          onClick={() => onChange(null)}
+          onClick={event => {
+            event.stopPropagation();
+            onChange(null);
+          }}
           type="button">
           <Icon icon={X} size="sm" />
         </button>
@@ -522,14 +663,16 @@ export function Select({
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
       style={style}>
+      {trigger}
       <Popover
+        anchorRef={triggerRef}
         content={menu}
         hasAutoFocus={hasSearch}
         hasCloseButton={false}
+        isEnabled={false}
         isOpen={isOpen}
-        onOpenChange={setIsOpen}>
-        {trigger}
-      </Popover>
+        onOpenChange={setIsOpen}
+      />
     </Field>
   );
 }

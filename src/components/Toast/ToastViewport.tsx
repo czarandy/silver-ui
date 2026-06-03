@@ -124,7 +124,20 @@ styles.position.topEnd = styles.topEnd;
 styles.position.topStart = styles.topStart;
 
 /**
- * Toast provider and viewport. Place once near the app root.
+ * Toast provider and viewport. Mount once near the app root to enable
+ * toast notifications. Components below this provider can call `useToast()`
+ * to show toasts.
+ *
+ * @example
+ * ```tsx
+ * function App() {
+ *   return (
+ *     <ToastViewport>
+ *       <MyRoutes />
+ *     </ToastViewport>
+ *   );
+ * }
+ * ```
  */
 export function ToastViewport({
   children,

@@ -13,8 +13,13 @@ import {scheduleRangeToZonedDateTimeRange} from './zonedDateTime';
 
 export interface ScheduleDayViewOptions {
   /**
-   * Last hour shown in the day grid (0-23).
-   * @default 23
+   * Pixel height used for each hourly row.
+   * @default 100
+   */
+  hourHeight?: number;
+  /**
+   * Exclusive ending hour shown in the day grid (1-24).
+   * @default 24
    */
   maxHour?: number;
   /**
@@ -36,6 +41,7 @@ function ScheduleDayView({
     <ScheduleFrame title={formatMonthTitle(day)} titleLabel={formatDate(day)}>
       <TimeGridView
         days={[day]}
+        hourHeight={options.hourHeight}
         maxHour={options.maxHour}
         minHour={options.minHour}
       />
@@ -47,7 +53,8 @@ function ScheduleDayView({
  * Creates a single-day schedule view configuration.
  */
 export function createScheduleDayView({
-  maxHour = 23,
+  hourHeight = 100,
+  maxHour = 24,
   minHour = 0,
 }: ScheduleDayViewOptions = {}): ScheduleView<ScheduleDayViewOptions> {
   return {
@@ -69,6 +76,6 @@ export function createScheduleDayView({
       label: 'Previous day',
       range: [date.startOfDay().addDays(-1), date.startOfDay()],
     }),
-    options: {maxHour, minHour},
+    options: {hourHeight, maxHour, minHour},
   };
 }

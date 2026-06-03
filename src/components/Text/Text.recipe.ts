@@ -1,4 +1,8 @@
 import {cva, type RecipeVariantProps} from 'styled-system/css';
+import {token} from 'styled-system/tokens';
+
+const textColorPrimary = `var(--silver-text-color, ${token.var('colors.fg')})`;
+const textColorMuted = `var(--silver-text-color-muted, ${token.var('colors.fg.muted')})`;
 
 export const textRecipe = cva({
   base: {
@@ -69,10 +73,10 @@ export const textRecipe = cva({
       inherit: {fontSize: 'inherit'},
     },
     color: {
-      primary: {color: 'fg'},
-      secondary: {color: 'fg.muted'},
+      primary: {color: textColorPrimary},
+      secondary: {color: textColorMuted},
       disabled: {color: 'fg.disabled'},
-      placeholder: {color: 'fg.muted'},
+      placeholder: {color: textColorMuted},
       active: {color: 'primary'},
       inherit: {color: 'inherit'},
     },
@@ -152,10 +156,10 @@ export const headingRecipe = cva({
       6: {fontSize: 'md', lineHeight: 'snug'},
     },
     color: {
-      primary: {color: 'fg'},
-      secondary: {color: 'fg.muted'},
+      primary: {color: textColorPrimary},
+      secondary: {color: textColorMuted},
       disabled: {color: 'fg.disabled'},
-      placeholder: {color: 'fg.muted'},
+      placeholder: {color: textColorMuted},
       active: {color: 'primary'},
       inherit: {color: 'inherit'},
     },

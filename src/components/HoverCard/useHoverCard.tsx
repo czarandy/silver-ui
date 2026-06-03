@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   type ReactNode,
   type RefCallback,
@@ -20,9 +21,7 @@ export interface UseHoverCardOptions {
   delay?: number;
   focusTrigger?: HoverCardFocusTrigger;
   hideDelay?: number;
-  isDefaultOpen?: boolean;
   isEnabled?: boolean;
-  isOpen?: boolean;
   onHide?: () => void;
   onShow?: () => void;
   placement?: LayerPlacement;
@@ -83,8 +82,6 @@ export function useHoverCard({
   hideDelay = 200,
   focusTrigger = 'auto',
   isEnabled = true,
-  isOpen,
-  isDefaultOpen = false,
   onShow,
   onHide,
 }: UseHoverCardOptions = {}): UseHoverCardReturn {
@@ -108,28 +105,32 @@ export function useHoverCard({
   }, []);
 
   const scheduleShow = useCallback(() => {
-    if (!isEnabled || isOpen === false) {
+    if (!isEnabled) {
       return;
     }
 
     clearTimeouts();
     showTimeoutRef.current = setTimeout(() => layer.show(), delay);
-  }, [clearTimeouts, delay, isEnabled, isOpen, layer]);
+  }, [clearTimeouts, delay, isEnabled, layer]);
 
   const scheduleHide = useCallback(() => {
-    if (isOpen === true) {
-      return;
-    }
-
     clearTimeouts();
     hideTimeoutRef.current = setTimeout(() => {
       if (!isHoveringContentRef.current) {
         layer.hide();
       }
     }, hideDelay);
-  }, [clearTimeouts, hideDelay, isOpen, layer]);
+  }, [clearTimeouts, hideDelay, layer]);
 
-  const handleMouseEnter = useCallback(() => scheduleShow(), [scheduleShow]);
+  const handleMouseEnter = useCallback(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(hover: none)').matches
+    ) {
+      return;
+    }
+    scheduleShow();
+  }, [scheduleShow]);
   const handleMouseLeave = useCallback(() => scheduleHide(), [scheduleHide]);
 
   const handleFocusIn = useCallback(() => {
@@ -162,7 +163,7 @@ export function useHoverCard({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && layer.isOpen) {
         event.stopPropagation();
         clearTimeouts();
         layer.hide();
@@ -224,25 +225,6 @@ export function useHoverCard({
     return () => clearTimeouts();
   }, [clearTimeouts]);
 
-  useEffect(() => {
-    if (isDefaultOpen) {
-      layer.show();
-    }
-  }, [isDefaultOpen, layer]);
-
-  useEffect(() => {
-    if (isOpen === undefined) {
-      return;
-    }
-
-    clearTimeouts();
-    if (isOpen) {
-      layer.show();
-    } else {
-      layer.hide();
-    }
-  }, [clearTimeouts, isOpen, layer]);
-
   const renderHoverCard = useCallback(
     (children: ReactNode, props?: ContextRenderProps): ReactNode => {
       const renderPlacement = props?.placement ?? placement;
@@ -298,14 +280,26 @@ export function useHoverCard({
     [alignment, clearTimeouts, layer, placement, scheduleHide],
   );
 
-  return {
-    anchorId: layer.anchorId,
-    describedBy: layer.id,
-    hide: layer.hide,
-    interactionRef,
-    positionRef: layer.ref,
-    ref,
-    renderHoverCard,
-    show: layer.show,
-  };
+  return useMemo(
+    () => ({
+      anchorId: layer.anchorId,
+      describedBy: layer.id,
+      hide: layer.hide,
+      interactionRef,
+      positionRef: layer.ref,
+      ref,
+      renderHoverCard,
+      show: layer.show,
+    }),
+    [
+      interactionRef,
+      layer.anchorId,
+      layer.hide,
+      layer.id,
+      layer.ref,
+      layer.show,
+      ref,
+      renderHoverCard,
+    ],
+  );
 }

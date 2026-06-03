@@ -11,7 +11,8 @@ import {
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
-import {ComboboxItem} from '../Combobox';
+import {AutocompleteInputItem} from '../AutocompleteInput';
+import type {InputStatus} from '../Field';
 import type {IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Tag} from '../Tag';
@@ -19,6 +20,7 @@ import {
   TagsInput,
   type TagsInputChange,
   type TagsInputHandle,
+  type TagsInputOverflowBehavior,
 } from '../TagsInput';
 import {Text} from '../Text';
 import {SearchFilterInputEditPopover} from './SearchFilterInputEditPopover';
@@ -97,6 +99,11 @@ export interface SearchFilterInputProps {
    */
   label?: string;
   /**
+   * Maximum number of items shown in the operator dropdown menu.
+   * When set, only the first N operators are displayed.
+   */
+  maxOperatorMenuItems?: number;
+  /**
    * Maximum displayed tag value length.
    * @default 40
    */
@@ -145,9 +152,21 @@ export interface SearchFilterInputProps {
    */
   startIcon?: IconComponent;
   /**
+   * Validation status displayed below the input.
+   */
+  status?: InputStatus;
+  /**
    * Inline styles applied to the input wrapper.
    */
   style?: CSSProperties;
+  /**
+   * Controls how tags overflow when the container is too narrow.
+   * - `'none'`: Tags wrap to multiple lines (default).
+   * - `'unfocusedInline'`: Single line with "+ N more" when unfocused; expands inline on focus.
+   * - `'unfocusedLayer'`: Single line with "+ N more" when unfocused; expands as overlay on focus.
+   * @default 'none'
+   */
+  tagOverflowBehavior?: TagsInputOverflowBehavior;
   /**
    * Timezone ID for date formatting.
    */
@@ -160,12 +179,18 @@ type PopoverState =
   | {filterIndex: number; partialFilter: PartialFilter; type: 'editing'};
 
 const styles = {
+  entityPhoto: css({
+    width: '16px',
+    height: '16px',
+    borderRadius: 'full',
+    objectFit: 'cover',
+    flexShrink: 0,
+  }),
   root: css({
     w: 'full',
   }),
   popover: css({
-    minW: '100',
-    w: 'anchor-size(width)',
+    minW: '400px',
   }),
   resultCount: css({
     whiteSpace: 'nowrap',
@@ -192,6 +217,7 @@ export function SearchFilterInput({
   isLabelHidden = true,
   isReadOnly = false,
   label = 'Search',
+  maxOperatorMenuItems,
   maxTagLength = 40,
   onBlur,
   onChange,
@@ -202,7 +228,9 @@ export function SearchFilterInput({
   resultCount,
   size = 'md',
   startIcon,
+  status,
   style,
+  tagOverflowBehavior,
   timezoneID,
 }: SearchFilterInputProps): React.JSX.Element {
   const config = useInternalSearchFilterInputConfig(configFromProps);
@@ -223,7 +251,7 @@ export function SearchFilterInput({
       filters.map((filter, index) => {
         const field = config.getField(filter.field);
         const operator = config.getOperator(filter.field, filter.operator);
-        const operatorLabel = operator?.label ? `: ${operator.label}` : '';
+        const operatorLabel = operator?.label ? ` ${operator.label}` : '';
         const value =
           operator == null
             ? ''
@@ -252,8 +280,8 @@ export function SearchFilterInput({
 
   const openEditor = useCallback(
     (state: Exclude<PopoverState, {type: 'idle'}>) => {
+      tagsInputRef.current?.blur();
       setPopoverState(state);
-      requestAnimationFrame(() => tagsInputRef.current?.blur());
     },
     [],
   );
@@ -392,6 +420,15 @@ export function SearchFilterInput({
             timezoneID,
           )
         : '';
+    const entityPhoto =
+      filter?.value.type === 'entity_list'
+        ? (() => {
+            const entities = filter.value.value;
+            return entities.length === 1 && entities[0].photo != null
+              ? entities[0].photo
+              : undefined;
+          })()
+        : undefined;
     return (
       <Tag
         endContent={
@@ -400,7 +437,7 @@ export function SearchFilterInput({
           )
         }
         isDisabled={isDisabled}
-        label={`${field?.label ?? ''}: ${operator?.label ?? ''}`.trim()}
+        label={`${field?.label ?? ''} ${operator?.label ?? ''}`.trim()}
         onClick={
           canInteract
             ? event => {
@@ -411,6 +448,11 @@ export function SearchFilterInput({
         }
         onRemove={canInteract ? onRemove : undefined}
         size={size}
+        startContent={
+          entityPhoto != null ? (
+            <img alt="" className={styles.entityPhoto} src={entityPhoto} />
+          ) : undefined
+        }
       />
     );
   };
@@ -421,7 +463,7 @@ export function SearchFilterInput({
         ? undefined
         : config.getField(item.auxiliaryData.fieldKey);
     return (
-      <ComboboxItem
+      <AutocompleteInputItem
         description={field?.description}
         icon={field?.icon ?? Search}
         item={item}
@@ -477,6 +519,7 @@ export function SearchFilterInput({
         config={config}
         filter={partialFilter}
         isReadOnly={isReadOnly}
+        maxOperatorMenuItems={maxOperatorMenuItems}
         mode={popoverState.type === 'editing' ? 'edit' : 'create'}
         onCancel={() => setPopoverState({type: 'idle'})}
         onSave={handleSave}
@@ -518,18 +561,23 @@ export function SearchFilterInput({
           hasEntriesOnFocus
           isDisabled={isDisabled}
           isLabelHidden={isLabelHidden}
+          isReadOnly={isReadOnly}
           label={label}
           onBlur={onBlur}
           onChange={handleTagsInputChange}
           onFocus={onFocus}
-          placeholder={filters.length === 0 ? placeholder : ''}
+          placeholder={
+            isReadOnly ? '' : filters.length === 0 ? placeholder : ''
+          }
           ref={ref}
           renderItem={renderItem}
           renderTag={renderTag}
           searchSource={searchSource}
           size={size}
           startIcon={startIcon}
+          status={status}
           style={style}
+          tagOverflowBehavior={tagOverflowBehavior}
           value={tagsInputValue}
         />
       </div>
@@ -539,6 +587,7 @@ export function SearchFilterInput({
         content={editorContent}
         hasAutoFocus={false}
         hasCloseButton={false}
+        hasLightDismiss={false}
         isOpen={popoverState.type !== 'idle'}
         onOpenChange={isOpen => {
           if (!isOpen) {

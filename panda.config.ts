@@ -4,6 +4,7 @@ import {generateColorScale} from './src/theme/generate-color-scale';
 const primary = generateColorScale('#547A95');
 const neutral = generateColorScale('#6A7B8C');
 const green = generateColorScale('#65c37e');
+const teal = generateColorScale('#89dbd9');
 const red = {
   50: {value: '#fceef0'},
   100: {value: '#f9d1d8'},
@@ -68,6 +69,7 @@ export default defineConfig({
           red,
           yellow,
           blue,
+          teal,
         },
         fonts: {
           body: {value: 'system-ui, -apple-system, sans-serif'},
@@ -157,16 +159,11 @@ export default defineConfig({
               },
               solid: {
                 value: {
-                  base: '{colors.yellow.400}',
-                  _dark: '{colors.yellow.300}',
+                  base: '{colors.yellow.500}',
+                  _dark: '{colors.yellow.400}',
                 },
               },
-              solidFg: {
-                value: {
-                  base: '{colors.yellow.950}',
-                  _dark: '{colors.yellow.950}',
-                },
-              },
+              solidFg: {value: '{colors.white}'},
             },
             info: {
               fg: {value: '#0164e0'},
@@ -378,7 +375,7 @@ export default defineConfig({
               },
               fg: {
                 value: {
-                  base: '{colors.green.800}',
+                  base: '{colors.green.900}',
                   _dark: '{colors.green.200}',
                 },
               },
@@ -501,7 +498,7 @@ export default defineConfig({
                 },
               },
               accent: {
-                value: {base: '{colors.teal.600}', _dark: '{colors.teal.400}'},
+                value: {base: '{colors.teal.700}', _dark: '{colors.teal.400}'},
               },
             },
             yellow: {

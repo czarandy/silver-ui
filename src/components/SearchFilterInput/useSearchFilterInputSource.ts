@@ -1,5 +1,5 @@
 import {useMemo} from 'react';
-import type {SearchSource} from '../Combobox';
+import type {SearchSource} from '../AutocompleteInput';
 import type {InternalSearchFilterInputConfig} from './internalConfig';
 import type {
   FilterValue,

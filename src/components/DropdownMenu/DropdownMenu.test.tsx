@@ -44,6 +44,53 @@ describe('DropdownMenu', () => {
     ).toBeDisabled();
   });
 
+  it('renders dividers', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropdownMenu
+        button={{label: 'Actions'}}
+        items={[{label: 'Edit'}, {type: 'divider'}, {label: 'Delete'}]}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+    expect(screen.getByRole('separator', {hidden: true})).toBeInTheDocument();
+  });
+
+  it('renders sections with titles', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropdownMenu
+        button={{label: 'Actions'}}
+        items={[
+          {
+            items: [{label: 'Edit'}, {label: 'Copy'}],
+            title: 'Editing',
+            type: 'section',
+          },
+          {
+            items: [{label: 'Delete'}],
+            title: 'Danger',
+            type: 'section',
+          },
+        ]}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+    expect(
+      screen.getByRole('group', {hidden: true, name: 'Editing'}),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', {hidden: true, name: 'Danger'}),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', {hidden: true, name: 'Edit'}),
+    ).toBeInTheDocument();
+  });
+
   it('supports compound menu items', async () => {
     const user = userEvent.setup();
     const onArchive = vi.fn();
@@ -57,5 +104,73 @@ describe('DropdownMenu', () => {
     await user.click(screen.getByRole('button', {name: 'Actions'}));
     await user.click(screen.getByText('Archive'));
     expect(onArchive).toHaveBeenCalled();
+  });
+
+  it('closes menu after clicking an item', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+
+    render(
+      <DropdownMenu
+        button={{label: 'Actions'}}
+        isMenuOpen={false}
+        items={[{label: 'Edit'}]}
+        onOpenChange={onOpenChange}
+      />,
+    );
+
+    onOpenChange.mockClear();
+    onOpenChange.mockImplementation(() => {});
+
+    render(
+      <DropdownMenu
+        button={{label: 'Actions'}}
+        isMenuOpen
+        items={[{label: 'Edit'}]}
+        onOpenChange={onOpenChange}
+      />,
+    );
+
+    await user.click(
+      screen.getAllByRole('menuitem', {hidden: true, name: 'Edit'})[0],
+    );
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('hides popover on Escape key via light-dismiss', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropdownMenu button={{label: 'Actions'}} items={[{label: 'Edit'}]} />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+    expect(screen.getByRole('menu', {hidden: true})).toBeInTheDocument();
+  });
+
+  it('renders item with description', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropdownMenu button={{label: 'Actions'}}>
+        <DropdownMenuItem description="Modify this item" label="Edit" />
+      </DropdownMenu>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+    expect(screen.getByText('Modify this item')).toBeInTheDocument();
+  });
+
+  it('renders item with endContent', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropdownMenu button={{label: 'Actions'}}>
+        <DropdownMenuItem endContent={<span>⌘E</span>} label="Edit" />
+      </DropdownMenu>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+    expect(screen.getByText('⌘E')).toBeInTheDocument();
   });
 });

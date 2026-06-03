@@ -1,14 +1,24 @@
 import {Temporal} from '@js-temporal/polyfill';
-import {Filter, X} from 'lucide-react';
-import {createContext, use, useMemo, type ReactNode} from 'react';
+import {Filter} from 'lucide-react';
+import {
+  createContext,
+  use,
+  useCallback,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import {css} from 'styled-system/css';
 import {
   plainDateToUnixSeconds,
   type PlainDate,
 } from '../../../../internal/plainDate';
 import {getBrowserTimezoneID} from '../../../../internal/time';
+import {
+  createStaticSource,
+  type SearchableItem,
+} from '../../../AutocompleteInput';
 import {Button} from '../../../Button';
-import {createStaticSource, type SearchableItem} from '../../../Combobox';
 import {DateInput} from '../../../DateInput';
 import {MultiSelect} from '../../../MultiSelect';
 import {NumberInput} from '../../../NumberInput';
@@ -31,6 +41,7 @@ import {Select} from '../../../Select';
 import {TagsInput} from '../../../TagsInput';
 import {TextInput} from '../../../TextInput';
 import {TimeInput} from '../../../TimeInput';
+import {proportional} from '../../columnUtils';
 import type {
   HeaderCellRenderProps,
   TableColumn,
@@ -39,7 +50,7 @@ import type {
 
 export type TableFilterValue = number | string | string[] | PlainDate;
 export type TableFilterState = Record<string, TableFilterValue | undefined>;
-export type TableFilterVariant = 'inline' | 'inline-compact' | 'popover';
+export type TableFilterVariant = 'inline' | 'popover';
 
 export interface TableFilterFieldRef {
   field: string;
@@ -66,13 +77,6 @@ const FilterStoreContext = createContext<FilterStore | null>(null);
 FilterStoreContext.displayName = 'TableFilterStoreContext';
 
 const styles = {
-  afterInline: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1',
-    mt: '1',
-    minW: 0,
-  }),
   afterPopover: css({
     display: 'inline-flex',
     alignItems: 'center',
@@ -86,6 +90,9 @@ const styles = {
     justifyContent: 'flex-end',
     gap: '2',
     mt: '2',
+  }),
+  popoverActionsSpacer: css({
+    flex: 1,
   }),
   popoverContent: css({
     w: '60',
@@ -581,33 +588,83 @@ function PopoverFilterTrigger<T extends Record<string, unknown>>({
   operatorValue: OperatorValue;
 }): React.JSX.Element {
   const store = useFilterStore();
-  const isActive = store.getConfig().filters[column.key] != null;
+  const value = store.getConfig().filters[column.key];
+  const isActive = value != null;
+  const [isOpen, setIsOpen] = useState(false);
+  const [draft, setDraft] = useState<TableFilterValue | null>(null);
+
+  const handleOpenChange = useCallback(
+    (isOpenNext: boolean) => {
+      if (isOpenNext) {
+        setDraft(value ?? null);
+      }
+      setIsOpen(isOpenNext);
+    },
+    [value],
+  );
+
+  const handleApply = useCallback(() => {
+    store.getConfig().onFilterChange(column.key, draft);
+    setIsOpen(false);
+  }, [column.key, draft, store]);
+
+  const handleReset = useCallback(() => {
+    store.getConfig().onFilterChange(column.key, null);
+    setDraft(null);
+    setIsOpen(false);
+  }, [column.key, store]);
+
+  const draftStore = useMemo<FilterStore>(
+    () => ({
+      getConfig() {
+        const config = store.getConfig();
+        return {
+          ...config,
+          filters: {
+            ...config.filters,
+            [column.key]: draft ?? undefined,
+          },
+          onFilterChange: (_columnKey, nextValue) => {
+            setDraft(nextValue);
+          },
+        };
+      },
+    }),
+    [column.key, draft, store],
+  );
+
   return (
     <Popover
       content={
-        <div className={styles.popoverContent}>
-          <FilterControl
-            column={column}
-            hasClear
-            operatorValue={operatorValue}
-            size="md"
-          />
-          {isActive ? (
+        <FilterStoreContext value={draftStore}>
+          <div className={styles.popoverContent}>
+            <FilterControl
+              column={column}
+              hasClear={false}
+              operatorValue={operatorValue}
+              size="sm"
+            />
             <div className={styles.popoverActions}>
               <Button
-                icon={X}
-                label="Clear"
-                onClick={() => {
-                  store.getConfig().onFilterChange(column.key, null);
-                }}
+                label="Reset"
+                onClick={handleReset}
                 size="sm"
                 variant="ghost"
               />
+              <div className={styles.popoverActionsSpacer} />
+              <Button
+                label="Apply"
+                onClick={handleApply}
+                size="sm"
+                variant="primary"
+              />
             </div>
-          ) : null}
-        </div>
+          </div>
+        </FilterStoreContext>
       }
+      isOpen={isOpen}
       label={`Filter ${getHeaderText(column)}`}
+      onOpenChange={handleOpenChange}
       padding="3"
       placement="below">
       <Button
@@ -635,11 +692,33 @@ export function useTableFiltering<T extends Record<string, unknown>>(
 
   return useMemo(
     (): TablePlugin<T> => ({
+      transformColumns:
+        variant === 'inline'
+          ? (columns: TableColumn<T>[]): TableColumn<T>[] =>
+              columns.map(column => {
+                if (column.filter != null && column.width == null) {
+                  return {...column, width: proportional(1)};
+                }
+                return column;
+              })
+          : undefined,
       transformHeaderCell(
         props: HeaderCellRenderProps,
         column: TableColumn<T>,
       ): HeaderCellRenderProps {
         if (column.filter == null) {
+          if (variant === 'inline') {
+            return {
+              ...props,
+              htmlProps: {
+                ...props.htmlProps,
+                style: {
+                  ...props.htmlProps.style,
+                  verticalAlign: 'bottom',
+                },
+              },
+            };
+          }
           return props;
         }
         const operatorValue = resolveFilterConfig(
@@ -667,16 +746,18 @@ export function useTableFiltering<T extends Record<string, unknown>>(
         return {
           ...props,
           below: (
-            <div className={styles.inlineWrapper}>
-              <FilterControl
-                column={column}
-                hasClear
-                operatorValue={operatorValue}
-                size={variant === 'inline-compact' ? 'sm' : 'md'}
-              />
-            </div>
+            <>
+              {props.below}
+              <div className={styles.inlineWrapper}>
+                <FilterControl
+                  column={column}
+                  hasClear
+                  operatorValue={operatorValue}
+                  size="sm"
+                />
+              </div>
+            </>
           ),
-          className: styles.afterInline,
         };
       },
       transformTableContext(children: ReactNode): ReactNode {

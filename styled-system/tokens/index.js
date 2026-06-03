@@ -1043,50 +1043,6 @@ const tokens = {
     "value": "#083344",
     "variable": "var(--silver-colors-cyan-950)"
   },
-  "colors.teal.50": {
-    "value": "#f0fdfa",
-    "variable": "var(--silver-colors-teal-50)"
-  },
-  "colors.teal.100": {
-    "value": "#ccfbf1",
-    "variable": "var(--silver-colors-teal-100)"
-  },
-  "colors.teal.200": {
-    "value": "#99f6e4",
-    "variable": "var(--silver-colors-teal-200)"
-  },
-  "colors.teal.300": {
-    "value": "#5eead4",
-    "variable": "var(--silver-colors-teal-300)"
-  },
-  "colors.teal.400": {
-    "value": "#2dd4bf",
-    "variable": "var(--silver-colors-teal-400)"
-  },
-  "colors.teal.500": {
-    "value": "#14b8a6",
-    "variable": "var(--silver-colors-teal-500)"
-  },
-  "colors.teal.600": {
-    "value": "#0d9488",
-    "variable": "var(--silver-colors-teal-600)"
-  },
-  "colors.teal.700": {
-    "value": "#0f766e",
-    "variable": "var(--silver-colors-teal-700)"
-  },
-  "colors.teal.800": {
-    "value": "#115e59",
-    "variable": "var(--silver-colors-teal-800)"
-  },
-  "colors.teal.900": {
-    "value": "#134e4a",
-    "variable": "var(--silver-colors-teal-900)"
-  },
-  "colors.teal.950": {
-    "value": "#042f2e",
-    "variable": "var(--silver-colors-teal-950)"
-  },
   "colors.emerald.50": {
     "value": "#ecfdf5",
     "variable": "var(--silver-colors-emerald-50)"
@@ -1739,6 +1695,50 @@ const tokens = {
     "value": "#172554",
     "variable": "var(--silver-colors-blue-950)"
   },
+  "colors.teal.50": {
+    "value": "#e3f5f5",
+    "variable": "var(--silver-colors-teal-50)"
+  },
+  "colors.teal.100": {
+    "value": "#cbedec",
+    "variable": "var(--silver-colors-teal-100)"
+  },
+  "colors.teal.200": {
+    "value": "#a6e0de",
+    "variable": "var(--silver-colors-teal-200)"
+  },
+  "colors.teal.300": {
+    "value": "#8ed7d5",
+    "variable": "var(--silver-colors-teal-300)"
+  },
+  "colors.teal.400": {
+    "value": "#61c7c5",
+    "variable": "var(--silver-colors-teal-400)"
+  },
+  "colors.teal.500": {
+    "value": "#89dbd9",
+    "variable": "var(--silver-colors-teal-500)"
+  },
+  "colors.teal.600": {
+    "value": "#58ccc9",
+    "variable": "var(--silver-colors-teal-600)"
+  },
+  "colors.teal.700": {
+    "value": "#36b1ae",
+    "variable": "var(--silver-colors-teal-700)"
+  },
+  "colors.teal.800": {
+    "value": "#288381",
+    "variable": "var(--silver-colors-teal-800)"
+  },
+  "colors.teal.900": {
+    "value": "#1b5756",
+    "variable": "var(--silver-colors-teal-900)"
+  },
+  "colors.teal.950": {
+    "value": "#042f2e",
+    "variable": "var(--silver-colors-teal-950)"
+  },
   "fonts.sans": {
     "value": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, \"Noto Sans\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
     "variable": "var(--silver-fonts-sans)"
@@ -1912,7 +1912,7 @@ const tokens = {
     "variable": "var(--silver-colors-status-warning-solid)"
   },
   "colors.status.warning.solidFg": {
-    "value": "var(--silver-colors-status-warning-solid-fg)",
+    "value": "var(--silver-colors-white)",
     "variable": "var(--silver-colors-status-warning-solid-fg)"
   },
   "colors.status.info.fg": {

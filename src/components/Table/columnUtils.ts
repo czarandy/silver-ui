@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import type {CSSProperties, ReactNode} from 'react';
 import type {PixelWidth, ProportionalWidth, TableColumn} from './types';
 
@@ -102,8 +103,16 @@ export function defaultCellRenderer<T extends Record<string, unknown>>(
   if (value == null) {
     return '';
   }
-  if (value instanceof Date) {
-    return value.toISOString();
+  // Default rendering intentionally supports Temporal date/time values only.
+  // Use renderCell for native Date instances or other object values.
+  if (
+    value instanceof Temporal.Instant ||
+    value instanceof Temporal.PlainDate ||
+    value instanceof Temporal.PlainDateTime ||
+    value instanceof Temporal.PlainTime ||
+    value instanceof Temporal.ZonedDateTime
+  ) {
+    return value.toString();
   }
   if (
     typeof value === 'bigint' ||

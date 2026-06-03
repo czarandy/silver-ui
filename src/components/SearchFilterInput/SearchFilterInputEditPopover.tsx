@@ -30,6 +30,10 @@ export interface SearchFilterInputEditPopoverProps {
    */
   isReadOnly?: boolean;
   /**
+   * Maximum number of items shown in the operator dropdown menu.
+   */
+  maxOperatorMenuItems?: number;
+  /**
    * Editor mode.
    */
   mode: 'create' | 'edit';
@@ -68,8 +72,7 @@ const styles = {
     pb: '3',
   }),
   fieldSelector: css({
-    flex: '1 1 0',
-    minW: 0,
+    flexShrink: 0,
   }),
   operatorSelector: css({
     flex: '1 0 auto',
@@ -83,6 +86,9 @@ const styles = {
     flexDirection: 'column',
     gap: '2',
     w: 'full',
+    listStyleType: 'none',
+    m: 0,
+    p: 0,
   }),
   nestedNode: css({
     display: 'flex',
@@ -406,11 +412,9 @@ function NestedEditor({
           value={partialFilter.operator ?? null}
         />
       ) : null}
-      <div className={styles.nestedList}>
+      <ul className={styles.nestedList} role="group">
         {subFilters.map((subFilter, index) => (
-          <div
-            className={styles.nestedNode}
-            key={`${subFilter.field}-${index}`}>
+          <li className={styles.nestedNode} key={`${subFilter.field}-${index}`}>
             <NestedSubFilterRow
               config={config}
               isReadOnly={isReadOnly}
@@ -418,9 +422,9 @@ function NestedEditor({
               onRemove={() => removeSubFilter(index)}
               subFilter={subFilter}
             />
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
       {!isReadOnly ? (
         <Button
           label="+ Add filter"
@@ -437,6 +441,7 @@ export function SearchFilterInputEditPopover({
   config,
   filter: initialFilter,
   isReadOnly = false,
+  maxOperatorMenuItems,
   mode,
   onCancel,
   onSave,
@@ -455,11 +460,14 @@ export function SearchFilterInputEditPopover({
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      valueEditorRef.current
-        ?.querySelector<HTMLElement>(
-          'input:not([disabled]), button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        )
-        ?.focus();
+      const innerFrame = requestAnimationFrame(() => {
+        valueEditorRef.current
+          ?.querySelector<HTMLElement>(
+            'input:not([disabled]), button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          )
+          ?.focus();
+      });
+      return () => cancelAnimationFrame(innerFrame);
     });
     return () => cancelAnimationFrame(frame);
   }, []);
@@ -481,13 +489,14 @@ export function SearchFilterInputEditPopover({
         .map(field => ({label: field.label, value: field.key})),
     [config],
   );
-  const operatorOptions = useMemo(
-    () =>
-      config
-        .getVisibleOperators(partialFilter.field)
-        .map(operator => ({label: operator.label, value: operator.key})),
-    [config, partialFilter.field],
-  );
+  const operatorOptions = useMemo(() => {
+    const allOptions = config
+      .getVisibleOperators(partialFilter.field)
+      .map(operator => ({label: operator.label, value: operator.key}));
+    return maxOperatorMenuItems != null
+      ? allOptions.slice(0, maxOperatorMenuItems)
+      : allOptions;
+  }, [config, maxOperatorMenuItems, partialFilter.field]);
   const isSaveDisabled =
     partialFilter.operator == null || partialFilter.value == null;
 
@@ -560,8 +569,15 @@ export function SearchFilterInputEditPopover({
       className={styles.root}
       onKeyDown={event => {
         if (event.key === 'Enter' && !isSaveDisabled) {
-          event.preventDefault();
-          handleSave();
+          const target = event.target as HTMLElement;
+          const isInsideSelect =
+            target.closest('[role="listbox"]') != null ||
+            target.closest('[role="option"]') != null ||
+            target.getAttribute('aria-expanded') === 'true';
+          if (!isInsideSelect) {
+            event.preventDefault();
+            handleSave();
+          }
         } else if (event.key === 'Escape' && !event.defaultPrevented) {
           event.preventDefault();
           onCancel();

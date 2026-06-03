@@ -1,7 +1,8 @@
-import {act, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {createStaticSource, type SearchableItem} from '../Combobox';
+import {useState} from 'react';
+import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
+import {createStaticSource, type SearchableItem} from '../AutocompleteInput';
 import {TagsInput} from './TagsInput';
 
 const items: SearchableItem[] = [
@@ -11,6 +12,12 @@ const items: SearchableItem[] = [
 ];
 
 const emptySource = createStaticSource([]);
+const showPopover = vi.fn(function (this: HTMLElement) {
+  this.setAttribute('popover-open', '');
+});
+const hidePopover = vi.fn(function (this: HTMLElement) {
+  this.removeAttribute('popover-open');
+});
 
 async function tick(): Promise<void> {
   return new Promise(resolve => {
@@ -26,16 +33,17 @@ beforeAll(() => {
   };
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
     configurable: true,
-    value(this: HTMLElement) {
-      this.setAttribute('popover-open', '');
-    },
+    value: showPopover,
   });
   Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
     configurable: true,
-    value(this: HTMLElement) {
-      this.removeAttribute('popover-open');
-    },
+    value: hidePopover,
   });
+});
+
+beforeEach(() => {
+  showPopover.mockClear();
+  hidePopover.mockClear();
 });
 
 describe('TagsInput', () => {
@@ -60,6 +68,31 @@ describe('TagsInput', () => {
       item: items[0],
       type: 'add',
     });
+  });
+
+  it('clears the typed query after selecting an item', async () => {
+    const user = userEvent.setup();
+
+    function ControlledTagsInput(): React.JSX.Element {
+      const [value, setValue] = useState<SearchableItem[]>([]);
+      return (
+        <TagsInput
+          debounceMs={0}
+          label="Team"
+          onChange={setValue}
+          searchSource={createStaticSource(items)}
+          value={value}
+        />
+      );
+    }
+
+    render(<ControlledTagsInput />);
+
+    const input = screen.getByRole('combobox', {name: 'Team'});
+    await user.type(input, 'ada');
+    await user.click(screen.getByText('Ada Lovelace'));
+
+    expect(input).toHaveValue('');
   });
 
   it('removes a selected tag', async () => {
@@ -238,8 +271,35 @@ describe('TagsInput', () => {
       />,
     );
 
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getAllByText('Ada Lovelace').length).toBeGreaterThanOrEqual(
+      1,
+    );
     expect(screen.getByRole('combobox', {name: 'Team'})).toBeInTheDocument();
+  });
+
+  it('opens popover when clicking the wrapper area', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <TagsInput
+        data-testid="tags"
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Team"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={[items[0]]}
+      />,
+    );
+
+    const wrapper = screen.getByTestId('tags');
+    await user.click(wrapper);
+    await act(async () => {
+      await tick();
+    });
+
+    const input = screen.getByRole('combobox', {name: 'Team'});
+    expect(input).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('expands tags on focus when tagOverflowBehavior is unfocusedInline', async () => {
@@ -261,5 +321,42 @@ describe('TagsInput', () => {
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
     expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
     expect(screen.getByText('Katherine Johnson')).toBeInTheDocument();
+  });
+
+  it('renders a top-layer popover for tagOverflowBehavior unfocusedLayer', () => {
+    render(
+      <TagsInput
+        data-testid="tags"
+        label="Team"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        tagOverflowBehavior="unfocusedLayer"
+        value={[items[0], items[1], items[2]]}
+      />,
+    );
+
+    expect(screen.getByTestId('tags')).toBeInTheDocument();
+    expect(screen.getByTestId('tags-layer')).toBeInTheDocument();
+  });
+
+  it('opens and closes the layer when tagOverflowBehavior is unfocusedLayer', () => {
+    render(
+      <TagsInput
+        data-testid="tags"
+        label="Team"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        tagOverflowBehavior="unfocusedLayer"
+        value={[items[0], items[1], items[2]]}
+      />,
+    );
+
+    const wrapper = screen.getByTestId('tags');
+
+    fireEvent.focusIn(wrapper);
+    expect(showPopover).toHaveBeenCalled();
+
+    fireEvent.focusOut(wrapper, {relatedTarget: document.body});
+    expect(hidePopover).toHaveBeenCalled();
   });
 });

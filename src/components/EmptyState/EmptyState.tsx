@@ -26,9 +26,9 @@ export interface EmptyStateProps {
    */
   headingLevel?: HeadingLevel;
   /**
-   * Decorative icon or illustration.
+   * Decorative illustration or large icon rendered above the title.
    */
-  icon?: ReactNode;
+  illustration?: ReactNode;
   /**
    * Whether to use tighter spacing for constrained areas.
    * @default false
@@ -56,6 +56,7 @@ const styles = {
     justifyContent: 'center',
     textAlign: 'center',
     gap: '4',
+    w: 'full',
     px: '6',
     py: '8',
   }),
@@ -64,12 +65,14 @@ const styles = {
     px: '4',
     py: '4',
   }),
-  icon: css({
+  illustration: css({
     display: 'inline-flex',
     color: 'fg.muted',
+    w: '16',
+    h: '16',
     '& > svg': {
-      w: 'var(--silver-sizes-icon-lg)',
-      h: 'var(--silver-sizes-icon-lg)',
+      w: 'full',
+      h: 'full',
     },
   }),
   text: css({
@@ -77,7 +80,7 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
     gap: '1',
-    maxW: '90',
+    maxW: '96',
   }),
   actions: css({
     display: 'flex',
@@ -101,7 +104,7 @@ export function EmptyState({
   'data-testid': dataTestId,
   description,
   headingLevel = 3,
-  icon,
+  illustration,
   isCompact = false,
   ref,
   style,
@@ -116,11 +119,11 @@ export function EmptyState({
       )}
       data-testid={dataTestId}
       ref={ref}
-      role="status"
+      role="region"
       style={style}>
-      {icon != null ? (
-        <div aria-hidden="true" className={styles.icon}>
-          {icon}
+      {illustration != null ? (
+        <div aria-hidden="true" className={styles.illustration}>
+          {illustration}
         </div>
       ) : null}
       <div className={styles.text}>

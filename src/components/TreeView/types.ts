@@ -4,6 +4,11 @@ export type TreeViewDensity = 'balanced' | 'compact' | 'spacious';
 
 export interface TreeViewItemData {
   /**
+   * Plain-text label used for keyboard type-ahead and generated control labels
+   * when `label` is not a string.
+   */
+  ariaLabel?: string;
+  /**
    * Nested child items. Items with children can be expanded or collapsed.
    */
   children?: TreeViewItemData[];

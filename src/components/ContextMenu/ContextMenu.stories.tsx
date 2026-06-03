@@ -1,7 +1,12 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Copy, Download, Pencil, Trash} from 'lucide-react';
 import {css} from 'styled-system/css';
+import {Badge} from '../Badge';
+import {Card} from '../Card';
 import {Divider} from '../Divider';
+import {Kbd} from '../Kbd';
+import {LayoutContent} from '../Layout/LayoutContent';
+import {LayoutHeader} from '../Layout/LayoutHeader';
 import {Text} from '../Text';
 import {ContextMenu, ContextMenuItem} from './ContextMenu';
 
@@ -30,7 +35,7 @@ export default meta;
 type Story = StoryObj<typeof ContextMenu>;
 
 export const Default: Story = {
-  render: () => (
+  render: (): React.JSX.Element => (
     <ContextMenu
       items={[
         {icon: Pencil, label: 'Rename'},
@@ -47,8 +52,141 @@ export const Default: Story = {
   ),
 };
 
+export const WithDescriptions: Story = {
+  render: (): React.JSX.Element => (
+    <ContextMenu
+      items={[
+        {
+          description: 'Change the file name',
+          icon: Pencil,
+          label: 'Rename',
+        },
+        {
+          description: 'Create an identical copy',
+          icon: Copy,
+          label: 'Duplicate',
+        },
+        {type: 'divider'},
+        {
+          description: 'Move to trash',
+          icon: Trash,
+          label: 'Delete',
+        },
+      ]}>
+      <div className={styles.target}>
+        <Text as="span" type="body">
+          Right-click for actions with descriptions
+        </Text>
+      </div>
+    </ContextMenu>
+  ),
+};
+
+export const WithShortcuts: Story = {
+  render: (): React.JSX.Element => (
+    <ContextMenu
+      menuContent={
+        <>
+          <ContextMenuItem
+            endContent={<Kbd keys="mod+r" />}
+            icon={Pencil}
+            label="Rename"
+          />
+          <ContextMenuItem
+            endContent={<Kbd keys="mod+d" />}
+            icon={Copy}
+            label="Duplicate"
+          />
+          <Divider />
+          <ContextMenuItem
+            endContent={<Kbd keys="backspace" />}
+            icon={Trash}
+            label="Delete"
+          />
+        </>
+      }>
+      <div className={styles.target}>
+        <Text as="span" type="body">
+          Right-click for actions with shortcuts
+        </Text>
+      </div>
+    </ContextMenu>
+  ),
+};
+
+export const WithDisabledItems: Story = {
+  render: (): React.JSX.Element => (
+    <ContextMenu
+      items={[
+        {icon: Pencil, label: 'Rename'},
+        {icon: Copy, isDisabled: true, label: 'Duplicate'},
+        {type: 'divider'},
+        {icon: Trash, isDisabled: true, label: 'Delete'},
+      ]}>
+      <div className={styles.target}>
+        <Text as="span" type="body">
+          Right-click — some actions disabled
+        </Text>
+      </div>
+    </ContextMenu>
+  ),
+};
+
+export const Disabled: Story = {
+  render: (): React.JSX.Element => (
+    <ContextMenu
+      isDisabled
+      items={[
+        {icon: Pencil, label: 'Rename'},
+        {icon: Copy, label: 'Duplicate'},
+      ]}>
+      <div className={styles.target}>
+        <Text as="span" type="body">
+          Right-click falls through to browser menu
+        </Text>
+      </div>
+    </ContextMenu>
+  ),
+};
+
+export const SizeVariants: Story = {
+  render: (): React.JSX.Element => {
+    const items = [
+      {icon: Pencil, label: 'Rename'},
+      {icon: Copy, label: 'Duplicate'},
+      {type: 'divider' as const},
+      {icon: Trash, label: 'Delete'},
+    ];
+    return (
+      <div style={{display: 'flex', gap: '2rem'}}>
+        <ContextMenu items={items} size="sm">
+          <div className={styles.target}>
+            <Text as="span" type="body">
+              Small
+            </Text>
+          </div>
+        </ContextMenu>
+        <ContextMenu items={items} size="md">
+          <div className={styles.target}>
+            <Text as="span" type="body">
+              Medium
+            </Text>
+          </div>
+        </ContextMenu>
+        <ContextMenu items={items} size="lg">
+          <div className={styles.target}>
+            <Text as="span" type="body">
+              Large
+            </Text>
+          </div>
+        </ContextMenu>
+      </div>
+    );
+  },
+};
+
 export const Sections: Story = {
-  render: () => (
+  render: (): React.JSX.Element => (
     <ContextMenu
       items={[
         {
@@ -74,22 +212,26 @@ export const Sections: Story = {
   ),
 };
 
-export const CompoundContent: Story = {
-  render: () => (
+export const CardTrigger: Story = {
+  render: (): React.JSX.Element => (
     <ContextMenu
-      menuContent={
-        <>
-          <ContextMenuItem icon={Pencil} label="Rename" />
-          <ContextMenuItem icon={Copy} label="Duplicate" />
-          <Divider />
-          <ContextMenuItem icon={Trash} label="Delete" />
-        </>
-      }>
-      <div className={styles.target}>
-        <Text as="span" type="body">
-          Right-click for custom content
-        </Text>
-      </div>
+      items={[
+        {icon: Pencil, label: 'Edit'},
+        {icon: Copy, label: 'Duplicate'},
+        {type: 'divider'},
+        {icon: Trash, label: 'Delete'},
+      ]}>
+      <Card style={{width: 360}}>
+        <LayoutHeader
+          endContent={<Badge color="blue" label="Active" />}
+          title="Project Alpha"
+        />
+        <LayoutContent>
+          <Text color="secondary" type="supporting">
+            3 members · Last updated 2 hours ago. Right-click for options.
+          </Text>
+        </LayoutContent>
+      </Card>
     </ContextMenu>
   ),
 };

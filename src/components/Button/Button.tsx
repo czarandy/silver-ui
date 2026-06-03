@@ -287,7 +287,9 @@ export function Button({
     );
   const linkRel = useRel({target, rel});
   const spinnerVariant =
-    variant === 'primary' || variant === 'destructive' ? 'onMedia' : 'default';
+    variant === 'primary' || variant === 'destructive' || variant === 'onSolid'
+      ? 'onMedia'
+      : 'default';
 
   const ariaAttrs = {
     'aria-controls': ariaControls,

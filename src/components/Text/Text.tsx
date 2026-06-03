@@ -1,5 +1,6 @@
 import {
   createElement,
+  useCallback,
   useRef,
   type AllHTMLAttributes,
   type CSSProperties,
@@ -9,7 +10,9 @@ import {
 } from 'react';
 import {cx} from 'styled-system/css';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {Tooltip, type TooltipProps} from '../Tooltip';
+import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
+import type {TooltipProps} from '../Tooltip';
+import {useTooltip} from '../Tooltip';
 import {textRecipe} from './Text.recipe';
 import {getMaxLinesVariant} from './Text.utils';
 import {useTruncation} from './useTruncation';
@@ -226,6 +229,42 @@ function TruncatedText({
     typeof hasTruncateTooltip === 'string' ? hasTruncateTooltip : 'above';
   const isTooltipEnabled =
     hasTruncateTooltip !== false && truncation.isTruncated;
+
+  const handleShow = useCallback(() => {}, []);
+  const handleHide = useCallback(() => {}, []);
+  const tooltip = useTooltip({
+    placement: tooltipPlacement,
+    isEnabled: isTooltipEnabled,
+    onShow: handleShow,
+    onHide: handleHide,
+  });
+
+  const tooltipRef = tooltip.ref;
+  const tooltipDescribedBy = tooltip.describedBy;
+
+  useIsomorphicLayoutEffect(() => {
+    const element = textRef.current;
+    if (element == null) {
+      return;
+    }
+
+    tooltipRef(element);
+    const existing = element.getAttribute('aria-describedby');
+    element.setAttribute(
+      'aria-describedby',
+      [existing, tooltipDescribedBy].filter(Boolean).join(' '),
+    );
+
+    return () => {
+      tooltipRef(null);
+      if (existing != null) {
+        element.setAttribute('aria-describedby', existing);
+      } else {
+        element.removeAttribute('aria-describedby');
+      }
+    };
+  }, [tooltipRef, tooltipDescribedBy]);
+
   const lineClampStyle: CSSProperties | undefined =
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
 
@@ -256,16 +295,13 @@ function TruncatedText({
   return (
     <>
       {element}
-      {isTooltipEnabled ? (
-        <Tooltip
-          anchorRef={textRef}
-          content={truncation.fullText}
-          contentStyle={{
-            maxWidth: truncation.elementWidth || undefined,
-          }}
-          placement={tooltipPlacement}
-        />
-      ) : null}
+      {isTooltipEnabled
+        ? tooltip.renderTooltip(truncation.fullText, {
+            contentStyle: {
+              maxWidth: truncation.elementWidth || undefined,
+            },
+          })
+        : null}
     </>
   );
 }

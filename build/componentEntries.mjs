@@ -1,5 +1,6 @@
 import {existsSync, readdirSync} from 'node:fs';
 import {join} from 'node:path';
+import process from 'node:process';
 
 export function getComponentEntries(root = process.cwd()) {
   return Object.fromEntries(

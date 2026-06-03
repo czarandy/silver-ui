@@ -6,103 +6,106 @@ For each component in the list below that isn't checked off ([ ]), spin up a sep
 Audit each component for: performance problems, accessibility concerns, logic
 bugs, unclear API, missing tests, and missing stories. Check that important
 props have stories demonstrating them, and that key behavior is tested.
+Rate each issue with a severity score: Critical, High, Medium, Low, or None.
+The report should contain all the issues sorted by severity (highest to lowest).
 
 Save your audits in a report in the repo root audits/ dir in a <ComponentName>.md file
+Then update this file to check off the completed item.
 ```
 
 ## Layout & Structure
 
-- [x] AppShell
-- [x] AspectRatio
-- [x] Center
-- [x] Collapsible
-- [x] Divider
-- [x] Layout
-- [x] Stack
+- [ ] AppShell
+- [ ] AspectRatio
+- [ ] Center
+- [ ] Collapsible
+- [ ] Divider
+- [ ] Layout
+- [ ] Stack
 
 ## Navigation
 
-- [x] Breadcrumbs
-- [x] Link
-- [x] MobileNav
-- [x] Pagination
-- [x] SideNav
-- [x] Tabs
-- [x] TopNav
+- [ ] Breadcrumbs
+- [ ] Link
+- [ ] MobileNav
+- [ ] Pagination
+- [ ] SideNav
+- [ ] Tabs
+- [ ] TopNav
 
 ## Buttons & Actions
 
-- [x] Button
-- [x] ButtonGroup
+- [ ] Button
+- [ ] ButtonGroup
 - [ ] ContextMenu
 - [ ] DropdownMenu
-- [x] SegmentedControl
-- [x] ToggleButton
+- [ ] SegmentedControl
+- [ ] ToggleButton
 
 ## Data Display
 
-- [x] Accordion
-- [x] Avatar
-- [x] AvatarGroup
-- [x] Badge
-- [x] Blockquote
-- [x] Card
-- [x] Icon
-- [x] Item
-- [x] Kbd
-- [x] Lightbox
+- [ ] Accordion
+- [ ] Avatar
+- [ ] AvatarGroup
+- [ ] Badge
+- [ ] Blockquote
+- [ ] Card
+- [ ] Icon
+- [ ] Item
+- [ ] Kbd
+- [ ] Lightbox
 - [ ] List
-- [x] MetadataList
+- [ ] MetadataList
 - [ ] Table
-- [x] Tag
-- [x] Text
+- [ ] Tag
+- [ ] Text
 - [ ] Thumbnail
 - [ ] Tooltip
 - [ ] TreeView
 
 ## Forms
 
-- [x] CheckboxInput
-- [ ] Combobox
-- [x] DateInput
-- [x] DateRangeInput
-- [x] DateTimeInput
-- [x] Field
+- [ ] CheckboxInput
+- [ ] AutocompleteInput
+- [ ] DateInput
+- [ ] DateRangeInput
+- [ ] DateTimeInput
+- [ ] Field
 - [ ] FileInput
-- [x] InputGroup
+- [ ] InputGroup
 - [ ] MultiSelect
-- [x] NumberInput
-- [x] PasswordInput
-- [x] RadioGroup
-- [x] Rating
+- [ ] NumberInput
+- [ ] PasswordInput
+- [ ] RadioGroup
+- [ ] Rating
 - [ ] SearchFilterInput
 - [ ] Select
 - [ ] Slider
 - [ ] Switch
-- [x] TagsInput
+- [ ] TagsInput
 - [ ] TextArea
-- [x] TextInput
-- [x] TimeInput
+- [ ] TextInput
+- [ ] TimeInput
 
 ## Feedback & Status
 
-- [x] Alert
+- [ ] Alert
 - [ ] EmptyState
 - [ ] Progress
 - [ ] Skeleton
-- [x] Spinner
+- [ ] Spinner
 - [ ] Stepper
 - [ ] Toast
 
 ## Overlays
 
-- [x] AlertDialog
-- [x] Dialog
+- [ ] AlertDialog
+- [ ] Dialog
 - [ ] Drawer
 - [ ] HoverCard
 - [ ] Popover
 
 ## Composite
 
-- [x] Calendar
+- [ ] Calendar
 - [ ] Schedule

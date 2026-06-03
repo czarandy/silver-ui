@@ -1,5 +1,9 @@
+/* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
+
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {useState} from 'react';
 import {Button} from '../Button';
+import {HStack, VStack} from '../Stack';
 import {Text} from '../Text';
 import {Popover} from './Popover';
 
@@ -11,6 +15,7 @@ const meta: Meta<typeof Popover> = {
       control: {type: 'select'},
       options: ['start', 'center', 'end'],
     },
+    anchorRef: {control: false},
     placement: {
       control: {type: 'select'},
       options: ['above', 'below', 'start', 'end'],
@@ -29,17 +34,135 @@ const meta: Meta<typeof Popover> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const popoverContent = (
+  <VStack gap={2}>
+    <Text as="p">Notification settings</Text>
+    <Button label="Save" size="sm" variant="primary" />
+  </VStack>
+);
+
 export const Default: Story = {
+  render: args => (
+    <Popover {...args} content={popoverContent} padding="3">
+      <Button label="Open popover" />
+    </Popover>
+  ),
+};
+
+export const Placements: Story = {
+  render: () => (
+    <div
+      style={{
+        display: 'grid',
+        gap: 24,
+        justifyItems: 'center',
+        padding: '80px',
+      }}>
+      <Popover
+        content={popoverContent}
+        label="Above"
+        padding="3"
+        placement="above">
+        <Button label="Above" />
+      </Popover>
+      <HStack gap={6}>
+        <Popover
+          content={popoverContent}
+          label="Start"
+          padding="3"
+          placement="start">
+          <Button label="Start" />
+        </Popover>
+        <Popover
+          content={popoverContent}
+          label="End"
+          padding="3"
+          placement="end">
+          <Button label="End" />
+        </Popover>
+      </HStack>
+      <Popover
+        content={popoverContent}
+        label="Below"
+        padding="3"
+        placement="below">
+        <Button label="Below" />
+      </Popover>
+    </div>
+  ),
+};
+
+export const Alignments: Story = {
+  render: () => (
+    <HStack gap={4} style={{padding: '40px'}}>
+      <Popover
+        alignment="start"
+        content={popoverContent}
+        label="Start"
+        padding="3"
+        placement="below">
+        <Button label="Start" />
+      </Popover>
+      <Popover
+        alignment="center"
+        content={popoverContent}
+        label="Center"
+        padding="3"
+        placement="below">
+        <Button label="Center" />
+      </Popover>
+      <Popover
+        alignment="end"
+        content={popoverContent}
+        label="End"
+        padding="3"
+        placement="below">
+        <Button label="End" />
+      </Popover>
+    </HStack>
+  ),
+};
+
+export const Controlled: Story = {
+  render: () => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+      <HStack gap={2}>
+        <Button
+          label={isOpen ? 'Close externally' : 'Open externally'}
+          onClick={() => setIsOpen(v => !v)}
+          variant="secondary"
+        />
+        <Popover
+          content={popoverContent}
+          isOpen={isOpen}
+          label="Controlled"
+          onOpenChange={setIsOpen}
+          padding="3"
+          placement="below">
+          <Button label="Trigger" />
+        </Popover>
+      </HStack>
+    );
+  },
+};
+
+export const Disabled: Story = {
+  render: args => (
+    <Popover {...args} content={popoverContent} isEnabled={false} padding="3">
+      <Button label="Disabled popover" />
+    </Popover>
+  ),
+};
+
+export const NoCloseButton: Story = {
   render: args => (
     <Popover
       {...args}
-      content={
-        <div style={{display: 'grid', gap: '0.5rem'}}>
-          <Text as="p">Notification settings</Text>
-          <Button label="Save" size="sm" variant="primary" />
-        </div>
-      }>
-      <Button label="Open popover" />
+      content={popoverContent}
+      hasCloseButton={false}
+      padding="3">
+      <Button label="No close button" />
     </Popover>
   ),
 };
@@ -48,7 +171,8 @@ export const MatchTriggerWidth: Story = {
   render: args => (
     <Popover
       {...args}
-      content={<Text as="p">This popover uses the trigger width.</Text>}>
+      content={<Text as="p">This popover matches the trigger width.</Text>}
+      padding="3">
       <Button label="Wide trigger button" />
     </Popover>
   ),
@@ -59,7 +183,8 @@ export const CustomWidth: Story = {
   render: args => (
     <Popover
       {...args}
-      content={<Text as="p">A fixed-width popover for richer panels.</Text>}>
+      content={<Text as="p">A fixed-width popover for richer panels.</Text>}
+      padding="3">
       <Button label="Open fixed panel" />
     </Popover>
   ),

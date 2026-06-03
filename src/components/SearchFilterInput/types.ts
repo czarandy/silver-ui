@@ -1,5 +1,5 @@
 import type {ComponentType, ReactNode} from 'react';
-import type {SearchableItem, SearchSource} from '../Combobox';
+import type {SearchableItem, SearchSource} from '../AutocompleteInput';
 import type {IconComponent} from '../Icon';
 
 export interface EmptyOperatorValue {
@@ -15,6 +15,17 @@ export interface StringOperatorValue {
 export interface StringListOperatorValue {
   readonly isArbitraryStringAllowed?: boolean;
   readonly searchSource?: SearchSource;
+  /**
+   * Controls how free-text input is split into tokens.
+   *
+   * - `regex` - a pattern used to split the raw input string into individual
+   *   tokens (e.g. `/[,;]\s* /` to split on commas or semicolons).
+   * - `sort` - an optional comparator applied to the resulting token array.
+   */
+  readonly tokenization?: {
+    readonly regex?: RegExp;
+    readonly sort?: (a: string, b: string) => number;
+  };
   readonly type: 'string_list';
 }
 

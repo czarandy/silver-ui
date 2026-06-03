@@ -1,11 +1,13 @@
+import {X} from 'lucide-react';
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   type ReactNode,
   type RefCallback,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
 import {useFocusTrap} from '../../internal/useFocusTrap';
 import {useLayer, type ContextRenderProps} from '../../internal/useLayer';
 import {Button} from '../Button';
@@ -53,22 +55,10 @@ const styles = {
   }),
   closeButtonWrapper: css({
     position: 'absolute',
-    bottom: 0,
-    left: '50%',
-    transform: 'translate(-50%, 100%)',
     w: '1px',
     h: '1px',
     overflow: 'hidden',
     clipPath: 'inset(50%)',
-    pointerEvents: 'none',
-    _focusWithin: {
-      w: 'auto',
-      h: 'auto',
-      overflow: 'visible',
-      clipPath: 'none',
-      pointerEvents: 'auto',
-      pt: '1',
-    },
   }),
 } as const;
 
@@ -123,23 +113,26 @@ export function usePopover({
       return layer.render(
         <div
           aria-label={label}
-          aria-modal={role === 'dialog' ? 'true' : undefined}
           className={hasSurface ? styles.surface : undefined}
           ref={contentRef}
           role={role}>
           {children}
           {hasCloseButton ? (
             <div className={styles.closeButtonWrapper}>
-              <Button label={closeButtonLabel} onClick={layer.hide} />
+              <Button
+                icon={X}
+                isIconOnly
+                label={closeButtonLabel}
+                onClick={layer.hide}
+                size="sm"
+                variant="ghost"
+              />
             </div>
           ) : null}
         </div>,
         {
           ...props,
-          className: cx(
-            hasSurface ? styles.surface : undefined,
-            props?.className,
-          ),
+          className: props?.className,
         },
       );
     },
@@ -154,20 +147,39 @@ export function usePopover({
     ],
   );
 
-  return {
-    anchorId: layer.anchorId,
-    contentRef,
-    hide: layer.hide,
-    id: layer.id,
-    isOpen: layer.isOpen,
-    render,
-    show,
-    toggle,
-    triggerProps: {
+  const triggerProps = useMemo(
+    () => ({
       'aria-controls': layer.id,
       'aria-expanded': layer.isOpen,
       'aria-haspopup': role,
-    },
-    triggerRef: layer.ref,
-  };
+    }),
+    [layer.id, layer.isOpen, role],
+  );
+
+  return useMemo(
+    () => ({
+      anchorId: layer.anchorId,
+      contentRef,
+      hide: layer.hide,
+      id: layer.id,
+      isOpen: layer.isOpen,
+      render,
+      show,
+      toggle,
+      triggerProps,
+      triggerRef: layer.ref,
+    }),
+    [
+      contentRef,
+      layer.anchorId,
+      layer.hide,
+      layer.id,
+      layer.isOpen,
+      layer.ref,
+      render,
+      show,
+      toggle,
+      triggerProps,
+    ],
+  );
 }

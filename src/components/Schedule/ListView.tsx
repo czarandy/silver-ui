@@ -1,27 +1,33 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
 import {css, cx} from 'styled-system/css';
-import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
+  plainDateFromInstant,
+  plainDateIsEqual,
 } from '../../internal/plainDate';
-import {Heading, Text} from '../Text';
+import {Text} from '../Text';
+import {Tooltip} from '../Tooltip';
 import {useScheduleContext} from './context';
-import {enumerateDates, eventOccursOnDate} from './dateMath';
+import {enumerateDates, eventOccursOnDate, isDayEvent} from './dateMath';
 import {
   eventColorClassName,
   getCategory,
   getEventTimeLabel,
+  isEventInPast,
+  formatListRangeTitle,
   ScheduleFrame,
   styles as sharedStyles,
 } from './shared';
 import type {
   CalendarEvent,
+  Instant,
   ScheduleView,
   ScheduleViewComponentProps,
   ZonedDateTime,
 } from './types';
+import {useCurrentTime} from './useCurrentTime';
 
 export interface ScheduleListViewOptions {
   /**
@@ -35,25 +41,50 @@ const styles = {
   list: css({
     display: 'flex',
     flexDirection: 'column',
-    gap: '4',
-    p: '3',
   }),
   day: css({
     display: 'grid',
-    gridTemplateColumns: '72px 1fr',
-    gap: '3',
+    gridTemplateColumns: '112px minmax(0, 1fr)',
+    alignItems: 'start',
+    columnGap: '3',
+    p: '3',
+    borderBlockEndWidth: 'default',
+    borderBlockEndStyle: 'solid',
+    borderBlockEndColor: 'border',
+  }),
+  dayLast: css({
+    borderBlockEndWidth: 0,
   }),
   dayHeading: css({
-    textAlign: 'center',
-  }),
-  dayName: css({
-    display: 'block',
+    m: 0,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    gap: '2',
     color: 'fg.muted',
+    fontFamily: 'body',
+    fontSize: 'lg',
+    fontWeight: 'semibold',
+    lineHeight: 'tight',
+    whiteSpace: 'nowrap',
+  }),
+  dayWeekday: css({
+    display: 'inline-block',
+    fontSize: 'lg',
   }),
   dayNumber: css({
-    display: 'block',
-    fontSize: '2xl',
-    fontWeight: 'semibold',
+    display: 'inline-flex',
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    w: '30px',
+    h: '30px',
+    borderRadius: 'full',
+    fontWeight: 'bold',
+  }),
+  dayNumberCurrent: css({
+    bg: 'primary',
+    color: 'fg.onPrimary',
   }),
   events: css({
     display: 'flex',
@@ -62,9 +93,12 @@ const styles = {
   }),
   eventRow: css({
     display: 'grid',
-    gridTemplateColumns: '120px 1fr',
+    gridTemplateColumns: '160px minmax(0, 1fr)',
     alignItems: 'center',
     gap: '3',
+  }),
+  eventPast: css({
+    opacity: 0.64,
   }),
   eventContent: css({
     display: 'flex',
@@ -72,31 +106,47 @@ const styles = {
     gap: '2',
     minW: 0,
   }),
+  eventTime: css({
+    whiteSpace: 'nowrap',
+  }),
+  nowRow: css({
+    h: '0.5',
+    bg: 'fg.danger',
+    borderRadius: 'full',
+  }),
 } as const;
 
 /**
  * Renders a single event row in the list view.
  */
-function ListEvent({event}: {event: CalendarEvent}): React.JSX.Element {
+function ListEvent({
+  event,
+  isPast,
+}: {
+  event: CalendarEvent;
+  isPast: boolean;
+}): React.JSX.Element {
   const {categories, timezoneID} = useScheduleContext();
   const category = getCategory(categories, event);
   return (
-    <div className={styles.eventRow}>
-      <Text color="secondary" type="supporting">
-        {getEventTimeLabel(event, timezoneID)}
+    <div
+      className={cx(styles.eventRow, isPast && styles.eventPast)}
+      data-state={isPast ? 'past' : undefined}>
+      <Text className={styles.eventTime} color="secondary" type="supporting">
+        {isDayEvent(event) ? 'All day' : getEventTimeLabel(event, timezoneID)}
       </Text>
       <div className={styles.eventContent}>
-        <span
-          aria-hidden="true"
-          className={cx(
-            sharedStyles.eventDot,
-            eventColorClassName(category.color),
-          )}
-        />
+        <Tooltip content={category.label} hasHoverIndication={false}>
+          <span
+            aria-label={category.label}
+            className={cx(
+              sharedStyles.eventDot,
+              eventColorClassName(category.color),
+            )}
+            role="img"
+          />
+        </Tooltip>
         <Text>{event.title}</Text>
-        <Text color="secondary" type="supporting">
-          {category.label}
-        </Text>
       </div>
     </div>
   );
@@ -108,45 +158,117 @@ function ListEvent({event}: {event: CalendarEvent}): React.JSX.Element {
 function ScheduleListView(
   _props: ScheduleViewComponentProps<ScheduleListViewOptions>,
 ): React.JSX.Element {
-  const {events, range, timezoneID, viewDate} = useScheduleContext();
+  const {events, highlightDate, isLoading, range, timezoneID} =
+    useScheduleContext();
   const days = enumerateDates(range.startDate, range.endDate);
-  const title = plainDateFormat(viewDate.toPlainDate(), {
-    month: 'long',
-    year: 'numeric',
-  });
+  const currentTime = useCurrentTime();
+  const currentPlainDate = plainDateFromInstant(currentTime, timezoneID);
+  const highlightPlainDate = highlightDate.toPlainDate();
+  const endDate = range.endDate.add({days: -1});
+  const title = formatListRangeTitle(range.startDate, endDate);
+  const visibleDays = days
+    .map(day => {
+      const dayEvents = events.filter(event =>
+        eventOccursOnDate(event, day, timezoneID),
+      );
+      const isCurrentDay = plainDateIsEqual(day, currentPlainDate);
+      const isHighlightedDay = plainDateIsEqual(day, highlightPlainDate);
+      const isBaseDay = plainDateIsEqual(day, range.startDate);
+      return {
+        day,
+        dayEvents,
+        isCurrentDay,
+        isHighlightedDay,
+        isVisible: dayEvents.length > 0 || isCurrentDay || isBaseDay,
+      };
+    })
+    .filter(dayRecord => dayRecord.isVisible);
 
   return (
     <ScheduleFrame title={title} titleLabel={title}>
       <div className={cx(sharedStyles.surface, styles.list)}>
-        {days.map(day => {
-          const dayEvents = events.filter(event =>
-            eventOccursOnDate(event, day, timezoneID),
-          );
-          const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
-          return (
-            <section className={styles.day} key={day.toString()}>
-              <Heading className={styles.dayHeading} level={3}>
-                <span className={styles.dayName}>
-                  {plainDateFormat(day, {weekday: 'short'})}
-                </span>
-                <span className={styles.dayNumber}>{day.day}</span>
-                <VisuallyHidden>{fullDate}</VisuallyHidden>
-              </Heading>
-              <div className={styles.events}>
-                {dayEvents.length > 0 ? (
-                  dayEvents.map(event => (
-                    <ListEvent event={event} key={event.id} />
-                  ))
-                ) : (
-                  <Text color="secondary">No events</Text>
+        {visibleDays.map(
+          ({day, dayEvents, isCurrentDay, isHighlightedDay}, index) => {
+            const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
+            return (
+              <section
+                className={cx(
+                  styles.day,
+                  index === visibleDays.length - 1 && styles.dayLast,
                 )}
-              </div>
-            </section>
-          );
-        })}
+                key={day.toString()}>
+                <h4
+                  aria-current={isHighlightedDay ? 'date' : undefined}
+                  aria-label={fullDate}
+                  className={styles.dayHeading}>
+                  <span
+                    className={cx(
+                      styles.dayNumber,
+                      isHighlightedDay && styles.dayNumberCurrent,
+                    )}>
+                    {day.day}
+                  </span>
+                  <span className={styles.dayWeekday}>
+                    {plainDateFormat(day, {weekday: 'short'})}
+                  </span>
+                </h4>
+                <div className={styles.events}>
+                  {renderListRows({
+                    currentTime,
+                    events: dayEvents,
+                    isShowingCurrentTime: isCurrentDay && !isLoading,
+                    timezoneID,
+                  })}
+                </div>
+              </section>
+            );
+          },
+        )}
       </div>
     </ScheduleFrame>
   );
+}
+
+function renderListRows({
+  currentTime,
+  events,
+  isShowingCurrentTime,
+  timezoneID,
+}: {
+  currentTime: Instant;
+  events: ReadonlyArray<CalendarEvent>;
+  isShowingCurrentTime: boolean;
+  timezoneID: string;
+}): React.JSX.Element[] {
+  const rows = events.map(event => (
+    <ListEvent
+      event={event}
+      isPast={isEventInPast(event, currentTime, timezoneID)}
+      key={event.id}
+    />
+  ));
+
+  if (!isShowingCurrentTime) {
+    return rows;
+  }
+
+  const marker = (
+    <div
+      aria-hidden="true"
+      className={styles.nowRow}
+      data-testid="schedule-list-current-time"
+      key="current-time"
+    />
+  );
+  const insertIndex = events.findIndex(
+    event => !isDayEvent(event) && event.start > currentTime,
+  );
+
+  if (insertIndex < 0) {
+    return [...rows, marker];
+  }
+
+  return [...rows.slice(0, insertIndex), marker, ...rows.slice(insertIndex)];
 }
 
 /**

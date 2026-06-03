@@ -4,7 +4,6 @@ import {
   useId,
   useMemo,
   useRef,
-  useState,
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
@@ -149,10 +148,18 @@ const THUMB_SIZE = 20;
 const TRACK_SIZE = 4;
 
 const styles = {
+  fieldVertical: css({
+    alignItems: 'center',
+    w: 'fit-content',
+  }),
   row: css({
     display: 'flex',
     alignItems: 'center',
     gap: '2',
+  }),
+  rowVertical: css({
+    flexDirection: 'column',
+    alignItems: 'center',
   }),
   textValue: css({
     flexShrink: 0,
@@ -165,7 +172,6 @@ const styles = {
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
-    flexGrow: 1,
     isolation: 'isolate',
     touchAction: 'none',
     userSelect: 'none',
@@ -177,6 +183,7 @@ const styles = {
   trackContainerHorizontal: css({
     w: 'full',
     h: `${THUMB_SIZE}px`,
+    flexGrow: 1,
     cursor: 'pointer',
   }),
   trackContainerVertical: css({
@@ -345,7 +352,6 @@ export function Slider({
   const trackRef = useRef<HTMLDivElement>(null);
   const pendingValuesRef = useRef<number[] | null>(null);
   const draggingThumbRef = useRef<number | null>(null);
-  const [draggingThumb, setDraggingThumb] = useState<number | null>(null);
   const isRange = Array.isArray(value);
   const isHorizontal = orientation === 'horizontal';
   const values = useMemo(() => (isRange ? value : [value]), [isRange, value]);
@@ -478,12 +484,7 @@ export function Slider({
           : Number(markElement.dataset.markValue);
       const thumbIndex = getClosestThumb(newValue);
       draggingThumbRef.current = thumbIndex;
-      setDraggingThumb(thumbIndex);
       updateValue(thumbIndex, newValue);
-
-      const thumbs =
-        trackRef.current?.querySelectorAll<HTMLElement>('[role="slider"]');
-      thumbs?.[thumbIndex]?.focus();
 
       if (typeof event.currentTarget.setPointerCapture === 'function') {
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -510,7 +511,6 @@ export function Slider({
       return;
     }
     draggingThumbRef.current = null;
-    setDraggingThumb(null);
     emitChangeEnd(pendingValuesRef.current ?? values);
   }, [emitChangeEnd, values]);
 
@@ -595,7 +595,7 @@ export function Slider({
 
   return (
     <Field
-      className={className}
+      className={cx(className, isHorizontal ? undefined : styles.fieldVertical)}
       data-testid={dataTestId}
       inputId={inputId}
       isDisabled={isDisabled}
@@ -609,7 +609,11 @@ export function Slider({
       }
       statusVariant="detached"
       style={style}>
-      <div className={styles.row}>
+      <div
+        className={cx(
+          styles.row,
+          isHorizontal ? undefined : styles.rowVertical,
+        )}>
         <div
           aria-label={isRange ? label : undefined}
           className={cx(
@@ -740,7 +744,6 @@ export function Slider({
                 content={displayValue(currentValue)}
                 delay={0}
                 focusTrigger="always"
-                isOpen={draggingThumb === thumbIndex ? true : undefined}
                 key={thumbKey}
                 placement={isHorizontal ? 'above' : 'start'}>
                 {thumb}

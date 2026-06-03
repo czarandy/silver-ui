@@ -64,7 +64,7 @@ export interface ToastProps {
 
 const styles = {
   root: css({
-    width: '100',
+    width: '25rem',
     maxW: 'calc(100vw - 32px)',
     p: '4',
     borderRadius: 'lg',
@@ -91,7 +91,7 @@ const styles = {
   }),
   inner: css({
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: '3',
   }),
   content: css({
@@ -103,8 +103,6 @@ const styles = {
     alignItems: 'center',
     gap: '2',
     flexShrink: 0,
-    mt: '-1',
-    me: '-1',
   }),
 } as const;
 
@@ -212,7 +210,7 @@ export function Toast({
             label="Dismiss notification"
             onClick={() => onDismiss('manual')}
             size="sm"
-            variant="ghost"
+            variant="onSolid"
           />
         </div>
       </div>

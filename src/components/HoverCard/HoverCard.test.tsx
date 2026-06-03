@@ -1,4 +1,5 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from '../Button';
 import {HoverCard} from './HoverCard';
@@ -39,10 +40,9 @@ describe('HoverCard', () => {
 
   it('opens on hover', async () => {
     showPopoverMock.mockClear();
-    const onOpenChange = vi.fn();
 
     render(
-      <HoverCard content="Details" delay={0} onOpenChange={onOpenChange}>
+      <HoverCard content="Details" delay={0}>
         <Button label="Hover" />
       </HoverCard>,
     );
@@ -51,8 +51,78 @@ describe('HoverCard', () => {
 
     await waitFor(() => {
       expect(showPopoverMock).toHaveBeenCalled();
-      expect(onOpenChange).toHaveBeenCalledWith(true);
     });
+  });
+
+  it('closes on mouse leave', async () => {
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <HoverCard content="Details" delay={0} hideDelay={0}>
+        <Button label="Hover" />
+      </HoverCard>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Hover'});
+    fireEvent.mouseEnter(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+
+    fireEvent.mouseLeave(trigger);
+
+    await waitFor(() => {
+      expect(hidePopoverMock).toHaveBeenCalled();
+    });
+  });
+
+  it('does not open when isEnabled is false', async () => {
+    showPopoverMock.mockClear();
+
+    render(
+      <HoverCard content="Details" delay={0} isEnabled={false}>
+        <Button label="Hover" />
+      </HoverCard>,
+    );
+
+    fireEvent.mouseEnter(screen.getByRole('button', {name: 'Hover'}));
+
+    await new Promise(r => setTimeout(r, 50));
+    expect(showPopoverMock).not.toHaveBeenCalled();
+  });
+
+  it('opens on focus for text triggers', async () => {
+    showPopoverMock.mockClear();
+    const user = userEvent.setup();
+
+    render(
+      <HoverCard content="Details" delay={0}>
+        Hover target
+      </HoverCard>,
+    );
+
+    await user.tab();
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+  });
+
+  it('does not open on focus when focusTrigger is never', async () => {
+    showPopoverMock.mockClear();
+
+    render(
+      <HoverCard content="Details" delay={0} focusTrigger="never">
+        Hover target
+      </HoverCard>,
+    );
+
+    fireEvent.focus(screen.getByText('Hover target'));
+
+    await new Promise(r => setTimeout(r, 50));
+    expect(showPopoverMock).not.toHaveBeenCalled();
   });
 
   it('applies className, style, and data-testid to text triggers', () => {

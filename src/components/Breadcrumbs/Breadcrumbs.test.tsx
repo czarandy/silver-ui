@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {Home} from 'lucide-react';
+import {Home, type LucideProps} from 'lucide-react';
 import type {ReactNode, Ref} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {LinkProvider} from '../Link';
@@ -22,6 +22,10 @@ function CustomLink({
       {children}
     </a>
   );
+}
+
+function HomeIcon(props: LucideProps): React.JSX.Element {
+  return <Home {...props} data-testid="home-icon" />;
 }
 
 describe('Breadcrumbs', () => {
@@ -69,10 +73,10 @@ describe('Breadcrumbs', () => {
       </Breadcrumbs>,
     );
 
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(
-      screen.getByText('Last Item').closest('[aria-current]'),
-    ).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByText('Last Item')).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
   });
 
   it('uses custom link components from props or provider', () => {
@@ -142,14 +146,13 @@ describe('Breadcrumbs', () => {
   it('renders a startIcon on a breadcrumb item', () => {
     render(
       <Breadcrumbs>
-        <BreadcrumbItem data-testid="item" href="/" startIcon={Home}>
+        <BreadcrumbItem data-testid="item" href="/" startIcon={HomeIcon}>
           Home
         </BreadcrumbItem>
       </Breadcrumbs>,
     );
 
-    // eslint-disable-next-line testing-library/no-node-access -- verifying decorative svg presence
-    expect(screen.getByTestId('item').querySelector('svg')).toBeInTheDocument();
+    expect(screen.getByTestId('home-icon')).toBeInTheDocument();
   });
 
   it('renders onClick items as buttons with type="button"', () => {

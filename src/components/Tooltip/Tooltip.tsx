@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useRef,
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
-} from 'react';
+import {useRef, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {css, cx} from 'styled-system/css';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
@@ -20,13 +14,9 @@ export interface TooltipProps {
    */
   alignment?: LayerAlignment;
   /**
-   * External ref to the anchor element. When provided, `children` is optional.
-   */
-  anchorRef?: React.RefObject<HTMLElement | null>;
-  /**
    * Element(s) that the tooltip is anchored to.
    */
-  children?: ReactNode;
+  children: ReactNode;
   /**
    * Additional CSS class names applied to the wrapper.
    */
@@ -64,22 +54,10 @@ export interface TooltipProps {
    */
   hideDelay?: number;
   /**
-   * Whether the tooltip is open by default (uncontrolled).
-   */
-  isDefaultOpen?: boolean;
-  /**
    * Whether the tooltip can be shown.
    * @default true
    */
   isEnabled?: boolean;
-  /**
-   * Controlled open state of the tooltip.
-   */
-  isOpen?: boolean;
-  /**
-   * Called when the tooltip open state changes.
-   */
-  onOpenChange?: (isOpen: boolean) => void;
   /**
    * Preferred placement of the tooltip relative to the anchor.
    * @default 'above'
@@ -121,10 +99,12 @@ function mergeIds(...ids: (string | undefined | null)[]): string | undefined {
 
 /**
  * Displays contextual information in a popup anchored to a trigger element.
+ *
+ * For attaching a tooltip to an external ref (without wrapping children),
+ * use the `useTooltip` hook directly.
  */
 export function Tooltip({
   children,
-  anchorRef,
   content,
   contentStyle,
   placement = 'above',
@@ -133,9 +113,6 @@ export function Tooltip({
   hideDelay = 0,
   focusTrigger = 'auto',
   isEnabled = true,
-  isOpen,
-  isDefaultOpen,
-  onOpenChange,
   hasHoverIndication = 'auto',
   className,
   'data-testid': dataTestId,
@@ -143,17 +120,9 @@ export function Tooltip({
   ref,
 }: TooltipProps): React.JSX.Element {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const textOnly = children != null ? isTextOnly(children) : false;
+  const textOnly = isTextOnly(children);
   const showHoverIndication =
     hasHoverIndication === true || (hasHoverIndication === 'auto' && textOnly);
-
-  const handleShow = useCallback(() => {
-    onOpenChange?.(true);
-  }, [onOpenChange]);
-
-  const handleHide = useCallback(() => {
-    onOpenChange?.(false);
-  }, [onOpenChange]);
 
   const tooltip = useTooltip({
     placement,
@@ -162,42 +131,13 @@ export function Tooltip({
     hideDelay,
     focusTrigger,
     isEnabled,
-    isOpen,
-    isDefaultOpen,
-    onShow: handleShow,
-    onHide: handleHide,
   });
 
-  useIsomorphicLayoutEffect(() => {
-    if (anchorRef == null) {
-      return;
-    }
-
-    const element = anchorRef.current;
-    if (element == null) {
-      return;
-    }
-
-    tooltip.ref(element);
-    const existingDescribedBy = element.getAttribute('aria-describedby');
-    element.setAttribute(
-      'aria-describedby',
-      mergeIds(existingDescribedBy, tooltip.describedBy) ?? '',
-    );
-
-    return () => {
-      tooltip.ref(null);
-      if (existingDescribedBy != null) {
-        element.setAttribute('aria-describedby', existingDescribedBy);
-        return;
-      }
-
-      element.removeAttribute('aria-describedby');
-    };
-  }, [anchorRef, tooltip]);
+  const tooltipRef = tooltip.ref;
+  const tooltipDescribedBy = tooltip.describedBy;
 
   useIsomorphicLayoutEffect(() => {
-    if (anchorRef != null || textOnly) {
+    if (textOnly) {
       return;
     }
 
@@ -206,15 +146,15 @@ export function Tooltip({
       return;
     }
 
-    tooltip.ref(firstChild);
+    tooltipRef(firstChild);
     const existingDescribedBy = firstChild.getAttribute('aria-describedby');
     firstChild.setAttribute(
       'aria-describedby',
-      mergeIds(existingDescribedBy, tooltip.describedBy) ?? '',
+      mergeIds(existingDescribedBy, tooltipDescribedBy) ?? '',
     );
 
     return () => {
-      tooltip.ref(null);
+      tooltipRef(null);
       if (existingDescribedBy != null) {
         firstChild.setAttribute('aria-describedby', existingDescribedBy);
         return;
@@ -222,11 +162,7 @@ export function Tooltip({
 
       firstChild.removeAttribute('aria-describedby');
     };
-  }, [anchorRef, textOnly, tooltip]);
-
-  if (anchorRef != null && children == null) {
-    return <>{tooltip.renderTooltip(content, {contentStyle})}</>;
-  }
+  }, [textOnly, tooltipRef, tooltipDescribedBy]);
 
   if (textOnly) {
     return (

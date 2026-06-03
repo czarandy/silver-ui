@@ -169,7 +169,7 @@ export function Avatar({
   );
   const initials = name != null ? getInitials(name) : '';
   const showInitials = initials !== '';
-  const accessibleName = alt ?? name ?? 'Avatar';
+  const accessibleName = alt ?? (showInitials ? name : undefined) ?? 'Avatar';
   const contentStyle = {
     width: numericSize,
     height: numericSize,

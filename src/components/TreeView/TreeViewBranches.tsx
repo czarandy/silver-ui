@@ -19,6 +19,8 @@ const styles = {
   }),
 } as const;
 
+const branchOffset = '6px';
+
 interface TreeViewBranchesProps {
   /**
    * Whether each ancestor at the corresponding level is the last sibling.
@@ -49,7 +51,7 @@ export function TreeViewBranches({
             className={styles.container}
             // eslint-disable-next-line @eslint-react/no-array-index-key -- level is the stable connector coordinate
             key={level}
-            style={{left: `calc(10px + ${level} * 16px)`}}>
+            style={{left: `calc(${branchOffset} + ${level} * 16px)`}}>
             <div className={styles.line} />
           </div>
         );
@@ -57,7 +59,7 @@ export function TreeViewBranches({
       {nestedLevel > 0 ? (
         <div
           className={styles.container}
-          style={{left: `calc(10px + ${nestedLevel - 1} * 16px)`}}>
+          style={{left: `calc(${branchOffset} + ${nestedLevel - 1} * 16px)`}}>
           <div className={styles.line} />
         </div>
       ) : null}

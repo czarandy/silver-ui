@@ -1,6 +1,7 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {useState} from 'react';
+import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from '../Button';
 import {Drawer} from './Drawer';
 import {useDrawer} from './useDrawer';
@@ -18,6 +19,10 @@ beforeAll(() => {
       this.removeAttribute('open');
     },
   });
+});
+
+afterEach(() => {
+  document.body.style.overflow = '';
 });
 
 describe('Drawer', () => {
@@ -46,6 +51,7 @@ describe('Drawer', () => {
     );
 
     expect(screen.getByTestId('drawer')).not.toHaveAttribute('open');
+    expect(screen.getByTestId('drawer')).not.toHaveClass('silver-d_flex');
   });
 
   it('calls onOpenChange(false) on backdrop click', () => {
@@ -59,6 +65,19 @@ describe('Drawer', () => {
 
     fireEvent.click(screen.getByRole('dialog'));
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('does not close when inner content is clicked', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <Drawer isOpen label="Navigation" onOpenChange={onOpenChange}>
+        <button type="button">Inner action</button>
+      </Drawer>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Inner action'}));
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
   it('calls onOpenChange(false) on escape', () => {
@@ -86,6 +105,60 @@ describe('Drawer', () => {
 
     const drawer = screen.getByTestId('drawer');
     expect(drawer).toHaveStyle({width: '320px'});
+  });
+
+  it('applies default size for each placement', () => {
+    const {rerender} = render(
+      <Drawer
+        data-testid="drawer"
+        isOpen
+        label="Nav"
+        onOpenChange={() => {}}
+        placement="start">
+        Content
+      </Drawer>,
+    );
+
+    expect(screen.getByTestId('drawer')).toHaveStyle({width: '320px'});
+
+    rerender(
+      <Drawer
+        data-testid="drawer"
+        isOpen
+        label="Nav"
+        onOpenChange={() => {}}
+        placement="end">
+        Content
+      </Drawer>,
+    );
+
+    expect(screen.getByTestId('drawer')).toHaveStyle({width: '320px'});
+
+    rerender(
+      <Drawer
+        data-testid="drawer"
+        isOpen
+        label="Nav"
+        onOpenChange={() => {}}
+        placement="top">
+        Content
+      </Drawer>,
+    );
+
+    expect(screen.getByTestId('drawer')).toHaveStyle({height: '40vh'});
+
+    rerender(
+      <Drawer
+        data-testid="drawer"
+        isOpen
+        label="Nav"
+        onOpenChange={() => {}}
+        placement="bottom">
+        Content
+      </Drawer>,
+    );
+
+    expect(screen.getByTestId('drawer')).toHaveStyle({height: '40vh'});
   });
 
   it('applies custom size based on placement', () => {
@@ -118,6 +191,22 @@ describe('Drawer', () => {
     expect(screen.getByTestId('drawer')).toHaveStyle({height: '50vh'});
   });
 
+  it('applies string size to horizontal placements', () => {
+    render(
+      <Drawer
+        data-testid="drawer"
+        isOpen
+        label="Nav"
+        onOpenChange={() => {}}
+        placement="end"
+        size="50vw">
+        Content
+      </Drawer>,
+    );
+
+    expect(screen.getByTestId('drawer')).toHaveStyle({width: '50vw'});
+  });
+
   it('applies className, style, ref, and data-testid', () => {
     const ref = vi.fn();
 
@@ -140,6 +229,24 @@ describe('Drawer', () => {
     expect(ref).toHaveBeenCalledWith(drawer);
   });
 
+  it('composes custom className with placement styles', () => {
+    render(
+      <Drawer
+        className="custom-drawer"
+        data-testid="drawer"
+        isOpen
+        label="Nav"
+        onOpenChange={() => {}}
+        placement="top">
+        Content
+      </Drawer>,
+    );
+
+    const drawer = screen.getByTestId('drawer');
+    expect(drawer).toHaveClass('custom-drawer');
+    expect(drawer).toHaveStyle({height: '40vh'});
+  });
+
   it('focuses a data-autofocus element after opening', async () => {
     render(
       <Drawer isOpen label="Nav" onOpenChange={() => {}}>
@@ -152,6 +259,92 @@ describe('Drawer', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', {name: 'First action'})).toHaveFocus();
     });
+  });
+
+  it('locks body overflow while open and restores it when closed', () => {
+    document.body.style.overflow = 'scroll';
+    const {rerender} = render(
+      <Drawer isOpen label="Nav" onOpenChange={() => {}}>
+        Content
+      </Drawer>,
+    );
+
+    expect(document.body).toHaveStyle({overflow: 'hidden'});
+
+    rerender(
+      <Drawer isOpen={false} label="Nav" onOpenChange={() => {}}>
+        Content
+      </Drawer>,
+    );
+
+    expect(document.body).toHaveStyle({overflow: 'scroll'});
+  });
+
+  it('restores body overflow when unmounted while open', () => {
+    document.body.style.overflow = 'auto';
+    const {unmount} = render(
+      <Drawer isOpen label="Nav" onOpenChange={() => {}}>
+        Content
+      </Drawer>,
+    );
+
+    expect(document.body).toHaveStyle({overflow: 'hidden'});
+
+    unmount();
+
+    expect(document.body).toHaveStyle({overflow: 'auto'});
+  });
+
+  it('restores focus to the trigger when closed', async () => {
+    const user = userEvent.setup();
+
+    function Fixture(): React.JSX.Element {
+      const [isOpen, setIsOpen] = useState(false);
+      return (
+        <>
+          <Button label="Open drawer" onClick={() => setIsOpen(true)} />
+          <Drawer isOpen={isOpen} label="Nav" onOpenChange={setIsOpen}>
+            <Button label="Close drawer" onClick={() => setIsOpen(false)} />
+          </Drawer>
+        </>
+      );
+    }
+
+    render(<Fixture />);
+
+    const trigger = screen.getByRole('button', {name: 'Open drawer'});
+    await user.click(trigger);
+    await user.click(screen.getByRole('button', {name: 'Close drawer'}));
+
+    await waitFor(() => {
+      expect(trigger).toHaveFocus();
+    });
+  });
+
+  it('handles rapid open and close updates', () => {
+    const {rerender} = render(
+      <Drawer isOpen={false} label="Nav" onOpenChange={() => {}}>
+        Content
+      </Drawer>,
+    );
+
+    rerender(
+      <Drawer isOpen label="Nav" onOpenChange={() => {}}>
+        Content
+      </Drawer>,
+    );
+    rerender(
+      <Drawer isOpen={false} label="Nav" onOpenChange={() => {}}>
+        Content
+      </Drawer>,
+    );
+    rerender(
+      <Drawer isOpen label="Nav" onOpenChange={() => {}}>
+        Content
+      </Drawer>,
+    );
+
+    expect(screen.getByRole('dialog', {name: 'Nav'})).toHaveAttribute('open');
   });
 });
 
@@ -185,5 +378,74 @@ describe('useDrawer', () => {
 
     await user.click(screen.getByRole('button', {name: 'Close'}));
     expect(screen.getByTestId('status')).toHaveTextContent('closed');
+  });
+
+  it('updates content and merges options when show is called multiple times', async () => {
+    const user = userEvent.setup();
+
+    function Fixture(): React.JSX.Element {
+      const drawer = useDrawer({label: 'Details', placement: 'end', size: 320});
+
+      return (
+        <>
+          <Button
+            label="Show first"
+            onClick={() => drawer.show(<div>First content</div>)}
+          />
+          <Button
+            label="Show second"
+            onClick={() =>
+              drawer.show(<div>Second content</div>, {
+                label: 'Second details',
+                placement: 'start',
+                size: '45vw',
+              })
+            }
+          />
+          {drawer.element}
+        </>
+      );
+    }
+
+    render(<Fixture />);
+
+    await user.click(screen.getByRole('button', {name: 'Show first'}));
+    expect(screen.getByText('First content')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', {name: 'Details'})).toHaveStyle({
+      width: '320px',
+    });
+
+    await user.click(screen.getByRole('button', {name: 'Show second'}));
+    expect(screen.queryByText('First content')).not.toBeInTheDocument();
+    expect(screen.getByText('Second content')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', {name: 'Second details'})).toHaveStyle({
+      width: '45vw',
+    });
+  });
+
+  it('uses default placement option', async () => {
+    const user = userEvent.setup();
+
+    function Fixture(): React.JSX.Element {
+      const drawer = useDrawer({label: 'Menu', placement: 'bottom'});
+
+      return (
+        <>
+          <Button
+            label="Open"
+            onClick={() => drawer.show(<div>Drawer content</div>)}
+          />
+          {drawer.element}
+        </>
+      );
+    }
+
+    render(<Fixture />);
+
+    await user.click(screen.getByRole('button', {name: 'Open'}));
+
+    expect(screen.getByRole('dialog', {name: 'Menu'})).toHaveStyle({
+      height: '40vh',
+    });
   });
 });

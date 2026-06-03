@@ -10,7 +10,8 @@ import {Tooltip} from '../Tooltip';
 
 export interface ThumbnailProps {
   /**
-   * Alt text for the image.
+   * Alt text describing the image content. Use `label` for a file name or
+   * action label shown in the tooltip and button accessible names.
    */
   alt?: string;
   /**
@@ -32,7 +33,8 @@ export interface ThumbnailProps {
    */
   isLoading?: boolean;
   /**
-   * Accessible label and tooltip text.
+   * File name or short item label used for the root accessible name, tooltip,
+   * and open/remove button labels. When omitted, `alt` is used as a fallback.
    */
   label?: string;
   /**
@@ -42,7 +44,7 @@ export interface ThumbnailProps {
   /**
    * Called when the remove button is clicked.
    */
-  onRemove?: (event: MouseEvent<HTMLElement>) => void;
+  onRemove?: (event: MouseEvent<HTMLButtonElement>) => void;
   /**
    * Ref forwarded to the root element.
    */
@@ -132,6 +134,7 @@ const styles = {
     top: '1',
     right: '1',
     zIndex: 1,
+    color: 'fg.onPrimary',
   }),
   overlay: css({
     position: 'absolute',
@@ -144,6 +147,84 @@ const styles = {
     zIndex: 1,
   }),
 } as const;
+
+type ThumbnailImageAreaProps = Pick<
+  ThumbnailProps,
+  'alt' | 'isLoading' | 'onClick' | 'onRemove' | 'src'
+> & {
+  accessibleName: string;
+  isDisabled: boolean;
+};
+
+function ThumbnailImageArea({
+  accessibleName,
+  alt,
+  isDisabled,
+  isLoading = false,
+  onClick,
+  onRemove,
+  src,
+}: ThumbnailImageAreaProps): React.JSX.Element {
+  const [hasImageError, setHasImageError] = useState(false);
+  const hasImage = src != null && !hasImageError;
+  const isInteractive = onClick != null && !isDisabled && !isLoading;
+  const imageContent =
+    isLoading && !hasImage ? (
+      <Skeleton radius={2} />
+    ) : hasImage ? (
+      <img
+        alt={alt ?? ''}
+        className={styles.image}
+        onError={() => setHasImageError(true)}
+        src={src}
+      />
+    ) : (
+      <div className={styles.placeholder}>
+        <Icon icon={ImageIcon} size="lg" />
+      </div>
+    );
+
+  return (
+    <div
+      className={cx(
+        styles.imageContainer,
+        isInteractive ? styles.interactive : undefined,
+      )}>
+      {isInteractive ? (
+        <button
+          aria-label={`Open ${accessibleName}`}
+          className={styles.imageButton}
+          onClick={onClick}
+          type="button">
+          {imageContent}
+        </button>
+      ) : (
+        imageContent
+      )}
+      {hasImage ? <div className={styles.insetBorder} /> : null}
+      {isLoading && hasImage ? (
+        <div className={styles.overlay}>
+          <Spinner size="sm" variant="onMedia" />
+        </div>
+      ) : null}
+      {onRemove != null && !isDisabled ? (
+        <div className={styles.remove}>
+          <Button
+            icon={X}
+            isIconOnly
+            label={`Remove ${accessibleName}`}
+            onClick={event => {
+              event.stopPropagation();
+              onRemove(event as MouseEvent<HTMLButtonElement>);
+            }}
+            size="sm"
+            variant="onSolid"
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * Square image preview for attachments and media.
@@ -161,28 +242,11 @@ export function Thumbnail({
   src,
   style,
 }: ThumbnailProps): React.JSX.Element {
-  const [hasImageError, setHasImageError] = useState(false);
-  const hasImage = src != null && !hasImageError;
-  const isInteractive = onClick != null && !isDisabled && !isLoading;
   const accessibleName = label ?? alt ?? 'thumbnail';
-  const imageContent =
-    isLoading && !hasImage ? (
-      <Skeleton radius={2} />
-    ) : hasImage ? (
-      <img
-        alt={alt ?? ''}
-        className={styles.image}
-        onError={() => setHasImageError(true)}
-        src={src}
-      />
-    ) : (
-      <div className={styles.placeholder}>
-        <Icon icon={ImageIcon} size="lg" />
-      </div>
-    );
 
   const thumbnail = (
     <div
+      aria-busy={isLoading || undefined}
       aria-label={accessibleName}
       className={cx(
         styles.root,
@@ -192,44 +256,16 @@ export function Thumbnail({
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      <div
-        className={cx(
-          styles.imageContainer,
-          isInteractive ? styles.interactive : undefined,
-        )}>
-        {isInteractive ? (
-          <button
-            aria-label={`Open ${accessibleName}`}
-            className={styles.imageButton}
-            onClick={onClick}
-            type="button">
-            {imageContent}
-          </button>
-        ) : (
-          imageContent
-        )}
-        {hasImage ? <div className={styles.insetBorder} /> : null}
-        {isLoading && hasImage ? (
-          <div className={styles.overlay}>
-            <Spinner size="sm" variant="onMedia" />
-          </div>
-        ) : null}
-        {onRemove != null && !isDisabled ? (
-          <div className={styles.remove}>
-            <Button
-              icon={X}
-              isIconOnly
-              label={`Remove ${accessibleName}`}
-              onClick={event => {
-                event.stopPropagation();
-                onRemove(event);
-              }}
-              size="sm"
-              variant="secondary"
-            />
-          </div>
-        ) : null}
-      </div>
+      <ThumbnailImageArea
+        accessibleName={accessibleName}
+        alt={alt}
+        isDisabled={isDisabled}
+        isLoading={isLoading}
+        key={src ?? 'empty'}
+        onClick={onClick}
+        onRemove={onRemove}
+        src={src}
+      />
     </div>
   );
 

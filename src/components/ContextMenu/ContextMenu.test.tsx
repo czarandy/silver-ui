@@ -155,4 +155,73 @@ describe('ContextMenu', () => {
 
     expect(showPopover).toHaveBeenCalledTimes(1);
   });
+
+  it('opens from Shift+F10 shortcut', () => {
+    render(
+      <ContextMenu data-testid="context-trigger" items={[{label: 'Copy'}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    fireEvent.keyDown(screen.getByTestId('context-trigger'), {
+      key: 'F10',
+      shiftKey: true,
+    });
+
+    expect(showPopover).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes the menu on Escape', () => {
+    render(
+      <ContextMenu items={[{label: 'Copy'}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+    expect(showPopover).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(screen.getByRole('menu', {hidden: true}), {
+      key: 'Escape',
+    });
+
+    expect(hidePopover).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onOpenChange when opening and closing', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+
+    render(
+      <ContextMenu items={[{label: 'Copy'}]} onOpenChange={onOpenChange}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+
+    await user.click(
+      screen.getByRole('menuitem', {hidden: true, name: 'Copy'}),
+    );
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('activates a menu item with Enter key', () => {
+    const handleClick = vi.fn();
+
+    render(
+      <ContextMenu items={[{label: 'Copy', onClick: handleClick}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+
+    const menuItem = screen.getByRole('menuitem', {hidden: true, name: 'Copy'});
+    menuItem.focus();
+    fireEvent.keyDown(screen.getByRole('menu', {hidden: true}), {key: 'Enter'});
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
 });

@@ -34,13 +34,12 @@ describe('Avatar', () => {
     );
 
     const avatar = screen.getByTestId('avatar');
-    // eslint-disable-next-line testing-library/no-node-access -- presentational img (alt="") has no accessible role
-    const img = avatar.querySelector('img');
+    expect(avatar).toBeInTheDocument();
+    const img = screen.getByAltText('');
     expect(img).toHaveAttribute('src', '/avatar.png');
-    fireEvent.error(img!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    fireEvent.error(img);
 
-    // eslint-disable-next-line testing-library/no-node-access
-    const fallbackImg = avatar.querySelector('img');
+    const fallbackImg = screen.getByAltText('');
     expect(fallbackImg).toHaveAttribute('src', '/fallback.png');
   });
 
@@ -53,10 +52,7 @@ describe('Avatar', () => {
   it('falls back to the default icon when name is only whitespace', () => {
     render(<Avatar data-testid="avatar" name="   " />);
 
-    // eslint-disable-next-line testing-library/no-node-access -- verifying svg icon presence, no accessible query available
-    expect(
-      screen.getByTestId('avatar').querySelector('svg'),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('avatar')).toHaveAccessibleName('Avatar');
   });
 
   it('renders status content positioned on the avatar', () => {
