@@ -1,8 +1,8 @@
 import {ChevronDown} from 'lucide-react';
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon} from '../Icon';
+import {accordionItemRecipe} from './AccordionItem.recipe';
 import {useCollapsible} from './useCollapsible';
 
 /**
@@ -64,73 +64,6 @@ export interface AccordionItemProps {
   value?: string;
 }
 
-const styles = {
-  root: css({
-    w: '100%',
-  }),
-  trigger: css({
-    all: 'unset',
-    boxSizing: 'border-box',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    w: '100%',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    fontSize: 'lg',
-    fontWeight: 'semibold',
-    color: 'fg',
-    textAlign: 'start',
-    py: 0,
-    _disabled: {
-      opacity: 0.5,
-      cursor: 'not-allowed',
-    },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-      borderRadius: 'sm',
-    },
-  }),
-  chevron: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    transitionProperty: 'transform',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    color: 'fg.muted',
-  }),
-  chevronOpen: css({
-    transform: 'rotate(180deg)',
-  }),
-  panel: css({
-    display: 'grid',
-    gridTemplateRows: '1fr',
-    // `visibility` is transitioned alongside the rows so the content stays
-    // readable while collapsing, then becomes `hidden` (removing it from the
-    // a11y tree and tab order) once closed. The inline `visibility` style in
-    // the component drives the open/closed value.
-    transitionProperty: 'grid-template-rows, visibility',
-    transitionDuration: 'normal',
-    transitionTimingFunction: 'default',
-    '@media (prefers-reduced-motion: reduce)': {
-      transitionDuration: '0.01s',
-    },
-  }),
-  panelCollapsed: css({
-    gridTemplateRows: '0fr',
-  }),
-  panelInner: css({
-    overflow: 'hidden',
-    minH: 0,
-    pt: '1',
-  }),
-} as const;
-
 export function AccordionItem({
   trigger,
   children,
@@ -158,36 +91,34 @@ export function AccordionItem({
   const triggerId = `${id}-trigger`;
   const panelId = `${id}-panel`;
 
+  const classes = accordionItemRecipe({isOpen});
+
   return (
     <div
-      className={cx(styles.root, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       <button
         aria-controls={panelId}
         aria-expanded={isOpen}
-        className={styles.trigger}
+        className={classes.trigger}
         disabled={isDisabled}
         id={triggerId}
         onClick={toggle}
         type="button">
         {trigger}
-        <span
-          className={cx(
-            styles.chevron,
-            isOpen ? styles.chevronOpen : undefined,
-          )}>
+        <span className={classes.chevron}>
           <Icon icon={ChevronDown} size="md" />
         </span>
       </button>
       <div
         aria-labelledby={triggerId}
-        className={cx(styles.panel, isOpen ? undefined : styles.panelCollapsed)}
+        className={classes.panel}
         id={panelId}
         role="region"
         style={{visibility: isOpen ? undefined : 'hidden'}}>
-        <div className={styles.panelInner}>{children}</div>
+        <div className={classes.panelInner}>{children}</div>
       </div>
     </div>
   );
