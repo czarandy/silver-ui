@@ -39,3 +39,9 @@ Stack is a flexbox layout utility component with three exports: `Stack` (base), 
 4. Export `StackDirection` and `StackProps` types from `index.ts`.
 5. Add tests for `gap={0}` and no-gap scenarios.
 6. Consider simplifying the alignment prop system or adding JSDoc examples showing common alignment patterns.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Stack is a single-element layout primitive: it renders one polymorphic element styled solely by `stackRecipe` (a `cva` with direction/gap/wrap variants), with alignment and width/height resolved into inline `style` rather than classes. There are no sub-elements and no standalone css styles object, so there are no additional slots for `sva` to manage; `cva` is the correct choice here. (HStack/VStack are thin wrappers that just preset `direction`.)

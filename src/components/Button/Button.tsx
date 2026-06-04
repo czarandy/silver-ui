@@ -217,6 +217,13 @@ const styles = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     minW: 0,
+    // The label is a (blockified) flex item, so `overflow: hidden` clips it to
+    // its line box. With a tight line-height that crops descenders (e.g. the
+    // "g" in "changes"), so pad the clip box vertically and cancel the padding
+    // with a negative margin to keep layout unchanged.
+    py: '0.25em',
+    mt: '-0.35em',
+    mb: '-0.25em',
   }),
   icon: css({
     display: 'inline-flex',

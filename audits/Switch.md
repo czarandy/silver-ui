@@ -36,3 +36,9 @@ A controlled toggle switch implemented as a styled checkbox with `role="switch"`
 2. The spread layout test should use a more robust DOM querying strategy.
 3. Consider whether error status messages should use `aria-live="polite"` instead of `"assertive"` for non-urgent validation feedback.
 4. Add `aria-live="polite"` explicitly to the loading status container for cross-AT compatibility.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Switch is implemented entirely without a recipe: a single standalone `styles` object in `Switch.tsx` holds ~16 `css()` blocks for the field, row, labelWrapper, label, control, hidden input, track, thumb, and status message, plus state overlays (`spread`, `labelDisabled`, `trackOn`, `trackDisabled`, `thumbOn`) and a `statusColor` map keyed by `InputStatusType`. Per-element `cx()` ternaries apply selected/disabled/spread state across the track and thumb. An `sva` recipe with slots `field`, `row`, `labelWrapper`, `label`, `control`, `input`, `track`, `thumb`, `status` and variants for `isSelected`, `isDisabled`, `labelSpacing` (and the status color) would consolidate the on/off transform and color logic that is currently spread across the markup, closely paralleling the Divider migration.

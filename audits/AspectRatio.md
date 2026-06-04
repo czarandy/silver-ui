@@ -31,3 +31,9 @@ AspectRatio is a lightweight layout component that maintains a fixed width-to-he
 1. Consider adding a console.warn in production for invalid ratio values, instead of silently falling back.
 2. Add a test for `NaN` and `Infinity` ratio values.
 3. Add a story showing embedded video or iframe content.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`AspectRatio.tsx` renders only two elements: a root `<div>` styled by the single-element `cva` (`aspectRatioRecipe`) and one inner positioning `<div>` with a single static `styles.child` css() block (absolute inset/full-size) that has no variants. With no orientation/size/state variants and only one trivial non-recipe block, an `sva` recipe (root/child) would technically be possible but adds essentially no consolidation value over the current cva + one css() block.

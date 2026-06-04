@@ -31,3 +31,9 @@ Spinner is a compact loading indicator that renders a spinning circle with an op
 1. Add a meaningful reduced-motion fallback (e.g., a pulsing opacity animation or a static icon with text) so users who prefer reduced motion still see a loading indication.
 2. Consider adding an `aria-label` story to demonstrate the override capability.
 3. The component is otherwise well-built and the test coverage is strong.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Spinner already uses a `cva` (`spinnerRecipe`, variants size/variant/hasLabel) for its root span, and the only other styled element is the decorative spinning `visual` span, styled by a single static `css()` block with no variants (it sizes itself from the `--spinner-size` CSS var the root sets). With essentially one variant-driven element plus one static child, there is nothing meaningful for `sva` slots to consolidate; the current cva-plus-one-static-css approach is appropriate.

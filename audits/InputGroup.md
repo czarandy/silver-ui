@@ -33,3 +33,9 @@ InputGroup groups multiple inputs into a single visually connected row. It consi
 2. Add a basic test file or test section for `InputGroupText` covering ref/className/style/data-testid forwarding.
 3. Add a comment in `InputGroupText.tsx` noting that its styles are applied via parent attribute selectors in `InputGroup.recipe.ts`.
 4. Overall the component is well-structured with good accessibility (proper `role="group"`, `aria-labelledby`, `aria-describedby`, `aria-disabled`), clean context usage, and thorough JSDoc.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`InputGroup` already styles its multiple "elements" through a single `cva` (`InputGroup.recipe.ts`) that targets the addon and control children via attribute/child selectors (`& > [data-silver-input-group-text]`, `& > :not(...)`) with `isDisabled`/`size`/`status` variants. The wrapper renders one styled `div`; child inputs and `InputGroupText` (which carries no styles of its own, only a `data-silver-input-group-text` marker) are styled by the parent recipe's descendant selectors rather than by separate slot classes. Because the children are arbitrary consumer-provided inputs (not fixed slots the component renders), `sva` cannot attach slot classes to them and would not improve on the current selector-based approach. The remaining structure (`Field` wrapper) delegates styling to `Field`.

@@ -42,3 +42,9 @@ Toast is a comprehensive notification system consisting of four parts: `Toast` (
 4. Add stories for `uniqueID`/`collisionBehavior`, `maxVisible`, `inset`, and `isTopLayer={false}`.
 5. Add tests for `maxVisible` and `inset` props.
 6. Consider syncing the exit animation timeout with the CSS transition duration via a shared constant.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+Toast renders 4 distinct styled elements (root, `inner` flex row, `content`, `end` action group) styled entirely by a standalone `const styles = {...}` object in `Toast.tsx` — no recipe. The 9 `css()` blocks include a `type`-keyed color set (`info`/`error`/`success`/`warning`, looked up as `styles[type]`) and an `isExiting` state block, applied via `cx(styles.root, styles[type], isExiting ? styles.exiting : ...)`. An `sva` with slots `root`/`inner`/`content`/`end` plus a `type` variant and an `isExiting` boolean variant would replace the manual `styles[type]` index lookup and the conditional `cx` with proper recipe variants. The benefit is moderate rather than strong because only the root carries the variant styling — the inner/content/end slots are static layout — so consolidation mainly cleans up the type/exiting branching rather than a large per-slot variant matrix. (The separate `ToastViewport.tsx` has its own `position`-keyed styles map that is a similar but distinct candidate.)

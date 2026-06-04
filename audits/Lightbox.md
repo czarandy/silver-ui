@@ -33,3 +33,9 @@ Lightbox is a fullscreen dialog component for viewing image or video media with 
 - Consider a CSS-class-based scroll lock (e.g., toggling a class on `document.documentElement`) for better interoperability with other scroll-locking components.
 - Add a story demonstrating `defaultIndex` with a non-zero value.
 - The test coverage is excellent, covering controlled/uncontrolled indexes, zoom, pan, navigation bounds, preloading, video, focus management, and the useLightbox hook.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+`Lightbox.tsx` renders a large set of distinct styled DOM elements — dialog, container, close control, prev/next nav controls, media group, media wrap (zoom viewport), image, video, caption, counter, and shared control buttons — all from one standalone `css()` object with ~20 blocks (`dialog`, `container`, `mediaGroup`, `mediaWrap`, `zoomable`, `zoomed`, `dragging`, `image`, `imageDragging`, `video`, `caption`, `close`, `nav`, `prev`, `next`, `counter`, `controlButton`). Several elements are styled with per-element `cx()` conditional branches keyed on interaction state — `zoomable`/`zoomed`/`dragging` on the media wrap and `imageDragging` on the image — which are effectively runtime state variants. There is no recipe today. An `sva` with slots (`dialog`/`container`/`mediaWrap`/`image`/`caption`/`nav`/`counter`/`controlButton`) and variants for zoom/drag state plus a `position` variant for prev/next nav would consolidate the styling and replace the ternary class composition, closely matching the Divider pattern.

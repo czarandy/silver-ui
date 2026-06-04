@@ -30,3 +30,9 @@ Center is a simple layout utility component that centers its children along one 
 1. Consider reversing the style spread order so `width`/`height` props take precedence over `style.width`/`style.height`, or document the current behavior explicitly.
 2. Add a JSDoc note to the `axis` prop explaining that vertical centering requires the container to have a defined height.
 3. Consider removing the empty `false: {}` branch from the `isInline` recipe variant for cleanliness.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Center renders a single styled `<div>` and applies one class via `cx(centerRecipe({axis, isInline}), className)`. Its styling is already fully expressed by a `cva` root recipe (`Center.recipe.ts`) with `axis` (both/horizontal/vertical) and `isInline` variants; `width`/`height` are inline styles, not recipe concerns. With only one styled element and no standalone `css()` object or per-element `cx()` branches, `sva` would provide no consolidation benefit.

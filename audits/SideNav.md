@@ -40,3 +40,9 @@ SideNav is a vertical side navigation panel with sections, items, headings, and 
 - Add tests for topbar and drawer render modes.
 - Test coverage is strong overall with 33 tests across SideNav, SideNavItem, SideNavSection, SideNavHeading, collapsed state, and collapsible items. Key behaviors are well-covered.
 - Story coverage is excellent with 13 stories covering basic, collapsible, footer, top content, disabled items, end content, button items, multiple sections, logo, collapsible items with and without links, and scrollable overflow.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+The SideNav container itself is well-factored: `SideNav.tsx` uses a `cva` (`sideNavRecipe`, variants `isCollapsed`/`mode`) for the root and a small `styles` object for stable layout regions (stickyTop, scrollable, stickyBottom, footerRow, footerIcons), with only a couple of `isCollapsed` cx branches — modest sva upside. The real multi-element complexity is in `SideNavItem.tsx`, which has a large standalone `styles` object (~14 `css()` blocks: navItem, navItemSelected, collapsed/collapsedSelected/collapsedDisabled, toggleRow, chevron, toggleButton, childrenContainer/childrenInner) with `isSelected`/`isDisabled`/`isExpanded`/`isCollapsed` applied through many per-element `cx()` ternaries across three render branches. Converting SideNavItem to an `sva` with slots `item`, `collapsed`, `toggleRow`, `toggleButton`, `chevron`, `childrenContainer`, `childrenInner` and `isSelected`/`isDisabled`/`isCollapsed`/`isExpanded` variants would meaningfully consolidate; the SideNav root alone would not benefit much, so the overall rating is Moderate.

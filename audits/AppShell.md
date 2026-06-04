@@ -34,3 +34,9 @@ None
 2. Add a test that verifies `contentPadding` propagates to the main content area.
 3. Consider removing the unnecessary `useCallback` wrapper around `setMobileNavOpen`.
 4. Document the multiple-render-context pattern for sideNav with inline comments explaining the lifecycle.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Although `AppShell.tsx` carries a large `const styles` object (~13 css() blocks: skipLink, headerSticky, banner, autoMobileTopBar, sideNavSticky, elevatedWrapper, elevatedBackdrop, contentSurface, contentTransparent, slotContents, etc.), these are independent structural utilities applied to many conditionally-rendered, loosely-related wrapper elements rather than a fixed set of co-varying slots. The root `cva` (`appShellRecipe`, height/variant variants) is correctly single-element. The component is fundamentally a responsive layout orchestrator delegating to `Layout`, `SideNav`, and `TopNav` via render contexts; an `sva` recipe would not naturally model its conditional `display: contents` slot wrappers and one-off backdrop/skip-link pieces, so the consolidation benefit is minimal.

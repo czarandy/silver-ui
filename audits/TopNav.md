@@ -39,3 +39,9 @@ TopNav is a horizontal top navigation bar with heading, start, center, and end c
 - Add tests for ref forwarding, `rel`/`target` props on TopNavItem, and the unused `TopNavSlotContext`.
 - Test coverage is good with 17 tests covering: heading/start/end content, center content, startContent vs children priority, no heading, className/style/data-testid, mobile-bar mode, TopNavItem selected/disabled/icon-only states, TopNavHeading variants (div vs link, logo/super/sub/end content, aria-label), drawer mode with content/dividers/null, and onClick with mobile context.
 - Story coverage is decent with 8 stories covering basic, center content, start content, no heading, disabled items, icon-only items, items with icons, and heading variants.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+The TopNav family spans three files. `TopNav.tsx` renders the `nav` root via a `cva` recipe (`topNavRecipe`, with a `layout` variant: flex/grid/mobile) plus a standalone `const styles = {...}` object of ~10 layout `css()` blocks for its section wrappers (`leftSection`, `heading`, `startContent`, `centerContent`, `rightSection`, `endContent`, `mobileEnd`, `drawerItems`, `drawerDivider`). An `sva` with slots `root`/`leftSection`/`heading`/`startContent`/`centerContent`/`rightSection`/`endContent` and the existing `layout` variant would consolidate the root recipe and these section styles into one place and could drive layout-dependent section visibility/styling through variants. `TopNavHeading.tsx` similarly has a 4-block `styles` object (`root`/`logo`/`text`/`endContent`) with no recipe — a modest standalone sva candidate. `TopNavItem.tsx`, by contrast, is a single styled element fully driven by `topNavItemRecipe` (cva, with `isSelected`/`isDisabled`/`isIconOnly`/`isDrawer` variants) and needs no change. Overall moderate: the section wrappers are mostly static layout with few variants, so consolidation improves cohesion more than it removes conditional logic.

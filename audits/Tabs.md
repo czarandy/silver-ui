@@ -38,3 +38,9 @@ Tabs is a controlled tab bar component with full keyboard navigation (arrow keys
 - Add tests for Home/End keys in TabMenu and RTL behavior.
 - Test coverage is strong with 14 tests covering: onChange, tab semantics (tablist, aria-selected), labels, data-testid, divider/fill/size styling, panels with controls, tabIndex management, href tabs, custom link components, end content with selected icon swap, keyboard navigation (arrows, Home, End), disabled tab skipping, TabMenu open/close/select/keyboard, disabled TabMenu, refs, out-of-context error, and re-click firing.
 - Story coverage is excellent with 12 stories covering default, fill layout, sizes, divider, link tabs, custom link, selected icons, disabled, TabMenu only, many tabs, controlled, panels, and RTL.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Tabs is a multi-file, multi-element component: `Tabs.tsx` holds a small `styles` object (root/fill/divider) and `Tab.tsx` holds a larger standalone `styles` object (~10 `css()` blocks: root, selected, disabled, fill, icon, label, labelText, labelSizer, endContent) plus a `size` map (sm/md/lg). No recipe is used; selected/disabled/fill/size state is applied through per-element `cx()` ternaries, and `size`/`layout` are shared from `TabsContext`. An `sva` recipe with slots `root`, `tab`, `icon`, `label`, `labelText`, `labelSizer`, `endContent` and variants `size`, `layout` (hug/fill), `isSelected`, `isDisabled`, `hasDivider` would consolidate the tablist-plus-tab styling across both files, mirroring Divider's slot/variant approach.

@@ -37,3 +37,9 @@ A search-as-you-type combobox for selecting a single item from a `SearchSource`.
 3. Add `aria-required` to the `<input>` when `isRequired` is true.
 4. Document that `item.element` bypasses `AutocompleteInputItem` props, or change the behavior to apply wrapper props.
 5. Add a ref-forwarding test for `AutocompleteInput`.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+The combobox styling concentrates in `BaseAutocompleteInput.tsx`, which renders many distinct styled elements (input, menu listbox, option `<button>`, check `<span>`, loading row, empty state) via a standalone `const styles` object of ~10 css() blocks, including a size sub-map `optionSize: {sm, md, lg}` and per-option `cx()` conditionals (`optionHighlighted`, `optionSelected`, `optionSize[size]`). `AutocompleteInput.tsx` adds its own wrapper/tag/inputHidden/clearButton css() blocks layered onto the shared `inputRecipe`, and `AutocompleteInputItem.tsx` has a 4-block styles object with an `isDisabled` conditional. An `sva` recipe (slots input/menu/option/check/loading/empty) with a `size` variant and `isHighlighted`/`isSelected` boolean variants would fold the manual `optionSize` map and the highlighted/selected `cx()` branches into proper recipe variants.

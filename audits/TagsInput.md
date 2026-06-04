@@ -40,3 +40,9 @@ Multi-select combobox that renders selected values as removable tags. Built on `
 3. Add a story for `isReadOnly` mode.
 4. Document that `searchSource` should be a stable/memoized reference to avoid unnecessary source recreation.
 5. Consider replacing the global document click listener pattern with a more controlled focus management approach.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+TagsInput renders many styled elements (the input wrapper, tag span, hidden input, end content, overflow "+N more" text, live region, layer popover) but most are wired through the shared `inputRecipe`/`inputStyles` from Field plus a large local `const styles = {...}` object in `TagsInput.tsx` (~14 `css()` blocks). The local styles include size-keyed maps (`wrapperWithTagsSize[size]`, `truncatedSize[size]`) and several `cx()` conditional branches (`isTruncated`, `value.length > 0`, `isAtMax`) applied to the wrapper and input. An `sva` could consolidate the wrapper/input/tag/overflowText/liveRegion slots and express the `size` plus truncated/hasTags states as variants and compoundVariants, removing the manual size-map lookups and conditional `cx` plumbing. Benefit is tempered because the visual chrome (border, focus, status colors) is owned by Field's `inputRecipe` rather than this component, so an sva here would mostly cover layout adjustments layered on top rather than the core input styling.

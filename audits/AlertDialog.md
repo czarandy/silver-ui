@@ -32,3 +32,9 @@ AlertDialog is a modal confirmation dialog for destructive or irreversible actio
 - Consider using `aria-labelledby` referencing the heading element instead of duplicating the title in `aria-label`, to avoid redundant screen reader announcements.
 - Consider adding a built-in debounce or disable mechanism to the action button when `onAction` is invoked, to prevent accidental double-submission.
 - The component is well-structured with good test coverage (7 tests covering core scenarios, imperative hook, loading state, custom labels, variants, and data-testid). Stories cover all major visual variants.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`AlertDialog.tsx` is a pure composition component: it renders no styled DOM elements of its own and applies no `css()` or recipe. It simply assembles `Dialog`, `Layout`/`LayoutContent`/`LayoutFooter`/`LayoutHeader`, `Text`, and two `Button`s, delegating all styling to those children. There are no slots to consolidate, so `sva` would add nothing.

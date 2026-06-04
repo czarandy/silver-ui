@@ -4,6 +4,14 @@
   "packageManager": "pnpm@11.3.0",
   "description": "A comprehensive themeable React component library",
   "license": "MIT",
+  "homepage": "https://silver-ui.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/czarandy/silver-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/czarandy/silver-ui/issues"
+  },
   "type": "module",
   "sideEffects": [
     "**/*.css"
@@ -42,6 +50,8 @@
     "storybook": "storybook dev -p 6006 --ci",
     "build": "panda codegen && tsup && tsc -p tsconfig.build.json && panda cssgen --outfile dist/styles.css --minify",
     "build:storybook": "storybook build",
+    "sync:brand": "cp brand/logo.svg brand/wordmark.svg site/public/",
+    "build:site": "pnpm sync:brand && pnpm build && pnpm -C site build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint --cache .",

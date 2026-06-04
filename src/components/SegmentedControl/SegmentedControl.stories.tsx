@@ -127,6 +127,17 @@ function ManyItemsStory(args: SegmentedControlProps): React.JSX.Element {
 const meta = {
   title: 'Components/SegmentedControl',
   component: SegmentedControl,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Use **SegmentedControl** to pick one value from a small set — it is a ' +
+          'styled radio group (`role="radiogroup"`), suited to filters, settings, and ' +
+          'view modes whose content you render yourself. If selecting an option should ' +
+          'show or hide associated content panels, use **Tabs** instead.',
+      },
+    },
+  },
   args: {
     label: 'Date range',
     layout: 'hug',

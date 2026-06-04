@@ -38,3 +38,9 @@ Calendar is a date picker component supporting single date and date range select
 - Investigate hover performance in range mode; consider debouncing `setHoveredDate` or using CSS-only hover previews.
 - Add a story for controlled `viewDate` and `timezoneID` to demonstrate timezone-aware rendering.
 - The test coverage is strong (14 tests covering single/range selection, constraints, disabled dates, outside days, week numbers, variable rows, week start, className/style/ref/data-testid, two months, navigation callbacks, imperative handle, reverse range, and default values).
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Calendar renders a large multi-element tree across three components (`Calendar`, `MonthGrid`, `DayCell`) — root, header, monthYear, months, monthGrid, weekHeader, dayName, daysGrid, weekRow, weekNumber, cell, rangeBackground/previewBackground, day, plus state layers — and styles all of it through one standalone `const styles = {...}` object in `Calendar.tsx` with roughly 24 `css()` blocks, applied via `cx()`. There is no recipe at all today. State and layout logic is entirely runtime ternaries: `hasWeekNumbers ? styles.weekHeaderWithNumbers : undefined`, `day.isOutside ? styles.dayOutside : undefined`, `isSelected || isRangeStart || isRangeEnd ? styles.daySelected : undefined`, the range/preview left/right radius branches, and the today/disabled overlays. An `sva` with slots like `root/header/monthGrid/weekHeader/dayName/daysGrid/cell/day/rangeBackground` plus boolean variants (`hasWeekNumbers`, `isOutside`, `isSelected`, `isToday`, `isDisabled`, `isRangeStart`/`isRangeEnd`) would consolidate the day-state styling into one recipe and remove the deep `cx()` ternary stacks, the largest payoff in this batch.

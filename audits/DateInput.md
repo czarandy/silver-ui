@@ -38,3 +38,9 @@ A date picker combining a text input with a calendar popover. Users can type a d
 3. Add integration tests for the calendar popover interaction and for `getIsDateDisabled`.
 4. Add a story for `getIsDateDisabled` (e.g., disabled weekends).
 5. Improve the placeholder to hint at expected date format.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+DateInput is a composition that delegates virtually all styling to the shared `Field` wrapper, `inputRecipe` (the wrapper class with `size`/`status`/`isDisabled` variants), and `inputStyles` (`control`, `clearButton`, `iconSlot`) — all of which live in `Field`. Its only local styling is a one-line `const styles = {wrapper: css({ps: '1', gap: '1'})}` merged onto the input-recipe wrapper. The multi-element styling (input, clear button, icon slot) is already centralized in `Field`, so converting DateInput itself to an `sva` would not consolidate anything; any slot-recipe work belongs in `Field`'s shared input styles, not here.

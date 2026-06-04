@@ -30,3 +30,9 @@ ButtonGroup groups related Button elements and propagates shared size, disabled 
 1. Consider whether arrow-key navigation should be added for toolbar-like use cases. If the ButtonGroup is intended as a toolbar, add `role="toolbar"` and roving tabindex. If it is purely a visual grouping, the current implementation is adequate.
 2. The CSS selectors in the recipe use `:where(button, a)` which is good for specificity, but document that wrapping elements (like Tooltip spans) between the group and button may require the `& > :not(:first-child) :where(button, a)` descendant selector pattern (which is already present).
 3. Add a story showing a ButtonGroup with buttons in a loading state to ensure the visual styling (spinner, disabled appearance) integrates well with the group border treatment.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`ButtonGroup.tsx` renders a single styled root `<div>` via the single-element `cva` (`buttonGroupRecipe`) with one `orientation` variant; it styles its child buttons through descendant `:where(button, a)` selectors inside that root recipe rather than rendering its own additional slots. There is no standalone `css()` styles object and no per-element `cx()` branching. Because all styling already belongs to one element's recipe (and the child styling is selector-based), `sva` slots would add nothing.

@@ -33,3 +33,9 @@ None
 1. **Verify the `_peerFocusVisible` selector works.** If Panda CSS requires an explicit `peer` className on the input, add `className={cx('peer', styles.input)}` to the input element.
 2. Add stories for `labelTooltip`, `labelIcon`, and `isLabelHidden`.
 3. Add a test for `isLabelHidden` to verify the checkbox remains interactive.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+CheckboxInput renders multiple distinct styled elements — root wrapper, boxWrap, the visually-hidden input, the visible box, the icon, the label, the necessity indicator, and the tooltip icon — and styles them through one standalone `const styles = {...}` object in `CheckboxInput.tsx` with ~14 `css()` blocks (including a nested `boxSize: {sm, md}` map). The box element is composed at runtime via `cx(styles.box, styles.boxSize[size], isCheckedOrIndeterminate ? styles.boxChecked : undefined, isDisabled ? styles.boxDisabled : undefined)`, and the label similarly toggles `styles.labelDisabled`. There is no recipe today; size, checked, and disabled are all applied as conditional `cx()` branches. An `sva` with slots like `root/boxWrap/input/box/icon/label/indicator` plus `size` and boolean `isChecked`/`isDisabled` variants would consolidate the box-state logic into one recipe (the status message already uses the shared `fieldStatusRecipe`). Note: the existing audit already flags a `_peerFocusVisible`/`peer` concern, which an `sva` migration should preserve.

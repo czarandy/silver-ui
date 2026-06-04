@@ -37,3 +37,9 @@ ToggleButton is a button that toggles between selected and unselected states usi
 4. Add a story demonstrating the `children` prop for custom toggle button content.
 5. Add a test for vertical orientation CSS class application on ToggleButtonGroup.
 6. Consider extracting the `onToggle` logic into separate functions for single and multiple modes to reduce type assertions.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+ToggleButton renders several styled elements — the root button (styled by the shared `buttonRecipe` cva from Button, with the `isSelected ? styles.selected` override layered on via `cx()`), plus a `content` wrapper, `labelWrapper`, `label`, `widthReservation` span, `icon` slot, and `spinner` — all coming from a standalone `const styles = {...}` object in `ToggleButton.tsx` (7 `css()` blocks). The `selected` state is applied as a conditional `cx` branch rather than a variant. An `sva` with slots `root`/`content`/`labelWrapper`/`label`/`icon`/`spinner` plus an `isSelected` variant would consolidate the selected override and the per-element label/icon plumbing into one recipe. Benefit is moderate because the core button visuals (size/variant/iconOnly) are owned by the shared `buttonRecipe`, so an sva here would mainly absorb the selected-state override and the inner label scaffolding rather than a full size/variant matrix. The sibling `ToggleButtonGroup.tsx` has only 2 trivial layout `css()` blocks and does not warrant conversion.

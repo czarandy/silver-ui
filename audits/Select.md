@@ -35,3 +35,9 @@ None
 2. Add a story for disabled options to demonstrate partial-disable behavior.
 3. Add a test for ref forwarding to the combobox button.
 4. Consider debouncing the search filter for very large option sets to avoid blocking the main thread during rapid typing.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Select renders many distinct styled elements (trigger wrapper, trigger button, label/placeholder span, icon slots, clear button, dropdown menu, search input, option buttons, option content, check, section heading, divider) via a single standalone `styles` object in `Select.tsx` with ~20 `css()` blocks. The trigger reuses `inputRecipe` from Field, but everything else — including state overlays applied through per-element `cx()` ternaries (`wrapperDisabled`, `placeholder`, `optionSelected`, `optionHighlighted`) — lives in the loose styles object with no recipe. An `sva` recipe with slots `wrapper`, `trigger`, `label`, `iconSlot`, `menu`, `search`, `option`, `optionContent`, `check`, `sectionHeading`, `divider` plus `isDisabled`/`isSelected`/`isHighlighted` variants would consolidate the option/menu styling that is currently entirely conditional ternaries. (The trigger box itself stays on the shared Field `inputRecipe`.)

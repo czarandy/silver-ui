@@ -34,3 +34,9 @@ Tag is a compact chip component for displaying selected values, filters, tags, o
 - Add a test for `startContent` rendering.
 - Add a story for disabled link tags.
 - Test coverage is otherwise strong, covering all interaction modes, remove button event isolation, icon rendering, size/color variants, hidden labels, description, tooltip, ref forwarding, keyboard activation, and the combined href+onClick+onRemove case.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Tag renders a multi-element structure: the recipe-driven root (`span`/`button`/`Link` via `tagRecipe` cva), an inner body button/link wrapper (`styles.bodyButton`/`buttonReset`), the `styles.label` span, and the `styles.removeButton`. Styling is split between a `cva` root recipe (`Tag.recipe.ts`, with `size`/`color`/`isInteractive`/`isDisabled` variants) and a standalone `const styles = {...}` object in `Tag.tsx` holding 4 `css()` blocks (`buttonReset`, `bodyButton`, `label`, `removeButton`), applied via `cx()` with a conditional `styles.buttonReset` branch. An `sva` with slots `root`/`body`/`label`/`removeButton` would consolidate all element styling into one recipe and let the `size` variant flow to slots (e.g. the remove button currently hardcodes `Icon size="sm"` regardless of tag size). The five-way branch over href/onClick/onRemove combinations is structural and would remain, but the per-element class plumbing would collapse to `classes.body`, `classes.label`, etc.

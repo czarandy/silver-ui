@@ -35,3 +35,9 @@ None
 2. Return focus to the trigger element when closing the menu via `Escape` key.
 3. Add `_focusVisible` styling to the trigger wrapper, or reconsider the `display: contents` approach for keyboard accessibility.
 4. Add tests for `hasAutoFocus={false}`, `menuWidth`, and outside-click closing with `onOpenChange`.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+ContextMenu renders two styled elements — a `display: contents` trigger wrapper and the `popover` menu surface — styled by a small standalone `styles` object with two `css()` blocks (`trigger`, `menu`) and no `cx()` ternaries or variants beyond the static `_open` selector. The trigger is effectively unstyled (`display: contents`), so there is really only one meaningful styled surface, and the actual menu items are delegated to `DropdownMenuItem`/`renderMenuItems`. With no size/variant/state styling on the recipe surfaces (`size` is passed through context to the items, not used for styling here), an `sva` slot recipe would not meaningfully consolidate anything.

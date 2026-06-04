@@ -31,3 +31,9 @@ Card is a rounded container surface for grouping related content. It supports 13
 1. Consider adding an interactive card variant with proper keyboard accessibility.
 2. Add more stories covering padding variations and complex content compositions.
 3. Consider whether test assertions on CSS class names are sufficiently stable, or if behavioral assertions would be more resilient.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Card renders a single styled `<div>` and applies one class via `cx(cardRecipe({variant, padding}), className)`. Its styling already lives entirely in a `cva` root recipe (`Card.recipe.ts`) with `variant` (13 color/surface options) and `padding` variants — exactly the case `cva` is designed for. There is no second styled element, no standalone `css()` styles object, and no per-element `cx()` branching, so an `sva` slot recipe would add structure without consolidating anything.

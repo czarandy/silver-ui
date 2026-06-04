@@ -38,3 +38,9 @@ Layout is a shell component with header, footer, start panel, end panel, and con
 4. Consider making `primaryButton` optional on LayoutFooter.
 5. Add stories demonstrating the `label`/`role="region"` accessibility feature on LayoutContent and LayoutPanel.
 6. Consider adding `minWidth`/`maxWidth` support to LayoutPanel.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+The Layout family spans six files and renders many styled elements, but styling is already split across three `cva` recipes (`layoutRecipe`, `layoutMiddleRecipe`, `layoutRegionRecipe` in `Layout.recipe.ts`) plus a small standalone `css()` object in each sub-component: `Layout.tsx` (`contentFill`), `LayoutPanel.tsx` (4 blocks: `root`/`scrollable`/`dividerEnd`/`dividerStart`, selected via `area`+`hasDivider` ternaries from context), `LayoutContent.tsx` (`root`/`scrollable`), `LayoutHeader.tsx` (7 blocks: `root`/`divider`/`inner`/`titleArea`/`actions`/`closeButton`), and `LayoutFooter.tsx` (6 blocks: `root`/`divider`/`inner`/`customInner`/`start`/`actions`). Within a single sub-component like LayoutHeader or LayoutFooter, an `sva` (slots `root`/`inner`/`titleArea`/`actions`, with a `hasDivider` variant) would consolidate the per-element css and the `hasDivider`/`isCustom` ternaries. However, each piece is a separate composition component sharing the `padding` recipe and context-driven divider logic, so the benefit is per-file and modest rather than one unifying recipe; the root `Layout` itself is mostly a context/slot orchestrator.

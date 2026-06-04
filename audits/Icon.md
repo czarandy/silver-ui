@@ -32,3 +32,9 @@ Icon renders a Lucide icon component with Silver UI size and color tokens. It ha
 1. Tighten the `IconComponent` type to ensure the icon component actually accepts the props being passed.
 2. Add a comment explaining why `height` and `width` are set to `undefined`.
 3. Add a story demonstrating accessible/labeled icon usage with `aria-label`.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`Icon.tsx` renders exactly one styled DOM element — the SVG icon — using a single `cva` (`Icon.recipe.ts`) with `size` and `color` variants. This is the textbook case where `cva` is correct: one element, one class. There is no standalone `css()` object, no per-element `cx()` branching, and no second slot to style. `sva` would add structure with no benefit.

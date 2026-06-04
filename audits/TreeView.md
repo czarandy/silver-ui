@@ -37,3 +37,9 @@ TreeView renders a hierarchical tree of expandable and selectable items with ful
 - Consider memoizing the `registerItem` return value per item ID to avoid unnecessary ref callback churn.
 - Add tests for `ariaLabel` with non-string labels and `style` prop forwarding.
 - The test suite is thorough, covering tree rendering, header association, descriptions/content slots, expansion/collapse (both click and keyboard), roving tabindex, full keyboard navigation (arrows, Home/End, type-ahead), focus visibility, link items, disabled items, selected items, deep nesting, density variants, prop forwarding, and the separation between item click and child toggle.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+The TreeView family is the strongest candidate in this batch. `TreeViewItem.tsx` renders ~10 distinct styled elements (wrapper `li`, `rowWrapper`, `contentWrapper`, `toggleButton`/`toggleSpacer`, `toggleIcon`, `startContent`, `content`/`invisibleAction`, `label`, `description`, `endContent`, `childGroup`) with no recipe at all — only a large standalone `const styles = {...}` object of ~20 `css()` blocks. State and density are applied via heavy per-element `cx()` branching: the content wrapper composes `styles.density[density]` (a `balanced`/`compact`/`spacious` keyed map) with conditional `interactive`/`disabled`/`selected`/`focused` blocks, and the toggle icon conditionally adds `toggleIconExpanded`. An `sva` with slots `contentWrapper`/`toggle`/`toggleIcon`/`content`/`label`/`description`/`startContent`/`endContent`, a `density` variant, and boolean variants `isInteractive`/`isDisabled`/`isSelected`/`isFocused`/`isExpanded` would consolidate exactly the kind of multi-element, density-keyed-map plus conditional-cx styling that the Divider migration targeted. `TreeView.tsx` (3 trivial blocks) and `TreeViewBranches.tsx` (2 connector-line blocks) are minor, but the item itself makes the family a clear Strong.

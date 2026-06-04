@@ -40,3 +40,9 @@ A file input supporting both inline input and drag-and-drop dropzone modes. Uses
 3. Add stories for `maxSize`, `maxFiles`, and dropzone with validation errors.
 4. Consider merging internal validation errors with external status props, or documenting the precedence behavior.
 5. Address the double-focusable-element issue by making the hidden input `tabIndex={-1}` (it is already triggered programmatically).
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+`FileInput.tsx` renders a multi-element control: the clickable surface (`div role="button"`), a hidden `input`, an upload icon span, the filename `Text`, a clear `button`, and a status-icon span. Styling currently lives in an 8-block standalone `css()` object (`surface`, `dropzone`, `disabled`, `active`, `hiddenInput`, `fileName`, `icon`, `clearButton`) composed onto elements via long `cx()` chains with per-element conditional branches (`isDropzone ? styles.dropzone : inputRecipe(...)`, `isDisabled ? styles.disabled`, `isDragOver ? styles.active`). The relevant states/variants are `mode` (input vs dropzone), `size`, `status`, `isDisabled`, and drag-over — currently applied as runtime ternaries rather than recipe variants. An `sva` with slots like `surface`/`hiddenInput`/`icon`/`fileName`/`clearButton` and variants for `mode`/`size`/`status`/`isDisabled`/`isDragOver` (with compoundVariants for dropzone+state) would consolidate all of this into one recipe, mirroring the Divider migration.

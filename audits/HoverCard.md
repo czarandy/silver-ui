@@ -36,3 +36,9 @@ HoverCard is a floating card that appears on hover or focus of a trigger element
 - Add stories demonstrating `focusTrigger` variants and different `alignment`/`placement` combinations with element triggers.
 - Document that `className`, `style`, `data-testid`, and `ref` only apply to text triggers.
 - The test coverage is reasonable (7 tests) but could benefit from additional tests for placement rendering and edge cases like rapid hover-in/hover-out sequences.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`HoverCard.tsx` renders no styled DOM elements of its own — it is a thin wrapper that delegates entirely to the internal `HoverLayerTrigger` (for the trigger wrapper and hover indication) and to `useHoverCard` (which renders the floating card layer). There is no recipe, no standalone `css()` object, and no `cx()` styling in the component; `className`/`style` are simply forwarded. With nothing to style locally and all visuals owned by shared internals, `sva` would add nothing.

@@ -86,7 +86,12 @@ const styles = {
 } as const;
 
 /**
- * Segmented toggle control that allows selecting one option from a set.
+ * Segmented toggle control for selecting one option from a small set.
+ *
+ * Rendered as a radio group (`role="radiogroup"`), so reach for it when picking
+ * a value — filters, settings, or view modes whose content you render yourself.
+ * If selecting an option should show or hide associated content panels, use
+ * {@link Tabs} instead.
  */
 export function SegmentedControl<TValue extends string = string>({
   children,

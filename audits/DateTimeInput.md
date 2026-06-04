@@ -35,3 +35,9 @@ None
 2. Fix the outer `<label>` to associate with at least one input, or use `labelAs="span"` with `aria-labelledby` on a group element.
 3. Add a `hasClear` prop to allow clearing the value.
 4. Add comprehensive stories and tests for constraint behavior, sizes, and optional/required states.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+DateTimeInput is a pure composition component: it wraps a `Field` around a two-column grid that delegates to child `DateInput` and `TimeInput` components, which carry their own styling. Its only local style is a single `const styles = {row: css({display: 'grid', ...})}` layout block applied via `cx(styles.row, className)` — one styled element, no variants, no per-element `cx()` state branches. With styling delegated to children and just one layout div of its own, `sva` would add nothing.

@@ -44,3 +44,9 @@ SearchFilterInput is a complex structured search control where each tag represen
 5. Fix the stale closure in `syncToParent` by using a ref for `partialFilter` or restructuring the callback.
 6. Add stories for `components`, `handleRef`, `timezoneID`, and `onBlur`/`onFocus` to improve documentation coverage.
 7. Despite these issues, the component is impressively comprehensive: it supports 13+ filter value types, nested filters, custom editors/tags, entity photos, combobox aliases, content search, and a well-structured configuration system. The type safety through discriminated unions is excellent.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+SearchFilterInput is primarily a composition/orchestration component that delegates its visuals to `TagsInput`, `Popover`, `Field`, and the dedicated editor/tag sub-components. Its own `styles` object in `SearchFilterInput.tsx` is just five small, variant-free atomic helpers (entityPhoto, root, popover, resultCount, value) applied directly with no conditional branching. The companion `SearchFilterInputEditPopover.tsx` has more `css()` blocks, but they are layout-shell styles for the popover/nested-filter editor with no shared variant axis. There are no multi-element styled clusters with duplicated size/orientation/state variants that an `sva` recipe would consolidate, so slot recipes offer little here.

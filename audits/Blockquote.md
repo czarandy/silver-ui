@@ -29,3 +29,9 @@ Blockquote is a simple styled wrapper around the native `<blockquote>` element. 
 
 1. Consider whether the `<cite>` usage should be documented with a note about the HTML spec distinction between work titles and author attributions.
 2. The component is clean, minimal, and well-tested for its scope. No urgent changes needed.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+`Blockquote.tsx` renders 2 distinct styled elements — the root `<blockquote>` and an optional `<cite>` (inside a `<footer>`) — via a standalone `const styles = {root, cite}` object (2 css() blocks) with `cx()`, and has no recipe file at all. There are no variants (size/orientation/state). An `sva` recipe with slots root/cite would consolidate the two-element styling into a single recipe matching the Divider pattern, but because there are no variants to deduplicate, the benefit is modest rather than strong.

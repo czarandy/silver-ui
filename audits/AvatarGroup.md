@@ -33,3 +33,9 @@ AvatarGroup renders a horizontally stacked row of Avatar components with consist
 2. Memoize `rootStyle` when `style` is undefined to avoid unnecessary re-renders.
 3. Consider using `role="status"` instead of `role="img"` on the static overflow indicator.
 4. Add a test that validates `AvatarGroupOverflow` custom content within an `AvatarGroup` context.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`AvatarGroup.tsx` renders a single styled root `<div>` via a no-variant `cva` (`avatarGroupRecipe`) and otherwise just provides size/overlap context and a `--avatar-group-overlap` CSS variable; it has no standalone styles object. The visually distinct overflow pill lives in the separate `AvatarGroupOverflow.tsx` (its own root/button css() blocks plus inline numeric sizing). Since the group root is a single element with no variants and the overflow is a separate component driven by inline pixel sizes, there are no co-varying slots for `sva` to consolidate.

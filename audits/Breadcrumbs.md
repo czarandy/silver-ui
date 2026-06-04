@@ -33,3 +33,9 @@ Breadcrumbs provides a navigation landmark (`<nav>`) wrapping an ordered list of
 - Differentiate the styling of non-interactive, non-current items from current items.
 - The test coverage is thorough: it covers landmarks, links, buttons, current items, separators, custom separators, custom link components, className/style/ref forwarding, icons, variants, and edge cases. No significant test gaps.
 - Story coverage is good, covering default, custom separator, supporting variant, icons, button items, and long trails.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+The styling lives in `BreadcrumbItem.tsx`, which renders multiple distinct styled elements (list `<li>` item, separator `<span>`, content `<span>`, link/button, icon `<span>`) via a standalone `const styles` object of ~8 css() blocks, with several per-element `cx()` ternaries keyed on the `supporting` variant and current state (`isSupporting ? styles.supportingSize : styles.defaultSize`, `isSupporting ? styles.supportingCurrent : styles.current`). The `variant` (default/supporting) comes from `BreadcrumbsContext`, and `Breadcrumbs.tsx` itself only has nav/list css() blocks. An `sva` recipe with slots item/separator/content/link/icon plus `variant` (default|supporting) and `isCurrent` variants would fold the repeated supporting/current `cx()` conditionals into recipe variants/compoundVariants.

@@ -34,3 +34,9 @@ Skeleton renders a pulsing placeholder with a shimmer animation, supporting conf
 3. Remove the `0` / `'none'` redundancy in `SkeletonRadius`, or document why both exist.
 4. Add a test for the `radius` prop.
 5. Add a story demonstrating the recommended `aria-busy` parent pattern.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Skeleton renders a single `<div>`. Its styling in `Skeleton.tsx` is one `styles.root` `css()` block plus a `radius` map of seven single-property `css()` blocks, combined via `cx()`, with width/height/animation-delay applied as inline styles. There is only one styled DOM element, so a slot recipe has no slots to consolidate; this is the textbook case where `cva` (or even the current flat css map) is correct and `sva` adds nothing.

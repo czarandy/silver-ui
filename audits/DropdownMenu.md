@@ -39,3 +39,9 @@ None
 3. Add a dev-mode warning when neither `items` nor `children` is provided.
 4. Consider using a label-specific selector or data attribute for type-ahead search instead of `textContent`, to avoid matching description text.
 5. Add stories for controlled state, `hasChevron={false}`, and `hasAutoFocus={false}`.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+`DropdownMenu` is a composition spread across several files. The menu surface in `DropdownMenu.tsx` uses a single standalone `css()` block (`styles.menu`, applied via `cx`) and delegates the trigger to `Button` and the floating surface to `Popover`. `menuUtils.tsx` holds a 3-block `css()` object (`section`/`heading`/`divider`) for section grouping, and `DropdownMenuItem.tsx` has its own `cva` (`menuItemRecipe`, size variants sm/md/lg) plus a single-block `css()` (`styles.icon`). The styled DOM elements are genuinely multi-element (menu container, section wrapper, section heading, divider, item button, item icon) but they live in different React components and are driven by a context-supplied `menuSize`, so a single `sva` would only cleanly consolidate within each file. The strongest candidate is `DropdownMenuItem` (recipe + icon css with a real `size` variant), which an `sva` with `root`/`icon` slots could merge; the rest is loose layout glue that gains little.

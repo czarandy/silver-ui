@@ -1,5 +1,4 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {dividerRecipe} from './Divider.recipe';
 
@@ -49,42 +48,6 @@ export interface DividerProps {
   variant?: DividerVariant;
 }
 
-const styles = {
-  line: css({
-    bg: 'border',
-  }),
-  lineStrong: css({
-    bg: 'border.emphasized',
-  }),
-  horizontalLine: css({
-    h: '1px',
-    flex: 1,
-  }),
-  verticalLine: css({
-    w: '1px',
-    flex: 1,
-  }),
-  label: css({
-    flexShrink: 0,
-    px: '3',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    color: 'fg.muted',
-  }),
-  verticalLabel: css({
-    px: 0,
-    py: '3',
-  }),
-  fullBleedHorizontal: css({
-    mx: 'calc(-1 * var(--card-padding, 0px))',
-    w: 'calc(100% + var(--card-padding, 0px) * 2)',
-  }),
-  fullBleedVertical: css({
-    my: 'calc(-1 * var(--card-padding, 0px))',
-    h: 'calc(100% + var(--card-padding, 0px) * 2)',
-  }),
-};
-
 export function Divider({
   'aria-label': ariaLabel,
   className,
@@ -96,40 +59,26 @@ export function Divider({
   style,
   variant = 'subtle',
 }: DividerProps): React.JSX.Element {
-  const isHorizontal = orientation === 'horizontal';
   const labelId = useId();
-  const lineClassName = cx(
-    styles.line,
-    variant === 'strong' && styles.lineStrong,
-    isHorizontal ? styles.horizontalLine : styles.verticalLine,
-  );
+  const classes = dividerRecipe({orientation, variant, isFullBleed});
 
   return (
     <div
       aria-label={ariaLabel}
       aria-labelledby={label != null && ariaLabel == null ? labelId : undefined}
       aria-orientation={orientation}
-      className={cx(
-        dividerRecipe({orientation, variant}),
-        isFullBleed &&
-          (isHorizontal
-            ? styles.fullBleedHorizontal
-            : styles.fullBleedVertical),
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       role="separator"
       style={style}>
-      <div className={lineClassName} />
+      <div className={classes.line} />
       {label != null ? (
         <>
-          <div
-            className={cx(styles.label, !isHorizontal && styles.verticalLabel)}
-            id={labelId}>
+          <div className={classes.label} id={labelId}>
             {label}
           </div>
-          <div className={lineClassName} />
+          <div className={classes.line} />
         </>
       ) : null}
     </div>

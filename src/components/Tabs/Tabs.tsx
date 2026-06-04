@@ -79,6 +79,11 @@ const styles = {
 
 /**
  * Controlled tab wrapper.
+ *
+ * Uses `tablist` / `tabpanel` semantics, so reach for it when selecting an
+ * option shows or hides associated content panels. To pick a value without
+ * swapping panels — a styled radio group for filters, settings, or view modes —
+ * use {@link SegmentedControl} instead.
  */
 export function Tabs({
   children,

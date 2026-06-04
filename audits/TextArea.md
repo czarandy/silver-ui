@@ -41,3 +41,9 @@ Multi-line text input field with optional character counter. Built on the shared
 2. Add a story for `startIcon`.
 3. Add tests for `isLoading` (aria-busy + spinner), `onFocus`/`onBlur`, and `startIcon`.
 4. Consider making the character counter a live region for accessibility, or at least adding a note about how screen reader users discover the count.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+TextArea renders a wrapper div, the `textarea` control, optional icon slots, a spinner, status icon, and a character counter Text — but nearly all the styling comes from Field's shared `inputRecipe`/`inputStyles` (root, `control`, `iconSlot`). The component's own `const styles = {...}` in `TextArea.tsx` is just 4 small `css()` blocks (`wrapper`, `textarea`, `counter`, `counterOverLimit`), each a thin layout/override on top of the shared input styles, applied via `cx()`. The only conditional branch is `isOverLimit ? styles.counterOverLimit`. There are no component-owned size/orientation/variant matrices to consolidate (size/status are handled by `inputRecipe`), so an sva here would mostly re-wrap a handful of trivial overrides. Not worth converting; the shared Field recipes are the right place for any slot consolidation.

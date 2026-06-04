@@ -31,3 +31,9 @@ The Button component is a well-architected, versatile action element that render
 1. Add a visual spinner or overlay for icon-only loading buttons, or at minimum document the limitation.
 2. Add `'onSolid'` to the stories argTypes and create an `OnSolid` story (ideally on a dark background to demonstrate the variant).
 3. Consider adding stories for external links (`target="_blank"`), form submission (`type="submit"`), and `aria-pressed` toggle patterns.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+`Button.tsx` renders several inner styled `<span>` elements (content wrapper, icon, startContent, label, endContent, loadingIndicator) via a standalone `const styles` object of 6 css() blocks, on top of the rich single-element root `cva` (`buttonRecipe`, variant/size/iconOnly variants). The root recipe is correctly cva and carries all the variant logic; the inner spans are mostly static flex wrappers with no variant-driven branching (no per-element `cx()` ternaries). An `sva` recipe (slots root/content/icon/label/startContent/endContent/loadingIndicator) would consolidate the loose styles object into the recipe, but since the inner slots don't currently vary by size/variant, the consolidation is organizational rather than eliminating duplicated conditional logic.

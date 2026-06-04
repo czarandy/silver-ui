@@ -36,3 +36,9 @@ None
 1. Assign `id={inputId}` to the first thumb even in range mode so the Field label click focuses it.
 2. Add a story for `onChangeEnd` demonstrating the live-change vs. commit distinction.
 3. Add a test for `description` rendering and `ref` forwarding.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Slider renders many distinct styled DOM elements (field wrapper, row, track container, track, filled track, thumb(s), marks container, individual marks, mark labels, text value), all styled via a single large standalone `styles` object in `Slider.tsx` with roughly 30 `css()` blocks. Every element has paired horizontal/vertical variants selected at runtime through `isHorizontal ? styles.fooHorizontal : styles.fooVertical` ternaries, plus disabled overrides (`trackContainerDisabled`, `thumbDisabled`). There is no recipe at all today. An `sva` recipe with slots like `field`, `row`, `trackContainer`, `track`, `filledTrack`, `thumb`, `marksContainer`, `mark`, `markLabel`, `textValue` and an `orientation` (horizontal/vertical) variant plus `isDisabled` variant would consolidate all of this and eliminate the dozens of orientation ternaries, mirroring exactly what Divider did at larger scale.

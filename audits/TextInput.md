@@ -39,3 +39,9 @@ Single-line text input field supporting text, email, and password types. Built o
 3. Add `@default` annotations to boolean prop JSDoc comments for consistency with other form components.
 4. Consider expanding `TextInputType` to include `'url'`, `'tel'`, and `'search'` if those use cases arise.
 5. Add tests for `onFocus`/`onBlur` callbacks and `autoComplete` passthrough.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+TextInput renders a wrapper div, the `input`, optional start-icon slot, clear button, end content, spinner, and status icon, but it owns no `css()` styles object at all — every class comes from Field's shared `inputRecipe` (root, with `size`/`status`/`isDisabled` variants) and `inputStyles` (`control`, `iconSlot`, `clearButton`). The component just applies `inputRecipe(...)` to the wrapper and fixed `inputStyles.*` classes to the children, with no per-element conditional `cx` ternaries on its own styles. Any slot consolidation would belong in Field's recipes, not here. sva adds nothing.

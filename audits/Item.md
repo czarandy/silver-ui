@@ -34,3 +34,9 @@ None
 1. Consider extracting the 4-way content rendering into helper functions for readability.
 2. Add a test verifying that disabled links don't navigate on click.
 3. Add a story for `width="auto"`.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+`Item.tsx` is the strongest candidate in this batch. It renders many distinct styled DOM elements — root, interactive content (link/button), non-interactive content span, text-content column, start content, end content (end vs inline), label row, and trailing content — all styled by a single large standalone `css()` object with ~14 blocks (`root`, `widthFull`, `alignStart`, `interactive`, `highlighted`, `selected`, `disabled`, `disabledContent`, `interactiveContent`, `content`, `textContent`, `startContent`, `endContent`, `endContentInline`, `labelRow`, `trailingContent`). There is no recipe at all; every element is assembled with long `cx()` chains and runtime ternaries for `width`, `align`, `isInteractive`, `isHighlighted`, `isSelected`, and `isDisabled` (the disabled state is applied per-element as `styles.disabledContent`). An `sva` with slots like `root`/`content`/`textContent`/`startContent`/`endContent`/`trailingContent` and variants for `align`/`width`/`isInteractive`/`isHighlighted`/`isSelected`/`isDisabled` would consolidate all styling into one recipe and replace the scattered conditional class logic — a near-textbook Divider-style migration at larger scale.

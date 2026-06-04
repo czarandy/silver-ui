@@ -37,3 +37,9 @@ Dialog is a modal dialog surface built on the native `<dialog>` element, with ba
 - Consider resetting options to defaults in `useDialog.show()` instead of merging accumulatively, or document the merge behavior clearly.
 - Add stories and tests for `position`, `maxHeight`, and edge cases like nested dialogs.
 - Consider using `aria-labelledby` instead of `aria-label` when a visible heading is present.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+Dialog renders two styled elements: the `<dialog>` root (with `_backdrop`, `_focusVisible`, open, and fullscreen states) and an `inner` content `<div>`. It currently styles both via a standalone `const styles = {root, open, fullscreen, inner}` object in `Dialog.tsx`, applying `cx(styles.root, isOpen ? styles.open : undefined, isFullscreen ? styles.fullscreen : undefined, className)`. Notably, a separate `cva` root recipe (`Dialog.recipe.ts`, with `isOpen` and `variant` variants) already exists but is unused/divergent — the audit above flags this. An `sva` with `root`/`inner` slots and `isOpen` + `variant` (standard/fullscreen) variants would both consolidate the two-element styling and resolve the recipe-vs-styles divergence, replacing the two `cx()` ternaries. Benefit is moderate rather than strong because there are only two slots and two variants and the `inner` slot has no variant-dependent styling.

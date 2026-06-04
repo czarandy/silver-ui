@@ -31,3 +31,9 @@ Thumbnail is a square image preview component for attachments and media. It supp
 - Consider making `alt` required when `src` is provided, or using `label` as a fallback for `alt` to ensure meaningful alt text.
 - Document the `accessibleName` fallback behavior to encourage consumers to provide descriptive labels.
 - Test coverage is good overall, covering image rendering, click/remove handlers, loading states, error recovery, disabled state, tooltip wiring, event isolation, and prop forwarding. The `key={src ?? 'empty'}` pattern for resetting error state on src change is a clever solution that is tested.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Thumbnail renders ~8 distinct styled DOM elements with no recipe at all — only a standalone `const styles = {...}` object in `Thumbnail.tsx` containing 11 `css()` blocks: `root`, `disabled`, `imageContainer`, `interactive`, `imageButton`, `image`, `placeholder`, `insetBorder`, `remove`, `overlay`. These are applied across the root div and the inner `ThumbnailImageArea` via `cx()` with per-element conditional branches (`isDisabled ? styles.disabled`, `isInteractive ? styles.interactive`). This is exactly the Divider-style split (per-element `css()` blocks plus conditional `cx`) that sva targets: a slot recipe with slots `root`/`imageContainer`/`imageButton`/`image`/`placeholder`/`insetBorder`/`remove`/`overlay` and boolean variants `isDisabled`/`isInteractive` would consolidate every element's styling and the conditional state logic into one recipe. There is no size/color matrix, but the multi-element, conditional, recipe-less structure makes the consolidation meaningful.

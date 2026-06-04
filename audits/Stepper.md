@@ -37,3 +37,9 @@ Stepper displays progress through a sequence of steps, supporting horizontal and
 3. Add `aria-setsize` and `aria-posinset` to step list items so screen readers know the total count.
 4. Reconsider hiding step numbers from assistive technology when steps are non-clickable.
 5. Add tests for Step `ref` and `style` forwarding.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+The Stepper family spans `Stepper.tsx` (root `ol` styles: root/horizontal/vertical) and `Step.tsx`, which has a large standalone `styles` object (~16 `css()` blocks for horizontal/vertical roots, content, connector wrappers, indicator column, labelRow, description) selected via `isVertical ? ... : ...` ternaries, alongside three separate `cva` recipes in `Step.recipe.ts` (`stepIndicatorRecipe`, `stepLabelRecipe`, `stepConnectorRecipe`) that each independently re-declare the five-state `StepState` and the orientation variant. This is precisely the spread-across-files pattern sva targets: a single `sva` with slots `root`, `content`, `indicator`, `label`, `description`, `connector`, `childrenContent` and shared `orientation` + `state` (+ `isClickable`) variants would unify the three duplicate-state cvas with the orientation-ternary css object into one recipe.

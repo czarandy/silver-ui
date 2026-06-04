@@ -35,3 +35,9 @@ Drawer is a slide-in panel anchored to a viewport edge (start, end, top, bottom)
 - Ensure `_focusVisible` has an accessible outline rather than `outline: 'none'`.
 - Consider changing the `ref` type to `Ref<HTMLDialogElement>` for type accuracy.
 - The test coverage is strong (15 tests covering open/close, placements, sizes, focus management, body scroll, unmount cleanup, rapid updates, and imperative hook). Stories cover all major visual variants including auto-focus and nested content.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+Drawer renders two styled elements: the `<dialog>` root and an `inner` content `<div>`. It styles them with a standalone `const styles = {...}` object containing seven `css()` blocks — `root`, `open`, `inner`, and one block per placement (`start`/`end`/`top`/`bottom`) — and applies them via `cx(styles.root, isOpen ? styles.open : undefined, styles[placement], className)`, indexing the styles object by the `placement` prop. There is no recipe today. An `sva` with `root`/`inner` slots and `placement` (start/end/top/bottom) + boolean `isOpen` variants would consolidate the four placement blocks and the open state into one recipe and replace the `styles[placement]` runtime lookup and the open ternary. It is moderate rather than strong because there are only two slots and the `inner` slot is placement-independent.

@@ -33,3 +33,9 @@ SegmentedControl is a radio-group-based toggle control that allows selecting one
 2. Evaluate whether to add the native `disabled` attribute alongside `aria-disabled` on items, or document the intentional use of `aria-disabled` for roving-tabindex compatibility.
 3. Add a story showing a disabled item that is the currently selected value.
 4. The keyboard navigation implementation is solid and well-tested, including wrapping, Home/End, and skipping disabled items. No changes needed there.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+SegmentedControl is a two-file, multi-element component with styling split across `SegmentedControl.tsx` (root `styles`: root/fill/disabled) and `SegmentedControlItem.tsx` (item `styles`: item/selected/disabled/fill/icon plus a `size` map for sm/md/lg). No recipe exists; both files use standalone `css()` objects with per-element `cx()` ternaries for selected, disabled, fill-layout, and size. Because the root and item share `size` and `layout` (hug/fill) state via `SegmentedControlContext`, an `sva` recipe with slots `root`, `item`, `icon` and variants `size`, `layout`, plus `isSelected`/`isDisabled` would consolidate the duplicated layout/size logic into one place, much like Divider.

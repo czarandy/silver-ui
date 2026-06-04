@@ -2,6 +2,14 @@ import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {Divider} from './Divider';
 
+/**
+ * Class tokens present in `withFlag` but not in `base`.
+ */
+function addedClasses(base: string, withFlag: string): string[] {
+  const baseTokens = new Set(base.split(/\s+/).filter(Boolean));
+  return withFlag.split(/\s+/).filter(token => token && !baseTokens.has(token));
+}
+
 describe('Divider', () => {
   it('defaults to horizontal orientation', () => {
     render(<Divider />);
@@ -61,6 +69,33 @@ describe('Divider', () => {
     const classesWith = divider.className;
 
     expect(classesWith).not.toBe(classesWithout);
+  });
+
+  it('applies a distinct full-bleed style for vertical orientation', () => {
+    const {rerender} = render(
+      <Divider data-testid="divider" orientation="vertical" />,
+    );
+    const divider = screen.getByTestId('divider');
+
+    const verticalBase = divider.className;
+    rerender(
+      <Divider data-testid="divider" isFullBleed orientation="vertical" />,
+    );
+    const verticalAdded = addedClasses(verticalBase, divider.className);
+
+    // Enabling full-bleed on a vertical divider adds a style class.
+    expect(verticalAdded.length).toBeGreaterThan(0);
+
+    // That class must differ from the horizontal full-bleed class, otherwise the
+    // orientation branch (fullBleedVertical vs fullBleedHorizontal) is wrong.
+    rerender(<Divider data-testid="divider" orientation="horizontal" />);
+    const horizontalBase = divider.className;
+    rerender(
+      <Divider data-testid="divider" isFullBleed orientation="horizontal" />,
+    );
+    const horizontalAdded = addedClasses(horizontalBase, divider.className);
+
+    expect(verticalAdded).not.toEqual(horizontalAdded);
   });
 
   it('applies className, style, data-testid, and ref to the root', () => {

@@ -17,6 +17,17 @@ import {Tabs} from './Tabs';
 const meta: Meta<typeof Tabs> = {
   title: 'Components/Tabs',
   component: Tabs,
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Use **Tabs** when selecting an option shows or hides associated content ' +
+          'panels (`tablist` / `tabpanel` semantics). To pick a value without swapping ' +
+          'panels — a styled radio group for filters, settings, or view modes — use ' +
+          '**SegmentedControl** instead.',
+      },
+    },
+  },
   args: {hasDivider: true, layout: 'hug', size: 'md', value: 'overview'},
 };
 

@@ -33,3 +33,9 @@ The Avatar component displays a user profile image with initials or a fallback i
 2. Remove the `useMemo` wrapper around `resolveAvatarSize` since it's a trivial computation.
 3. Add a story for the icon-only fallback (no name, no src).
 4. Add a comment explaining the `CIRCLE_EDGE_OFFSET_RATIO` geometry.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+`Avatar.tsx` renders 4+ styled elements (root, content circle, image, fallback initials/icon, status corner) using a single-element root `cva` (`avatarRecipe`, only an `isGrouped` boolean variant) PLUS a standalone `const styles` object with 4 css() blocks (content, image, fallback, status). Because Avatar's many sizes are driven by computed numeric pixel values via inline `style` (not Panda size tokens), most per-element sizing cannot move into recipe variants, which limits the benefit. Still, an `sva` recipe with slots root/content/image/fallback/status would consolidate the static structural styling and the `isGrouped` variant into one place; `AvatarStatusDot.tsx` and `AvatarGroupOverflow` similarly mix a styles object with `variantClassName` lookups but rely heavily on inline numeric sizing.

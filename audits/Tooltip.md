@@ -35,3 +35,9 @@ Tooltip displays contextual information in a popup anchored to a trigger element
 - Add tests for `hideDelay`, `alignment`, and `hasHoverIndication` props.
 - Add stories for `hideDelay` and `focusTrigger` modes.
 - The core architecture is sound: the hook-based approach with separate `ref`, `positionRef`, and `interactionRef` provides excellent flexibility. The stable handler ref pattern avoids stale closure issues. The `useTooltip` hook story demonstrates the hook-based API well.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+The `Tooltip` component itself (`Tooltip.tsx`) renders no styled DOM of its own — it delegates entirely to `HoverLayerTrigger` and `useTooltip`. The actual tooltip popup styling lives in `useTooltip.tsx` as a small `const styles = {...}` object with `tooltipContainer`, `tooltipContent`, and a placement-keyed `marginByPlacement` map (`above`/`below`/`start`/`end`), composed via `cx()` when rendering into the layer. While that is technically two slots (container + content) plus a placement variant, it is hook-internal styling for a popup with no size/variant/state matrix, and sva recipes are oriented toward component markup rather than imperative `layer.render(...)` calls. The marginal benefit (turning the 2-block + placement-map into a slot recipe) does not justify conversion; cx-composed styles are appropriate here.

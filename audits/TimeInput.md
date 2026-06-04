@@ -39,3 +39,9 @@ None
 3. Consider adding `onBlur`/`onFocus` callbacks for parity with other input components.
 4. Document the `step`/`hasSeconds` interaction in JSDoc or stories.
 5. Consider whether hiding the native time picker indicator is desirable without providing an alternative UI.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+TimeInput renders a wrapper div, a leading clock icon slot, the `input`, an optional clear button, spinner, and status icon — but essentially all styling comes from Field's shared `inputRecipe` (root, `size`/`status`/`isDisabled` variants) and `inputStyles` (`control`, `iconSlot`, `clearButton`). Its only local style is a single `css()` block (`styles.input`) that hides the native `::-webkit-calendar-picker-indicator`, merged onto the control via `cx()`. There is no multi-block styles object and no per-element conditional styling to consolidate, so sva would add nothing; the component is correctly recipe-delegated.

@@ -36,3 +36,9 @@ Table is a complex, plugin-based data table component supporting configurable de
 - Evaluate whether the `@js-temporal/polyfill` import can be made lazy or optional to reduce bundle size for consumers who do not use Temporal types.
 - Add an ARIA live region or `aria-live="polite"` announcement when sort state changes for better screen reader support.
 - The test suite is exceptionally thorough, covering rendering, visual context props, cell overflow classes, divider behavior, children mode, plugin ordering, sorting with multi-sort and custom comparators, selection with external store optimization, pagination, column settings, column resize with keyboard/pointer/RTL, filtering with inline and popover variants, and all state management hooks. This is one of the best-tested components in the library.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+The Table family is a composition where each structural sub-component carries its own standalone `css()` styles object and reads shared visual state from `TableContext` (density, dividers, verticalAlign, textOverflow, isStriped). `TableCell.tsx` and `TableHeaderCell.tsx` each have a `density` map (balanced/compact/spacious) plus divider (rows/columns/grid), truncate/wrap, and verticalAlign blocks applied through long per-element `cx()` ternaries; `TableRow.tsx` adds base/hover/striped/stripedHover branches; `Table.tsx`/`BaseTable.tsx` add scroll wrapper and table layout blocks. The same `density`/`dividers` variants are effectively duplicated across cell and header-cell. An `sva` recipe with slots `wrapper`, `table`, `row`, `cell`, `headerCell` and variants `density`, `dividers`, `verticalAlign`, `textOverflow`, `isStriped` would consolidate this context-driven, duplicated styling into one recipe, similar in spirit to Divider but at larger scale.

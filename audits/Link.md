@@ -32,3 +32,9 @@ None
 - Align `LinkComponentProps` with all ARIA attributes accepted by `Link` to prevent type mismatches with custom link components.
 - The test suite is comprehensive (33 tests) covering all major behaviors: href, fallback href, disabled state, external links, tooltips, custom components, LinkProvider, ARIA attributes, className/style, refs, and keyboard interaction.
 - Stories are thorough with 22 stories covering all color variants, weights, sizes, underline, external links, disabled states, tooltips, custom components, and inline usage.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`Link.tsx` styles one primary element — the anchor — via a single `cva` (`Link.recipe.ts`) with `size`/`color`/`weight`/`hasUnderline` variants, which is the correct pattern for the link itself. The only secondary styled element is a small external-link icon wrapper backed by a one-block standalone `css()` (`styles.externalLink`), which is static (no variants) and conditionally rendered. With just one trivial, variant-less second element, converting to an `sva` (`root`/`externalIcon`) would technically work but consolidate almost nothing; the existing `cva` plus a single static `css()` is appropriate. Tooltip wrapping is delegated to `Tooltip`.

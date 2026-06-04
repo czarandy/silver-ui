@@ -37,3 +37,9 @@ A date range picker that pairs a read-only text input with a calendar popover fo
 3. Add integration tests for the calendar popover interaction (opening, selecting a range, closing).
 4. Add stories for `isRequired`, `isOptional`, `labelTooltip`, and `labelIcon`.
 5. Consider documenting the intentional read-only design decision and its accessibility implications.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+DateRangeInput uses the same pattern as DateInput: it delegates almost all styling to the shared `Field` wrapper, `inputRecipe` (size/status/isDisabled variants on the wrapper), and `inputStyles` (`control`, `clearButton`, `iconSlot`), with only a one-line local `const styles = {wrapper: css({ps: '1', gap: '1'})}`. The multi-element input styling already lives centrally in `Field`, so an `sva` conversion at this component would consolidate nothing; the shared `Field` input styles are the only place a slot recipe could help.

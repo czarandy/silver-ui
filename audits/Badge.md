@@ -33,3 +33,9 @@ Badge is a compact status label, category marker, or count indicator. It support
 2. Consider adding `variant` support (solid, outline, subtle) for more visual flexibility.
 3. Add a story demonstrating accessible badge usage with `role="status"` and `aria-label`.
 4. Add a story for large numeric labels to verify visual handling.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+`Badge.tsx` renders a single styled `<span>` (the optional `Icon` is a child component, not a separately styled Badge element) governed entirely by the single-element `cva` (`badgeRecipe`) with `size` and `color` variants. There is no standalone `css()` styles object and no per-element `cx()` branching. `cva` is the correct tool here; converting to `sva` would add slot machinery for what is fundamentally one element.

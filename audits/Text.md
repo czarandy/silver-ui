@@ -36,3 +36,9 @@ Text is a foundational typography component with two variants: `Text` (body copy
 - Add stories for `wordBreak` and `display` props.
 - Add a test for `textWrap` behavior.
 - The truncation system (`useTruncation`) is well-engineered, using `useSyncExternalStore` with `ResizeObserver` for tear-free state management. Test coverage for both Text and Heading is solid, covering element rendering, typography variants, truncation, ref forwarding, className/style merging, native HTML attributes, and the negative maxLines guard.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Text (and its sibling Heading) render a single styled DOM element via `createElement` — one `cva` recipe (`textRecipe` / `headingRecipe` in `Text.recipe.ts`) applied with `cx()` to that element. Although the component has many variants (`type`, `size`, `color`, `weight`, `display`, `wordBreak`, `textWrap`, `hasStrikethrough`, `hasTabularNumbers`, `maxLines`), they all target the same single element, which is exactly the case `cva` is designed for. There is no standalone `css()` styles object and no per-element `cx` branching. The optional truncation tooltip is delegated to the separate `Tooltip`/`useTooltip` component. sva (slot recipes) would add no value since there are no distinct sibling slots to style.

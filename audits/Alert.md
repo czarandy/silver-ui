@@ -35,3 +35,9 @@ Alert displays a contextual message with status-based styling (error, info, succ
 3. Add collapse/expand animation (e.g., grid-template-rows transition like ToastViewport uses).
 4. Add tests for `container` and `padding` props.
 5. Consider removing the `AlertVariants` export or giving the root recipe actual variants.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+`Alert.tsx` renders many styled elements (root, header, icon `<span>`, content column, end-area, collapsible body) across TWO `cva` recipes (`alertRecipe`, `alertHeaderRecipe` in `Alert.recipe.ts`) PLUS a standalone `const styles` object with 6 css() blocks (icon, content, endArea, body, bodyCard, chevronExpanded) applied via `cx()` and conditionals (`container === 'card' ? styles.bodyCard : undefined`, `isExpanded ? styles.chevronExpanded : undefined`). The status colors and container/hasContent/isCentered logic already drive variants on the header recipe, but the body's card-vs-section radius and the icon/content/end-area static styles are split off. An `sva` recipe with slots root/header/icon/content/endArea/body, carrying the `status`, `container`, `hasContent`, and `isCentered` variants (with a compoundVariant for the body's card radius), would unify the two recipes and the loose styles object into one slot recipe.
