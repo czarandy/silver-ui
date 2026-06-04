@@ -259,9 +259,8 @@ export function App(): JSX.Element {
             component library
           </h1>
           <Text as="p" className="hero__lede" color="secondary" type="large">
-            silver-ui gives you 70+ polished, accessible components with
-            CSS-variable theming and dark mode — built on Panda CSS for React
-            19.
+            silver-ui has 70+ fast and accessible components with support for
+            theming and dark mode to help you build polished web apps.
           </Text>
 
           <div className="hero__install">
