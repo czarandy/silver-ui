@@ -49,7 +49,7 @@
     "prepare": "husky && panda codegen",
     "storybook": "storybook dev -p 6006 --ci",
     "build": "panda codegen && tsup && tsc -p tsconfig.build.json && panda cssgen --outfile dist/styles.css --minify",
-    "build:storybook": "storybook build",
+    "build:storybook": "panda codegen && storybook build",
     "sync:brand": "cp brand/logo.svg brand/wordmark.svg site/public/",
     "build:site": "pnpm sync:brand && pnpm build && pnpm -C site build",
     "test": "vitest run",
