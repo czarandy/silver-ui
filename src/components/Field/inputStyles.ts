@@ -100,23 +100,4 @@ export const inputStyles = {
     flexShrink: 0,
     color: 'fg.muted',
   }),
-  clearButton: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    p: 0,
-    borderWidth: 0,
-    borderStyle: 'none',
-    bg: 'transparent',
-    color: 'fg.muted',
-    cursor: 'pointer',
-    borderRadius: 'sm',
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
 } as const;

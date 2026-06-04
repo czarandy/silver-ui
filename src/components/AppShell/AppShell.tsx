@@ -8,8 +8,9 @@ import {
   observeResize,
   unobserveResize,
 } from '../../internal/sharedResizeObserver';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {useMediaQuery} from '../../internal/useMediaQuery';
-import {Layout, LayoutContent, LayoutPanel, type SpacingStep} from '../Layout';
+import {Layout, LayoutContent, LayoutPanel} from '../Layout';
 import {SideNavRenderContext} from '../SideNav';
 import {TopNavMobileContentContext, TopNavRenderContext} from '../TopNav';
 import {appShellRecipe} from './AppShell.recipe';
@@ -43,7 +44,7 @@ export interface AppShellProps {
   /**
    * Padding applied to the main content area. Default is `0`.
    */
-  contentPadding?: SpacingStep;
+  contentPadding?: SpacingToken;
   /**
    * Test ID applied to the root element.
    */

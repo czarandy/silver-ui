@@ -54,12 +54,12 @@ describe('Skeleton', () => {
     });
   });
 
-  it('merges consumer style after computed styles', () => {
+  it('width and height props take precedence over style', () => {
     render(
       <Skeleton
         data-testid="skeleton"
         height={20}
-        style={{opacity: 0.5}}
+        style={{width: '50%', height: '50%', opacity: 0.5}}
         width={120}
       />,
     );
@@ -68,6 +68,22 @@ describe('Skeleton', () => {
     expect(el).toHaveStyle({
       width: '120px',
       height: '20px',
+      opacity: '0.5',
+    });
+  });
+
+  it('passes through style when width and height are not set', () => {
+    render(
+      <Skeleton
+        data-testid="skeleton"
+        style={{width: '50%', height: '2rem', opacity: 0.5}}
+      />,
+    );
+
+    const el = screen.getByTestId('skeleton');
+    expect(el).toHaveStyle({
+      width: '100%',
+      height: '100%',
       opacity: '0.5',
     });
   });

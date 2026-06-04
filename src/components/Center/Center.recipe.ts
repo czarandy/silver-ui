@@ -21,7 +21,6 @@ export const centerRecipe = cva({
       true: {
         display: 'inline-flex',
       },
-      false: {},
     },
   },
   defaultVariants: {

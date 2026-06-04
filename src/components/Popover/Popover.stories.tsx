@@ -43,7 +43,7 @@ const popoverContent = (
 
 export const Default: Story = {
   render: args => (
-    <Popover {...args} content={popoverContent} padding="3">
+    <Popover {...args} content={popoverContent} padding={3}>
       <Button label="Open popover" />
     </Popover>
   ),
@@ -61,7 +61,7 @@ export const Placements: Story = {
       <Popover
         content={popoverContent}
         label="Above"
-        padding="3"
+        padding={3}
         placement="above">
         <Button label="Above" />
       </Popover>
@@ -69,14 +69,14 @@ export const Placements: Story = {
         <Popover
           content={popoverContent}
           label="Start"
-          padding="3"
+          padding={3}
           placement="start">
           <Button label="Start" />
         </Popover>
         <Popover
           content={popoverContent}
           label="End"
-          padding="3"
+          padding={3}
           placement="end">
           <Button label="End" />
         </Popover>
@@ -84,7 +84,7 @@ export const Placements: Story = {
       <Popover
         content={popoverContent}
         label="Below"
-        padding="3"
+        padding={3}
         placement="below">
         <Button label="Below" />
       </Popover>
@@ -99,7 +99,7 @@ export const Alignments: Story = {
         alignment="start"
         content={popoverContent}
         label="Start"
-        padding="3"
+        padding={3}
         placement="below">
         <Button label="Start" />
       </Popover>
@@ -107,7 +107,7 @@ export const Alignments: Story = {
         alignment="center"
         content={popoverContent}
         label="Center"
-        padding="3"
+        padding={3}
         placement="below">
         <Button label="Center" />
       </Popover>
@@ -115,7 +115,7 @@ export const Alignments: Story = {
         alignment="end"
         content={popoverContent}
         label="End"
-        padding="3"
+        padding={3}
         placement="below">
         <Button label="End" />
       </Popover>
@@ -138,7 +138,7 @@ export const Controlled: Story = {
           isOpen={isOpen}
           label="Controlled"
           onOpenChange={setIsOpen}
-          padding="3"
+          padding={3}
           placement="below">
           <Button label="Trigger" />
         </Popover>
@@ -149,7 +149,7 @@ export const Controlled: Story = {
 
 export const Disabled: Story = {
   render: args => (
-    <Popover {...args} content={popoverContent} isEnabled={false} padding="3">
+    <Popover {...args} content={popoverContent} isEnabled={false} padding={3}>
       <Button label="Disabled popover" />
     </Popover>
   ),
@@ -161,7 +161,7 @@ export const NoCloseButton: Story = {
       {...args}
       content={popoverContent}
       hasCloseButton={false}
-      padding="3">
+      padding={3}>
       <Button label="No close button" />
     </Popover>
   ),
@@ -172,7 +172,7 @@ export const MatchTriggerWidth: Story = {
     <Popover
       {...args}
       content={<Text as="p">This popover matches the trigger width.</Text>}
-      padding="3">
+      padding={3}>
       <Button label="Wide trigger button" />
     </Popover>
   ),
@@ -184,7 +184,7 @@ export const CustomWidth: Story = {
     <Popover
       {...args}
       content={<Text as="p">A fixed-width popover for richer panels.</Text>}
-      padding="3">
+      padding={3}>
       <Button label="Open fixed panel" />
     </Popover>
   ),

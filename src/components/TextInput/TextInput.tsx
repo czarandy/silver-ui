@@ -9,8 +9,10 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -232,13 +234,14 @@ export function TextInput({
         value={value}
       />
       {hasClear && value !== '' && !effectiveDisabled ? (
-        <button
-          aria-label={`Clear ${label}`}
-          className={inputStyles.clearButton}
+        <Button
+          icon={X}
+          isIconOnly
+          label={`Clear ${label}`}
           onClick={() => onChange('', null)}
-          type="button">
-          <Icon icon={X} size="sm" />
-        </button>
+          size="sm"
+          variant="ghost"
+        />
       ) : null}
       {endContent}
       {isLoading ? <Spinner size="sm" /> : null}
@@ -262,8 +265,7 @@ export function TextInput({
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isOptional={isOptional}
-      isRequired={isRequired}
+      {...getNecessity(isOptional, isRequired)}
       label={label}
       labelIcon={labelIcon}
       labelTooltip={labelTooltip}

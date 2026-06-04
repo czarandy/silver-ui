@@ -2,12 +2,12 @@ import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {useDialogContext} from '../Dialog/DialogContext';
 import {Heading, Text} from '../Text';
 import {layoutRegionRecipe} from './Layout.recipe';
 import {useLayoutDivider} from './LayoutContext';
-import type {SpacingStep} from './types';
 
 /**
  * Header landmark region within a Layout with a structured title,
@@ -41,7 +41,7 @@ export interface LayoutHeaderProps {
   /**
    * Inner padding.
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
   /**
    * Ref forwarded to the header element.
    */

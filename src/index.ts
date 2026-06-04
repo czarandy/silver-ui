@@ -348,7 +348,7 @@ export {
   type LayoutHeight,
   type LayoutPanelProps,
   type LayoutProps,
-  type SpacingStep,
+  type SpacingToken,
 } from './components/Layout';
 export {
   SideNav,
@@ -500,6 +500,8 @@ export {
 } from './components/Calendar';
 export {
   Field,
+  getNecessity,
+  type FieldNecessity,
   type FieldProps,
   type FieldStatus,
   type FieldStatusVariant,
@@ -691,3 +693,12 @@ export {
   type RadioGroupSize,
 } from './components/RadioGroup';
 export {cx} from './internal/cx';
+export {
+  materialTheme,
+  neutralTheme,
+  nordTheme,
+  solarizedTheme,
+  themePresets,
+  type ThemePreset,
+  type ThemePresetName,
+} from './themes/presets';

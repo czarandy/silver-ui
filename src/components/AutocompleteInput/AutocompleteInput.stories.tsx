@@ -171,7 +171,7 @@ export const WithStartIcon: Story = {
 };
 
 export const PreSelectedValue: Story = {
-  render: args => {
+  render: (args: AutocompleteInputProps) => {
     const [value, setValue] = useState<SearchableItem<{role: string}> | null>(
       people[1],
     );
@@ -191,7 +191,7 @@ export const PreSelectedValue: Story = {
 
 export const WithoutClearButton: Story = {
   args: {hasClear: false},
-  render: args => {
+  render: (args: AutocompleteInputProps) => {
     const [value, setValue] = useState<SearchableItem<{role: string}> | null>(
       people[0],
     );
@@ -209,7 +209,7 @@ export const WithoutClearButton: Story = {
 };
 
 export const Sizes: Story = {
-  render: args => {
+  render: (args: AutocompleteInputProps) => {
     const source = useMemo(() => createStaticSource(people), []);
     const [small, setSmall] = useState<SearchableItem | null>(null);
     const [medium, setMedium] = useState<SearchableItem | null>(null);
@@ -248,7 +248,7 @@ export const Sizes: Story = {
 };
 
 export const AsyncSearchSource: Story = {
-  render: args => {
+  render: (args: AutocompleteInputProps) => {
     const [value, setValue] = useState<SearchableItem | null>(null);
     const source = useMemo(() => createAsyncSource(manyPeople), []);
     return (
@@ -298,7 +298,7 @@ export const BaseAutocompleteInputStandalone: Story = {
 };
 
 export const LargeItemList: Story = {
-  render: args => {
+  render: (args: AutocompleteInputProps) => {
     const [value, setValue] = useState<SearchableItem | null>(null);
     const source = useMemo(() => createStaticSource(manyPeople), []);
     return (
@@ -316,7 +316,11 @@ export const LargeItemList: Story = {
 };
 
 export const RequiredAndOptional: Story = {
-  render: args => {
+  render: ({
+    isOptional: _io,
+    isRequired: _ir,
+    ...args
+  }: AutocompleteInputProps) => {
     const source = useMemo(() => createStaticSource(people), []);
     const [required, setRequired] = useState<SearchableItem | null>(null);
     const [optional, setOptional] = useState<SearchableItem | null>(null);

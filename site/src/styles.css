@@ -1,14 +1,12 @@
 :root {
-  /* teal accent — used by the feature card markers */
-  --teal-deep: #0d9488;
-  --teal-light: #5eead4;
-  /* ink */
-  --ink: #1a1d22;
-
-  --bg: #fafafa;
   --maxw: 1080px;
+}
 
+[data-theme='light'] {
   color-scheme: light;
+}
+[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 * {
@@ -27,8 +25,6 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
-  background: var(--bg);
-  color: var(--ink);
   line-height: 1.5;
 }
 
@@ -36,6 +32,8 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: var(--silver-colors-bg);
+  color: var(--silver-colors-fg);
 }
 
 /* ---- nav (TopNav owns layout; we only size the logo) ---- */
@@ -49,13 +47,8 @@ body {
 .hero {
   max-width: 760px;
   margin: 0 auto;
-  padding: 72px 24px 88px;
+  padding: 72px 24px;
   text-align: center;
-}
-
-.hero__mark {
-  display: block;
-  margin: 0 auto 28px;
 }
 
 .hero__title {
@@ -72,21 +65,18 @@ body {
   margin: 0 auto 28px;
 }
 
-.hero__tags {
-  margin-bottom: 32px;
-}
-
 .hero__install {
   display: flex;
   justify-content: center;
   margin-bottom: 32px;
+  margin-top: 32px;
 }
 
 /* ---- features ---- */
 .features {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 0 24px 96px;
+  padding: 0 24px 72px;
   display: grid;
   gap: 20px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -102,27 +92,39 @@ body {
   gap: 10px;
 }
 
-.feature__title::before {
-  content: '';
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  background: linear-gradient(135deg, var(--teal-light), var(--teal-deep));
-  flex: none;
-}
-
-/* ---- footer ---- */
-.page__divider {
-  margin-top: auto;
-}
-
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  width: 100%;
+/* ---- theme showcase ---- */
+.showcase {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 24px;
+  padding: 0 24px 96px;
+}
+
+.showcase__heading {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 32px;
+  text-align: center;
+}
+
+.showcase__lede {
+  text-align: center;
+  margin: 0 auto 32px;
+  max-width: 560px;
+}
+
+.showcase__selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.showcase__panel {
+  position: relative;
+}
+
+.showcase__control {
+  position: absolute;
+  top: 24px;
+  right: 24px;
 }

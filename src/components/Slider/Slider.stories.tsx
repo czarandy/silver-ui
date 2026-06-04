@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
+import {getNecessity} from '../Field';
 import {VStack} from '../Stack';
 import {Slider, type SliderRangeProps, type SliderSingleProps} from './Slider';
 
@@ -40,11 +41,20 @@ type ControlledSingleSliderProps = Omit<
 
 function ControlledSingleSlider({
   value: initialValue = 50,
+  isOptional,
+  isRequired,
   ...args
 }: ControlledSingleSliderProps): React.JSX.Element {
   const [value, setValue] = useState(initialValue);
 
-  return <Slider {...args} onChange={setValue} value={value} />;
+  return (
+    <Slider
+      {...args}
+      {...getNecessity(isOptional, isRequired)}
+      onChange={setValue}
+      value={value}
+    />
+  );
 }
 
 type ControlledRangeSliderProps = Omit<
@@ -56,11 +66,20 @@ type ControlledRangeSliderProps = Omit<
 
 function ControlledRangeSlider({
   value: initialValue = DEFAULT_RANGE_VALUE,
+  isOptional,
+  isRequired,
   ...args
 }: ControlledRangeSliderProps): React.JSX.Element {
   const [value, setValue] = useState<[number, number]>(initialValue);
 
-  return <Slider {...args} onChange={setValue} value={value} />;
+  return (
+    <Slider
+      {...args}
+      {...getNecessity(isOptional, isRequired)}
+      onChange={setValue}
+      value={value}
+    />
+  );
 }
 
 const defaultMarks = [

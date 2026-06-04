@@ -3,8 +3,10 @@ import {Clock, X} from 'lucide-react';
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -190,7 +192,7 @@ export function TimeInput({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field
@@ -240,13 +242,14 @@ export function TimeInput({
           value={toInputString(value, hasSeconds)}
         />
         {hasClear && value != null && !isDisabled ? (
-          <button
-            aria-label={`Clear ${label}`}
-            className={inputStyles.clearButton}
+          <Button
+            icon={X}
+            isIconOnly
+            label={`Clear ${label}`}
             onClick={() => onChange(undefined)}
-            type="button">
-            <Icon icon={X} size="sm" />
-          </button>
+            size="sm"
+            variant="ghost"
+          />
         ) : null}
         {isLoading ? <Spinner size="sm" /> : null}
         {status != null ? (

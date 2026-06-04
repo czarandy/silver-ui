@@ -13,6 +13,7 @@ import {cx} from '../../internal/cx';
 import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -210,7 +211,7 @@ export function AutocompleteInput<T extends SearchableItem>({
     [status, statusMessageID],
   );
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field

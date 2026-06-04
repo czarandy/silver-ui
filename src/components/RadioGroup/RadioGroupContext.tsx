@@ -1,7 +1,7 @@
 import {createContext} from 'react';
 
 export type RadioGroupOrientation = 'horizontal' | 'vertical';
-export type RadioGroupSize = 'sm' | 'md';
+export type RadioGroupSize = 'sm' | 'md' | 'lg';
 
 export interface RadioGroupContextValue {
   isDisabled: boolean;

@@ -86,4 +86,36 @@ describe('PasswordInput', () => {
     await user.keyboard(' ');
     expect(input).toHaveAttribute('type', 'password');
   });
+
+  it('forwards data-testid to the input', () => {
+    render(
+      <PasswordInput
+        data-testid="pw-input"
+        label="Password"
+        onChange={noop}
+        value=""
+      />,
+    );
+
+    expect(screen.getByTestId('pw-input')).toBeInTheDocument();
+    expect(screen.getByTestId('pw-input').tagName).toBe('INPUT');
+  });
+
+  it('forwards className and style', () => {
+    const {container} = render(
+      <PasswordInput
+        className="custom-pw"
+        data-testid="pw-input"
+        label="Password"
+        onChange={noop}
+        style={{maxWidth: 300}}
+        value=""
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const wrapper = container.querySelector('.custom-pw');
+    expect(wrapper).toBeInTheDocument();
+    expect(wrapper).toHaveStyle({maxWidth: '300px'});
+  });
 });

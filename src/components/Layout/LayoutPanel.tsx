@@ -1,9 +1,9 @@
 import type {ComponentPropsWithRef} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutRegionRecipe} from './Layout.recipe';
 import {useLayoutArea, useLayoutDivider} from './LayoutContext';
-import type {SpacingStep} from './types';
 
 /**
  * Side panel region within a Layout. Placed in the start or end slot,
@@ -25,7 +25,7 @@ export interface LayoutPanelProps extends ComponentPropsWithRef<'div'> {
   /**
    * Inner padding.
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
   /**
    * Fixed width for the panel.
    */

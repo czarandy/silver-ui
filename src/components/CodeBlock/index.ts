@@ -4,3 +4,4 @@ export {
   type CodeBlockProps,
   type CodeBlockSize,
 } from './CodeBlock';
+export {type CodeBlockVariants} from './CodeBlock.recipe';

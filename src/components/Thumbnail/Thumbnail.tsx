@@ -1,12 +1,12 @@
 import {ImageIcon, X} from 'lucide-react';
 import {useState, type CSSProperties, type MouseEvent, type Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
 import {Icon} from '../Icon';
 import {Skeleton} from '../Skeleton';
 import {Spinner} from '../Spinner';
 import {Tooltip} from '../Tooltip';
+import {thumbnailRecipe} from './Thumbnail.recipe';
 
 export interface ThumbnailProps {
   /**
@@ -59,105 +59,21 @@ export interface ThumbnailProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  root: css({
-    position: 'relative',
-    display: 'inline-flex',
-    flexDirection: 'column',
-    w: '16',
-    flexShrink: 0,
-    isolation: 'isolate',
-  }),
-  disabled: css({
-    opacity: 0.5,
-    pointerEvents: 'none',
-  }),
-  imageContainer: css({
-    position: 'relative',
-    w: 'full',
-    aspectRatio: '1',
-    borderRadius: 'md',
-    overflow: 'hidden',
-    bg: 'surface.gray',
-  }),
-  interactive: css({
-    cursor: 'pointer',
-    transitionProperty: 'opacity, box-shadow',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    _hover: {
-      boxShadow: 'lg',
-      opacity: 0.9,
-    },
-    _active: {
-      opacity: 0.75,
-    },
-    '&:has(:focus-visible)': {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  imageButton: css({
-    display: 'block',
-    w: 'full',
-    h: 'full',
-    cursor: 'pointer',
-    borderRadius: 'inherit',
-    overflow: 'hidden',
-  }),
-  image: css({
-    display: 'block',
-    w: 'full',
-    h: 'full',
-    objectFit: 'cover',
-  }),
-  placeholder: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: 'full',
-    h: 'full',
-    color: 'fg.muted',
-  }),
-  insetBorder: css({
-    position: 'absolute',
-    inset: 0,
-    borderRadius: 'inherit',
-    boxShadow: 'inset 0 0 0 1px token(colors.border.emphasized)',
-    pointerEvents: 'none',
-  }),
-  remove: css({
-    position: 'absolute',
-    top: '1',
-    right: '1',
-    zIndex: 1,
-    color: 'fg.onPrimary',
-  }),
-  overlay: css({
-    position: 'absolute',
-    inset: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    bg: 'overlay.scrim.subtle',
-    borderRadius: 'inherit',
-    zIndex: 1,
-  }),
-} as const;
+type ThumbnailClasses = ReturnType<typeof thumbnailRecipe>;
 
 type ThumbnailImageAreaProps = Pick<
   ThumbnailProps,
   'alt' | 'isLoading' | 'onClick' | 'onRemove' | 'src'
 > & {
   accessibleName: string;
+  classes: ThumbnailClasses;
   isDisabled: boolean;
 };
 
 function ThumbnailImageArea({
   accessibleName,
   alt,
+  classes,
   isDisabled,
   isLoading = false,
   onClick,
@@ -173,26 +89,22 @@ function ThumbnailImageArea({
     ) : hasImage ? (
       <img
         alt={alt ?? ''}
-        className={styles.image}
+        className={classes.image}
         onError={() => setHasImageError(true)}
         src={src}
       />
     ) : (
-      <div className={styles.placeholder}>
+      <div className={classes.placeholder}>
         <Icon icon={ImageIcon} size="lg" />
       </div>
     );
 
   return (
-    <div
-      className={cx(
-        styles.imageContainer,
-        isInteractive ? styles.interactive : undefined,
-      )}>
+    <div className={classes.imageContainer}>
       {isInteractive ? (
         <button
           aria-label={`Open ${accessibleName}`}
-          className={styles.imageButton}
+          className={classes.imageButton}
           onClick={onClick}
           type="button">
           {imageContent}
@@ -200,14 +112,14 @@ function ThumbnailImageArea({
       ) : (
         imageContent
       )}
-      {hasImage ? <div className={styles.insetBorder} /> : null}
+      {hasImage ? <div className={classes.insetBorder} /> : null}
       {isLoading && hasImage ? (
-        <div className={styles.overlay}>
+        <div className={classes.overlay}>
           <Spinner size="sm" variant="onMedia" />
         </div>
       ) : null}
       {onRemove != null && !isDisabled ? (
-        <div className={styles.remove}>
+        <div className={classes.remove}>
           <Button
             icon={X}
             isIconOnly
@@ -242,22 +154,21 @@ export function Thumbnail({
   style,
 }: ThumbnailProps): React.JSX.Element {
   const accessibleName = label ?? alt ?? 'thumbnail';
+  const isInteractive = onClick != null && !isDisabled && !isLoading;
+  const classes = thumbnailRecipe({isDisabled, isInteractive});
 
   const thumbnail = (
     <div
       aria-busy={isLoading || undefined}
       aria-label={accessibleName}
-      className={cx(
-        styles.root,
-        isDisabled ? styles.disabled : undefined,
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       <ThumbnailImageArea
         accessibleName={accessibleName}
         alt={alt}
+        classes={classes}
         isDisabled={isDisabled}
         isLoading={isLoading}
         key={src ?? 'empty'}

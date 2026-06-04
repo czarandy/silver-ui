@@ -10,13 +10,13 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {Card} from '../Card';
 import {Divider} from '../Divider';
-import type {SpacingStep} from '../Layout/types';
+import {codeBlockRecipe} from './CodeBlock.recipe';
 
 export type CodeBlockContainer = 'card' | 'section' | 'inline';
 export type CodeBlockSize = 'sm' | 'md';
@@ -76,7 +76,7 @@ export interface CodeBlockProps {
    * Inner padding step.
    * @default 4
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
   /**
    * Ref forwarded to the root element.
    */
@@ -100,147 +100,6 @@ export interface CodeBlockProps {
    */
   width?: string;
 }
-
-const styles = {
-  root: css({
-    position: 'relative',
-    isolation: 'isolate',
-    display: 'flex',
-    flexDirection: 'column',
-    color: 'fg',
-    overflow: 'hidden',
-    // Reveal the floating (headerless) copy button on hover or keyboard focus.
-    '&:hover [data-cb-copy], &:focus-within [data-cb-copy]': {
-      opacity: 1,
-      pointerEvents: 'auto',
-    },
-  }),
-  card: css({
-    borderRadius: 'md',
-  }),
-  // Layout only — the surface (bg/border/radius) comes from the <Card> wrapper.
-  inline: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    maxWidth: '100%',
-    color: 'fg',
-    ps: '2.5',
-  }),
-  inlineCode: css({
-    minW: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'pre',
-    fontFamily: 'mono',
-  }),
-  inlineDivider: css({
-    alignSelf: 'stretch',
-    ms: '1.5',
-  }),
-  header: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '3',
-    px: '4',
-    py: '2',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  headerTitle: css({
-    minW: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    color: 'fg.muted',
-    fontFamily: 'mono',
-    fontSize: 'xs',
-    fontWeight: 'medium',
-  }),
-  scroll: css({
-    overflow: 'auto',
-  }),
-  body: css({
-    display: 'flex',
-    minW: 'fit-content',
-  }),
-  gutter: css({
-    flexShrink: 0,
-    py: '3',
-    ps: '4',
-    pe: '3',
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-    color: 'fg.muted',
-    textAlign: 'end',
-    userSelect: 'none',
-  }),
-  gutterLine: css({
-    fontFamily: 'mono',
-    lineHeight: '1.5rem',
-  }),
-  pre: css({
-    m: 0,
-    flex: 1,
-    minW: 0,
-  }),
-  code: css({
-    display: 'flex',
-    flexDirection: 'column',
-    color: 'fg',
-    fontFamily: 'mono',
-    tabSize: 2,
-    whiteSpace: 'pre',
-    wordBreak: 'normal',
-    overflowWrap: 'normal',
-  }),
-  codeWithFloatingCopy: css({
-    pe: '12',
-  }),
-  codeWrapped: css({
-    whiteSpace: 'pre-wrap',
-    wordBreak: 'break-word',
-    overflowWrap: 'anywhere',
-  }),
-  sizeSm: css({
-    fontSize: 'xs',
-    lineHeight: '1.5rem',
-  }),
-  sizeMd: css({
-    fontSize: 'sm',
-    lineHeight: '1.5rem',
-  }),
-  line: css({
-    display: 'block',
-    minH: '1.5rem',
-  }),
-  lineHighlighted: css({
-    bg: 'bg.selected',
-    mx: 'calc(var(--cb-padding) * -1)',
-    px: 'var(--cb-padding)',
-  }),
-  copyButtonFloating: css({
-    position: 'absolute',
-    top: '3',
-    right: '3',
-    zIndex: 1,
-    // On hover-capable devices, hide until the block is hovered/focused (the
-    // root reveals it). On touch devices (no hover) it stays visible.
-    '@media (hover: hover)': {
-      opacity: 0,
-      pointerEvents: 'none',
-      transitionProperty: 'opacity',
-      transitionDuration: 'fast',
-      transitionTimingFunction: 'default',
-      '@media (prefers-reduced-motion: reduce)': {
-        transitionDuration: '0s',
-      },
-    },
-  }),
-} as const;
 
 function getLines(code: string): string[] {
   const lines = code.split('\n');
@@ -310,8 +169,14 @@ export function CodeBlock({
   );
   const isInline = container === 'inline';
   const showHeader = !isInline && title != null;
-  const sizeClassName = size === 'sm' ? styles.sizeSm : styles.sizeMd;
   const regionLabel = getRegionLabel({label, title});
+
+  const classes = codeBlockRecipe({
+    container,
+    size,
+    isWrapped,
+    hasFloatingCopy: !showHeader && hasCopyButton,
+  });
 
   useEffect(() => {
     return () => {
@@ -384,7 +249,7 @@ export function CodeBlock({
     return (
       <Card
         aria-label={regionLabel}
-        className={cx(styles.inline, className)}
+        className={cx(classes.root, className)}
         data-container={container}
         data-size={size}
         data-testid={dataTestId}
@@ -393,14 +258,14 @@ export function CodeBlock({
         role="group"
         style={rootStyle}>
         <code
-          className={cx(styles.inlineCode, sizeClassName)}
+          className={classes.inlineCode}
           data-testid={dataTestId == null ? undefined : `${dataTestId}-code`}>
           {code}
         </code>
         {copyButton != null ? (
           <>
             <Divider
-              className={styles.inlineDivider}
+              className={classes.inlineDivider}
               height="auto"
               isFullBleed
               orientation="vertical"
@@ -415,11 +280,7 @@ export function CodeBlock({
   return (
     <Card
       aria-label={regionLabel}
-      className={cx(
-        styles.root,
-        container === 'card' ? styles.card : undefined,
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-container={container}
       data-size={size}
       data-testid={dataTestId}
@@ -428,36 +289,29 @@ export function CodeBlock({
       style={rootStyle}
       variant={container === 'section' ? 'section' : 'default'}>
       {showHeader ? (
-        <div className={styles.header}>
-          <div className={styles.headerTitle}>{title}</div>
+        <div className={classes.header}>
+          <div className={classes.headerTitle}>{title}</div>
           {copyButton}
         </div>
       ) : null}
       <div
         {...scrollRegionProps}
-        className={styles.scroll}
+        className={classes.scroll}
         data-testid={dataTestId == null ? undefined : `${dataTestId}-scroll`}
         style={scrollStyle}>
-        <div className={styles.body}>
+        <div className={classes.body}>
           {hasLineNumbers ? (
-            <div
-              aria-hidden="true"
-              className={cx(styles.gutter, sizeClassName)}>
+            <div aria-hidden="true" className={classes.gutter}>
               {lines.map(line => (
-                <div className={styles.gutterLine} key={line.lineNumber}>
+                <div className={classes.gutterLine} key={line.lineNumber}>
                   {line.lineNumber}
                 </div>
               ))}
             </div>
           ) : null}
-          <pre className={styles.pre}>
+          <pre className={classes.pre}>
             <code
-              className={cx(
-                styles.code,
-                sizeClassName,
-                !showHeader && hasCopyButton && styles.codeWithFloatingCopy,
-                isWrapped && styles.codeWrapped,
-              )}
+              className={classes.code}
               data-testid={
                 dataTestId == null ? undefined : `${dataTestId}-code`
               }
@@ -465,11 +319,7 @@ export function CodeBlock({
               style={codeStyle}>
               {lines.map(line => (
                 <span
-                  className={cx(
-                    styles.line,
-                    highlightedLines?.has(line.lineNumber) &&
-                      styles.lineHighlighted,
-                  )}
+                  className={classes.line}
                   data-highlighted={
                     highlightedLines?.has(line.lineNumber) ? '' : undefined
                   }
@@ -483,7 +333,7 @@ export function CodeBlock({
         </div>
       </div>
       {!showHeader && copyButton != null ? (
-        <div className={styles.copyButtonFloating} data-cb-copy="">
+        <div className={classes.copyButtonFloating} data-cb-copy="">
           {copyButton}
         </div>
       ) : null}

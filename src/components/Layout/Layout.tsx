@@ -2,6 +2,7 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutMiddleRecipe, layoutRecipe} from './Layout.recipe';
 import {
   LayoutAreaContext,
@@ -9,7 +10,7 @@ import {
   LayoutSlotsContext,
   type LayoutArea,
 } from './LayoutContext';
-import type {LayoutHeight, SpacingStep} from './types';
+import type {LayoutHeight} from './types';
 
 /**
  * Shell with header, side panels, content, and footer slots.
@@ -50,7 +51,7 @@ export interface LayoutProps {
   /**
    * Outer padding for layout edges.
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
   /**
    * Ref forwarded to the root element.
    */

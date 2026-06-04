@@ -136,4 +136,77 @@ describe('RadioGroup', () => {
       render(<RadioGroupItem label="Orphan" value="orphan" />),
     ).toThrow('RadioGroupItem must be used within a RadioGroup');
   });
+
+  it('sets aria-orientation to horizontal', () => {
+    render(
+      <RadioGroup
+        label="Notification preference"
+        onChange={() => {}}
+        orientation="horizontal"
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByRole('radiogroup')).toHaveAttribute(
+      'aria-orientation',
+      'horizontal',
+    );
+  });
+
+  it('forwards className, style, data-testid, and ref', () => {
+    const ref = vi.fn<(element: HTMLDivElement | null) => void>();
+
+    render(
+      <RadioGroup
+        className="custom-class"
+        data-testid="rg"
+        label="Notification preference"
+        onChange={() => {}}
+        ref={ref}
+        style={{maxWidth: 400}}
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+      </RadioGroup>,
+    );
+
+    const root = screen.getByTestId('rg');
+    expect(root).toHaveClass('custom-class');
+    expect(root).toHaveStyle({maxWidth: '400px'});
+    expect(ref).toHaveBeenCalledWith(root);
+  });
+
+  it('renders startContent on a radio item', () => {
+    render(
+      <RadioGroup
+        label="Notification preference"
+        onChange={() => {}}
+        value="email">
+        <RadioGroupItem
+          label="Email"
+          startContent={<span data-testid="start-icon">📧</span>}
+          value="email"
+        />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByTestId('start-icon')).toBeInTheDocument();
+  });
+
+  it('renders endContent on a radio item', () => {
+    render(
+      <RadioGroup
+        label="Notification preference"
+        onChange={() => {}}
+        value="email">
+        <RadioGroupItem
+          endContent={<span data-testid="end-badge">Recommended</span>}
+          label="Email"
+          value="email"
+        />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByTestId('end-badge')).toBeInTheDocument();
+  });
 });

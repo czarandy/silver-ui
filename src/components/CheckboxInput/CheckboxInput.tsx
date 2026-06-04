@@ -14,7 +14,7 @@ import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import type {FieldNecessity, InputStatus} from '../Field';
-import {fieldStatusRecipe} from '../Field/Field.recipe';
+import {fieldRecipe} from '../Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
@@ -333,10 +333,12 @@ export function CheckboxInput({
     status?.message != null ? (
       <div
         aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-        className={fieldStatusRecipe({
-          statusType: status.type,
-          statusVariant: 'detached',
-        })}
+        className={
+          fieldRecipe({
+            statusType: status.type,
+            statusVariant: 'detached',
+          }).status
+        }
         id={statusMessageID}
         role={status.type === 'error' ? 'alert' : 'status'}>
         {status.message}

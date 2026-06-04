@@ -8,6 +8,7 @@ import {
 import {cx} from '../../internal/cx';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -106,7 +107,7 @@ export function InputGroup({
     [isDisabled, label, size, status?.type],
   );
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <InputGroupContext value={contextValue}>

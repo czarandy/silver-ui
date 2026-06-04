@@ -21,7 +21,7 @@ export default meta;
 type Story = StoryObj<DateInputProps>;
 
 export const Default: Story = {
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );
@@ -30,7 +30,7 @@ export const Default: Story = {
 };
 
 export const Placeholder: Story = {
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>();
     return <DateInput {...args} onChange={setValue} value={value} />;
   },
@@ -38,7 +38,7 @@ export const Placeholder: Story = {
 
 export const WithConstraints: Story = {
   args: {hasClear: true},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );
@@ -56,7 +56,7 @@ export const WithConstraints: Story = {
 
 export const Disabled: Story = {
   args: {isDisabled: true},
-  render: args => (
+  render: (args: DateInputProps) => (
     <DateInput
       {...args}
       onChange={() => {}}
@@ -67,7 +67,7 @@ export const Disabled: Story = {
 
 export const Loading: Story = {
   args: {isLoading: true},
-  render: args => (
+  render: (args: DateInputProps) => (
     <DateInput
       {...args}
       onChange={() => {}}
@@ -78,7 +78,7 @@ export const Loading: Story = {
 
 export const WithDescription: Story = {
   args: {description: 'Choose the date this task is due.'},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );
@@ -88,7 +88,7 @@ export const WithDescription: Story = {
 
 export const Required: Story = {
   args: {isRequired: true},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );
@@ -98,7 +98,7 @@ export const Required: Story = {
 
 export const Optional: Story = {
   args: {isOptional: true},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );
@@ -108,7 +108,7 @@ export const Optional: Story = {
 
 export const HiddenLabel: Story = {
   args: {isLabelHidden: true},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );
@@ -118,7 +118,7 @@ export const HiddenLabel: Story = {
 
 export const ErrorStatus: Story = {
   args: {status: {message: 'Date is required', type: 'error'}},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>();
     return <DateInput {...args} onChange={setValue} value={value} />;
   },
@@ -126,7 +126,7 @@ export const ErrorStatus: Story = {
 
 export const WarningStatus: Story = {
   args: {status: {message: 'Date is in the past', type: 'warning'}},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2024, 1, 15),
     );
@@ -136,7 +136,7 @@ export const WarningStatus: Story = {
 
 export const SuccessStatus: Story = {
   args: {status: {message: 'Date is available', type: 'success'}},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );
@@ -167,7 +167,7 @@ export const Sizes: Story = {
 
 export const WithLabelTooltip: Story = {
   args: {labelTooltip: 'The date by which this task should be completed.'},
-  render: args => {
+  render: (args: DateInputProps) => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
       plainDateCreate(2026, 5, 21),
     );

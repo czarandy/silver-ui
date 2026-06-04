@@ -6,10 +6,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import {Icon, type IconColor, type IconSize} from '../Icon';
+import {ratingRecipe} from './Rating.recipe';
 
 export interface RatingProps {
   /**
@@ -73,48 +73,6 @@ export interface RatingProps {
   value: number;
 }
 
-const styles = {
-  root: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5',
-  }),
-  star: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    cursor: 'pointer',
-    p: 0,
-    m: 0,
-    borderWidth: 0,
-    bg: 'transparent',
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-      borderRadius: 'sm',
-    },
-  }),
-  disabled: css({
-    opacity: 0.5,
-    cursor: 'not-allowed',
-  }),
-  readOnly: css({
-    cursor: 'default',
-  }),
-  input: css({
-    position: 'absolute',
-    w: '1px',
-    h: '1px',
-    p: 0,
-    m: '-1px',
-    overflow: 'hidden',
-    clip: 'rect(0, 0, 0, 0)',
-    whiteSpace: 'nowrap',
-    borderWidth: 0,
-  }),
-} as const;
-
 function StarIcon({
   color,
   isFilled,
@@ -175,22 +133,22 @@ export function Rating({
   const [hoverValue, setHoverValue] = useState<number | null>(null);
   const isInteractive = !isReadOnly && !isDisabled && onChange != null;
   const displayValue = isInteractive ? (hoverValue ?? value) : value;
+  const classes = ratingRecipe({
+    isDisabled: isDisabled || undefined,
+    isReadOnly: isReadOnly || undefined,
+  });
 
   if (!isInteractive) {
     return (
       <div
         aria-label={`${label}: ${value} out of ${count}`}
-        className={cx(
-          styles.root,
-          isDisabled ? styles.disabled : undefined,
-          className,
-        )}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={ref}
         role="img"
         style={style}>
         {Array.from({length: count}, (_, i) => (
-          <span className={styles.readOnly} key={i}>
+          <span className={classes.star} key={i}>
             <StarIcon
               color={i < value ? filledColor : emptyColor}
               isFilled={i < value}
@@ -206,7 +164,7 @@ export function Rating({
     // eslint-disable-next-line jsx-a11y-x/interactive-supports-focus -- focus is managed by the radio inputs inside
     <div
       aria-label={label}
-      className={cx(styles.root, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       onMouseLeave={() => setHoverValue(null)}
       ref={ref}
@@ -217,12 +175,12 @@ export function Rating({
         return (
           // eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- label wraps its radio input
           <label
-            className={styles.star}
+            className={classes.star}
             key={i}
             onMouseEnter={() => setHoverValue(starValue)}>
             <input
               checked={value === starValue}
-              className={styles.input}
+              className={classes.input}
               name={groupId}
               onChange={() => onChange(starValue)}
               type="radio"

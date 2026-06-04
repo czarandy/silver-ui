@@ -1,6 +1,6 @@
 import type {CSSProperties, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {skeletonRecipe} from './Skeleton.recipe';
 
 export type SkeletonRadius = 0 | 1 | 2 | 3 | 4 | 'none' | 'rounded';
 
@@ -52,29 +52,6 @@ export interface SkeletonProps {
 const delayTime = 1000;
 const staggerTime = 100;
 
-const styles = {
-  root: css({
-    bg: 'skeleton',
-    backgroundImage:
-      'linear-gradient(90deg, token(colors.skeleton) 0%, token(colors.skeleton.shimmer) 50%, token(colors.skeleton) 100%)',
-    backgroundSize: '200% 100%',
-    animation: 'skeleton-shimmer 1.4s ease-in-out infinite',
-    '@media (prefers-reduced-motion: reduce)': {
-      animation: 'none',
-      backgroundImage: 'none',
-    },
-  }),
-  radius: {
-    none: css({borderRadius: 0}),
-    0: css({borderRadius: 0}),
-    1: css({borderRadius: 'xs'}),
-    2: css({borderRadius: 'sm'}),
-    3: css({borderRadius: 'md'}),
-    4: css({borderRadius: 'lg'}),
-    rounded: css({borderRadius: 'full'}),
-  } satisfies Record<SkeletonRadius, string>,
-} as const;
-
 function formatSize(value: number | string): string {
   return typeof value === 'number' ? `${value}px` : value;
 }
@@ -101,15 +78,15 @@ export function Skeleton({
   return (
     <div
       aria-label={ariaLabel}
-      className={cx(styles.root, styles.radius[radius], className)}
+      className={cx(skeletonRecipe({radius}), className)}
       data-testid={dataTestId}
       ref={ref}
       role="status"
       style={{
+        ...style,
         width: formatSize(width),
         height: formatSize(height),
         animationDelay: `${delayTime + staggerTime * clampedIndex}ms`,
-        ...style,
       }}
     />
   );

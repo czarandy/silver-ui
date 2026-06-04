@@ -49,9 +49,9 @@ export const buttonRecipe = cva({
         _active: {bg: 'primary.active'},
       },
       secondary: {
-        bg: 'bg.subtle',
+        bg: 'surface.gray',
         color: 'fg',
-        _hover: {bg: 'bg.hover'},
+        _hover: {bg: 'surface.gray.hover'},
         _active: {bg: 'surface.gray.hover'},
       },
       ghost: {

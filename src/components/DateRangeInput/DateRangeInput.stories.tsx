@@ -27,7 +27,7 @@ const defaultRange: DateRange = {
 };
 
 export const Default: Story = {
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );
@@ -36,7 +36,7 @@ export const Default: Story = {
 };
 
 export const Empty: Story = {
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>();
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
@@ -44,7 +44,7 @@ export const Empty: Story = {
 
 export const WithClear: Story = {
   args: {hasClear: true},
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );
@@ -53,7 +53,7 @@ export const WithClear: Story = {
 };
 
 export const WithConstraints: Story = {
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );
@@ -70,7 +70,7 @@ export const WithConstraints: Story = {
 };
 
 export const DisabledWeekends: Story = {
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );
@@ -87,21 +87,21 @@ export const DisabledWeekends: Story = {
 
 export const Disabled: Story = {
   args: {isDisabled: true},
-  render: args => (
+  render: (args: DateRangeInputProps) => (
     <DateRangeInput {...args} onChange={() => {}} value={defaultRange} />
   ),
 };
 
 export const Loading: Story = {
   args: {isLoading: true},
-  render: args => (
+  render: (args: DateRangeInputProps) => (
     <DateRangeInput {...args} onChange={() => {}} value={defaultRange} />
   ),
 };
 
 export const ErrorStatus: Story = {
   args: {status: {message: 'End date must be after start date', type: 'error'}},
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );
@@ -111,7 +111,7 @@ export const ErrorStatus: Story = {
 
 export const WarningStatus: Story = {
   args: {status: {message: 'Range exceeds 7 days', type: 'warning'}},
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );
@@ -121,7 +121,7 @@ export const WarningStatus: Story = {
 
 export const SingleMonth: Story = {
   args: {numberOfMonths: 1},
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );
@@ -131,7 +131,7 @@ export const SingleMonth: Story = {
 
 export const WithDescription: Story = {
   args: {description: 'Select a check-in and check-out date.'},
-  render: args => {
+  render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | undefined>(
       () => defaultRange,
     );

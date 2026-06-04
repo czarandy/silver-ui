@@ -8,3 +8,7 @@ export {
   type RadioGroupSize,
 } from './RadioGroupContext';
 export {RadioGroupItem, type RadioGroupItemProps} from './RadioGroupItem';
+export {
+  type RadioGroupItemVariants,
+  type RadioGroupVariants,
+} from './RadioGroup.recipe';

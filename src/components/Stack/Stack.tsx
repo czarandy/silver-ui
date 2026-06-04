@@ -7,8 +7,8 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {toPixelSize, type SizeValue} from '../../internal/toPixelSize';
-import type {SpacingStep} from '../Layout/types';
 import {stackRecipe} from './Stack.recipe';
 
 export type {SizeValue};
@@ -23,7 +23,7 @@ export type StackMainAlignment =
 export type StackCrossAlignment = 'start' | 'center' | 'end' | 'stretch';
 export type StackAlignment = StackMainAlignment | StackCrossAlignment;
 export type StackWrap = 'nowrap' | 'wrap' | 'wrap-reverse';
-export type StackGap = SpacingStep;
+export type StackGap = SpacingToken;
 
 export interface StackProps extends HTMLAttributes<HTMLElement> {
   /**

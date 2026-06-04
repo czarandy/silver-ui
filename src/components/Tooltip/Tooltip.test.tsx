@@ -179,4 +179,46 @@ describe('Tooltip', () => {
       screen.getByRole('button', {name: 'External trigger'}),
     ).toHaveAttribute('aria-describedby');
   });
+
+  it('keeps tooltip visible during hideDelay', () => {
+    vi.useFakeTimers();
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0} hideDelay={300}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    fireEvent.mouseEnter(trigger);
+
+    // delay=0 still uses setTimeout(fn, 0); advance to trigger show.
+    vi.advanceTimersByTime(0);
+    expect(showPopoverMock).toHaveBeenCalled();
+
+    fireEvent.mouseLeave(trigger);
+
+    // Tooltip should still be visible before hideDelay elapses.
+    vi.advanceTimersByTime(100);
+    expect(hidePopoverMock).not.toHaveBeenCalled();
+
+    // After the full hideDelay, it should hide.
+    vi.advanceTimersByTime(200);
+    expect(hidePopoverMock).toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
+  it('applies alignment to the tooltip layer', () => {
+    render(
+      <Tooltip alignment="start" content="Tooltip text" placement="above">
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    expect(tooltip).toHaveStyle({positionArea: 'top span-right'});
+  });
 });

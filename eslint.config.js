@@ -322,7 +322,7 @@ export default tseslint.config(
   // Color tokens — source must use semantic color tokens for dark-mode support
   {
     files: ['src/**/*.{ts,tsx}'],
-    ignores: ['**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}', 'src/themes/**'],
     plugins: {
       'silver-ui': silverUiPlugin,
     },

@@ -13,13 +13,15 @@ import {
   useSelectListbox,
   type SelectListboxOptionData,
 } from '../../internal/useSelectListbox';
+import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe, inputStyles} from '../Field/inputStyles';
+import {inputRecipe} from '../Field/inputStyles';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
@@ -466,7 +468,7 @@ export function Select({
     </>
   );
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   const trigger = (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- mouse clicks anywhere on the visual input delegate to the inner combobox button; keyboard handling stays on that button.
@@ -517,16 +519,17 @@ export function Select({
       </button>
       {isLoading ? <Spinner size="sm" /> : null}
       {hasClear && selectedOption != null && !isDisabled ? (
-        <button
-          aria-label={`Clear ${label}`}
-          className={inputStyles.clearButton}
+        <Button
+          icon={X}
+          isIconOnly
+          label={`Clear ${label}`}
           onClick={event => {
             event.stopPropagation();
             onChange(null);
           }}
-          type="button">
-          <Icon icon={X} size="sm" />
-        </button>
+          size="sm"
+          variant="ghost"
+        />
       ) : null}
       <span className={styles.iconSlot}>
         <Icon icon={ChevronDown} size="sm" />

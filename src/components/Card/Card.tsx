@@ -1,6 +1,6 @@
 import type {ComponentPropsWithRef} from 'react';
 import {cx} from '../../internal/cx';
-import type {SpacingStep} from '../Layout/types';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {cardRecipe} from './Card.recipe';
 
 export type CardColor =
@@ -34,7 +34,7 @@ export interface CardProps extends ComponentPropsWithRef<'div'> {
    * Inner padding step.
    * @default 0
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
   /**
    * Visual style variant.
    *

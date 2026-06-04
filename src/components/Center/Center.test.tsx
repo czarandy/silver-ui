@@ -75,7 +75,7 @@ describe('Center', () => {
     });
   });
 
-  it('style prop overrides width and height', () => {
+  it('width and height props take precedence over style', () => {
     render(
       <Center
         data-testid="center"
@@ -87,8 +87,24 @@ describe('Center', () => {
     );
 
     expect(screen.getByTestId('center')).toHaveStyle({
+      width: '300px',
+      height: '200px',
+    });
+  });
+
+  it('passes through style when width and height are not set', () => {
+    render(
+      <Center
+        data-testid="center"
+        style={{width: '50%', height: '50%', color: 'red'}}>
+        Content
+      </Center>,
+    );
+
+    expect(screen.getByTestId('center')).toHaveStyle({
       width: '50%',
       height: '50%',
+      color: 'rgb(255, 0, 0)',
     });
   });
 

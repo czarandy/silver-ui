@@ -4,7 +4,6 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {kbdRecipe} from './Kbd.recipe';
 
@@ -41,18 +40,6 @@ export interface KbdProps {
    */
   style?: CSSProperties;
 }
-
-const styles = {
-  root: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    verticalAlign: 'bottom',
-  }),
-  rootSm: css({gap: '0.5'}),
-  rootMd: css({gap: '1'}),
-  rootLg: css({gap: '1.5'}),
-} as const;
 
 const keyDisplay: Record<string, string> = {
   alt: '⌥',
@@ -163,22 +150,17 @@ export function Kbd({
     };
   }, [keys, isMac]);
 
-  const gapStyle =
-    size === 'sm'
-      ? styles.rootSm
-      : size === 'lg'
-        ? styles.rootLg
-        : styles.rootMd;
+  const classes = kbdRecipe({size});
 
   return (
     <kbd
       aria-label={ariaLabel}
-      className={cx(styles.root, gapStyle, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       {keyedParts.map(part => (
-        <kbd className={kbdRecipe({size})} key={part.id}>
+        <kbd className={classes.key} key={part.id}>
           {part.display}
         </kbd>
       ))}

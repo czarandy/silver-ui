@@ -17,7 +17,7 @@ export default meta;
 type Story = StoryObj<InputGroupProps>;
 
 export const Default: Story = {
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [value, setValue] = useState('');
     return (
       <InputGroup {...args}>
@@ -37,7 +37,7 @@ export const Default: Story = {
 
 export const Currency: Story = {
   args: {label: 'Price'},
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [value, setValue] = useState<number | null>(24);
     return (
       <InputGroup {...args}>
@@ -62,7 +62,7 @@ export const WithStatus: Story = {
     label: 'Website',
     status: {message: 'Website is required', type: 'error'},
   },
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [value, setValue] = useState('');
     return (
       <InputGroup {...args}>
@@ -80,7 +80,7 @@ export const WithStatus: Story = {
 
 export const Disabled: Story = {
   args: {isDisabled: true},
-  render: args => (
+  render: (args: InputGroupProps) => (
     <InputGroup {...args}>
       <InputGroupText>https://</InputGroupText>
       <TextInput
@@ -116,7 +116,7 @@ export const Sizes: Story = {
 
 export const Required: Story = {
   args: {isRequired: true},
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [value, setValue] = useState('');
     return (
       <InputGroup {...args}>
@@ -135,7 +135,7 @@ export const Required: Story = {
 
 export const Optional: Story = {
   args: {isOptional: true},
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [value, setValue] = useState('');
     return (
       <InputGroup {...args}>
@@ -154,7 +154,7 @@ export const Optional: Story = {
 
 export const HiddenLabel: Story = {
   args: {isLabelHidden: true},
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [value, setValue] = useState('');
     return (
       <InputGroup {...args}>
@@ -174,7 +174,7 @@ export const HiddenLabel: Story = {
 
 export const WithLabelTooltip: Story = {
   args: {labelTooltip: 'The full URL where your site is hosted.'},
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [value, setValue] = useState('');
     return (
       <InputGroup {...args}>
@@ -193,7 +193,7 @@ export const WithLabelTooltip: Story = {
 
 export const MultipleInputs: Story = {
   args: {label: 'Date range'},
-  render: args => {
+  render: (args: InputGroupProps) => {
     const [start, setStart] = useState('');
     const [end, setEnd] = useState('');
     return (

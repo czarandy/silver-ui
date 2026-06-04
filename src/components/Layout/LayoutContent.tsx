@@ -1,8 +1,8 @@
 import type {ComponentPropsWithRef, ElementType} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutRegionRecipe} from './Layout.recipe';
-import type {SpacingStep} from './types';
 
 /**
  * Scrollable main content area within a Layout. Fills the remaining space
@@ -28,7 +28,7 @@ export interface LayoutContentProps extends ComponentPropsWithRef<'div'> {
   /**
    * Inner padding.
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
 }
 
 const styles = {

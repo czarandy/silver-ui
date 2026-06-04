@@ -253,7 +253,9 @@ export default defineConfig({
             DEFAULT: {
               value: {
                 base: '{colors.gray.100}',
-                _dark: '{colors.gray.900}',
+                // One step lighter than `bg` (gray.900) so default borders stay
+                // visible in dark mode, mirroring gray.100-on-white in light.
+                _dark: '{colors.gray.800}',
               },
             },
             emphasized: {

@@ -14,9 +14,9 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {Icon} from '../Icon';
-import type {SpacingStep} from '../Layout/types';
 import {Text} from '../Text';
 import {alertRecipe, type AlertVariants} from './Alert.recipe';
 
@@ -81,7 +81,7 @@ export interface AlertProps {
    * Inner padding step.
    * @default 4
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
   /**
    * Ref forwarded to the root element.
    */

@@ -2,6 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Mail, Search} from 'lucide-react';
 import {useState} from 'react';
 import {Badge} from '../Badge';
+import {getNecessity} from '../Field';
 import {TextInput, type TextInputProps} from './TextInput';
 
 const meta = {
@@ -40,17 +41,15 @@ function ControlledTextInput({
   ...args
 }: ControlledTextInputProps): React.JSX.Element {
   const [value, setValue] = useState(initialValue);
-  const props = {
-    ...args,
-    onChange: setValue,
-    value,
-  };
 
-  if (isOptional === true) {
-    return <TextInput {...props} isOptional />;
-  }
-
-  return <TextInput {...props} isRequired={isRequired} />;
+  return (
+    <TextInput
+      {...args}
+      {...getNecessity(isOptional, isRequired)}
+      onChange={setValue}
+      value={value}
+    />
+  );
 }
 
 export const Default: Story = {

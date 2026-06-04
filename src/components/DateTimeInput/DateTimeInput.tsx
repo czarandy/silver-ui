@@ -13,6 +13,7 @@ import {plainDateIsEqual, type PlainDate} from '../../internal/plainDate';
 import {DateInput} from '../DateInput';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -213,7 +214,7 @@ export function DateTimeInput({
     [onChange, date],
   );
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field

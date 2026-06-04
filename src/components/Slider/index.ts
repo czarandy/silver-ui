@@ -8,3 +8,4 @@ export {
   type SliderSingleProps,
   type SliderValueDisplay,
 } from './Slider';
+export {sliderRecipe, type SliderVariants} from './Slider.recipe';

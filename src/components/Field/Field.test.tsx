@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Field} from './Field';
+import {Field, getNecessity} from './Field';
 
 describe('Field', () => {
   it('renders label, description, and status', () => {
@@ -56,5 +56,47 @@ describe('Field', () => {
     expect(labelSpan).not.toBeNull();
     expect(labelSpan?.tagName).toBe('SPAN');
     expect(labelSpan).not.toHaveAttribute('for');
+  });
+
+  it('shows Optional indicator when isOptional is true', () => {
+    render(
+      <Field inputId="opt" isOptional label="Name">
+        <input id="opt" />
+      </Field>,
+    );
+
+    expect(screen.getByText('Optional')).toBeInTheDocument();
+  });
+
+  it('shows Required indicator when isRequired is true', () => {
+    render(
+      <Field inputId="req" isRequired label="Name">
+        <input id="req" />
+      </Field>,
+    );
+
+    expect(screen.getByText('Required')).toBeInTheDocument();
+  });
+
+  describe('getNecessity', () => {
+    it('returns isOptional when isOptional is true', () => {
+      expect(getNecessity(true, undefined)).toEqual({isOptional: true});
+    });
+
+    it('returns isRequired when isRequired is true', () => {
+      expect(getNecessity(undefined, true)).toEqual({isRequired: true});
+    });
+
+    it('returns empty object when neither is set', () => {
+      expect(getNecessity(undefined, undefined)).toEqual({});
+    });
+
+    it('returns isOptional when both are true (isOptional wins)', () => {
+      expect(getNecessity(true, true)).toEqual({isOptional: true});
+    });
+
+    it('returns empty object when both are false', () => {
+      expect(getNecessity(false, false)).toEqual({});
+    });
   });
 });

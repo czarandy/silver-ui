@@ -141,3 +141,23 @@ export const HoverIndication: Story = {
     hasHoverIndication: true,
   },
 };
+
+export const FocusTriggerAlways: Story = {
+  render: (): React.JSX.Element => (
+    <Tooltip
+      content="Shown on focus even though div is not natively focusable"
+      focusTrigger="always">
+      <span role="button" style={{padding: '0.5rem 1rem'}} tabIndex={0}>
+        Focus me (non-interactive element)
+      </span>
+    </Tooltip>
+  ),
+};
+
+export const FocusTriggerNever: Story = {
+  render: (): React.JSX.Element => (
+    <Tooltip content="Only shown on hover, never on focus" focusTrigger="never">
+      <Button label="Hover only" />
+    </Tooltip>
+  ),
+};

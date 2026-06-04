@@ -11,6 +11,7 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -193,7 +194,7 @@ export function TextArea({
   const describedBy = getDescribedBy(descriptionID, statusMessageID, counterID);
   const isOverLimit = maxLength != null && value.length > maxLength;
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field

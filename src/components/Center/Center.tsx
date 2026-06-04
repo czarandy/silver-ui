@@ -55,9 +55,9 @@ export function Center({
       data-testid={dataTestId}
       ref={ref}
       style={{
-        width: toPixelSize(width),
-        height: toPixelSize(height),
         ...style,
+        ...(width != null ? {width: toPixelSize(width)} : undefined),
+        ...(height != null ? {height: toPixelSize(height)} : undefined),
       }}>
       {children}
     </div>

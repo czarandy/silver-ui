@@ -9,10 +9,15 @@ import {
   type PointerEvent,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {Field, type FieldNecessity, type InputStatus} from '../Field';
+import {
+  Field,
+  getNecessity,
+  type FieldNecessity,
+  type InputStatus,
+} from '../Field';
 import {Tooltip} from '../Tooltip';
+import {sliderRecipe} from './Slider.recipe';
 
 export type SliderOrientation = 'horizontal' | 'vertical';
 export type SliderValueDisplay = 'tooltip' | 'text' | 'none';
@@ -143,166 +148,6 @@ export type SliderRangeProps = SliderBaseProps & {
 };
 
 export type SliderProps = SliderRangeProps | SliderSingleProps;
-
-const THUMB_SIZE = 20;
-const TRACK_SIZE = 4;
-
-const styles = {
-  fieldVertical: css({
-    alignItems: 'center',
-    w: 'fit-content',
-  }),
-  row: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-  }),
-  rowVertical: css({
-    flexDirection: 'column',
-    alignItems: 'center',
-  }),
-  textValue: css({
-    flexShrink: 0,
-    color: 'fg',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    whiteSpace: 'nowrap',
-  }),
-  trackContainer: css({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    isolation: 'isolate',
-    touchAction: 'none',
-    userSelect: 'none',
-  }),
-  trackContainerDisabled: css({
-    cursor: 'not-allowed',
-    opacity: 0.5,
-  }),
-  trackContainerHorizontal: css({
-    w: 'full',
-    h: `${THUMB_SIZE}px`,
-    flexGrow: 1,
-    cursor: 'pointer',
-  }),
-  trackContainerVertical: css({
-    w: `${THUMB_SIZE}px`,
-    h: '40',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    cursor: 'pointer',
-  }),
-  track: css({
-    position: 'absolute',
-    bg: 'track',
-    borderRadius: 'full',
-  }),
-  trackHorizontal: css({
-    insetInline: 0,
-    top: '50%',
-    h: `${TRACK_SIZE}px`,
-    transform: 'translateY(-50%)',
-  }),
-  trackVertical: css({
-    insetBlock: 0,
-    left: '50%',
-    w: `${TRACK_SIZE}px`,
-    transform: 'translateX(-50%)',
-  }),
-  filledTrack: css({
-    position: 'absolute',
-    bg: 'primary',
-    borderRadius: 'full',
-  }),
-  filledTrackHorizontal: css({
-    top: '50%',
-    h: `${TRACK_SIZE}px`,
-    transform: 'translateY(-50%)',
-  }),
-  filledTrackVertical: css({
-    left: '50%',
-    w: `${TRACK_SIZE}px`,
-    transform: 'translateX(-50%)',
-  }),
-  thumb: css({
-    position: 'absolute',
-    zIndex: 1,
-    w: `${THUMB_SIZE}px`,
-    h: `${THUMB_SIZE}px`,
-    borderRadius: 'full',
-    bg: 'primary',
-    cursor: 'grab',
-    outline: 'none',
-    transform: 'translate(-50%, -50%)',
-    transitionDuration: 'fast',
-    transitionProperty: 'background-color, box-shadow',
-    transitionTimingFunction: 'default',
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-    _hover: {
-      '@media (hover: hover)': {
-        bg: 'primary.emphasized',
-      },
-    },
-  }),
-  thumbDisabled: css({
-    bg: 'track.disabled',
-    cursor: 'not-allowed',
-  }),
-  thumbHorizontal: css({
-    top: '50%',
-  }),
-  thumbVertical: css({
-    left: '50%',
-    transform: 'translate(-50%, 50%)',
-  }),
-  marksContainer: css({
-    position: 'absolute',
-  }),
-  marksContainerHorizontal: css({
-    insetInline: 0,
-    top: '50%',
-  }),
-  marksContainerVertical: css({
-    insetBlock: 0,
-    left: '50%',
-  }),
-  mark: css({
-    position: 'absolute',
-    bg: 'border.emphasized',
-    borderRadius: 'full',
-  }),
-  markHorizontal: css({
-    w: '0.5',
-    h: '2',
-    transform: 'translate(-50%, -50%)',
-  }),
-  markVertical: css({
-    w: '2',
-    h: '0.5',
-    transform: 'translate(-50%, 50%)',
-  }),
-  markLabel: css({
-    position: 'absolute',
-    color: 'fg.muted',
-    fontFamily: 'body',
-    fontSize: 'xs',
-    whiteSpace: 'nowrap',
-  }),
-  markLabelHorizontal: css({
-    top: `${THUMB_SIZE / 2 + 4}px`,
-    transform: 'translateX(-50%)',
-  }),
-  markLabelVertical: css({
-    left: `${THUMB_SIZE / 2 + 4}px`,
-    transform: 'translateY(50%)',
-  }),
-} as const;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -582,21 +427,28 @@ export function Slider({
       : {bottom: '0%', height: `${percent}%`};
   })();
 
+  const classes = sliderRecipe({
+    orientation,
+    isDisabled: isDisabled || undefined,
+  });
+
   const textDisplay =
     valueDisplay === 'text' ? (
-      <span className={styles.textValue}>
+      <span className={classes.textValue}>
         {isRange
           ? `${displayValue(values[0])} - ${displayValue(values[1])}`
           : displayValue(values[0])}
       </span>
     ) : null;
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field
-      className={cx(className, isHorizontal ? undefined : styles.fieldVertical)}
+      className={cx(className, classes.field)}
       data-testid={dataTestId}
+      description={description}
+      descriptionID={descriptionID}
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
@@ -609,20 +461,10 @@ export function Slider({
       }
       statusVariant="detached"
       style={style}>
-      <div
-        className={cx(
-          styles.row,
-          isHorizontal ? undefined : styles.rowVertical,
-        )}>
+      <div className={classes.row}>
         <div
           aria-label={isRange ? label : undefined}
-          className={cx(
-            styles.trackContainer,
-            isHorizontal
-              ? styles.trackContainerHorizontal
-              : styles.trackContainerVertical,
-            isDisabled ? styles.trackContainerDisabled : undefined,
-          )}
+          className={classes.trackContainer}
           data-testid="slider-track-container"
           onPointerCancel={handlePointerUp}
           onPointerDown={handlePointerDown}
@@ -630,32 +472,14 @@ export function Slider({
           onPointerUp={handlePointerUp}
           ref={trackRef}
           role={isRange ? 'group' : undefined}>
+          <div aria-hidden="true" className={classes.track} />
           <div
             aria-hidden="true"
-            className={cx(
-              styles.track,
-              isHorizontal ? styles.trackHorizontal : styles.trackVertical,
-            )}
-          />
-          <div
-            aria-hidden="true"
-            className={cx(
-              styles.filledTrack,
-              isHorizontal
-                ? styles.filledTrackHorizontal
-                : styles.filledTrackVertical,
-            )}
+            className={classes.filledTrack}
             style={filledStyle}
           />
           {marks == null ? null : (
-            <div
-              aria-hidden="true"
-              className={cx(
-                styles.marksContainer,
-                isHorizontal
-                  ? styles.marksContainerHorizontal
-                  : styles.marksContainerVertical,
-              )}>
+            <div aria-hidden="true" className={classes.marksContainer}>
               {marks.map(mark => {
                 const percent = getPercent(mark.value, min, max);
                 const markStyle = isHorizontal
@@ -664,24 +488,14 @@ export function Slider({
                 return (
                   <div key={mark.value}>
                     <div
-                      className={cx(
-                        styles.mark,
-                        isHorizontal
-                          ? styles.markHorizontal
-                          : styles.markVertical,
-                      )}
+                      className={classes.mark}
                       data-mark-value={mark.value}
                       data-testid="slider-mark"
                       style={markStyle}
                     />
                     {mark.label == null ? null : (
                       <span
-                        className={cx(
-                          styles.markLabel,
-                          isHorizontal
-                            ? styles.markLabelHorizontal
-                            : styles.markLabelVertical,
-                        )}
+                        className={classes.markLabel}
                         data-mark-value={mark.value}
                         data-testid="slider-mark-label"
                         style={markStyle}>
@@ -721,12 +535,8 @@ export function Slider({
                 aria-valuetext={
                   formatValue == null ? undefined : formatValue(currentValue)
                 }
-                className={cx(
-                  styles.thumb,
-                  isHorizontal ? styles.thumbHorizontal : styles.thumbVertical,
-                  isDisabled ? styles.thumbDisabled : undefined,
-                )}
-                id={!isRange ? inputId : undefined}
+                className={classes.thumb}
+                id={!isRange || thumbIndex === 0 ? inputId : undefined}
                 key={thumbKey}
                 onKeyDown={event => handleKeyDown(thumbIndex, event)}
                 role="slider"

@@ -12,8 +12,10 @@ import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {formatFileSize} from '../../internal/formatFileSize';
 import {mergeRefs} from '../../internal/mergeRefs';
+import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -208,14 +210,6 @@ const styles = {
     display: 'inline-flex',
     color: 'fg.muted',
   }),
-  clearButton: css({
-    display: 'inline-flex',
-    p: 0,
-    borderWidth: 0,
-    bg: 'transparent',
-    color: 'fg.muted',
-    cursor: 'pointer',
-  }),
 } as const;
 
 function validateFiles(
@@ -386,7 +380,7 @@ export function FileInput({
       }
     : {};
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field
@@ -461,16 +455,17 @@ export function FileInput({
           {isDragOver ? 'Drop files here' : displayText}
         </Text>
         {fileNames != null ? (
-          <button
-            aria-label={`Clear ${label}`}
-            className={styles.clearButton}
+          <Button
+            icon={X}
+            isIconOnly
+            label={`Clear ${label}`}
             onClick={event => {
               event.stopPropagation();
               handleClear();
             }}
-            type="button">
-            <Icon icon={X} size="sm" />
-          </button>
+            size="sm"
+            variant="ghost"
+          />
         ) : null}
         {status != null && !isDropzone ? (
           <span className={styles.icon}>{getStatusIcon(status.type)}</span>

@@ -7,8 +7,8 @@ import {
   type RefObject,
 } from 'react';
 import {css, cx} from 'styled-system/css';
-import type {SpacingToken} from 'styled-system/tokens';
 import {token} from 'styled-system/tokens';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {nowMonotonicMilliseconds} from '../../internal/time';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
@@ -269,7 +269,7 @@ export function Popover({
       : {width: typeof width === 'number' ? `${width}px` : width};
 
   const paddingStyle =
-    padding != null && padding !== '0'
+    padding != null && padding !== 0
       ? {padding: token(`spacing.${padding}`)}
       : undefined;
 

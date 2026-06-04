@@ -108,8 +108,8 @@ export const PlatformAdaptive: Story = {
           Mac
         </Text>
         <kbd aria-label="Command+K" className={styledKbd}>
-          <kbd className={kbdRecipe({size: 'md'})}>⌘</kbd>
-          <kbd className={kbdRecipe({size: 'md'})}>K</kbd>
+          <kbd className={kbdRecipe({size: 'md'}).key}>⌘</kbd>
+          <kbd className={kbdRecipe({size: 'md'}).key}>K</kbd>
         </kbd>
       </div>
       <div className={styles.row}>
@@ -117,8 +117,8 @@ export const PlatformAdaptive: Story = {
           Non-Mac
         </Text>
         <kbd aria-label="Control+K" className={styledKbd}>
-          <kbd className={kbdRecipe({size: 'md'})}>Ctrl</kbd>
-          <kbd className={kbdRecipe({size: 'md'})}>K</kbd>
+          <kbd className={kbdRecipe({size: 'md'}).key}>Ctrl</kbd>
+          <kbd className={kbdRecipe({size: 'md'}).key}>K</kbd>
         </kbd>
       </div>
       <div className={styles.row}>

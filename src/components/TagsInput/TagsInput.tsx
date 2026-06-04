@@ -18,8 +18,10 @@ import {cx} from '../../internal/cx';
 import {useLayer} from '../../internal/useLayer';
 import {BaseAutocompleteInput} from '../AutocompleteInput';
 import type {SearchableItem, SearchSource} from '../AutocompleteInput';
+import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -470,7 +472,7 @@ export function TagsInput<T extends SearchableItem>({
     }
   }, [isDisabled, isLayerMode, layer]);
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   const tokens = value.map(item => (
     <span className={styles.tag} key={item.id}>
@@ -596,9 +598,10 @@ export function TagsInput<T extends SearchableItem>({
           <span className={styles.endContent}>{endContent}</span>
         ) : null}
         {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
-          <button
-            aria-label={`Clear ${label}`}
-            className={inputStyles.clearButton}
+          <Button
+            icon={X}
+            isIconOnly
+            label={`Clear ${label}`}
             onClick={event => {
               event.stopPropagation();
               onChangeRef.current([], {
@@ -607,9 +610,9 @@ export function TagsInput<T extends SearchableItem>({
               });
               announce('Cleared all tags');
             }}
-            type="button">
-            <Icon icon={X} size="sm" />
-          </button>
+            size="sm"
+            variant="ghost"
+          />
         ) : null}
         <span aria-live="polite" className={styles.liveRegion} role="status">
           {announcement}

@@ -5,9 +5,14 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
-import {Field, type FieldNecessity, type InputStatus} from '../Field';
+import {
+  Field,
+  getNecessity,
+  type FieldNecessity,
+  type InputStatus,
+} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
+import {radioGroupRecipe} from './RadioGroup.recipe';
 import {
   RadioGroupContext,
   type RadioGroupOrientation,
@@ -84,22 +89,6 @@ export type RadioGroupProps = {
   value: string;
 } & FieldNecessity;
 
-const styles = {
-  group: css({
-    display: 'flex',
-  }),
-  vertical: css({
-    flexDirection: 'column',
-    gap: '0.5',
-  }),
-  horizontal: css({
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: '4',
-    rowGap: '0',
-  }),
-} as const;
-
 /**
  * A controlled radio group for single-value selection.
  */
@@ -142,7 +131,7 @@ export function RadioGroup({
     [isDisabled, isRequired, nameId, onChange, orientation, size, value],
   );
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field
@@ -168,11 +157,7 @@ export function RadioGroup({
         aria-labelledby={labelId}
         aria-orientation={orientation}
         aria-required={isRequired ?? undefined}
-        className={
-          orientation === 'vertical'
-            ? `${styles.group} ${styles.vertical}`
-            : `${styles.group} ${styles.horizontal}`
-        }
+        className={radioGroupRecipe({orientation})}
         id={inputId}
         role="radiogroup">
         <RadioGroupContext value={contextValue}>{children}</RadioGroupContext>

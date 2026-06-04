@@ -2,7 +2,7 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 /**
  * Symmetric padding overrides for the collapsible body. Keys mirror the
- * `SpacingStep` scale so the `padding` prop maps onto build-time-validated
+ * `SpacingToken` scale so the `padding` prop maps onto build-time-validated
  * spacing tokens instead of a runtime token lookup.
  */
 const paddingVariants = {

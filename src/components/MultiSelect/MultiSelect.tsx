@@ -14,13 +14,15 @@ import {
   type SelectListboxOptionData,
 } from '../../internal/useSelectListbox';
 import {Badge} from '../Badge';
+import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe, inputStyles} from '../Field/inputStyles';
+import {inputRecipe} from '../Field/inputStyles';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
@@ -639,16 +641,17 @@ export function MultiSelect({
       </button>
       {isLoading ? <Spinner size="sm" /> : null}
       {hasClear && value.length > 0 && !isDisabled ? (
-        <button
-          aria-label={`Clear ${label}`}
-          className={inputStyles.clearButton}
+        <Button
+          icon={X}
+          isIconOnly
+          label={`Clear ${label}`}
           onClick={event => {
             event.stopPropagation();
             commitChange([]);
           }}
-          type="button">
-          <Icon icon={X} size="sm" />
-        </button>
+          size="sm"
+          variant="ghost"
+        />
       ) : null}
       <span className={styles.iconSlot}>
         <Icon icon={ChevronDown} size="sm" />
@@ -656,7 +659,7 @@ export function MultiSelect({
     </div>
   );
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field

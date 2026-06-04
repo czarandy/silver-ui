@@ -1,9 +1,9 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutRegionRecipe} from './Layout.recipe';
 import {useLayoutDivider} from './LayoutContext';
-import type {SpacingStep} from './types';
 
 interface LayoutFooterBaseProps {
   /**
@@ -25,7 +25,7 @@ interface LayoutFooterBaseProps {
   /**
    * Inner padding.
    */
-  padding?: SpacingStep;
+  padding?: SpacingToken;
   /**
    * Ref forwarded to the footer element.
    */

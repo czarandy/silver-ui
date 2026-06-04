@@ -12,8 +12,10 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {Button} from '../Button';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -270,7 +272,7 @@ export function NumberInput({
     pendingInput.trim() === '' ||
     parseNumberInput(pendingInput, {min, max, isIntegerOnly}) != null;
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   const inputWrapper = (
     <div
@@ -347,13 +349,14 @@ export function NumberInput({
       />
       {units != null ? <span className={styles.units}>{units}</span> : null}
       {hasClear === true && value != null && !effectiveDisabled ? (
-        <button
-          aria-label={`Clear ${label}`}
-          className={inputStyles.clearButton}
+        <Button
+          icon={X}
+          isIconOnly
+          label={`Clear ${label}`}
           onClick={() => onChange(null)}
-          type="button">
-          <Icon icon={X} size="sm" />
-        </button>
+          size="sm"
+          variant="ghost"
+        />
       ) : null}
       {endContent}
       {isLoading ? <Spinner size="sm" /> : null}

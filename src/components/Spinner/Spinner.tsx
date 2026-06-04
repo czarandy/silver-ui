@@ -1,5 +1,4 @@
 import type {CSSProperties, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Text} from '../Text';
 import {spinnerRecipe, type SpinnerVariants} from './Spinner.recipe';
@@ -7,12 +6,6 @@ import {spinnerRecipe, type SpinnerVariants} from './Spinner.recipe';
 type SpinnerSize = NonNullable<SpinnerVariants>['size'];
 type SpinnerVariant = NonNullable<SpinnerVariants>['variant'];
 
-/**
- * A compact loading indicator for pending or indeterminate work.
- *
- * Spinner renders with `role="status"` and an accessible name so assistive
- * technologies can announce loading state without exposing the decorative visual.
- */
 export interface SpinnerProps {
   /**
    * Accessible label for the loading status. Defaults to a string label when
@@ -49,25 +42,12 @@ export interface SpinnerProps {
   variant?: SpinnerVariant;
 }
 
-const styles = {
-  visual: css({
-    display: 'block',
-    w: 'var(--spinner-size)',
-    h: 'var(--spinner-size)',
-    flexShrink: 0,
-    aspectRatio: 'square',
-    borderRadius: 'full',
-    borderWidth: 'emphasized',
-    borderStyle: 'solid',
-    borderColor: 'currentColor',
-    borderTopColor: 'transparent',
-    animation: 'spin 0.8s linear infinite',
-    '@media (prefers-reduced-motion: reduce)': {
-      animation: 'none',
-    },
-  }),
-};
-
+/**
+ * A compact loading indicator for pending or indeterminate work.
+ *
+ * Spinner renders with `role="status"` and an accessible name so assistive
+ * technologies can announce loading state without exposing the decorative visual.
+ */
 export function Spinner({
   size,
   variant,
@@ -86,16 +66,17 @@ export function Spinner({
         ? label
         : 'Loading';
   const labelColor = variant === 'onMedia' ? 'inherit' : undefined;
+  const classes = spinnerRecipe({size, variant, hasLabel});
 
   return (
     <span
       aria-label={ariaLabel}
-      className={cx(spinnerRecipe({size, variant, hasLabel}), className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       role="status"
       style={style}>
-      <span aria-hidden="true" className={styles.visual} />
+      <span aria-hidden="true" className={classes.visual} />
       {hasLabel ? (
         <Text as="span" color={labelColor} type="label">
           {label}

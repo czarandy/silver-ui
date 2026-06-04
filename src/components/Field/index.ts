@@ -1,5 +1,6 @@
 export {
   Field,
+  getNecessity,
   type FieldNecessity,
   type FieldProps,
   type FieldStatus,

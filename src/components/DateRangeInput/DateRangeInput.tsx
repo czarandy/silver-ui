@@ -19,6 +19,7 @@ import {Button} from '../Button';
 import {Calendar} from '../Calendar';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -29,7 +30,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
-import {Icon, type IconComponent} from '../Icon';
+import type {IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
@@ -175,7 +176,7 @@ export function DateRangeInput({
   const [isOpen, setIsOpen] = useState(false);
   const displayValue = useMemo(() => formatRange(value), [value]);
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   return (
     <Field
@@ -223,7 +224,7 @@ export function DateRangeInput({
           isOpen={isOpen}
           label={`Choose ${label}`}
           onOpenChange={setIsOpen}
-          padding="3">
+          padding={3}>
           <Button
             icon={CalendarIcon}
             isDisabled={isDisabled}
@@ -249,13 +250,14 @@ export function DateRangeInput({
           value={displayValue}
         />
         {hasClear && value != null && !isDisabled ? (
-          <button
-            aria-label={`Clear ${label}`}
-            className={inputStyles.clearButton}
+          <Button
+            icon={X}
+            isIconOnly
+            label={`Clear ${label}`}
             onClick={() => onChange(undefined)}
-            type="button">
-            <Icon icon={X} size="sm" />
-          </button>
+            size="sm"
+            variant="ghost"
+          />
         ) : null}
         {isLoading ? <Spinner size="sm" /> : null}
         {status != null ? (

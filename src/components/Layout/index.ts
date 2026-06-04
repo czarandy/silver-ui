@@ -4,4 +4,4 @@ export {LayoutFooter, type LayoutFooterProps} from './LayoutFooter';
 export {LayoutHeader, type LayoutHeaderProps} from './LayoutHeader';
 export {LayoutPanel, type LayoutPanelProps} from './LayoutPanel';
 
-export type {LayoutHeight, SpacingStep} from './types';
+export type {LayoutHeight, SpacingToken} from './types';

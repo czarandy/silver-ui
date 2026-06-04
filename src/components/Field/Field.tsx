@@ -1,12 +1,11 @@
 import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
-import {fieldLabelRecipe, fieldStatusRecipe} from './Field.recipe';
+import {fieldRecipe} from './Field.recipe';
 import type {InputStatusType} from './types';
 
 export type FieldStatusVariant = 'attached' | 'detached';
@@ -102,39 +101,36 @@ interface FieldBaseProps {
   style?: CSSProperties;
 }
 
-export interface FieldNecessity {
-  /**
-   * Whether the field is optional. Cannot be `true` when `isRequired` is `true`.
-   */
-  isOptional?: boolean;
-  /**
-   * Whether the field is required. Cannot be `true` when `isOptional` is `true`.
-   */
-  isRequired?: boolean;
-}
+/**
+ * Controls whether a field displays an "Optional" or "Required" indicator.
+ * The two options are mutually exclusive — a field cannot be both optional
+ * and required at the same time. TypeScript enforces this at the type level.
+ */
+export type FieldNecessity =
+  | {isOptional?: false; isRequired?: false}
+  | {isOptional: true; isRequired?: false}
+  | {isOptional?: false; isRequired: true};
 
 export type FieldProps = FieldBaseProps & FieldNecessity;
 
-const styles = {
-  root: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1',
-  }),
-  indicator: css({
-    fontWeight: 'normal',
-    color: 'fg.muted',
-  }),
-  tooltipIcon: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
-  }),
-  inputStatusWrapper: css({
-    display: 'flex',
-    flexDirection: 'column',
-    isolation: 'isolate',
-  }),
-} as const;
+/**
+ * Narrows individually-typed `isOptional`/`isRequired` values back into
+ * a valid `FieldNecessity` union member. Useful when forwarding necessity
+ * props that were destructured from a component's own props (which widens
+ * the discriminated union to `boolean | undefined`).
+ */
+export function getNecessity(
+  isOptional: boolean | undefined,
+  isRequired: boolean | undefined,
+): FieldNecessity {
+  if (isOptional === true) {
+    return {isOptional: true};
+  }
+  if (isRequired === true) {
+    return {isRequired: true};
+  }
+  return {};
+}
 
 /**
  * A form field wrapper that renders a label, description, control slot, and validation status.
@@ -167,9 +163,14 @@ export function Field({
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
   const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
+  const classes = fieldRecipe({
+    isDisabled,
+    statusType: status?.type,
+    statusVariant,
+  });
   const labelNode = (
     <LabelComponent
-      className={fieldLabelRecipe({isDisabled})}
+      className={classes.label}
       {...(LabelComponent === 'label' ? {htmlFor: inputId} : undefined)}
       id={labelId}>
       {labelIcon != null ? (
@@ -179,14 +180,14 @@ export function Field({
         {label}
       </Text>
       {statusText != null ? (
-        <Text as="span" className={styles.indicator} type="supporting">
+        <Text as="span" className={classes.indicator} type="supporting">
           <span aria-hidden="true"> · </span>
           {statusText}
         </Text>
       ) : null}
       {labelTooltip != null ? (
         <Tooltip content={labelTooltip}>
-          <span className={styles.tooltipIcon}>
+          <span className={classes.tooltipIcon}>
             <Icon icon={Info} size="sm" />
           </span>
         </Tooltip>
@@ -198,7 +199,6 @@ export function Field({
       <Text
         as="span"
         color="secondary"
-        data-testid={undefined}
         id={resolvedDescriptionID}
         type="supporting">
         {description}
@@ -208,10 +208,7 @@ export function Field({
     status?.message != null ? (
       <div
         aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-        className={fieldStatusRecipe({
-          statusType: status.type,
-          statusVariant,
-        })}
+        className={classes.status}
         id={resolvedStatusID}
         role={status.type === 'error' ? 'alert' : 'status'}>
         {status.message}
@@ -220,7 +217,7 @@ export function Field({
 
   return (
     <div
-      className={cx(styles.root, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
@@ -236,7 +233,7 @@ export function Field({
         </>
       )}
       {statusVariant === 'attached' ? (
-        <div className={styles.inputStatusWrapper}>
+        <div className={classes.inputWrapper}>
           {children}
           {statusNode}
         </div>

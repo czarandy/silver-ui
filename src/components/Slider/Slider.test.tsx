@@ -2,6 +2,7 @@ import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
+import {getNecessity} from '../Field';
 import {Slider, type SliderRangeProps, type SliderSingleProps} from './Slider';
 
 const popoverOpenState = new WeakMap<HTMLElement, boolean>();
@@ -31,6 +32,8 @@ describe('Slider', () => {
   function ControlledSingleSlider({
     onChange,
     value: initialValue,
+    isOptional,
+    isRequired,
     ...props
   }: Omit<SliderSingleProps, 'onChange' | 'value'> & {
     onChange?: (value: number) => void;
@@ -41,6 +44,7 @@ describe('Slider', () => {
     return (
       <Slider
         {...props}
+        {...getNecessity(isOptional, isRequired)}
         onChange={(nextValue: number) => {
           setValue(nextValue);
           onChange?.(nextValue);
@@ -53,6 +57,8 @@ describe('Slider', () => {
   function ControlledRangeSlider({
     onChange,
     value: initialValue,
+    isOptional,
+    isRequired,
     ...props
   }: Omit<SliderRangeProps, 'onChange' | 'value'> & {
     onChange?: (value: [number, number]) => void;
@@ -63,6 +69,7 @@ describe('Slider', () => {
     return (
       <Slider
         {...props}
+        {...getNecessity(isOptional, isRequired)}
         onChange={(nextValue: [number, number]) => {
           setValue(nextValue);
           onChange?.(nextValue);
@@ -93,6 +100,39 @@ describe('Slider', () => {
     expect(sliders[1]).toHaveAttribute(
       'aria-label',
       'Price range, maximum value',
+    );
+  });
+
+  it('associates the label with the first thumb in range mode', () => {
+    render(<Slider label="Price range" onChange={() => {}} value={[20, 80]} />);
+
+    const sliders = screen.getAllByRole('slider');
+    const thumbId = sliders[0].getAttribute('id');
+    expect(thumbId).toBeTruthy();
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(screen.getByText('Price range').closest('label')).toHaveAttribute(
+      'for',
+      thumbId,
+    );
+  });
+
+  it('links description to the thumb via aria-describedby', () => {
+    render(
+      <Slider
+        description="Adjust the volume level"
+        label="Volume"
+        onChange={noop}
+        value={50}
+      />,
+    );
+
+    const slider = screen.getByRole('slider');
+    const describedBy = slider.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    const descriptionId = describedBy?.split(' ')[0] ?? '';
+    expect(screen.getByText('Adjust the volume level')).toHaveAttribute(
+      'id',
+      expect.stringContaining(descriptionId),
     );
   });
 

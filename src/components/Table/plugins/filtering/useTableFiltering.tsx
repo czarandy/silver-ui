@@ -665,7 +665,7 @@ function PopoverFilterTrigger<T extends Record<string, unknown>>({
       isOpen={isOpen}
       label={`Filter ${getHeaderText(column)}`}
       onOpenChange={handleOpenChange}
-      padding="3"
+      padding={3}
       placement="below">
       <Button
         icon={Filter}

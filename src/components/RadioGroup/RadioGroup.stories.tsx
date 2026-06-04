@@ -98,6 +98,8 @@ export const Horizontal: Story = {args: {orientation: 'horizontal'}};
 
 export const Small: Story = {args: {size: 'sm'}};
 
+export const Large: Story = {args: {size: 'lg'}};
+
 export const Disabled: Story = {args: {isDisabled: true}};
 
 export const ItemDisabled: Story = {
@@ -107,6 +109,8 @@ export const ItemDisabled: Story = {
 };
 
 export const Required: Story = {args: {isRequired: true}};
+
+export const Optional: Story = {args: {isOptional: true}};
 
 export const Error: Story = {
   args: {

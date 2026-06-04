@@ -25,6 +25,7 @@ import {Button} from '../Button';
 import {Calendar, type CalendarHandle} from '../Calendar';
 import {
   Field,
+  getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
@@ -35,7 +36,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from '../Field/inputUtils';
-import {Icon, type IconComponent} from '../Icon';
+import type {IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 
@@ -198,7 +199,7 @@ export function DateInput({
 
   const displayValue = pendingInput ?? formatDate(value);
 
-  const necessity: FieldNecessity = {isOptional, isRequired};
+  const necessity = getNecessity(isOptional, isRequired);
 
   const handleCalendarChange = useCallback(
     (nextValue: PlainDate) => {
@@ -313,7 +314,7 @@ export function DateInput({
           isOpen={isOpen}
           label={`Choose ${label}`}
           onOpenChange={setIsOpen}
-          padding="3">
+          padding={3}>
           <Button
             icon={CalendarIcon}
             isDisabled={isDisabled}
@@ -342,13 +343,14 @@ export function DateInput({
           value={displayValue}
         />
         {hasClear && value != null && !isDisabled && !isLoading ? (
-          <button
-            aria-label={`Clear ${label}`}
-            className={inputStyles.clearButton}
+          <Button
+            icon={X}
+            isIconOnly
+            label={`Clear ${label}`}
             onClick={handleClear}
-            type="button">
-            <Icon icon={X} size="sm" />
-          </button>
+            size="sm"
+            variant="ghost"
+          />
         ) : null}
         {isLoading ? <Spinner size="sm" /> : null}
         {status != null ? (
