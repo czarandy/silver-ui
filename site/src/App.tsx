@@ -6,9 +6,11 @@ import {
   Card,
   CodeBlock,
   DateInput,
+  Divider,
   DropdownMenu,
   HStack,
   Icon,
+  Link,
   type PlainDate,
   Progress,
   SearchFilterInput,
@@ -338,6 +340,22 @@ export function App(): JSX.Element {
           </Theme>
         </section>
       </main>
+
+      <Divider className="page__divider" />
+      <footer className="footer">
+        <HStack align="center" gap={2}>
+          <Badge color="neutral" label="MIT" size="sm" />
+          <Text color="secondary" type="sm">
+            Licensed
+          </Text>
+        </HStack>
+        <Text color="secondary" type="sm">
+          Created by{' '}
+          <Link color="secondary" href="https://github.com/czarandy">
+            Andrey Goder
+          </Link>
+        </Text>
+      </footer>
     </Theme>
   );
 }
