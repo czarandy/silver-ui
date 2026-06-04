@@ -112,6 +112,7 @@ export {
   type SliderSingleProps,
   type SliderValueDisplay,
 } from './components/Slider';
+export {Rating, type RatingProps} from './components/Rating';
 export {
   TreeView,
   type TreeViewDensity,
@@ -183,6 +184,7 @@ export {
   type ProgressVariant,
 } from './components/Progress';
 export {Kbd, type KbdProps} from './components/Kbd';
+export {NavIcon, type NavIconProps} from './components/NavIcon';
 export {
   CodeBlock,
   type CodeBlockContainer,
@@ -463,9 +465,11 @@ export {
 } from './components/EmptyState';
 export {
   Switch,
+  switchRecipe,
   type SwitchLabelPosition,
   type SwitchLabelSpacing,
   type SwitchProps,
+  type SwitchVariants,
 } from './components/Switch';
 export {
   Toast,
@@ -522,6 +526,14 @@ export {
   type UseAlertDialogReturn,
 } from './components/AlertDialog';
 export {
+  Drawer,
+  useDrawer,
+  type DrawerOptions,
+  type DrawerPlacement,
+  type DrawerProps,
+  type UseDrawerReturn,
+} from './components/Drawer';
+export {
   HoverCard,
   useHoverCard,
   type HoverCardFocusTrigger,
@@ -551,6 +563,10 @@ export {
   type TextInputProps,
   type TextInputType,
 } from './components/TextInput';
+export {
+  PasswordInput,
+  type PasswordInputProps,
+} from './components/PasswordInput';
 export {
   InputGroup,
   InputGroupContext,
@@ -678,6 +694,7 @@ export {
   type TextType,
   type TextWeight,
 } from './components/Text';
+export {Blockquote, type BlockquoteProps} from './components/Blockquote';
 export {NumberInput, type NumberInputProps} from './components/NumberInput';
 export {
   CheckboxInput,

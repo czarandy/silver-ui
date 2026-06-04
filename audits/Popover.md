@@ -39,3 +39,9 @@ Popover is a click-triggered floating dialog anchored to a trigger element. It s
 - Add tests for `hasLightDismiss`, `hasAutoFocus`, close button keyboard access, `role="menu"`, and `padding`.
 - Consider using React-managed ARIA attributes for inline children instead of imperative DOM manipulation, falling back to imperative only for external anchor refs.
 - The test coverage (7 tests) is adequate for core behavior but has gaps around accessibility features. Stories are comprehensive for visual props (8 stories covering placements, alignments, controlled mode, disabled, no close button, match width, and custom width).
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Popover is primarily a behavior/positioning component (trigger wiring, light-dismiss, focus management via `usePopover`) rather than a styled multi-element one. Its standalone `styles` object in `Popover.tsx` is minimal: an `anchor` wrapper (`display: inline-flex`), an empty `content` block, and a small `gap` map of four directional margins (`above`/`below`/`start`/`end`) selected by `placement`. The placement gap is the only "variant"-like branch, applied via `styles.gap[placement]`. Spacing/width/padding are handled through inline `style` and the `token()` helper, and the floating surface chrome comes from the layer rendering, not local recipes. With only a couple of trivial styled wrappers and a four-entry directional gap map, an `sva` recipe would add structure without consolidating meaningful styling.

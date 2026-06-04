@@ -14,9 +14,11 @@ import {css} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
+import {Card} from '../Card';
+import {Divider} from '../Divider';
 import type {SpacingStep} from '../Layout/types';
 
-export type CodeBlockContainer = 'card' | 'section';
+export type CodeBlockContainer = 'card' | 'section' | 'inline';
 export type CodeBlockSize = 'sm' | 'md';
 
 export interface CodeBlockProps {
@@ -29,7 +31,9 @@ export interface CodeBlockProps {
    */
   code: string;
   /**
-   * Container presentation style.
+   * Container presentation style. Use `'inline'` for a compact, single-line
+   * snippet (e.g. an install command) with the copy button rendered inline;
+   * line numbers, titles, and `maxHeight` do not apply to inline blocks.
    * @default 'card'
    */
   container?: CodeBlockContainer;
@@ -106,6 +110,11 @@ const styles = {
     color: 'fg',
     overflow: 'hidden',
     boxSizing: 'border-box',
+    // Reveal the floating (headerless) copy button on hover or keyboard focus.
+    '&:hover [data-cb-copy], &:focus-within [data-cb-copy]': {
+      opacity: 1,
+      pointerEvents: 'auto',
+    },
   }),
   card: css({
     borderWidth: 'default',
@@ -116,6 +125,26 @@ const styles = {
   section: css({
     borderWidth: 0,
     borderRadius: 0,
+  }),
+  // Layout only — the surface (bg/border/radius) comes from the <Card> wrapper.
+  inline: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '1',
+    maxWidth: '100%',
+    color: 'fg',
+    ps: '2.5',
+  }),
+  inlineCode: css({
+    minW: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'pre',
+    fontFamily: 'mono',
+  }),
+  inlineDivider: css({
+    alignSelf: 'stretch',
+    ms: '1.5',
   }),
   header: css({
     display: 'flex',
@@ -205,6 +234,19 @@ const styles = {
     position: 'absolute',
     top: '3',
     right: '3',
+    zIndex: 1,
+    // On hover-capable devices, hide until the block is hovered/focused (the
+    // root reveals it). On touch devices (no hover) it stays visible.
+    '@media (hover: hover)': {
+      opacity: 0,
+      pointerEvents: 'none',
+      transitionProperty: 'opacity',
+      transitionDuration: 'fast',
+      transitionTimingFunction: 'default',
+      '@media (prefers-reduced-motion: reduce)': {
+        transitionDuration: '0s',
+      },
+    },
   }),
 } as const;
 
@@ -274,7 +316,8 @@ export function CodeBlock({
         : new Set(highlightLineKey.split(',').map(Number)),
     [highlightLineKey],
   );
-  const showHeader = title != null;
+  const isInline = container === 'inline';
+  const showHeader = !isInline && title != null;
   const sizeClassName = size === 'sm' ? styles.sizeSm : styles.sizeMd;
   const regionLabel = getRegionLabel({label, title});
 
@@ -309,12 +352,14 @@ export function CodeBlock({
     padding: paddingToken,
   };
 
-  const rootStyle: CSSProperties = {
-    width,
-    minWidth: width === 'fit-content' ? 'min(100%, 400px)' : undefined,
-    maxWidth: width === 'fit-content' ? '100%' : undefined,
-    ...style,
-  };
+  const rootStyle: CSSProperties = isInline
+    ? {...style}
+    : {
+        width,
+        minWidth: width === 'fit-content' ? 'min(100%, 400px)' : undefined,
+        maxWidth: width === 'fit-content' ? '100%' : undefined,
+        ...style,
+      };
   const scrollStyle: CSSProperties | undefined =
     maxHeight == null
       ? undefined
@@ -331,7 +376,6 @@ export function CodeBlock({
   const copyLabel = copied ? 'Copied' : 'Copy code';
   const copyButton = hasCopyButton ? (
     <Button
-      className={!showHeader ? styles.copyButtonFloating : undefined}
       icon={copied ? Check : Copy}
       isIconOnly
       label={copyLabel}
@@ -343,6 +387,38 @@ export function CodeBlock({
       variant="ghost"
     />
   ) : null;
+
+  if (isInline) {
+    return (
+      <Card
+        aria-label={regionLabel}
+        className={cx(styles.inline, className)}
+        data-container={container}
+        data-size={size}
+        data-testid={dataTestId}
+        padding={1}
+        ref={ref}
+        role="group"
+        style={rootStyle}>
+        <code
+          className={cx(styles.inlineCode, sizeClassName)}
+          data-testid={dataTestId == null ? undefined : `${dataTestId}-code`}>
+          {code}
+        </code>
+        {copyButton != null ? (
+          <>
+            <Divider
+              className={styles.inlineDivider}
+              height="auto"
+              isFullBleed
+              orientation="vertical"
+            />
+            {copyButton}
+          </>
+        ) : null}
+      </Card>
+    );
+  }
 
   return (
     <div
@@ -413,7 +489,11 @@ export function CodeBlock({
           </pre>
         </div>
       </div>
-      {!showHeader ? copyButton : null}
+      {!showHeader && copyButton != null ? (
+        <div className={styles.copyButtonFloating} data-cb-copy="">
+          {copyButton}
+        </div>
+      ) : null}
     </div>
   );
 }

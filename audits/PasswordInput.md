@@ -33,3 +33,9 @@ PasswordInput is a thin wrapper around TextInput that adds a toggle button to sh
 2. Consider adding an `autoComplete` story to demonstrate the common password field patterns.
 3. Consider wrapping the toggle `onClick` handler in `useCallback` for a minor re-render optimization.
 4. The component is clean, well-scoped, and follows good accessibility practices -- the toggle button has clear labels ("Show password" / "Hide password"), is disabled when the input is disabled, and keyboard interaction is properly tested.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+PasswordInput is a pure composition wrapper around `TextInput` (`PasswordInput.tsx`). It renders no DOM elements of its own and contains no `css()` calls, no `styles` object, and no recipe -- it only forwards props to `TextInput` and injects a `Button` as `endContent` for the show/hide toggle. All styling lives in `TextInput`/`Field` and `Button`. With zero styled elements owned by this component, an `sva` slot recipe has nothing to consolidate.

@@ -35,3 +35,9 @@ Pagination provides page navigation controls with four display variants: numbere
 - Consider adding a single-page story and an edge case story for `totalItems` with `variant="count"` where `totalPages` is used instead.
 - Test coverage is excellent with 20 tests covering: landmarks, page buttons, current page marking, onChange callbacks, boundary disabling, all variants (count, compact, none), totalItems derivation, siblingCount, clamping, keyboard activation, ref/className/style forwarding, prev/next buttons, custom labels, and data-testid.
 - Story coverage is good with 10 stories covering default, all variants, sizes, disabled, unknown total, many pages, custom sibling count, and controlled usage.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+Pagination renders a `nav` root, a `controls` row, prev/next `Button`s, numbered page `Button`s, an `ellipsis` span, and an `infoText` span, but the interactive elements are all the shared `Button` component (styling delegated to Button's own recipe). Its local standalone `styles` object in `Pagination.tsx` has only 5 small `css()` blocks (`root`, `controls`, `ellipsis`, `infoText`, `activePage`), and the only conditional is `isActive ? styles.activePage` passed through Button's `className`. There are display variants (`pages`/`count`/`compact`/`none`), but those are layout/branching choices in `renderIndicator()` that swap which elements render, not multi-slot style variants. Because the heavy styling lives in `Button`/`Text` and the local styles are a handful of flat layout helpers, an `sva` slot recipe would not meaningfully consolidate anything.

@@ -47,9 +47,40 @@ import {SideNav, SideNavItem} from 'silver-ui/SideNav';
 
 ## Theming
 
-silver-ui uses CSS variables for theming. Override any `--silver-*` variable to
-customize colors, typography, spacing, radii, and more. All library styles use
-CSS `@layer`, so your overrides always win without specificity battles.
+The easiest way to theme silver-ui is the `<Theme>` component. It maps friendly
+token names to the underlying CSS variables and applies them app-wide or to a
+scoped subtree. Wrap your app (or any branded area) and override the tokens you
+care about:
+
+```tsx
+import {Button, Theme} from 'silver-ui';
+
+export function App() {
+  return (
+    <Theme
+      mode="light"
+      tokens={{
+        colors: {
+          primary: 'teal-500',
+          primaryHover: 'teal-600',
+          primaryActive: 'teal-700',
+        },
+        radii: {componentMd: '0.5rem'},
+        fonts: {body: 'Inter, system-ui, sans-serif'},
+      }}>
+      <Button label="Save" />
+    </Theme>
+  );
+}
+```
+
+Palette references (`teal-500`) and custom CSS values (`#e11d48`, `oklch(...)`,
+`var(...)`) are both supported, and multiple `<Theme>` regions can coexist on
+one page.
+
+Prefer plain CSS? Every component is driven by `--silver-*` variables, so you
+can override them directly. All library styles use CSS `@layer`, so your
+overrides always win without specificity battles.
 
 ```css
 :root {
@@ -64,8 +95,8 @@ CSS `@layer`, so your overrides always win without specificity battles.
 Variables can be scoped to containers, dark mode (`[data-theme="dark"]`), or
 individual instances via `className`/`style` props.
 
-See [THEME.md](THEME.md) for the full variable reference, dark mode details,
-scoped theming examples, and per-instance overrides.
+See [THEME.md](THEME.md) for the full `<Theme>` API, variable reference, dark
+mode details, scoped theming examples, and per-instance overrides.
 
 ## Components
 
@@ -84,7 +115,7 @@ scoped theming examples, and per-instance overrides.
 
 - **Breadcrumbs** — hierarchical page location trail
 - **Link** — polymorphic link with external link handling and router integration
-- **MobileNav** — slide-out drawer for mobile navigation
+- **NavIcon** — circular accent-colored icon container for navigation headers
 - **Pagination** — page navigation controls
 - **SideNav** — vertical side navigation panel with collapsing support
 - **Tabs** — tabbed content switching
@@ -105,6 +136,7 @@ scoped theming examples, and per-instance overrides.
 - **AvatarGroup** — stacked avatar collection with overflow count
 - **Badge** — small status label with icon support
 - **Blockquote** — styled quotation block
+- **CodeBlock** — read-only code display with line numbers, line highlighting, and copy button
 - **Icon** — renders Lucide icons with size and color tokens
 - **Item** — generic list item with icon, label, and description
 - **Kbd** — keyboard shortcut display with accessible labels

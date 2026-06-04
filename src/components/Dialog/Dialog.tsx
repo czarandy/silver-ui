@@ -7,9 +7,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
+import {dialogRecipe} from './Dialog.recipe';
 import {DialogContext} from './DialogContext';
 
 export type DialogVariant = 'fullscreen' | 'standard';
@@ -93,51 +93,6 @@ export interface DialogProps {
   width?: number | string;
 }
 
-const styles = {
-  root: css({
-    position: 'fixed',
-    m: 'auto',
-    p: 0,
-    borderWidth: 0,
-    bg: 'bg',
-    color: 'fg',
-    borderRadius: 'md',
-    boxShadow: 'xl',
-    flexDirection: 'column',
-    overscrollBehavior: 'contain',
-    _backdrop: {
-      bg: 'overlay.scrim',
-      backdropFilter: 'blur(2px)',
-    },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  open: css({
-    display: 'flex',
-  }),
-  fullscreen: css({
-    w: '100dvw',
-    h: '100dvh',
-    maxW: '100dvw',
-    maxH: '100dvh',
-    borderRadius: 0,
-    m: 0,
-    inset: 0,
-  }),
-  inner: css({
-    display: 'flex',
-    flexDirection: 'column',
-    flex: '1 1 auto',
-    minH: 0,
-    overflow: 'hidden',
-    borderRadius: 'inherit',
-  }),
-} as const;
-
 function formatSize(value: number | string): string {
   return typeof value === 'number' ? `${value}px` : value;
 }
@@ -188,6 +143,7 @@ export function Dialog({
   const {isBackdropDismissEnabled, isEscapeDismissEnabled} =
     getDismissBehavior(dismissBehavior);
   const dialogContextValue = useMemo(() => ({onOpenChange}), [onOpenChange]);
+  const classes = dialogRecipe({isOpen, variant});
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -237,12 +193,7 @@ export function Dialog({
   return (
     <dialog
       aria-label={label}
-      className={cx(
-        styles.root,
-        isOpen ? styles.open : undefined,
-        isFullscreen ? styles.fullscreen : undefined,
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       onCancel={event => {
         event.preventDefault();
@@ -264,7 +215,7 @@ export function Dialog({
         ...style,
       }}>
       <DialogContext value={dialogContextValue}>
-        <div className={styles.inner}>{children}</div>
+        <div className={classes.inner}>{children}</div>
       </DialogContext>
     </dialog>
   );

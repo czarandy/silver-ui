@@ -108,3 +108,12 @@ export const WidthComparison: Story = {
     </div>
   ),
 };
+
+export const Inline: Story = {
+  args: {
+    code: 'npm install silver-ui',
+    container: 'inline',
+    label: 'Install silver-ui',
+    title: undefined,
+  },
+};

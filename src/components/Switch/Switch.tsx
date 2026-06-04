@@ -7,15 +7,15 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
-import type {FieldNecessity, InputStatus, InputStatusType} from '../Field';
+import type {FieldNecessity, InputStatus} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
+import {switchRecipe} from './Switch.recipe';
 
 export type SwitchLabelPosition = 'end' | 'start';
 export type SwitchLabelSpacing = 'default' | 'spread';
@@ -100,147 +100,6 @@ export type SwitchProps = {
   style?: CSSProperties;
 } & FieldNecessity;
 
-const styles = {
-  field: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1',
-    w: 'fit-content',
-  }),
-  spreadField: css({
-    w: 'full',
-  }),
-  row: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-  }),
-  spread: css({
-    justifyContent: 'space-between',
-    w: 'full',
-  }),
-  labelWrapper: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    minW: 0,
-  }),
-  label: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    w: 'fit-content',
-    color: 'fg.muted',
-    cursor: 'pointer',
-  }),
-  labelDisabled: css({
-    color: 'fg.disabled',
-    cursor: 'not-allowed',
-  }),
-  labelIcon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-  }),
-  requiredness: css({
-    fontWeight: 'normal',
-    color: 'fg.muted',
-  }),
-  tooltipIcon: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
-  }),
-  status: css({
-    fontFamily: 'body',
-    fontSize: 'sm',
-    lineHeight: 'normal',
-    px: '2',
-    py: '1.5',
-    mt: '1',
-    borderRadius: 'md',
-  }),
-  statusColor: {
-    warning: css({bg: 'surface.yellow', color: 'surface.yellow.fg'}),
-    error: css({bg: 'surface.red', color: 'surface.red.fg'}),
-    success: css({bg: 'surface.green', color: 'surface.green.fg'}),
-  } satisfies Record<InputStatusType, string>,
-  control: css({
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    w: '10',
-    h: '6',
-    borderRadius: 'full',
-    isolation: 'isolate',
-    '&:has(input:focus-visible)': {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-    '& [data-switch-track][data-selected="true"]': {
-      bg: 'primary',
-    },
-    '&:has(input:active:not(:disabled)) [data-switch-track]': {
-      bg: 'primary.active',
-    },
-  }),
-  input: css({
-    position: 'absolute',
-    inset: 0,
-    m: 0,
-    p: 0,
-    opacity: 0,
-    cursor: 'pointer',
-    zIndex: 1,
-    _disabled: {
-      cursor: 'not-allowed',
-    },
-  }),
-  track: css({
-    display: 'flex',
-    alignItems: 'center',
-    w: '10',
-    h: '6',
-    p: '1',
-    borderRadius: 'full',
-    bg: 'track.emphasized',
-    transitionProperty: 'background-color',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    pointerEvents: 'none',
-    '@media (prefers-reduced-motion: reduce)': {
-      transitionDuration: '0s',
-    },
-  }),
-  trackOn: css({
-    bg: 'primary',
-  }),
-  trackDisabled: css({
-    opacity: 0.5,
-  }),
-  thumb: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: '4',
-    h: '4',
-    borderRadius: 'full',
-    bg: 'bg',
-    color: 'primary',
-    transform: 'translateX(0)',
-    transitionProperty: 'transform',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    '@media (prefers-reduced-motion: reduce)': {
-      transitionDuration: '0s',
-    },
-  }),
-  thumbOn: css({
-    transform: 'translateX(16px)',
-  }),
-} as const;
-
 /**
  * A controlled switch for boolean settings.
  */
@@ -276,14 +135,20 @@ export function Switch({
     : isRequired
       ? 'Required'
       : null;
+  const classes = switchRecipe({
+    labelSpacing,
+    isSelected,
+    isDisabled,
+    status: status?.type,
+  });
   const control = (
-    <span className={styles.control}>
+    <span className={classes.control}>
       <input
         aria-busy={isLoading || undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         checked={isSelected}
-        className={styles.input}
+        className={classes.input}
         data-testid={dataTestId}
         disabled={isDisabled}
         id={inputId}
@@ -297,15 +162,10 @@ export function Switch({
       />
       <span
         aria-hidden="true"
-        className={cx(
-          styles.track,
-          isSelected ? styles.trackOn : undefined,
-          isDisabled ? styles.trackDisabled : undefined,
-        )}
+        className={classes.track}
         data-selected={isSelected ? 'true' : undefined}
         data-switch-track="">
-        <span
-          className={cx(styles.thumb, isSelected ? styles.thumbOn : undefined)}>
+        <span className={classes.thumb}>
           {isLoading ? <Spinner size="sm" /> : null}
         </span>
       </span>
@@ -317,15 +177,10 @@ export function Switch({
     </span>
   );
   const labelNode = (
-    <div className={styles.labelWrapper}>
-      <label
-        className={cx(
-          styles.label,
-          isDisabled ? styles.labelDisabled : undefined,
-        )}
-        htmlFor={inputId}>
+    <div className={classes.labelWrapper}>
+      <label className={classes.label} htmlFor={inputId}>
         {labelIcon != null ? (
-          <span className={styles.labelIcon}>
+          <span className={classes.labelIcon}>
             <Icon color="secondary" icon={labelIcon} size="sm" />
           </span>
         ) : null}
@@ -333,14 +188,14 @@ export function Switch({
           {label}
         </Text>
         {requirednessText != null ? (
-          <Text as="span" className={styles.requiredness} type="supporting">
+          <Text as="span" className={classes.requiredness} type="supporting">
             <span aria-hidden="true"> · </span>
             {requirednessText}
           </Text>
         ) : null}
         {labelTooltip != null ? (
           <Tooltip content={labelTooltip}>
-            <span className={styles.tooltipIcon}>
+            <span className={classes.tooltipIcon}>
               <Icon icon={Info} size="sm" />
             </span>
           </Tooltip>
@@ -355,18 +210,8 @@ export function Switch({
   );
 
   return (
-    <div
-      className={cx(
-        styles.field,
-        labelSpacing === 'spread' ? styles.spreadField : undefined,
-        className,
-      )}
-      style={style}>
-      <div
-        className={cx(
-          styles.row,
-          labelSpacing === 'spread' ? styles.spread : undefined,
-        )}>
+    <div className={cx(classes.field, className)} style={style}>
+      <div className={classes.row}>
         {labelPosition === 'start' ? (
           isLabelHidden ? (
             <VisuallyHidden>{labelNode}</VisuallyHidden>
@@ -387,7 +232,7 @@ export function Switch({
       {status?.message != null ? (
         <div
           aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-          className={cx(styles.status, styles.statusColor[status.type])}
+          className={classes.status}
           id={statusMessageID}
           role={status.type === 'error' ? 'alert' : 'status'}>
           {status.message}

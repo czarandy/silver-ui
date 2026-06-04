@@ -205,4 +205,43 @@ describe('CodeBlock', () => {
       screen.queryByRole('button', {name: 'Copy code'}),
     ).not.toBeInTheDocument();
   });
+
+  it('renders an inline container with the copy button inline', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {writeText},
+    });
+
+    render(
+      <CodeBlock
+        code="npm install silver-ui"
+        container="inline"
+        data-testid="code-block"
+        label="Install silver-ui"
+      />,
+    );
+
+    const root = screen.getByRole('group', {name: 'Install silver-ui'});
+    expect(root).toHaveAttribute('data-container', 'inline');
+    expect(screen.getByText('npm install silver-ui')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', {name: 'Copy code'}));
+    expect(writeText).toHaveBeenCalledWith('npm install silver-ui');
+  });
+
+  it('omits the header and region landmark for the inline container', () => {
+    render(
+      <CodeBlock
+        code="npm install silver-ui"
+        container="inline"
+        label="Install"
+        title="ignored.ts"
+      />,
+    );
+
+    expect(screen.queryByText('ignored.ts')).not.toBeInTheDocument();
+    expect(screen.queryByRole('region')).not.toBeInTheDocument();
+  });
 });

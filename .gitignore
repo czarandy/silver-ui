@@ -1,6 +1,7 @@
 node_modules/
 dist/
 storybook-static/
+styled-system/
 *.tsbuildinfo
 .eslintcache
 *.log

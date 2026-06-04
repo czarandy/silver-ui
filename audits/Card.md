@@ -10,6 +10,9 @@ Card is a rounded container surface for grouping related content. It supports 13
 
 - None.
 
+NEEDS A SECTION VARIANT i.e. with no border
+then we can use it as the wrapper in CodeBlock
+
 ### High
 
 - None.

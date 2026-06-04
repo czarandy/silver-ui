@@ -1,53 +1,58 @@
-import {cva, type RecipeVariantProps} from 'styled-system/css';
+import {sva, type RecipeVariantProps} from 'styled-system/css';
 
-export const dialogRecipe = cva({
+export const dialogRecipe = sva({
+  slots: ['root', 'inner'],
   base: {
-    position: 'fixed',
-    m: 'auto',
-    p: 0,
-    borderWidth: 0,
-    bg: 'bg',
-    color: 'fg',
-    borderRadius: 'lg',
-    boxShadow: 'lg',
-    display: 'none',
-    flexDirection: 'column',
-    h: 'fit-content',
-    maxW: 'min(90vw, var(--dialog-width))',
-    maxH: 'var(--dialog-max-height)',
-    w: 'var(--dialog-width)',
-    overflow: 'hidden',
-    overscrollBehavior: 'contain',
-    opacity: 0,
-    '&::backdrop': {
-      bg: 'overlay.scrim',
-      backdropFilter: 'blur(2px)',
+    root: {
+      position: 'fixed',
+      m: 'auto',
+      p: 0,
+      borderWidth: 0,
+      bg: 'bg',
+      color: 'fg',
+      borderRadius: 'md',
+      boxShadow: 'xl',
+      flexDirection: 'column',
+      overscrollBehavior: 'contain',
+      _backdrop: {
+        bg: 'overlay.scrim',
+        backdropFilter: 'blur(2px)',
+      },
+      _focusVisible: {
+        outlineWidth: 'focus',
+        outlineStyle: 'solid',
+        outlineColor: 'primary',
+        outlineOffset: 'focusOffset',
+      },
     },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'accent',
-      outlineOffset: 'focusOffset',
+    inner: {
+      display: 'flex',
+      flexDirection: 'column',
+      flex: '1 1 auto',
+      minH: 0,
+      overflow: 'hidden',
+      borderRadius: 'inherit',
     },
   },
   variants: {
+    // When closed, the native <dialog> UA style (display: none) applies; opening
+    // switches on the flex column layout.
     isOpen: {
-      true: {
-        display: 'flex',
-        opacity: 1,
-      },
+      true: {root: {display: 'flex'}},
       false: {},
     },
     variant: {
       standard: {},
       fullscreen: {
-        inset: 0,
-        m: 0,
-        borderRadius: 0,
-        maxW: '100dvw',
-        maxH: '100dvh',
-        w: '100dvw',
-        h: '100dvh',
+        root: {
+          w: '100dvw',
+          h: '100dvh',
+          maxW: '100dvw',
+          maxH: '100dvh',
+          borderRadius: 0,
+          m: 0,
+          inset: 0,
+        },
       },
     },
   },

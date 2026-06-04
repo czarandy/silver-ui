@@ -38,3 +38,9 @@ RadioGroup is a controlled radio group for single-value selection, composed of `
 4. Add an `Optional` story for completeness.
 5. Use `cx()` consistently instead of template string concatenation for className merging.
 6. The component has excellent accessibility: proper `role="radiogroup"`, `aria-labelledby`, `aria-describedby`, `aria-invalid`, `aria-required`, `aria-orientation`, native radio inputs for keyboard navigation, and a good error boundary (`RadioGroupItem` throws if used outside `RadioGroup`).
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+The styling weight lives in `RadioGroupItem.tsx`, which renders a deeply nested control: a `controlWrap` span, a visually-hidden `input`, a `radio` indicator span, and an inner `dot` span, plus a `label`. Its standalone `styles` object holds ~10 flat `css()` blocks PLUS three per-size maps (`controlSize`, `radioSize`, `dotSize`, each with `sm`/`md`). The component composes these through stacked per-element `cx()` calls and ternaries: `cx(styles.radio, styles.radioSize[size], isChecked ? styles.radioChecked : undefined, isDisabled ? styles.radioDisabled : undefined)` and similar for the wrap/dot/label. So it juggles three variant axes (size, checked, disabled) by hand across four elements -- exactly the duplication `sva` is meant to absorb. An `sva` with slots `controlWrap`/`input`/`radio`/`dot`/`label` and `size`/`isChecked`/`isDisabled` variants would replace the three parallel size maps and the conditional `cx()` chains with one recipe. (The parent `RadioGroup.tsx` itself is light -- a `group` flex with `vertical`/`horizontal` variants selected by template-string concatenation -- and could be a small `orientation` variant or its own recipe, but the Item is the real Strong candidate.)

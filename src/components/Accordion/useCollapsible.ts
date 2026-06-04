@@ -1,4 +1,4 @@
-import {use, useState} from 'react';
+import {use, useCallback, useState} from 'react';
 import {AccordionContext} from './AccordionContext';
 
 export interface CollapsibleConfig {
@@ -55,18 +55,26 @@ export function useCollapsible(
     isOpen = internalIsOpen;
   }
 
-  const toggle = () => {
-    if (isControlledByGroup) {
+  const configIsOpen = config?.isOpen;
+  const onOpenChange = config?.onOpenChange;
+
+  // Depend on the primitive config fields rather than the `config` object so
+  // the toggle keeps a stable identity across renders (callers commonly build
+  // a fresh `config` object each render). Re-checking `group`/`value` inside
+  // the callback also gives TypeScript the non-null narrowing it needs.
+  const toggle = useCallback(() => {
+    if (group != null && value != null) {
       group.toggle(value);
-    } else if (isMissingGroupValue) {
+    } else if (group != null) {
+      // Inside a group but missing a `value` prop: nothing to toggle.
       return;
-    } else if (config?.isOpen !== undefined) {
-      config.onOpenChange?.(!isOpen);
+    } else if (configIsOpen !== undefined) {
+      onOpenChange?.(!configIsOpen);
     } else {
       setInternalIsOpen(prev => !prev);
-      config?.onOpenChange?.(!isOpen);
+      onOpenChange?.(!isOpen);
     }
-  };
+  }, [group, value, configIsOpen, onOpenChange, isOpen]);
 
   return {isOpen, toggle};
 }

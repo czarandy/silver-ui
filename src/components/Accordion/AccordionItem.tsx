@@ -107,7 +107,26 @@ const styles = {
   chevronOpen: css({
     transform: 'rotate(180deg)',
   }),
-  content: css({
+  panel: css({
+    display: 'grid',
+    gridTemplateRows: '1fr',
+    // `visibility` is transitioned alongside the rows so the content stays
+    // readable while collapsing, then becomes `hidden` (removing it from the
+    // a11y tree and tab order) once closed. The inline `visibility` style in
+    // the component drives the open/closed value.
+    transitionProperty: 'grid-template-rows, visibility',
+    transitionDuration: 'normal',
+    transitionTimingFunction: 'default',
+    '@media (prefers-reduced-motion: reduce)': {
+      transitionDuration: '0.01s',
+    },
+  }),
+  panelCollapsed: css({
+    gridTemplateRows: '0fr',
+  }),
+  panelInner: css({
+    overflow: 'hidden',
+    minH: 0,
     pt: '1',
   }),
 } as const;
@@ -164,11 +183,11 @@ export function AccordionItem({
       </button>
       <div
         aria-labelledby={triggerId}
-        className={styles.content}
-        hidden={!isOpen || undefined}
+        className={cx(styles.panel, isOpen ? undefined : styles.panelCollapsed)}
         id={panelId}
-        role="region">
-        {children}
+        role="region"
+        style={{visibility: isOpen ? undefined : 'hidden'}}>
+        <div className={styles.panelInner}>{children}</div>
       </div>
     </div>
   );

@@ -83,6 +83,30 @@ export const VerticalWithLabel: Story = {
   ),
 };
 
+export const HorizontalWidth: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1.5rem'}}>
+      <Text color="secondary" size="sm">
+        A horizontal divider sized with the `width` prop (200px, then 60%).
+      </Text>
+      <Divider width={200} />
+      <Divider variant="strong" width="60%" />
+    </div>
+  ),
+};
+
+export const VerticalHeight: Story = {
+  render: () => (
+    <div style={{display: 'flex', alignItems: 'center', gap: '1.5rem'}}>
+      <Text>Left</Text>
+      <Divider height={40} orientation="vertical" />
+      <Text>Middle</Text>
+      <Divider height={80} orientation="vertical" variant="strong" />
+      <Text>Right</Text>
+    </div>
+  ),
+};
+
 export const FullBleed: Story = {
   render: () => (
     <Card>

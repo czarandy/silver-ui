@@ -35,3 +35,9 @@ MultiSelect is a multi-value dropdown selector with checkbox-style options. It s
 2. Remove the `commitChange` wrapper or add the intended validation/transformation logic to justify its existence.
 3. Add stories for `isRequired`, `isOptional`, `labelIcon`, and `isDefaultOpen` to improve documentation coverage.
 4. The component is otherwise well-built with excellent keyboard navigation, proper ARIA attributes on the combobox trigger, disabled option handling, and thorough test coverage of core interactions.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+MultiSelect is one of the most element-dense components in the library: a single standalone `styles` object in `MultiSelect.tsx` holds roughly 18 `css()` blocks (`wrapper`, `wrapperDisabled`, `trigger`, `triggerText`, `placeholder`, `iconSlot`, `badges`, `menu`, `search`, `option`, `checkbox`, `checkboxSelected`, `optionHighlighted`, `optionContent`, `sectionHeading`, `divider`), styling the trigger, the dropdown menu, search input, each option row, and the checkbox. State is applied via per-element `cx()` ternaries (`isInteractionDisabled ? styles.wrapperDisabled`, `isSelected ? styles.checkboxSelected`, `isHighlighted ? styles.optionHighlighted`). It also reuses the external `inputRecipe` for the trigger frame (size/status/disabled). An `sva` with slots like `trigger`/`triggerText`/`menu`/`search`/`option`/`checkbox`/`optionContent`/`sectionHeading`/`divider` plus `isDisabled`/`isSelected`/`isHighlighted` boolean variants would consolidate all the scattered conditional `cx()` branches into recipe variants, the way Divider's `compoundVariants` replaced ternaries. This is a clear Strong candidate.

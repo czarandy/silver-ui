@@ -23,6 +23,11 @@ export interface DividerProps {
    */
   'data-testid'?: string;
   /**
+   * Length of a vertical divider. Numbers are treated as pixels. Ignored for
+   * horizontal dividers, which size to their container width.
+   */
+  height?: number | string;
+  /**
    * Whether the divider should escape container padding.
    */
   isFullBleed?: boolean;
@@ -46,21 +51,39 @@ export interface DividerProps {
    * Visual weight of the divider. Default is `subtle`.
    */
   variant?: DividerVariant;
+  /**
+   * Length of a horizontal divider. Numbers are treated as pixels. Ignored for
+   * vertical dividers, which size to their container height.
+   */
+  width?: number | string;
+}
+
+function formatSize(value: number | string): string {
+  return typeof value === 'number' ? `${value}px` : value;
 }
 
 export function Divider({
   'aria-label': ariaLabel,
   className,
   'data-testid': dataTestId,
+  height,
   isFullBleed = false,
   label,
   orientation = 'horizontal',
   ref,
   style,
   variant = 'subtle',
+  width,
 }: DividerProps): React.JSX.Element {
   const labelId = useId();
+  const isHorizontal = orientation === 'horizontal';
   const classes = dividerRecipe({orientation, variant, isFullBleed});
+  // Only the along-axis length applies: width for horizontal, height for
+  // vertical. Consumer `style` still wins via the spread below.
+  const dimensionStyle: CSSProperties = {
+    width: isHorizontal && width != null ? formatSize(width) : undefined,
+    height: !isHorizontal && height != null ? formatSize(height) : undefined,
+  };
 
   return (
     <div
@@ -71,7 +94,7 @@ export function Divider({
       data-testid={dataTestId}
       ref={ref}
       role="separator"
-      style={style}>
+      style={{...dimensionStyle, ...style}}>
       <div className={classes.line} />
       {label != null ? (
         <>

@@ -32,3 +32,9 @@ List is a semantic vertical list container that supports ordered/unordered lists
 - Consider conditionally passing `leadingContent` in `ListItem` only when the list style requires a marker.
 - Add a test verifying that visual markers are actually rendered for `disc`, `circle`, and `decimal` list styles (e.g., checking for the marker DOM elements).
 - Story coverage is good, with stories for all marker styles, dividers, headers, clickable/link items, disabled/selected states, custom start values, and long content.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+List renders an optional `root` wrapper, a `header`, and the `ul`/`ol` `list` element (in `List.tsx`); `ListItem.tsx` composes the shared `Item` primitive but adds its own `marker` slots (a `markerContainer` wrapping a `dot`/`circle`/`number`). Both files use the OLD pattern: standalone `css()` styles objects (5 blocks in `List.tsx`, 9 in `ListItem.tsx`) with per-element `cx()` conditionals (`hasDividers ? styles.withDividers`, `listStyle !== 'none' ? styles.withCounter`, marker selection by `listStyle`). The only "variant" is `listStyle` (none/disc/decimal/circle) plus the `hasDividers` boolean. An `sva` with slots like `root`/`header`/`list`/`marker`/`markerSymbol` and a `listStyle` variant would consolidate the marker selection and the divider/counter toggles, but the styling is fairly flat and much of the per-item visuals are delegated to `Item`, so the benefit is real but modest. The `List`/`ListItem` split across two files via `ListContext` also limits how much a single recipe can unify.

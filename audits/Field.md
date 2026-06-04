@@ -34,3 +34,9 @@ None
 2. Add comprehensive tests for `isLabelHidden`, `labelAs`, `statusVariant`, and necessity indicator text.
 3. Consider using a discriminated union for `FieldNecessity` to make `isOptional` and `isRequired` truly mutually exclusive at the type level.
 4. Remove the `data-testid={undefined}` on the description element.
+
+## SVA Conversion
+
+**Benefit: Strong**
+
+Field renders several distinct styled elements — root wrapper, label, optional description, the control slot, and the status message — but its styling is split across _multiple separate_ `cva` recipes (`fieldLabelRecipe`, `fieldStatusRecipe`) plus the shared `inputRecipe`/`inputStyles`, rather than one cohesive slot recipe. Because the same axes (`size`, `status`, `isDisabled`) are re-declared independently in each recipe, an `sva` with slots like `root`/`label`/`description`/`status` would let one set of variants drive every slot and remove the cross-recipe duplication. The caveat is that Field is foundational and widely consumed (and exports `fieldLabelRecipe`/`fieldStatusRecipe`/`inputRecipe` for other components), so migration must preserve those exports or update every consumer — making this the highest-impact but also highest-risk conversion in the library. Sequence it after the leaf components (Divider is done; Switch, Slider, Thumbnail, TreeView next) so the pattern is well-established first.

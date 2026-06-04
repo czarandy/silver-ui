@@ -30,3 +30,9 @@ MetadataList displays label-value metadata pairs using semantic `<dl>`, `<dt>`, 
 - Consider whether the dev-only throw vs. production silent behavior in `MetadataListItem` is the right trade-off. A warning in production might be preferable to silent fallback.
 - Add a test verifying icon rendering in the stacked (`labelPosition="top"`) layout.
 - Test and story coverage is solid overall, with good coverage of both layouts, title association, forward props, and the dev-only error boundary.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+MetadataList renders a `root` wrapper, an optional `title` Heading, and a `dl` grid (`MetadataList.tsx`, 5 `css()` blocks), while each `MetadataListItem` renders a wrapper plus a `dt` `label` and `dd` `value` (`MetadataListItem.tsx`, 4 `css()` blocks). The single styling axis is `labelPosition` (start/top), currently applied via per-element `cx()` ternaries: the parent picks `grid` vs `gridStacked` for the `dl`, and the item picks `inline` (display:contents) vs `stacked` for its wrapper. An `sva` with slots `root`/`title`/`dl`/`item`/`label`/`value` and a `labelPosition` variant would consolidate that orientation logic into one recipe and remove the two parallel standalone styles objects. Benefit is moderate because there are only two layout states and the styling is split across the container and item files (coupled via `MetadataListContext`), so a single recipe cannot fully co-locate everything.

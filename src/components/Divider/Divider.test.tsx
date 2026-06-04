@@ -98,6 +98,44 @@ describe('Divider', () => {
     expect(verticalAdded).not.toEqual(horizontalAdded);
   });
 
+  it('applies width to a horizontal divider and ignores height', () => {
+    render(<Divider data-testid="divider" height={50} width={200} />);
+
+    const divider = screen.getByTestId('divider');
+    expect(divider).toHaveStyle({width: '200px'});
+    // height is the cross axis for a horizontal divider, so it is not applied.
+    expect(divider).not.toHaveStyle({height: '50px'});
+  });
+
+  it('applies height to a vertical divider and ignores width', () => {
+    render(
+      <Divider
+        data-testid="divider"
+        height={120}
+        orientation="vertical"
+        width={200}
+      />,
+    );
+
+    const divider = screen.getByTestId('divider');
+    expect(divider).toHaveStyle({height: '120px'});
+    expect(divider).not.toHaveStyle({width: '200px'});
+  });
+
+  it('accepts string dimension values verbatim', () => {
+    render(<Divider data-testid="divider" width="50%" />);
+
+    expect(screen.getByTestId('divider')).toHaveStyle({width: '50%'});
+  });
+
+  it('lets consumer style override the dimension', () => {
+    render(
+      <Divider data-testid="divider" style={{width: '10px'}} width={200} />,
+    );
+
+    expect(screen.getByTestId('divider')).toHaveStyle({width: '10px'});
+  });
+
   it('applies className, style, data-testid, and ref to the root', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 

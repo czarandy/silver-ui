@@ -12,7 +12,7 @@ Dialog is a modal dialog surface built on the native `<dialog>` element, with ba
 
 ### High
 
-- **`Dialog.recipe.ts` is exported but never used by `Dialog.tsx`**: The Dialog component defines its own inline `css()` styles in the `.tsx` file, while `Dialog.recipe.ts` defines a separate `cva()` recipe with different token values (e.g., `borderRadius: 'lg'` in recipe vs `'md'` in component, `outlineColor: 'accent'` vs `'primary'`, `boxShadow: 'lg'` vs `'xl'`). This creates a maintenance risk: consumers importing the recipe for custom styling will get different values than the actual component uses. The recipe is dead code from the component's perspective.
+- None.
 
 ### Medium
 
@@ -32,7 +32,6 @@ Dialog is a modal dialog surface built on the native `<dialog>` element, with ba
 
 ## Recommendations
 
-- Remove or unify `Dialog.recipe.ts` with the actual component styles to eliminate the divergence.
 - Evaluate whether `DialogHeader` and `DialogFooter` should be removed, documented, or integrated into stories and tests.
 - Consider resetting options to defaults in `useDialog.show()` instead of merging accumulatively, or document the merge behavior clearly.
 - Add stories and tests for `position`, `maxHeight`, and edge cases like nested dialogs.
@@ -40,6 +39,4 @@ Dialog is a modal dialog surface built on the native `<dialog>` element, with ba
 
 ## SVA Conversion
 
-**Benefit: Moderate**
-
-Dialog renders two styled elements: the `<dialog>` root (with `_backdrop`, `_focusVisible`, open, and fullscreen states) and an `inner` content `<div>`. It currently styles both via a standalone `const styles = {root, open, fullscreen, inner}` object in `Dialog.tsx`, applying `cx(styles.root, isOpen ? styles.open : undefined, isFullscreen ? styles.fullscreen : undefined, className)`. Notably, a separate `cva` root recipe (`Dialog.recipe.ts`, with `isOpen` and `variant` variants) already exists but is unused/divergent — the audit above flags this. An `sva` with `root`/`inner` slots and `isOpen` + `variant` (standard/fullscreen) variants would both consolidate the two-element styling and resolve the recipe-vs-styles divergence, replacing the two `cx()` ternaries. Benefit is moderate rather than strong because there are only two slots and two variants and the `inner` slot has no variant-dependent styling.
+**Status: Migrated.** `Dialog.recipe.ts` is an `sva` slot recipe with `root`/`inner` slots and `isOpen` + `variant` (standard/fullscreen) variants; `Dialog.tsx` consumes it via `dialogRecipe({isOpen, variant})` → `classes.root`/`classes.inner`. Dynamic width/maxHeight/position remain inline `style` props.

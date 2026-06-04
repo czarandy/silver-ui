@@ -37,3 +37,9 @@ Rating is a star-based rating control that supports both read-only display (`rol
 3. Consider adding `isRequired` and `status` props to align with other form components, even if Rating does not use the `Field` wrapper.
 4. Consider adding a `.recipe.ts` file with `cva` for style consistency.
 5. The component has good accessibility in both modes: `role="img"` with a descriptive label for read-only, and `role="radiogroup"` with individual radio inputs and visually hidden labels for interactive mode. The hover preview feature is a nice UX touch.
+
+## SVA Conversion
+
+**Benefit: Moderate**
+
+Rating renders a `root` flex container and, per star, a `star` `<label>` (or a read-only `<span>`) wrapping a visually-hidden radio `input` and a `Star` icon. Its standalone `styles` object in `Rating.tsx` has 5 `css()` blocks (`root`, `star`, `disabled`, `readOnly`, `input`), applied with per-element `cx()` conditionals (`isDisabled ? styles.disabled`, and the read-only branch swaps `styles.readOnly` onto the wrapper). Star fill/color is handled by the `Icon` component's own `color`/`fill` props rather than local CSS, so much of the visual state is delegated. An `sva` with slots `root`/`star`/`input` and `isDisabled`/`isReadOnly` boolean variants would consolidate the two interactive-vs-readonly rendering paths and their cursor/opacity ternaries into one recipe; the audit already notes a recommendation to add a recipe for consistency. Benefit is moderate -- only a few slots and two boolean states, with coloring delegated to `Icon`.

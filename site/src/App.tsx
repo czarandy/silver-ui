@@ -1,14 +1,27 @@
 import type {JSX} from 'react';
-import {useState} from 'react';
-import {Button} from 'silver-ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CodeBlock,
+  Divider,
+  HStack,
+  Link,
+  Text,
+  TopNav,
+  TopNavHeading,
+  TopNavItem,
+} from 'silver-ui';
 
 const LINKS = {
   github: 'https://github.com/czarandy/silver-ui',
   npm: 'https://www.npmjs.com/package/silver-ui',
-  storybook: 'https://silver-ui-eight.vercel.app/',
+  storybook: 'https://storybook.silver-ui.com/',
 };
 
 const INSTALL_CMD = 'npm install silver-ui';
+
+const TAGS = ['React 19', 'Panda CSS', 'Dark mode', 'Tree-shakeable'];
 
 const FEATURES = [
   {
@@ -37,51 +50,32 @@ const FEATURES = [
   },
 ];
 
-function InstallCommand() {
-  const [copied, setCopied] = useState(false);
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(INSTALL_CMD);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // clipboard unavailable; ignore
-    }
-  };
-
-  return (
-    <div className="install">
-      <code className="install__cmd">
-        <span className="install__prompt">$</span> {INSTALL_CMD}
-      </code>
-      <Button
-        label={copied ? 'Copied' : 'Copy'}
-        onClick={copy}
-        size="sm"
-        variant="secondary"
-      />
-    </div>
-  );
-}
-
 export function App(): JSX.Element {
   return (
     <div className="page">
-      <header className="nav">
-        <a aria-label="silver-ui home" className="brand" href="/">
-          <img
-            alt="silver-ui"
-            className="brand__wordmark"
-            src="/wordmark.svg"
+      <TopNav
+        endContent={
+          <>
+            <TopNavItem href={LINKS.storybook} label="Components" />
+            <TopNavItem href={LINKS.github} label="GitHub" />
+            <TopNavItem href={LINKS.npm} label="npm" />
+          </>
+        }
+        heading={
+          <TopNavHeading
+            aria-label="silver-ui home"
+            href="/"
+            logo={
+              <img
+                alt="silver-ui"
+                className="brand__wordmark"
+                src="/wordmark.svg"
+              />
+            }
           />
-        </a>
-        <nav className="nav__links">
-          <a href={LINKS.storybook}>Components</a>
-          <a href={LINKS.github}>GitHub</a>
-          <a href={LINKS.npm}>npm</a>
-        </nav>
-      </header>
+        }
+        label="Main navigation"
+      />
 
       <main>
         <section className="hero">
@@ -97,15 +91,37 @@ export function App(): JSX.Element {
             <br />
             component library
           </h1>
-          <p className="hero__lede">
+          <Text as="p" className="hero__lede" color="secondary" type="large">
             silver-ui gives you a polished, accessible component set with
             CSS-variable theming and dark mode — built on Panda CSS for React
             19.
-          </p>
+          </Text>
 
-          <InstallCommand />
+          <HStack
+            align="center"
+            className="hero__tags"
+            gap={2}
+            justify="center"
+            wrap="wrap">
+            {TAGS.map(tag => (
+              <Badge color="neutral" key={tag} label={tag} size="md" />
+            ))}
+          </HStack>
 
-          <div className="hero__cta">
+          <div className="hero__install">
+            <CodeBlock
+              code={INSTALL_CMD}
+              container="inline"
+              label="Install silver-ui"
+            />
+          </div>
+
+          <HStack
+            align="center"
+            className="hero__cta"
+            gap={3}
+            justify="center"
+            wrap="wrap">
             <Button
               href={LINKS.storybook}
               label="Browse components"
@@ -118,26 +134,40 @@ export function App(): JSX.Element {
               size="lg"
               variant="secondary"
             />
-          </div>
+          </HStack>
         </section>
 
         <section aria-label="Features" className="features">
           {FEATURES.map(f => (
-            <article className="feature" key={f.title}>
+            <Card className="feature" key={f.title} padding={6}>
               <h2 className="feature__title">{f.title}</h2>
-              <p className="feature__body">{f.body}</p>
-            </article>
+              <Text as="p" color="secondary">
+                {f.body}
+              </Text>
+            </Card>
           ))}
         </section>
       </main>
 
+      <Divider className="page__divider" />
       <footer className="footer">
-        <span>MIT Licensed</span>
-        <nav className="footer__links">
-          <a href={LINKS.storybook}>Storybook</a>
-          <a href={LINKS.github}>GitHub</a>
-          <a href={LINKS.npm}>npm</a>
-        </nav>
+        <HStack align="center" gap={2}>
+          <Badge color="neutral" label="MIT" size="sm" />
+          <Text color="secondary" size="sm">
+            Licensed
+          </Text>
+        </HStack>
+        <HStack gap={5}>
+          <Link color="secondary" href={LINKS.storybook}>
+            Storybook
+          </Link>
+          <Link color="secondary" href={LINKS.github}>
+            GitHub
+          </Link>
+          <Link color="secondary" href={LINKS.npm}>
+            npm
+          </Link>
+        </HStack>
       </footer>
     </div>
   );

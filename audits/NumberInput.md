@@ -36,3 +36,9 @@ NumberInput is a numeric input field with optional min/max clamping, integer-onl
 3. Add a dedicated `Clearable` story and an `InputGroupIntegration` story.
 4. Add a test for the InputGroup integration path to verify that group-level disabled/size/status propagation works correctly.
 5. Overall the component is solid with good pending-input UX, clean discriminated union typing for clearable/non-clearable, and thorough test coverage of core scenarios.
+
+## SVA Conversion
+
+**Benefit: Low / None**
+
+NumberInput delegates almost all of its styling to the shared Field input recipes: the wrapper uses `inputRecipe({size, status, isDisabled})` and the input, icon slots, and clear button use `inputStyles.control` / `inputStyles.iconSlot` / `inputStyles.clearButton` from the Field module. Its own standalone `styles` object in `NumberInput.tsx` contains exactly one block (`units`, a small text span). There are no per-element `cx()` conditional style branches local to this component and no orientation/variant logic of its own. Because the multi-element styling already lives in the shared `inputRecipe`/`inputStyles` (which Field owns), an `sva` here would add nothing -- the single local `units` style is trivial. Any consolidation effort belongs in the Field input recipes, not in a NumberInput slot recipe.
