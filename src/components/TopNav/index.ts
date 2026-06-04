@@ -8,4 +8,3 @@ export {
   type TopNavRenderMode,
   type TopNavSlot,
 } from './TopNavContext';
-export {topNavRecipe, type TopNavVariants} from './TopNav.recipe';

@@ -1,4 +1,10 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from '../Button';
@@ -265,6 +271,36 @@ describe('LayoutHeader in Dialog', () => {
 
     await user.click(screen.getByRole('button', {name: 'Close'}));
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('uses aria-labelledby when LayoutHeader is present and label is omitted', () => {
+    render(
+      <Dialog isOpen onOpenChange={() => {}}>
+        <LayoutHeader title="Heading title" />
+      </Dialog>,
+    );
+
+    const dialog = screen.getByRole('dialog', {name: 'Heading title'});
+    expect(dialog).not.toHaveAttribute('aria-label');
+    expect(dialog).toHaveAttribute('aria-labelledby');
+
+    const labelledById = dialog.getAttribute('aria-labelledby');
+    expect(labelledById).toBeDefined();
+    expect(
+      within(dialog).getByRole('heading', {name: 'Heading title'}),
+    ).toHaveAttribute('id', labelledById);
+  });
+
+  it('falls back to aria-label when no LayoutHeader is present', () => {
+    render(
+      <Dialog isOpen label="Standalone label" onOpenChange={() => {}}>
+        <p>No header here</p>
+      </Dialog>,
+    );
+
+    const dialog = screen.getByRole('dialog', {name: 'Standalone label'});
+    expect(dialog).toHaveAttribute('aria-label', 'Standalone label');
+    expect(dialog).not.toHaveAttribute('aria-labelledby');
   });
 
   it('does not render a close button outside dialog context', () => {

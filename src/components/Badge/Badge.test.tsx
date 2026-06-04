@@ -62,6 +62,13 @@ describe('Badge', () => {
     expect(screen.getByTestId('badge')).toHaveClass(badgeRecipe({size: 'lg'}));
   });
 
+  it('does not render an icon when icon is not provided', () => {
+    render(<Badge data-testid="badge" label="No icon" />);
+
+    const badge = screen.getByTestId('badge');
+    expect(badge.querySelector('svg')).toBeNull(); // eslint-disable-line testing-library/no-node-access -- no role/testid on the optional icon
+  });
+
   it('applies aria-label and role', () => {
     render(
       <Badge

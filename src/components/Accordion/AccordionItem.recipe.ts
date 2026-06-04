@@ -7,8 +7,6 @@ export const accordionItemRecipe = sva({
       w: '100%',
     },
     trigger: {
-      all: 'unset',
-      boxSizing: 'border-box',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',

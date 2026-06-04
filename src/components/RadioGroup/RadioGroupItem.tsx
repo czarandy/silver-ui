@@ -80,7 +80,6 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    boxSizing: 'border-box',
     borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',

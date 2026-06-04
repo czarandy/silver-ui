@@ -39,6 +39,18 @@ export const Count: Story = {
   args: {label: 42, color: 'info'},
 };
 
+export const LargeCount: Story = {
+  render: () => (
+    <HStack align="center" gap={2}>
+      <Badge color="info" label={1} />
+      <Badge color="info" label={42} />
+      <Badge color="info" label={99} />
+      <Badge color="error" label="99+" />
+      <Badge color="error" label={1234} />
+    </HStack>
+  ),
+};
+
 export const Sizes: Story = {
   render: () => (
     <HStack align="center" gap={2}>

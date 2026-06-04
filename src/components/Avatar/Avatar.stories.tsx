@@ -71,6 +71,13 @@ export const FallbackSrc: Story = {
   },
 };
 
+export const DefaultIcon: Story = {
+  args: {
+    name: undefined,
+    src: undefined,
+  },
+};
+
 export const NumericSizes: Story = {
   render: () => (
     <div style={{display: 'flex', alignItems: 'center', gap: 16}}>

@@ -5,6 +5,7 @@ import plugin from './silver-ui-plugin.js';
 const requireComponentPropsRule = plugin.rules['require-component-props'];
 const booleanPropNamingRule = plugin.rules['boolean-prop-naming'];
 const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
+const noRedundantBoxSizingRule = plugin.rules['no-redundant-box-sizing'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -535,6 +536,90 @@ tester.run('no-direct-color-tokens', noDirectColorTokensRule, {
           data: {color: 'colors.black'},
         },
       ],
+    },
+  ],
+});
+
+tester.run('no-redundant-box-sizing', noRedundantBoxSizingRule, {
+  valid: [
+    {
+      name: 'allows boxSizing: content-box (intentional override)',
+      code: `
+        const styles = css({
+          boxSizing: 'content-box',
+        });
+      `,
+    },
+    {
+      name: 'allows non-boxSizing properties',
+      code: `
+        const styles = css({
+          display: 'flex',
+          position: 'relative',
+        });
+      `,
+    },
+  ],
+  invalid: [
+    {
+      name: 'reports standalone boxSizing: border-box',
+      code: `
+        const styles = css({
+          boxSizing: 'border-box',
+          display: 'flex',
+        });
+      `,
+      output: `
+        const styles = css({
+          display: 'flex',
+        });
+      `,
+      errors: [{messageId: 'redundant'}],
+    },
+    {
+      name: 'reports boxSizing: border-box as the only property',
+      code: `
+        const styles = css({
+          boxSizing: 'border-box',
+        });
+      `,
+      output: `
+        const styles = css({
+        });
+      `,
+      errors: [{messageId: 'redundant'}],
+    },
+    {
+      name: 'reports boxSizing: border-box at the end of object',
+      code: `
+        const styles = css({
+          display: 'flex',
+          boxSizing: 'border-box',
+        });
+      `,
+      output: `
+        const styles = css({
+          display: 'flex',
+        });
+      `,
+      errors: [{messageId: 'redundant'}],
+    },
+    {
+      name: 'reports boxSizing: border-box even with all: unset',
+      code: `
+        const styles = css({
+          all: 'unset',
+          boxSizing: 'border-box',
+          display: 'flex',
+        });
+      `,
+      output: `
+        const styles = css({
+          all: 'unset',
+          display: 'flex',
+        });
+      `,
+      errors: [{messageId: 'redundant'}],
     },
   ],
 });

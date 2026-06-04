@@ -328,6 +328,7 @@ export default tseslint.config(
     },
     rules: {
       'silver-ui/no-direct-color-tokens': 'error',
+      'silver-ui/no-redundant-box-sizing': 'error',
     },
   },
   // Testing Library — enforce best practices in test files

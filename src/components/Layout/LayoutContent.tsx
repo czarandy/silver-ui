@@ -33,7 +33,6 @@ export interface LayoutContentProps extends ComponentPropsWithRef<'div'> {
 
 const styles = {
   root: css({
-    boxSizing: 'border-box',
     flex: 1,
     minH: 0,
     minW: 0,

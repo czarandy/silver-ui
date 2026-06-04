@@ -33,7 +33,6 @@ export interface TableHeaderCellProps {
 
 const styles = {
   base: css({
-    boxSizing: 'border-box',
     color: 'fg.muted',
     fontWeight: 'semibold',
     maxWidth: 0,

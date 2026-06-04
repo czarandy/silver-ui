@@ -3,4 +3,3 @@ export {
   AvatarGroupOverflow,
   type AvatarGroupOverflowProps,
 } from './AvatarGroupOverflow';
-export {avatarGroupRecipe} from './AvatarGroup.recipe';

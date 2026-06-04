@@ -7,7 +7,6 @@ export const sideNavRecipe = cva({
     h: '100%',
     w: '260px',
     bg: 'inherit',
-    boxSizing: 'border-box',
     overflow: 'hidden',
   },
   variants: {

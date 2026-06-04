@@ -5,7 +5,6 @@ export const topNavRecipe = cva({
     alignItems: 'center',
     w: '100%',
     p: '2',
-    boxSizing: 'border-box',
   },
   variants: {
     layout: {

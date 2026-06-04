@@ -11,12 +11,11 @@ import {
 import {cx} from '../../internal/cx';
 import {
   Field,
-  inputRecipe,
-  inputStyles,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
 } from '../Field';
+import {inputRecipe, inputStyles} from '../Field/inputStyles';
 import {
   getDescribedBy,
   getStatusIcon,

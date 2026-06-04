@@ -13,12 +13,19 @@ export const cardRecipe = cva({
         bg: 'bg',
         borderColor: 'border',
       },
+      section: {
+        bg: 'bg',
+        borderRadius: 0,
+        borderWidth: 0,
+      },
       transparent: {
         bg: 'transparent',
       },
       muted: {
         bg: 'bg.subtle',
       },
+    },
+    color: {
       blue: {bg: 'surface.blue'},
       cyan: {bg: 'surface.cyan'},
       gray: {bg: 'surface.gray'},

@@ -13,17 +13,25 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
-import {token} from 'styled-system/tokens';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
 import {Icon} from '../Icon';
 import type {SpacingStep} from '../Layout/types';
 import {Text} from '../Text';
-import {alertHeaderRecipe, alertRecipe} from './Alert.recipe';
+import {alertRecipe, type AlertVariants} from './Alert.recipe';
 
-export type AlertContainer = 'card' | 'section';
-export type AlertStatus = 'error' | 'info' | 'success' | 'warning';
+/**
+ * Derived from the recipe's `container` variant so the prop stays in sync with
+ * the styles.
+ */
+export type AlertContainer = NonNullable<
+  NonNullable<AlertVariants>['container']
+>;
+/**
+ * Derived from the recipe's `status` variant so the prop stays in sync with the
+ * styles.
+ */
+export type AlertStatus = NonNullable<NonNullable<AlertVariants>['status']>;
 
 export interface AlertProps {
   /**
@@ -106,42 +114,6 @@ const defaultIcons: Record<AlertStatus, ReactNode> = {
   warning: <Icon color="warning" icon={TriangleAlert} />,
 };
 
-const styles = {
-  icon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-  content: css({
-    display: 'flex',
-    flex: 1,
-    flexDirection: 'column',
-    minW: 0,
-  }),
-  endArea: css({
-    display: 'flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    gap: '2',
-    ms: 'auto',
-  }),
-  body: css({
-    bg: 'bg',
-    borderBlockEndWidth: 'default',
-    borderColor: 'border',
-    borderInlineWidth: 'default',
-    borderStyle: 'solid',
-    px: '4',
-    py: '3',
-  }),
-  bodyCard: css({
-    borderBottomRadius: 'lg',
-  }),
-  chevronExpanded: css({
-    transform: 'rotate(180deg)',
-  }),
-} as const;
-
 /**
  * Displays a contextual message with status-based styling, an optional
  * collapsible body, and dismiss functionality.
@@ -167,6 +139,10 @@ export function Alert({
   const [isDismissed, setIsDismissed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
   const hasChildren = children != null;
+  // The body is kept mounted whenever there are children (so child state and
+  // the `aria-controls` target survive collapsing); `isExpanded` only drives
+  // the visual collapse. `showContent` reflects whether the body is currently
+  // revealed, which the header uses to square off its bottom corners.
   const showContent = hasChildren && isExpanded;
   const showEndArea = endContent != null || isDismissable || hasChildren;
   const isSingleLine =
@@ -176,24 +152,27 @@ export function Alert({
     return null;
   }
 
+  const classes = alertRecipe({
+    container,
+    hasContent: showContent,
+    isCentered: isSingleLine,
+    isExpanded,
+    padding,
+    status,
+  });
+
   return (
     <div
-      className={cx(alertRecipe(), className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       role={statusRole[status]}
       style={style}>
-      <div
-        className={alertHeaderRecipe({
-          container,
-          hasContent: showContent,
-          isCentered: isSingleLine,
-          status,
-        })}>
-        <span aria-hidden="true" className={styles.icon}>
+      <div className={classes.header}>
+        <span aria-hidden="true" className={classes.icon}>
           {icon ?? defaultIcons[status]}
         </span>
-        <div className={styles.content}>
+        <div className={classes.content}>
           <Text as="p" type="label" weight="semibold">
             {title}
           </Text>
@@ -204,13 +183,13 @@ export function Alert({
           ) : null}
         </div>
         {showEndArea ? (
-          <div className={styles.endArea}>
+          <div className={classes.endArea}>
             {endContent}
             {hasChildren ? (
               <Button
                 aria-controls={bodyId}
                 aria-expanded={isExpanded}
-                className={isExpanded ? styles.chevronExpanded : undefined}
+                className={classes.chevron}
                 icon={ChevronDown}
                 isIconOnly
                 label={isExpanded ? 'Collapse' : 'Expand'}
@@ -235,17 +214,12 @@ export function Alert({
           </div>
         ) : null}
       </div>
-      {showContent ? (
+      {hasChildren ? (
         <div
-          className={cx(
-            styles.body,
-            container === 'card' ? styles.bodyCard : undefined,
-          )}
+          className={classes.body}
           id={bodyId}
-          style={
-            padding != null ? {padding: token(`spacing.${padding}`)} : undefined
-          }>
-          {children}
+          style={{visibility: isExpanded ? undefined : 'hidden'}}>
+          <div className={classes.bodyContent}>{children}</div>
         </div>
       ) : null}
     </div>

@@ -47,7 +47,6 @@ const styles = {
     borderRadius: 'full',
     borderStyle: 'solid',
     borderColor: 'bg',
-    boxSizing: 'border-box',
   }),
   success: css({
     bg: 'presence.success',
@@ -108,6 +107,15 @@ export function AvatarStatusDot({
   const avatarSize = useAvatarSize();
   const {borderWidth, dotSize, iconSize} = resolveStatusDotSize(avatarSize);
   const hasVisibleIcon = icon != null && iconSize > 0;
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (icon != null && iconSize === 0) {
+      console.warn(
+        'AvatarStatusDot: `icon` is not visible at avatar sizes 36px or ' +
+          'smaller. Use a larger avatar size or remove the `icon` prop.',
+      );
+    }
+  }
 
   return (
     <div

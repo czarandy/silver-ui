@@ -34,7 +34,6 @@ export interface LayoutPanelProps extends ComponentPropsWithRef<'div'> {
 
 const styles = {
   root: css({
-    boxSizing: 'border-box',
     flexShrink: 0,
     overflow: 'clip',
   }),

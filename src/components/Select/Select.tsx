@@ -15,12 +15,11 @@ import {
 } from '../../internal/useSelectListbox';
 import {
   Field,
-  inputRecipe,
-  inputStyles,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
 } from '../Field';
+import {inputRecipe, inputStyles} from '../Field/inputStyles';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
@@ -222,7 +221,6 @@ const styles = {
     p: '1',
   }),
   search: css({
-    boxSizing: 'border-box',
     w: 'full',
     px: '2',
     py: '1',

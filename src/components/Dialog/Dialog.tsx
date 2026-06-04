@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions */
 import {
   useEffect,
+  useId,
   useMemo,
   useRef,
   type CSSProperties,
@@ -52,9 +53,14 @@ export interface DialogProps {
    */
   isOpen: boolean;
   /**
-   * Accessible label for the dialog.
+   * Accessible label for the dialog. When provided, sets `aria-label`
+   * directly. When omitted, the dialog uses `aria-labelledby` to
+   * reference the heading rendered by a child `LayoutHeader`.
+   *
+   * Omit this prop when using a `LayoutHeader` inside the dialog.
+   * Set it when the dialog has no visible heading.
    */
-  label: string;
+  label?: string;
   /**
    * Maximum height of the dialog. Numbers are treated as pixels.
    * @default '75vh'
@@ -139,10 +145,14 @@ export function Dialog({
 }: DialogProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const titleId = useId();
   const isFullscreen = variant === 'fullscreen';
   const {isBackdropDismissEnabled, isEscapeDismissEnabled} =
     getDismissBehavior(dismissBehavior);
-  const dialogContextValue = useMemo(() => ({onOpenChange}), [onOpenChange]);
+  const dialogContextValue = useMemo(
+    () => ({onOpenChange, titleId}),
+    [onOpenChange, titleId],
+  );
   const classes = dialogRecipe({isOpen, variant});
 
   useEffect(() => {
@@ -193,6 +203,7 @@ export function Dialog({
   return (
     <dialog
       aria-label={label}
+      aria-labelledby={label == null ? titleId : undefined}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       onCancel={event => {

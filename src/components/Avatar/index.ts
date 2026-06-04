@@ -11,4 +11,3 @@ export {
   type AvatarStatusDotProps,
   type AvatarStatusDotVariant,
 } from './AvatarStatusDot';
-export {avatarRecipe, type AvatarVariants} from './Avatar.recipe';

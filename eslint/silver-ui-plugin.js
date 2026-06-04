@@ -371,6 +371,75 @@ const noDirectColorTokens = {
   },
 };
 
+/**
+ * Disallow redundant boxSizing: 'border-box' declarations.
+ *
+ * The Panda CSS preflight resets all elements to border-box, so explicit
+ * declarations are unnecessary. Non-border-box values (e.g. content-box) are
+ * still allowed as intentional overrides.
+ */
+const noRedundantBoxSizing = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description:
+        'Disallow redundant boxSizing: border-box (already set by preflight). ' +
+        'Allows non-border-box values like content-box.',
+    },
+    fixable: 'code',
+    messages: {
+      redundant:
+        'Redundant boxSizing: \'border-box\' — already set by the Panda CSS preflight reset.',
+    },
+    schema: [],
+  },
+  create(context) {
+    return {
+      Property(node) {
+        // Match boxSizing: 'border-box'
+        if (
+          getPropertyName(node) !== 'boxSizing' ||
+          node.value.type !== 'Literal' ||
+          node.value.value !== 'border-box'
+        ) {
+          return;
+        }
+
+        context.report({
+          node,
+          messageId: 'redundant',
+          fix(fixer) {
+            const sourceCode = context.sourceCode || context.getSourceCode();
+            const text = sourceCode.getText();
+            const tokenAfter = sourceCode.getTokenAfter(node);
+
+            // Determine the range to remove: the whole line including the
+            // trailing comma and surrounding whitespace/newlines.
+            let start = node.range[0];
+            let end = node.range[1];
+
+            // Include trailing comma
+            if (tokenAfter && tokenAfter.value === ',') {
+              end = tokenAfter.range[1];
+            }
+
+            // Extend backward to consume leading whitespace up to (and
+            // including) the preceding newline so the entire line vanishes.
+            while (start > 0 && (text[start - 1] === ' ' || text[start - 1] === '\t')) {
+              start--;
+            }
+            if (start > 0 && text[start - 1] === '\n') {
+              start--;
+            }
+
+            return fixer.removeRange([start, end]);
+          },
+        });
+      },
+    };
+  },
+};
+
 const plugin = {
   meta: {
     name: 'eslint-plugin-silver-ui',
@@ -379,6 +448,7 @@ const plugin = {
   rules: {
     'boolean-prop-naming': booleanPropNaming,
     'no-direct-color-tokens': noDirectColorTokens,
+    'no-redundant-box-sizing': noRedundantBoxSizing,
     'require-component-props': requireComponentProps,
   },
 };

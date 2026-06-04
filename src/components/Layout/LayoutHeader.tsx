@@ -74,7 +74,6 @@ const styles = {
     borderBlockEndColor: 'border',
   }),
   inner: css({
-    boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
@@ -124,6 +123,7 @@ export function LayoutHeader({
   const dialogContext = useDialogContext();
   const hasDivider = dividerContext?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
+
   const closeButton =
     dialogContext != null ? (
       <Button
@@ -151,6 +151,7 @@ export function LayoutHeader({
         <div className={styles.titleArea}>
           <Heading
             data-dialog-autofocus={dialogContext != null ? 'true' : undefined}
+            id={dialogContext?.titleId}
             level={4}
             tabIndex={dialogContext != null ? -1 : undefined}>
             {title}

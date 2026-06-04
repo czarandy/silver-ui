@@ -1,8 +1,8 @@
 import type {CSSProperties, MouseEvent, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
-import {buttonRecipe} from '../Button';
 import type {ButtonSize} from '../Button';
+import {buttonRecipe} from '../Button/Button.recipe';
 import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Tooltip} from '../Tooltip';

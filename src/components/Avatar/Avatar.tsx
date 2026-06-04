@@ -1,7 +1,6 @@
 import {User} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo, useState} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {useAvatarGroup} from '../AvatarGroup/AvatarGroupContext';
 import {Icon} from '../Icon';
@@ -100,39 +99,6 @@ export interface AvatarProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  content: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 'full',
-    overflow: 'hidden',
-    userSelect: 'none',
-    bg: 'bg.subtle',
-    color: 'fg.muted',
-  }),
-  image: css({
-    w: '100%',
-    h: '100%',
-    objectFit: 'cover',
-  }),
-  fallback: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: '100%',
-    h: '100%',
-    bg: 'bg.subtle',
-    color: 'fg.muted',
-    fontFamily: 'body',
-    fontWeight: 'medium',
-    textTransform: 'uppercase',
-  }),
-  status: css({
-    position: 'absolute',
-  }),
-};
-
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
 
@@ -167,6 +133,7 @@ export function Avatar({
     () => resolveAvatarSize(resolvedSize),
     [resolvedSize],
   );
+  const classes = avatarRecipe({isGrouped: avatarGroup != null});
   const initials = name != null ? getInitials(name) : '';
   const showInitials = initials !== '';
   const accessibleName = alt ?? (showInitials ? name : undefined) ?? 'Avatar';
@@ -187,25 +154,23 @@ export function Avatar({
     <AvatarSizeContext value={numericSize}>
       <div
         aria-label={accessibleName}
-        className={cx(
-          avatarRecipe({isGrouped: avatarGroup != null}),
-          className,
-        )}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={ref}
         role="img"
         style={style}>
-        <div className={styles.content} style={contentStyle}>
+        <div className={classes.content} style={contentStyle}>
           <AvatarImage
+            classes={classes}
             fallbackSrc={fallbackSrc}
             key={`${src}\0${fallbackSrc}`}
             src={src}>
             {showInitials ? (
-              <div className={styles.fallback} style={fallbackStyle}>
+              <div className={classes.fallback} style={fallbackStyle}>
                 {initials}
               </div>
             ) : (
-              <div className={styles.fallback}>
+              <div className={classes.fallback}>
                 <Icon
                   icon={User}
                   size={
@@ -217,7 +182,7 @@ export function Avatar({
           </AvatarImage>
         </div>
         {status != null ? (
-          <div className={styles.status} style={statusStyle}>
+          <div className={classes.status} style={statusStyle}>
             {status}
           </div>
         ) : null}
@@ -228,10 +193,12 @@ export function Avatar({
 
 function AvatarImage({
   children,
+  classes,
   fallbackSrc,
   src,
 }: {
   children: ReactNode;
+  classes: {image?: string};
   fallbackSrc?: string;
   src?: string;
 }): React.JSX.Element {
@@ -245,7 +212,7 @@ function AvatarImage({
     return (
       <img
         alt=""
-        className={styles.image}
+        className={classes.image}
         onError={() => setImageError(true)}
         src={src}
       />
@@ -256,7 +223,7 @@ function AvatarImage({
     return (
       <img
         alt=""
-        className={styles.image}
+        className={classes.image}
         onError={() => setFallbackError(true)}
         src={fallbackSrc}
       />

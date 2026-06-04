@@ -130,7 +130,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '2',
-    boxSizing: 'border-box',
     overflow: 'hidden',
     px: '2',
     borderRadius: 'md',
@@ -185,7 +184,6 @@ const styles = {
     },
   }),
   invisibleAction: css({
-    all: 'unset',
     display: 'flex',
     flex: 1,
     minW: 0,
@@ -218,7 +216,6 @@ const styles = {
     flexShrink: 0,
   }),
   toggleButton: css({
-    all: 'unset',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

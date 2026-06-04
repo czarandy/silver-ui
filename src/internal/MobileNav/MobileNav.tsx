@@ -76,7 +76,6 @@ const styles = {
     flexDirection: 'column',
     bg: 'bg',
     borderColor: 'border',
-    boxSizing: 'border-box',
     overflow: 'hidden',
     transitionProperty: 'transform',
     transitionDuration: 'fast',

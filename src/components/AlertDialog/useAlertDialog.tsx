@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useState, type ReactNode} from 'react';
+import {useCallback, useState, type ReactNode} from 'react';
 import {AlertDialog, type AlertDialogProps} from './AlertDialog';
 
 export type AlertDialogOptions = Omit<
@@ -33,15 +33,15 @@ export function useAlertDialog(): UseAlertDialogReturn {
     setOptions(nextOptions);
     setIsOpen(true);
   }, []);
-  const hide = useCallback(() => setIsOpen(false), []);
+  const hide = useCallback(() => {
+    setIsOpen(false);
+    setOptions(null);
+  }, []);
 
-  const element = useMemo(
-    () =>
-      options == null ? null : (
-        <AlertDialog {...options} isOpen={isOpen} onOpenChange={setIsOpen} />
-      ),
-    [isOpen, options],
-  );
+  const element: ReactNode =
+    options == null ? null : (
+      <AlertDialog {...options} isOpen={isOpen} onOpenChange={setIsOpen} />
+    );
 
   return {element, hide, isOpen, show};
 }

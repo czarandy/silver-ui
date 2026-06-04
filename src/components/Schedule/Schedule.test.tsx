@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import {Component, useState, type ErrorInfo, type ReactNode} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
-import {buttonRecipe} from '../Button';
+import {buttonRecipe} from '../Button/Button.recipe';
 import {createEventFromISO} from './CalendarEvent';
 import {createScheduleDayView} from './DayView';
 import {createScheduleListView} from './ListView';

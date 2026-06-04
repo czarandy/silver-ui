@@ -1,6 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {blockquoteRecipe} from './Blockquote.recipe';
 
 /**
  * Styled block quotation with an optional citation footer.
@@ -32,24 +32,6 @@ export interface BlockquoteProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  root: css({
-    borderInlineStartWidth: 'emphasized',
-    borderInlineStartStyle: 'solid',
-    borderInlineStartColor: 'border.emphasized',
-    ps: '4',
-    color: 'fg.muted',
-    m: 0,
-  }),
-  cite: css({
-    display: 'block',
-    mt: '2',
-    fontSize: 'sm',
-    lineHeight: 'normal',
-    fontStyle: 'normal',
-  }),
-} as const;
-
 /**
  * Styled block quotation with an optional citation footer.
  */
@@ -61,16 +43,18 @@ export function Blockquote({
   ref,
   style,
 }: BlockquoteProps): React.JSX.Element {
+  const classes = blockquoteRecipe();
+
   return (
     <blockquote
-      className={cx(styles.root, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       {children}
       {cite != null ? (
         <footer>
-          <cite className={styles.cite}>{cite}</cite>
+          <cite className={classes.cite}>{cite}</cite>
         </footer>
       ) : null}
     </blockquote>

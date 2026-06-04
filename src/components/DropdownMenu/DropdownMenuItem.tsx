@@ -51,8 +51,6 @@ export interface DropdownMenuItemProps {
 
 const menuItemRecipe = cva({
   base: {
-    all: 'unset',
-    boxSizing: 'border-box',
     display: 'block',
     w: 'full',
     borderRadius: 'md',

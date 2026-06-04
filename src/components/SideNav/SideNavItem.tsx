@@ -131,8 +131,6 @@ const styles = {
     pointerEvents: 'none',
   }),
   toggleRow: css({
-    all: 'unset',
-    boxSizing: 'border-box',
     display: 'flex',
     w: '100%',
     cursor: 'pointer',
@@ -162,8 +160,6 @@ const styles = {
     transform: 'rotate(180deg)',
   }),
   toggleButton: css({
-    all: 'unset',
-    boxSizing: 'border-box',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',

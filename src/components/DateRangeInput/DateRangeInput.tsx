@@ -19,12 +19,11 @@ import {Button} from '../Button';
 import {Calendar} from '../Calendar';
 import {
   Field,
-  inputRecipe,
-  inputStyles,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
 } from '../Field';
+import {inputRecipe, inputStyles} from '../Field/inputStyles';
 import {
   getDescribedBy,
   getStatusIcon,

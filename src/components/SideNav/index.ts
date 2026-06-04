@@ -8,4 +8,3 @@ export {
   type SideNavCollapseState,
   type SideNavRenderMode,
 } from './SideNavContext';
-export {sideNavRecipe, type SideNavVariants} from './SideNav.recipe';

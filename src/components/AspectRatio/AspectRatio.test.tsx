@@ -97,6 +97,22 @@ describe('AspectRatio', () => {
       );
     }).toThrow('finite positive number');
 
+    expect(() => {
+      render(
+        <AspectRatio ratio={NaN}>
+          <div>Content</div>
+        </AspectRatio>,
+      );
+    }).toThrow('finite positive number');
+
+    expect(() => {
+      render(
+        <AspectRatio ratio={Infinity}>
+          <div>Content</div>
+        </AspectRatio>,
+      );
+    }).toThrow('finite positive number');
+
     errorSpy.mockRestore();
   });
 });

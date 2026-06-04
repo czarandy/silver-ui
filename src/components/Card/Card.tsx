@@ -3,10 +3,7 @@ import {cx} from '../../internal/cx';
 import type {SpacingStep} from '../Layout/types';
 import {cardRecipe} from './Card.recipe';
 
-export type CardVariant =
-  | 'default'
-  | 'transparent'
-  | 'muted'
+export type CardColor =
   | 'blue'
   | 'cyan'
   | 'gray'
@@ -18,10 +15,17 @@ export type CardVariant =
   | 'teal'
   | 'yellow';
 
+export type CardVariant = 'default' | 'section' | 'transparent' | 'muted';
+
 /**
  * Rounded container surface for grouping related content.
  */
 export interface CardProps extends ComponentPropsWithRef<'div'> {
+  /**
+   * Decorative surface color. When set, overrides the variant's default
+   * background with the corresponding surface color token.
+   */
+  color?: CardColor;
   /**
    * Test ID applied to the root element.
    */
@@ -33,6 +37,12 @@ export interface CardProps extends ComponentPropsWithRef<'div'> {
   padding?: SpacingStep;
   /**
    * Visual style variant.
+   *
+   * - `default` — bordered, rounded container with `bg` background.
+   * - `section` — flat container with no border or border-radius, for use
+   *   inside a larger container.
+   * - `transparent` — no background.
+   * - `muted` — subtle background, no visible border.
    * @default 'default'
    */
   variant?: CardVariant;
@@ -44,6 +54,7 @@ export interface CardProps extends ComponentPropsWithRef<'div'> {
 export function Card({
   children,
   className,
+  color,
   'data-testid': dataTestId,
   padding = 0,
   ref,
@@ -54,7 +65,7 @@ export function Card({
   return (
     <div
       {...htmlProps}
-      className={cx(cardRecipe({variant, padding}), className)}
+      className={cx(cardRecipe({variant, color, padding}), className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>

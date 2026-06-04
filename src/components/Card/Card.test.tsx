@@ -56,6 +56,41 @@ describe('Card', () => {
     expect(screen.getByTestId('card')).toHaveClass('silver-bg_bg.subtle');
   });
 
+  it('applies the section variant class', () => {
+    render(
+      <Card data-testid="card" variant="section">
+        Content
+      </Card>,
+    );
+
+    const card = screen.getByTestId('card');
+    expect(card).toHaveClass('silver-bdr_0');
+    expect(card).toHaveClass('silver-bd-w_0');
+  });
+
+  it('applies a color class', () => {
+    render(
+      <Card color="blue" data-testid="card">
+        Content
+      </Card>,
+    );
+
+    expect(screen.getByTestId('card')).toHaveClass('silver-bg_surface.blue');
+  });
+
+  it('composes section variant with color', () => {
+    render(
+      <Card color="blue" data-testid="card" variant="section">
+        Content
+      </Card>,
+    );
+
+    const card = screen.getByTestId('card');
+    expect(card).toHaveClass('silver-bdr_0');
+    expect(card).toHaveClass('silver-bd-w_0');
+    expect(card).toHaveClass('silver-bg_surface.blue');
+  });
+
   it('defaults to padding 0', () => {
     render(<Card data-testid="card">Content</Card>);
 

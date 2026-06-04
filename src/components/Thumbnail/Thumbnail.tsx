@@ -100,7 +100,6 @@ const styles = {
     },
   }),
   imageButton: css({
-    all: 'unset',
     display: 'block',
     w: 'full',
     h: 'full',

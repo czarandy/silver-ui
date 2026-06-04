@@ -146,7 +146,6 @@ export interface ItemProps {
 
 const styles = {
   root: css({
-    boxSizing: 'border-box',
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
@@ -190,8 +189,6 @@ const styles = {
     opacity: 0.5,
   }),
   interactiveContent: css({
-    all: 'unset',
-    boxSizing: 'border-box',
     cursor: 'inherit',
     color: 'inherit',
     display: 'flex',

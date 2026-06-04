@@ -55,9 +55,15 @@ export interface BadgeProps {
    */
   ref?: Ref<HTMLSpanElement>;
   /**
-   * ARIA role for the badge element.
+   * ARIA role for the badge element. Common choices:
+   *
+   * - `'status'` — a live region whose content is advisory (e.g. "3 new").
+   * - `'alert'` — an urgent, time-sensitive message (e.g. error counts).
+   * - `'log'` — appended information such as chat counts or activity feeds.
+   *
+   * Any valid ARIA role string is accepted.
    */
-  role?: string;
+  role?: 'status' | 'alert' | 'log' | (string & {});
   /**
    * Badge size.
    * @default 'md'

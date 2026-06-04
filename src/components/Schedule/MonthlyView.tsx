@@ -72,7 +72,6 @@ const styles = {
     color: 'fg.muted',
   }),
   dayNumber: css({
-    boxSizing: 'border-box',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',

@@ -4,8 +4,8 @@ import {Blockquote} from './Blockquote';
 
 describe('Blockquote', () => {
   it('renders children in a blockquote element', () => {
-    render(<Blockquote data-testid="bq">A quoted statement.</Blockquote>);
-    const element = screen.getByTestId('bq');
+    render(<Blockquote>A quoted statement.</Blockquote>);
+    const element = screen.getByRole('blockquote');
     expect(element.tagName).toBe('BLOCKQUOTE');
     expect(element).toHaveTextContent('A quoted statement.');
   });

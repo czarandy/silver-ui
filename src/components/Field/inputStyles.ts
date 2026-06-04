@@ -2,7 +2,6 @@ import {css, cva, type RecipeVariantProps} from 'styled-system/css';
 
 export const inputRecipe = cva({
   base: {
-    boxSizing: 'border-box',
     position: 'relative',
     zIndex: 1,
     display: 'flex',

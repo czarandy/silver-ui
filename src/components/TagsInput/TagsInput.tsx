@@ -20,12 +20,11 @@ import {BaseAutocompleteInput} from '../AutocompleteInput';
 import type {SearchableItem, SearchSource} from '../AutocompleteInput';
 import {
   Field,
-  inputRecipe,
-  inputStyles,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
 } from '../Field';
+import {inputRecipe, inputStyles} from '../Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
 import {Tag} from '../Tag';

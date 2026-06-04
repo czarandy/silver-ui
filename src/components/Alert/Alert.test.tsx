@@ -127,23 +127,56 @@ describe('Alert', () => {
       </Alert>,
     );
 
+    // The content stays mounted while collapsed (so child state and the
+    // aria-controls target are preserved) but is hidden from view.
     const expandBtn = screen.getByRole('button', {name: 'Expand'});
     expect(expandBtn).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByText('Extra content')).not.toBeInTheDocument();
+    expect(screen.getByText('Extra content')).not.toBeVisible();
 
     await user.click(expandBtn);
     expect(screen.getByRole('button', {name: 'Collapse'})).toHaveAttribute(
       'aria-expanded',
       'true',
     );
-    expect(screen.getByText('Extra content')).toBeInTheDocument();
+    expect(screen.getByText('Extra content')).toBeVisible();
 
     await user.click(screen.getByRole('button', {name: 'Collapse'}));
     expect(screen.getByRole('button', {name: 'Expand'})).toHaveAttribute(
       'aria-expanded',
       'false',
     );
-    expect(screen.queryByText('Extra content')).not.toBeInTheDocument();
+    expect(screen.getByText('Extra content')).not.toBeVisible();
+  });
+
+  it('keeps the aria-controls target in the DOM while collapsed', () => {
+    render(
+      <Alert status="info" title="Details">
+        <div>Extra content</div>
+      </Alert>,
+    );
+
+    // The expand button references the body via aria-controls; because the body
+    // subtree stays mounted while collapsed, that reference is never dangling.
+    expect(screen.getByRole('button', {name: 'Expand'})).toHaveAttribute(
+      'aria-controls',
+    );
+    expect(screen.getByText('Extra content')).toBeInTheDocument();
+  });
+
+  it('preserves collapsible child state across collapse and expand', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Alert isDefaultExpanded status="info" title="Details">
+        <input aria-label="Note" />
+      </Alert>,
+    );
+
+    await user.type(screen.getByLabelText('Note'), 'hello');
+    await user.click(screen.getByRole('button', {name: 'Collapse'}));
+    await user.click(screen.getByRole('button', {name: 'Expand'}));
+
+    expect(screen.getByLabelText('Note')).toHaveValue('hello');
   });
 
   it('renders content expanded by default', () => {
@@ -153,7 +186,61 @@ describe('Alert', () => {
       </Alert>,
     );
 
-    expect(screen.getByText('Extra content')).toBeInTheDocument();
+    expect(screen.getByText('Extra content')).toBeVisible();
+  });
+
+  // The collapsible body is the only id-bearing div (it carries the
+  // aria-controls target id); its single child is the styled content slot,
+  // which has no accessible role to query by.
+  const getBodyContent = (testId: string): Element | null =>
+    // eslint-disable-next-line testing-library/no-node-access -- styling wrapper has no semantic query
+    screen.getByTestId(testId).querySelector('div[id] > div');
+
+  it('rounds the body bottom corners for the card container', () => {
+    render(
+      <Alert
+        container="card"
+        data-testid="alert"
+        isDefaultExpanded
+        status="info"
+        title="Details">
+        Body
+      </Alert>,
+    );
+
+    expect(getBodyContent('alert')).toHaveClass('silver-bdr-b_lg');
+  });
+
+  it('omits the body bottom corner radius for the section container', () => {
+    render(
+      <Alert
+        container="section"
+        data-testid="alert"
+        isDefaultExpanded
+        status="info"
+        title="Details">
+        Body
+      </Alert>,
+    );
+
+    expect(getBodyContent('alert')).not.toHaveClass('silver-bdr-b_lg');
+  });
+
+  it('applies the padding prop to the collapsible body', () => {
+    render(
+      <Alert
+        data-testid="alert"
+        isDefaultExpanded
+        padding={6}
+        status="info"
+        title="Details">
+        Body
+      </Alert>,
+    );
+
+    const body = getBodyContent('alert');
+    expect(body).toHaveClass('silver-px_6');
+    expect(body).toHaveClass('silver-py_6');
   });
 
   it('ignores isDefaultExpanded when there are no children', () => {

@@ -1,4 +1,10 @@
-import type {CSSProperties, Ref} from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type Ref,
+} from 'react';
 import {Button} from '../Button';
 import {Dialog} from '../Dialog';
 import {Layout, LayoutContent, LayoutFooter, LayoutHeader} from '../Layout';
@@ -88,13 +94,40 @@ export function AlertDialog({
   title,
   width = 400,
 }: AlertDialogProps): React.JSX.Element | null {
+  /**
+   * Synchronous guard against rapid double-invocation of onAction.
+   * The ref flips immediately on the first call — before React can
+   * re-render with `isActionLoading=true` — so a second Enter/click
+   * in the same event-loop tick is ignored.
+   */
+  const actionFiredRef = useRef(false);
+
+  useEffect(() => {
+    if (!isActionLoading) {
+      actionFiredRef.current = false;
+    }
+  }, [isActionLoading]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      actionFiredRef.current = false;
+    }
+  }, [isOpen]);
+
+  const handleAction = useCallback(() => {
+    if (actionFiredRef.current) {
+      return;
+    }
+    actionFiredRef.current = true;
+    onAction();
+  }, [onAction]);
+
   return (
     <Dialog
       className={className}
       data-testid={dataTestId}
       dismissBehavior={false}
       isOpen={isOpen}
-      label={title}
       onOpenChange={onOpenChange}
       ref={ref}
       role="alertdialog"
@@ -114,7 +147,7 @@ export function AlertDialog({
               <Button
                 isLoading={isActionLoading}
                 label={actionLabel}
-                onClick={onAction}
+                onClick={handleAction}
                 variant={actionVariant}
               />
             }

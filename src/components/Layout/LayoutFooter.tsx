@@ -80,15 +80,12 @@ const styles = {
     borderBlockStartColor: 'border',
   }),
   inner: css({
-    boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     gap: '3',
   }),
-  customInner: css({
-    boxSizing: 'border-box',
-  }),
+  customInner: css({}),
   start: css({
     display: 'flex',
     alignItems: 'center',

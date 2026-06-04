@@ -90,7 +90,6 @@ const styles = {
   }),
   markerContainer: css({
     alignSelf: 'baseline',
-    boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',

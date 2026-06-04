@@ -1,5 +1,5 @@
 export {Button, type ButtonProps, type ButtonSize} from './components/Button';
-export {buttonRecipe, type ButtonVariants} from './components/Button';
+
 export {
   Theme,
   type ThemeColorTokens,
@@ -122,25 +122,21 @@ export {
 export {
   Avatar,
   AvatarStatusDot,
-  avatarRecipe,
   type AvatarNamedSize,
   type AvatarNumericSize,
   type AvatarProps,
   type AvatarSize,
   type AvatarStatusDotProps,
   type AvatarStatusDotVariant,
-  type AvatarVariants,
 } from './components/Avatar';
 export {
   AvatarGroup,
   AvatarGroupOverflow,
-  avatarGroupRecipe,
   type AvatarGroupOverflowProps,
   type AvatarGroupProps,
 } from './components/AvatarGroup';
 export {
   ButtonGroup,
-  buttonGroupRecipe,
   type ButtonGroupContextValue,
   type ButtonGroupOrientation,
   type ButtonGroupProps,
@@ -178,8 +174,6 @@ export {
 } from './components/Pagination';
 export {
   Progress,
-  progressFillRecipe,
-  type ProgressFillVariants,
   type ProgressProps,
   type ProgressVariant,
 } from './components/Progress';
@@ -289,50 +283,36 @@ export {
 } from './components/ContextMenu';
 export {
   Alert,
-  alertRecipe,
   type AlertContainer,
   type AlertProps,
   type AlertStatus,
-  type AlertVariants,
 } from './components/Alert';
 export {
   Badge,
-  badgeRecipe,
   type BadgeColor,
   type BadgeProps,
   type BadgeSize,
-  type BadgeVariants,
 } from './components/Badge';
 export {
   Card,
-  cardRecipe,
+  type CardColor,
   type CardProps,
   type CardVariant,
-  type CardVariants,
 } from './components/Card';
-export {
-  Center,
-  centerRecipe,
-  type CenterAxis,
-  type CenterProps,
-  type CenterVariants,
-} from './components/Center';
+export {Center, type CenterAxis, type CenterProps} from './components/Center';
 export {
   HStack,
-  stackRecipe,
   VStack,
   type HStackProps,
   type SizeValue,
   type StackCrossAlignment,
   type StackGap,
   type StackMainAlignment,
-  type StackVariants,
   type StackWrap,
   type VStackProps,
 } from './components/Stack';
 export {
   AppShell,
-  appShellRecipe,
   AppShellMobileContext,
   useAppShellMobile,
   type AppShellBreakpoint,
@@ -340,14 +320,8 @@ export {
   type AppShellMobileContextValue,
   type AppShellProps,
   type AppShellVariant,
-  type AppShellVariants,
 } from './components/AppShell';
-export {
-  AspectRatio,
-  aspectRatioRecipe,
-  type AspectRatioProps,
-  type AspectRatioVariants,
-} from './components/AspectRatio';
+export {AspectRatio, type AspectRatioProps} from './components/AspectRatio';
 export {
   Accordion,
   AccordionItem,
@@ -358,11 +332,9 @@ export {
 } from './components/Accordion';
 export {
   Divider,
-  dividerRecipe,
   type DividerOrientation,
   type DividerProps,
   type DividerVariant,
-  type DividerVariants,
 } from './components/Divider';
 export {
   Layout,
@@ -370,14 +342,12 @@ export {
   LayoutFooter,
   LayoutHeader,
   LayoutPanel,
-  layoutRecipe,
   type LayoutContentProps,
   type LayoutFooterProps,
   type LayoutHeaderProps,
   type LayoutHeight,
   type LayoutPanelProps,
   type LayoutProps,
-  type LayoutVariants,
   type SpacingStep,
 } from './components/Layout';
 export {
@@ -387,14 +357,12 @@ export {
   SideNavItem,
   SideNavRenderContext,
   SideNavSection,
-  sideNavRecipe,
   type SideNavCollapseState,
   type SideNavHeadingProps,
   type SideNavItemProps,
   type SideNavProps,
   type SideNavRenderMode,
   type SideNavSectionProps,
-  type SideNavVariants,
 } from './components/SideNav';
 export {
   TopNav,
@@ -403,24 +371,20 @@ export {
   TopNavMobileContentContext,
   TopNavRenderContext,
   TopNavSlotContext,
-  topNavRecipe,
   type TopNavHeadingProps,
   type TopNavItemProps,
   type TopNavProps,
   type TopNavRenderMode,
   type TopNavSlot,
-  type TopNavVariants,
 } from './components/TopNav';
 export {
   Link,
   LinkProvider,
-  linkRecipe,
   useLinkComponent,
   type LinkComponent,
   type LinkComponentProps,
   type LinkProps,
   type LinkProviderProps,
-  type LinkVariants,
 } from './components/Link';
 export {
   Tab,
@@ -446,30 +410,18 @@ export {
   type UseLightboxOptions,
   type UseLightboxReturn,
 } from './components/Lightbox';
-export {
-  Spinner,
-  spinnerRecipe,
-  type SpinnerProps,
-  type SpinnerVariants,
-} from './components/Spinner';
+export {Spinner, type SpinnerProps} from './components/Spinner';
 export {
   Skeleton,
   type SkeletonProps,
   type SkeletonRadius,
 } from './components/Skeleton';
-export {
-  EmptyState,
-  emptyStateRecipe,
-  type EmptyStateProps,
-  type EmptyStateVariants,
-} from './components/EmptyState';
+export {EmptyState, type EmptyStateProps} from './components/EmptyState';
 export {
   Switch,
-  switchRecipe,
   type SwitchLabelPosition,
   type SwitchLabelSpacing,
   type SwitchProps,
-  type SwitchVariants,
 } from './components/Switch';
 export {
   Toast,
@@ -504,7 +456,6 @@ export {
 export {
   Dialog,
   DialogContext,
-  dialogRecipe,
   useDialog,
   useDialogContext,
   type DialogDismissBehavior,
@@ -514,7 +465,6 @@ export {
   type DialogProps,
   type DialogRole,
   type DialogVariant,
-  type DialogVariants,
   type UseDialogReturn,
 } from './components/Dialog';
 export {
@@ -550,7 +500,6 @@ export {
 } from './components/Calendar';
 export {
   Field,
-  inputStyles,
   type FieldProps,
   type FieldStatus,
   type FieldStatusVariant,
@@ -597,11 +546,9 @@ export {
 } from './components/MultiSelect';
 export {
   Tag,
-  tagRecipe,
   type TagColor,
   type TagProps,
   type TagSize,
-  type TagVariants,
 } from './components/Tag';
 export {
   BaseAutocompleteInput,
@@ -694,7 +641,12 @@ export {
   type TextType,
   type TextWeight,
 } from './components/Text';
-export {Blockquote, type BlockquoteProps} from './components/Blockquote';
+export {
+  Blockquote,
+  blockquoteRecipe,
+  type BlockquoteProps,
+  type BlockquoteVariants,
+} from './components/Blockquote';
 export {NumberInput, type NumberInputProps} from './components/NumberInput';
 export {
   CheckboxInput,

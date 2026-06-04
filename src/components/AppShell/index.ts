@@ -10,4 +10,3 @@ export {
   useAppShellMobile,
   type AppShellMobileContextValue,
 } from './AppShellMobileContext';
-export {appShellRecipe, type AppShellVariants} from './AppShell.recipe';

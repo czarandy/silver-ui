@@ -109,7 +109,6 @@ const styles = {
     flexDirection: 'column',
     color: 'fg',
     overflow: 'hidden',
-    boxSizing: 'border-box',
     // Reveal the floating (headerless) copy button on hover or keyboard focus.
     '&:hover [data-cb-copy], &:focus-within [data-cb-copy]': {
       opacity: 1,
@@ -117,14 +116,7 @@ const styles = {
     },
   }),
   card: css({
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'border',
     borderRadius: 'md',
-  }),
-  section: css({
-    borderWidth: 0,
-    borderRadius: 0,
   }),
   // Layout only — the surface (bg/border/radius) comes from the <Card> wrapper.
   inline: css({
@@ -421,11 +413,11 @@ export function CodeBlock({
   }
 
   return (
-    <div
+    <Card
       aria-label={regionLabel}
       className={cx(
         styles.root,
-        container === 'card' ? styles.card : styles.section,
+        container === 'card' ? styles.card : undefined,
         className,
       )}
       data-container={container}
@@ -433,7 +425,8 @@ export function CodeBlock({
       data-testid={dataTestId}
       ref={ref}
       role="region"
-      style={rootStyle}>
+      style={rootStyle}
+      variant={container === 'section' ? 'section' : 'default'}>
       {showHeader ? (
         <div className={styles.header}>
           <div className={styles.headerTitle}>{title}</div>
@@ -494,7 +487,7 @@ export function CodeBlock({
           {copyButton}
         </div>
       ) : null}
-    </div>
+    </Card>
   );
 }
 

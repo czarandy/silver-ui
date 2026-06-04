@@ -17,9 +17,3 @@ export {
   type TextWrap,
   type TruncateTooltipPlacement,
 } from './Text';
-export {
-  headingRecipe,
-  textRecipe,
-  type HeadingVariants,
-  type TextVariants,
-} from './Text.recipe';

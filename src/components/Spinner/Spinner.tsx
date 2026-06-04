@@ -55,7 +55,6 @@ const styles = {
     w: 'var(--spinner-size)',
     h: 'var(--spinner-size)',
     flexShrink: 0,
-    boxSizing: 'border-box',
     aspectRatio: 'square',
     borderRadius: 'full',
     borderWidth: 'emphasized',

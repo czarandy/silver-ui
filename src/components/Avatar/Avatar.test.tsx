@@ -132,4 +132,20 @@ describe('Avatar', () => {
       height: '64px',
     });
   });
+
+  it('warns in development when AvatarStatusDot icon is not visible at small sizes', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(
+      <Avatar
+        name="Ada Lovelace"
+        size="small"
+        status={<AvatarStatusDot icon={<Check />} label="Verified" />}
+      />,
+    );
+
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('icon'));
+
+    warnSpy.mockRestore();
+  });
 });

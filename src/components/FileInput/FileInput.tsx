@@ -14,11 +14,11 @@ import {formatFileSize} from '../../internal/formatFileSize';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {
   Field,
-  inputRecipe,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
 } from '../Field';
+import {inputRecipe} from '../Field/inputStyles';
 import {
   getDescribedBy,
   getStatusIcon,
@@ -149,7 +149,6 @@ export type FileInputProps = (FileInputMultipleProps | FileInputSingleProps) &
 
 const styles = {
   surface: css({
-    boxSizing: 'border-box',
     display: 'flex',
     alignItems: 'center',
     gap: '2',

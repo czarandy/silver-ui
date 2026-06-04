@@ -6,7 +6,7 @@ export {
   type DialogRole,
   type DialogVariant,
 } from './Dialog';
-export {dialogRecipe, type DialogVariants} from './Dialog.recipe';
+
 export {
   DialogContext,
   useDialogContext,

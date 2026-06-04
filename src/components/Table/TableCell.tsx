@@ -44,7 +44,6 @@ export interface TableCellProps {
 
 const styles = {
   base: css({
-    boxSizing: 'border-box',
     maxWidth: 0,
   }),
   density: {

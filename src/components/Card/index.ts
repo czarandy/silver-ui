@@ -1,2 +1,1 @@
-export {Card, type CardProps, type CardVariant} from './Card';
-export {cardRecipe, type CardVariants} from './Card.recipe';
+export {Card, type CardColor, type CardProps, type CardVariant} from './Card';
