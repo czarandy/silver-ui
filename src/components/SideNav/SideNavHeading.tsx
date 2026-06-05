@@ -3,6 +3,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Text} from '../Text';
@@ -73,7 +74,7 @@ export function SideNavHeading({
   const resolvedHref = headingHref ?? href;
   const Element = resolvedHref != null ? LinkComponent : 'div';
 
-  if (isCollapsed && logo == null) {
+  if (isCollapsed && !isReactNode(logo)) {
     return null;
   }
 
@@ -86,7 +87,7 @@ export function SideNavHeading({
       ref={ref as Ref<HTMLAnchorElement & HTMLDivElement>}
       style={style}
       to={Element === 'a' ? undefined : resolvedHref}>
-      {logo != null ? <span className={styles.logo}>{logo}</span> : null}
+      {isReactNode(logo) ? <span className={styles.logo}>{logo}</span> : null}
       {!isCollapsed ? (
         <span className={styles.text}>
           {superheading != null ? (
@@ -106,7 +107,7 @@ export function SideNavHeading({
           ) : null}
         </span>
       ) : null}
-      {!isCollapsed && headerEndContent != null ? (
+      {!isCollapsed && isReactNode(headerEndContent) ? (
         <span className={styles.endContent}>{headerEndContent}</span>
       ) : null}
     </Element>

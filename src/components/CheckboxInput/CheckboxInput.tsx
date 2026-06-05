@@ -12,6 +12,7 @@ import {
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
 import type {FieldNecessity, InputStatus} from '../Field';
 import {fieldRecipe} from '../Field/Field.recipe';
@@ -227,7 +228,7 @@ export function CheckboxInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(
-    description != null ? descriptionId : undefined,
+    isReactNode(description) ? descriptionId : undefined,
     statusMessageID,
   );
   const isIndeterminate = value === 'indeterminate';
@@ -304,7 +305,7 @@ export function CheckboxInput({
           {statusText}
         </Text>
       ) : null}
-      {labelTooltip != null ? (
+      {isReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={styles.tooltipIcon}>
             <Icon icon={Info} size="sm" />
@@ -348,7 +349,7 @@ export function CheckboxInput({
   const item = (
     <Item
       description={
-        description != null ? (
+        isReactNode(description) ? (
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }

@@ -6,7 +6,6 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {
   renderSelectListboxOptions,
@@ -25,6 +24,7 @@ import {inputRecipe} from '../Field/inputStyles';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
+import {selectMenuRecipe, selectTriggerRecipe} from './Select.recipe';
 
 export interface SelectOptionData extends SelectListboxOptionData {
   /**
@@ -172,124 +172,6 @@ export type SelectProps = {
   value: string | null;
 } & FieldNecessity;
 
-const styles = {
-  wrapper: css({
-    cursor: 'pointer',
-  }),
-  wrapperDisabled: css({
-    cursor: 'not-allowed',
-  }),
-  trigger: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '2',
-    flex: 1,
-    minW: 0,
-    p: 0,
-    borderWidth: 0,
-    bg: 'transparent',
-    color: 'inherit',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    outline: 'none',
-    textAlign: 'start',
-    _disabled: {
-      cursor: 'not-allowed',
-    },
-  }),
-  label: css({
-    flex: 1,
-    minW: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  }),
-  placeholder: css({
-    color: 'fg.muted',
-  }),
-  iconSlot: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    color: 'fg.muted',
-  }),
-  menu: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    maxH: '80',
-    overflowY: 'auto',
-    p: '1',
-  }),
-  search: css({
-    w: 'full',
-    px: '2',
-    py: '1',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'border.emphasized',
-    borderRadius: 'md',
-    fontFamily: 'body',
-    outline: 'none',
-    _focus: {
-      borderColor: 'primary',
-    },
-  }),
-  option: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '2',
-    w: 'full',
-    px: '2',
-    py: '2',
-    borderWidth: 0,
-    borderRadius: 'md',
-    bg: 'transparent',
-    color: 'fg',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    textAlign: 'start',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffsetTight',
-    },
-    _disabled: {
-      opacity: 0.5,
-      cursor: 'not-allowed',
-    },
-  }),
-  optionSelected: css({fontWeight: 'medium'}),
-  optionHighlighted: css({bg: 'bg.subtle'}),
-  optionContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '2',
-    minW: 0,
-  }),
-  check: css({
-    display: 'inline-flex',
-    color: 'primary',
-  }),
-  sectionHeading: css({
-    px: '2',
-    py: '1',
-    color: 'fg.muted',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    fontWeight: 'semibold',
-  }),
-  divider: css({
-    h: '1px',
-    bg: 'border',
-    my: '1',
-  }),
-} as const;
-
 /**
  * Single-select dropdown field.
  */
@@ -374,35 +256,33 @@ export function Select({
     [selectableOptions, value],
   );
 
+  const menuClasses = selectMenuRecipe();
+
   const renderOption = useCallback(
     (option: SelectOptionData): ReactNode => {
       if (!filteredValues.has(option.value)) {
         return null;
       }
-      const isSelected = option.value === value;
-      const isHighlighted = option.value === highlightedValue;
       return (
-        <button
-          aria-selected={isSelected}
-          className={cx(
-            styles.option,
-            isSelected ? styles.optionSelected : undefined,
-            isHighlighted ? styles.optionHighlighted : undefined,
-          )}
+        // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
+        <div
+          aria-disabled={option.isDisabled ?? undefined}
+          aria-selected={option.value === value || undefined}
+          className={menuClasses.option}
+          data-highlighted={option.value === highlightedValue ? '' : undefined}
+          data-selected={option.value === value ? '' : undefined}
           data-value={option.value}
-          disabled={option.isDisabled}
           id={getOptionId(option.value)}
           key={option.value}
-          onClick={handleOptionClick}
+          onClick={option.isDisabled ? undefined : handleOptionClick}
           onMouseEnter={handleOptionMouseEnter}
           role="option"
-          tabIndex={isHighlighted ? 0 : -1}
-          type="button">
-          <span className={styles.optionContent}>
+          tabIndex={option.value === highlightedValue ? 0 : -1}>
+          <span className={menuClasses.optionContent}>
             {renderOptionProp == null ? (
               <>
                 {option.icon != null ? (
-                  <span className={styles.iconSlot}>
+                  <span className={menuClasses.iconSlot}>
                     <Icon color="secondary" icon={option.icon} size="sm" />
                   </span>
                 ) : null}
@@ -412,12 +292,12 @@ export function Select({
               renderOptionProp(option)
             )}
           </span>
-          {isSelected ? (
-            <span className={styles.check}>
+          {option.value === value ? (
+            <span className={menuClasses.check}>
               <Icon color="accent" icon={Check} size="sm" />
             </span>
           ) : null}
-        </button>
+        </div>
       );
     },
     [
@@ -426,17 +306,18 @@ export function Select({
       handleOptionClick,
       handleOptionMouseEnter,
       highlightedValue,
+      menuClasses,
       renderOptionProp,
       value,
     ],
   );
 
   const optionNodes = renderSelectListboxOptions({
-    dividerClassName: styles.divider,
+    dividerClassName: menuClasses.divider ?? '',
     inputId,
     options,
     renderOption,
-    sectionHeadingClassName: styles.sectionHeading,
+    sectionHeadingClassName: menuClasses.sectionHeading ?? '',
   });
 
   const menu = (
@@ -447,7 +328,7 @@ export function Select({
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-label={`Search ${label}`}
-          className={styles.search}
+          className={menuClasses.search}
           onChange={event => {
             setQuery(event.target.value);
             setHighlightedValue(null);
@@ -460,7 +341,7 @@ export function Select({
       ) : null}
       <div
         aria-label={`${label} options`}
-        className={styles.menu}
+        className={menuClasses.menu}
         id={listboxId}
         role="listbox">
         {optionNodes}
@@ -469,6 +350,10 @@ export function Select({
   );
 
   const necessity = getNecessity(isOptional, isRequired);
+  const triggerClasses = selectTriggerRecipe({
+    isDisabled: isInteractionDisabled,
+    isPlaceholder: selectedOption == null,
+  });
 
   const trigger = (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- mouse clicks anywhere on the visual input delegate to the inner combobox button; keyboard handling stays on that button.
@@ -479,8 +364,7 @@ export function Select({
           status: status?.type,
           isDisabled,
         }),
-        styles.wrapper,
-        isInteractionDisabled ? styles.wrapperDisabled : undefined,
+        triggerClasses.wrapper,
       )}
       onClick={() => {
         if (!isInteractionDisabled) {
@@ -489,7 +373,7 @@ export function Select({
       }}
       ref={triggerRef}>
       {startIcon != null ? (
-        <span className={styles.iconSlot}>
+        <span className={menuClasses.iconSlot}>
           <Icon color="secondary" icon={startIcon} size="sm" />
         </span>
       ) : null}
@@ -501,7 +385,7 @@ export function Select({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
-        className={styles.trigger}
+        className={triggerClasses.trigger}
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
         id={inputId}
@@ -509,11 +393,7 @@ export function Select({
         ref={ref}
         role="combobox"
         type="button">
-        <span
-          className={cx(
-            styles.label,
-            selectedOption == null ? styles.placeholder : undefined,
-          )}>
+        <span className={triggerClasses.label}>
           {selectedOption?.label ?? placeholder}
         </span>
       </button>
@@ -531,7 +411,7 @@ export function Select({
           variant="ghost"
         />
       ) : null}
-      <span className={styles.iconSlot}>
+      <span className={menuClasses.iconSlot}>
         <Icon icon={ChevronDown} size="sm" />
       </span>
     </div>

@@ -7,6 +7,7 @@ const booleanPropNamingRule = plugin.rules['boolean-prop-naming'];
 const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
 const noRedundantBoxSizingRule = plugin.rules['no-redundant-box-sizing'];
 const noRecipeExportsRule = plugin.rules['no-recipe-exports'];
+const preferIsReactNodeRule = plugin.rules['prefer-is-react-node'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -15,6 +16,16 @@ const tester = new RuleTester({
     },
   },
 });
+const typeAwareLanguageOptions = {
+  parser: tseslint.parser,
+  parserOptions: {
+    ecmaFeatures: {jsx: true},
+    projectService: {
+      allowDefaultProject: ['src/components/Example/*.tsx'],
+    },
+    tsconfigRootDir: import.meta.dirname + '/..',
+  },
+};
 
 tester.run('require-component-props', requireComponentPropsRule, {
   valid: [
@@ -537,6 +548,102 @@ tester.run('no-direct-color-tokens', noDirectColorTokensRule, {
           data: {color: 'colors.black'},
         },
       ],
+    },
+  ],
+});
+
+tester.run('prefer-is-react-node', preferIsReactNodeRule, {
+  valid: [
+    {
+      name: 'allows isReactNode checks',
+      code: `
+        import type {ReactNode} from 'react';
+        import isReactNode from '../../internal/isReactNode';
+
+        export function Example({children}: {children?: ReactNode}) {
+          return isReactNode(children) ? <div>{children}</div> : null;
+        }
+      `,
+      filename: 'src/components/Example/Example.tsx',
+      languageOptions: typeAwareLanguageOptions,
+    },
+    {
+      name: 'ignores non-ReactNode null checks',
+      code: `
+        export function Example({label}: {label?: string}) {
+          return label != null ? <div>{label}</div> : null;
+        }
+      `,
+      filename: 'src/components/Example/Example.tsx',
+      languageOptions: typeAwareLanguageOptions,
+    },
+  ],
+  invalid: [
+    {
+      name: 'replaces loose positive ReactNode null checks and adds import',
+      code: `import type {ReactNode} from 'react';
+
+export function Example({children}: {children?: ReactNode}) {
+  return children != null ? <div>{children}</div> : null;
+}
+`,
+      output: `import type {ReactNode} from 'react';
+import isReactNode from '../../internal/isReactNode';
+
+export function Example({children}: {children?: ReactNode}) {
+  return isReactNode(children) ? <div>{children}</div> : null;
+}
+`,
+      filename: 'src/components/Example/Example.tsx',
+      languageOptions: typeAwareLanguageOptions,
+      errors: [{messageId: 'preferIsReactNode', data: {name: 'children'}}],
+    },
+    {
+      name: 'replaces negative ReactNode null checks with negated utility',
+      code: `
+        import type {ReactNode} from 'react';
+        import isReactNode from '../../internal/isReactNode';
+
+        export function Example({children}: {children?: ReactNode}) {
+          return children == null ? null : <div>{children}</div>;
+        }
+      `,
+      output: `
+        import type {ReactNode} from 'react';
+        import isReactNode from '../../internal/isReactNode';
+
+        export function Example({children}: {children?: ReactNode}) {
+          return !isReactNode(children) ? null : <div>{children}</div>;
+        }
+      `,
+      filename: 'src/components/Example/Example.tsx',
+      languageOptions: typeAwareLanguageOptions,
+      errors: [{messageId: 'preferIsReactNode', data: {name: 'children'}}],
+    },
+    {
+      name: 'replaces React.ReactNode strict null checks',
+      code: `import type React from 'react';
+
+export function Example({slot}: {slot?: React.ReactNode}) {
+  if (slot !== null) {
+    return <div>{slot}</div>;
+  }
+  return null;
+}
+`,
+      output: `import type React from 'react';
+import isReactNode from '../../internal/isReactNode';
+
+export function Example({slot}: {slot?: React.ReactNode}) {
+  if (isReactNode(slot)) {
+    return <div>{slot}</div>;
+  }
+  return null;
+}
+`,
+      filename: 'src/components/Example/Example.tsx',
+      languageOptions: typeAwareLanguageOptions,
+      errors: [{messageId: 'preferIsReactNode', data: {name: 'slot'}}],
     },
   ],
 });

@@ -287,9 +287,10 @@ const styles = {
       outlineColor: 'primary',
       outlineOffset: 'focusOffsetTight',
     },
-    _disabled: {
+    '&[aria-disabled="true"]': {
       opacity: 0.55,
       cursor: 'not-allowed',
+      pointerEvents: 'none',
     },
   }),
   checkbox: css({
@@ -501,21 +502,21 @@ export function MultiSelect({
     const isSelected = selectedValues.has(option.value);
     const isHighlighted = highlightedValue === option.value;
     return (
-      <button
+      // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
+      <div
+        aria-disabled={option.isDisabled ?? undefined}
         aria-selected={isSelected}
         className={cx(
           styles.option,
           isHighlighted ? styles.optionHighlighted : undefined,
         )}
         data-value={option.value}
-        disabled={option.isDisabled}
         id={getOptionId(option.value)}
         key={option.value}
-        onClick={handleOptionClick}
+        onClick={option.isDisabled ? undefined : handleOptionClick}
         onMouseEnter={handleOptionMouseEnter}
         role="option"
-        tabIndex={isHighlighted ? 0 : -1}
-        type="button">
+        tabIndex={isHighlighted ? 0 : -1}>
         <span
           aria-hidden="true"
           className={cx(
@@ -538,7 +539,7 @@ export function MultiSelect({
             children(option)
           )}
         </span>
-      </button>
+      </div>
     );
   };
 
@@ -576,12 +577,13 @@ export function MultiSelect({
         id={listboxId}
         role="listbox">
         {hasSelectAll ? (
-          <button
+          // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
+          <div
             aria-selected={allSelected}
             className={styles.option}
             onClick={toggleAll}
             role="option"
-            type="button">
+            tabIndex={-1}>
             <span
               aria-hidden="true"
               className={cx(
@@ -591,7 +593,7 @@ export function MultiSelect({
               {allSelected ? <Icon icon={Check} size="sm" /> : null}
             </span>
             <span className={styles.optionContent}>{selectAllLabel}</span>
-          </button>
+          </div>
         ) : null}
         {optionNodes}
       </div>

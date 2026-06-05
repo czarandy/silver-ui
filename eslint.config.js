@@ -168,6 +168,9 @@ export default tseslint.config(
         projectService: true,
       },
     },
+    plugins: {
+      'silver-ui': silverUiPlugin,
+    },
     rules: {
       '@typescript-eslint/array-type': [
         'error',
@@ -209,6 +212,7 @@ export default tseslint.config(
       '@typescript-eslint/return-await': 'error',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       '@typescript-eslint/unbound-method': 'error',
+      'silver-ui/prefer-is-react-node': 'error',
     },
   },
   // React rules — component and source files
@@ -373,6 +377,13 @@ export default tseslint.config(
   {
     files: ['**/*.test.{ts,tsx}'],
     ...vitest.configs.recommended,
+  },
+  // Relax rules in test files — non-null assertions are fine in tests
+  {
+    files: ['**/*.test.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+    },
   },
   // Storybook — enforce correct story structure
   ...storybook.configs['flat/recommended'],

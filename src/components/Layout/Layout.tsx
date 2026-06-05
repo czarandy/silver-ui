@@ -2,6 +2,7 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutMiddleRecipe, layoutRecipe} from './Layout.recipe';
 import {
@@ -82,7 +83,7 @@ function AreaProvider({
   area: LayoutArea;
   children?: ReactNode;
 }): React.JSX.Element | null {
-  if (children == null) {
+  if (!isReactNode(children)) {
     return null;
   }
 
@@ -105,10 +106,10 @@ export function Layout({
 }: LayoutProps): React.JSX.Element {
   const slots = useMemo(
     () => ({
-      hasEnd: end != null,
-      hasFooter: footer != null,
-      hasHeader: header != null,
-      hasStart: start != null,
+      hasEnd: isReactNode(end),
+      hasFooter: isReactNode(footer),
+      hasHeader: isReactNode(header),
+      hasStart: isReactNode(start),
     }),
     [end, footer, header, start],
   );

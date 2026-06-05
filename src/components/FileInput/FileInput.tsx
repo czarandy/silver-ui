@@ -11,6 +11,7 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {formatFileSize} from '../../internal/formatFileSize';
+import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Button} from '../Button';
 import {
@@ -314,8 +315,9 @@ export function FileInput({
     (validationError == null
       ? undefined
       : {type: 'error' as const, message: validationError});
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
+  const descriptionID = isReactNode(description)
+    ? `${inputId}-description`
+    : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const fileNames = getFileNames(value);

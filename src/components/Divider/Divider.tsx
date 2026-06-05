@@ -1,5 +1,6 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {dividerRecipe} from './Divider.recipe';
 
 export type DividerOrientation = 'horizontal' | 'vertical';
@@ -88,7 +89,9 @@ export function Divider({
   return (
     <div
       aria-label={ariaLabel}
-      aria-labelledby={label != null && ariaLabel == null ? labelId : undefined}
+      aria-labelledby={
+        isReactNode(label) && ariaLabel == null ? labelId : undefined
+      }
       aria-orientation={orientation}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
@@ -96,7 +99,7 @@ export function Divider({
       role="separator"
       style={{...dimensionStyle, ...style}}>
       <div className={classes.line} />
-      {label != null ? (
+      {isReactNode(label) ? (
         <>
           <div className={classes.label} id={labelId}>
             {label}

@@ -1,6 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- discriminated union: custom-element items render item.element directly; passthrough props only apply to standard items */
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';
 import {autocompleteItemRecipe} from './AutocompleteInput.recipe';
@@ -70,7 +71,7 @@ export type AutocompleteInputItemProps =
 export function AutocompleteInputItem(
   props: AutocompleteInputItemProps,
 ): React.JSX.Element {
-  if (props.item.element != null) {
+  if (isReactNode(props.item.element)) {
     return <>{props.item.element}</>;
   }
 
@@ -102,7 +103,7 @@ export function AutocompleteInputItem(
         <Text as="span" color="inherit" type="label">
           {item.label}
         </Text>
-        {description != null ? (
+        {isReactNode(description) ? (
           <Text as="span" color="secondary" type="supporting">
             {description}
           </Text>

@@ -3,6 +3,7 @@ import {useEffect, useId, useMemo, useRef, useState} from 'react';
 import {css} from 'styled-system/css';
 import {MobileNavToggle} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {
   observeResize,
@@ -207,11 +208,11 @@ export function AppShell({
   const isBelowBreakpoint = useMediaQuery(breakpointQuery);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const {ref: topNavPresenceRef, hasContent: hasTopNavContent} =
-    useSlotPresence(topNav != null);
+    useSlotPresence(isReactNode(topNav));
   const {ref: sideNavPresenceRef, hasContent: hasSideNavContent} =
-    useSlotPresence(sideNav != null);
-  const hasTopNav = topNav != null;
-  const hasSideNav = sideNav != null;
+    useSlotPresence(isReactNode(sideNav));
+  const hasTopNav = isReactNode(topNav);
+  const hasSideNav = isReactNode(sideNav);
   const hasNavContent = hasTopNavContent || hasSideNavContent;
   const mobileNavEnabled = !isMobileNavDisabled && hasNavContent;
   const showSideNavInline = hasSideNav && !isBelowBreakpoint;
@@ -283,10 +284,10 @@ export function AppShell({
       topNav
     );
   const headerContent =
-    hasTopNav || banner != null ? (
+    hasTopNav || isReactNode(banner) ? (
       <div className={cx(isAuto && styles.headerSticky)} ref={headerRef}>
         <header style={{flexShrink: 0}}>
-          {banner != null ? (
+          {isReactNode(banner) ? (
             <div className={styles.banner}>{banner}</div>
           ) : null}
           {hasTopNav ? (

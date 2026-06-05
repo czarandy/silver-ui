@@ -1,5 +1,6 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {Heading, type HeadingLevel, Text} from '../Text';
 import {emptyStateRecipe} from './EmptyState.recipe';
 
@@ -74,7 +75,7 @@ export function EmptyState({
       ref={ref}
       role="region"
       style={style}>
-      {illustration != null ? (
+      {isReactNode(illustration) ? (
         <div aria-hidden="true" className={classes.illustration}>
           {illustration}
         </div>
@@ -89,7 +90,7 @@ export function EmptyState({
           </Text>
         ) : null}
       </div>
-      {actions != null ? (
+      {isReactNode(actions) ? (
         <div className={classes.actions}>{actions}</div>
       ) : null}
     </div>

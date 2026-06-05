@@ -2,6 +2,7 @@ import {User} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo, useState} from 'react';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {useAvatarGroup} from '../AvatarGroup/AvatarGroupContext';
 import {Icon} from '../Icon';
 import {avatarRecipe} from './Avatar.recipe';
@@ -181,7 +182,7 @@ export function Avatar({
             )}
           </AvatarImage>
         </div>
-        {status != null ? (
+        {isReactNode(status) ? (
           <div className={classes.status} style={statusStyle}>
             {status}
           </div>

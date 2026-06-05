@@ -113,7 +113,7 @@ describe('Avatar', () => {
     const avatar = screen.getByTestId('avatar');
     // eslint-disable-next-line testing-library/no-node-access -- presentational img (alt="") has no accessible role
     const img = avatar.querySelector('img');
-    fireEvent.error(img!); // eslint-disable-line @typescript-eslint/no-non-null-assertion
+    fireEvent.error(img!);
     // eslint-disable-next-line testing-library/no-node-access
     expect(avatar.querySelector('img')).toBeNull();
 

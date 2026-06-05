@@ -2,6 +2,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
@@ -197,7 +198,7 @@ export function Tab({
           {label}
         </span>
       </span>
-      {endContent != null ? (
+      {isReactNode(endContent) ? (
         <span className={styles.endContent}>{endContent}</span>
       ) : null}
     </>

@@ -14,6 +14,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {TreeViewItem} from './TreeViewItem';
 import type {TreeViewDensity, TreeViewItemData} from './types';
 
@@ -425,13 +426,13 @@ export function TreeView({
       onPointerDownCapture={handlePointerDownCapture}
       ref={ref}
       style={style}>
-      {header == null ? null : (
+      {!isReactNode(header) ? null : (
         <div className={styles.header} id={headerId}>
           {header}
         </div>
       )}
       <ul
-        aria-labelledby={header == null ? undefined : headerId}
+        aria-labelledby={!isReactNode(header) ? undefined : headerId}
         className={styles.list}
         role="tree">
         {renderItems(items, 0, [])}

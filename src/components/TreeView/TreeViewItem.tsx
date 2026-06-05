@@ -4,6 +4,7 @@ import {ChevronRight} from 'lucide-react';
 import {useCallback, useId, useRef, type ReactNode, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {Icon} from '../Icon';
 import {TreeViewBranches} from './TreeViewBranches';
 import type {TreeViewDensity} from './types';
@@ -399,7 +400,7 @@ export function TreeViewItem({
   const content = (
     <>
       {toggle}
-      {startContent == null ? null : (
+      {!isReactNode(startContent) ? null : (
         <span className={styles.startContent}>{startContent}</span>
       )}
       {href != null ? (
@@ -430,7 +431,7 @@ export function TreeViewItem({
       ) : (
         <span className={styles.content}>{labelAndDescription}</span>
       )}
-      {endContent == null ? null : (
+      {!isReactNode(endContent) ? null : (
         <span className={styles.endContent}>{endContent}</span>
       )}
     </>
@@ -478,7 +479,7 @@ export function TreeViewItem({
           {content}
         </div>
       </div>
-      {isExpanded && renderedChildren != null ? (
+      {isExpanded && isReactNode(renderedChildren) ? (
         <ul className={styles.childGroup} role="group">
           {renderedChildren}
         </ul>

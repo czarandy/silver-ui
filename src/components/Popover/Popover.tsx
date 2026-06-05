@@ -8,6 +8,7 @@ import {
 } from 'react';
 import {css, cx} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
+import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {nowMonotonicMilliseconds} from '../../internal/time';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
@@ -289,7 +290,7 @@ export function Popover({
     },
   );
 
-  if (anchorRef != null && children == null) {
+  if (anchorRef != null && !isReactNode(children)) {
     return <>{popoverContent}</>;
   }
 

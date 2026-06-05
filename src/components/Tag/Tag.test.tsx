@@ -189,7 +189,6 @@ describe('Tag', () => {
     render(<Tag color="blue" data-testid="tag" label="Blue" />);
 
     const classes = tagRecipe({color: 'blue'});
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- recipe always returns root slot
     expect(screen.getByTestId('tag')).toHaveClass(classes.root!);
   });
 
@@ -278,7 +277,6 @@ describe('Tag', () => {
 
     const tag = screen.getByTestId('tag');
     const classes = tagRecipe({color: 'blue', isRootInteractive: true});
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- recipe always returns root slot
     expect(tag).toHaveClass(classes.root!);
     // The blue color's background must not be overridden by isRootInteractive.
     expect(tag).toHaveClass('silver-bg_surface.blue');

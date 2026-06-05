@@ -3,6 +3,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Text} from '../Text';
@@ -81,7 +82,7 @@ export function TopNavHeading({
       ref={ref as Ref<HTMLAnchorElement & HTMLDivElement>}
       style={style}
       to={Element === 'a' ? undefined : resolvedHref}>
-      {logo != null ? <span className={styles.logo}>{logo}</span> : null}
+      {isReactNode(logo) ? <span className={styles.logo}>{logo}</span> : null}
       <span className={styles.text}>
         {superheading != null ? (
           <Text color="secondary" type="supporting">
@@ -99,7 +100,7 @@ export function TopNavHeading({
           </Text>
         ) : null}
       </span>
-      {headerEndContent != null ? (
+      {isReactNode(headerEndContent) ? (
         <span className={styles.endContent}>{headerEndContent}</span>
       ) : null}
     </Element>

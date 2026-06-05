@@ -10,6 +10,7 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import type {DateRange} from '../../internal/dateTypes';
+import isReactNode from '../../internal/isReactNode';
 import {
   DATE_FORMAT_SHORT_WITH_YEAR,
   plainDateFormat,
@@ -169,8 +170,9 @@ export function DateRangeInput({
   ref,
 }: DateRangeInputProps): React.JSX.Element {
   const inputId = useId();
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
+  const descriptionID = isReactNode(description)
+    ? `${inputId}-description`
+    : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const [isOpen, setIsOpen] = useState(false);

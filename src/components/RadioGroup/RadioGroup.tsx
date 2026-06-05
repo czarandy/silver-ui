@@ -5,6 +5,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import isReactNode from '../../internal/isReactNode';
 import {
   Field,
   getNecessity,
@@ -114,8 +115,9 @@ export function RadioGroup({
   const nameId = useId();
   const inputId = useId();
   const labelId = `${inputId}-label`;
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
+  const descriptionID = isReactNode(description)
+    ? `${inputId}-description`
+    : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const contextValue = useMemo(

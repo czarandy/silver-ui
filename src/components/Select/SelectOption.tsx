@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
+import {selectOptionItemRecipe} from './Select.recipe';
 
 export interface SelectOptionProps {
   /**
@@ -39,19 +39,6 @@ export interface SelectOptionProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  root: css({
-    display: 'flex',
-    minW: 0,
-    p: 0,
-  }),
-  icon: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-    color: 'fg.muted',
-  }),
-} as const;
-
 /**
  * Helper layout for custom Select option rendering.
  */
@@ -65,10 +52,12 @@ export function SelectOption({
   ref,
   style,
 }: SelectOptionProps): React.JSX.Element {
+  const classes = selectOptionItemRecipe();
+
   return (
     <Item
       as="span"
-      className={cx(styles.root, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       description={description}
       endContent={endContent}
@@ -76,7 +65,7 @@ export function SelectOption({
       ref={ref}
       startContent={
         icon != null ? (
-          <span className={styles.icon}>
+          <span className={classes.icon}>
             <Icon color="secondary" icon={icon} size="sm" />
           </span>
         ) : null

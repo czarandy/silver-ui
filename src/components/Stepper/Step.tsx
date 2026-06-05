@@ -2,6 +2,7 @@ import {Check, TriangleAlert} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {Icon} from '../Icon';
 import {Text} from '../Text';
 import {
@@ -304,7 +305,7 @@ export function Step({
         </div>
         <div className={styles.verticalContent}>
           {labelNode}
-          {children != null ? (
+          {isReactNode(children) ? (
             <div className={styles.stepContent}>{children}</div>
           ) : null}
         </div>

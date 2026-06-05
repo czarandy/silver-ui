@@ -10,6 +10,13 @@ const peopleOptions = [
   {label: 'Katherine Johnson', value: 'katherine'},
 ];
 
+const disabledOptions: SelectProps['options'] = [
+  {label: 'Ada Lovelace', value: 'ada'},
+  {isDisabled: true, label: 'Grace Hopper (unavailable)', value: 'grace'},
+  {label: 'Katherine Johnson', value: 'katherine'},
+  {isDisabled: true, label: 'Hedy Lamarr (unavailable)', value: 'hedy'},
+];
+
 const sectionedOptions: SelectProps['options'] = [
   {
     title: 'Engineering',
@@ -148,5 +155,10 @@ export const HiddenLabel: Story = {
 
 export const CustomPlaceholder: Story = {
   args: {placeholder: 'Assign someone'},
+  render: (args: SelectProps) => <EmptySelectStory {...args} />,
+};
+
+export const DisabledOptions: Story = {
+  args: {options: disabledOptions},
   render: (args: SelectProps) => <EmptySelectStory {...args} />,
 };

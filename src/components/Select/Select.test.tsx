@@ -387,6 +387,61 @@ describe('Select', () => {
     fireEvent.click(screen.getByText('Banana'));
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it('forwards ref to the combobox button', () => {
+    const ref = vi.fn<(el: HTMLButtonElement | null) => void>();
+
+    render(
+      <Select
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        ref={ref}
+        value="Apple"
+      />,
+    );
+
+    expect(ref).toHaveBeenCalledWith(
+      screen.getByRole('combobox', {name: 'Fruit'}),
+    );
+  });
+
+  it('renders description with aria-describedby', () => {
+    render(
+      <Select
+        description="Choose your favorite fruit"
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    expect(screen.getByText('Choose your favorite fruit')).toBeInTheDocument();
+    const combobox = screen.getByRole('combobox', {name: 'Fruit'});
+    const describedById = combobox.getAttribute('aria-describedby');
+    expect(describedById).toBeTruthy();
+    // eslint-disable-next-line testing-library/no-node-access -- verifying aria-describedby target content
+    expect(document.getElementById(describedById!)).toHaveTextContent(
+      'Choose your favorite fruit',
+    );
+  });
+
+  it('renders label tooltip', () => {
+    render(
+      <Select
+        label="Fruit"
+        labelTooltip="Pick one fruit from the list"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Pick one fruit from the list',
+    );
+  });
 });
 
 describe('SelectOption', () => {

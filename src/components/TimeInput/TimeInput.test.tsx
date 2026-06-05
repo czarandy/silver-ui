@@ -240,7 +240,7 @@ describe('TimeInput', () => {
     const input = screen.getByLabelText('Time');
     const describedById = input.getAttribute('aria-describedby');
     expect(describedById).toBeTruthy();
-    // eslint-disable-next-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion -- verifying aria-describedby target content
+    // eslint-disable-next-line testing-library/no-node-access -- verifying aria-describedby target content
     expect(document.getElementById(describedById!)).toHaveTextContent(
       'Use 24-hour format',
     );

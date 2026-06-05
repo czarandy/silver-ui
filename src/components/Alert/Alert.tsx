@@ -14,6 +14,7 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {Icon} from '../Icon';
@@ -138,15 +139,16 @@ export function Alert({
   const bodyId = useId();
   const [isDismissed, setIsDismissed] = useState(false);
   const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
-  const hasChildren = children != null;
+  const hasChildren = isReactNode(children);
   // The body is kept mounted whenever there are children (so child state and
   // the `aria-controls` target survive collapsing); `isExpanded` only drives
   // the visual collapse. `showContent` reflects whether the body is currently
   // revealed, which the header uses to square off its bottom corners.
   const showContent = hasChildren && isExpanded;
-  const showEndArea = endContent != null || isDismissable || hasChildren;
+  const showEndArea = isReactNode(endContent) || isDismissable || hasChildren;
   const isSingleLine =
-    description == null && (endContent != null || isDismissable || hasChildren);
+    !isReactNode(description) &&
+    (isReactNode(endContent) || isDismissable || hasChildren);
 
   if (isDismissed) {
     return null;
@@ -176,7 +178,7 @@ export function Alert({
           <Text as="p" type="label" weight="semibold">
             {title}
           </Text>
-          {description != null ? (
+          {isReactNode(description) ? (
             <Text as="p" color="secondary" type="supporting">
               {description}
             </Text>

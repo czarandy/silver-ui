@@ -1,6 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutRegionRecipe} from './Layout.recipe';
 import {useLayoutDivider} from './LayoutContext';
@@ -121,7 +122,7 @@ export function LayoutFooter({
   const dividerContext = useLayoutDivider();
   const hasDivider = dividerContext?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
-  const isCustom = children != null;
+  const isCustom = isReactNode(children);
 
   return (
     <footer
@@ -140,7 +141,7 @@ export function LayoutFooter({
           children
         ) : (
           <>
-            {startContent != null ? (
+            {isReactNode(startContent) ? (
               <div className={styles.start}>{startContent}</div>
             ) : null}
             <div className={styles.actions}>

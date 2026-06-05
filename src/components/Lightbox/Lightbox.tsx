@@ -14,6 +14,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 import {Button} from '../Button';
@@ -467,7 +468,7 @@ export function Lightbox({
                 />
               )}
             </div>
-            {currentItem.caption != null ? (
+            {isReactNode(currentItem.caption) ? (
               <div className={styles.caption}>{currentItem.caption}</div>
             ) : null}
           </div>

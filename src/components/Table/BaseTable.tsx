@@ -1,6 +1,7 @@
 import {memo, useRef, type ReactElement, type ReactNode, type Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {EmptyState} from '../EmptyState';
 import {Text} from '../Text';
 import {TableBody} from './TableBody';
@@ -297,10 +298,10 @@ function BaseTableInner<T extends Record<string, unknown>>({
         resolvedContent
       );
     const hasSlots =
-      headerCellProps.before != null ||
-      headerCellProps.after != null ||
-      headerCellProps.overlay != null ||
-      headerCellProps.below != null;
+      isReactNode(headerCellProps.before) ||
+      isReactNode(headerCellProps.after) ||
+      isReactNode(headerCellProps.overlay) ||
+      isReactNode(headerCellProps.below);
 
     return (
       <HeaderCellComponent
@@ -315,7 +316,7 @@ function BaseTableInner<T extends Record<string, unknown>>({
         {hasSlots ? (
           <>
             {headerCellProps.before}
-            {headerCellProps.after == null ? (
+            {!isReactNode(headerCellProps.after) ? (
               renderedContent
             ) : (
               <div className={styles.headerLabelRow}>
@@ -357,7 +358,7 @@ function BaseTableInner<T extends Record<string, unknown>>({
       className={cx(
         'silver-base-table',
         styles.table,
-        children != null ? styles.tableAutoLayout : undefined,
+        isReactNode(children) ? styles.tableAutoLayout : undefined,
         tableRenderProps.htmlProps.className,
         tableRenderProps.className,
         className,

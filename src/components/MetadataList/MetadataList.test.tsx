@@ -26,7 +26,7 @@ describe('MetadataList', () => {
     );
 
     const heading = screen.getByRole('heading', {name: 'Details'});
-    const dl = screen.getByRole('definition').closest('dl')!; // eslint-disable-line testing-library/no-node-access, @typescript-eslint/no-non-null-assertion
+    const dl = screen.getByRole('definition').closest('dl')!; // eslint-disable-line testing-library/no-node-access
     expect(dl).toHaveAttribute('aria-labelledby', heading.id);
   });
 

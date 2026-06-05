@@ -10,6 +10,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from './cx';
+import isReactNode from './isReactNode';
 import {mergeRefs} from './mergeRefs';
 import {useIsomorphicLayoutEffect} from './useIsomorphicLayoutEffect';
 
@@ -202,7 +203,7 @@ export function OverflowList({
         ref={measureRefCallback}
         style={{gap}}>
         {childArray}
-        {measureIndicator != null ? (
+        {isReactNode(measureIndicator) ? (
           <div className={styles.measureIndicator}>{measureIndicator}</div>
         ) : null}
       </div>

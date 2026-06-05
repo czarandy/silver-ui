@@ -3,6 +3,7 @@ import {useCallback, useMemo, useState} from 'react';
 import {css} from 'styled-system/css';
 import {MobileNav} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {sideNavRecipe} from './SideNav.recipe';
 import {SideNavCollapseContext, useSideNavRenderMode} from './SideNavContext';
 import {SideNavCollapseButton} from './internal/SideNavCollapseButton';
@@ -179,7 +180,7 @@ export function SideNav({
         ref={ref}
         role="navigation"
         style={style}>
-        {header != null || (!isCollapsed && topContent != null) ? (
+        {isReactNode(header) || (!isCollapsed && isReactNode(topContent)) ? (
           <div className={styles.stickyTop}>
             {header}
             {!isCollapsed ? topContent : null}
@@ -192,7 +193,7 @@ export function SideNav({
           )}>
           {children}
         </div>
-        {footer != null || footerIcons != null || isCollapsible ? (
+        {isReactNode(footer) || isReactNode(footerIcons) || isCollapsible ? (
           <div className={styles.stickyBottom}>
             {footer}
             <div
@@ -201,7 +202,7 @@ export function SideNav({
                 isCollapsed && styles.footerRowCollapsed,
               )}>
               {isCollapsible ? <SideNavCollapseButton /> : null}
-              {footerIcons != null ? (
+              {isReactNode(footerIcons) ? (
                 <div
                   className={cx(
                     styles.footerIcons,

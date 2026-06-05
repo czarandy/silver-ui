@@ -3,6 +3,7 @@ import {useId} from 'react';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {Text} from '../Text';
 import {useSideNavCollapse} from './SideNavContext';
 
@@ -85,7 +86,7 @@ export function SideNavSection({
           </Text>
         ) : null}
       </span>
-      {endContent != null ? (
+      {isReactNode(endContent) ? (
         <span className={styles.endContent}>{endContent}</span>
       ) : null}
     </div>

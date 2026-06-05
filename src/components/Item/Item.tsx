@@ -10,6 +10,7 @@ import type {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {useRel} from '../../internal/linkAccessibility';
 import type {LinkComponent as LinkComponentType} from '../Link';
 import {useLinkComponent} from '../Link';
@@ -288,7 +289,7 @@ export function Item({
   const hasParentRole = role != null;
 
   const inlineEndContent =
-    endContent != null && endContentPosition === 'inline' ? (
+    isReactNode(endContent) && endContentPosition === 'inline' ? (
       <span
         className={cx(
           styles.endContentInline,
@@ -312,7 +313,7 @@ export function Item({
           {label}
         </Text>
       )}
-      {description != null ? (
+      {isReactNode(description) ? (
         <Text
           as="span"
           maxLines={getMaxLines(descriptionLines, description)}
@@ -338,11 +339,11 @@ export function Item({
 
   const innerSlots = (
     <>
-      {startContent != null ? (
+      {isReactNode(startContent) ? (
         <span className={styles.startContent}>{startContent}</span>
       ) : null}
       <span className={styles.textContent}>{labelAndDescription}</span>
-      {endContent != null && endContentPosition !== 'inline' ? (
+      {isReactNode(endContent) && endContentPosition !== 'inline' ? (
         <span
           className={cx(
             styles.endContent,
@@ -438,7 +439,7 @@ export function Item({
       style={style}>
       {leadingContent}
       {content}
-      {trailingContent != null ? (
+      {isReactNode(trailingContent) ? (
         <span className={styles.trailingContent}>{trailingContent}</span>
       ) : null}
     </Component>

@@ -9,6 +9,7 @@ import {
 } from 'react';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import type {FieldNecessity, InputStatus} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
@@ -126,8 +127,9 @@ export function Switch({
   isSelected,
 }: SwitchProps): React.JSX.Element {
   const inputId = useId();
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
+  const descriptionID = isReactNode(description)
+    ? `${inputId}-description`
+    : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const requirednessText = isOptional
@@ -193,7 +195,7 @@ export function Switch({
             {requirednessText}
           </Text>
         ) : null}
-        {labelTooltip != null ? (
+        {isReactNode(labelTooltip) ? (
           <Tooltip content={labelTooltip}>
             <span className={classes.tooltipIcon}>
               <Icon icon={Info} size="sm" />
@@ -201,7 +203,7 @@ export function Switch({
           </Tooltip>
         ) : null}
       </label>
-      {description != null ? (
+      {isReactNode(description) ? (
         <Text as="span" color="secondary" id={descriptionID} type="supporting">
           {description}
         </Text>

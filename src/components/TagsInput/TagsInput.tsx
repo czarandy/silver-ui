@@ -15,6 +15,7 @@ import {
 import {css} from 'styled-system/css';
 import {OverflowList} from '../../internal/OverflowList';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {useLayer} from '../../internal/useLayer';
 import {BaseAutocompleteInput} from '../AutocompleteInput';
 import type {SearchableItem, SearchSource} from '../AutocompleteInput';
@@ -317,8 +318,9 @@ export function TagsInput<T extends SearchableItem>({
   value,
 }: TagsInputProps<T>): React.JSX.Element {
   const inputId = useId();
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
+  const descriptionID = isReactNode(description)
+    ? `${inputId}-description`
+    : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -600,7 +602,7 @@ export function TagsInput<T extends SearchableItem>({
           size={size}
           value={null}
         />
-        {endContent != null ? (
+        {isReactNode(endContent) ? (
           <span className={styles.endContent}>{endContent}</span>
         ) : null}
         {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (

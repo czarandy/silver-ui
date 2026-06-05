@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 /**
  * Custom ESLint plugin for silver-ui component conventions.
  *
@@ -5,6 +7,7 @@
  * - silver-ui/require-component-props: Components must accept className, style, ref, and data-testid
  * - silver-ui/boolean-prop-naming: Boolean props must start with is or has
  * - silver-ui/no-direct-color-tokens: Source must use semantic color tokens instead of primitive color tokens
+ * - silver-ui/prefer-is-react-node: ReactNode null checks must use isReactNode
  */
 
 const requireComponentProps = {
@@ -371,6 +374,188 @@ const noDirectColorTokens = {
   },
 };
 
+function isNullLiteral(node) {
+  return node.type === 'Literal' && node.value === null;
+}
+
+function hasReactNodeType(context, node) {
+  const services = context.sourceCode.parserServices;
+  if (
+    services?.program == null ||
+    services.esTreeNodeToTSNodeMap == null
+  ) {
+    return false;
+  }
+
+  const checker = services.program.getTypeChecker();
+  const tsNode = services.esTreeNodeToTSNodeMap.get(node);
+  const type = checker.getTypeAtLocation(tsNode);
+
+  return isReactNodeType(type, checker);
+}
+
+function isReactNodeType(type, checker) {
+  if (type.aliasSymbol?.escapedName === 'ReactNode') {
+    return true;
+  }
+
+  if (checker.typeToString(type) === 'ReactNode') {
+    return true;
+  }
+
+  return false;
+}
+
+function getImportSource(filename) {
+  const normalized = filename.replaceAll('\\', '/');
+  const srcRoot = normalized.includes('/src/')
+    ? normalized.slice(0, normalized.lastIndexOf('/src/') + '/src'.length)
+    : normalized.startsWith('src/')
+      ? 'src'
+      : null;
+
+  if (srcRoot == null) {
+    return '../../internal/isReactNode';
+  }
+
+  const fromDirectory = path.posix.dirname(normalized);
+  const target = `${srcRoot}/internal/isReactNode`;
+  const relativePath = path.posix.relative(fromDirectory, target);
+
+  return relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
+}
+
+function hasIsReactNodeImport(program) {
+  return program.body.some(
+    node =>
+      node.type === 'ImportDeclaration' &&
+      node.specifiers.some(
+        specifier =>
+          specifier.type === 'ImportDefaultSpecifier' &&
+          specifier.local.name === 'isReactNode',
+      ),
+  );
+}
+
+function hasIsReactNodeBinding(program) {
+  return program.body.some(node => {
+    if (
+      node.type === 'FunctionDeclaration' &&
+      node.id?.name === 'isReactNode'
+    ) {
+      return true;
+    }
+
+    if (node.type !== 'VariableDeclaration') {
+      return false;
+    }
+
+    return node.declarations.some(
+      declaration =>
+        declaration.id.type === 'Identifier' &&
+        declaration.id.name === 'isReactNode',
+    );
+  });
+}
+
+function getImportFix(fixer, context, program, shouldAddImport) {
+  if (!shouldAddImport) {
+    return [];
+  }
+
+  const sourceCode = context.sourceCode || context.getSourceCode();
+  const imports = program.body.filter(node => node.type === 'ImportDeclaration');
+  const importSource = getImportSource(context.filename || context.getFilename());
+  const importText = `import isReactNode from '${importSource}';\n`;
+
+  if (imports.length === 0) {
+    return [fixer.insertTextBeforeRange([0, 0], importText)];
+  }
+
+  const lastImport = imports.at(-1);
+  const tokenAfter = sourceCode.getTokenAfter(lastImport, {includeComments: true});
+  if (tokenAfter == null) {
+    return [fixer.insertTextAfter(lastImport, `\n${importText}`)];
+  }
+
+  return [
+    fixer.replaceTextRange(
+      [lastImport.range[1], tokenAfter.range[0]],
+      `\n${importText}\n`,
+    ),
+  ];
+}
+
+const preferIsReactNode = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description:
+        'Require isReactNode for ReactNode null checks so boolean values are excluded from JSX rendering branches',
+    },
+    fixable: 'code',
+    messages: {
+      preferIsReactNode:
+        'Use isReactNode({{name}}) instead of comparing a ReactNode value to null.',
+    },
+    schema: [],
+  },
+  create(context) {
+    const filename = context.filename || context.getFilename();
+    if (/src\/internal\/isReactNode\.ts$/.test(filename.replaceAll('\\', '/'))) {
+      return {};
+    }
+
+    let programNode = null;
+    let needsImport = false;
+    let canAddImport = false;
+
+    return {
+      Program(node) {
+        programNode = node;
+        const alreadyImported = hasIsReactNodeImport(node);
+        canAddImport = alreadyImported || !hasIsReactNodeBinding(node);
+        needsImport = !alreadyImported && canAddImport;
+      },
+      BinaryExpression(node) {
+        if (!['!=', '!==', '==', '==='].includes(node.operator)) {
+          return;
+        }
+
+        const comparedNode = isNullLiteral(node.left)
+          ? node.right
+          : isNullLiteral(node.right)
+            ? node.left
+            : null;
+
+        if (comparedNode == null || !hasReactNodeType(context, comparedNode)) {
+          return;
+        }
+
+        const sourceCode = context.sourceCode || context.getSourceCode();
+        const comparedText = sourceCode.getText(comparedNode);
+        const isPositiveCheck = node.operator === '!=' || node.operator === '!==';
+        const replacement = isPositiveCheck
+          ? `isReactNode(${comparedText})`
+          : `!isReactNode(${comparedText})`;
+        const shouldAddImport = needsImport && canAddImport;
+
+        context.report({
+          node,
+          messageId: 'preferIsReactNode',
+          data: {name: comparedText},
+          fix(fixer) {
+            const fixes = [fixer.replaceText(node, replacement)];
+            fixes.push(...getImportFix(fixer, context, programNode, shouldAddImport));
+            needsImport = false;
+            return fixes;
+          },
+        });
+      },
+    };
+  },
+};
+
 /**
  * Disallow redundant boxSizing: 'border-box' declarations.
  *
@@ -518,6 +703,7 @@ const plugin = {
     'no-direct-color-tokens': noDirectColorTokens,
     'no-recipe-exports': noRecipeExports,
     'no-redundant-box-sizing': noRedundantBoxSizing,
+    'prefer-is-react-node': preferIsReactNode,
     'require-component-props': requireComponentProps,
   },
 };

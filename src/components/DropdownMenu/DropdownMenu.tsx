@@ -9,6 +9,7 @@ import {
   type Ref,
 } from 'react';
 import {css, cx} from 'styled-system/css';
+import isReactNode from '../../internal/isReactNode';
 import {Button, type ButtonProps, type ButtonSize} from '../Button';
 import {Icon} from '../Icon';
 import {Popover} from '../Popover';
@@ -124,7 +125,7 @@ export function DropdownMenu({
   const menuRef = useRef<HTMLDivElement>(null);
 
   if (process.env.NODE_ENV !== 'production') {
-    if (items != null && children != null) {
+    if (items != null && isReactNode(children)) {
       throw new Error(
         'DropdownMenu: pass either `items` or `children`, not both.',
       );

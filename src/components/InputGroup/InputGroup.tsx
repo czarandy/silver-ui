@@ -6,6 +6,7 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {
   Field,
   getNecessity,
@@ -91,8 +92,9 @@ export function InputGroup({
 }: InputGroupProps): React.JSX.Element {
   const inputId = useId();
   const labelId = `${inputId}-label`;
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
+  const descriptionID = isReactNode(description)
+    ? `${inputId}-description`
+    : undefined;
   const statusID = status?.message != null ? `${inputId}-status` : undefined;
   const describedBy =
     [descriptionID, statusID].filter(Boolean).join(' ') || undefined;

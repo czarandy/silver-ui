@@ -2,6 +2,7 @@ import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
@@ -158,7 +159,7 @@ export function Field({
 }: FieldProps): React.JSX.Element {
   const resolvedDescriptionID =
     descriptionID ??
-    (description != null ? `${inputId}-description` : undefined);
+    (isReactNode(description) ? `${inputId}-description` : undefined);
   const resolvedStatusID =
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
@@ -185,7 +186,7 @@ export function Field({
           {statusText}
         </Text>
       ) : null}
-      {labelTooltip != null ? (
+      {isReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>
             <Icon icon={Info} size="sm" />
@@ -194,16 +195,15 @@ export function Field({
       ) : null}
     </LabelComponent>
   );
-  const descriptionNode =
-    description != null ? (
-      <Text
-        as="span"
-        color="secondary"
-        id={resolvedDescriptionID}
-        type="supporting">
-        {description}
-      </Text>
-    ) : null;
+  const descriptionNode = isReactNode(description) ? (
+    <Text
+      as="span"
+      color="secondary"
+      id={resolvedDescriptionID}
+      type="supporting">
+      {description}
+    </Text>
+  ) : null;
   const statusNode =
     status?.message != null ? (
       <div

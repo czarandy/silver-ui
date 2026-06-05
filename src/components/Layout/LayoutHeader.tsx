@@ -2,6 +2,7 @@ import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {useDialogContext} from '../Dialog/DialogContext';
@@ -135,7 +136,7 @@ export function LayoutHeader({
         variant="ghost"
       />
     ) : null;
-  const hasEnd = endContent != null || closeButton != null;
+  const hasEnd = isReactNode(endContent) || closeButton != null;
 
   return (
     <header
@@ -145,7 +146,7 @@ export function LayoutHeader({
       ref={ref}
       style={rootStyle}>
       <div className={cx(styles.inner, layoutRegionRecipe({padding}))}>
-        {startContent != null ? (
+        {isReactNode(startContent) ? (
           <div className={styles.actions}>{startContent}</div>
         ) : null}
         <div className={styles.titleArea}>

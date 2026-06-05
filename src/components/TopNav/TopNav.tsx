@@ -2,6 +2,7 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {css} from 'styled-system/css';
 import {MobileNav, MobileNavToggle} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Divider} from '../Divider';
 import {topNavRecipe} from './TopNav.recipe';
@@ -129,10 +130,11 @@ export function TopNav({
   const mobileContent = useTopNavMobileContent();
   const {hasAutoToggle} = useAppShellMobile();
   const resolvedStartContent = startContent ?? children;
-  const hasCenterContent = centerContent != null;
+  const hasCenterContent = isReactNode(centerContent);
   const hasCollapsibleContent =
-    resolvedStartContent != null || centerContent != null;
-  const hasMobileDrawerContent = hasCollapsibleContent || mobileContent != null;
+    isReactNode(resolvedStartContent) || isReactNode(centerContent);
+  const hasMobileDrawerContent =
+    hasCollapsibleContent || isReactNode(mobileContent);
 
   if (renderMode === 'mobile-bar') {
     return (
@@ -142,7 +144,7 @@ export function TopNav({
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        {heading != null ? (
+        {isReactNode(heading) ? (
           <div className={styles.heading}>{heading}</div>
         ) : null}
         <div className={styles.mobileEnd}>
@@ -154,7 +156,7 @@ export function TopNav({
   }
 
   if (renderMode === 'drawer') {
-    if (!hasCollapsibleContent && mobileContent == null) {
+    if (!hasCollapsibleContent && !isReactNode(mobileContent)) {
       return null;
     }
 
@@ -168,7 +170,7 @@ export function TopNav({
             </div>
           </TopNavSlotContext>
         ) : null}
-        {hasCollapsibleContent && mobileContent != null ? (
+        {hasCollapsibleContent && isReactNode(mobileContent) ? (
           <div className={styles.drawerDivider}>
             <Divider />
           </div>
@@ -189,10 +191,10 @@ export function TopNav({
       ref={ref}
       style={style}>
       <div className={styles.leftSection}>
-        {heading != null ? (
+        {isReactNode(heading) ? (
           <div className={styles.heading}>{heading}</div>
         ) : null}
-        {resolvedStartContent != null ? (
+        {isReactNode(resolvedStartContent) ? (
           <TopNavSlotContext value="start">
             <div className={styles.startContent}>{resolvedStartContent}</div>
           </TopNavSlotContext>
@@ -207,7 +209,7 @@ export function TopNav({
         <div className={styles.rightSection}>
           <TopNavSlotContext value="end">{endContent}</TopNavSlotContext>
         </div>
-      ) : endContent != null ? (
+      ) : isReactNode(endContent) ? (
         <div className={styles.endContent}>
           <TopNavSlotContext value="end">{endContent}</TopNavSlotContext>
         </div>

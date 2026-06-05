@@ -16,6 +16,7 @@ import {
   getDescribedBy,
   getStatusMessageID,
 } from '../components/Field/inputUtils';
+import isReactNode from './isReactNode';
 import {useListboxNavigation} from './useListboxNavigation';
 
 export interface SelectListboxOptionData {
@@ -89,8 +90,8 @@ export type UseSelectListboxResult<TOption extends SelectListboxOptionData> = {
   handleKeyboardNavigation: (
     event: KeyboardEvent<HTMLInputElement | HTMLButtonElement>,
   ) => void;
-  handleOptionClick: (event: MouseEvent<HTMLButtonElement>) => void;
-  handleOptionMouseEnter: (event: MouseEvent<HTMLButtonElement>) => void;
+  handleOptionClick: (event: MouseEvent<HTMLElement>) => void;
+  handleOptionMouseEnter: (event: MouseEvent<HTMLElement>) => void;
   highlightedValue: string | null;
   inputId: string;
   isInteractionDisabled: boolean;
@@ -121,8 +122,9 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   status,
 }: UseSelectListboxOptions<TOption>): UseSelectListboxResult<TOption> {
   const inputId = useId();
-  const descriptionID =
-    description != null ? `${inputId}-description` : undefined;
+  const descriptionID = isReactNode(description)
+    ? `${inputId}-description`
+    : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const [isOpen, setIsOpen] = useState(isDefaultOpen);
@@ -190,7 +192,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   });
 
   const handleOptionClick = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
+    (event: MouseEvent<HTMLElement>) => {
       const optionValue = event.currentTarget.dataset.value;
       const option =
         optionValue == null ? undefined : optionByValue.get(optionValue);
@@ -209,7 +211,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   );
 
   const handleOptionMouseEnter = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
+    (event: MouseEvent<HTMLElement>) => {
       const optionValue = event.currentTarget.dataset.value;
       const option =
         optionValue == null ? undefined : optionByValue.get(optionValue);

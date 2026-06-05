@@ -377,7 +377,8 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         results.map((item, index) => {
           const isSelected = value?.id === item.id;
           return (
-            <button
+            // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
+            <div
               aria-selected={isSelected}
               className={cx(
                 menuClasses.option,
@@ -389,7 +390,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
               onClick={() => selectItem(item)}
               onMouseEnter={() => setHighlightedIndex(index)}
               role="option"
-              type="button">
+              tabIndex={-1}>
               {renderItem == null ? (
                 <AutocompleteInputItem item={item} />
               ) : (
@@ -400,7 +401,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
                   <Icon color="accent" icon={Check} size="sm" />
                 </span>
               ) : null}
-            </button>
+            </div>
           );
         })
       )}

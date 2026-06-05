@@ -11,6 +11,7 @@ import type {
 } from 'react';
 import {VisuallyHidden} from '../../internal';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {useButtonGroup} from '../ButtonGroup/ButtonGroupContext';
 import {Icon, type IconComponent} from '../Icon';
@@ -260,8 +261,8 @@ export function Button({
     getAriaLabel(
       isIconOnly ||
         isLoading ||
-        startContent != null ||
-        endContent != null ||
+        isReactNode(startContent) ||
+        isReactNode(endContent) ||
         opensInNewTab
         ? label
         : undefined,
@@ -328,11 +329,11 @@ export function Button({
             )}
           </span>
         ) : null}
-        {!isIconOnly && startContent != null ? (
+        {!isIconOnly && isReactNode(startContent) ? (
           <span className={classes.startContent}>{startContent}</span>
         ) : null}
         {!isIconOnly ? <span className={classes.label}>{label}</span> : null}
-        {!isIconOnly && endContent != null ? (
+        {!isIconOnly && isReactNode(endContent) ? (
           <span className={classes.endContent}>{endContent}</span>
         ) : null}
         {!isIconOnly && isLoading ? (

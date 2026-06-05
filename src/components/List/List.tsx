@@ -6,6 +6,7 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {listRecipe} from './List.recipe';
 import {ListContext, type ListStyle} from './ListContext';
 
@@ -84,7 +85,7 @@ export function List({
 
   const listElement = (
     <Component
-      aria-labelledby={header != null ? headerId : undefined}
+      aria-labelledby={isReactNode(header) ? headerId : undefined}
       className={cx(classes.list, className)}
       data-testid={dataTestId}
       ref={ref as Ref<HTMLUListElement & HTMLOListElement>}
@@ -97,7 +98,7 @@ export function List({
 
   return (
     <ListContext value={contextValue}>
-      {header == null ? (
+      {!isReactNode(header) ? (
         listElement
       ) : (
         <div className={classes.root}>

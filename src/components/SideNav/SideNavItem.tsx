@@ -5,6 +5,7 @@ import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useCallback, useId, useState} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import isReactNode from '../../internal/isReactNode';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
@@ -225,7 +226,7 @@ export function SideNavItem({
   const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
   const childrenId = useId();
 
-  const hasChildren = children != null;
+  const hasChildren = isReactNode(children);
   const isExpandable = hasChildren && isItemCollapsible;
   const hasPrimaryAction = href != null || onClick != null;
 
@@ -299,18 +300,17 @@ export function SideNavItem({
     </span>
   ) : null;
 
-  const childrenContainer =
-    children != null ? (
-      <div
-        className={cx(
-          styles.childrenContainer,
-          isExpandable && !isExpanded && styles.childrenCollapsed,
-        )}
-        id={childrenId}
-        role="group">
-        <div className={styles.childrenInner}>{children}</div>
-      </div>
-    ) : null;
+  const childrenContainer = isReactNode(children) ? (
+    <div
+      className={cx(
+        styles.childrenContainer,
+        isExpandable && !isExpanded && styles.childrenCollapsed,
+      )}
+      id={childrenId}
+      role="group">
+      <div className={styles.childrenInner}>{children}</div>
+    </div>
+  ) : null;
 
   // Collapsible WITHOUT primary action: whole row toggles
   if (isExpandable && !hasPrimaryAction) {
