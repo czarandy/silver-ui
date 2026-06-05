@@ -1091,18 +1091,19 @@ describe('Schedule', () => {
     const defaultIconButtonClassName = buttonRecipe({
       iconOnly: true,
       size: 'sm',
-    });
+    }).root as string;
     const ghostIconButtonClassName = buttonRecipe({
       iconOnly: true,
       size: 'sm',
       variant: 'ghost',
-    });
+    }).root as string;
+    const todayClassName = buttonRecipe({size: 'sm'}).root as string;
 
     expect(screen.getByRole('button', {name: 'Previous day'})).toHaveClass(
       defaultIconButtonClassName,
     );
     expect(screen.getByRole('button', {name: 'Today'})).toHaveClass(
-      buttonRecipe({size: 'sm'}),
+      todayClassName,
     );
     expect(screen.getByRole('button', {name: 'Next day'})).toHaveClass(
       defaultIconButtonClassName,

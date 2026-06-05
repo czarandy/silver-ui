@@ -8,10 +8,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {nowMonotonicMilliseconds} from '../../internal/time';
 import {Button} from '../Button';
+import {toastRecipe} from './Toast.recipe';
 import type {ToastDismissReason, ToastType} from './types';
 
 export interface ToastProps {
@@ -62,50 +62,6 @@ export interface ToastProps {
   type: ToastType;
 }
 
-const styles = {
-  root: css({
-    width: '25rem',
-    maxW: 'calc(100vw - 32px)',
-    p: '4',
-    borderRadius: 'lg',
-    boxShadow: 'xl',
-    fontFamily: 'body',
-    transitionProperty: 'opacity, transform',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    '@starting-style': {
-      opacity: 0,
-      transform: 'translateY(8px)',
-    },
-    '@media (prefers-reduced-motion: reduce)': {
-      transitionDuration: '0.01ms',
-    },
-  }),
-  info: css({bg: 'status.info.solid', color: 'status.info.solidFg'}),
-  error: css({bg: 'status.error.solid', color: 'status.error.solidFg'}),
-  success: css({bg: 'status.success.solid', color: 'status.success.solidFg'}),
-  warning: css({bg: 'status.warning.solid', color: 'status.warning.solidFg'}),
-  exiting: css({
-    opacity: 0,
-    transform: 'translateY(-8px)',
-  }),
-  inner: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '3',
-  }),
-  content: css({
-    flex: 1,
-    minW: 0,
-  }),
-  end: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    flexShrink: 0,
-  }),
-} as const;
-
 const assertiveTypes: Partial<Record<ToastType, true>> = {
   error: true,
   warning: true,
@@ -131,6 +87,10 @@ export function Toast({
   const startedAtRef = useRef<number | null>(null);
   const remainingRef = useRef(autoHideDuration);
   const isPausedRef = useRef(false);
+  const onDismissRef = useRef(onDismiss);
+  useEffect(() => {
+    onDismissRef.current = onDismiss;
+  });
 
   const startTimer = useCallback(() => {
     if (!isAutoHide) {
@@ -141,10 +101,10 @@ export function Toast({
     }
     startedAtRef.current = nowMonotonicMilliseconds();
     timerRef.current = setTimeout(
-      () => onDismiss('auto'),
+      () => onDismissRef.current('auto'),
       remainingRef.current,
     );
-  }, [isAutoHide, onDismiss]);
+  }, [isAutoHide]);
 
   const pauseTimer = useCallback(() => {
     if (!isAutoHide || isPausedRef.current) {
@@ -182,16 +142,13 @@ export function Toast({
     };
   }, [autoHideDuration, startTimer]);
 
+  const classes = toastRecipe({type, isExiting});
+
   return (
     <div
       aria-atomic="true"
       aria-live={assertiveTypes[type] ? 'assertive' : 'polite'}
-      className={cx(
-        styles.root,
-        styles[type],
-        isExiting ? styles.exiting : undefined,
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       onBlurCapture={resumeTimer}
       onFocusCapture={pauseTimer}
@@ -200,9 +157,9 @@ export function Toast({
       ref={ref}
       role={assertiveTypes[type] ? 'alert' : 'status'}
       style={style}>
-      <div className={styles.inner}>
-        <div className={styles.content}>{body}</div>
-        <div className={styles.end}>
+      <div className={classes.inner}>
+        <div className={classes.content}>{body}</div>
+        <div className={classes.end}>
           {endContent}
           <Button
             icon={X}

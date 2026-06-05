@@ -10,6 +10,7 @@ import {
 } from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {mergeRefs} from '../../internal/mergeRefs';
 import {Toast} from './Toast';
 import {ToastContext, type ToastContextValue} from './ToastContext';
 import type {ToastDismissReason, ToastEntry, ToastPosition} from './types';
@@ -183,7 +184,7 @@ export function ToastViewport({
     const entry = toastsRef.current.find(toast => toast.id === id);
     entry?.options.onHide?.(reason);
     setExitingIds(previous => new Set(previous).add(id));
-    window.setTimeout(() => {
+    globalThis.setTimeout(() => {
       setExitingIds(previous => {
         const next = new Set(previous);
         next.delete(id);
@@ -230,14 +231,7 @@ export function ToastViewport({
         className={cx(styles.viewport, styles.position[position], className)}
         data-testid={dataTestId}
         popover={isTopLayer ? 'manual' : undefined}
-        ref={node => {
-          viewportRef.current = node;
-          if (typeof ref === 'function') {
-            ref(node);
-          } else if (ref != null) {
-            ref.current = node;
-          }
-        }}
+        ref={mergeRefs(viewportRef, ref)}
         role="region"
         style={insetStyle}>
         {visibleToasts.map(entry => {

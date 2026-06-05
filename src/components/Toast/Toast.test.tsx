@@ -304,4 +304,47 @@ describe('Toast', () => {
 
     vi.useRealTimers();
   });
+
+  it('limits visible toasts to maxVisible', async () => {
+    const user = userEvent.setup();
+
+    function Fixture(): React.JSX.Element {
+      const toast = useToast();
+      let counter = 0;
+      return (
+        <Button
+          label="Add"
+          onClick={() => toast({body: `Toast ${++counter}`, isAutoHide: false})}
+        />
+      );
+    }
+
+    render(
+      <ToastViewport isTopLayer={false} maxVisible={2}>
+        <Fixture />
+      </ToastViewport>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Add'}));
+    await user.click(screen.getByRole('button', {name: 'Add'}));
+    await user.click(screen.getByRole('button', {name: 'Add'}));
+
+    const dismissButtons = screen.getAllByRole('button', {
+      name: 'Dismiss notification',
+    });
+    expect(dismissButtons).toHaveLength(2);
+  });
+
+  it('applies inset styles to the viewport', () => {
+    render(
+      <ToastViewport
+        data-testid="viewport"
+        inset={{top: 64, end: 16}}
+        isTopLayer={false}
+      />,
+    );
+
+    const viewport = screen.getByTestId('viewport');
+    expect(viewport).toHaveStyle({top: '64px', insetInlineEnd: '16px'});
+  });
 });

@@ -188,6 +188,17 @@ describe('Button', () => {
     );
   });
 
+  it('replaces icon with spinner when icon-only and loading', () => {
+    render(<Button icon={Home} isIconOnly isLoading label="Refresh" />);
+
+    const button = screen.getByRole('button', {name: 'Refresh'});
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    // Icon should be replaced by spinner
+    // eslint-disable-next-line testing-library/no-node-access -- verifying spinner presence in icon slot
+    expect(button.querySelector('[role="status"]')).toBeInTheDocument();
+  });
+
   it('falls back to a button when loading with href', () => {
     render(<Button href="/docs" isLoading label="Docs" />);
 

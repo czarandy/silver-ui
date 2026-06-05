@@ -233,6 +233,7 @@ export function DateTimeInput({
         style={style}>
         <DateInput
           getIsDateDisabled={getIsDateDisabled}
+          htmlId={fieldId}
           isDisabled={isDisabled}
           isLabelHidden
           isLoading={isLoading}

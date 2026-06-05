@@ -78,3 +78,63 @@ export const Small: Story = {
     value: Temporal.PlainDateTime.from('2026-05-21T09:00'),
   },
 };
+
+export const Sizes: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+      <DateTimeStory
+        label="Small"
+        onChange={() => {}}
+        size="sm"
+        value={Temporal.PlainDateTime.from('2026-05-21T09:00')}
+      />
+      <DateTimeStory
+        label="Medium"
+        onChange={() => {}}
+        size="md"
+        value={Temporal.PlainDateTime.from('2026-05-21T09:00')}
+      />
+      <DateTimeStory
+        label="Large"
+        onChange={() => {}}
+        size="lg"
+        value={Temporal.PlainDateTime.from('2026-05-21T09:00')}
+      />
+    </div>
+  ),
+};
+
+export const Required: Story = {
+  args: {
+    isRequired: true,
+    value: Temporal.PlainDateTime.from('2026-05-21T09:00'),
+  },
+};
+
+export const Optional: Story = {
+  args: {
+    isOptional: true,
+    value: Temporal.PlainDateTime.from('2026-05-21T09:00'),
+  },
+};
+
+export const HiddenLabel: Story = {
+  args: {
+    isLabelHidden: true,
+    value: Temporal.PlainDateTime.from('2026-05-21T09:00'),
+  },
+};
+
+export const WithLabelTooltip: Story = {
+  args: {
+    labelTooltip: 'Select the date and time for the meeting.',
+    value: Temporal.PlainDateTime.from('2026-05-21T09:00'),
+  },
+};
+
+export const WithDescription: Story = {
+  args: {
+    description: 'Choose a date and time during business hours.',
+    value: Temporal.PlainDateTime.from('2026-05-21T09:00'),
+  },
+};

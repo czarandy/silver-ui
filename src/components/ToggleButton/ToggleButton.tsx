@@ -182,7 +182,7 @@ export function ToggleButton({
       aria-label={isIconOnly || isLoading ? label : undefined}
       aria-pressed={isSelected}
       className={cx(
-        buttonRecipe({variant: 'ghost', size, iconOnly: isIconOnly}),
+        buttonRecipe({variant: 'ghost', size, iconOnly: isIconOnly}).root,
         isSelected ? styles.selected : undefined,
         className,
       )}

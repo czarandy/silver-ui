@@ -16,6 +16,12 @@ beforeAll(() => {
       this.removeAttribute('open');
     },
   });
+  Object.defineProperty(HTMLDialogElement.prototype, 'open', {
+    configurable: true,
+    get(this: HTMLDialogElement) {
+      return this.hasAttribute('open');
+    },
+  });
 });
 
 describe('MobileNav', () => {
@@ -41,6 +47,23 @@ describe('MobileNav', () => {
     );
 
     await user.click(screen.getByRole('button', {name: 'Close navigation'}));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('calls onOpenChange(false) when Escape is pressed', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <MobileNav header="Menu" isOpen onOpenChange={onOpenChange}>
+        Content
+      </MobileNav>,
+    );
+
+    const dialog = screen.getByRole('dialog');
+    const cancelEvent = new Event('cancel', {cancelable: true});
+    dialog.dispatchEvent(cancelEvent);
+
+    expect(cancelEvent.defaultPrevented).toBe(true);
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 

@@ -69,6 +69,10 @@ export type DateInputProps = {
    */
   hasClear?: boolean;
   /**
+   * Custom HTML id applied to the input element.
+   */
+  htmlId?: string;
+  /**
    * Whether the input is disabled.
    * @default false
    */
@@ -178,6 +182,7 @@ export function DateInput({
   isDisabled = false,
   isLoading = false,
   hasClear = false,
+  htmlId,
   status,
   labelIcon,
   labelTooltip,
@@ -186,7 +191,8 @@ export function DateInput({
   style,
   ref,
 }: DateInputProps): React.JSX.Element {
-  const inputId = useId();
+  const generatedId = useId();
+  const inputId = htmlId ?? generatedId;
   const descriptionID =
     description != null ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

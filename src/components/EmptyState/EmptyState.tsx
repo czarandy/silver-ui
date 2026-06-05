@@ -1,5 +1,4 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Heading, type HeadingLevel, Text} from '../Text';
 import {emptyStateRecipe} from './EmptyState.recipe';
@@ -49,34 +48,6 @@ export interface EmptyStateProps {
   title: string;
 }
 
-const styles = {
-  illustration: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
-    w: '16',
-    h: '16',
-    '& > svg': {
-      w: 'full',
-      h: 'full',
-    },
-  }),
-  text: css({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '1',
-    maxW: '96',
-  }),
-  actions: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: '2',
-    mt: '1',
-  }),
-} as const;
-
 /**
  * A placeholder for an empty data or content area.
  */
@@ -93,21 +64,22 @@ export function EmptyState({
   title,
 }: EmptyStateProps): React.JSX.Element {
   const headingId = useId();
+  const classes = emptyStateRecipe({isCompact});
 
   return (
     <div
       aria-labelledby={headingId}
-      className={cx(emptyStateRecipe({isCompact}), className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       role="region"
       style={style}>
       {illustration != null ? (
-        <div aria-hidden="true" className={styles.illustration}>
+        <div aria-hidden="true" className={classes.illustration}>
           {illustration}
         </div>
       ) : null}
-      <div className={styles.text}>
+      <div className={classes.text}>
         <Heading id={headingId} level={headingLevel}>
           {title}
         </Heading>
@@ -117,7 +89,9 @@ export function EmptyState({
           </Text>
         ) : null}
       </div>
-      {actions != null ? <div className={styles.actions}>{actions}</div> : null}
+      {actions != null ? (
+        <div className={classes.actions}>{actions}</div>
+      ) : null}
     </div>
   );
 }

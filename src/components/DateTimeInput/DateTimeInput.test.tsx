@@ -89,6 +89,21 @@ describe('DateTimeInput', () => {
     expect(screen.getByText('Invalid date-time')).toBeInTheDocument();
   });
 
+  it('associates the field label with the date input', () => {
+    render(
+      <DateTimeInput label="Meeting" onChange={() => {}} value={undefined} />,
+    );
+
+    const dateInput = screen.getByLabelText('Meeting date');
+    const dateInputId = dateInput.getAttribute('id');
+    expect(dateInputId).toBeTruthy();
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(screen.getByText('Meeting').closest('label')).toHaveAttribute(
+      'for',
+      dateInputId,
+    );
+  });
+
   it('forwards ref to the date input', () => {
     const ref = vi.fn<(el: HTMLInputElement | null) => void>();
 
@@ -102,5 +117,75 @@ describe('DateTimeInput', () => {
     );
 
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLInputElement));
+  });
+
+  it('clamps time to min when date matches the min date', () => {
+    const onChange = vi.fn();
+
+    render(
+      <DateTimeInput
+        label="Meeting"
+        min={Temporal.PlainDateTime.from('2026-05-01T08:00')}
+        onChange={onChange}
+        value={Temporal.PlainDateTime.from('2026-05-01T06:00')}
+      />,
+    );
+
+    const timeInput = screen.getByLabelText('Meeting time');
+    expect(timeInput).toHaveAttribute('min', '08:00');
+  });
+
+  it('clamps time to max when date matches the max date', () => {
+    const onChange = vi.fn();
+
+    render(
+      <DateTimeInput
+        label="Meeting"
+        max={Temporal.PlainDateTime.from('2026-05-31T18:00')}
+        onChange={onChange}
+        value={Temporal.PlainDateTime.from('2026-05-31T12:00')}
+      />,
+    );
+
+    const timeInput = screen.getByLabelText('Meeting time');
+    expect(timeInput).toHaveAttribute('max', '18:00');
+  });
+
+  it('does not apply time constraints when date differs from min/max date', () => {
+    render(
+      <DateTimeInput
+        label="Meeting"
+        max={Temporal.PlainDateTime.from('2026-05-31T18:00')}
+        min={Temporal.PlainDateTime.from('2026-05-01T08:00')}
+        onChange={() => {}}
+        value={Temporal.PlainDateTime.from('2026-05-15T12:00')}
+      />,
+    );
+
+    const timeInput = screen.getByLabelText('Meeting time');
+    expect(timeInput).toHaveAttribute('min', '');
+    expect(timeInput).toHaveAttribute('max', '');
+  });
+
+  it('clamps the existing time when the date changes to the min boundary', () => {
+    const onChange = vi.fn();
+
+    render(
+      <DateTimeInput
+        label="Meeting"
+        min={Temporal.PlainDateTime.from('2026-05-01T08:00')}
+        onChange={onChange}
+        value={Temporal.PlainDateTime.from('2026-05-15T06:00')}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Meeting date'), {
+      target: {value: '2026-05-01'},
+    });
+
+    const result = onChange.mock.calls[0][0] as Temporal.PlainDateTime;
+    expect(result.toPlainDate().toString()).toBe('2026-05-01');
+    expect(result.hour).toBe(8);
+    expect(result.minute).toBe(0);
   });
 });

@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Inbox, Plus, Settings} from 'lucide-react';
+import {Inbox, Plus, RefreshCw, Settings} from 'lucide-react';
 import {css} from 'styled-system/css';
 import {Icon} from '../Icon';
 import {Button} from './Button';
@@ -10,7 +10,7 @@ const meta = {
   argTypes: {
     variant: {
       control: {type: 'select'},
-      options: ['primary', 'secondary', 'ghost', 'destructive'],
+      options: ['primary', 'secondary', 'ghost', 'destructive', 'onSolid'],
     },
     size: {
       control: {type: 'select'},
@@ -166,6 +166,47 @@ export const WithStartContent: Story = {
           />
         }
         variant="secondary"
+      />
+    </div>
+  ),
+};
+
+export const OnSolid: Story = {
+  render: () => (
+    <div
+      className={css({bg: 'primary', borderRadius: 'lg', p: '4'})}
+      style={{
+        display: 'flex',
+        gap: '0.5rem',
+        alignItems: 'center',
+        color: 'white',
+      }}>
+      <Button icon={Settings} isIconOnly label="Settings" variant="onSolid" />
+      <Button label="Action" variant="onSolid" />
+      <Button icon={Plus} label="Add item" variant="onSolid" />
+    </div>
+  ),
+};
+
+export const IconOnlyLoading: Story = {
+  render: () => (
+    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+      <Button icon={RefreshCw} isIconOnly isLoading label="Refresh" size="sm" />
+      <Button
+        icon={RefreshCw}
+        isIconOnly
+        isLoading
+        label="Refresh"
+        size="md"
+        variant="primary"
+      />
+      <Button
+        icon={RefreshCw}
+        isIconOnly
+        isLoading
+        label="Refresh"
+        size="lg"
+        variant="ghost"
       />
     </div>
   ),

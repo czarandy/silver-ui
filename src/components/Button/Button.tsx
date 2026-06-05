@@ -9,7 +9,6 @@ import type {
   ReactNode,
   Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal';
 import {cx} from '../../internal/cx';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
@@ -209,45 +208,6 @@ export type ButtonProps =
       isIconOnly?: false;
     });
 
-const styles = {
-  content: css({
-    display: 'contents',
-  }),
-  label: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    minW: 0,
-    // The label is a (blockified) flex item, so `overflow: hidden` clips it to
-    // its line box. With a tight line-height that crops descenders (e.g. the
-    // "g" in "changes"), so pad the clip box vertically and cancel the padding
-    // with a negative margin to keep layout unchanged.
-    py: '0.25em',
-    mt: '-0.35em',
-    mb: '-0.25em',
-  }),
-  icon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }),
-  endContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    color: 'inherit',
-  }),
-  startContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    color: 'inherit',
-  }),
-  loadingIndicator: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    color: 'inherit',
-  }),
-} as const;
-
 export function Button({
   label,
   'aria-controls': ariaControls,
@@ -313,6 +273,8 @@ export function Button({
       ? 'onMedia'
       : 'default';
 
+  const classes = buttonRecipe({variant, size, iconOnly: isIconOnly});
+
   const ariaAttrs = {
     'aria-controls': ariaControls,
     'aria-current': ariaCurrent,
@@ -356,21 +318,25 @@ export function Button({
 
   const buttonContent = (
     <>
-      <span aria-hidden={isLoading || undefined} className={styles.content}>
+      <span aria-hidden={isLoading || undefined} className={classes.content}>
         {icon != null ? (
-          <span aria-hidden="true" className={styles.icon}>
-            <Icon icon={icon} size={size} />
+          <span aria-hidden="true" className={classes.icon}>
+            {isIconOnly && isLoading ? (
+              <Spinner size={size} variant={spinnerVariant} />
+            ) : (
+              <Icon icon={icon} size={size} />
+            )}
           </span>
         ) : null}
         {!isIconOnly && startContent != null ? (
-          <span className={styles.startContent}>{startContent}</span>
+          <span className={classes.startContent}>{startContent}</span>
         ) : null}
-        {!isIconOnly ? <span className={styles.label}>{label}</span> : null}
+        {!isIconOnly ? <span className={classes.label}>{label}</span> : null}
         {!isIconOnly && endContent != null ? (
-          <span className={styles.endContent}>{endContent}</span>
+          <span className={classes.endContent}>{endContent}</span>
         ) : null}
         {!isIconOnly && isLoading ? (
-          <span aria-hidden="true" className={styles.loadingIndicator}>
+          <span aria-hidden="true" className={classes.loadingIndicator}>
             <Spinner size={size} variant={spinnerVariant} />
           </span>
         ) : null}
@@ -381,10 +347,7 @@ export function Button({
     </>
   );
 
-  const rootClassName = cx(
-    buttonRecipe({variant, size, iconOnly: isIconOnly}),
-    className,
-  );
+  const rootClassName = cx(classes.root, className);
 
   const element = renderAsLink ? (
     <LinkComponent
