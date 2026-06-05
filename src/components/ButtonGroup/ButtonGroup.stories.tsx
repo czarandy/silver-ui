@@ -3,11 +3,17 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  Archive,
   Bold,
+  Copy,
+  Edit,
   Italic,
+  Scissors,
+  Trash2,
   Underline,
 } from 'lucide-react';
 import {Button} from '../Button';
+import {DropdownMenu} from '../DropdownMenu';
 import {ButtonGroup} from './ButtonGroup';
 
 const meta: Meta<typeof ButtonGroup> = {
@@ -130,6 +136,27 @@ export const LargeGroup: Story = {
       <Button label="3" />
       <Button label="Next" />
       <Button label="Last" />
+    </ButtonGroup>
+  ),
+};
+
+export const WithDropdownMenu: Story = {
+  args: {
+    label: 'Document actions',
+  },
+  render: args => (
+    <ButtonGroup {...args}>
+      <Button icon={Copy} label="Copy" />
+      <Button icon={Scissors} label="Cut" />
+      <DropdownMenu
+        button={{label: 'More'}}
+        items={[
+          {icon: Edit, label: 'Rename'},
+          {icon: Archive, label: 'Archive'},
+          {type: 'divider'},
+          {icon: Trash2, label: 'Delete'},
+        ]}
+      />
     </ButtonGroup>
   ),
 };

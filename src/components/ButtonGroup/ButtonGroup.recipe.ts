@@ -16,7 +16,7 @@ export const buttonGroupRecipe = cva({
     orientation: {
       horizontal: {
         flexDirection: 'row',
-        '& > :not(:first-child):is(button, a), & > :not(:first-child) :where(button, a)':
+        '& > :not(:first-child):is(button, a), & > :not(:first-child) :where(button, a):not([popover] *)':
           {
             borderTopLeftRadius: 0,
             borderBottomLeftRadius: 0,
@@ -24,7 +24,13 @@ export const buttonGroupRecipe = cva({
             borderInlineStartStyle: 'solid',
             borderInlineStartColor: 'border',
           },
-        '& > :not(:last-child):is(button, a), & > :not(:last-child) :where(button, a)':
+        // `:has(~ :not([popover]))` rather than `:not(:last-child)` so that a
+        // trailing `[popover]` sibling (e.g. DropdownMenu's floating content,
+        // which is display:none but still counts for :last-child) does not
+        // strip the end radius from the last visible button in the group. The
+        // `:not([popover] *)` on the descendant clause keeps these joins from
+        // leaking onto buttons rendered inside a child's popover (menu items).
+        '& > :has(~ :not([popover])):is(button, a), & > :has(~ :not([popover])) :where(button, a):not([popover] *)':
           {
             borderTopRightRadius: 0,
             borderBottomRightRadius: 0,
@@ -32,7 +38,7 @@ export const buttonGroupRecipe = cva({
       },
       vertical: {
         flexDirection: 'column',
-        '& > :not(:first-child):is(button, a), & > :not(:first-child) :where(button, a)':
+        '& > :not(:first-child):is(button, a), & > :not(:first-child) :where(button, a):not([popover] *)':
           {
             borderTopLeftRadius: 0,
             borderTopRightRadius: 0,
@@ -40,7 +46,10 @@ export const buttonGroupRecipe = cva({
             borderBlockStartStyle: 'solid',
             borderBlockStartColor: 'border',
           },
-        '& > :not(:last-child):is(button, a), & > :not(:last-child) :where(button, a)':
+        // See the horizontal note above: skip trailing `[popover]` siblings so
+        // the last visible button keeps its bottom radius, and exclude popover
+        // descendants so menu items don't inherit the group joins.
+        '& > :has(~ :not([popover])):is(button, a), & > :has(~ :not([popover])) :where(button, a):not([popover] *)':
           {
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
