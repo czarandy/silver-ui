@@ -331,6 +331,16 @@ export default tseslint.config(
       'silver-ui/no-redundant-box-sizing': 'error',
     },
   },
+  // Recipes are internal — barrel (index) files must not export them
+  {
+    files: ['src/index.ts', 'src/components/**/index.ts'],
+    plugins: {
+      'silver-ui': silverUiPlugin,
+    },
+    rules: {
+      'silver-ui/no-recipe-exports': 'error',
+    },
+  },
   // Testing Library — enforce best practices in test files
   {
     files: ['**/*.test.{ts,tsx}'],

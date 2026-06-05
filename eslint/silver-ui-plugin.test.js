@@ -6,6 +6,7 @@ const requireComponentPropsRule = plugin.rules['require-component-props'];
 const booleanPropNamingRule = plugin.rules['boolean-prop-naming'];
 const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
 const noRedundantBoxSizingRule = plugin.rules['no-redundant-box-sizing'];
+const noRecipeExportsRule = plugin.rules['no-recipe-exports'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -620,6 +621,52 @@ tester.run('no-redundant-box-sizing', noRedundantBoxSizingRule, {
         });
       `,
       errors: [{messageId: 'redundant'}],
+    },
+  ],
+});
+
+tester.run('no-recipe-exports', noRecipeExportsRule, {
+  valid: [
+    {
+      name: 'barrel exports the component and its prop types',
+      code: "export {Divider, type DividerProps, type DividerOrientation} from './Divider';",
+      filename: 'src/components/Divider/index.ts',
+    },
+    {
+      name: 'singular *Variant union type is allowed',
+      code: "export {Divider, type DividerVariant} from './Divider';",
+      filename: 'src/components/Divider/index.ts',
+    },
+    {
+      name: 'root barrel re-exporting only component + props',
+      code: "export {Switch, type SwitchProps} from './components/Switch';",
+      filename: 'src/index.ts',
+    },
+  ],
+  invalid: [
+    {
+      name: 're-export from a recipe module',
+      code: "export {dividerRecipe, type DividerVariants} from './Divider.recipe';",
+      filename: 'src/components/Divider/index.ts',
+      errors: [{messageId: 'recipeModuleReexport'}],
+    },
+    {
+      name: 'wildcard re-export from a recipe module',
+      code: "export * from './Divider.recipe';",
+      filename: 'src/components/Divider/index.ts',
+      errors: [{messageId: 'recipeModuleReexport'}],
+    },
+    {
+      name: 'recipe name re-exported via a component barrel',
+      code: "export {Blockquote, blockquoteRecipe, type BlockquoteProps} from './components/Blockquote';",
+      filename: 'src/index.ts',
+      errors: [{messageId: 'recipeNamedExport', data: {name: 'blockquoteRecipe'}}],
+    },
+    {
+      name: 'recipe *Variants type re-exported via a component barrel',
+      code: "export {Skeleton, type SkeletonVariants} from './components/Skeleton';",
+      filename: 'src/index.ts',
+      errors: [{messageId: 'recipeNamedExport', data: {name: 'SkeletonVariants'}}],
     },
   ],
 });

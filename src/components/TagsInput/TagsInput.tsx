@@ -221,7 +221,7 @@ const styles = {
     rowGap: '1',
   }),
   wrapperWithTagsSize: {
-    sm: css({pt: '1px', pb: '0.5'}),
+    sm: css({pt: '0px', pb: '0.5'}),
     md: css({py: '1'}),
     lg: css({py: '1'}),
   },

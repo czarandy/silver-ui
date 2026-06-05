@@ -440,6 +440,74 @@ const noRedundantBoxSizing = {
   },
 };
 
+/**
+ * Disallow exporting Panda recipes (and their *Variants types) from barrel
+ * files. Recipes are an internal implementation detail — components import them
+ * directly from their "*.recipe" module. Re-exporting them from an index.ts
+ * leaks them into the public API.
+ *
+ * Flags:
+ * - Re-exporting from a "*.recipe" module: `export { x } from './X.recipe'`
+ * - Exporting any name ending in `Recipe` or `Variants` (plural): the recipe
+ *   function and its `RecipeVariantProps` type. Singular `*Variant` union types
+ *   (e.g. `DividerVariant`) are intentionally allowed.
+ */
+const noRecipeExports = {
+  meta: {
+    type: 'problem',
+    docs: {
+      description:
+        'Disallow exporting Panda recipes or their *Variants types from barrel (index) files; they are an internal implementation detail.',
+    },
+    messages: {
+      recipeModuleReexport:
+        'Do not re-export from a recipe module ("{{source}}"). Recipes are internal — import them directly from the "*.recipe" file where needed.',
+      recipeNamedExport:
+        'Do not export "{{name}}" from a barrel. Recipes and their *Variants types are an internal implementation detail; keep them out of index.ts.',
+    },
+    schema: [],
+  },
+  create(context) {
+    const recipeSourcePattern = /\.recipe(\.[cm]?[jt]s)?$/;
+    const recipeNamePattern = /(Recipe|Variants)$/;
+
+    function reportRecipeSource(node) {
+      if (node.source != null && recipeSourcePattern.test(node.source.value)) {
+        context.report({
+          node,
+          messageId: 'recipeModuleReexport',
+          data: {source: node.source.value},
+        });
+        return true;
+      }
+      return false;
+    }
+
+    return {
+      ExportAllDeclaration(node) {
+        reportRecipeSource(node);
+      },
+      ExportNamedDeclaration(node) {
+        // `export ... from './X.recipe'` — flag the whole statement.
+        if (reportRecipeSource(node)) {
+          return;
+        }
+        // `export { fooRecipe, type FooVariants }` (with or without `from`).
+        for (const specifier of node.specifiers) {
+          const name = specifier.exported?.name;
+          if (name != null && recipeNamePattern.test(name)) {
+            context.report({
+              node: specifier,
+              messageId: 'recipeNamedExport',
+              data: {name},
+            });
+          }
+        }
+      },
+    };
+  },
+};
+
 const plugin = {
   meta: {
     name: 'eslint-plugin-silver-ui',
@@ -448,6 +516,7 @@ const plugin = {
   rules: {
     'boolean-prop-naming': booleanPropNaming,
     'no-direct-color-tokens': noDirectColorTokens,
+    'no-recipe-exports': noRecipeExports,
     'no-redundant-box-sizing': noRedundantBoxSizing,
     'require-component-props': requireComponentProps,
   },

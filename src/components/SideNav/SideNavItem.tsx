@@ -86,6 +86,10 @@ const styles = {
     fontWeight: 'medium',
     minH: '8',
     py: '0.5',
+    // Override Item's default `bg.subtle` hover, which is invisible when the
+    // SideNav sits on the AppShell's `bg.subtle` surface. Match TopNavItem's
+    // darker `bg.hover` so the hover is visible in both navs.
+    _hover: {bg: 'bg.hover'},
   }),
   navItemSelected: css({
     bg: 'bg.hover',
