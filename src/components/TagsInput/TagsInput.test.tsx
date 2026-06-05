@@ -128,7 +128,7 @@ describe('TagsInput', () => {
       />,
     );
 
-    expect(screen.getByTestId('tags')).toHaveClass('silver-pt_1px');
+    expect(screen.getByTestId('tags')).toHaveClass('silver-pt_0px');
     expect(screen.getByTestId('tags')).toHaveClass('silver-pb_0.5');
   });
 

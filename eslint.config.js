@@ -272,6 +272,24 @@ export default tseslint.config(
       '@eslint-react/dom-no-unknown-property': 'error',
 
       // JSX correctness
+      // Conditional rendering must use ternaries, not && / ||.
+      // Scoped to JSX *children* (parent is an element/fragment) so the
+      // `attr={cond || undefined}` idiom on attributes is left alone.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            ":matches(JSXElement, JSXFragment) > JSXExpressionContainer > LogicalExpression[operator='&&']",
+          message:
+            'Use a ternary (cond ? <X/> : null) instead of && for conditional rendering.',
+        },
+        {
+          selector:
+            ":matches(JSXElement, JSXFragment) > JSXExpressionContainer > LogicalExpression[operator='||']",
+          message:
+            'Use a ternary (cond ? <X/> : <Y/>) instead of || for conditional rendering.',
+        },
+      ],
       '@eslint-react/no-leaked-conditional-rendering': 'error',
       '@eslint-react/no-missing-key': 'error',
       '@eslint-react/no-duplicate-key': 'error',

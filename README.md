@@ -128,6 +128,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **ContextMenu** — right-click context menu
 - **DropdownMenu** — button-triggered dropdown menu
 - **SegmentedControl** — mutually exclusive option selector
+- **SplitButton** — primary action paired with a dropdown menu of related actions
 - **ToggleButton** — button with pressed/unpressed state
 
 ### Data Display

@@ -365,7 +365,7 @@ export function Button({
         {!isIconOnly && startContent != null ? (
           <span className={styles.startContent}>{startContent}</span>
         ) : null}
-        {!isIconOnly && <span className={styles.label}>{label}</span>}
+        {!isIconOnly ? <span className={styles.label}>{label}</span> : null}
         {!isIconOnly && endContent != null ? (
           <span className={styles.endContent}>{endContent}</span>
         ) : null}

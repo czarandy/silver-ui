@@ -93,11 +93,13 @@ export function useTablePagination<T extends Record<string, unknown>>({
 
         return (
           <>
-            {(current.position === 'above' || current.position === 'both') &&
-              makePagination('above')}
+            {current.position === 'above' || current.position === 'both'
+              ? makePagination('above')
+              : null}
             {children}
-            {(current.position === 'below' || current.position === 'both') &&
-              makePagination('below')}
+            {current.position === 'below' || current.position === 'both'
+              ? makePagination('below')
+              : null}
           </>
         );
       },

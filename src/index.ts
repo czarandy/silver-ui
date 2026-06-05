@@ -411,6 +411,7 @@ export {
   type UseLightboxReturn,
 } from './components/Lightbox';
 export {Spinner, type SpinnerProps} from './components/Spinner';
+export {SplitButton, type SplitButtonProps} from './components/SplitButton';
 export {
   Skeleton,
   type SkeletonProps,
