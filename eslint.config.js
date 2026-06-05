@@ -18,8 +18,8 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     ignores: [
-      'dist/',
-      'storybook-static/',
+      '**/dist/',
+      '**/storybook-static/',
       'styled-system/',
       '*.cjs',
       'eslint/',
