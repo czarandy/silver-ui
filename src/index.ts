@@ -643,12 +643,7 @@ export {
   type TextType,
   type TextWeight,
 } from './components/Text';
-export {
-  Blockquote,
-  blockquoteRecipe,
-  type BlockquoteProps,
-  type BlockquoteVariants,
-} from './components/Blockquote';
+export {Blockquote, type BlockquoteProps} from './components/Blockquote';
 export {NumberInput, type NumberInputProps} from './components/NumberInput';
 export {
   CheckboxInput,

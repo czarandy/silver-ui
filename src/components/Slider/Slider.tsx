@@ -454,6 +454,7 @@ export function Slider({
       isLabelHidden={isLabelHidden}
       {...necessity}
       label={label}
+      labelAs="span"
       labelTooltip={labelTooltip}
       ref={ref}
       status={

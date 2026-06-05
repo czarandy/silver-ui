@@ -350,9 +350,7 @@ export function App(): JSX.Element {
         </HStack>
         <Text color="secondary" type="sm">
           Created by{' '}
-          <Link color="secondary" href="https://github.com/czarandy">
-            Andrey Goder
-          </Link>
+          <Link href="https://github.com/czarandy">Andrey Goder</Link>
         </Text>
       </footer>
     </Theme>

@@ -103,17 +103,31 @@ describe('Slider', () => {
     );
   });
 
-  it('associates the label with the first thumb in range mode', () => {
+  it('names range thumbs via aria-label with min/max distinction', () => {
     render(<Slider label="Price range" onChange={() => {}} value={[20, 80]} />);
 
-    const sliders = screen.getAllByRole('slider');
-    const thumbId = sliders[0].getAttribute('id');
-    expect(thumbId).toBeTruthy();
-    // eslint-disable-next-line testing-library/no-node-access
-    expect(screen.getByText('Price range').closest('label')).toHaveAttribute(
-      'for',
-      thumbId,
+    expect(
+      screen.getByRole('slider', {name: 'Price range, minimum value'}),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('slider', {name: 'Price range, maximum value'}),
+    ).toBeInTheDocument();
+  });
+
+  it('does not render a label[for] targeting the non-labelable slider', () => {
+    // Regression: the thumb is a div[role="slider"], not a labelable form
+    // element, so the Field label must not use `htmlFor` to point at it —
+    // Chrome reports "Incorrect use of <label for=FORM_ELEMENT>" otherwise.
+    // The slider is named by the thumb's aria-label instead.
+    const {container} = render(
+      <Slider label="Volume" onChange={noop} value={50} />,
     );
+
+    expect(screen.getByRole('slider', {name: 'Volume'})).toBeInTheDocument();
+    // The visible label is rendered, but as a span without a `for` attribute.
+    expect(screen.getByText('Volume').tagName).not.toBe('LABEL');
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    expect(container.querySelector('label[for]')).toBeNull();
   });
 
   it('links description to the thumb via aria-describedby', () => {
