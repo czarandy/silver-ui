@@ -1,6 +1,6 @@
 import {useMemo, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {breadcrumbsRecipe} from './Breadcrumbs.recipe';
 import {
   BreadcrumbsContext,
   type BreadcrumbsVariant,
@@ -44,21 +44,6 @@ export interface BreadcrumbsProps {
   variant?: BreadcrumbsVariant;
 }
 
-const styles = {
-  nav: css({
-    display: 'block',
-  }),
-  list: css({
-    display: 'flex',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    gap: '1',
-    m: 0,
-    p: 0,
-    listStyle: 'none',
-  }),
-} as const;
-
 /**
  * Navigation landmark that displays a trail of breadcrumb links.
  */
@@ -76,16 +61,17 @@ export function Breadcrumbs({
     () => ({separator, variant}),
     [separator, variant],
   );
+  const classes = breadcrumbsRecipe();
 
   return (
     <BreadcrumbsContext value={contextValue}>
       <nav
         aria-label={label}
-        className={cx(styles.nav, className)}
+        className={cx(classes.nav, className)}
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        <ol className={styles.list}>{children}</ol>
+        <ol className={classes.list}>{children}</ol>
       </nav>
     </BreadcrumbsContext>
   );

@@ -51,7 +51,7 @@ export function MobileNavToggle({
   return (
     <Button
       className={className}
-      data-testid={dataTestId ?? 'mobile-nav-toggle'}
+      data-testid={dataTestId}
       icon={Menu}
       isIconOnly
       label={label}

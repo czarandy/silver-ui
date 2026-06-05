@@ -57,6 +57,51 @@ describe('AutocompleteInput', () => {
     expect(onChange).toHaveBeenCalledWith(items[1]);
   });
 
+  it('closes the menu after selecting an item', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'gr');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(screen.getByText('Grace Hopper'));
+
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('closes the menu after selecting an item with hasEntriesOnFocus', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'gr');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(screen.getByText('Grace Hopper'));
+
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('clears the selected item', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -73,6 +118,82 @@ describe('AutocompleteInput', () => {
     await user.click(screen.getByRole('button', {name: 'Clear Assignee'}));
 
     expect(onChange).toHaveBeenCalledWith(null);
+  });
+
+  it('clicking the tag enters edit mode with the label text in the input', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={items[0]}
+      />,
+    );
+
+    // A tag should be visible for the selected value.
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+
+    // Click the tag to enter edit mode.
+    await user.click(screen.getByText('Ada Lovelace'));
+
+    // The input should now be visible with the label text pre-filled.
+    const input = screen.getByRole<HTMLInputElement>('combobox', {
+      name: 'Assignee',
+    });
+    await waitFor(() => {
+      expect(input).toHaveValue('Ada Lovelace');
+    });
+    // Cursor should be at the end of the text.
+    expect(input.selectionStart).toBe('Ada Lovelace'.length);
+    expect(input.selectionEnd).toBe('Ada Lovelace'.length);
+  });
+
+  it('shows search results after clicking the tag to edit', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={items[0]}
+      />,
+    );
+
+    await user.click(screen.getByText('Ada Lovelace'));
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await waitFor(() => {
+      expect(input).toHaveAttribute('aria-expanded', 'true');
+    });
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+  });
+
+  it('clicking the wrapper area enters edit mode when a value is selected', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AutocompleteInput
+        data-testid="wrapper"
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={items[0]}
+      />,
+    );
+
+    // Click the wrapper div (not the tag itself).
+    await user.click(screen.getByTestId('wrapper'));
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await waitFor(() => {
+      expect(input).toHaveValue('Ada Lovelace');
+    });
   });
 
   it('navigates results with the keyboard and closes with Escape', async () => {
@@ -179,6 +300,67 @@ describe('AutocompleteInput', () => {
     expect(await screen.findByText('Grace Hopper')).toBeInTheDocument();
   });
 
+  it('shows error text when search fails', async () => {
+    const user = userEvent.setup();
+    let rejectSearch: (error: Error) => void = () => {};
+    const source: SearchSource = {
+      bootstrap: () => [],
+      search: async () =>
+        new Promise<SearchableItem[]>((_, reject) => {
+          rejectSearch = reject;
+        }),
+    };
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={source}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+
+    act(() => {
+      rejectSearch(new Error('Network error'));
+    });
+
+    expect(await screen.findByText('Something went wrong')).toBeInTheDocument();
+  });
+
+  it('shows custom error text when search fails', async () => {
+    const user = userEvent.setup();
+    let rejectSearch: (error: Error) => void = () => {};
+    const source: SearchSource = {
+      bootstrap: () => [],
+      search: async () =>
+        new Promise<SearchableItem[]>((_, reject) => {
+          rejectSearch = reject;
+        }),
+    };
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        errorText="Search unavailable"
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={source}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+
+    act(() => {
+      rejectSearch(new Error('Network error'));
+    });
+
+    expect(await screen.findByText('Search unavailable')).toBeInTheDocument();
+  });
+
   it('does not open or search when disabled', async () => {
     const user = userEvent.setup();
     const source = {
@@ -227,11 +409,12 @@ describe('AutocompleteInput', () => {
     expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
   });
 
-  it('defers opening focus results until the initiating pointer click completes', async () => {
+  it('keeps menu open when clicking the input while results are shown', async () => {
+    const user = userEvent.setup();
+
     render(
       <AutocompleteInput
         debounceMs={0}
-        hasEntriesOnFocus
         label="Assignee"
         onChange={() => {}}
         searchSource={createStaticSource(items)}
@@ -241,21 +424,43 @@ describe('AutocompleteInput', () => {
 
     const input = screen.getByRole('combobox', {name: 'Assignee'});
 
-    fireEvent.pointerDown(input);
-    fireEvent.focus(input);
+    // Type to open the menu with results.
+    await user.type(input, 'a');
+
+    await waitFor(() => {
+      expect(input).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    // Click the input again (e.g. to reposition cursor). The menu must
+    // stay open — the popover's light-dismiss must not close it.
+    await user.click(input);
+
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+  });
+
+  it('opens menu on focus when hasEntriesOnFocus is true', async () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        hasEntriesOnFocus
+        label="Assignee"
+        onChange={() => {}}
+        onOpenChange={onOpenChange}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    fireEvent.focus(screen.getByRole('combobox', {name: 'Assignee'}));
 
     await act(async () => {
       await Promise.resolve();
     });
 
-    expect(input).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.pointerUp(input);
-    fireEvent.click(input);
-
-    await waitFor(() => {
-      expect(input).toHaveAttribute('aria-expanded', 'true');
-    });
+    expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
   it('renders custom empty text for empty results', async () => {
@@ -364,17 +569,35 @@ describe('AutocompleteInput', () => {
       screen.queryByRole('button', {name: 'Clear Assignee'}),
     ).not.toBeInTheDocument();
   });
+
+  it('sets aria-required on the combobox when isRequired is true', () => {
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        isRequired
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSource(items)}
+        value={null}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', {name: /Assignee/})).toBeRequired();
+  });
 });
 
 describe('BaseAutocompleteInput', () => {
   it('can be used directly', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
+    const onQueryChange = vi.fn();
 
     render(
       <BaseAutocompleteInput
         debounceMs={0}
         onChange={onChange}
+        onQueryChange={onQueryChange}
+        query=""
         searchSource={createStaticSource(items)}
         value={null}
       />,

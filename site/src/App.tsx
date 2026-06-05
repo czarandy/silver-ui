@@ -1,6 +1,7 @@
 import {useState, type JSX} from 'react';
 import {
   Alert,
+  AppShell,
   Badge,
   Button,
   Card,
@@ -17,6 +18,7 @@ import {
   type SearchFilterInputFilter,
   SegmentedControl,
   SegmentedControlItem,
+  Select,
   Slider,
   Switch,
   Tag,
@@ -28,6 +30,7 @@ import {
   TopNav,
   TopNavHeading,
   TopNavItem,
+  useAppShellMobile,
   useSearchFilterInputConfig,
   VStack,
 } from 'silver-ui';
@@ -206,6 +209,49 @@ function ComponentShowcase(): JSX.Element {
   );
 }
 
+/**
+ * Theme preset picker. Renders a SegmentedControl on desktop and swaps to a
+ * Select dropdown on mobile, where five segments would overflow the panel.
+ * Relies on AppShell's mobile context, so it must render inside AppShell.
+ */
+function ThemeSelector({
+  onChange,
+  value,
+}: {
+  onChange: (value: string) => void;
+  value: string;
+}): JSX.Element {
+  const {isMobile} = useAppShellMobile();
+
+  if (isMobile) {
+    return (
+      <Select
+        className="showcase__control"
+        label="Theme preset"
+        onChange={next => onChange(next ?? 'default')}
+        options={THEME_OPTIONS}
+        value={value}
+      />
+    );
+  }
+
+  return (
+    <SegmentedControl
+      className="showcase__control"
+      label="Theme preset"
+      onChange={onChange}
+      value={value}>
+      {THEME_OPTIONS.map(opt => (
+        <SegmentedControlItem
+          key={opt.value}
+          label={opt.label}
+          value={opt.value}
+        />
+      ))}
+    </SegmentedControl>
+  );
+}
+
 export function App(): JSX.Element {
   const [mode, setMode] = useState<'dark' | 'light'>('light');
   const [selectedTheme, setSelectedTheme] = useState('default');
@@ -217,41 +263,49 @@ export function App(): JSX.Element {
 
   return (
     <Theme className="page" mode={mode}>
-      <TopNav
-        endContent={
-          <>
-            <TopNavItem href={LINKS.storybook} label="Components" />
-            <TopNavItem href={LINKS.github} label="GitHub" />
-            <TopNavItem href={LINKS.npm} label="npm" />
-            <TopNavItem
-              href="#"
-              icon={mode === 'dark' ? Sun : Moon}
-              isIconOnly
-              label="Toggle dark mode"
-              onClick={e => {
-                e.preventDefault();
-                setMode(prev => (prev === 'dark' ? 'light' : 'dark'));
-              }}
-            />
-          </>
-        }
-        heading={
-          <TopNavHeading
-            aria-label="silver-ui home"
-            href="/"
-            logo={
-              <img
-                alt="silver-ui"
-                className="brand__wordmark"
-                src="/wordmark.svg"
+      <AppShell
+        contentPadding={0}
+        height="auto"
+        mobileBreakpoint="sm"
+        topNav={
+          <TopNav
+            className="site-nav"
+            endContent={
+              <TopNavItem
+                href="#"
+                icon={mode === 'dark' ? Sun : Moon}
+                isIconOnly
+                label="Toggle dark mode"
+                onClick={e => {
+                  e.preventDefault();
+                  setMode(prev => (prev === 'dark' ? 'light' : 'dark'));
+                }}
               />
+            }
+            heading={
+              <TopNavHeading
+                aria-label="silver-ui home"
+                href="/"
+                logo={
+                  <img
+                    alt="silver-ui"
+                    className="brand__wordmark"
+                    src="/wordmark.svg"
+                  />
+                }
+              />
+            }
+            label="Main navigation"
+            startContent={
+              <>
+                <TopNavItem href={LINKS.storybook} label="Components" />
+                <TopNavItem href={LINKS.github} label="GitHub" />
+                <TopNavItem href={LINKS.npm} label="npm" />
+              </>
             }
           />
         }
-        label="Main navigation"
-      />
-
-      <main>
+        variant="section">
         <section className="hero">
           <h1 className="hero__title">
             A themeable React
@@ -321,34 +375,23 @@ export function App(): JSX.Element {
 
           <Theme themes={preset?.themes} tokens={preset?.tokens}>
             <Card className="showcase__panel" padding={6}>
-              <SegmentedControl
-                className="showcase__control"
-                label="Theme preset"
+              <ThemeSelector
                 onChange={setSelectedTheme}
-                value={selectedTheme}>
-                {THEME_OPTIONS.map(opt => (
-                  <SegmentedControlItem
-                    key={opt.value}
-                    label={opt.label}
-                    value={opt.value}
-                  />
-                ))}
-              </SegmentedControl>
+                value={selectedTheme}
+              />
               <ComponentShowcase />
             </Card>
           </Theme>
         </section>
-      </main>
+      </AppShell>
 
       <Divider className="page__divider" />
       <footer className="footer">
         <HStack align="center" gap={2}>
           <Badge color="neutral" label="MIT" size="sm" />
-          <Text color="secondary" type="sm">
-            Licensed
-          </Text>
+          <Text color="secondary">Licensed</Text>
         </HStack>
-        <Text color="secondary" type="sm">
+        <Text color="secondary">
           Created by{' '}
           <Link href="https://github.com/czarandy">Andrey Goder</Link>
         </Text>

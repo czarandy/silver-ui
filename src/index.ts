@@ -560,8 +560,10 @@ export {
   AutocompleteInputItem,
   type BaseAutocompleteInputProps,
   type CreateStaticSourceOptions,
+  type CustomSearchableItem,
   type SearchableItem,
   type SearchSource,
+  type StandardSearchableItem,
   type AutocompleteInputItemProps,
   type AutocompleteInputProps,
 } from './components/AutocompleteInput';

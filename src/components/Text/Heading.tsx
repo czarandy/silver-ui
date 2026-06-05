@@ -1,6 +1,4 @@
 import {
-  createElement,
-  useCallback,
   useRef,
   type CSSProperties,
   type HTMLAttributes,
@@ -92,11 +90,6 @@ export interface HeadingProps extends NativeHeadingProps {
   wordBreak?: TextWordBreak;
 }
 
-type HeadingElementProps = HTMLAttributes<HTMLHeadingElement> & {
-  'data-testid'?: string;
-  ref?: Ref<HTMLHeadingElement>;
-};
-
 const levelToElement = {
   1: 'h1',
   2: 'h2',
@@ -123,19 +116,17 @@ function BaseHeading({
   ref,
   ...props
 }: HeadingProps): JSX.Element {
+  const Component = levelToElement[level];
   const ariaLevel =
     accessibilityLevel != null && accessibilityLevel !== level
       ? accessibilityLevel
       : undefined;
 
-  return createElement(
-    levelToElement[level],
-    {
-      ...props,
-      ref,
-      'aria-level': ariaLevel,
-      'data-testid': dataTestId,
-      className: cx(
+  return (
+    <Component
+      {...props}
+      aria-level={ariaLevel}
+      className={cx(
         headingRecipe({
           level,
           color,
@@ -145,10 +136,12 @@ function BaseHeading({
           maxLines: 'none',
         }),
         className,
-      ),
-      style,
-    },
-    children,
+      )}
+      data-testid={dataTestId}
+      ref={ref}
+      style={style}>
+      {children}
+    </Component>
   );
 }
 
@@ -177,13 +170,9 @@ function TruncatedHeading({
   const isTooltipEnabled =
     hasTruncateTooltip !== false && truncation.isTruncated;
 
-  const handleShow = useCallback(() => {}, []);
-  const handleHide = useCallback(() => {}, []);
   const tooltip = useTooltip({
     placement: tooltipPlacement,
     isEnabled: isTooltipEnabled,
-    onShow: handleShow,
-    onHide: handleHide,
   });
 
   const tooltipRef = tooltip.ref;
@@ -214,36 +203,34 @@ function TruncatedHeading({
 
   const lineClampStyle: CSSProperties | undefined =
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
+  const Component = levelToElement[level];
   const ariaLevel =
     accessibilityLevel != null && accessibilityLevel !== level
       ? accessibilityLevel
       : undefined;
 
-  const elementProps: HeadingElementProps = {
-    ...props,
-    ref: mergeRefs(ref, truncation.ref, headingRef),
-    'aria-level': ariaLevel,
-    'data-testid': dataTestId,
-    className: cx(
-      headingRecipe({
-        level,
-        color,
-        display: 'block',
-        wordBreak: resolvedWordBreak,
-        textWrap,
-        hasStrikethrough,
-        maxLines: getMaxLinesVariant(maxLines),
-      }),
-      className,
-    ),
-    style: {...style, ...lineClampStyle},
-  };
-
-  const element = createElement(levelToElement[level], elementProps, children);
-
   return (
     <>
-      {element}
+      <Component
+        {...props}
+        aria-level={ariaLevel}
+        className={cx(
+          headingRecipe({
+            level,
+            color,
+            display: 'block',
+            wordBreak: resolvedWordBreak,
+            textWrap,
+            hasStrikethrough,
+            maxLines: getMaxLinesVariant(maxLines),
+          }),
+          className,
+        )}
+        data-testid={dataTestId}
+        ref={mergeRefs(ref, truncation.ref, headingRef)}
+        style={{...style, ...lineClampStyle}}>
+        {children}
+      </Component>
       {isTooltipEnabled
         ? tooltip.renderTooltip(truncation.fullText, {
             contentStyle: {

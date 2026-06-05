@@ -135,6 +135,17 @@ describe('Tag', () => {
     expect(screen.getByTestId('end')).toBeInTheDocument();
   });
 
+  it('renders startContent before the label', () => {
+    render(
+      <Tag
+        label="Tag"
+        startContent={<span data-testid="start">Before</span>}
+      />,
+    );
+
+    expect(screen.getByTestId('start')).toBeInTheDocument();
+  });
+
   it('forwards ref to the root element', () => {
     const ref = vi.fn<(element: HTMLElement | null) => void>();
 
@@ -177,7 +188,9 @@ describe('Tag', () => {
   it('applies the specified color recipe class', () => {
     render(<Tag color="blue" data-testid="tag" label="Blue" />);
 
-    expect(screen.getByTestId('tag')).toHaveClass(tagRecipe({color: 'blue'}));
+    const classes = tagRecipe({color: 'blue'});
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- recipe always returns root slot
+    expect(screen.getByTestId('tag')).toHaveClass(classes.root!);
   });
 
   it('activates a clickable tag via keyboard', async () => {
@@ -223,6 +236,52 @@ describe('Tag', () => {
     await user.click(screen.getByRole('button', {name: 'Remove Filter'}));
     expect(onRemove).toHaveBeenCalledOnce();
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('wraps onClick + onRemove in a labelled group', () => {
+    render(
+      <Tag
+        data-testid="tag"
+        label="Filter"
+        onClick={vi.fn()}
+        onRemove={vi.fn()}
+      />,
+    );
+
+    const group = screen.getByRole('group', {name: 'Filter'});
+    expect(group).toBe(screen.getByTestId('tag'));
+  });
+
+  it('wraps href + onRemove in a labelled group', () => {
+    render(
+      <Tag
+        data-testid="tag"
+        href="/filters"
+        label="Filter"
+        onRemove={vi.fn()}
+      />,
+    );
+
+    const group = screen.getByRole('group', {name: 'Filter'});
+    expect(group).toBe(screen.getByTestId('tag'));
+  });
+
+  it('retains color background when rendered as a clickable button', () => {
+    render(
+      <Tag
+        color="blue"
+        data-testid="tag"
+        label="Clickable"
+        onClick={vi.fn()}
+      />,
+    );
+
+    const tag = screen.getByTestId('tag');
+    const classes = tagRecipe({color: 'blue', isRootInteractive: true});
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- recipe always returns root slot
+    expect(tag).toHaveClass(classes.root!);
+    // The blue color's background must not be overridden by isRootInteractive.
+    expect(tag).toHaveClass('silver-bg_surface.blue');
   });
 
   it('triggers onClick when endContent is clicked in onClick + onRemove mode', async () => {

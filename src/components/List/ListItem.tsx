@@ -5,9 +5,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Item} from '../Item';
+import {listItemRecipe} from './List.recipe';
 import {ListContext, type ListStyle} from './ListContext';
 
 export interface ListItemProps {
@@ -71,80 +71,33 @@ export interface ListItemProps {
   target?: string;
 }
 
-const markerSize = '6px';
+type MarkerClasses = ReturnType<typeof listItemRecipe>;
 
-const styles = {
-  withCounter: css({
-    counterIncrement: 'silver-list',
-  }),
-  withDivider: css({
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-    _last: {
-      borderBlockEndWidth: 0,
-    },
-  }),
-  noRadius: css({
-    borderRadius: 0,
-  }),
-  markerContainer: css({
-    alignSelf: 'baseline',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    w: '4',
-    mt: `calc((1em * 1.5 - ${markerSize}) / 2)`,
-  }),
-  dot: css({
-    w: markerSize,
-    h: markerSize,
-    borderRadius: 'full',
-    bg: 'fg',
-  }),
-  circle: css({
-    w: markerSize,
-    h: markerSize,
-    borderRadius: 'full',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'fg',
-    bg: 'transparent',
-  }),
-  number: css({
-    alignSelf: 'baseline',
-    flexShrink: 0,
-    color: 'fg',
-    fontFamily: 'body',
-    fontSize: 'md',
-    lineHeight: '1.5',
-    w: '4',
-    _before: {
-      content: 'counter(silver-list) "."',
-    },
-  }),
-} as const;
-
-function Marker({listStyle}: {listStyle: ListStyle}): React.JSX.Element | null {
+function Marker({
+  classes,
+  listStyle,
+}: {
+  classes: MarkerClasses;
+  listStyle: ListStyle;
+}): React.JSX.Element | null {
   if (listStyle === 'disc') {
     return (
-      <span className={styles.markerContainer}>
-        <span className={styles.dot} />
+      <span className={classes.markerContainer}>
+        <span className={classes.dot} />
       </span>
     );
   }
 
   if (listStyle === 'circle') {
     return (
-      <span className={styles.markerContainer}>
-        <span className={styles.circle} />
+      <span className={classes.markerContainer}>
+        <span className={classes.circle} />
       </span>
     );
   }
 
   if (listStyle === 'decimal') {
-    return <span className={styles.number} />;
+    return <span className={classes.number} />;
   }
 
   return null;
@@ -172,17 +125,14 @@ export function ListItem({
   const context = use(ListContext);
   const hasDividers = context?.hasDividers ?? false;
   const listStyle = context?.listStyle ?? 'none';
+  const hasCounter = listStyle === 'decimal';
   const hasMarkers = listStyle !== 'none';
+  const classes = listItemRecipe({hasCounter, hasDividers});
 
   return (
     <Item
       as="li"
-      className={cx(
-        hasMarkers ? styles.withCounter : undefined,
-        hasDividers ? styles.withDivider : undefined,
-        hasDividers ? styles.noRadius : undefined,
-        className,
-      )}
+      className={cx(classes.item, className)}
       data-testid={dataTestId}
       description={description}
       endContent={endContent}
@@ -190,7 +140,11 @@ export function ListItem({
       isDisabled={isDisabled}
       isSelected={isSelected}
       label={label}
-      leadingContent={<Marker listStyle={listStyle} />}
+      leadingContent={
+        hasMarkers ? (
+          <Marker classes={classes} listStyle={listStyle} />
+        ) : undefined
+      }
       onClick={onClick}
       ref={ref}
       rel={rel}

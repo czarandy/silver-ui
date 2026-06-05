@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {HStack} from './HStack';
-import {Stack} from './Stack';
 import {VStack} from './VStack';
+import {Stack} from './internal/Stack';
 
 describe('Stack', () => {
   it('renders children', () => {
@@ -36,6 +36,23 @@ describe('Stack', () => {
     );
 
     expect(screen.getByTestId('stack')).toHaveClass('silver-gap_4');
+  });
+
+  it('applies gap={0} class', () => {
+    render(
+      <VStack data-testid="stack" gap={0}>
+        <div>One</div>
+      </VStack>,
+    );
+
+    expect(screen.getByTestId('stack')).toHaveClass('silver-gap_0');
+  });
+
+  it('does not apply a gap class when gap is omitted', () => {
+    render(<VStack data-testid="stack">Content</VStack>);
+
+    const classList = Array.from(screen.getByTestId('stack').classList);
+    expect(classList.some(c => c.includes('gap'))).toBe(false);
   });
 
   it('applies numeric width and height as pixels', () => {

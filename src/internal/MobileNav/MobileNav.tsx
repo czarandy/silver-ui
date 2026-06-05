@@ -88,11 +88,13 @@ const styles = {
     insetInlineStart: 0,
     borderInlineEndWidth: 'default',
     transform: 'translateX(-100%)',
+    _rtl: {transform: 'translateX(100%)'},
   }),
   drawerEnd: css({
     insetInlineEnd: 0,
     borderInlineStartWidth: 'default',
     transform: 'translateX(100%)',
+    _rtl: {transform: 'translateX(-100%)'},
   }),
   drawerOpen: css({
     transform: 'translateX(0)',

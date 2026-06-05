@@ -263,6 +263,28 @@ export const AsyncSearchSource: Story = {
   },
 };
 
+export const SearchError: Story = {
+  render: (args: AutocompleteInputProps) => {
+    const [value, setValue] = useState<SearchableItem | null>(null);
+    const source = useMemo<SearchSource<SearchableItem>>(
+      () => ({
+        bootstrap: () => [],
+        search: async () => Promise.reject(new Error('Network error')),
+      }),
+      [],
+    );
+    return (
+      <AutocompleteInput
+        {...args}
+        debounceMs={0}
+        onChange={setValue}
+        searchSource={source}
+        value={value}
+      />
+    );
+  },
+};
+
 export const EmptySearchResults: Story = {
   args: {emptySearchResultsText: 'No people match your search.'},
   render: (args: AutocompleteInputProps) => (
@@ -283,13 +305,16 @@ export const WithDescriptionAndTooltip: Story = {
 export const BaseAutocompleteInputStandalone: Story = {
   render: () => {
     const [value, setValue] = useState<SearchableItem | null>(null);
+    const [query, setQuery] = useState('');
     const source = useMemo(() => createStaticSource(people), []);
     return (
       <BaseAutocompleteInput
         debounceMs={0}
         hasEntriesOnFocus
         onChange={setValue}
+        onQueryChange={setQuery}
         placeholder="Search people"
+        query={query}
         searchSource={source}
         value={value}
       />

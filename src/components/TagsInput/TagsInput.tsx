@@ -325,6 +325,7 @@ export function TagsInput<T extends SearchableItem>({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isFocusedWithin, setIsFocusedWithin] = useState(false);
   const [announcement, setAnnouncement] = useState('');
+  const [queryValue, setQueryValue] = useState('');
   const isLayerMode = tagOverflowBehavior === 'unfocusedLayer';
   const layer = useLayer();
   const layerContentRef = useRef<HTMLDivElement>(null);
@@ -544,6 +545,7 @@ export function TagsInput<T extends SearchableItem>({
           emptySearchResultsText={emptySearchResultsText}
           hasAutoFocus={hasAutoFocus}
           hasEntriesOnFocus={hasEntriesOnFocus}
+          hasReopenOnSelect={hasEntriesOnFocus}
           inputId={inputId}
           isDisabled={isDisabled || isReadOnly || isAtMax}
           maxMenuItems={maxMenuItems}
@@ -586,8 +588,12 @@ export function TagsInput<T extends SearchableItem>({
               removeItem(item);
             }
           }}
-          onQueryChange={onQueryChange}
+          onQueryChange={nextQuery => {
+            setQueryValue(nextQuery);
+            onQueryChange?.(nextQuery);
+          }}
           placeholder={value.length === 0 ? placeholder : undefined}
+          query={queryValue}
           ref={inputRef}
           renderItem={renderItem}
           searchSource={filteredSource}

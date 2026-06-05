@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useCallback, useEffect, useId, useMemo, useRef, useState} from 'react';
+import {useEffect, useId, useMemo, useRef, useState} from 'react';
 import {css} from 'styled-system/css';
 import {MobileNavToggle} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
@@ -206,9 +206,6 @@ export function AppShell({
       : `(max-width: ${BREAKPOINT_VALUES[mobileBreakpoint]}px)`;
   const isBelowBreakpoint = useMediaQuery(breakpointQuery);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const setMobileNavOpen = useCallback((isOpen: boolean) => {
-    setIsMobileNavOpen(isOpen);
-  }, []);
   const {ref: topNavPresenceRef, hasContent: hasTopNavContent} =
     useSlotPresence(topNav != null);
   const {ref: sideNavPresenceRef, hasContent: hasSideNavContent} =
@@ -244,19 +241,19 @@ export function AppShell({
 
   const mobileContextValue = useMemo<AppShellMobileContextValue>(
     () => ({
-      closeMobileNav: () => setMobileNavOpen(false),
+      closeMobileNav: () => setIsMobileNavOpen(false),
       hasAutoToggle: true,
       isMobile: isBelowBreakpoint,
       isMobileNavEnabled: mobileNavEnabled,
       isMobileNavOpen,
-      openMobileNav: () => mobileNavEnabled && setMobileNavOpen(true),
+      openMobileNav: () => mobileNavEnabled && setIsMobileNavOpen(true),
       toggleMobileNav: () => {
         if (mobileNavEnabled) {
           setIsMobileNavOpen(prev => !prev);
         }
       },
     }),
-    [isBelowBreakpoint, isMobileNavOpen, mobileNavEnabled, setMobileNavOpen],
+    [isBelowBreakpoint, isMobileNavOpen, mobileNavEnabled],
   );
 
   /* eslint-disable @eslint-react/no-unstable-context-value -- sideNav ReactNode prop prevents stable memoization */

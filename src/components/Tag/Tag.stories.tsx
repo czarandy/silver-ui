@@ -5,7 +5,6 @@ import {HStack} from '../Stack';
 import {Tag, type TagColor} from './Tag';
 
 const colors: TagColor[] = [
-  'default',
   'red',
   'orange',
   'yellow',

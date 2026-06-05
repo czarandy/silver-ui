@@ -2,6 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Home} from 'lucide-react';
 import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
+import {layoutRegionRecipe} from '../Layout/Layout.recipe';
 import {SideNav, SideNavItem, SideNavSection} from '../SideNav';
 import {TopNav, TopNavHeading, TopNavItem} from '../TopNav';
 import {AppShell} from './AppShell';
@@ -312,5 +313,17 @@ describe('AppShell', () => {
       screen.queryByRole('button', {name: 'Open navigation'}),
     ).not.toBeInTheDocument();
     expect(screen.getByRole('main')).toHaveTextContent('Content');
+  });
+
+  it('applies contentPadding to the main content area', () => {
+    render(
+      <AppShell contentPadding={6}>
+        <div>Content</div>
+      </AppShell>,
+    );
+
+    expect(screen.getByRole('main')).toHaveClass(
+      layoutRegionRecipe({padding: 6}),
+    );
   });
 });

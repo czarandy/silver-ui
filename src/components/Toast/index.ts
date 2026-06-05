@@ -1,5 +1,4 @@
 export {Toast, type ToastProps} from './Toast';
-export {type ToastVariants} from './Toast.recipe';
 export {
   ToastViewport,
   type ToastViewportInset,

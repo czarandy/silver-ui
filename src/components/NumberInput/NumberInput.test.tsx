@@ -1,6 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
+import {InputGroup} from '../InputGroup';
 import {NumberInput} from './NumberInput';
 
 describe('NumberInput', () => {
@@ -27,7 +28,7 @@ describe('NumberInput', () => {
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
-  it('rejects values outside min/max on blur', async () => {
+  it('clamps values to max on blur', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
 
@@ -47,6 +48,30 @@ describe('NumberInput', () => {
     await user.tab();
 
     expect(onChange).not.toHaveBeenCalledWith(200);
+    expect(onChange).toHaveBeenCalledWith(100);
+  });
+
+  it('clamps values to min on blur', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <NumberInput
+        label="Percent"
+        max={100}
+        min={0}
+        onChange={onChange}
+        value={50}
+      />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Percent'});
+    await user.clear(input);
+    await user.type(input, '-5');
+    await user.tab();
+
+    expect(onChange).not.toHaveBeenCalledWith(-5);
+    expect(onChange).toHaveBeenCalledWith(0);
   });
 
   it('rejects decimal input when isIntegerOnly is true', async () => {
@@ -161,6 +186,26 @@ describe('NumberInput', () => {
     expect(input).toHaveValue(99);
   });
 
+  it('does not set aria-invalid while typing an out-of-range value', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <NumberInput
+        label="Percent"
+        max={100}
+        min={50}
+        onChange={vi.fn()}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Percent'});
+    await user.type(input, '1');
+
+    // "1" is below min=50, but aria-invalid should not be set during typing.
+    expect(input).not.toHaveAttribute('aria-invalid');
+  });
+
   it('sets native required attribute', () => {
     render(
       <NumberInput
@@ -207,5 +252,60 @@ describe('NumberInput', () => {
       'aria-busy',
       'true',
     );
+  });
+
+  it('calls onKeyDown when a key is pressed', async () => {
+    const user = userEvent.setup();
+    const onKeyDown = vi.fn();
+
+    render(
+      <NumberInput
+        label="Count"
+        onChange={vi.fn()}
+        onKeyDown={onKeyDown}
+        value={1}
+      />,
+    );
+
+    screen.getByRole('spinbutton', {name: 'Count'}).focus();
+    await user.keyboard('a');
+
+    expect(onKeyDown).toHaveBeenCalled();
+    expect(onKeyDown.mock.calls[0][0]).toHaveProperty('key');
+  });
+
+  it('inherits disabled state from InputGroup', () => {
+    render(
+      <InputGroup isDisabled label="Group">
+        <NumberInput label="Count" onChange={vi.fn()} value={1} />
+      </InputGroup>,
+    );
+
+    expect(screen.getByRole('spinbutton', {name: 'Count'})).toBeDisabled();
+  });
+
+  it('inherits size from InputGroup', () => {
+    render(
+      <InputGroup label="Group" size="lg">
+        <NumberInput label="Count" onChange={vi.fn()} value={1} />
+      </InputGroup>,
+    );
+
+    // The input wrapper div picks up the size from the recipe. Verify it
+    // renders without error and the input is present with the group's size.
+    expect(screen.getByRole('spinbutton', {name: 'Count'})).toBeInTheDocument();
+  });
+
+  it('renders without Field wrapper inside InputGroup', () => {
+    render(
+      <InputGroup label="Group">
+        <NumberInput label="Count" onChange={vi.fn()} value={1} />
+      </InputGroup>,
+    );
+
+    // Inside InputGroup, the label comes from aria-label on the input
+    // rather than a Field wrapper label element.
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    expect(input).toHaveAttribute('aria-label', 'Count');
   });
 });

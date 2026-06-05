@@ -18,6 +18,11 @@ import {Icon} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
+import {
+  autocompleteMenuRecipe,
+  optionHighlightedStyle,
+  optionSelectedStyle,
+} from './AutocompleteInput.recipe';
 import {AutocompleteInputItem} from './AutocompleteInputItem';
 import type {SearchableItem, SearchSource} from './types';
 
@@ -49,6 +54,11 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    */
   emptySearchResultsText?: string;
   /**
+   * Text shown in the menu when a search fails.
+   * @default 'Something went wrong'
+   */
+  errorText?: string;
+  /**
    * Whether to focus the input on mount.
    * @default false
    */
@@ -59,6 +69,12 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    */
   hasEntriesOnFocus?: boolean;
   /**
+   * Whether to re-bootstrap results after selecting an item. Useful for
+   * multi-select comboboxes where the user picks several items in a row.
+   * @default false
+   */
+  hasReopenOnSelect?: boolean;
+  /**
    * Optional ID for the input.
    */
   inputId?: string;
@@ -67,6 +83,11 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether the input is required.
+   * @default false
+   */
+  isRequired?: boolean;
   /**
    * Maximum number of menu items.
    * @default 10
@@ -87,12 +108,16 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
   /**
    * Called when the query changes.
    */
-  onQueryChange?: (query: string) => void;
+  onQueryChange: (query: string) => void;
   /**
    * Placeholder text.
    * @default 'Search...'
    */
   placeholder?: string;
+  /**
+   * Current query string.
+   */
+  query: string;
   /**
    * Ref forwarded to the input.
    */
@@ -136,64 +161,6 @@ const styles = {
     _placeholder: {color: 'fg.muted'},
     _disabled: {cursor: 'not-allowed'},
   }),
-  menu: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    maxH: '80',
-    overflowY: 'auto',
-    p: '1',
-  }),
-  option: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '2',
-    w: 'full',
-    borderWidth: 0,
-    borderRadius: 'md',
-    bg: 'transparent',
-    color: 'fg',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    textAlign: 'start',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffsetTight',
-    },
-  }),
-  optionHighlighted: css({bg: 'bg.subtle'}),
-  optionSelected: css({fontWeight: 'medium'}),
-  optionSize: {
-    sm: css({px: '2', py: '1'}),
-    md: css({px: '2', py: '2'}),
-    lg: css({px: '3', py: '2.5'}),
-  } satisfies Record<'sm' | 'md' | 'lg', string>,
-  check: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-    color: 'primary',
-  }),
-  loading: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    p: '2',
-    color: 'fg.muted',
-    '& > svg': {
-      animation: 'spin 0.8s linear infinite',
-    },
-    '@media (prefers-reduced-motion: reduce)': {
-      '& > svg': {animation: 'none'},
-    },
-  }),
-  empty: css({
-    p: '3',
-    textAlign: 'center',
-  }),
 } as const;
 
 /**
@@ -206,16 +173,20 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
   'data-testid': dataTestId,
   debounceMs = 150,
   emptySearchResultsText = 'No results found',
+  errorText = 'Something went wrong',
   hasAutoFocus = false,
   hasEntriesOnFocus = false,
+  hasReopenOnSelect = false,
   inputId,
   isDisabled = false,
+  isRequired = false,
   maxMenuItems = 10,
   onChange,
   onKeyDown,
   onOpenChange,
   onQueryChange,
   placeholder = 'Search...',
+  query,
   ref,
   renderItem,
   searchSource,
@@ -230,13 +201,12 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
   const fallbackAnchorRef = useRef<HTMLInputElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const generationRef = useRef(0);
-  const [query, setQuery] = useState('');
   const [results, setResults] = useState<T[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const pointerActiveRef = useRef(false);
   const selectingRef = useRef(false);
 
   const setOpen = useCallback(
@@ -252,15 +222,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
   );
 
   const showMenu = useCallback(() => {
-    if (pointerActiveRef.current) {
-      document.addEventListener(
-        'click',
-        () => requestAnimationFrame(() => setOpen(true)),
-        {once: true},
-      );
-    } else {
-      setOpen(true);
-    }
+    setOpen(true);
   }, [setOpen]);
 
   const runSearch = useCallback(
@@ -269,6 +231,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       searchSource.cancel?.();
       setIsLoading(true);
       setHasSearched(true);
+      setHasError(false);
 
       try {
         const nextResults =
@@ -290,7 +253,8 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         if (generationRef.current === generation) {
           setResults([]);
           setHighlightedIndex(-1);
-          setOpen(false);
+          setHasError(true);
+          showMenu();
         }
       } finally {
         if (generationRef.current === generation) {
@@ -303,8 +267,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
 
   const updateQuery = useCallback(
     (nextQuery: string) => {
-      setQuery(nextQuery);
-      onQueryChange?.(nextQuery);
+      onQueryChange(nextQuery);
 
       if (timeoutRef.current != null) {
         clearTimeout(timeoutRef.current);
@@ -315,6 +278,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         searchSource.cancel?.();
         setResults([]);
         setHasSearched(false);
+        setHasError(false);
         setIsLoading(false);
         setOpen(false);
         return;
@@ -347,21 +311,30 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         clearTimeout(timeoutRef.current);
       }
       searchSource.cancel?.();
-      setQuery('');
+      onQueryChange('');
       setResults([]);
       setHasSearched(false);
+      setHasError(false);
       setIsLoading(false);
       onChange(item);
       selectingRef.current = true;
       inputRef.current?.focus();
       selectingRef.current = false;
-      if (hasEntriesOnFocus) {
+      if (hasReopenOnSelect && hasEntriesOnFocus) {
         void runSearch('', 'bootstrap');
       } else {
         setOpen(false);
       }
     },
-    [hasEntriesOnFocus, onChange, runSearch, searchSource, setOpen],
+    [
+      hasEntriesOnFocus,
+      hasReopenOnSelect,
+      onChange,
+      onQueryChange,
+      runSearch,
+      searchSource,
+      setOpen,
+    ],
   );
 
   useEffect(() => {
@@ -373,21 +346,29 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
     };
   }, [searchSource]);
 
+  const menuClasses = autocompleteMenuRecipe({size});
+
   const menu = (
     <div
       aria-label="Search results"
-      className={styles.menu}
+      className={menuClasses.menu}
       id={listboxId}
       role="listbox">
       {isLoading ? (
-        <div className={styles.loading} role="status">
+        <div className={menuClasses.loading} role="status">
           <Icon icon={LoaderCircle} size="sm" />
           <Text as="span" color="secondary" type="supporting">
             Loading
           </Text>
         </div>
+      ) : hasError ? (
+        <div className={menuClasses.empty} role="alert">
+          <Text as="span" color="secondary" type="supporting">
+            {errorText}
+          </Text>
+        </div>
       ) : results.length === 0 && hasSearched ? (
-        <div className={styles.empty}>
+        <div className={menuClasses.empty}>
           <Text as="span" color="secondary" type="supporting">
             {emptySearchResultsText}
           </Text>
@@ -399,12 +380,9 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
             <button
               aria-selected={isSelected}
               className={cx(
-                styles.option,
-                styles.optionSize[size],
-                index === highlightedIndex
-                  ? styles.optionHighlighted
-                  : undefined,
-                isSelected ? styles.optionSelected : undefined,
+                menuClasses.option,
+                index === highlightedIndex ? optionHighlightedStyle : undefined,
+                isSelected ? optionSelectedStyle : undefined,
               )}
               id={`${listboxId}-option-${index}`}
               key={item.id}
@@ -418,7 +396,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
                 renderItem(item)
               )}
               {isSelected ? (
-                <span className={styles.check}>
+                <span className={menuClasses.check}>
                   <Icon color="accent" icon={Check} size="sm" />
                 </span>
               ) : null}
@@ -441,6 +419,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         aria-controls={listboxId}
         aria-describedby={ariaDescribedBy}
         aria-expanded={isOpen}
+        aria-required={isRequired || undefined}
         autoComplete="off"
         // eslint-disable-next-line jsx-a11y-x/no-autofocus
         autoFocus={hasAutoFocus}
@@ -449,12 +428,31 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         data-testid={dataTestId}
         disabled={isDisabled}
         id={resolvedInputId}
+        onBlur={() => {
+          // Defer so we can check whether focus moved to an option inside
+          // the popover (e.g. the user clicked a result). If focus left
+          // both the input and the popover, close the menu.
+          requestAnimationFrame(() => {
+            if (
+              !inputRef.current?.contains(document.activeElement) &&
+              !document.activeElement?.closest('[role="listbox"]')
+            ) {
+              setOpen(false);
+            }
+          });
+        }}
         onChange={event => updateQuery(event.target.value)}
         onFocus={() => {
           if (selectingRef.current) {
             return;
           }
-          if (hasEntriesOnFocus && query === '' && results.length === 0) {
+          if (query !== '' && results.length === 0) {
+            void runSearch(query, 'search');
+          } else if (
+            hasEntriesOnFocus &&
+            query === '' &&
+            results.length === 0
+          ) {
             void runSearch('', 'bootstrap');
           } else if (results.length > 0) {
             showMenu();
@@ -499,16 +497,6 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
             setOpen(false);
           }
         }}
-        onPointerDown={() => {
-          pointerActiveRef.current = true;
-          document.addEventListener(
-            'click',
-            () => {
-              pointerActiveRef.current = false;
-            },
-            {once: true},
-          );
-        }}
         placeholder={placeholder}
         ref={mergeRefs(ref, inputRef, fallbackAnchorRef)}
         role="combobox"
@@ -522,6 +510,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         content={menu}
         hasAutoFocus={false}
         hasCloseButton={false}
+        hasLightDismiss={false}
         isOpen={isOpen}
         onOpenChange={setOpen}
       />

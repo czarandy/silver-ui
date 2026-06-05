@@ -1,6 +1,4 @@
 import {
-  createElement,
-  useCallback,
   useRef,
   type AllHTMLAttributes,
   type CSSProperties,
@@ -136,11 +134,6 @@ export interface TextProps extends NativeTextProps {
   wordBreak?: TextWordBreak;
 }
 
-type TextElementProps = AllHTMLAttributes<HTMLElement> & {
-  'data-testid'?: string;
-  ref?: Ref<HTMLElement>;
-};
-
 const defaultColorByType: Record<TextType, TextColor> = {
   body: 'primary',
   large: 'primary',
@@ -175,13 +168,10 @@ function BaseText({
 }: TextProps): JSX.Element {
   const resolvedColor = color ?? defaultColorByType[type];
 
-  return createElement(
-    Component,
-    {
-      ...props,
-      ref,
-      'data-testid': dataTestId,
-      className: cx(
+  return (
+    <Component
+      {...props}
+      className={cx(
         textRecipe({
           type,
           size,
@@ -194,10 +184,12 @@ function BaseText({
           maxLines: 'none',
         }),
         className,
-      ),
-      style,
-    },
-    children,
+      )}
+      data-testid={dataTestId}
+      ref={ref as Ref<never>}
+      style={style}>
+      {children}
+    </Component>
   );
 }
 
@@ -230,13 +222,9 @@ function TruncatedText({
   const isTooltipEnabled =
     hasTruncateTooltip !== false && truncation.isTruncated;
 
-  const handleShow = useCallback(() => {}, []);
-  const handleHide = useCallback(() => {}, []);
   const tooltip = useTooltip({
     placement: tooltipPlacement,
     isEnabled: isTooltipEnabled,
-    onShow: handleShow,
-    onHide: handleHide,
   });
 
   const tooltipRef = tooltip.ref;
@@ -268,33 +256,30 @@ function TruncatedText({
   const lineClampStyle: CSSProperties | undefined =
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
 
-  const elementProps: TextElementProps = {
-    ...props,
-    ref: mergeRefs(ref, truncation.ref, textRef),
-    'data-testid': dataTestId,
-    className: cx(
-      textRecipe({
-        type,
-        size,
-        color: resolvedColor,
-        weight,
-        display: 'block',
-        wordBreak: resolvedWordBreak,
-        textWrap,
-        hasStrikethrough,
-        hasTabularNumbers,
-        maxLines: getMaxLinesVariant(maxLines),
-      }),
-      className,
-    ),
-    style: {...style, ...lineClampStyle},
-  };
-
-  const element = createElement(Component, elementProps, children);
-
   return (
     <>
-      {element}
+      <Component
+        {...props}
+        className={cx(
+          textRecipe({
+            type,
+            size,
+            color: resolvedColor,
+            weight,
+            display: 'block',
+            wordBreak: resolvedWordBreak,
+            textWrap,
+            hasStrikethrough,
+            hasTabularNumbers,
+            maxLines: getMaxLinesVariant(maxLines),
+          }),
+          className,
+        )}
+        data-testid={dataTestId}
+        ref={mergeRefs(ref, truncation.ref, textRef)}
+        style={{...style, ...lineClampStyle}}>
+        {children}
+      </Component>
       {isTooltipEnabled
         ? tooltip.renderTooltip(truncation.fullText, {
             contentStyle: {

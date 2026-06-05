@@ -1,6 +1,12 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {Clock, X} from 'lucide-react';
-import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
+import {
+  useId,
+  type CSSProperties,
+  type FocusEvent,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Button} from '../Button';
@@ -98,9 +104,17 @@ export type TimeInputProps = {
    */
   min?: PlainTime;
   /**
+   * Called when the input loses focus.
+   */
+  onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  /**
    * Called when the time value changes.
    */
   onChange: (value: PlainTime | undefined) => void;
+  /**
+   * Called when the input gains focus.
+   */
+  onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   /**
    * Placeholder text.
    * @default 'Select a time'
@@ -162,7 +176,9 @@ function fromInputString(value: string): PlainTime | undefined {
 export function TimeInput({
   label,
   value,
+  onBlur,
   onChange,
+  onFocus,
   hasSeconds = false,
   hasClear = false,
   hasAutoFocus = false,
@@ -234,7 +250,9 @@ export function TimeInput({
           max={toInputString(max, hasSeconds)}
           min={toInputString(min, hasSeconds)}
           name={htmlName}
+          onBlur={onBlur}
           onChange={event => onChange(fromInputString(event.target.value))}
+          onFocus={onFocus}
           placeholder={placeholder}
           ref={ref}
           step={step ?? (hasSeconds ? 1 : 60)}

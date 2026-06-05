@@ -5,8 +5,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {listRecipe} from './List.recipe';
 import {ListContext, type ListStyle} from './ListContext';
 
 export type {ListStyle};
@@ -53,30 +53,6 @@ export interface ListProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  root: css({
-    display: 'flex',
-    flexDirection: 'column',
-  }),
-  list: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    m: 0,
-    p: 0,
-    listStyleType: 'none',
-  }),
-  withDividers: css({
-    gap: 0,
-  }),
-  withCounter: css({
-    counterReset: 'silver-list',
-  }),
-  header: css({
-    mb: '2',
-  }),
-} as const;
-
 /**
  * Semantic vertical list container with optional dividers, markers, and header.
  */
@@ -93,9 +69,10 @@ export function List({
 }: ListProps): React.JSX.Element {
   const headerId = useId();
   const isOrdered = listStyle === 'decimal';
+  const hasCounter = isOrdered;
   const Component = isOrdered ? 'ol' : 'ul';
   const counterReset =
-    listStyle !== 'none' && start != null && start !== 1
+    hasCounter && start != null && start !== 1
       ? `silver-list ${start - 1}`
       : undefined;
   const contextValue = useMemo(
@@ -103,15 +80,12 @@ export function List({
     [hasDividers, listStyle],
   );
 
+  const classes = listRecipe({hasDividers, hasCounter});
+
   const listElement = (
     <Component
       aria-labelledby={header != null ? headerId : undefined}
-      className={cx(
-        styles.list,
-        hasDividers ? styles.withDividers : undefined,
-        listStyle !== 'none' ? styles.withCounter : undefined,
-        className,
-      )}
+      className={cx(classes.list, className)}
       data-testid={dataTestId}
       ref={ref as Ref<HTMLUListElement & HTMLOListElement>}
       role={listStyle === 'none' && !isOrdered ? 'list' : undefined}
@@ -126,8 +100,8 @@ export function List({
       {header == null ? (
         listElement
       ) : (
-        <div className={styles.root}>
-          <div className={styles.header} id={headerId}>
+        <div className={classes.root}>
+          <div className={classes.header} id={headerId}>
             {header}
           </div>
           {listElement}

@@ -4,7 +4,7 @@ import {
   type StackCrossAlignment,
   type StackMainAlignment,
   type StackProps,
-} from './Stack';
+} from './internal/Stack';
 
 export interface HStackProps extends Omit<
   StackProps,

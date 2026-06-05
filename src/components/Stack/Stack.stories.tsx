@@ -3,8 +3,8 @@ import {css} from 'styled-system/css';
 import {Card} from '../Card';
 import {Text} from '../Text';
 import {HStack} from './HStack';
-import type {StackGap} from './Stack';
 import {VStack} from './VStack';
+import type {StackGap} from './internal/Stack';
 
 const meta: Meta<typeof HStack> = {
   title: 'Components/Stack',

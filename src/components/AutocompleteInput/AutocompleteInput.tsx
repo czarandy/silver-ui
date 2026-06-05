@@ -1,5 +1,6 @@
 import {X} from 'lucide-react';
 import {
+  useCallback,
   useId,
   useMemo,
   useRef,
@@ -49,6 +50,11 @@ export type AutocompleteInputProps<T extends SearchableItem = SearchableItem> =
      * @default 'No results found'
      */
     emptySearchResultsText?: string;
+    /**
+     * Text shown in the menu when a search fails.
+     * @default 'Something went wrong'
+     */
+    errorText?: string;
     /**
      * Whether to focus the input on mount.
      * @default false
@@ -172,6 +178,7 @@ export function AutocompleteInput<T extends SearchableItem>({
   debounceMs,
   description,
   emptySearchResultsText,
+  errorText,
   hasAutoFocus = false,
   hasClear = true,
   hasEntriesOnFocus = false,
@@ -204,6 +211,7 @@ export function AutocompleteInput<T extends SearchableItem>({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [queryValue, setQueryValue] = useState('');
   const showTag = value != null && !isEditing;
   const fieldStatus = useMemo(
     () =>
@@ -212,6 +220,24 @@ export function AutocompleteInput<T extends SearchableItem>({
   );
 
   const necessity = getNecessity(isOptional, isRequired);
+
+  const startEditing = useCallback(
+    (seedQuery: string) => {
+      if (isDisabled) {
+        return;
+      }
+      setIsEditing(true);
+      setQueryValue(seedQuery);
+      requestAnimationFrame(() => {
+        const input = inputRef.current;
+        if (input != null) {
+          input.focus();
+          input.setSelectionRange(seedQuery.length, seedQuery.length);
+        }
+      });
+    },
+    [isDisabled],
+  );
 
   return (
     <Field
@@ -228,6 +254,7 @@ export function AutocompleteInput<T extends SearchableItem>({
       ref={ref}
       status={fieldStatus}
       style={style}>
+      {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- wrapper delegates focus to the inner input; keyboard users interact with the input directly */}
       <div
         className={cx(
           inputRecipe({
@@ -238,6 +265,11 @@ export function AutocompleteInput<T extends SearchableItem>({
           styles.wrapper,
         )}
         data-testid={dataTestId}
+        onClick={() => {
+          if (showTag) {
+            startEditing(value.label);
+          }
+        }}
         ref={wrapperRef}>
         {startIcon != null ? (
           <span className={inputStyles.iconSlot}>
@@ -249,10 +281,7 @@ export function AutocompleteInput<T extends SearchableItem>({
             className={styles.tag}
             isDisabled={isDisabled}
             label={value.label}
-            onClick={() => {
-              setIsEditing(true);
-              requestAnimationFrame(() => inputRef.current?.focus());
-            }}
+            onClick={() => startEditing(value.label)}
             size={size}
           />
         ) : null}
@@ -262,18 +291,25 @@ export function AutocompleteInput<T extends SearchableItem>({
           className={showTag ? styles.inputHidden : undefined}
           debounceMs={debounceMs}
           emptySearchResultsText={emptySearchResultsText}
+          errorText={errorText}
           hasAutoFocus={hasAutoFocus}
           hasEntriesOnFocus={hasEntriesOnFocus}
           inputId={inputId}
           isDisabled={isDisabled}
+          isRequired={isRequired}
           maxMenuItems={maxMenuItems}
           onChange={item => {
             setIsEditing(false);
+            setQueryValue('');
             onChange(item);
           }}
           onOpenChange={onOpenChange}
-          onQueryChange={onQueryChange}
+          onQueryChange={nextQuery => {
+            setQueryValue(nextQuery);
+            onQueryChange?.(nextQuery);
+          }}
           placeholder={showTag ? undefined : placeholder}
+          query={queryValue}
           ref={inputRef}
           renderItem={renderItem}
           searchSource={searchSource}

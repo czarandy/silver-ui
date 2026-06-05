@@ -1,14 +1,45 @@
 import type {ReactNode} from 'react';
 
-export interface SearchableItem<TAuxiliaryData = unknown> {
+/**
+ * A search result item with a fully custom pre-rendered element. When
+ * `element` is set, `AutocompleteInputItem` renders it directly — props
+ * like `icon`, `description`, and `className` do not apply.
+ */
+export interface CustomSearchableItem<TAuxiliaryData = unknown> {
   /**
    * Custom data associated with the item.
    */
   auxiliaryData?: TAuxiliaryData;
   /**
-   * Optional pre-rendered item content.
+   * Pre-rendered item content. When set, `AutocompleteInputItem` renders
+   * this element directly and ignores layout props like `icon` and
+   * `description`.
    */
-  element?: ReactNode;
+  element: ReactNode;
+  /**
+   * Stable unique identifier.
+   */
+  id: string;
+  /**
+   * Display text used for the selected-value tag chip.
+   */
+  label: string;
+}
+
+/**
+ * A search result item rendered by the default `AutocompleteInputItem`
+ * layout with an optional icon and description.
+ */
+export interface StandardSearchableItem<TAuxiliaryData = unknown> {
+  /**
+   * Custom data associated with the item.
+   */
+  auxiliaryData?: TAuxiliaryData;
+  /**
+   * Must be omitted to use the standard layout. Set `element` on a
+   * {@link CustomSearchableItem} for fully custom rendering.
+   */
+  element?: undefined;
   /**
    * Stable unique identifier.
    */
@@ -18,6 +49,15 @@ export interface SearchableItem<TAuxiliaryData = unknown> {
    */
   label: string;
 }
+
+/**
+ * A search result item. Items without `element` use the default
+ * `AutocompleteInputItem` layout; items with `element` render fully
+ * custom content.
+ */
+export type SearchableItem<TAuxiliaryData = unknown> =
+  | CustomSearchableItem<TAuxiliaryData>
+  | StandardSearchableItem<TAuxiliaryData>;
 
 export interface SearchSource<T extends SearchableItem = SearchableItem> {
   /**

@@ -129,4 +129,13 @@ describe('Text', () => {
     expect(el).toHaveAttribute('id', 'my-text');
     expect(el).toHaveAttribute('aria-label', 'description');
   });
+
+  it('applies textWrap variant', () => {
+    render(
+      <Text data-testid="text" textWrap="balance">
+        Balanced text
+      </Text>,
+    );
+    expect(screen.getByTestId('text')).toBeInTheDocument();
+  });
 });

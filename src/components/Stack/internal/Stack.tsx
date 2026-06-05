@@ -1,14 +1,13 @@
-import {
-  createElement,
-  type CSSProperties,
-  type ElementType,
-  type HTMLAttributes,
-  type ReactNode,
-  type Ref,
+import type {
+  CSSProperties,
+  ElementType,
+  HTMLAttributes,
+  ReactNode,
+  Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
-import type {SpacingToken} from '../../internal/spacingTokens';
-import {toPixelSize, type SizeValue} from '../../internal/toPixelSize';
+import {cx} from '../../../internal/cx';
+import type {SpacingToken} from '../../../internal/spacingTokens';
+import {toPixelSize, type SizeValue} from '../../../internal/toPixelSize';
 import {stackRecipe} from './Stack.recipe';
 
 export type {SizeValue};
@@ -25,6 +24,10 @@ export type StackAlignment = StackMainAlignment | StackCrossAlignment;
 export type StackWrap = 'nowrap' | 'wrap' | 'wrap-reverse';
 export type StackGap = SpacingToken;
 
+/**
+ * @internal
+ * Props for the base `Stack` component.
+ */
 export interface StackProps extends HTMLAttributes<HTMLElement> {
   /**
    * Cross-axis alignment.
@@ -96,6 +99,12 @@ const crossAlignValues: Record<StackCrossAlignment, string> = {
   stretch: 'stretch',
 };
 
+/**
+ * @internal
+ * Base flex stack layout primitive. Not exported to consumers — use
+ * `HStack` or `VStack` instead, which provide direction-specific
+ * type safety for alignment props.
+ */
 export function Stack({
   align,
   children,
@@ -136,16 +145,15 @@ export function Stack({
     ...style,
   };
 
-  return createElement(
-    Element,
-    {
-      ...htmlProps,
-      className: cx(stackRecipe({direction, gap, wrap}), className),
-      'data-testid': dataTestId,
-      ref,
-      style: stackStyle,
-    },
-    children,
+  return (
+    <Element
+      {...htmlProps}
+      className={cx(stackRecipe({direction, gap, wrap}), className)}
+      data-testid={dataTestId}
+      ref={ref}
+      style={stackStyle}>
+      {children}
+    </Element>
   );
 }
 

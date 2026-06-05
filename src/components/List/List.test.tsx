@@ -17,16 +17,16 @@ describe('List', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
   });
 
-  it('associates the header with the list', () => {
+  it('associates the header with the list via aria-labelledby', () => {
     render(
       <List header="Team members">
         <ListItem label="Ada" />
       </List>,
     );
 
-    expect(
-      screen.getByRole('list', {name: 'Team members'}),
-    ).toBeInTheDocument();
+    const heading = screen.getByText('Team members');
+    const list = screen.getByRole('list', {name: 'Team members'});
+    expect(list).toHaveAttribute('aria-labelledby', heading.id);
   });
 
   it('renders ordered lists with a start value', () => {
@@ -86,7 +86,7 @@ describe('List', () => {
     );
   });
 
-  it('renders disc markers by default', () => {
+  it('renders with default none list style', () => {
     render(
       <List data-testid="list">
         <ListItem label="Item" />

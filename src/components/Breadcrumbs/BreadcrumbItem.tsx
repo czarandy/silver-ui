@@ -7,11 +7,11 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
+import {breadcrumbItemRecipe} from './BreadcrumbItem.recipe';
 import {BreadcrumbsContext} from './BreadcrumbsContext';
 
 export interface BreadcrumbItemProps {
@@ -57,74 +57,6 @@ export interface BreadcrumbItemProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  item: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-    m: 0,
-    '--breadcrumb-separator-display': 'flex',
-    _first: {
-      '--breadcrumb-separator-display': 'none',
-    },
-  }),
-  defaultSize: css({
-    fontSize: 'sm',
-    lineHeight: 'normal',
-  }),
-  supportingSize: css({
-    fontSize: 'xs',
-    lineHeight: 'normal',
-  }),
-  content: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    minW: 0,
-  }),
-  link: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    minW: 0,
-    p: 0,
-    py: '1',
-    borderWidth: 0,
-    bg: 'transparent',
-    color: 'fg.muted',
-    cursor: 'pointer',
-    font: 'inherit',
-    textDecoration: 'none',
-    _hover: {
-      textDecoration: 'underline',
-    },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  current: css({
-    color: 'fg',
-  }),
-  supportingCurrent: css({
-    color: 'fg.muted',
-  }),
-  icon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-  separator: css({
-    display: 'var(--breadcrumb-separator-display)',
-    alignItems: 'center',
-    color: 'fg.muted',
-    py: '1',
-    userSelect: 'none',
-  }),
-} as const;
-
 /**
  * A single item in a breadcrumb trail, rendered as a link, button, or
  * static text depending on the props provided.
@@ -144,12 +76,15 @@ export function BreadcrumbItem({
   const context = use(BreadcrumbsContext);
   const LinkComponent = useLinkComponent(as);
   const isCurrent = isCurrentProp === true;
-  const isSupporting = context.variant === 'supporting';
+  const classes = breadcrumbItemRecipe({
+    variant: context.variant,
+    isCurrent: isCurrent || undefined,
+  });
 
   const content = (
     <>
       {startIcon != null ? (
-        <span className={styles.icon}>
+        <span className={classes.icon}>
           <Icon icon={startIcon} size="sm" />
         </span>
       ) : null}
@@ -157,28 +92,17 @@ export function BreadcrumbItem({
     </>
   );
 
-  const itemClassName = cx(
-    styles.item,
-    isSupporting ? styles.supportingSize : styles.defaultSize,
-    className,
-  );
-
   if (isCurrent) {
     return (
       <li
-        className={itemClassName}
+        className={cx(classes.item, className)}
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        <span aria-hidden="true" className={styles.separator}>
+        <span aria-hidden="true" className={classes.separator}>
           {context.separator}
         </span>
-        <span
-          aria-current="page"
-          className={cx(
-            styles.content,
-            isSupporting ? styles.supportingCurrent : styles.current,
-          )}>
+        <span aria-current="page" className={classes.content}>
           {content}
         </span>
       </li>
@@ -187,33 +111,27 @@ export function BreadcrumbItem({
 
   return (
     <li
-      className={itemClassName}
+      className={cx(classes.item, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      <span aria-hidden="true" className={styles.separator}>
+      <span aria-hidden="true" className={classes.separator}>
         {context.separator}
       </span>
       {href != null ? (
         <LinkComponent
-          className={styles.link}
+          className={classes.link}
           href={href}
           onClick={onClick}
           to={LinkComponent === 'a' ? undefined : href}>
           {content}
         </LinkComponent>
       ) : onClick != null ? (
-        <button className={styles.link} onClick={onClick} type="button">
+        <button className={classes.link} onClick={onClick} type="button">
           {content}
         </button>
       ) : (
-        <span
-          className={cx(
-            styles.content,
-            isSupporting ? styles.supportingCurrent : styles.current,
-          )}>
-          {content}
-        </span>
+        <span className={classes.content}>{content}</span>
       )}
     </li>
   );

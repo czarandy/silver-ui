@@ -122,7 +122,7 @@ export function AvatarGroupOverflow({
       className={cx(styles.root, className)}
       data-testid={dataTestId}
       ref={ref}
-      role="img"
+      role="status"
       style={rootStyle}>
       {content}
     </span>

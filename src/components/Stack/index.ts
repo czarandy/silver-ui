@@ -5,6 +5,6 @@ export {
   type StackGap,
   type StackMainAlignment,
   type StackWrap,
-} from './Stack';
+} from './internal/Stack';
 
 export {VStack, type VStackProps} from './VStack';

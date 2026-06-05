@@ -1,13 +1,26 @@
+/* eslint-disable silver-ui/require-component-props -- discriminated union: custom-element items render item.element directly; passthrough props only apply to standard items */
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';
+import {autocompleteItemRecipe} from './AutocompleteInput.recipe';
 import type {SearchableItem} from './types';
 
-export interface AutocompleteInputItemProps<
-  T extends SearchableItem = SearchableItem,
-> {
+/**
+ * Props for an item with a custom `element`. The element is rendered
+ * directly — layout props like `icon` and `description` do not apply.
+ */
+interface AutocompleteInputCustomItemProps {
+  /**
+   * Search result item with custom element content.
+   */
+  item: SearchableItem & {element: ReactNode};
+}
+
+/**
+ * Props for a standard item rendered with the default layout.
+ */
+interface AutocompleteInputStandardItemProps {
   /**
    * Additional CSS class names applied to the item layout.
    */
@@ -30,9 +43,9 @@ export interface AutocompleteInputItemProps<
    */
   isDisabled?: boolean;
   /**
-   * Search result item.
+   * Search result item without a custom element.
    */
-  item: T;
+  item: SearchableItem & {element?: undefined};
   /**
    * Ref forwarded to the item layout.
    */
@@ -43,59 +56,49 @@ export interface AutocompleteInputItemProps<
   style?: CSSProperties;
 }
 
-const styles = {
-  root: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    minW: 0,
-  }),
-  icon: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-    color: 'fg.muted',
-  }),
-  text: css({
-    display: 'flex',
-    flexDirection: 'column',
-    minW: 0,
-  }),
-  disabled: css({opacity: 0.55}),
-} as const;
+export type AutocompleteInputItemProps =
+  | AutocompleteInputCustomItemProps
+  | AutocompleteInputStandardItemProps;
 
 /**
  * Default layout for AutocompleteInput and TagsInput result rows.
+ *
+ * When the item has a pre-rendered `element`, it is returned directly.
+ * Otherwise the component renders a flex row with an optional icon,
+ * primary label, and description.
  */
-export function AutocompleteInputItem<T extends SearchableItem>({
-  className,
-  'data-testid': dataTestId,
-  description,
-  icon,
-  item,
-  isDisabled = false,
-  ref,
-  style,
-}: AutocompleteInputItemProps<T>): React.JSX.Element {
-  if (item.element != null) {
-    return <>{item.element}</>;
+export function AutocompleteInputItem(
+  props: AutocompleteInputItemProps,
+): React.JSX.Element {
+  if (props.item.element != null) {
+    return <>{props.item.element}</>;
   }
+
+  const {
+    className,
+    'data-testid': dataTestId,
+    description,
+    icon,
+    isDisabled = false,
+    item,
+    ref,
+    style,
+  } = props as AutocompleteInputStandardItemProps;
+
+  const classes = autocompleteItemRecipe({isDisabled});
 
   return (
     <div
-      className={cx(
-        styles.root,
-        isDisabled ? styles.disabled : undefined,
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       {icon != null ? (
-        <span className={styles.icon}>
+        <span className={classes.icon}>
           <Icon color="secondary" icon={icon} size="sm" />
         </span>
       ) : null}
-      <span className={styles.text}>
+      <span className={classes.text}>
         <Text as="span" color="inherit" type="label">
           {item.label}
         </Text>

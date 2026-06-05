@@ -13,6 +13,8 @@ export {
 export {
   createStaticSource,
   type CreateStaticSourceOptions,
+  type CustomSearchableItem,
   type SearchableItem,
   type SearchSource,
+  type StandardSearchableItem,
 } from './types';

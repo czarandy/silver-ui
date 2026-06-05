@@ -191,7 +191,7 @@ const styles = {
 
 function parseNumberInput(
   input: string,
-  options: {isIntegerOnly: boolean; max?: number | null; min?: number | null},
+  options: {isIntegerOnly: boolean},
 ): number | null {
   const trimmed = input.trim();
   if (trimmed === '' || trimmed === '-') {
@@ -204,13 +204,22 @@ function parseNumberInput(
   if (options.isIntegerOnly && !Number.isInteger(number)) {
     return null;
   }
-  if (options.min != null && number < options.min) {
-    return null;
-  }
-  if (options.max != null && number > options.max) {
-    return null;
-  }
   return number;
+}
+
+function clampValue(
+  value: number,
+  min?: number | null,
+  max?: number | null,
+): number {
+  let clamped = value;
+  if (min != null && clamped < min) {
+    clamped = min;
+  }
+  if (max != null && clamped > max) {
+    clamped = max;
+  }
+  return clamped;
 }
 
 /**
@@ -267,10 +276,6 @@ export function NumberInput({
     }
     return value == null ? '' : String(value);
   }, [pendingInput, value]);
-  const isInputValid =
-    pendingInput == null ||
-    pendingInput.trim() === '' ||
-    parseNumberInput(pendingInput, {min, max, isIntegerOnly}) != null;
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -293,7 +298,7 @@ export function NumberInput({
       <input
         aria-busy={isLoading || undefined}
         aria-describedby={describedBy}
-        aria-invalid={status?.type === 'error' || !isInputValid || undefined}
+        aria-invalid={status?.type === 'error' || undefined}
         aria-label={inputGroup != null ? label : undefined}
         aria-required={isRequired ?? undefined}
         autoComplete={autoComplete}
@@ -309,13 +314,12 @@ export function NumberInput({
         name={htmlName}
         onBlur={event => {
           if (pendingInput != null) {
-            const parsed = parseNumberInput(pendingInput, {
-              min,
-              max,
-              isIntegerOnly,
-            });
-            if (parsed != null && parsed !== value) {
-              onChange(parsed);
+            const parsed = parseNumberInput(pendingInput, {isIntegerOnly});
+            if (parsed != null) {
+              const clamped = clampValue(parsed, min, max);
+              if (clamped !== value) {
+                onChange(clamped);
+              }
             }
             setPendingInput(null);
           }
@@ -324,13 +328,12 @@ export function NumberInput({
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
           const nextValue = event.target.value;
           setPendingInput(nextValue);
-          const parsed = parseNumberInput(nextValue, {
-            min,
-            max,
-            isIntegerOnly,
-          });
-          if (parsed != null && parsed !== value) {
-            onChange(parsed);
+          const parsed = parseNumberInput(nextValue, {isIntegerOnly});
+          if (parsed != null) {
+            const clamped = clampValue(parsed, min, max);
+            if (clamped !== value) {
+              onChange(clamped);
+            }
           }
         }}
         onFocus={onFocus}

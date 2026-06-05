@@ -43,6 +43,23 @@ body {
   width: auto;
 }
 
+/*
+ * The nav links live in TopNav's `startContent` slot so they collapse into the
+ * AppShell drawer on mobile. On desktop we push them to the far right of the
+ * left section (flex auto-margin) so the bar reads: logo … links + toggle,
+ * matching the original right-aligned layout. Scoped above AppShell's `sm`
+ * breakpoint (640px) so it never affects the mobile bar.
+ */
+@media (min-width: 641px) {
+  .site-nav > div:first-child > :last-child {
+    margin-inline-start: auto;
+  }
+  /* Small gap between the links and the dark-mode toggle (matches gap token 1). */
+  .site-nav > div:last-child {
+    margin-inline-start: 0.25rem;
+  }
+}
+
 /* ---- hero ---- */
 .hero {
   max-width: 760px;
@@ -119,14 +136,10 @@ body {
   margin-bottom: 24px;
 }
 
-.showcase__panel {
-  position: relative;
-}
-
+/* Theme selector sits in normal flow at the top of the panel, above the
+   showcase header (cleaner than absolute positioning, especially on mobile). */
 .showcase__control {
-  position: absolute;
-  top: 24px;
-  right: 24px;
+  margin-bottom: 24px;
 }
 
 /* ---- footer ---- */
