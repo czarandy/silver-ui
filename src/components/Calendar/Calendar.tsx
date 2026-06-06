@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {
   memo,
@@ -9,7 +10,7 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import type {DateRange, DayOfWeek} from '../../internal/dateTypes';
 import {
   DATE_FORMAT_MONTH_YEAR,
@@ -29,6 +30,7 @@ import {
 import {getBrowserTimezoneID} from '../../internal/time';
 import {useGridFocus} from '../../internal/useGridFocus';
 import {Button} from '../Button';
+import {calendarRecipe} from './Calendar.recipe';
 
 export type {DateRange, DayOfWeek} from '../../internal/dateTypes';
 
@@ -151,150 +153,6 @@ interface CalendarDay {
   isOutside: boolean;
 }
 
-const styles = {
-  root: css({
-    display: 'inline-block',
-    minW: '220px',
-    color: 'fg',
-    fontFamily: 'body',
-  }),
-  header: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '2',
-    mb: '2',
-  }),
-  monthYear: css({
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 'sm',
-    fontWeight: 'semibold',
-  }),
-  months: css({
-    display: 'flex',
-    gap: '4',
-  }),
-  monthGrid: css({
-    flex: '1 1 0',
-  }),
-  weekHeader: css({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(7, 1fr)',
-    mb: '1',
-  }),
-  weekHeaderWithNumbers: css({
-    gridTemplateColumns: 'auto repeat(7, 1fr)',
-  }),
-  dayName: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: 'component.md',
-    h: 'component.md',
-    color: 'fg.muted',
-    fontSize: 'sm',
-  }),
-  daysGrid: css({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(7, 1fr)',
-  }),
-  daysGridWithNumbers: css({
-    gridTemplateColumns: 'auto repeat(7, 1fr)',
-  }),
-  weekRow: css({
-    display: 'contents',
-  }),
-  weekNumber: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: 'component.md',
-    h: 'component.md',
-    color: 'fg.muted',
-    fontSize: 'sm',
-  }),
-  cell: css({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    h: 'component.md',
-    isolation: 'isolate',
-  }),
-  rangeBackground: css({
-    position: 'absolute',
-    insetBlock: '2px',
-    insetInline: 0,
-    bg: 'bg.selected',
-  }),
-  previewBackground: css({
-    position: 'absolute',
-    insetBlock: '2px',
-    insetInline: 0,
-    bg: 'bg.subtle',
-  }),
-  rangeLeft: css({
-    left: '2px',
-    borderTopLeftRadius: 'full',
-    borderBottomLeftRadius: 'full',
-  }),
-  rangeRight: css({
-    right: '2px',
-    borderTopRightRadius: 'full',
-    borderBottomRightRadius: 'full',
-  }),
-  day: css({
-    position: 'relative',
-    zIndex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: 'component.sm',
-    h: 'component.sm',
-    p: 0,
-    borderWidth: 0,
-    borderStyle: 'none',
-    borderRadius: 'full',
-    bg: 'transparent',
-    color: 'fg',
-    cursor: 'pointer',
-    fontFamily: 'inherit',
-    fontSize: 'md',
-    transitionProperty: 'background-color, color',
-    transitionDuration: 'fast',
-    _hover: {
-      bg: 'bg.subtle',
-    },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-    _disabled: {
-      cursor: 'not-allowed',
-    },
-  }),
-  dayOutside: css({
-    color: 'fg.muted',
-    opacity: 0.55,
-  }),
-  dayToday: css({
-    boxShadow: 'inset 0 0 0 1px token(colors.border.emphasized)',
-  }),
-  daySelected: css({
-    bg: 'primary',
-    color: 'fg.onPrimary',
-    _hover: {
-      bg: 'primary',
-    },
-  }),
-  dayDisabled: css({
-    opacity: 0.35,
-  }),
-} as const;
-
 function generateCalendarDays({
   year,
   month,
@@ -358,14 +216,6 @@ function checkDateDisabled(
   }
 
   return options.getIsDateDisabled?.(date) ?? false;
-}
-
-function plainDateFromDataAttribute(value: string): PlainDate {
-  return plainDateCreate(
-    parseInt(value.slice(0, 4)),
-    parseInt(value.slice(5, 7)),
-    parseInt(value.slice(8, 10)),
-  );
 }
 
 function getSelectedTabDate({
@@ -478,11 +328,11 @@ export function Calendar({
     max == null || plainDateIsAfter(max.with({day: 1}), lastVisibleMonth);
 
   const navigateMonth = useCallback(
-    (delta: number, focusedDate?: PlainDate, offset = 7) => {
+    (delta: number, nextFocus?: PlainDate) => {
       const nextMonth = baseMonth.add({months: delta});
 
-      if (focusedDate != null) {
-        setPendingFocus(focusedDate.add({days: delta * offset}));
+      if (nextFocus != null) {
+        setPendingFocus(nextFocus);
       }
 
       onViewDateChange?.(nextMonth);
@@ -530,14 +380,12 @@ export function Calendar({
   );
 
   const handleNavigateNext = useCallback(
-    (focusedDate: PlainDate, offset: number) =>
-      navigateMonth(1, focusedDate, offset),
+    (nextFocus: PlainDate) => navigateMonth(1, nextFocus),
     [navigateMonth],
   );
 
   const handleNavigatePrevious = useCallback(
-    (focusedDate: PlainDate, offset: number) =>
-      navigateMonth(-1, focusedDate, offset),
+    (nextFocus: PlainDate) => navigateMonth(-1, nextFocus),
     [navigateMonth],
   );
 
@@ -545,6 +393,8 @@ export function Calendar({
     () => setPendingFocus(null),
     [],
   );
+
+  const styles = calendarRecipe();
 
   return (
     // eslint-disable-next-line jsx-a11y-x/no-static-element-interactions
@@ -626,8 +476,8 @@ interface MonthGridProps {
   month: PlainDate;
   onDayClick: (date: PlainDate) => void;
   onDayHover: (date: PlainDate | null) => void;
-  onNavigateNext: (focusedDate: PlainDate, offset: number) => void;
-  onNavigatePrevious: (focusedDate: PlainDate, offset: number) => void;
+  onNavigateNext: (nextFocus: PlainDate) => void;
+  onNavigatePrevious: (nextFocus: PlainDate) => void;
   onPendingFocusHandled: () => void;
   pendingFocus: PlainDate | null;
   rangeSelectionStart: PlainDate | null;
@@ -691,7 +541,7 @@ const MonthGrid = memo(function MonthGrid({
   const getFocusedDate = useCallback((): PlainDate | null => {
     const activeElement = document.activeElement as HTMLElement | null;
     const date = activeElement?.dataset.date;
-    return date == null ? null : plainDateFromDataAttribute(date);
+    return date == null ? null : Temporal.PlainDate.from(date);
   }, []);
 
   const {gridRef, handleKeyDown} = useGridFocus<HTMLDivElement>({
@@ -700,25 +550,27 @@ const MonthGrid = memo(function MonthGrid({
     onNavigateBefore: (_column, offset) => {
       const focusedDate = getFocusedDate();
       if (focusedDate != null) {
-        onNavigatePrevious(focusedDate, offset);
+        onNavigatePrevious(focusedDate.subtract({days: offset}));
       }
     },
     onNavigateAfter: (_column, offset) => {
       const focusedDate = getFocusedDate();
       if (focusedDate != null) {
-        onNavigateNext(focusedDate, offset);
+        onNavigateNext(focusedDate.add({days: offset}));
       }
     },
+    // Page keys move a whole month, keeping the same day. Temporal's default
+    // `constrain` overflow clamps to the month's last day (e.g. Jan 31 -> Feb 28).
     onPageUp: () => {
       const focusedDate = getFocusedDate();
       if (focusedDate != null) {
-        onNavigatePrevious(focusedDate, 7);
+        onNavigatePrevious(focusedDate.subtract({months: 1}));
       }
     },
     onPageDown: () => {
       const focusedDate = getFocusedDate();
       if (focusedDate != null) {
-        onNavigateNext(focusedDate, 7);
+        onNavigateNext(focusedDate.add({months: 1}));
       }
     },
   });
@@ -759,13 +611,11 @@ const MonthGrid = memo(function MonthGrid({
     }
   }
 
+  const styles = calendarRecipe({hasWeekNumbers});
+
   return (
     <div className={styles.monthGrid}>
-      <div
-        className={cx(
-          styles.weekHeader,
-          hasWeekNumbers ? styles.weekHeaderWithNumbers : undefined,
-        )}>
+      <div className={styles.weekHeader}>
         {hasWeekNumbers ? <div className={styles.dayName} /> : null}
         {dayNames.map(dayName => (
           <div className={styles.dayName} key={dayName} role="columnheader">
@@ -775,10 +625,7 @@ const MonthGrid = memo(function MonthGrid({
       </div>
       <div
         aria-label={plainDateFormat(month, DATE_FORMAT_MONTH_YEAR)}
-        className={cx(
-          styles.daysGrid,
-          hasWeekNumbers ? styles.daysGridWithNumbers : undefined,
-        )}
+        className={styles.daysGrid}
         onKeyDown={handleKeyDown}
         ref={gridRef}
         role="grid"
@@ -860,7 +707,7 @@ const DayCell = memo(function DayCell({
   onDayHover,
 }: DayCellProps): React.JSX.Element {
   if (day.isOutside && !hasOutsideDays) {
-    return <div className={styles.cell} />;
+    return <div className={calendarRecipe().cell} />;
   }
 
   const effectivelyDisabled = isDisabled || day.isOutside;
@@ -893,39 +740,33 @@ const DayCell = memo(function DayCell({
   const isFirstColumn = dayIndex === 0;
   const isLastColumn = dayIndex === 6;
 
+  const styles = calendarRecipe({
+    isOutside: day.isOutside,
+    isToday,
+    isSelected: isSelected || isRangeStart || isRangeEnd,
+    isInRange,
+    isDisabled: effectivelyDisabled,
+  });
+  const rangeBackgroundClass = calendarRecipe({
+    rangeTone: 'range',
+    roundedStart: isRangeStart || isFirstColumn,
+    roundedEnd: isRangeEnd || isLastColumn,
+  }).rangeBackground;
+  const previewBackgroundClass = calendarRecipe({
+    rangeTone: 'preview',
+    roundedStart: isPreviewStart || isFirstColumn,
+    roundedEnd: isPreviewEnd || isLastColumn,
+  }).rangeBackground;
+
   return (
     <div className={styles.cell}>
-      {isInRange ? (
-        <div
-          className={cx(
-            styles.rangeBackground,
-            isRangeStart || isFirstColumn ? styles.rangeLeft : undefined,
-            isRangeEnd || isLastColumn ? styles.rangeRight : undefined,
-          )}
-        />
-      ) : null}
-      {isInPreview ? (
-        <div
-          className={cx(
-            styles.previewBackground,
-            isPreviewStart || isFirstColumn ? styles.rangeLeft : undefined,
-            isPreviewEnd || isLastColumn ? styles.rangeRight : undefined,
-          )}
-        />
-      ) : null}
+      {isInRange ? <div className={rangeBackgroundClass} /> : null}
+      {isInPreview ? <div className={previewBackgroundClass} /> : null}
       <button
         aria-disabled={effectivelyDisabled || undefined}
         aria-label={plainDateFormat(day.date, DATE_FORMAT_WITH_WEEKDAY)}
         aria-selected={isSelected || isInRange || undefined}
-        className={cx(
-          styles.day,
-          day.isOutside ? styles.dayOutside : undefined,
-          isToday && !isSelected && !isInRange ? styles.dayToday : undefined,
-          isSelected || isRangeStart || isRangeEnd
-            ? styles.daySelected
-            : undefined,
-          effectivelyDisabled ? styles.dayDisabled : undefined,
-        )}
+        className={styles.day}
         data-date={day.date.toString()}
         disabled={isDisabled}
         onClick={() => {

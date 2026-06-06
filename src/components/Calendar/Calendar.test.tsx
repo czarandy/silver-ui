@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {plainDateCreate} from '../../internal/plainDate';
 import {Calendar, type CalendarHandle} from './Calendar';
+import {calendarRecipe} from './Calendar.recipe';
 
 describe('Calendar', () => {
   it('renders the selected month and selected day', () => {
@@ -278,4 +279,181 @@ describe('Calendar', () => {
       screen.getByRole('gridcell', {name: /May 15, 2026/}),
     ).toHaveAttribute('aria-selected', 'true');
   });
+
+  it('moves focus within the month with arrow keys', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />,
+    );
+
+    act(() => screen.getByRole('gridcell', {name: /May 15, 2026/}).focus());
+
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('gridcell', {name: /May 16, 2026/})).toHaveFocus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByRole('gridcell', {name: /May 15, 2026/})).toHaveFocus();
+
+    await user.keyboard('{ArrowDown}');
+    expect(screen.getByRole('gridcell', {name: /May 22, 2026/})).toHaveFocus();
+
+    await user.keyboard('{ArrowUp}');
+    expect(screen.getByRole('gridcell', {name: /May 15, 2026/})).toHaveFocus();
+  });
+
+  it('moves to the start and end of the week with Home and End', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />,
+    );
+
+    act(() => screen.getByRole('gridcell', {name: /May 14, 2026/}).focus());
+
+    await user.keyboard('{Home}');
+    expect(screen.getByRole('gridcell', {name: /May 10, 2026/})).toHaveFocus();
+
+    await user.keyboard('{End}');
+    expect(screen.getByRole('gridcell', {name: /May 16, 2026/})).toHaveFocus();
+  });
+
+  it('jumps to the first and last day of the grid with Ctrl+Home and Ctrl+End', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />,
+    );
+
+    act(() => screen.getByRole('gridcell', {name: /May 15, 2026/}).focus());
+
+    await user.keyboard('{Control>}{Home}{/Control}');
+    expect(
+      screen.getByRole('gridcell', {name: /April 26, 2026/}),
+    ).toHaveFocus();
+
+    await user.keyboard('{Control>}{End}{/Control}');
+    expect(screen.getByRole('gridcell', {name: /June 6, 2026/})).toHaveFocus();
+  });
+
+  it('navigates to the next month when arrowing past the last row', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />,
+    );
+
+    act(() => screen.getByRole('gridcell', {name: /May 31, 2026/}).focus());
+
+    await user.keyboard('{ArrowDown}');
+
+    expect(screen.getByText('June 2026')).toBeInTheDocument();
+    expect(screen.getByRole('gridcell', {name: /June 7, 2026/})).toHaveFocus();
+  });
+
+  it('navigates to the previous month when arrowing above the first row', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />,
+    );
+
+    act(() => screen.getByRole('gridcell', {name: /May 1, 2026/}).focus());
+
+    await user.keyboard('{ArrowUp}');
+
+    expect(screen.getByText('April 2026')).toBeInTheDocument();
+    expect(
+      screen.getByRole('gridcell', {name: /April 24, 2026/}),
+    ).toHaveFocus();
+  });
+
+  it('keeps focus on the same day across months with PageDown and PageUp', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />,
+    );
+
+    act(() => screen.getByRole('gridcell', {name: /May 15, 2026/}).focus());
+
+    await user.keyboard('{PageDown}');
+    expect(screen.getByText('June 2026')).toBeInTheDocument();
+    expect(screen.getByRole('gridcell', {name: /June 15, 2026/})).toHaveFocus();
+
+    await user.keyboard('{PageUp}');
+    expect(screen.getByText('May 2026')).toBeInTheDocument();
+    expect(screen.getByRole('gridcell', {name: /May 15, 2026/})).toHaveFocus();
+  });
+
+  it('applies the not-allowed cursor to outside (non-selectable) days', () => {
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />,
+    );
+
+    // Outside days are aria-disabled but intentionally not natively `disabled`
+    // (that would drop them from grid keyboard navigation), so the not-allowed
+    // cursor comes from the recipe's isDisabled variant rather than `:disabled`.
+    const recipe = calendarRecipe({isDisabled: true});
+    assertNonNull(recipe.day);
+    const cursorClass = recipe.day
+      .split(' ')
+      .find(className => className.includes('cursor'));
+    if (cursorClass == null) {
+      throw new Error('expected a cursor class on the disabled day variant');
+    }
+
+    expect(screen.getByRole('gridcell', {name: /April 26, 2026/})).toHaveClass(
+      cursorClass,
+    );
+    expect(
+      screen.getByRole('gridcell', {name: /May 15, 2026/}),
+    ).not.toHaveClass(cursorClass);
+  });
+
+  it('cancels a pending range selection when Escape is pressed', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <Calendar
+        mode="range"
+        onChange={onChange}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />,
+    );
+
+    const may10 = screen.getByRole('gridcell', {name: /May 10, 2026/});
+    await user.click(may10);
+    expect(may10).toHaveAttribute('aria-selected', 'true');
+
+    await user.keyboard('{Escape}');
+    expect(may10).not.toHaveAttribute('aria-selected');
+
+    // The pending start is gone, so clicking another day begins a new range
+    // rather than completing the cancelled one.
+    await user.click(screen.getByRole('gridcell', {name: /May 20, 2026/}));
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('clamps to the last day of a shorter month when paging', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 1, 1)} />,
+    );
+
+    act(() => screen.getByRole('gridcell', {name: /January 31, 2026/}).focus());
+
+    // Feb 2026 has no 31st, so focus clamps to Feb 28.
+    await user.keyboard('{PageDown}');
+    expect(screen.getByText('February 2026')).toBeInTheDocument();
+    expect(
+      screen.getByRole('gridcell', {name: /February 28, 2026/}),
+    ).toHaveFocus();
+  });
 });
+
+function assertNonNull<T>(val: T): asserts val is NonNullable<T> {
+  expect(val).not.toBeNull();
+}

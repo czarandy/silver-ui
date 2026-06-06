@@ -5,7 +5,7 @@
 
 A complete, themeable React component library, built with [Panda CSS](https://panda-css.com/).
 
-[Storybook](https://silver-ui-eight.vercel.app/) — browse and interact with all components.
+[Storybook](https://storybook.silver-ui.com/) — browse and interact with all components.
 
 ## Installation
 
