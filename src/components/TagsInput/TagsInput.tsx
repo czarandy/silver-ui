@@ -469,11 +469,21 @@ export function TagsInput<T extends SearchableItem>({
       }
       document.addEventListener(
         'click',
-        () => requestAnimationFrame(() => inputRef.current?.focus()),
+        event => {
+          // Focus the input only when the click that completes this press lands
+          // inside the TagsInput. A press on a tag may open a popover anchored to
+          // it (e.g. SearchFilterInput's edit popover); since the tag's own click
+          // can stop propagation, this listener instead fires on the next click
+          // — which might be a control in that popover. Focusing the input then
+          // would steal focus back and briefly re-open the input's surface.
+          if (isFocusInTagsInput(event.target)) {
+            requestAnimationFrame(() => inputRef.current?.focus());
+          }
+        },
         {once: true},
       );
     }
-  }, [isDisabled, isLayerMode, layer]);
+  }, [isDisabled, isFocusInTagsInput, isLayerMode, layer]);
 
   const necessity = getNecessity(isOptional, isRequired);
 

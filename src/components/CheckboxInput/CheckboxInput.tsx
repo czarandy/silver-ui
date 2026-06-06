@@ -9,7 +9,6 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
@@ -22,6 +21,7 @@ import {Item} from '../Item';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
+import {checkboxInputRecipe} from './CheckboxInput.recipe';
 
 export type CheckboxInputSize = 'sm' | 'md';
 export type CheckboxInputValue = boolean | 'indeterminate';
@@ -124,76 +124,6 @@ export type CheckboxInputProps = {
   value: CheckboxInputValue;
 } & FieldNecessity;
 
-const styles = {
-  root: css({
-    display: 'flex',
-    flexDirection: 'column',
-  }),
-  boxWrap: css({
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }),
-  input: css({
-    position: 'absolute',
-    inset: 0,
-    opacity: 0,
-    cursor: 'pointer',
-    _disabled: {
-      cursor: 'not-allowed',
-    },
-  }),
-  box: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'border.emphasized',
-    borderRadius: 'sm',
-    bg: 'bg',
-    color: 'fg.onPrimary',
-    pointerEvents: 'none',
-    _peerFocusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  boxChecked: css({
-    bg: 'primary',
-    borderColor: 'primary',
-  }),
-  boxDisabled: css({
-    opacity: 0.55,
-  }),
-  boxSize: {
-    sm: css({w: '4.5', h: '4.5'}),
-    md: css({w: '5.5', h: '5.5'}),
-  },
-  icon: css({
-    w: '70%',
-    h: '70%',
-  }),
-  label: css({
-    cursor: 'pointer',
-  }),
-  labelDisabled: css({
-    cursor: 'not-allowed',
-  }),
-  indicator: css({
-    fontWeight: 'normal',
-    color: 'fg.muted',
-  }),
-  tooltipIcon: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
-  }),
-} as const;
-
 /**
  * A checkbox input with label, description, and validation support.
  */
@@ -234,6 +164,11 @@ export function CheckboxInput({
   const isIndeterminate = value === 'indeterminate';
   const isChecked = value === true;
   const isCheckedOrIndeterminate = isChecked || isIndeterminate;
+  const classes = checkboxInputRecipe({
+    size,
+    isChecked: isCheckedOrIndeterminate,
+    isDisabled,
+  });
 
   useEffect(() => {
     if (inputRef.current != null) {
@@ -244,7 +179,7 @@ export function CheckboxInput({
   const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
 
   const control = (
-    <span className={styles.boxWrap}>
+    <span className={classes.boxWrap}>
       <input
         aria-busy={isLoading || undefined}
         aria-checked={isIndeterminate ? 'mixed' : undefined}
@@ -252,7 +187,10 @@ export function CheckboxInput({
         aria-invalid={status?.type === 'error' || undefined}
         aria-readonly={isReadOnly || undefined}
         checked={isChecked}
-        className={styles.input}
+        // `peer` is the marker class Panda's `_peerFocusVisible` selector on
+        // the box targets (`.peer:is(:focus-visible,…) ~ &`); without it the
+        // box's keyboard focus ring never renders.
+        className={cx('peer', classes.input)}
         data-testid={dataTestId}
         disabled={isDisabled}
         id={inputId}
@@ -265,29 +203,32 @@ export function CheckboxInput({
           }
           onChange(event.target.checked, event);
         }}
+        onClick={event => {
+          // For checkboxes the native toggle happens during `click`, before
+          // `change` fires, so blocking only `onChange` lets the box flip
+          // momentarily until React resets it. Preventing the click stops the
+          // toggle outright — and covers label clicks and Space-key activation,
+          // which both dispatch a click on the input.
+          if (isReadOnly) {
+            event.preventDefault();
+          }
+        }}
         onFocus={onFocus}
         readOnly={isReadOnly}
         ref={mergeRefs(ref, inputRef)}
         required={isRequired}
         type="checkbox"
       />
-      <span
-        aria-hidden="true"
-        className={cx(
-          styles.box,
-          styles.boxSize[size],
-          isCheckedOrIndeterminate ? styles.boxChecked : undefined,
-          isDisabled ? styles.boxDisabled : undefined,
-        )}>
+      <span aria-hidden="true" className={classes.box}>
         {isLoading ? (
           <Spinner
             size="sm"
             variant={isCheckedOrIndeterminate ? 'onMedia' : 'default'}
           />
         ) : isIndeterminate ? (
-          <Icon className={styles.icon} icon={Minus} />
+          <Icon className={classes.icon} icon={Minus} />
         ) : isChecked ? (
-          <Icon className={styles.icon} icon={Check} />
+          <Icon className={classes.icon} icon={Check} />
         ) : null}
       </span>
     </span>
@@ -300,14 +241,14 @@ export function CheckboxInput({
       ) : null}
       {label}
       {statusText != null ? (
-        <Text as="span" className={styles.indicator} type="supporting">
+        <Text as="span" className={classes.indicator} type="supporting">
           <span aria-hidden="true"> · </span>
           {statusText}
         </Text>
       ) : null}
       {isReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
-          <span className={styles.tooltipIcon}>
+          <span className={classes.tooltipIcon}>
             <Icon icon={Info} size="sm" />
           </span>
         </Tooltip>
@@ -316,12 +257,7 @@ export function CheckboxInput({
   );
 
   const labelNode = (
-    <label
-      className={cx(
-        styles.label,
-        isDisabled ? styles.labelDisabled : undefined,
-      )}
-      htmlFor={inputId}>
+    <label className={classes.label} htmlFor={inputId}>
       {isLabelHidden ? (
         <VisuallyHidden>{labelContent}</VisuallyHidden>
       ) : (
@@ -363,7 +299,7 @@ export function CheckboxInput({
   );
 
   return (
-    <div className={cx(styles.root, className)} style={style}>
+    <div className={cx(classes.root, className)} style={style}>
       {item}
       {statusNode}
     </div>

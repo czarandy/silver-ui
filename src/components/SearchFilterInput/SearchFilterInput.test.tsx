@@ -416,6 +416,32 @@ describe('edit popover focus', () => {
     value: {type: 'string', value: 'John'},
   } as const;
 
+  it('does not flash the input focused after cancelling a tag edit', async () => {
+    const user = userEvent.setup();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={() => {}}
+      />,
+    );
+    const input = screen.getByRole('combobox', {name: 'Search'});
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('button', {name: 'Cancel'}));
+
+    // Pressing a tag used to register TagsInput's global "focus the input on the
+    // next click" listener. Because the tag's onClick stops propagation, that
+    // listener never fired on the tag click and leaked to the later Cancel
+    // click — briefly focusing the input (and re-opening the popover/
+    // suggestions) before a deferred blur, producing a visible flash.
+    expect(input).not.toHaveFocus();
+    await flushFrames(1);
+    expect(input).not.toHaveFocus();
+    await flushFrames(1);
+    expect(input).not.toHaveFocus();
+  });
+
   it('does not focus the input when editing is cancelled (the reported bug)', async () => {
     const user = userEvent.setup();
     render(
