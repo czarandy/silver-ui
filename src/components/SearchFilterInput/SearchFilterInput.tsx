@@ -237,6 +237,7 @@ export function SearchFilterInput({
   const searchSource = useSearchFilterInputSource(config);
   const tagsInputRef = useRef<TagsInputHandle>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const wasInputFocusedRef = useRef(false);
   const [popoverState, setPopoverState] = useState<PopoverState>({
     type: 'idle',
   });
@@ -280,11 +281,39 @@ export function SearchFilterInput({
 
   const openEditor = useCallback(
     (state: Exclude<PopoverState, {type: 'idle'}>) => {
+      // Remember whether the text input was the interaction surface before
+      // opening the editor, so cancel/escape can restore focus only when it
+      // makes sense. Adding always originates from typing in the input; for
+      // editing (a tag click) fall back to the actual focus state.
+      const active = document.activeElement;
+      const isInputFocused =
+        active?.tagName === 'INPUT' &&
+        rootRef.current?.contains(active) === true;
+      wasInputFocusedRef.current = state.type === 'adding' || isInputFocused;
       tagsInputRef.current?.blur();
       setPopoverState(state);
     },
     [],
   );
+
+  const handleCancel = useCallback(() => {
+    const wasInputFocused = wasInputFocusedRef.current;
+    setPopoverState({type: 'idle'});
+    if (wasInputFocused) {
+      // The input was the interaction surface before opening — return focus to
+      // it so the user can keep typing.
+      requestAnimationFrame(() => tagsInputRef.current?.focus());
+    } else {
+      // The editor was opened by clicking a tag, so the input was not focused
+      // and should not be. Clicking the Cancel button triggers TagsInput's
+      // "focus the input on the next click after a wrapper press" behavior,
+      // which queues a focus in a requestAnimationFrame. Blur in a nested frame
+      // so it runs after that focus and the input ends up unfocused.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => tagsInputRef.current?.blur());
+      });
+    }
+  }, []);
 
   const handleTagsInputChange = useCallback(
     (
@@ -509,7 +538,7 @@ export function SearchFilterInput({
         filter={partialFilter}
         isReadOnly={isReadOnly}
         mode={popoverState.type === 'editing' ? 'edit' : 'create'}
-        onCancel={() => setPopoverState({type: 'idle'})}
+        onCancel={handleCancel}
         onSave={handleSave}
         saveButtonLabel={popoverSaveButtonLabel}
         timezoneID={timezoneID}
@@ -521,7 +550,7 @@ export function SearchFilterInput({
         isReadOnly={isReadOnly}
         maxOperatorMenuItems={maxOperatorMenuItems}
         mode={popoverState.type === 'editing' ? 'edit' : 'create'}
-        onCancel={() => setPopoverState({type: 'idle'})}
+        onCancel={handleCancel}
         onSave={handleSave}
         saveButtonLabel={popoverSaveButtonLabel}
       />

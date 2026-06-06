@@ -1,5 +1,6 @@
-import {fireEvent, render, screen} from '@testing-library/react';
-import {describe, expect, it, vi} from 'vitest';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {SearchFilterInput} from './SearchFilterInput';
 import {formatFilterValue} from './formatFilterValue';
 import type {EnumItem, SearchFilterInputConfig} from './types';
@@ -374,6 +375,109 @@ describe('SearchFilterInput', () => {
     expect(
       screen.queryByRole('presentation', {hidden: true}),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('edit popover focus', () => {
+  beforeAll(() => {
+    globalThis.ResizeObserver = class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    };
+    // jsdom defaults `[popover]` elements to `display: none` and lacks
+    // showPopover/hidePopover. Toggle inline display so opened popover content
+    // is visible (and thus queryable/clickable) in tests.
+    Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+      configurable: true,
+      value(this: HTMLElement) {
+        this.style.display = 'block';
+      },
+    });
+    Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
+      configurable: true,
+      value(this: HTMLElement) {
+        this.style.display = 'none';
+      },
+    });
+  });
+
+  async function flushFrames(count = 1): Promise<void> {
+    await act(async () => {
+      for (let i = 0; i < count; i++) {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+      }
+    });
+  }
+
+  const nameFilter = {
+    field: 'name',
+    operator: 'contains',
+    value: {type: 'string', value: 'John'},
+  } as const;
+
+  it('does not focus the input when editing is cancelled (the reported bug)', async () => {
+    const user = userEvent.setup();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={() => {}}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('button', {name: 'Cancel'}));
+    await flushFrames(2);
+
+    expect(screen.getByRole('combobox', {name: 'Search'})).not.toHaveFocus();
+  });
+
+  it('does not focus the input when editing is dismissed with Escape', async () => {
+    const user = userEvent.setup();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={() => {}}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await screen.findByRole('button', {name: 'Cancel'});
+    await user.keyboard('{Escape}');
+    await flushFrames(2);
+
+    expect(screen.getByRole('combobox', {name: 'Search'})).not.toHaveFocus();
+  });
+
+  it('returns focus to the input when adding is cancelled', async () => {
+    const user = userEvent.setup();
+    render(
+      <SearchFilterInput config={config} filters={[]} onChange={() => {}} />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Search'});
+    await user.type(input, 'Name');
+    await user.click(await screen.findByText('Name'));
+    await user.click(await screen.findByRole('button', {name: 'Cancel'}));
+
+    await waitFor(() => expect(input).toHaveFocus());
+  });
+
+  it('returns focus to the input when adding is dismissed with Escape', async () => {
+    const user = userEvent.setup();
+    render(
+      <SearchFilterInput config={config} filters={[]} onChange={() => {}} />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Search'});
+    await user.type(input, 'Name');
+    await user.click(await screen.findByText('Name'));
+    await screen.findByRole('button', {name: 'Cancel'});
+    await user.keyboard('{Escape}');
+
+    await waitFor(() => expect(input).toHaveFocus());
   });
 });
 
