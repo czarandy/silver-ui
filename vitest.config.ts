@@ -16,5 +16,6 @@ export default defineConfig({
     setupFiles: ['./src/test-setup.ts'],
     include: ['src/**/*.test.{ts,tsx}', 'eslint/**/*.test.{js,ts}'],
     css: true,
+    testTimeout: 10000,
   },
 });
