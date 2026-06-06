@@ -2,6 +2,7 @@ import {act, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {plainDateCreate} from '../../internal/plainDate';
+import {assertNonNull} from '../../internal/testHelpers';
 import {Calendar, type CalendarHandle} from './Calendar';
 import {calendarRecipe} from './Calendar.recipe';
 
@@ -395,8 +396,8 @@ describe('Calendar', () => {
     // (that would drop them from grid keyboard navigation), so the not-allowed
     // cursor comes from the recipe's isDisabled variant rather than `:disabled`.
     const recipe = calendarRecipe({isDisabled: true});
-    assertNonNull(recipe.day);
-    const cursorClass = recipe.day
+    const dayClass = assertNonNull(recipe.day);
+    const cursorClass = dayClass
       .split(' ')
       .find(className => className.includes('cursor'));
     if (cursorClass == null) {
@@ -453,7 +454,3 @@ describe('Calendar', () => {
     ).toHaveFocus();
   });
 });
-
-function assertNonNull<T>(val: T): asserts val is NonNullable<T> {
-  expect(val).not.toBeNull();
-}

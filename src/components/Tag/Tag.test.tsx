@@ -2,6 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Star} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
+import {assertNonNull} from '../../internal/testHelpers';
 import {Tag} from './Tag';
 import {tagRecipe} from './Tag.recipe';
 
@@ -189,7 +190,7 @@ describe('Tag', () => {
     render(<Tag color="blue" data-testid="tag" label="Blue" />);
 
     const classes = tagRecipe({color: 'blue'});
-    expect(screen.getByTestId('tag')).toHaveClass(classes.root!);
+    expect(screen.getByTestId('tag')).toHaveClass(assertNonNull(classes.root));
   });
 
   it('activates a clickable tag via keyboard', async () => {
@@ -277,7 +278,7 @@ describe('Tag', () => {
 
     const tag = screen.getByTestId('tag');
     const classes = tagRecipe({color: 'blue', isRootInteractive: true});
-    expect(tag).toHaveClass(classes.root!);
+    expect(tag).toHaveClass(assertNonNull(classes.root));
     // The blue color's background must not be overridden by isRootInteractive.
     expect(tag).toHaveClass('silver-bg_surface.blue');
   });

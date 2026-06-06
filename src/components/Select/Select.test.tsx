@@ -2,6 +2,7 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {assertNonNull} from '../../internal/testHelpers';
 import {Select} from './Select';
 import {SelectOption} from './SelectOption';
 
@@ -419,10 +420,11 @@ describe('Select', () => {
 
     expect(screen.getByText('Choose your favorite fruit')).toBeInTheDocument();
     const combobox = screen.getByRole('combobox', {name: 'Fruit'});
-    const describedById = combobox.getAttribute('aria-describedby');
-    expect(describedById).toBeTruthy();
+    const describedById = assertNonNull(
+      combobox.getAttribute('aria-describedby'),
+    );
     // eslint-disable-next-line testing-library/no-node-access -- verifying aria-describedby target content
-    expect(document.getElementById(describedById!)).toHaveTextContent(
+    expect(document.getElementById(describedById)).toHaveTextContent(
       'Choose your favorite fruit',
     );
   });

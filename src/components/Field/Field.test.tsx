@@ -1,5 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
+import {assertNonNull} from '../../internal/testHelpers';
 import {Field, getNecessity} from './Field';
 
 describe('Field', () => {
@@ -52,9 +53,8 @@ describe('Field', () => {
     );
 
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const labelSpan = container.querySelector('#opt-label');
-    expect(labelSpan).not.toBeNull();
-    expect(labelSpan?.tagName).toBe('SPAN');
+    const labelSpan = assertNonNull(container.querySelector('#opt-label'));
+    expect(labelSpan.tagName).toBe('SPAN');
     expect(labelSpan).not.toHaveAttribute('for');
   });
 

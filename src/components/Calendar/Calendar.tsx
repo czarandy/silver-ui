@@ -611,6 +611,8 @@ const MonthGrid = memo(function MonthGrid({
     }
   }
 
+  const isSelectingRange = mode === 'range' && rangeSelectionStart != null;
+
   const styles = calendarRecipe({hasWeekNumbers});
 
   return (
@@ -649,6 +651,7 @@ const MonthGrid = memo(function MonthGrid({
                   dayIndex={dayIndex}
                   hasOutsideDays={hasOutsideDays}
                   isDisabled={isDisabled(day.date)}
+                  isSelectingRange={isSelectingRange}
                   isTabbable={
                     tabbableDate != null &&
                     plainDateIsEqual(tabbableDate, day.date)
@@ -678,6 +681,7 @@ interface DayCellProps {
   dayIndex: number;
   hasOutsideDays: boolean;
   isDisabled: boolean;
+  isSelectingRange: boolean;
   isTabbable: boolean;
   mode: 'single' | 'range';
   onDayClick: (date: PlainDate) => void;
@@ -702,6 +706,7 @@ const DayCell = memo(function DayCell({
   today,
   hasOutsideDays,
   isDisabled,
+  isSelectingRange,
   isTabbable,
   onDayClick,
   onDayHover,
@@ -775,11 +780,15 @@ const DayCell = memo(function DayCell({
           }
         }}
         onMouseEnter={() => {
-          if (!effectivelyDisabled) {
+          if (isSelectingRange && !effectivelyDisabled) {
             onDayHover(day.date);
           }
         }}
-        onMouseLeave={() => onDayHover(null)}
+        onMouseLeave={() => {
+          if (isSelectingRange) {
+            onDayHover(null);
+          }
+        }}
         role="gridcell"
         tabIndex={isTabbable ? 0 : -1}
         type="button">

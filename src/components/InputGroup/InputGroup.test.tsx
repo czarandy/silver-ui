@@ -1,5 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
+import {assertNonNull} from '../../internal/testHelpers';
 import {NumberInput} from '../NumberInput';
 import {TextInput} from '../TextInput';
 import {InputGroup} from './InputGroup';
@@ -173,7 +174,6 @@ describe('InputGroup', () => {
     );
 
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    const inputWrapper = container.querySelector('[data-testid="group"] > div');
-    expect(inputWrapper).not.toBeNull();
+    assertNonNull(container.querySelector('[data-testid="group"] > div'));
   });
 });

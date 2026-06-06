@@ -2,6 +2,7 @@ import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
+import {assertNonNull} from '../../internal/testHelpers';
 import {TimeInput} from './TimeInput';
 
 const T = (s: string) => Temporal.PlainTime.from(s);
@@ -238,10 +239,9 @@ describe('TimeInput', () => {
     );
 
     const input = screen.getByLabelText('Time');
-    const describedById = input.getAttribute('aria-describedby');
-    expect(describedById).toBeTruthy();
+    const describedById = assertNonNull(input.getAttribute('aria-describedby'));
     // eslint-disable-next-line testing-library/no-node-access -- verifying aria-describedby target content
-    expect(document.getElementById(describedById!)).toHaveTextContent(
+    expect(document.getElementById(describedById)).toHaveTextContent(
       'Use 24-hour format',
     );
   });

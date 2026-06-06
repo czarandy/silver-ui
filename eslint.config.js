@@ -383,6 +383,12 @@ export default tseslint.config(
     files: ['**/*.test.{ts,tsx}'],
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
+      // assertNonNull (src/internal/testHelpers) wraps an expect, so treat it
+      // as an assertion for the no-empty-test heuristic.
+      'vitest/expect-expect': [
+        'error',
+        {assertFunctionNames: ['expect', 'assertNonNull']},
+      ],
     },
   },
   // Storybook — enforce correct story structure

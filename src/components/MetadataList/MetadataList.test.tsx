@@ -1,6 +1,7 @@
 import {render, screen, within} from '@testing-library/react';
 import {CircleCheck} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
+import {assertNonNull} from '../../internal/testHelpers';
 import {MetadataList} from './MetadataList';
 import {MetadataListItem} from './MetadataListItem';
 
@@ -26,7 +27,8 @@ describe('MetadataList', () => {
     );
 
     const heading = screen.getByRole('heading', {name: 'Details'});
-    const dl = screen.getByRole('definition').closest('dl')!; // eslint-disable-line testing-library/no-node-access
+    // eslint-disable-next-line testing-library/no-node-access
+    const dl = assertNonNull(screen.getByRole('definition').closest('dl'));
     expect(dl).toHaveAttribute('aria-labelledby', heading.id);
   });
 

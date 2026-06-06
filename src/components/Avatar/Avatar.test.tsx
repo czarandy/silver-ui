@@ -1,6 +1,7 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import {Check} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
+import {assertNonNull} from '../../internal/testHelpers';
 import {Avatar} from './Avatar';
 import {AvatarStatusDot} from './AvatarStatusDot';
 
@@ -112,8 +113,8 @@ describe('Avatar', () => {
 
     const avatar = screen.getByTestId('avatar');
     // eslint-disable-next-line testing-library/no-node-access -- presentational img (alt="") has no accessible role
-    const img = avatar.querySelector('img');
-    fireEvent.error(img!);
+    const img = assertNonNull(avatar.querySelector('img'));
+    fireEvent.error(img);
     // eslint-disable-next-line testing-library/no-node-access
     expect(avatar.querySelector('img')).toBeNull();
 
