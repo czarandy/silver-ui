@@ -21,8 +21,9 @@
 #   scripts/release.sh --dry-run       # run every check + build but do NOT bump/tag/push/release
 #   scripts/release.sh patch --preid=rc # use a different pre-release identifier
 #
-# Release notes (default: auto-generated changelog from merged PRs/commits):
-#   scripts/release.sh patch --edit                    # edit the auto-generated changelog in $EDITOR first
+# Release notes (default: changelog auto-generated from commit titles since the
+# previous release tag; shown to you with the option to edit before submitting):
+#   scripts/release.sh patch --edit                    # always open the changelog in $EDITOR
 #   scripts/release.sh patch --notes="Fixes the X bug" # use this exact text as the notes
 #   scripts/release.sh patch --notes-file=NOTES.md     # use a file as the notes
 #
@@ -47,8 +48,10 @@ DRY_RUN=0
 PREID="beta"
 NOTES_TEXT=""    # --notes "..."        : use this exact text as the release body
 NOTES_FILE=""    # --notes-file PATH    : use a file as the release body
-EDIT_NOTES=0     # --edit               : open $EDITOR on the auto-generated changelog first
-NOTES_TMP=""     # temp file for --edit (cleaned up on exit)
+EDIT_NOTES=0     # --edit               : always open $EDITOR on the changelog first
+NOTES_TMP=""     # temp file for the changelog (cleaned up on exit)
+DEFAULT_NOTES="" # changelog auto-generated from commit titles since prev release
+PREV_TAG=""      # previous release tag the changelog is computed against
 
 for arg in "$@"; do
   case "$arg" in
@@ -205,6 +208,19 @@ warn "This will: bump the version, create a git commit + tag, push to origin, an
 warn "create a GitHub Release. The release triggers CI to publish to npm."
 confirm "Cut the release?" || die "Aborted before releasing."
 
+# Build the default changelog from commit titles since the previous release tag.
+# Done BEFORE the version bump so the bump commit itself isn't listed.
+if [ -z "$NOTES_FILE" ] && [ -z "$NOTES_TEXT" ]; then
+  PREV_TAG="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
+  if [ -n "$PREV_TAG" ]; then
+    NOTES_RANGE="${PREV_TAG}..HEAD"
+  else
+    NOTES_RANGE="HEAD"   # no prior tag: list the whole history
+  fi
+  DEFAULT_NOTES="$(git log --no-merges --reverse --pretty=format:'- %s' "$NOTES_RANGE")"
+  [ -z "$DEFAULT_NOTES" ] && DEFAULT_NOTES="- (no changes since ${PREV_TAG:-the previous release})"
+fi
+
 # 1. Version bump — updates package.json, commits, and creates a tag (vX.Y.Z).
 if [ "$IS_PRERELEASE" -eq 1 ]; then
   NEW_TAG="$(npm version "$RELEASE_TYPE" --preid="$PREID")"
@@ -228,28 +244,28 @@ ok "Pushed commit and tag to origin"
 GH_FLAGS=(--title "$NEW_TAG")
 [ "$IS_PRERELEASE" -eq 1 ] && GH_FLAGS+=(--prerelease)
 
-# In an interactive run with no notes source chosen, offer to edit them.
-if [ "$ASSUME_YES" -eq 0 ] && [ "$EDIT_NOTES" -eq 0 ] \
-   && [ -z "$NOTES_FILE" ] && [ -z "$NOTES_TEXT" ]; then
-  confirm "Edit the auto-generated release notes before submitting?" && EDIT_NOTES=1
-fi
-
-# Release notes, in priority order: explicit file > inline text > edit the
-# auto-generated changelog > plain auto-generated changelog.
+# Release notes, in priority order: explicit file > inline text > the changelog
+# auto-generated from commit titles (shown here, with the option to edit).
 if [ -n "$NOTES_FILE" ]; then
   GH_FLAGS+=(--notes-file "$NOTES_FILE")
 elif [ -n "$NOTES_TEXT" ]; then
   GH_FLAGS+=(--notes "$NOTES_TEXT")
-elif [ "$EDIT_NOTES" -eq 1 ]; then
-  NOTES_TMP="$(mktemp)"
-  info "Pre-filling the auto-generated changelog for editing"
-  # The tag is already pushed, so GitHub can diff it against the previous tag.
-  gh api --method POST "repos/{owner}/{repo}/releases/generate-notes" \
-    -f tag_name="$NEW_TAG" --jq '.body' >"$NOTES_TMP" 2>/dev/null || true
-  "${EDITOR:-${VISUAL:-vi}}" "$NOTES_TMP"
-  GH_FLAGS+=(--notes-file "$NOTES_TMP")
 else
-  GH_FLAGS+=(--generate-notes)
+  NOTES_TMP="$(mktemp)"
+  printf '%s\n' "$DEFAULT_NOTES" >"$NOTES_TMP"
+
+  echo
+  bold "Release notes for $NEW_TAG  (commits since ${PREV_TAG:-the beginning})"
+  printf '%s\n' "$DEFAULT_NOTES"
+  echo
+
+  # Open the editor if --edit was passed, or (interactively) if the user asks to
+  # after seeing the notes. Under --yes we never prompt, so accept them as-is.
+  if [ "$EDIT_NOTES" -eq 1 ] \
+     || { [ "$ASSUME_YES" -eq 0 ] && confirm "Edit these release notes before submitting?"; }; then
+    "${EDITOR:-${VISUAL:-vi}}" "$NOTES_TMP"
+  fi
+  GH_FLAGS+=(--notes-file "$NOTES_TMP")
 fi
 
 info "Creating GitHub Release $NEW_TAG"

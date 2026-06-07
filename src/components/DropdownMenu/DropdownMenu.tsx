@@ -159,18 +159,22 @@ export function DropdownMenu({
     [items, children],
   );
 
+  const menuContent = (
+    // eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- keyboard handler captures events for the parent role="menu" element
+    <div
+      className={cx(styles.menu, className)}
+      onKeyDown={handleMenuKeyDown}
+      ref={menuRef}
+      tabIndex={-1}>
+      {menuNode}
+    </div>
+  );
+
   return (
     <Popover
       content={
         <DropdownMenuContext value={contextValue}>
-          {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- keyboard handler captures events for the parent role="menu" element */}
-          <div
-            className={cx(styles.menu, className)}
-            onKeyDown={handleMenuKeyDown}
-            ref={menuRef}
-            tabIndex={-1}>
-            {menuNode}
-          </div>
+          {menuContent}
         </DropdownMenuContext>
       }
       hasAutoFocus={hasAutoFocus}
