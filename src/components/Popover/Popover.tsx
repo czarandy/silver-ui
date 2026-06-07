@@ -59,10 +59,16 @@ export interface PopoverProps {
    */
   hasCloseButton?: boolean;
   /**
-   * Whether clicking outside closes the popover.
+   * Id applied to the popover content element. Falls back to a generated id.
+   * Supply this when another element needs a stable `aria-controls` reference
+   * to the popover.
+   */
+  id?: string;
+  /**
+   * Whether clicking outside or pressing Escape closes the popover.
    * @default true
    */
-  hasLightDismiss?: boolean;
+  isDismissable?: boolean;
   /**
    * Whether trigger interactions open the popover.
    * @default true
@@ -147,7 +153,7 @@ export function Popover({
   width,
   label,
   hasCloseButton,
-  hasLightDismiss,
+  isDismissable,
   closeButtonLabel,
   padding,
   ref,
@@ -155,6 +161,7 @@ export function Popover({
   className,
   style,
   role,
+  id,
   'data-testid': dataTestId,
 }: PopoverProps): React.JSX.Element {
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -165,8 +172,9 @@ export function Popover({
     closeButtonLabel,
     hasAutoFocus,
     hasCloseButton,
-    hasLightDismiss,
+    isDismissable,
     label,
+    layerId: id,
     onHide: () => {
       lastHideTimeRef.current = nowMonotonicMilliseconds();
       onOpenChange?.(false);

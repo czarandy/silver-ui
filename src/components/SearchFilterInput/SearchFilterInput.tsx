@@ -616,7 +616,7 @@ export function SearchFilterInput({
         content={editorContent}
         hasAutoFocus={false}
         hasCloseButton={false}
-        hasLightDismiss={false}
+        isDismissable={false}
         isOpen={popoverState.type !== 'idle'}
         onOpenChange={isOpen => {
           if (!isOpen) {

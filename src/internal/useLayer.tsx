@@ -14,16 +14,48 @@ export type LayerPlacement = 'above' | 'below' | 'start' | 'end';
 export type LayerAlignment = 'start' | 'center' | 'end';
 
 export interface ContextRenderProps {
+  /**
+   * How the layer aligns along the edge it is placed against. Defaults to
+   * `'center'`.
+   */
   alignment?: LayerAlignment;
+  /**
+   * Additional class name merged onto the layer element.
+   */
   className?: string;
+  /**
+   * Which side of the anchor the layer is placed on. Defaults to `'above'`.
+   */
   placement?: LayerPlacement;
+  /**
+   * ARIA role applied to the layer element.
+   */
   role?: string;
+  /**
+   * Additional inline styles merged onto the layer element.
+   */
   style?: React.CSSProperties;
 }
 
 interface LayerOptions {
-  hasLightDismiss?: boolean;
+  /**
+   * Id applied to the layer element. Falls back to a generated id. Supply this
+   * when another element needs a stable `aria-controls` reference to the layer.
+   */
+  id?: string;
+  /**
+   * When `true`, the layer can be dismissed by clicking outside or pressing
+   * Escape (the native `auto` popover behavior). When `false`, it uses `manual`
+   * mode and must be hidden programmatically. Defaults to `false`.
+   */
+  isDismissable?: boolean;
+  /**
+   * Called after the layer is hidden, including via light dismiss.
+   */
   onHide?: () => void;
+  /**
+   * Called after the layer is shown.
+   */
   onShow?: () => void;
 }
 
@@ -35,12 +67,33 @@ type LayerElementProps = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 export interface LayerReturn {
+  /**
+   * CSS anchor name tying the layer to the trigger for positioning.
+   */
   anchorId: string;
+  /**
+   * Hides the layer.
+   */
   hide: () => void;
+  /**
+   * Id of the layer element, matching the value to use for `aria-controls`.
+   */
   id: string;
+  /**
+   * Whether the layer is currently open.
+   */
   isOpen: boolean;
+  /**
+   * Ref callback to attach to the trigger element for anchor positioning.
+   */
   ref: RefCallback<HTMLElement>;
+  /**
+   * Renders the given children inside the layer element.
+   */
   render: (children: ReactNode, props?: ContextRenderProps) => ReactNode;
+  /**
+   * Shows the layer.
+   */
   show: () => void;
 }
 
@@ -91,9 +144,11 @@ function getPositionArea(
 export function useLayer({
   onShow,
   onHide,
-  hasLightDismiss = false,
+  isDismissable = false,
+  id: providedId,
 }: LayerOptions = {}): LayerReturn {
-  const id = useId();
+  const generatedId = useId();
+  const id = providedId ?? generatedId;
   const anchorId = `--silver-layer-${id.replace(/:/g, '')}`;
   const [isOpen, setIsOpen] = useState(false);
   const popoverRef = useRef<HTMLElement | null>(null);
@@ -182,14 +237,14 @@ export function useLayer({
         ref: popoverRefCallback,
         id,
         role: props?.role,
-        popover: hasLightDismiss ? 'auto' : 'manual',
+        popover: isDismissable ? 'auto' : 'manual',
         className: cx(styles.layer, props?.className),
         style: {...anchorStyle, ...props?.style},
       };
 
       return createElement('div', layerProps, children);
     },
-    [anchorId, hasLightDismiss, id, popoverRefCallback],
+    [anchorId, isDismissable, id, popoverRefCallback],
   );
 
   return {

@@ -513,7 +513,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         content={menu}
         hasAutoFocus={false}
         hasCloseButton={false}
-        hasLightDismiss={false}
+        isDismissable={false}
         isOpen={isOpen}
         onOpenChange={setOpen}
       />

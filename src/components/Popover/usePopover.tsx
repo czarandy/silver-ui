@@ -15,31 +15,101 @@ import {Button} from '../Button';
 export type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
 
 export interface UsePopoverOptions {
+  /**
+   * Accessible label for the close button rendered when `hasCloseButton` is
+   * `true`. Defaults to `'Close popover'`.
+   */
   closeButtonLabel?: string;
+  /**
+   * When `true`, focus moves to the first focusable element inside the popover
+   * when it opens. Defaults to `true`.
+   */
   hasAutoFocus?: boolean;
+  /**
+   * When `true`, renders a visually hidden close button inside the popover so
+   * assistive technology users can dismiss it. Defaults to `true`.
+   */
   hasCloseButton?: boolean;
-  hasLightDismiss?: boolean;
+  /**
+   * When `true`, wraps the content in a styled surface (background, border,
+   * shadow). Set to `false` to render unstyled content. Defaults to `true`.
+   */
   hasSurface?: boolean;
+  /**
+   * When `true`, the popover can be dismissed by clicking outside or pressing
+   * Escape. Defaults to `true`.
+   */
+  isDismissable?: boolean;
+  /**
+   * Accessible label applied to the popover content via `aria-label`.
+   */
   label?: string;
+  /**
+   * Id applied to the underlying layer element. Falls back to a generated id.
+   * Supply this when another element needs a stable `aria-controls` reference
+   * to the popover.
+   */
+  layerId?: string;
+  /**
+   * Called after the popover is hidden, including via light dismiss.
+   */
   onHide?: () => void;
+  /**
+   * Called after the popover is shown.
+   */
   onShow?: () => void;
+  /**
+   * ARIA role for the popover content. Defaults to `'dialog'`; use `'menu'` for
+   * menu-style popovers.
+   */
   role?: 'dialog' | 'menu';
 }
 
 export interface UsePopoverReturn {
+  /**
+   * CSS anchor name tying the popover content to the trigger for positioning.
+   */
   anchorId: string;
+  /**
+   * Ref attached to the popover content element.
+   */
   contentRef: React.RefObject<HTMLDivElement | null>;
+  /**
+   * Hides the popover.
+   */
   hide: () => void;
+  /**
+   * Id of the underlying layer element, matching `triggerProps['aria-controls']`.
+   */
   id: string;
+  /**
+   * Whether the popover is currently open.
+   */
   isOpen: boolean;
+  /**
+   * Renders the given children inside the popover layer.
+   */
   render: (children: ReactNode, props?: ContextRenderProps) => ReactNode;
+  /**
+   * Shows the popover. Pass `isAutoFocusSkipped` to suppress moving focus into
+   * the content for this open.
+   */
   show: (options?: {isAutoFocusSkipped?: boolean}) => void;
+  /**
+   * Toggles the popover between open and closed.
+   */
   toggle: () => void;
+  /**
+   * ARIA props to spread onto the trigger element.
+   */
   triggerProps: {
     'aria-controls': string;
     'aria-expanded': boolean;
     'aria-haspopup': 'dialog' | 'menu';
   };
+  /**
+   * Ref callback to attach to the trigger element for anchor positioning.
+   */
   triggerRef: RefCallback<HTMLElement>;
 }
 
@@ -65,16 +135,17 @@ const styles = {
 export function usePopover({
   onShow,
   onHide,
-  hasLightDismiss = true,
+  isDismissable = true,
   hasAutoFocus = true,
   hasSurface = true,
   hasCloseButton = true,
   closeButtonLabel = 'Close popover',
   label,
   role = 'dialog',
+  layerId,
 }: UsePopoverOptions = {}): UsePopoverReturn {
   const skipAutoFocusRef = useRef(false);
-  const layer = useLayer({hasLightDismiss, onShow, onHide});
+  const layer = useLayer({isDismissable, id: layerId, onShow, onHide});
   const {containerRef: contentRef, focusFirst} = useFocusTrap<HTMLDivElement>({
     isActive: layer.isOpen,
     onEscape: layer.hide,

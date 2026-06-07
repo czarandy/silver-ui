@@ -113,7 +113,9 @@ export type DateInputProps = {
    */
   onChange: (value: PlainDate | undefined) => void;
   /**
-   * Placeholder text shown when no date is selected.
+   * Placeholder text shown when no date is selected. Typed dates accept a
+   * range of formats, including "May 21, 2026", "5/21/2026", and "2026-05-21".
+   * @default 'e.g. May 21, 2026'
    */
   placeholder?: string;
   /**
@@ -174,7 +176,7 @@ export function DateInput({
   min,
   max,
   getIsDateDisabled,
-  placeholder = 'Select a date',
+  placeholder = 'e.g. May 21, 2026',
   size = 'md',
   description,
   isLabelHidden = false,
@@ -194,6 +196,7 @@ export function DateInput({
 }: DateInputProps): React.JSX.Element {
   const generatedId = useId();
   const inputId = htmlId ?? generatedId;
+  const popoverId = `${inputId}-calendar`;
   const descriptionID = isReactNode(description)
     ? `${inputId}-description`
     : undefined;
@@ -309,6 +312,7 @@ export function DateInput({
           content={
             <Calendar
               getIsDateDisabled={getIsDateDisabled}
+              hasAutoFocus={isOpen}
               max={max}
               min={min}
               onChange={handleCalendarChange}
@@ -317,7 +321,8 @@ export function DateInput({
               viewDate={value}
             />
           }
-          hasAutoFocus
+          hasAutoFocus={false}
+          id={popoverId}
           isEnabled={!isDisabled}
           isOpen={isOpen}
           label={`Choose ${label}`}
@@ -334,7 +339,10 @@ export function DateInput({
         </Popover>
         <input
           aria-busy={isLoading || undefined}
+          aria-controls={popoverId}
           aria-describedby={describedBy}
+          aria-expanded={isOpen}
+          aria-haspopup="dialog"
           aria-invalid={status?.type === 'error' || undefined}
           aria-required={isRequired ?? undefined}
           autoComplete="off"
@@ -347,6 +355,7 @@ export function DateInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           ref={mergeRefs(ref, inputRef)}
+          role="combobox"
           type="text"
           value={displayValue}
         />

@@ -6,6 +6,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type Ref,
@@ -52,6 +53,14 @@ interface CalendarBaseProps {
    */
   getIsDateDisabled?: (date: PlainDate) => boolean;
   /**
+   * Whether to move focus into the day grid — onto the selected date, otherwise
+   * today, otherwise the first enabled day. Focus is (re)applied whenever this
+   * transitions to `true`, so driving it from an open state focuses the grid
+   * each time the calendar opens.
+   * @default false
+   */
+  hasAutoFocus?: boolean;
+  /**
    * Whether to show outside-month days.
    * @default true
    */
@@ -80,7 +89,9 @@ interface CalendarBaseProps {
    */
   numberOfMonths?: 1 | 2;
   /**
-   * Called when the visible month changes.
+   * Called when the visible month changes. Passing this alongside `viewDate`
+   * puts the visible month in controlled mode: the calendar stops tracking the
+   * month itself and renders whatever `viewDate` you feed back here.
    */
   onViewDateChange?: (viewDate: PlainDate) => void;
   /**
@@ -97,7 +108,10 @@ interface CalendarBaseProps {
    */
   timezoneID?: string;
   /**
-   * Controlled visible month.
+   * The visible month. On its own this is just the initial month to display;
+   * the calendar then tracks the month internally. Pass `onViewDateChange` as
+   * well to make the visible month controlled, where `viewDate` is the source
+   * of truth on every render.
    */
   viewDate?: PlainDate;
   /**
@@ -258,6 +272,7 @@ export function Calendar({
   'data-testid': dataTestId,
   defaultValue,
   getIsDateDisabled: getIsDateDisabledProp,
+  hasAutoFocus = false,
   hasOutsideDays = true,
   hasVariableRowCount = false,
   hasWeekNumbers = false,
@@ -286,6 +301,7 @@ export function Calendar({
     useState<PlainDate | null>(null);
   const [hoveredDate, setHoveredDate] = useState<PlainDate | null>(null);
   const [pendingFocus, setPendingFocus] = useState<PlainDate | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const effectiveValue = value ?? internalValue;
   const isViewDateControlled =
     viewDateFromProps != null && onViewDateChange != null;
@@ -356,6 +372,20 @@ export function Calendar({
     [isViewDateControlled, onViewDateChange],
   );
 
+  // When focus is requested, move it to the grid cell that holds the roving
+  // tabindex — the selected date if visible and enabled, otherwise today,
+  // otherwise the first enabled day — per the WAI-ARIA date picker pattern.
+  // Driving `hasAutoFocus` from an open state re-focuses each time it opens.
+  useEffect(() => {
+    if (!hasAutoFocus) {
+      return;
+    }
+
+    rootRef.current
+      ?.querySelector<HTMLButtonElement>('[data-date][tabindex="0"]')
+      ?.focus();
+  }, [hasAutoFocus]);
+
   const handleDayClick = useCallback(
     (date: PlainDate) => {
       if (mode === 'single') {
@@ -412,6 +442,7 @@ export function Calendar({
           event.stopPropagation();
         }
       }}
+      ref={rootRef}
       style={style}>
       <div className={styles.header}>
         <Button
@@ -575,6 +606,12 @@ const MonthGrid = memo(function MonthGrid({
     },
   });
 
+  // Keyboard navigation that crosses a month boundary sets `pendingFocus` and
+  // changes the visible month in the same update. We can't focus the target day
+  // imperatively at that point because its cell doesn't exist yet — it only
+  // renders after the new month commits (and with a controlled `viewDate`, that
+  // render is driven by the parent, so its timing isn't ours to know). Deferring
+  // to this effect runs the focus once the new month's cells are in the DOM.
   useEffect(() => {
     if (pendingFocus == null || gridRef.current == null) {
       return;

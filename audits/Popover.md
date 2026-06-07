@@ -23,7 +23,7 @@ Popover is a click-triggered floating dialog anchored to a trigger element. It s
 
 ### Low
 
-- **No test for `hasLightDismiss` behavior**: The `hasLightDismiss` prop is not tested. Tests use mocked `showPopover`/`hidePopover` which don't simulate actual light dismiss.
+- **No test for `isDismissable` behavior**: The `isDismissable` prop is not tested. Tests use mocked `showPopover`/`hidePopover` which don't simulate actual light dismiss.
 - **No test for `hasAutoFocus` behavior**: Auto-focus is not tested due to the `requestAnimationFrame` challenge.
 - **No test for keyboard-accessible close button**: The hidden close button (`hasCloseButton`) is not tested.
 - **No test for `role="menu"` variant**: The `role` prop accepts `'menu'` but this is not tested.
@@ -36,7 +36,7 @@ Popover is a click-triggered floating dialog anchored to a trigger element. It s
 ## Recommendations
 
 - Replace the time-based 50ms debounce with a flag-based approach for toggle prevention.
-- Add tests for `hasLightDismiss`, `hasAutoFocus`, close button keyboard access, `role="menu"`, and `padding`.
+- Add tests for `isDismissable`, `hasAutoFocus`, close button keyboard access, `role="menu"`, and `padding`.
 - Consider using React-managed ARIA attributes for inline children instead of imperative DOM manipulation, falling back to imperative only for external anchor refs.
 - The test coverage (7 tests) is adequate for core behavior but has gaps around accessibility features. Stories are comprehensive for visual props (8 stories covering placements, alignments, controlled mode, disabled, no close button, match width, and custom width).
 
