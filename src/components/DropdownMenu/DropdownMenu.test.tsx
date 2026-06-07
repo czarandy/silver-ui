@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Edit, Trash2} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
@@ -106,6 +106,119 @@ describe('DropdownMenu', () => {
     expect(onArchive).toHaveBeenCalled();
   });
 
+  it('skips aria-disabled items during keyboard navigation', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DropdownMenu button={{label: 'Actions'}}>
+        <button role="menuitem" type="button">
+          First
+        </button>
+        <button aria-disabled="true" role="menuitem" type="button">
+          Second
+        </button>
+        <button role="menuitem" type="button">
+          Third
+        </button>
+      </DropdownMenu>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+
+    const first = screen.getByRole('menuitem', {hidden: true, name: 'First'});
+    first.focus();
+
+    fireEvent.keyDown(first, {key: 'ArrowDown'});
+
+    expect(
+      screen.getByRole('menuitem', {hidden: true, name: 'Third'}),
+    ).toHaveFocus();
+  });
+
+  describe('keyboard navigation', () => {
+    async function openMenu(onSelect?: (label: string) => void) {
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu
+          button={{label: 'Actions'}}
+          items={[
+            {label: 'Apple', onClick: () => onSelect?.('Apple')},
+            {label: 'Banana', onClick: () => onSelect?.('Banana')},
+            {label: 'Cherry', onClick: () => onSelect?.('Cherry')},
+          ]}
+        />,
+      );
+      await user.click(screen.getByRole('button', {name: 'Actions'}));
+      return (name: string) =>
+        screen.getByRole('menuitem', {hidden: true, name});
+    }
+
+    it('moves focus to the next item on ArrowDown and wraps around', async () => {
+      const item = await openMenu();
+
+      item('Apple').focus();
+      fireEvent.keyDown(item('Apple'), {key: 'ArrowDown'});
+      expect(item('Banana')).toHaveFocus();
+
+      fireEvent.keyDown(item('Banana'), {key: 'ArrowDown'});
+      expect(item('Cherry')).toHaveFocus();
+
+      fireEvent.keyDown(item('Cherry'), {key: 'ArrowDown'});
+      expect(item('Apple')).toHaveFocus();
+    });
+
+    it('moves focus to the previous item on ArrowUp and wraps around', async () => {
+      const item = await openMenu();
+
+      item('Apple').focus();
+      fireEvent.keyDown(item('Apple'), {key: 'ArrowUp'});
+      expect(item('Cherry')).toHaveFocus();
+
+      fireEvent.keyDown(item('Cherry'), {key: 'ArrowUp'});
+      expect(item('Banana')).toHaveFocus();
+    });
+
+    it('focuses the first item on Home and the last item on End', async () => {
+      const item = await openMenu();
+
+      item('Banana').focus();
+      fireEvent.keyDown(item('Banana'), {key: 'End'});
+      expect(item('Cherry')).toHaveFocus();
+
+      fireEvent.keyDown(item('Cherry'), {key: 'Home'});
+      expect(item('Apple')).toHaveFocus();
+    });
+
+    it('activates the focused item on Enter', async () => {
+      const onSelect = vi.fn();
+      const item = await openMenu(onSelect);
+
+      item('Banana').focus();
+      fireEvent.keyDown(item('Banana'), {key: 'Enter'});
+
+      expect(onSelect).toHaveBeenCalledWith('Banana');
+    });
+
+    it('activates the focused item on Space', async () => {
+      const onSelect = vi.fn();
+      const item = await openMenu(onSelect);
+
+      item('Cherry').focus();
+      fireEvent.keyDown(item('Cherry'), {key: ' '});
+
+      expect(onSelect).toHaveBeenCalledWith('Cherry');
+    });
+
+    it('focuses a matching item via type-ahead search', async () => {
+      const item = await openMenu();
+
+      item('Apple').focus();
+      fireEvent.keyDown(item('Apple'), {key: 'c'});
+
+      expect(item('Cherry')).toHaveFocus();
+    });
+  });
+
   it('closes menu after clicking an item', async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
@@ -189,5 +302,33 @@ describe('DropdownMenu', () => {
     expect(screen.getByTestId('btn-end')).toBeInTheDocument();
     // eslint-disable-next-line testing-library/no-node-access -- verifying chevron SVG is also present
     expect(button.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('throws when both items and children are provided', () => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    expect(() =>
+      render(
+        <DropdownMenu items={[{label: 'Edit'}]}>
+          <DropdownMenuItem label="Delete" />
+        </DropdownMenu>,
+      ),
+    ).toThrow('DropdownMenu: pass either `items` or `children`, not both.');
+
+    consoleError.mockRestore();
+  });
+
+  it('throws when neither items nor children is provided', () => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    expect(() => render(<DropdownMenu />)).toThrow(
+      'DropdownMenu: provide either `items` or `children`.',
+    );
+
+    consoleError.mockRestore();
   });
 });

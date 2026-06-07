@@ -6,8 +6,9 @@ import {
   type Ref,
   type RefObject,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
+import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {nowMonotonicMilliseconds} from '../../internal/time';

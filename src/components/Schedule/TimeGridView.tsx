@@ -2,7 +2,8 @@
 
 import {Temporal} from '@js-temporal/polyfill';
 import type {CSSProperties} from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,

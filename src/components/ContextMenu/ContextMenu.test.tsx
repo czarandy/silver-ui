@@ -207,6 +207,27 @@ describe('ContextMenu', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  it('calls onOpenChange(false) when closing via outside click', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <>
+        <ContextMenu items={[{label: 'Copy'}]} onOpenChange={onOpenChange}>
+          <div>Right-click me</div>
+        </ContextMenu>
+        <div>Outside</div>
+      </>,
+    );
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+    expect(onOpenChange).toHaveBeenLastCalledWith(true);
+
+    fireEvent.mouseDown(screen.getByText('Outside'));
+
+    expect(onOpenChange).toHaveBeenLastCalledWith(false);
+    expect(hidePopover).toHaveBeenCalledTimes(1);
+  });
+
   it('activates a menu item with Enter key', () => {
     const handleClick = vi.fn();
 
@@ -223,6 +244,66 @@ describe('ContextMenu', () => {
     fireEvent.keyDown(screen.getByRole('menu', {hidden: true}), {key: 'Enter'});
 
     expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('auto-focuses the first menu item on open by default', () => {
+    render(
+      <ContextMenu items={[{label: 'Copy'}, {label: 'Paste'}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    const originalRAF = window.requestAnimationFrame;
+    const pendingCallbacks: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = (cb: FrameRequestCallback) => {
+      pendingCallbacks.push(cb);
+      return pendingCallbacks.length;
+    };
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+
+    window.requestAnimationFrame = originalRAF;
+
+    act(() => {
+      for (const cb of pendingCallbacks) {
+        cb(0);
+      }
+    });
+
+    expect(
+      screen.getByRole('menuitem', {hidden: true, name: 'Copy'}),
+    ).toHaveFocus();
+  });
+
+  it('does not auto-focus the first menu item when hasAutoFocus is false', () => {
+    render(
+      <ContextMenu
+        hasAutoFocus={false}
+        items={[{label: 'Copy'}, {label: 'Paste'}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    const originalRAF = window.requestAnimationFrame;
+    const pendingCallbacks: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = (cb: FrameRequestCallback) => {
+      pendingCallbacks.push(cb);
+      return pendingCallbacks.length;
+    };
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+
+    window.requestAnimationFrame = originalRAF;
+
+    act(() => {
+      for (const cb of pendingCallbacks) {
+        cb(0);
+      }
+    });
+
+    expect(
+      screen.getByRole('menuitem', {hidden: true, name: 'Copy'}),
+    ).not.toHaveFocus();
   });
 
   it('clamps menu position to stay within the viewport', () => {
@@ -277,6 +358,42 @@ describe('ContextMenu', () => {
     expect(menu).toHaveStyle({
       left: `${800 - 160 - 4}px`,
       top: `${600 - 200 - 4}px`,
+    });
+  });
+
+  it('applies the default menu width', () => {
+    render(
+      <ContextMenu items={[{label: 'Copy'}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    expect(screen.getByRole('menu', {hidden: true})).toHaveStyle({
+      width: '160px',
+    });
+  });
+
+  it('applies a numeric menuWidth as pixels', () => {
+    render(
+      <ContextMenu items={[{label: 'Copy'}]} menuWidth={240}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    expect(screen.getByRole('menu', {hidden: true})).toHaveStyle({
+      width: '240px',
+    });
+  });
+
+  it('applies a string menuWidth verbatim', () => {
+    render(
+      <ContextMenu items={[{label: 'Copy'}]} menuWidth="20rem">
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    expect(screen.getByRole('menu', {hidden: true})).toHaveStyle({
+      width: '20rem',
     });
   });
 });

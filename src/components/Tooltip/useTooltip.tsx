@@ -6,7 +6,8 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import {
   useHoverLayer,
   type HoverLayerFocusTrigger,

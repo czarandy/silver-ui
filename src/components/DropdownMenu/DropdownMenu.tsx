@@ -8,7 +8,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Button, type ButtonProps, type ButtonSize} from '../Button';
 import {Icon} from '../Icon';
@@ -129,6 +130,9 @@ export function DropdownMenu({
       throw new Error(
         'DropdownMenu: pass either `items` or `children`, not both.',
       );
+    }
+    if (items == null && !isReactNode(children)) {
+      throw new Error('DropdownMenu: provide either `items` or `children`.');
     }
   }
 

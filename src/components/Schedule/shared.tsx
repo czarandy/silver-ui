@@ -1,6 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {ReactNode} from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import {
   DATE_FORMAT_MONTH_YEAR,
   DATE_FORMAT_WITH_WEEKDAY,

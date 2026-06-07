@@ -7,7 +7,8 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
+import {cx} from './cx';
 
 export type LayerPlacement = 'above' | 'below' | 'start' | 'end';
 export type LayerAlignment = 'start' | 'center' | 'end';

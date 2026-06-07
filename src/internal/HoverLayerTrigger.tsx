@@ -5,7 +5,8 @@ import {
   type Ref,
   type RefCallback,
 } from 'react';
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
+import {cx} from './cx';
 import {mergeRefs} from './mergeRefs';
 import {useIsomorphicLayoutEffect} from './useIsomorphicLayoutEffect';
 

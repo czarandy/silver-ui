@@ -1,9 +1,9 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css, cva} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {Item} from '../Item';
 import {useDropdownMenuContext} from './DropdownMenuContext';
+import {dropdownMenuItemRecipe} from './DropdownMenuItem.recipe';
 
 export interface DropdownMenuItemProps {
   /**
@@ -49,56 +49,6 @@ export interface DropdownMenuItemProps {
   style?: CSSProperties;
 }
 
-const menuItemRecipe = cva({
-  base: {
-    display: 'block',
-    w: 'full',
-    borderRadius: 'md',
-    color: 'fg',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    textAlign: 'start',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffsetTight',
-    },
-    _disabled: {
-      opacity: 0.5,
-      cursor: 'not-allowed',
-    },
-  },
-  variants: {
-    size: {
-      sm: {
-        minH: 'component.sm',
-        '& > *': {py: '0.5', px: '1.5', gap: '1.5'},
-      },
-      md: {
-        minH: 'component.md',
-        '& > *': {py: '1.5', px: '2'},
-      },
-      lg: {
-        minH: 'component.lg',
-        '& > *': {py: '2.5', px: '2.5', gap: '2.5'},
-      },
-    },
-  },
-  defaultVariants: {
-    size: 'md',
-  },
-});
-
-const styles = {
-  icon: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-    color: 'fg.muted',
-  }),
-} as const;
-
 /**
  * Action item inside a `DropdownMenu`.
  */
@@ -116,10 +66,11 @@ export function DropdownMenuItem({
 }: DropdownMenuItemProps): React.JSX.Element {
   const context = useDropdownMenuContext();
   const menuSize = context?.menuSize ?? 'md';
+  const classes = dropdownMenuItemRecipe({size: menuSize});
 
   return (
     <button
-      className={cx(menuItemRecipe({size: menuSize}), className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       disabled={isDisabled}
       onClick={() => {
@@ -137,7 +88,7 @@ export function DropdownMenuItem({
         label={label}
         startContent={
           icon != null ? (
-            <span className={styles.icon}>
+            <span className={classes.icon}>
               <Icon color="secondary" icon={icon} size="sm" />
             </span>
           ) : null

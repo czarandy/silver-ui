@@ -94,7 +94,7 @@ export function useMenuKeyboard(
     }
     return Array.from(
       menuRef.current.querySelectorAll<HTMLElement>(
-        '[role="menuitem"]:not(:disabled)',
+        '[role="menuitem"]:not(:disabled):not([aria-disabled="true"])',
       ),
     );
   }, [menuRef]);

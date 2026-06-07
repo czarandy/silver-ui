@@ -1,6 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
-import {css, cx} from 'styled-system/css';
+import {css} from 'styled-system/css';
+import {cx} from '../../internal/cx';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
