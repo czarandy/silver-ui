@@ -10,7 +10,7 @@ import {
 import {getBrowserTimezoneID} from '../../internal/time';
 import {
   AutocompleteInput,
-  createStaticSource,
+  createStaticSearchSource,
   type SearchableItem,
   type SearchSource,
 } from '../AutocompleteInput';
@@ -418,7 +418,7 @@ function EnumListEditor({
     () => enumItemsToSearchableItems(operatorValue.values),
     [operatorValue.values],
   );
-  const source = useMemo(() => createStaticSource(items), [items]);
+  const source = useMemo(() => createStaticSearchSource(items), [items]);
   const currentValue = useMemo<SearchableItem[]>(() => {
     if (filterValue?.type !== 'enum_list') {
       return [];

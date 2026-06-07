@@ -555,11 +555,11 @@ export {
 } from './components/Tag';
 export {
   BaseAutocompleteInput,
-  createStaticSource,
+  createStaticSearchSource,
   AutocompleteInput,
   AutocompleteInputItem,
   type BaseAutocompleteInputProps,
-  type CreateStaticSourceOptions,
+  type CreateStaticSearchSourceOptions,
   type CustomSearchableItem,
   type SearchableItem,
   type SearchSource,

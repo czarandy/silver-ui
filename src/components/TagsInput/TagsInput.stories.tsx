@@ -2,7 +2,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Users} from 'lucide-react';
 import {useMemo, useState} from 'react';
 import {
-  createStaticSource,
+  createStaticSearchSource,
   type SearchableItem,
   type SearchSource,
 } from '../AutocompleteInput';
@@ -47,7 +47,7 @@ function TagsInputStory(
   args: React.ComponentProps<typeof TagsInput>,
 ): React.JSX.Element {
   const [value, setValue] = useState<SearchableItem[]>([people[0]]);
-  const source = useMemo(() => createStaticSource(people), []);
+  const source = useMemo(() => createStaticSearchSource(people), []);
   return (
     <TagsInput
       {...args}
@@ -68,7 +68,7 @@ function EmptyTagsInputStory(
   args: React.ComponentProps<typeof TagsInput>,
 ): React.JSX.Element {
   const [value, setValue] = useState<SearchableItem[]>([]);
-  const source = useMemo(() => createStaticSource(people), []);
+  const source = useMemo(() => createStaticSearchSource(people), []);
   return (
     <TagsInput
       {...args}
@@ -175,7 +175,7 @@ function OverflowInlineStory(
   args: React.ComponentProps<typeof TagsInput>,
 ): React.JSX.Element {
   const [val, setVal] = useState<SearchableItem[]>(people.slice(0, 4));
-  const source = useMemo(() => createStaticSource(people), []);
+  const source = useMemo(() => createStaticSearchSource(people), []);
   return (
     <div style={{maxWidth: 400}}>
       <TagsInput
@@ -209,7 +209,7 @@ function OverflowBehaviorsStory(
   const [popoverValue, setPopoverValue] = useState<SearchableItem[]>(
     people.slice(0, 5),
   );
-  const source = useMemo(() => createStaticSource(people), []);
+  const source = useMemo(() => createStaticSearchSource(people), []);
 
   return (
     <div

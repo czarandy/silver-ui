@@ -127,7 +127,9 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    */
   renderItem?: (item: T) => ReactNode;
   /**
-   * Search source.
+   * Provides results for the menu. Use `createStaticSearchSource` for
+   * in-memory data, or implement {@link SearchSource} for async/remote
+   * search.
    */
   searchSource: SearchSource<T>;
   /**

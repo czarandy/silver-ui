@@ -175,7 +175,9 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    */
   renderTag?: (item: T, onRemove: () => void) => ReactNode;
   /**
-   * Search source.
+   * Provides results for the menu. Use `createStaticSearchSource` for
+   * in-memory data, or implement {@link SearchSource} for async/remote
+   * search.
    */
   searchSource: SearchSource<T>;
   /**

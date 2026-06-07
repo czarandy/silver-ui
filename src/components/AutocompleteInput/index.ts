@@ -11,8 +11,8 @@ export {
   type AutocompleteInputItemProps,
 } from './AutocompleteInputItem';
 export {
-  createStaticSource,
-  type CreateStaticSourceOptions,
+  createStaticSearchSource,
+  type CreateStaticSearchSourceOptions,
   type CustomSearchableItem,
   type SearchableItem,
   type SearchSource,

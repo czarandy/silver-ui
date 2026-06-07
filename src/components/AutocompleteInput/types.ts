@@ -74,18 +74,18 @@ export interface SearchSource<T extends SearchableItem = SearchableItem> {
   search(query: string): Promise<T[]> | T[];
 }
 
-export interface CreateStaticSourceOptions<
+export interface CreateStaticSearchSourceOptions<
   T extends SearchableItem = SearchableItem,
 > {
   /**
    * Extra searchable terms for each item.
    */
-  keywords?: (item: T) => string[];
+  getKeywords?: (item: T) => string[];
 }
 
-export function createStaticSource<T extends SearchableItem>(
+export function createStaticSearchSource<T extends SearchableItem>(
   items: T[],
-  options?: CreateStaticSourceOptions<T>,
+  options?: CreateStaticSearchSourceOptions<T>,
 ): SearchSource<T> {
   return {
     bootstrap: () => items,
@@ -101,7 +101,7 @@ export function createStaticSource<T extends SearchableItem>(
         }
         return (
           options
-            ?.keywords?.(item)
+            ?.getKeywords?.(item)
             .some(keyword => keyword.toLowerCase().includes(normalizedQuery)) ??
           false
         );

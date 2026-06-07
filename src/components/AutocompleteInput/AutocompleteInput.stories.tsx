@@ -10,7 +10,7 @@ import {
 import {AutocompleteInputItem} from './AutocompleteInputItem';
 import {BaseAutocompleteInput} from './BaseAutocompleteInput';
 import {
-  createStaticSource,
+  createStaticSearchSource,
   type SearchableItem,
   type SearchSource,
 } from './types';
@@ -98,7 +98,7 @@ function AutocompleteInputStory(
   args: React.ComponentProps<typeof AutocompleteInput>,
 ) {
   const [value, setValue] = useState<SearchableItem | null>(null);
-  const source = useMemo(() => createStaticSource(people), []);
+  const source = useMemo(() => createStaticSearchSource(people), []);
   return (
     <AutocompleteInput
       {...args}
@@ -123,7 +123,7 @@ function CustomItemsStory(
   const [value, setValue] = useState<SearchableItem<{role: string}> | null>(
     null,
   );
-  const source = useMemo(() => createStaticSource(people), []);
+  const source = useMemo(() => createStaticSearchSource(people), []);
   return (
     <AutocompleteInput
       {...args}
@@ -175,7 +175,7 @@ export const PreSelectedValue: Story = {
     const [value, setValue] = useState<SearchableItem<{role: string}> | null>(
       people[1],
     );
-    const source = useMemo(() => createStaticSource(people), []);
+    const source = useMemo(() => createStaticSearchSource(people), []);
     return (
       <AutocompleteInput
         {...args}
@@ -195,7 +195,7 @@ export const WithoutClearButton: Story = {
     const [value, setValue] = useState<SearchableItem<{role: string}> | null>(
       people[0],
     );
-    const source = useMemo(() => createStaticSource(people), []);
+    const source = useMemo(() => createStaticSearchSource(people), []);
     return (
       <AutocompleteInput
         {...args}
@@ -210,7 +210,7 @@ export const WithoutClearButton: Story = {
 
 export const Sizes: Story = {
   render: (args: AutocompleteInputProps) => {
-    const source = useMemo(() => createStaticSource(people), []);
+    const source = useMemo(() => createStaticSearchSource(people), []);
     const [small, setSmall] = useState<SearchableItem | null>(null);
     const [medium, setMedium] = useState<SearchableItem | null>(null);
     const [large, setLarge] = useState<SearchableItem | null>(null);
@@ -306,7 +306,7 @@ export const BaseAutocompleteInputStandalone: Story = {
   render: () => {
     const [value, setValue] = useState<SearchableItem | null>(null);
     const [query, setQuery] = useState('');
-    const source = useMemo(() => createStaticSource(people), []);
+    const source = useMemo(() => createStaticSearchSource(people), []);
     return (
       <BaseAutocompleteInput
         debounceMs={0}
@@ -325,7 +325,7 @@ export const BaseAutocompleteInputStandalone: Story = {
 export const LargeItemList: Story = {
   render: (args: AutocompleteInputProps) => {
     const [value, setValue] = useState<SearchableItem | null>(null);
-    const source = useMemo(() => createStaticSource(manyPeople), []);
+    const source = useMemo(() => createStaticSearchSource(manyPeople), []);
     return (
       <AutocompleteInput
         {...args}
@@ -346,7 +346,7 @@ export const RequiredAndOptional: Story = {
     isRequired: _ir,
     ...args
   }: AutocompleteInputProps) => {
-    const source = useMemo(() => createStaticSource(people), []);
+    const source = useMemo(() => createStaticSearchSource(people), []);
     const [required, setRequired] = useState<SearchableItem | null>(null);
     const [optional, setOptional] = useState<SearchableItem | null>(null);
     return (

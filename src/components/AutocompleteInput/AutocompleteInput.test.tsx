@@ -6,7 +6,7 @@ import {AutocompleteInput} from './AutocompleteInput';
 import {AutocompleteInputItem} from './AutocompleteInputItem';
 import {BaseAutocompleteInput} from './BaseAutocompleteInput';
 import {
-  createStaticSource,
+  createStaticSearchSource,
   type SearchableItem,
   type SearchSource,
 } from './types';
@@ -46,7 +46,7 @@ describe('AutocompleteInput', () => {
         debounceMs={0}
         label="Assignee"
         onChange={onChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -65,7 +65,7 @@ describe('AutocompleteInput', () => {
         debounceMs={0}
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -88,7 +88,7 @@ describe('AutocompleteInput', () => {
         hasEntriesOnFocus
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -110,7 +110,7 @@ describe('AutocompleteInput', () => {
       <AutocompleteInput
         label="Assignee"
         onChange={onChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={items[0]}
       />,
     );
@@ -128,7 +128,7 @@ describe('AutocompleteInput', () => {
         debounceMs={0}
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={items[0]}
       />,
     );
@@ -159,7 +159,7 @@ describe('AutocompleteInput', () => {
         debounceMs={0}
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={items[0]}
       />,
     );
@@ -182,7 +182,7 @@ describe('AutocompleteInput', () => {
         debounceMs={0}
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={items[0]}
       />,
     );
@@ -207,7 +207,7 @@ describe('AutocompleteInput', () => {
         label="Assignee"
         onChange={onChange}
         onOpenChange={onOpenChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -231,6 +231,48 @@ describe('AutocompleteInput', () => {
     await user.keyboard('{Escape}');
     expect(input).toHaveAttribute('aria-expanded', 'false');
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('keeps focus on the input during arrow navigation and moves focus out on Tab', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <AutocompleteInput
+          debounceMs={0}
+          label="Assignee"
+          onChange={() => {}}
+          searchSource={createStaticSearchSource(items)}
+          value={null}
+        />
+        <button type="button">Next field</button>
+      </>,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'a');
+
+    const options = await screen.findAllByRole('option', {hidden: true});
+    expect(options.length).toBeGreaterThan(0);
+
+    // Arrow keys move the highlight via aria-activedescendant, not DOM focus:
+    // focus stays on the input and the active option is referenced by id.
+    await user.keyboard('{ArrowDown}');
+    expect(input).toHaveFocus();
+    expect(options.map(option => option.id)).toContain(
+      input.getAttribute('aria-activedescendant'),
+    );
+
+    // Options are never in the tab sequence.
+    for (const option of options) {
+      expect(option).toHaveAttribute('tabindex', '-1');
+    }
+
+    // Tab leaves the combobox for the next control instead of entering the
+    // listbox popover.
+    await user.tab();
+    expect(screen.getByRole('button', {name: 'Next field'})).toHaveFocus();
+    expect(input).not.toHaveFocus();
   });
 
   it('debounces search calls', async () => {
@@ -398,7 +440,7 @@ describe('AutocompleteInput', () => {
         hasEntriesOnFocus
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -417,7 +459,7 @@ describe('AutocompleteInput', () => {
         debounceMs={0}
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -449,7 +491,7 @@ describe('AutocompleteInput', () => {
         label="Assignee"
         onChange={() => {}}
         onOpenChange={onOpenChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -471,7 +513,7 @@ describe('AutocompleteInput', () => {
         emptySearchResultsText="No matching people"
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -490,7 +532,7 @@ describe('AutocompleteInput', () => {
         label="Assignee"
         maxMenuItems={1}
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -514,7 +556,7 @@ describe('AutocompleteInput', () => {
         onChange={() => {}}
         onOpenChange={onOpenChange}
         onQueryChange={onQueryChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -539,7 +581,7 @@ describe('AutocompleteInput', () => {
             item={item}
           />
         )}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         startIcon={Search}
         value={null}
       />,
@@ -558,7 +600,7 @@ describe('AutocompleteInput', () => {
         hasClear={false}
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         status={{message: 'Select an assignee', type: 'error'}}
         value={items[0]}
       />,
@@ -577,7 +619,7 @@ describe('AutocompleteInput', () => {
         isRequired
         label="Assignee"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -598,7 +640,7 @@ describe('BaseAutocompleteInput', () => {
         onChange={onChange}
         onQueryChange={onQueryChange}
         query=""
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={null}
       />,
     );
@@ -650,10 +692,10 @@ describe('AutocompleteInputItem', () => {
   });
 });
 
-describe('createStaticSource', () => {
+describe('createStaticSearchSource', () => {
   it('searches item keywords', () => {
-    const source = createStaticSource(items, {
-      keywords: item => (item.id === 'ada' ? ['analytical engine'] : []),
+    const source = createStaticSearchSource(items, {
+      getKeywords: item => (item.id === 'ada' ? ['analytical engine'] : []),
     });
 
     expect(source.search('engine')).toEqual([items[0]]);

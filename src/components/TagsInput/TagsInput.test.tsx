@@ -2,7 +2,10 @@ import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
-import {createStaticSource, type SearchableItem} from '../AutocompleteInput';
+import {
+  createStaticSearchSource,
+  type SearchableItem,
+} from '../AutocompleteInput';
 import {TagsInput} from './TagsInput';
 
 const items: SearchableItem[] = [
@@ -11,7 +14,7 @@ const items: SearchableItem[] = [
   {id: 'katherine', label: 'Katherine Johnson'},
 ];
 
-const emptySource = createStaticSource([]);
+const emptySource = createStaticSearchSource([]);
 const showPopover = vi.fn(function (this: HTMLElement) {
   this.setAttribute('popover-open', '');
 });
@@ -56,7 +59,7 @@ describe('TagsInput', () => {
         debounceMs={0}
         label="Team"
         onChange={onChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={[]}
       />,
     );
@@ -80,7 +83,7 @@ describe('TagsInput', () => {
           debounceMs={0}
           label="Team"
           onChange={setValue}
-          searchSource={createStaticSource(items)}
+          searchSource={createStaticSearchSource(items)}
           value={value}
         />
       );
@@ -103,7 +106,7 @@ describe('TagsInput', () => {
       <TagsInput
         label="Team"
         onChange={onChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={[items[0]]}
       />,
     );
@@ -140,7 +143,7 @@ describe('TagsInput', () => {
       <TagsInput
         label="Team"
         onChange={onChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={[items[0], items[1]]}
       />,
     );
@@ -165,7 +168,7 @@ describe('TagsInput', () => {
         hasClear
         label="Team"
         onChange={onChange}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={selected}
       />,
     );
@@ -184,7 +187,7 @@ describe('TagsInput', () => {
         hasClear
         label="Team"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={[]}
       />,
     );
@@ -200,7 +203,7 @@ describe('TagsInput', () => {
         isDisabled
         label="Team"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={[items[0]]}
       />,
     );
@@ -214,7 +217,7 @@ describe('TagsInput', () => {
         label="Team"
         maxEntries={2}
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={[items[0], items[1]]}
       />,
     );
@@ -281,7 +284,7 @@ describe('TagsInput', () => {
         data-testid="tags"
         label="Team"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         tagOverflowBehavior="unfocusedInline"
         value={[items[0], items[1], items[2]]}
       />,
@@ -303,7 +306,7 @@ describe('TagsInput', () => {
         hasEntriesOnFocus
         label="Team"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         value={[items[0]]}
       />,
     );
@@ -326,7 +329,7 @@ describe('TagsInput', () => {
         data-testid="tags"
         label="Team"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         tagOverflowBehavior="unfocusedInline"
         value={[items[0], items[1], items[2]]}
       />,
@@ -345,7 +348,7 @@ describe('TagsInput', () => {
         data-testid="tags"
         label="Team"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         tagOverflowBehavior="unfocusedLayer"
         value={[items[0], items[1], items[2]]}
       />,
@@ -361,7 +364,7 @@ describe('TagsInput', () => {
         data-testid="tags"
         label="Team"
         onChange={() => {}}
-        searchSource={createStaticSource(items)}
+        searchSource={createStaticSearchSource(items)}
         tagOverflowBehavior="unfocusedLayer"
         value={[items[0], items[1], items[2]]}
       />,
@@ -378,7 +381,7 @@ describe('TagsInput', () => {
 
   it('re-bootstraps results after selecting an item with hasEntriesOnFocus', async () => {
     const user = userEvent.setup();
-    const source = createStaticSource(items);
+    const source = createStaticSearchSource(items);
 
     function Controlled(): React.JSX.Element {
       const [value, setValue] = useState<SearchableItem[]>([]);

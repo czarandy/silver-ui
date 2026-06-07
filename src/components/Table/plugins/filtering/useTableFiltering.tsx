@@ -15,7 +15,7 @@ import {
 } from '../../../../internal/plainDate';
 import {getBrowserTimezoneID} from '../../../../internal/time';
 import {
-  createStaticSource,
+  createStaticSearchSource,
   type SearchableItem,
 } from '../../../AutocompleteInput';
 import {Button} from '../../../Button';
@@ -456,7 +456,9 @@ function ListFilterControl({
   const items = Array.isArray(value) ? value.map(id => ({id, label: id})) : [];
   const source =
     operatorValue.searchSource ??
-    createStaticSource<SearchableItem>(items, {keywords: item => [item.id]});
+    createStaticSearchSource<SearchableItem>(items, {
+      getKeywords: item => [item.id],
+    });
 
   return (
     <TagsInput
