@@ -1,0 +1,15 @@
+diff --git a/lib/values/expressions/index.js b/lib/values/expressions/index.js
+index 4ebff6ce503b43cd4db237f319740382696ffb39..89a4b05fb4dd14daba7e61375d08d208a135ebf8 100644
+--- a/lib/values/expressions/index.js
++++ b/lib/values/expressions/index.js
+@@ -75,6 +75,10 @@ var TYPES = {
+ var noop = function noop() {
+   return null;
+ };
++// Treat empty JSX expressions (e.g. `{/* comment */}`) as unresolvable instead
++// of logging a spurious console.error. Added to TYPES so the spread into
++// LITERAL_TYPES picks it up as well.
++TYPES.JSXEmptyExpression = noop;
+ var errorMessage = function errorMessage(expression) {
+   return "The prop value with an expression type of ".concat(expression, " could not be resolved. Please file an issue ( https://github.com/jsx-eslint/jsx-ast-utils/issues/new ) to get this fixed immediately.");
+ };

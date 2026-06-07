@@ -4,3 +4,6 @@ packages:
 allowBuilds:
   esbuild: true
   unrs-resolver: true
+
+patchedDependencies:
+  jsx-ast-utils-x@0.1.0: patches/jsx-ast-utils-x@0.1.0.patch

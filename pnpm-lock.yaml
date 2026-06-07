@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  jsx-ast-utils-x@0.1.0: c867687da2574b058039e0f6f4aa50b796945d32aed8077344bca038852b19b6
+
 importers:
 
   .:
@@ -6116,7 +6119,7 @@ snapshots:
       axobject-query: 4.1.0
       damerau-levenshtein: 1.0.8
       eslint: 10.4.0
-      jsx-ast-utils-x: 0.1.0
+      jsx-ast-utils-x: 0.1.0(patch_hash=c867687da2574b058039e0f6f4aa50b796945d32aed8077344bca038852b19b6)
       language-tags: 1.0.9
       minimatch: 10.2.5
 
@@ -6645,7 +6648,7 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  jsx-ast-utils-x@0.1.0: {}
+  jsx-ast-utils-x@0.1.0(patch_hash=c867687da2574b058039e0f6f4aa50b796945d32aed8077344bca038852b19b6): {}
 
   keyv@4.5.4:
     dependencies:
