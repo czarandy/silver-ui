@@ -1,7 +1,9 @@
-import {render, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
+import {inputRecipe} from '../Field/inputStyles';
+import {InputGroup} from '../InputGroup';
 import {TextInput} from './TextInput';
 
 function SearchIcon(props: LucideProps): React.JSX.Element {
@@ -224,5 +226,164 @@ describe('TextInput', () => {
     );
 
     expect(screen.getByTestId('my-input')).toBeInTheDocument();
+  });
+
+  it('applies the autoComplete attribute', () => {
+    render(
+      <TextInput autoComplete="email" label="Email" onChange={noop} value="" />,
+    );
+
+    expect(screen.getByRole('textbox', {name: 'Email'})).toHaveAttribute(
+      'autocomplete',
+      'email',
+    );
+  });
+
+  it('applies htmlName to the input', () => {
+    render(
+      <TextInput htmlName="username" label="Name" onChange={noop} value="" />,
+    );
+
+    expect(screen.getByRole('textbox', {name: 'Name'})).toHaveAttribute(
+      'name',
+      'username',
+    );
+  });
+
+  it('calls onFocus and onBlur handlers', () => {
+    const onFocus = vi.fn();
+    const onBlur = vi.fn();
+
+    render(
+      <TextInput
+        label="Name"
+        onBlur={onBlur}
+        onChange={noop}
+        onFocus={onFocus}
+        value=""
+      />,
+    );
+
+    const input = screen.getByRole('textbox', {name: 'Name'});
+    fireEvent.focus(input);
+    fireEvent.blur(input);
+
+    expect(onFocus).toHaveBeenCalledOnce();
+    expect(onBlur).toHaveBeenCalledOnce();
+  });
+
+  it('visually hides the label when isLabelHidden is true', () => {
+    render(<TextInput isLabelHidden label="Name" onChange={noop} value="" />);
+
+    // The label stays accessible even though it is visually hidden.
+    expect(screen.getByText('Name')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', {name: 'Name'})).toBeInTheDocument();
+  });
+
+  it('renders a label icon', () => {
+    render(
+      <TextInput
+        label="Search"
+        labelIcon={SearchIcon}
+        onChange={noop}
+        value=""
+      />,
+    );
+
+    expect(screen.getByTestId('search-icon')).toBeInTheDocument();
+  });
+
+  it('renders label tooltip content', () => {
+    render(
+      <TextInput
+        label="Name"
+        labelTooltip="Your full legal name."
+        onChange={noop}
+        value=""
+      />,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Your full legal name.',
+    );
+  });
+
+  describe('inside an InputGroup', () => {
+    it('exposes the label via aria-label rather than a field label', () => {
+      render(
+        <InputGroup label="Website">
+          <TextInput isLabelHidden label="URL" onChange={noop} value="" />
+        </InputGroup>,
+      );
+
+      const input = screen.getByRole('textbox', {name: 'URL'});
+      expect(input).toHaveAttribute('aria-label', 'URL');
+      // The group renders the field label, so no <label> is tied to the input.
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(input.closest('label')).toBeNull();
+    });
+
+    it('is disabled when the group is disabled even if its own isDisabled is false', () => {
+      render(
+        <InputGroup isDisabled label="Website">
+          <TextInput isLabelHidden label="URL" onChange={noop} value="" />
+        </InputGroup>,
+      );
+
+      expect(screen.getByRole('textbox', {name: 'URL'})).toBeDisabled();
+    });
+
+    it('hides the clear button when the group is disabled', () => {
+      render(
+        <InputGroup isDisabled label="Website">
+          <TextInput
+            hasClear
+            isLabelHidden
+            label="URL"
+            onChange={noop}
+            value="acme"
+          />
+        </InputGroup>,
+      );
+
+      expect(
+        screen.queryByRole('button', {name: 'Clear URL'}),
+      ).not.toBeInTheDocument();
+    });
+
+    it('applies the group status type to the input wrapper', () => {
+      render(
+        <InputGroup label="Website" status={{message: 'Bad', type: 'error'}}>
+          <TextInput isLabelHidden label="URL" onChange={noop} value="" />
+        </InputGroup>,
+      );
+
+      const input = screen.getByRole('textbox', {name: 'URL'});
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(input.parentElement).toHaveClass(inputRecipe({status: 'error'}));
+      // Group status styling must not flag the field as invalid.
+      expect(input).not.toHaveAttribute('aria-invalid');
+    });
+
+    it('forwards className and style to the wrapper instead of a field', () => {
+      const {container} = render(
+        <InputGroup label="Website">
+          <TextInput
+            className="custom-wrapper"
+            isLabelHidden
+            label="URL"
+            onChange={noop}
+            style={{maxWidth: 200}}
+            value=""
+          />
+        </InputGroup>,
+      );
+
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      const wrapper = container.querySelector('.custom-wrapper');
+      expect(wrapper).toBeInTheDocument();
+      expect(wrapper).toHaveStyle({maxWidth: '200px'});
+      expect(wrapper).toContainElement(screen.getByRole('textbox'));
+    });
   });
 });

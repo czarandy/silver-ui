@@ -53,10 +53,12 @@ export type TextInputProps = {
   endContent?: ReactNode;
   /**
    * Whether to focus the input on mount.
+   * @default false
    */
   hasAutoFocus?: boolean;
   /**
    * Whether to show a clear button when the input has a value.
+   * @default false
    */
   hasClear?: boolean;
   /**
@@ -65,14 +67,17 @@ export type TextInputProps = {
   htmlName?: string;
   /**
    * Whether the input is disabled.
+   * @default false
    */
   isDisabled?: boolean;
   /**
    * Whether to visually hide the label.
+   * @default false
    */
   isLabelHidden?: boolean;
   /**
    * Whether the input is loading.
+   * @default false
    */
   isLoading?: boolean;
   /**
