@@ -8,7 +8,6 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import {formatFileSize} from '../../internal/formatFileSize';
@@ -22,7 +21,6 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe} from '../Field/inputStyles';
 import {
   getDescribedBy,
   getStatusIcon,
@@ -31,6 +29,7 @@ import {
 import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
+import {fileInputRecipe} from './FileInput.recipe';
 
 export type FileInputMode = 'dropzone' | 'input';
 
@@ -151,58 +150,6 @@ interface FileInputMultipleProps extends FileInputBaseProps {
 export type FileInputProps = (FileInputMultipleProps | FileInputSingleProps) &
   FieldNecessity;
 
-const styles = {
-  surface: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    px: '3',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'border.emphasized',
-    borderRadius: 'md',
-    bg: 'bg',
-    cursor: 'pointer',
-    _hover: {borderColor: 'fg.muted'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  dropzone: css({
-    minH: '32',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderStyle: 'dashed',
-    textAlign: 'center',
-    '& > *': {
-      flex: 'none',
-    },
-  }),
-  disabled: css({
-    cursor: 'not-allowed',
-    opacity: 0.55,
-  }),
-  active: css({
-    borderColor: 'primary',
-    bg: 'bg.selected',
-  }),
-  fileName: css({
-    flex: 1,
-    minW: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  }),
-  icon: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
-  }),
-} as const;
-
 function validateFiles(
   files: File[],
   options: {
@@ -300,11 +247,15 @@ export function FileInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  // A validation error from the user's most recent selection is immediate,
+  // actionable feedback about what they just tried to do (wrong type, too
+  // large, too many), so it takes precedence over a consumer-provided `status`
+  // such as a form-level "required". Once there is no validation error (a valid
+  // selection or a cleared field), the external status surfaces again.
   const status =
-    statusFromProps ??
-    (validationError == null
-      ? undefined
-      : {type: 'error' as const, message: validationError});
+    validationError == null
+      ? statusFromProps
+      : {type: 'error' as const, message: validationError};
   const descriptionID = isReactNode(description)
     ? `${inputId}-description`
     : undefined;
@@ -314,6 +265,13 @@ export function FileInput({
   const displayText =
     fileNames ?? placeholder ?? (isMultiple ? 'Choose files' : 'Choose file');
   const isDropzone = mode === 'dropzone';
+  const classes = fileInputRecipe({
+    mode,
+    size,
+    status: status?.type,
+    isDisabled,
+    isDragOver,
+  });
 
   const handleFiles = (files: File[]) => {
     if (isDisabled) {
@@ -341,6 +299,12 @@ export function FileInput({
       (onChange as (files: File[]) => void)([]);
     } else {
       (onChange as (file: File | null) => void)(null);
+    }
+  };
+
+  const openFilePicker = () => {
+    if (!isDisabled) {
+      inputRef.current?.click();
     }
   };
 
@@ -388,33 +352,20 @@ export function FileInput({
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
       }>
+      {/*
+        The visually-hidden <input> is the real, focusable, labeled control
+        (the Field label targets it via htmlFor), so it owns the accessible
+        name, description, focus, and keyboard activation. The surface is only
+        a presentational mouse/drop target — it intentionally has no role or
+        keyboard handler, because that would create a redundant second control
+        with the same name. Hence the scoped a11y disables below.
+      */}
+      {/* eslint-disable jsx-a11y-x/no-static-element-interactions, jsx-a11y-x/click-events-have-key-events */}
       <div
         aria-busy={isLoading || undefined}
-        aria-describedby={describedBy}
-        aria-disabled={isDisabled || undefined}
-        className={cx(
-          styles.surface,
-          isDropzone
-            ? styles.dropzone
-            : inputRecipe({size, status: status?.type, isDisabled}),
-          isDisabled ? styles.disabled : undefined,
-          isDragOver ? styles.active : undefined,
-          className,
-        )}
-        onClick={() => {
-          if (!isDisabled) {
-            inputRef.current?.click();
-          }
-        }}
-        onKeyDown={event => {
-          if (!isDisabled && (event.key === 'Enter' || event.key === ' ')) {
-            event.preventDefault();
-            inputRef.current?.click();
-          }
-        }}
-        role="button"
+        className={cx(classes.surface, className)}
+        onClick={openFilePicker}
         style={style}
-        tabIndex={isDisabled ? -1 : 0}
         {...dragProps}>
         <VisuallyHidden>
           <input
@@ -437,17 +388,17 @@ export function FileInput({
         {isLoading ? (
           <Spinner size={isDropzone ? 'md' : 'sm'} />
         ) : (
-          <span className={styles.icon}>
+          <span className={classes.icon}>
             <Icon icon={Upload} size={isDropzone ? 'md' : 'sm'} />
           </span>
         )}
         <Text
           as="span"
-          className={styles.fileName}
+          className={classes.fileName}
           color={fileNames == null ? 'secondary' : 'primary'}>
           {isDragOver ? 'Drop files here' : displayText}
         </Text>
-        {fileNames != null ? (
+        {fileNames != null && !isDisabled && !isLoading ? (
           <Button
             icon={X}
             isIconOnly
@@ -461,9 +412,10 @@ export function FileInput({
           />
         ) : null}
         {status != null && !isDropzone ? (
-          <span className={styles.icon}>{getStatusIcon(status.type)}</span>
+          <span className={classes.icon}>{getStatusIcon(status.type)}</span>
         ) : null}
       </div>
+      {/* eslint-enable jsx-a11y-x/no-static-element-interactions, jsx-a11y-x/click-events-have-key-events */}
     </Field>
   );
 }
