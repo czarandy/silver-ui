@@ -27,6 +27,37 @@ beforeAll(() => {
   });
 });
 
+// The dialog occupies the rect (100,100)-(300,300). Points outside it (e.g.
+// 5,5) represent the backdrop; points inside (e.g. 150,150) represent the
+// dialog surface or its padding.
+function stubDialogRect(dialog: HTMLElement): void {
+  const rect: DOMRect = {
+    bottom: 300,
+    height: 200,
+    left: 100,
+    right: 300,
+    toJSON: () => ({}),
+    top: 100,
+    width: 200,
+    x: 100,
+    y: 100,
+  };
+  dialog.getBoundingClientRect = () => rect;
+}
+
+const BACKDROP_POINT = {clientX: 5, clientY: 5};
+const INSIDE_POINT = {clientX: 150, clientY: 150};
+
+function pressAndRelease(
+  dialog: HTMLElement,
+  down: {clientX: number; clientY: number},
+  up: {clientX: number; clientY: number},
+): void {
+  stubDialogRect(dialog);
+  fireEvent.pointerDown(dialog, down);
+  fireEvent.click(dialog, {...up, detail: 1});
+}
+
 describe('Dialog', () => {
   it('opens and renders dialog content', () => {
     render(
@@ -64,8 +95,55 @@ describe('Dialog', () => {
       </Dialog>,
     );
 
-    fireEvent.click(screen.getByRole('dialog'));
+    pressAndRelease(screen.getByRole('dialog'), BACKDROP_POINT, BACKDROP_POINT);
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('does not close when clicking dialog padding inside the rect', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <Dialog isOpen label="Preferences" onOpenChange={onOpenChange}>
+        Content
+      </Dialog>,
+    );
+
+    // A click whose coordinates land inside the dialog's border box (as a
+    // click on padding would) must not be treated as a backdrop click.
+    pressAndRelease(screen.getByRole('dialog'), INSIDE_POINT, INSIDE_POINT);
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('does not close on an inside-out drag that ends on the backdrop', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <Dialog isOpen label="Preferences" onOpenChange={onOpenChange}>
+        Content
+      </Dialog>,
+    );
+
+    // Press starts inside the dialog (e.g. selecting text) and the release
+    // overshoots onto the backdrop: this must not dismiss.
+    pressAndRelease(screen.getByRole('dialog'), INSIDE_POINT, BACKDROP_POINT);
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('ignores keyboard-synthesized clicks (detail 0) on the dialog', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <Dialog isOpen label="Preferences" onOpenChange={onOpenChange}>
+        Content
+      </Dialog>,
+    );
+
+    const dialog = screen.getByRole('dialog');
+    stubDialogRect(dialog);
+    // Enter/Space on a child control bubbles a click with detail 0 and 0,0
+    // coordinates — which would otherwise read as "outside the rect".
+    fireEvent.click(dialog, {clientX: 0, clientY: 0, detail: 0});
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
   it('does not close on backdrop click when backdrop dismiss is disabled', () => {
@@ -81,7 +159,7 @@ describe('Dialog', () => {
       </Dialog>,
     );
 
-    fireEvent.click(screen.getByRole('dialog'));
+    pressAndRelease(screen.getByRole('dialog'), BACKDROP_POINT, BACKDROP_POINT);
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
@@ -145,6 +223,80 @@ describe('Dialog', () => {
     expect(ref).toHaveBeenCalledWith(dialog);
   });
 
+  it('applies numeric width and maxHeight as pixels', () => {
+    render(
+      <Dialog
+        data-testid="dialog"
+        isOpen
+        label="Preferences"
+        maxHeight={300}
+        onOpenChange={() => {}}
+        width={520}>
+        Content
+      </Dialog>,
+    );
+
+    expect(screen.getByTestId('dialog')).toHaveStyle({
+      maxHeight: '300px',
+      width: '520px',
+    });
+  });
+
+  it('passes string maxHeight through unchanged', () => {
+    render(
+      <Dialog
+        data-testid="dialog"
+        isOpen
+        label="Preferences"
+        maxHeight="60vh"
+        onOpenChange={() => {}}>
+        Content
+      </Dialog>,
+    );
+
+    expect(screen.getByTestId('dialog')).toHaveStyle({maxHeight: '60vh'});
+  });
+
+  it('applies fixed position offsets and pins the remaining edges to auto', () => {
+    render(
+      <Dialog
+        data-testid="dialog"
+        isOpen
+        label="Preferences"
+        onOpenChange={() => {}}
+        position={{left: 30, top: 20}}>
+        Content
+      </Dialog>,
+    );
+
+    expect(screen.getByTestId('dialog')).toHaveStyle({
+      bottom: 'auto',
+      left: '30px',
+      margin: '0px',
+      right: 'auto',
+      top: '20px',
+    });
+  });
+
+  it('ignores position in the fullscreen variant', () => {
+    render(
+      <Dialog
+        data-testid="dialog"
+        isOpen
+        label="Preferences"
+        onOpenChange={() => {}}
+        position={{left: 30, top: 20}}
+        variant="fullscreen">
+        Content
+      </Dialog>,
+    );
+
+    // Fullscreen pins itself via the recipe (inset: 0), so the inline
+    // position offsets are not applied.
+    const dialog = screen.getByTestId('dialog');
+    expect(dialog).not.toHaveStyle({left: '30px', top: '20px'});
+  });
+
   it('focuses a data-autofocus element after opening', async () => {
     render(
       <Dialog isOpen label="Preferences" onOpenChange={() => {}}>
@@ -204,6 +356,85 @@ describe('useDialog', () => {
     await user.click(screen.getByRole('button', {name: 'Close'}));
     expect(screen.getByTestId('status')).toHaveTextContent('closed');
   });
+
+  it('merges options accumulatively across show() calls', async () => {
+    const user = userEvent.setup();
+
+    function Fixture(): React.JSX.Element {
+      const dialog = useDialog({label: 'Preview'});
+
+      return (
+        <>
+          <Button
+            label="Open as alert"
+            onClick={() =>
+              dialog.show(<div>First content</div>, {
+                className: 'first-class',
+                role: 'alertdialog',
+              })
+            }
+          />
+          <Button
+            label="Open plain"
+            onClick={() => dialog.show(<div>Second content</div>)}
+          />
+          {dialog.element}
+        </>
+      );
+    }
+
+    render(<Fixture />);
+
+    // First show sets role and className.
+    await user.click(screen.getByRole('button', {name: 'Open as alert'}));
+    const alertDialog = screen.getByRole('alertdialog');
+    expect(alertDialog).toHaveClass('first-class');
+    expect(screen.getByText('First content')).toBeInTheDocument();
+
+    // Second show passes no options, but the previous options persist
+    // because show() merges into the existing options rather than
+    // replacing them.
+    await user.click(screen.getByRole('button', {name: 'Open plain'}));
+    expect(screen.getByText('Second content')).toBeInTheDocument();
+    const stillAlertDialog = screen.getByRole('alertdialog');
+    expect(stillAlertDialog).toHaveClass('first-class');
+    expect(screen.queryByText('First content')).not.toBeInTheDocument();
+  });
+
+  it('labels the dialog via the LayoutHeader heading when no label is given', async () => {
+    const user = userEvent.setup();
+
+    function Fixture(): React.JSX.Element {
+      const dialog = useDialog();
+
+      return (
+        <>
+          <Button
+            label="Open"
+            onClick={() =>
+              dialog.show(<LayoutHeader title="Generated report" />)
+            }
+          />
+          {dialog.element}
+        </>
+      );
+    }
+
+    render(<Fixture />);
+
+    await user.click(screen.getByRole('button', {name: 'Open'}));
+
+    // The heading provides the accessible name via aria-labelledby — there
+    // is no duplicate generic aria-label.
+    const dialog = screen.getByRole('dialog', {name: 'Generated report'});
+    expect(dialog).not.toHaveAttribute('aria-label');
+    expect(dialog).toHaveAttribute('aria-labelledby');
+
+    const labelledById = dialog.getAttribute('aria-labelledby');
+    expect(
+      within(dialog).getByRole('heading', {name: 'Generated report'}),
+    ).toHaveAttribute('id', labelledById);
+  });
 });
 
 describe('Dialog additional', () => {
@@ -221,7 +452,11 @@ describe('Dialog additional', () => {
       </Dialog>,
     );
 
-    fireEvent.click(screen.getByRole('alertdialog'));
+    pressAndRelease(
+      screen.getByRole('alertdialog'),
+      BACKDROP_POINT,
+      BACKDROP_POINT,
+    );
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 

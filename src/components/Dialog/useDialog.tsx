@@ -36,7 +36,7 @@ export function useDialog(defaultOptions?: DialogOptions): UseDialogReturn {
         {...(defaultOptions ?? {})}
         {...(options ?? {})}
         isOpen={isOpen}
-        label={options?.label ?? defaultOptions?.label ?? 'Dialog'}
+        label={options?.label ?? defaultOptions?.label}
         onOpenChange={setIsOpen}>
         {content}
       </Dialog>

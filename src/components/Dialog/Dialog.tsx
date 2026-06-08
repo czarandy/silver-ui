@@ -103,6 +103,26 @@ function formatSize(value: number | string): string {
   return typeof value === 'number' ? `${value}px` : value;
 }
 
+/**
+ * Whether a pointer coordinate falls outside an element's border box. Native
+ * `<dialog>` renders its backdrop outside this box, so a click whose
+ * coordinates land outside the dialog rect is a backdrop click — regardless of
+ * any padding, border, or margin on the dialog element.
+ */
+function isPointerOutsideElement(
+  element: HTMLElement,
+  clientX: number,
+  clientY: number,
+): boolean {
+  const rect = element.getBoundingClientRect();
+  return (
+    clientX < rect.left ||
+    clientX > rect.right ||
+    clientY < rect.top ||
+    clientY > rect.bottom
+  );
+}
+
 function getDismissBehavior(
   dismissBehavior: DialogDismissBehavior | undefined,
 ): {isBackdropDismissEnabled: boolean; isEscapeDismissEnabled: boolean} {
@@ -144,7 +164,7 @@ export function Dialog({
   ref,
 }: DialogProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const triggerRef = useRef<HTMLElement | null>(null);
+  const pointerDownOnBackdropRef = useRef(false);
   const titleId = useId();
   const isFullscreen = variant === 'fullscreen';
   const {isBackdropDismissEnabled, isEscapeDismissEnabled} =
@@ -162,18 +182,19 @@ export function Dialog({
     }
 
     if (isOpen) {
-      triggerRef.current = document.activeElement as HTMLElement | null;
       if (!dialog.open) {
         dialog.showModal();
       }
+      // Override the dialog's default initial focus when an autofocus target is
+      // present. Focus restoration on close is left to the native <dialog>,
+      // which restores focus to the element that was focused before
+      // showModal() — avoiding races with external focus management.
       const autofocusTarget =
         dialog.querySelector<HTMLElement>('[data-autofocus="true"]') ??
         dialog.querySelector<HTMLElement>('[data-dialog-autofocus="true"]');
       autofocusTarget?.focus();
     } else if (dialog.open) {
       dialog.close();
-      triggerRef.current?.focus();
-      triggerRef.current = null;
     }
   }, [isOpen]);
 
@@ -213,9 +234,36 @@ export function Dialog({
         }
       }}
       onClick={event => {
-        if (event.target === event.currentTarget && isBackdropDismissEnabled) {
+        const startedOnBackdrop = pointerDownOnBackdropRef.current;
+        pointerDownOnBackdropRef.current = false;
+        // Keyboard-synthesized clicks (Enter/Space on a child control) report
+        // detail 0 and 0,0 coordinates; ignore them so they are not mistaken
+        // for a backdrop click.
+        if (event.detail === 0) {
+          return;
+        }
+        const releasedOnBackdrop = isPointerOutsideElement(
+          event.currentTarget,
+          event.clientX,
+          event.clientY,
+        );
+        // Dismiss only when the press and the release both landed on the
+        // backdrop. This ignores clicks on dialog padding (inside the rect) and
+        // inside-out drags (e.g. text selection) that end on the backdrop.
+        if (
+          startedOnBackdrop &&
+          releasedOnBackdrop &&
+          isBackdropDismissEnabled
+        ) {
           onOpenChange(false);
         }
+      }}
+      onPointerDown={event => {
+        pointerDownOnBackdropRef.current = isPointerOutsideElement(
+          event.currentTarget,
+          event.clientX,
+          event.clientY,
+        );
       }}
       ref={mergeRefs(ref, dialogRef)}
       role={role === 'dialog' ? undefined : role}

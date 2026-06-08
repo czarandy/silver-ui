@@ -30,7 +30,6 @@ const meta: Meta<typeof Dialog> = {
       isBackdropDismissEnabled: true,
       isEscapeDismissEnabled: true,
     },
-    label: 'Confirm changes',
     maxHeight: '75vh',
     role: 'dialog',
     variant: 'standard',
@@ -88,7 +87,6 @@ export const Default: Story = {
 export const Required: Story = {
   args: {
     dismissBehavior: false,
-    label: 'Required action',
     role: 'alertdialog',
   },
   render: args => {
@@ -131,7 +129,6 @@ export const Form: Story = {
       isBackdropDismissEnabled: false,
       isEscapeDismissEnabled: true,
     },
-    label: 'Edit profile',
     width: 480,
   },
   render: args => {
@@ -188,7 +185,7 @@ export const Form: Story = {
 };
 
 export const Fullscreen: Story = {
-  args: {label: 'Full screen', variant: 'fullscreen'},
+  args: {variant: 'fullscreen'},
   render: args => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -216,7 +213,7 @@ export const Fullscreen: Story = {
 };
 
 export const Scrollable: Story = {
-  args: {label: 'Terms of Service', maxHeight: '60vh', width: 520},
+  args: {maxHeight: '60vh', width: 520},
   render: args => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -318,7 +315,7 @@ export const HeaderVariants: Story = {
 
 export const Imperative: Story = {
   render: () => {
-    const dialog = useDialog({label: 'Generated report', width: 480});
+    const dialog = useDialog({width: 480});
 
     return (
       <>
