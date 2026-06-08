@@ -1,4 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {MessageSquare} from 'lucide-react';
 import {useState} from 'react';
 import {TextArea, type TextAreaProps} from './TextArea';
 
@@ -34,6 +35,14 @@ export const OverLimit: Story = {
 
 export const WithDescription: Story = {
   args: {description: 'Markdown is supported.'},
+};
+
+export const WithStartIcon: Story = {
+  args: {startIcon: MessageSquare},
+};
+
+export const LabelHidden: Story = {
+  args: {isLabelHidden: true, placeholder: 'Add a comment...'},
 };
 
 export const Disabled: Story = {

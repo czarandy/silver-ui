@@ -1,7 +1,12 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {MessageSquare, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {TextArea} from './TextArea';
+
+function MessageIcon(props: LucideProps): React.JSX.Element {
+  return <MessageSquare {...props} data-testid="message-icon" />;
+}
 
 describe('TextArea', () => {
   it('calls onChange and renders a character counter', async () => {
@@ -79,5 +84,111 @@ describe('TextArea', () => {
     render(<TextArea label="Notes" onChange={() => {}} ref={ref} value="" />);
 
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLTextAreaElement));
+  });
+
+  it('sets the native maxlength attribute', () => {
+    render(
+      <TextArea label="Notes" maxLength={10} onChange={() => {}} value="" />,
+    );
+
+    expect(screen.getByRole('textbox', {name: 'Notes'})).toHaveAttribute(
+      'maxlength',
+      '10',
+    );
+  });
+
+  it('calls onFocus and onBlur', async () => {
+    const user = userEvent.setup();
+    const onFocus = vi.fn();
+    const onBlur = vi.fn();
+
+    render(
+      <TextArea
+        label="Notes"
+        onBlur={onBlur}
+        onChange={() => {}}
+        onFocus={onFocus}
+        value=""
+      />,
+    );
+
+    await user.click(screen.getByRole('textbox', {name: 'Notes'}));
+    expect(onFocus).toHaveBeenCalledOnce();
+
+    await user.tab();
+    expect(onBlur).toHaveBeenCalledOnce();
+  });
+
+  it('calls onPaste', async () => {
+    const user = userEvent.setup();
+    const onPaste = vi.fn();
+
+    render(
+      <TextArea label="Notes" onChange={() => {}} onPaste={onPaste} value="" />,
+    );
+
+    await user.click(screen.getByRole('textbox', {name: 'Notes'}));
+    await user.paste('pasted text');
+    expect(onPaste).toHaveBeenCalledOnce();
+  });
+
+  it('renders placeholder text', () => {
+    render(
+      <TextArea
+        label="Notes"
+        onChange={() => {}}
+        placeholder="Add notes"
+        value=""
+      />,
+    );
+
+    expect(screen.getByPlaceholderText('Add notes')).toBeInTheDocument();
+  });
+
+  it('applies the rows prop', () => {
+    render(<TextArea label="Notes" onChange={() => {}} rows={8} value="" />);
+
+    expect(screen.getByRole('textbox', {name: 'Notes'})).toHaveAttribute(
+      'rows',
+      '8',
+    );
+  });
+
+  it('sets aria-busy when loading', () => {
+    render(<TextArea isLoading label="Notes" onChange={() => {}} value="" />);
+
+    expect(screen.getByRole('textbox', {name: 'Notes'})).toHaveAttribute(
+      'aria-busy',
+      'true',
+    );
+  });
+
+  it('renders a start icon', () => {
+    render(
+      <TextArea
+        label="Notes"
+        onChange={() => {}}
+        startIcon={MessageIcon}
+        value=""
+      />,
+    );
+
+    expect(screen.getByTestId('message-icon')).toBeInTheDocument();
+  });
+
+  it('disables spellcheck when hasSpellCheck is false', () => {
+    render(
+      <TextArea
+        hasSpellCheck={false}
+        label="Notes"
+        onChange={() => {}}
+        value=""
+      />,
+    );
+
+    expect(screen.getByRole('textbox', {name: 'Notes'})).toHaveAttribute(
+      'spellcheck',
+      'false',
+    );
   });
 });

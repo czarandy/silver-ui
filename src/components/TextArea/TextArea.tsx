@@ -240,6 +240,7 @@ export function TextArea({
           data-testid={dataTestId}
           disabled={isDisabled}
           id={inputId}
+          maxLength={maxLength}
           name={htmlName}
           onBlur={onBlur}
           onChange={event => onChange(event.target.value, event)}
