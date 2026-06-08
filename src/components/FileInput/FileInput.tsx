@@ -9,6 +9,7 @@ import {
   type Ref,
 } from 'react';
 import {css} from 'styled-system/css';
+import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import {formatFileSize} from '../../internal/formatFileSize';
 import isReactNode from '../../internal/isReactNode';
@@ -188,17 +189,6 @@ const styles = {
   active: css({
     borderColor: 'primary',
     bg: 'bg.selected',
-  }),
-  hiddenInput: css({
-    position: 'absolute',
-    w: '1px',
-    h: '1px',
-    p: 0,
-    m: '-1px',
-    overflow: 'hidden',
-    clipPath: 'inset(50%)',
-    whiteSpace: 'nowrap',
-    borderWidth: 0,
   }),
   fileName: css({
     flex: 1,
@@ -426,23 +416,24 @@ export function FileInput({
         style={style}
         tabIndex={isDisabled ? -1 : 0}
         {...dragProps}>
-        <input
-          accept={accept}
-          aria-describedby={describedBy}
-          aria-invalid={status?.type === 'error' || undefined}
-          className={styles.hiddenInput}
-          data-testid={dataTestId}
-          disabled={isDisabled}
-          id={inputId}
-          multiple={isMultiple}
-          onChange={event => {
-            handleFiles(Array.from(event.target.files ?? []));
-            event.currentTarget.value = '';
-          }}
-          ref={mergeRefs(ref, inputRef)}
-          required={isRequired}
-          type="file"
-        />
+        <VisuallyHidden>
+          <input
+            accept={accept}
+            aria-describedby={describedBy}
+            aria-invalid={status?.type === 'error' || undefined}
+            data-testid={dataTestId}
+            disabled={isDisabled}
+            id={inputId}
+            multiple={isMultiple}
+            onChange={event => {
+              handleFiles(Array.from(event.target.files ?? []));
+              event.currentTarget.value = '';
+            }}
+            ref={mergeRefs(ref, inputRef)}
+            required={isRequired}
+            type="file"
+          />
+        </VisuallyHidden>
         {isLoading ? (
           <Spinner size={isDropzone ? 'md' : 'sm'} />
         ) : (

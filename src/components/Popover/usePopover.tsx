@@ -8,6 +8,7 @@ import {
   type RefCallback,
 } from 'react';
 import {css} from 'styled-system/css';
+import {VisuallyHidden} from '../../internal';
 import {useFocusTrap} from '../../internal/useFocusTrap';
 import {useLayer, type ContextRenderProps} from '../../internal/useLayer';
 import {Button} from '../Button';
@@ -123,13 +124,6 @@ const styles = {
     borderStyle: 'solid',
     borderColor: 'border',
   }),
-  closeButtonWrapper: css({
-    position: 'absolute',
-    w: '1px',
-    h: '1px',
-    overflow: 'hidden',
-    clipPath: 'inset(50%)',
-  }),
 } as const;
 
 export function usePopover({
@@ -189,7 +183,7 @@ export function usePopover({
           role={role}>
           {children}
           {hasCloseButton ? (
-            <div className={styles.closeButtonWrapper}>
+            <VisuallyHidden>
               <Button
                 icon={X}
                 isIconOnly
@@ -198,7 +192,7 @@ export function usePopover({
                 size="sm"
                 variant="ghost"
               />
-            </div>
+            </VisuallyHidden>
           ) : null}
         </div>,
         {
