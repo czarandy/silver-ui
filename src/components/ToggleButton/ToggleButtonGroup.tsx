@@ -172,12 +172,14 @@ export function ToggleButtonGroup({
   return (
     <ToggleButtonGroupContext value={contextValue}>
       <div
+        aria-disabled={isDisabled || undefined}
         aria-label={label}
         className={cx(
           styles.group,
           orientation === 'vertical' ? styles.vertical : undefined,
           className,
         )}
+        data-orientation={orientation}
         data-testid={dataTestId}
         ref={ref}
         role="group"

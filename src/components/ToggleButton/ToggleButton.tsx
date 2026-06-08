@@ -1,18 +1,14 @@
-import type {CSSProperties, MouseEvent, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
+import type {CSSProperties, MouseEvent, Ref} from 'react';
 import {cx} from '../../internal/cx';
 import type {ButtonSize} from '../Button';
 import {buttonRecipe} from '../Button/Button.recipe';
 import {Icon, type IconComponent} from '../Icon';
 import {Spinner} from '../Spinner';
 import {Tooltip} from '../Tooltip';
+import {toggleButtonRecipe} from './ToggleButton.recipe';
 import {useToggleButtonGroup} from './ToggleButtonGroup';
 
 export interface ToggleButtonProps {
-  /**
-   * Custom visible content. When omitted, `label` is rendered.
-   */
-  children?: ReactNode;
   /**
    * Additional CSS class names applied to the button root.
    */
@@ -79,54 +75,10 @@ export interface ToggleButtonProps {
   value?: string;
 }
 
-const styles = {
-  selected: css({
-    bg: 'bg.subtle',
-    fontWeight: 'semibold',
-    _hover: {bg: 'bg.subtle'},
-    _active: {bg: 'bg.subtle'},
-  }),
-  content: css({
-    display: 'contents',
-  }),
-  labelWrapper: css({
-    display: 'inline-flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minW: 0,
-  }),
-  label: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    minW: 0,
-  }),
-  widthReservation: css({
-    display: 'block',
-    h: 0,
-    overflow: 'hidden',
-    visibility: 'hidden',
-    pointerEvents: 'none',
-    fontWeight: 'semibold',
-  }),
-  icon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }),
-  spinner: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    color: 'inherit',
-  }),
-} as const;
-
 /**
  * Button that toggles between selected and unselected states.
  */
 export function ToggleButton({
-  children,
   className,
   'data-testid': dataTestId,
   icon,
@@ -160,7 +112,7 @@ export function ToggleButton({
   const size = sizeProp ?? group?.size ?? 'md';
   const isDisabled = isDisabledProp || group?.isDisabled === true;
   const resolvedIcon = isSelected && selectedIcon != null ? selectedIcon : icon;
-  const visibleLabel = children ?? label;
+  const classes = toggleButtonRecipe({isSelected});
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (isDisabled || isLoading) {
@@ -183,7 +135,7 @@ export function ToggleButton({
       aria-pressed={isSelected}
       className={cx(
         buttonRecipe({variant: 'ghost', size, iconOnly: isIconOnly}).root,
-        isSelected ? styles.selected : undefined,
+        classes.root,
         className,
       )}
       data-testid={dataTestId}
@@ -192,22 +144,26 @@ export function ToggleButton({
       ref={ref}
       style={style}
       type="button">
-      <span aria-hidden={isLoading || undefined} className={styles.content}>
+      <span aria-hidden={isLoading || undefined} className={classes.content}>
         {resolvedIcon != null ? (
-          <span className={styles.icon}>
-            <Icon icon={resolvedIcon} size={size} />
+          <span className={classes.icon}>
+            {isIconOnly && isLoading ? (
+              <Spinner size={size} />
+            ) : (
+              <Icon icon={resolvedIcon} size={size} />
+            )}
           </span>
         ) : null}
         {!isIconOnly ? (
-          <span className={styles.labelWrapper}>
-            <span className={styles.label}>{visibleLabel}</span>
-            <span aria-hidden="true" className={styles.widthReservation}>
-              {visibleLabel}
+          <span className={classes.labelWrapper}>
+            <span className={classes.label}>{label}</span>
+            <span aria-hidden="true" className={classes.widthReservation}>
+              {label}
             </span>
           </span>
         ) : null}
         {!isIconOnly && isLoading ? (
-          <span aria-hidden="true" className={styles.spinner}>
+          <span aria-hidden="true" className={classes.spinner}>
             <Spinner size={size} />
           </span>
         ) : null}

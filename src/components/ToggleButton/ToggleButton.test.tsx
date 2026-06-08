@@ -12,11 +12,6 @@ describe('ToggleButton', () => {
     expect(screen.getByRole('button', {name: 'Bold'})).toBeInTheDocument();
   });
 
-  it('renders children instead of label when provided', () => {
-    render(<ToggleButton label="Toggle bold">Custom content</ToggleButton>);
-    expect(screen.getByRole('button')).toHaveTextContent('Custom content');
-  });
-
   it('sets aria-pressed from isSelected', () => {
     const {rerender} = render(<ToggleButton isSelected={false} label="Bold" />);
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
@@ -75,6 +70,19 @@ describe('ToggleButton', () => {
 
     await user.click(button);
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('replaces icon with spinner when icon-only and loading', () => {
+    render(<ToggleButton icon={Star} isIconOnly isLoading label="Favorite" />);
+
+    const button = screen.getByRole('button', {name: 'Favorite'});
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    // Icon should be replaced by spinner
+    // eslint-disable-next-line testing-library/no-node-access -- verifying spinner presence in icon slot
+    expect(button.querySelector('[role="status"]')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- no testing-library query for SVG class
+    expect(button.querySelector('.lucide-star')).not.toBeInTheDocument();
   });
 
   it('renders a tooltip when tooltip prop is provided', () => {
@@ -150,6 +158,35 @@ describe('ToggleButtonGroup', () => {
     expect(screen.getByRole('group', {name: 'View mode'})).toBeInTheDocument();
   });
 
+  it('defaults to horizontal orientation', () => {
+    render(
+      <ToggleButtonGroup label="View mode" onChange={() => {}} value="a">
+        <ToggleButton isIconOnly label="A" value="a" />
+      </ToggleButtonGroup>,
+    );
+
+    expect(screen.getByRole('group', {name: 'View mode'})).toHaveAttribute(
+      'data-orientation',
+      'horizontal',
+    );
+  });
+
+  it('sets vertical orientation and applies the vertical CSS class', () => {
+    render(
+      <ToggleButtonGroup
+        label="View mode"
+        onChange={() => {}}
+        orientation="vertical"
+        value="a">
+        <ToggleButton isIconOnly label="A" value="a" />
+      </ToggleButtonGroup>,
+    );
+
+    const group = screen.getByRole('group', {name: 'View mode'});
+    expect(group).toHaveAttribute('data-orientation', 'vertical');
+    expect(group).toHaveClass('silver-flex-d_column');
+  });
+
   it('supports single selection and deselection', async () => {
     const user = userEvent.setup();
     render(<SingleGroup />);
@@ -202,6 +239,10 @@ describe('ToggleButtonGroup', () => {
       </ToggleButtonGroup>,
     );
 
+    expect(screen.getByRole('group', {name: 'View mode'})).toHaveAttribute(
+      'aria-disabled',
+      'true',
+    );
     expect(screen.getByRole('button', {name: 'List'})).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Grid'})).toBeDisabled();
 
