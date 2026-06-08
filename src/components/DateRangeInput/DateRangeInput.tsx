@@ -170,6 +170,7 @@ export function DateRangeInput({
   ref,
 }: DateRangeInputProps): React.JSX.Element {
   const inputId = useId();
+  const popoverId = `${inputId}-calendar`;
   const descriptionID = isReactNode(description)
     ? `${inputId}-description`
     : undefined;
@@ -222,6 +223,7 @@ export function DateRangeInput({
             />
           }
           hasAutoFocus
+          id={popoverId}
           isEnabled={!isDisabled}
           isOpen={isOpen}
           label={`Choose ${label}`}
@@ -238,7 +240,10 @@ export function DateRangeInput({
         </Popover>
         <input
           aria-busy={isLoading || undefined}
+          aria-controls={popoverId}
           aria-describedby={describedBy}
+          aria-expanded={isOpen}
+          aria-haspopup="dialog"
           aria-invalid={status?.type === 'error' || undefined}
           aria-required={isRequired ?? undefined}
           className={inputStyles.control}
@@ -248,10 +253,11 @@ export function DateRangeInput({
           placeholder={placeholder}
           readOnly
           ref={ref}
+          role="combobox"
           type="text"
           value={displayValue}
         />
-        {hasClear && value != null && !isDisabled ? (
+        {hasClear && value != null && !isDisabled && !isLoading ? (
           <Button
             icon={X}
             isIconOnly
