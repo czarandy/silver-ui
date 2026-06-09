@@ -2,6 +2,7 @@ import {
   createElement,
   useCallback,
   useId,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -247,13 +248,16 @@ export function useLayer({
     [anchorId, isDismissable, id, popoverRefCallback],
   );
 
-  return {
-    ref,
-    anchorId,
-    show,
-    hide,
-    isOpen,
-    id,
-    render,
-  };
+  return useMemo(
+    () => ({
+      ref,
+      anchorId,
+      show,
+      hide,
+      isOpen,
+      id,
+      render,
+    }),
+    [ref, anchorId, show, hide, isOpen, id, render],
+  );
 }

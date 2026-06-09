@@ -154,4 +154,30 @@ describe('HoverCard', () => {
     expect(trigger).toHaveClass('custom-hover');
     expect(trigger).toHaveStyle({color: 'rgb(255, 0, 0)'});
   });
+
+  it('applies placement to the hover card layer', () => {
+    render(
+      <HoverCard content="Details" placement="below">
+        Hover target
+      </HoverCard>,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access -- the hover card layer has no role or testid
+    expect(screen.getByText('Details').parentElement).toHaveStyle({
+      positionArea: 'bottom',
+    });
+  });
+
+  it('applies alignment to the hover card layer', () => {
+    render(
+      <HoverCard alignment="start" content="Details" placement="above">
+        Hover target
+      </HoverCard>,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access -- the hover card layer has no role or testid
+    expect(screen.getByText('Details').parentElement).toHaveStyle({
+      positionArea: 'top span-right',
+    });
+  });
 });

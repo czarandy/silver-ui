@@ -192,6 +192,8 @@ export function useHoverLayer({
     handlersRef.current.keyDown(event as KeyboardEvent);
   }, []);
 
+  const hasTriggerEscape = onTriggerEscape != null;
+
   const interactionRef: RefCallback<HTMLElement> = useCallback(
     element => {
       if (triggerRef.current != null) {
@@ -215,7 +217,7 @@ export function useHoverLayer({
           element.addEventListener('focusout', stableFocusOut);
         }
 
-        if (onTriggerEscape != null) {
+        if (hasTriggerEscape) {
           element.addEventListener('keydown', stableKeyDown);
         }
       }
@@ -224,7 +226,7 @@ export function useHoverLayer({
     },
     [
       focusTrigger,
-      onTriggerEscape,
+      hasTriggerEscape,
       stableFocusIn,
       stableFocusOut,
       stableKeyDown,
