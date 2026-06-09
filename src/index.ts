@@ -479,6 +479,7 @@ export {
 export {
   Drawer,
   useDrawer,
+  type DrawerDismissBehavior,
   type DrawerOptions,
   type DrawerPlacement,
   type DrawerProps,

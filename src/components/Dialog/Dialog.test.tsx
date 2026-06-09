@@ -357,7 +357,7 @@ describe('useDialog', () => {
     expect(screen.getByTestId('status')).toHaveTextContent('closed');
   });
 
-  it('merges options accumulatively across show() calls', async () => {
+  it('does not carry per-call options into a later show() call', async () => {
     const user = userEvent.setup();
 
     function Fixture(): React.JSX.Element {
@@ -391,13 +391,13 @@ describe('useDialog', () => {
     expect(alertDialog).toHaveClass('first-class');
     expect(screen.getByText('First content')).toBeInTheDocument();
 
-    // Second show passes no options, but the previous options persist
-    // because show() merges into the existing options rather than
-    // replacing them.
+    // Second show passes no options, so the previous call's options are
+    // dropped: the dialog reverts to a plain dialog with the default label.
     await user.click(screen.getByRole('button', {name: 'Open plain'}));
     expect(screen.getByText('Second content')).toBeInTheDocument();
-    const stillAlertDialog = screen.getByRole('alertdialog');
-    expect(stillAlertDialog).toHaveClass('first-class');
+    const dialog = screen.getByRole('dialog', {name: 'Preview'});
+    expect(dialog).not.toHaveClass('first-class');
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
     expect(screen.queryByText('First content')).not.toBeInTheDocument();
   });
 

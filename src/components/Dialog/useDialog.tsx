@@ -15,14 +15,15 @@ export interface UseDialogReturn {
 export function useDialog(defaultOptions?: DialogOptions): UseDialogReturn {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<ReactNode>(null);
-  const [options, setOptions] = useState<DialogOptions | undefined>(
-    defaultOptions,
-  );
+  // Options passed to the most recent `show()` call. Each call replaces these
+  // rather than merging, so per-call options never bleed into later calls.
+  // `defaultOptions` remains the baseline, applied beneath them below.
+  const [callOptions, setCallOptions] = useState<DialogOptions | undefined>();
 
   const show = useCallback(
     (nextContent: ReactNode, nextOptions?: DialogOptions) => {
       setContent(nextContent);
-      setOptions(previous => ({...previous, ...nextOptions}));
+      setCallOptions(nextOptions);
       setIsOpen(true);
     },
     [],
@@ -34,14 +35,14 @@ export function useDialog(defaultOptions?: DialogOptions): UseDialogReturn {
     () => (
       <Dialog
         {...(defaultOptions ?? {})}
-        {...(options ?? {})}
+        {...(callOptions ?? {})}
         isOpen={isOpen}
-        label={options?.label ?? defaultOptions?.label}
+        label={callOptions?.label ?? defaultOptions?.label}
         onOpenChange={setIsOpen}>
         {content}
       </Dialog>
     ),
-    [content, defaultOptions, isOpen, options],
+    [content, defaultOptions, isOpen, callOptions],
   );
 
   return {element, hide, isOpen, show};

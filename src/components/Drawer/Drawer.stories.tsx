@@ -12,6 +12,7 @@ const meta: Meta<typeof Drawer> = {
   title: 'Components/Drawer',
   component: Drawer,
   argTypes: {
+    dismissBehavior: {control: 'object'},
     placement: {
       control: {type: 'select'},
       options: ['start', 'end', 'top', 'bottom'],
@@ -19,6 +20,10 @@ const meta: Meta<typeof Drawer> = {
     size: {control: 'text'},
   },
   args: {
+    dismissBehavior: {
+      isBackdropDismissEnabled: true,
+      isEscapeDismissEnabled: true,
+    },
     isOpen: false,
     label: 'Drawer',
     placement: 'end',
@@ -148,6 +153,62 @@ export const CustomSize: Story = {
           <DrawerContent
             onClose={() => setVariant(null)}
             title={variant === 'string' ? '60vw drawer' : '480px drawer'}
+          />
+        </Drawer>
+      </>
+    );
+  },
+};
+
+export const UnsavedChanges: Story = {
+  args: {
+    dismissBehavior: {
+      isBackdropDismissEnabled: false,
+      isEscapeDismissEnabled: false,
+    },
+    label: 'Edit profile',
+    placement: 'end',
+    size: 400,
+  },
+  render: args => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <>
+        <Button label="Edit profile" onClick={() => setIsOpen(true)} />
+        <Drawer {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
+          <Layout
+            content={
+              <LayoutContent>
+                <div
+                  style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+                  <Text as="p" color="secondary">
+                    Backdrop and Escape dismissal are disabled, so unsaved edits
+                    can only be discarded through an explicit action.
+                  </Text>
+                  <TextInput
+                    label="Display name"
+                    onChange={() => {}}
+                    value="Ada Lovelace"
+                  />
+                </div>
+              </LayoutContent>
+            }
+            footer={
+              <LayoutFooter
+                primaryButton={
+                  <Button
+                    label="Save"
+                    onClick={() => setIsOpen(false)}
+                    variant="primary"
+                  />
+                }
+                secondaryButton={
+                  <Button label="Discard" onClick={() => setIsOpen(false)} />
+                }
+              />
+            }
+            header={<LayoutHeader title="Edit profile" />}
           />
         </Drawer>
       </>

@@ -1,10 +1,16 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useRef} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {
+  resolveDismissBehavior,
+  type DismissBehavior,
+} from '../../internal/dismissBehavior';
 import {mergeRefs} from '../../internal/mergeRefs';
+import {useBackdropDismiss} from '../../internal/useBackdropDismiss';
+import {drawerRecipe} from './Drawer.recipe';
 
 export type DrawerPlacement = 'start' | 'end' | 'top' | 'bottom';
+export type DrawerDismissBehavior = DismissBehavior;
 
 export interface DrawerProps {
   /**
@@ -19,6 +25,12 @@ export interface DrawerProps {
    * Test ID applied to the drawer.
    */
   'data-testid'?: string;
+  /**
+   * Controls whether Escape and backdrop clicks request dismissal. Pass a
+   * boolean to enable or disable both behaviors together.
+   * @default {isEscapeDismissEnabled: true, isBackdropDismissEnabled: true}
+   */
+  dismissBehavior?: DrawerDismissBehavior;
   /**
    * Whether the drawer is open.
    */
@@ -39,7 +51,7 @@ export interface DrawerProps {
   /**
    * Ref forwarded to the drawer element.
    */
-  ref?: Ref<HTMLElement>;
+  ref?: Ref<HTMLDialogElement>;
   /**
    * Width (start/end) or height (top/bottom) of the drawer.
    */
@@ -53,76 +65,6 @@ export interface DrawerProps {
 function formatSize(value: number | string): string {
   return typeof value === 'number' ? `${value}px` : value;
 }
-
-const styles = {
-  root: css({
-    position: 'fixed',
-    p: 0,
-    borderWidth: 0,
-    bg: 'bg',
-    color: 'fg',
-    boxShadow: 'xl',
-    flexDirection: 'column',
-    overscrollBehavior: 'contain',
-    _backdrop: {
-      bg: 'overlay.scrim',
-      backdropFilter: 'blur(2px)',
-    },
-    _focusVisible: {
-      outline: 'none',
-    },
-  }),
-  open: css({
-    display: 'flex',
-  }),
-  start: css({
-    inset: 0,
-    marginInlineEnd: 'auto',
-    h: '100dvh',
-    maxH: '100dvh',
-    borderRadius: 0,
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-  }),
-  end: css({
-    inset: 0,
-    marginInlineStart: 'auto',
-    h: '100dvh',
-    maxH: '100dvh',
-    borderRadius: 0,
-    borderInlineStartWidth: 'default',
-    borderInlineStartStyle: 'solid',
-    borderInlineStartColor: 'border',
-  }),
-  top: css({
-    inset: 0,
-    mb: 'auto',
-    w: '100dvw',
-    maxW: '100dvw',
-    borderRadius: 0,
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  bottom: css({
-    inset: 0,
-    mt: 'auto',
-    w: '100dvw',
-    maxW: '100dvw',
-    borderRadius: 0,
-    borderBlockStartWidth: 'default',
-    borderBlockStartStyle: 'solid',
-    borderBlockStartColor: 'border',
-  }),
-  inner: css({
-    display: 'flex',
-    flexDirection: 'column',
-    flex: '1 1 auto',
-    minH: 0,
-    overflow: 'hidden',
-  }),
-} as const;
 
 const DEFAULT_SIZES: Record<DrawerPlacement, number | string> = {
   start: 320,
@@ -151,6 +93,7 @@ export function Drawer({
   onOpenChange,
   placement = 'end',
   size,
+  dismissBehavior,
   children,
   className,
   'data-testid': dataTestId,
@@ -159,6 +102,12 @@ export function Drawer({
 }: DrawerProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const {isBackdropDismissEnabled, isEscapeDismissEnabled} =
+    resolveDismissBehavior(dismissBehavior);
+  const backdropDismiss = useBackdropDismiss<HTMLDialogElement>({
+    isEnabled: isBackdropDismissEnabled,
+    onDismiss: () => onOpenChange(false),
+  });
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -194,31 +143,25 @@ export function Drawer({
 
   const effectiveSize = size ?? DEFAULT_SIZES[placement];
   const sizeStyle = getSizeStyle(placement, effectiveSize);
+  const classes = drawerRecipe({isOpen, placement});
 
   return (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- native dialog backdrop clicks close the drawer
     <dialog
       aria-label={label}
-      aria-modal="true"
-      className={cx(
-        styles.root,
-        isOpen ? styles.open : undefined,
-        styles[placement],
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       onCancel={event => {
         event.preventDefault();
-        onOpenChange(false);
-      }}
-      onClick={event => {
-        if (event.target === event.currentTarget) {
+        if (isEscapeDismissEnabled) {
           onOpenChange(false);
         }
       }}
-      ref={mergeRefs(ref as Ref<HTMLDialogElement>, dialogRef)}
+      onClick={backdropDismiss.onClick}
+      onPointerDown={backdropDismiss.onPointerDown}
+      ref={mergeRefs(ref, dialogRef)}
       style={{...sizeStyle, ...style}}>
-      <div className={styles.inner}>{children}</div>
+      <div className={classes.inner}>{children}</div>
     </dialog>
   );
 }

@@ -9,18 +9,18 @@ import {
   type Ref,
 } from 'react';
 import {cx} from '../../internal/cx';
+import {
+  resolveDismissBehavior,
+  type DismissBehavior,
+} from '../../internal/dismissBehavior';
 import {mergeRefs} from '../../internal/mergeRefs';
+import {useBackdropDismiss} from '../../internal/useBackdropDismiss';
 import {dialogRecipe} from './Dialog.recipe';
 import {DialogContext} from './DialogContext';
 
 export type DialogVariant = 'fullscreen' | 'standard';
 export type DialogRole = 'alertdialog' | 'dialog';
-export type DialogDismissBehavior =
-  | boolean
-  | {
-      isBackdropDismissEnabled?: boolean;
-      isEscapeDismissEnabled?: boolean;
-    };
+export type DialogDismissBehavior = DismissBehavior;
 
 export interface DialogPosition {
   bottom?: number | string;
@@ -104,46 +104,6 @@ function formatSize(value: number | string): string {
 }
 
 /**
- * Whether a pointer coordinate falls outside an element's border box. Native
- * `<dialog>` renders its backdrop outside this box, so a click whose
- * coordinates land outside the dialog rect is a backdrop click — regardless of
- * any padding, border, or margin on the dialog element.
- */
-function isPointerOutsideElement(
-  element: HTMLElement,
-  clientX: number,
-  clientY: number,
-): boolean {
-  const rect = element.getBoundingClientRect();
-  return (
-    clientX < rect.left ||
-    clientX > rect.right ||
-    clientY < rect.top ||
-    clientY > rect.bottom
-  );
-}
-
-function getDismissBehavior(
-  dismissBehavior: DialogDismissBehavior | undefined,
-): {isBackdropDismissEnabled: boolean; isEscapeDismissEnabled: boolean} {
-  if (dismissBehavior == null) {
-    return {isBackdropDismissEnabled: true, isEscapeDismissEnabled: true};
-  }
-
-  if (typeof dismissBehavior === 'boolean') {
-    return {
-      isBackdropDismissEnabled: dismissBehavior,
-      isEscapeDismissEnabled: dismissBehavior,
-    };
-  }
-
-  return {
-    isBackdropDismissEnabled: dismissBehavior.isBackdropDismissEnabled ?? true,
-    isEscapeDismissEnabled: dismissBehavior.isEscapeDismissEnabled ?? true,
-  };
-}
-
-/**
  * A modal dialog surface with backdrop, focus management,
  * and configurable dismiss behavior.
  */
@@ -164,11 +124,14 @@ export function Dialog({
   ref,
 }: DialogProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const pointerDownOnBackdropRef = useRef(false);
   const titleId = useId();
   const isFullscreen = variant === 'fullscreen';
   const {isBackdropDismissEnabled, isEscapeDismissEnabled} =
-    getDismissBehavior(dismissBehavior);
+    resolveDismissBehavior(dismissBehavior);
+  const backdropDismiss = useBackdropDismiss<HTMLDialogElement>({
+    isEnabled: isBackdropDismissEnabled,
+    onDismiss: () => onOpenChange(false),
+  });
   const dialogContextValue = useMemo(
     () => ({onOpenChange, titleId}),
     [onOpenChange, titleId],
@@ -233,38 +196,8 @@ export function Dialog({
           onOpenChange(false);
         }
       }}
-      onClick={event => {
-        const startedOnBackdrop = pointerDownOnBackdropRef.current;
-        pointerDownOnBackdropRef.current = false;
-        // Keyboard-synthesized clicks (Enter/Space on a child control) report
-        // detail 0 and 0,0 coordinates; ignore them so they are not mistaken
-        // for a backdrop click.
-        if (event.detail === 0) {
-          return;
-        }
-        const releasedOnBackdrop = isPointerOutsideElement(
-          event.currentTarget,
-          event.clientX,
-          event.clientY,
-        );
-        // Dismiss only when the press and the release both landed on the
-        // backdrop. This ignores clicks on dialog padding (inside the rect) and
-        // inside-out drags (e.g. text selection) that end on the backdrop.
-        if (
-          startedOnBackdrop &&
-          releasedOnBackdrop &&
-          isBackdropDismissEnabled
-        ) {
-          onOpenChange(false);
-        }
-      }}
-      onPointerDown={event => {
-        pointerDownOnBackdropRef.current = isPointerOutsideElement(
-          event.currentTarget,
-          event.clientX,
-          event.clientY,
-        );
-      }}
+      onClick={backdropDismiss.onClick}
+      onPointerDown={backdropDismiss.onPointerDown}
       ref={mergeRefs(ref, dialogRef)}
       role={role === 'dialog' ? undefined : role}
       style={{

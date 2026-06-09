@@ -15,14 +15,15 @@ export interface UseDrawerReturn {
 export function useDrawer(defaultOptions?: DrawerOptions): UseDrawerReturn {
   const [isOpen, setIsOpen] = useState(false);
   const [content, setContent] = useState<ReactNode>(null);
-  const [options, setOptions] = useState<DrawerOptions | undefined>(
-    defaultOptions,
-  );
+  // Options passed to the most recent `show()` call. Each call replaces these
+  // rather than merging, so per-call options never bleed into later calls.
+  // `defaultOptions` remains the baseline, applied beneath them below.
+  const [callOptions, setCallOptions] = useState<DrawerOptions | undefined>();
 
   const show = useCallback(
     (nextContent: ReactNode, nextOptions?: DrawerOptions) => {
       setContent(nextContent);
-      setOptions(previous => ({...previous, ...nextOptions}));
+      setCallOptions(nextOptions);
       setIsOpen(true);
     },
     [],
@@ -34,14 +35,14 @@ export function useDrawer(defaultOptions?: DrawerOptions): UseDrawerReturn {
     () => (
       <Drawer
         {...(defaultOptions ?? {})}
-        {...(options ?? {})}
+        {...(callOptions ?? {})}
         isOpen={isOpen}
-        label={options?.label ?? defaultOptions?.label ?? 'Drawer'}
+        label={callOptions?.label ?? defaultOptions?.label ?? 'Drawer'}
         onOpenChange={setIsOpen}>
         {content}
       </Drawer>
     ),
-    [content, defaultOptions, isOpen, options],
+    [content, defaultOptions, isOpen, callOptions],
   );
 
   return {element, hide, isOpen, show};
