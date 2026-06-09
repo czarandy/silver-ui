@@ -1,5 +1,4 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
 
 export interface InputGroupTextProps {
   children: ReactNode;
@@ -18,7 +17,7 @@ export function InputGroupText({
 }: InputGroupTextProps): React.JSX.Element {
   return (
     <div
-      className={cx(className)}
+      className={className}
       data-silver-input-group-text=""
       data-testid={dataTestId}
       ref={ref}

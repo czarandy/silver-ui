@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {assertNonNull} from '../../internal/testHelpers';
+import {inputRecipe} from '../Field/inputStyles';
 import {NumberInput} from '../NumberInput';
 import {TextInput} from '../TextInput';
 import {InputGroup} from './InputGroup';
@@ -160,8 +160,8 @@ describe('InputGroup', () => {
     expect(group).not.toHaveAttribute('aria-label');
   });
 
-  it('propagates size to child TextInput via context', () => {
-    const {container} = render(
+  it('propagates size to child TextInput via context, overriding its own prop', () => {
+    render(
       <InputGroup data-testid="group" label="Website" size="lg">
         <TextInput
           isLabelHidden
@@ -173,7 +173,11 @@ describe('InputGroup', () => {
       </InputGroup>,
     );
 
-    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
-    assertNonNull(container.querySelector('[data-testid="group"] > div'));
+    const input = screen.getByRole('textbox', {name: 'URL'});
+    // eslint-disable-next-line testing-library/no-node-access
+    const wrapper = input.parentElement;
+    // The group's `lg` size must win over the child's own `sm` prop.
+    expect(wrapper).toHaveClass(inputRecipe({size: 'lg'}));
+    expect(wrapper).not.toHaveClass(inputRecipe({size: 'sm'}));
   });
 });
