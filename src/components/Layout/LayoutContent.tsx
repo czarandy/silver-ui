@@ -1,8 +1,7 @@
 import type {ComponentPropsWithRef, ElementType} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {layoutRegionRecipe} from './Layout.recipe';
+import {layoutContentRecipe, layoutRegionRecipe} from './Layout.recipe';
 
 /**
  * Scrollable main content area within a Layout. Fills the remaining space
@@ -31,18 +30,6 @@ export interface LayoutContentProps extends ComponentPropsWithRef<'div'> {
   padding?: SpacingToken;
 }
 
-const styles = {
-  root: css({
-    flex: 1,
-    minH: 0,
-    minW: 0,
-    overflow: 'clip',
-  }),
-  scrollable: css({
-    overflow: 'auto',
-  }),
-};
-
 /**
  * Scrollable main content area within a Layout. Fills the remaining space
  * between panels and stretches to fill the available height.
@@ -65,9 +52,8 @@ export function LayoutContent({
       {...rest}
       aria-label={label}
       className={cx(
-        styles.root,
+        layoutContentRecipe({isScrollable}),
         layoutRegionRecipe({padding}),
-        isScrollable && styles.scrollable,
         className,
       )}
       data-testid={dataTestId}

@@ -2,26 +2,12 @@ import {createContext, use} from 'react';
 
 export type LayoutArea = 'header' | 'content' | 'start' | 'end' | 'footer';
 
-export interface LayoutSlots {
-  hasEnd: boolean;
-  hasFooter: boolean;
-  hasHeader: boolean;
-  hasStart: boolean;
-}
-
 export interface LayoutDividerContextValue {
   hasDividers: boolean;
 }
 
 export const LayoutAreaContext = createContext<LayoutArea>('content');
 LayoutAreaContext.displayName = 'LayoutAreaContext';
-export const LayoutSlotsContext = createContext<LayoutSlots>({
-  hasEnd: false,
-  hasFooter: false,
-  hasHeader: false,
-  hasStart: false,
-});
-LayoutSlotsContext.displayName = 'LayoutSlotsContext';
 export const LayoutDividerContext =
   createContext<LayoutDividerContextValue | null>(null);
 LayoutDividerContext.displayName = 'LayoutDividerContext';

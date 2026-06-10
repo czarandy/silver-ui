@@ -1,13 +1,12 @@
 import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {useDialogContext} from '../Dialog/DialogContext';
 import {Heading, Text} from '../Text';
-import {layoutRegionRecipe} from './Layout.recipe';
+import {layoutHeaderRecipe, layoutRegionRecipe} from './Layout.recipe';
 import {useLayoutDivider} from './LayoutContext';
 
 /**
@@ -65,40 +64,6 @@ export interface LayoutHeaderProps {
   title: string;
 }
 
-const styles = {
-  root: css({
-    flexShrink: 0,
-  }),
-  divider: css({
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  inner: css({
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: '3',
-  }),
-  titleArea: css({
-    flex: 1,
-    minW: 0,
-    '& > :focus': {
-      outline: 'none',
-    },
-  }),
-  actions: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    flexShrink: 0,
-  }),
-  closeButton: css({
-    marginInlineEnd: '-2',
-    marginBlockStart: '-2',
-  }),
-} as const;
-
 /**
  * Header landmark region within a Layout with a structured title,
  * optional subtitle, and start/end content slots.
@@ -124,11 +89,12 @@ export function LayoutHeader({
   const dialogContext = useDialogContext();
   const hasDivider = dividerContext?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
+  const classes = layoutHeaderRecipe({hasDivider});
 
   const closeButton =
     dialogContext != null ? (
       <Button
-        className={styles.closeButton}
+        className={classes.closeButton}
         icon={X}
         isIconOnly
         label="Close"
@@ -141,15 +107,15 @@ export function LayoutHeader({
   return (
     <header
       aria-label={label}
-      className={cx(styles.root, hasDivider && styles.divider, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={rootStyle}>
-      <div className={cx(styles.inner, layoutRegionRecipe({padding}))}>
+      <div className={cx(classes.inner, layoutRegionRecipe({padding}))}>
         {isReactNode(startContent) ? (
-          <div className={styles.actions}>{startContent}</div>
+          <div className={classes.actions}>{startContent}</div>
         ) : null}
-        <div className={styles.titleArea}>
+        <div className={classes.titleArea}>
           <Heading
             data-dialog-autofocus={dialogContext != null ? 'true' : undefined}
             id={dialogContext?.titleId}
@@ -164,7 +130,7 @@ export function LayoutHeader({
           ) : null}
         </div>
         {hasEnd ? (
-          <div className={styles.actions}>
+          <div className={classes.actions}>
             {endContent}
             {closeButton}
           </div>

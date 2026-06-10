@@ -1,5 +1,7 @@
 import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
+import {DialogContext} from '../Dialog/DialogContext';
 import {Layout} from './Layout';
 import {LayoutContent} from './LayoutContent';
 import {LayoutFooter} from './LayoutFooter';
@@ -214,6 +216,40 @@ describe('LayoutHeader', () => {
     expect(screen.getByTestId('header')).toHaveStyle({height: '64px'});
   });
 
+  it('does not render a close button outside a Dialog', () => {
+    render(<LayoutHeader title="Header" />);
+
+    expect(
+      screen.queryByRole('button', {name: 'Close'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders a Dialog close button that calls onOpenChange(false)', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+
+    render(
+      <DialogContext value={{onOpenChange, titleId: 'title'}}>
+        <LayoutHeader title="Header" />
+      </DialogContext>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Close'}));
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('wires the title to the Dialog via titleId and autofocus', () => {
+    render(
+      <DialogContext value={{onOpenChange: vi.fn(), titleId: 'dialog-title'}}>
+        <LayoutHeader title="Header" />
+      </DialogContext>,
+    );
+
+    const heading = screen.getByRole('heading', {name: 'Header'});
+    expect(heading).toHaveAttribute('id', 'dialog-title');
+    expect(heading).toHaveAttribute('data-dialog-autofocus', 'true');
+  });
+
   it('forwards className, style, ref, and data-testid', () => {
     const ref = vi.fn<(element: HTMLElement | null) => void>();
 
@@ -268,6 +304,15 @@ describe('LayoutFooter', () => {
     );
 
     expect(screen.getByTestId('start')).toBeInTheDocument();
+  });
+
+  it('renders startContent alone without requiring action buttons', () => {
+    render(
+      <LayoutFooter startContent={<span data-testid="start">Saved</span>} />,
+    );
+
+    expect(screen.getByTestId('start')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('applies divider on the block-start edge when hasDividers is set', () => {

@@ -1,14 +1,12 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {layoutMiddleRecipe, layoutRecipe} from './Layout.recipe';
+import {layoutRecipe} from './Layout.recipe';
 import {
   LayoutAreaContext,
   LayoutDividerContext,
-  LayoutSlotsContext,
   type LayoutArea,
 } from './LayoutContext';
 import type {LayoutHeight} from './types';
@@ -67,15 +65,6 @@ export interface LayoutProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  contentFill: css({
-    flex: 1,
-    minW: 0,
-    display: 'flex',
-    flexDirection: 'column',
-  }),
-};
-
 function AreaProvider({
   area,
   children,
@@ -104,39 +93,26 @@ export function Layout({
   start,
   style,
 }: LayoutProps): React.JSX.Element {
-  const slots = useMemo(
-    () => ({
-      hasEnd: isReactNode(end),
-      hasFooter: isReactNode(footer),
-      hasHeader: isReactNode(header),
-      hasStart: isReactNode(start),
-    }),
-    [end, footer, header, start],
-  );
   const dividerValue = useMemo(() => ({hasDividers}), [hasDividers]);
-  const rootStyle: CSSProperties = {
-    ...style,
-  };
+  const classes = layoutRecipe({height, padding});
 
   return (
     <LayoutDividerContext value={dividerValue}>
-      <LayoutSlotsContext value={slots}>
-        <div
-          className={cx(layoutRecipe({height, padding}), className)}
-          data-testid={dataTestId}
-          ref={ref}
-          style={rootStyle}>
-          <AreaProvider area="header">{header}</AreaProvider>
-          <div className={layoutMiddleRecipe()}>
-            <AreaProvider area="start">{start}</AreaProvider>
-            <div className={styles.contentFill}>
-              <AreaProvider area="content">{content}</AreaProvider>
-            </div>
-            <AreaProvider area="end">{end}</AreaProvider>
+      <div
+        className={cx(classes.root, className)}
+        data-testid={dataTestId}
+        ref={ref}
+        style={style}>
+        <AreaProvider area="header">{header}</AreaProvider>
+        <div className={classes.middle}>
+          <AreaProvider area="start">{start}</AreaProvider>
+          <div className={classes.content}>
+            <AreaProvider area="content">{content}</AreaProvider>
           </div>
-          <AreaProvider area="footer">{footer}</AreaProvider>
+          <AreaProvider area="end">{end}</AreaProvider>
         </div>
-      </LayoutSlotsContext>
+        <AreaProvider area="footer">{footer}</AreaProvider>
+      </div>
     </LayoutDividerContext>
   );
 }

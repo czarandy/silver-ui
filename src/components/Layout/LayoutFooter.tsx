@@ -1,9 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {layoutRegionRecipe} from './Layout.recipe';
+import {layoutFooterRecipe, layoutRegionRecipe} from './Layout.recipe';
 import {useLayoutDivider} from './LayoutContext';
 
 interface LayoutFooterBaseProps {
@@ -52,7 +51,7 @@ interface LayoutFooterActionsProps extends LayoutFooterBaseProps {
   /**
    * Primary action button, rendered rightmost.
    */
-  primaryButton: ReactNode;
+  primaryButton?: ReactNode;
   /**
    * Secondary action button, rendered left of the primary button.
    */
@@ -70,38 +69,6 @@ interface LayoutFooterActionsProps extends LayoutFooterBaseProps {
 export type LayoutFooterProps =
   | LayoutFooterActionsProps
   | LayoutFooterCustomProps;
-
-const styles = {
-  root: css({
-    flexShrink: 0,
-  }),
-  divider: css({
-    borderBlockStartWidth: 'default',
-    borderBlockStartStyle: 'solid',
-    borderBlockStartColor: 'border',
-  }),
-  inner: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '3',
-  }),
-  customInner: css({}),
-  start: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    flex: 1,
-    minW: 0,
-    marginInlineEnd: 'auto',
-  }),
-  actions: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    flexShrink: 0,
-  }),
-};
 
 /**
  * Footer landmark region within a Layout.
@@ -123,31 +90,31 @@ export function LayoutFooter({
   const hasDivider = dividerContext?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
   const isCustom = isReactNode(children);
+  const hasActions = isReactNode(primaryButton) || isReactNode(secondaryButton);
+  const classes = layoutFooterRecipe({hasDivider, isCustom});
 
   return (
     <footer
       aria-label={label}
-      className={cx(styles.root, hasDivider && styles.divider, className)}
+      className={cx(classes.root, className)}
       data-divider={hasDivider || undefined}
       data-testid={dataTestId}
       ref={ref}
       style={rootStyle}>
-      <div
-        className={cx(
-          isCustom ? styles.customInner : styles.inner,
-          layoutRegionRecipe({padding}),
-        )}>
+      <div className={cx(classes.inner, layoutRegionRecipe({padding}))}>
         {isCustom ? (
           children
         ) : (
           <>
             {isReactNode(startContent) ? (
-              <div className={styles.start}>{startContent}</div>
+              <div className={classes.start}>{startContent}</div>
             ) : null}
-            <div className={styles.actions}>
-              {secondaryButton}
-              {primaryButton}
-            </div>
+            {hasActions ? (
+              <div className={classes.actions}>
+                {secondaryButton}
+                {primaryButton}
+              </div>
+            ) : null}
           </>
         )}
       </div>

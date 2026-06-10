@@ -1,4 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {ChevronLeft} from 'lucide-react';
 import {Button} from '../Button';
 import {Card} from '../Card';
 import {VStack} from '../Stack';
@@ -292,6 +293,82 @@ export const ContentPadding: Story = {
           </LayoutContent>
         }
         header={<LayoutHeader title="Header (default padding)" />}
+      />
+    </Card>
+  ),
+};
+
+export const HeaderSubtitle: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Header with supporting subtitle text.</Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader
+            subtitle="Manage your account preferences"
+            title="Settings"
+          />
+        }
+      />
+    </Card>
+  ),
+};
+
+export const HeaderActions: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">
+              startContent holds a back button, endContent holds primary
+              actions.
+            </Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader
+            endContent={<Button label="Save" variant="primary" />}
+            startContent={
+              <Button
+                icon={ChevronLeft}
+                isIconOnly
+                label="Back"
+                variant="ghost"
+              />
+            }
+            subtitle="Edit details"
+            title="Profile"
+          />
+        }
+      />
+    </Card>
+  ),
+};
+
+export const HeaderHeight: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">Header is pinned to a fixed 96px height.</Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader
+            height={96}
+            subtitle="Fixed 96px height"
+            title="Tall header"
+          />
+        }
       />
     </Card>
   ),
