@@ -12,12 +12,13 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
+import {useScrollLock} from '../../internal/useScrollLock';
 import {Button} from '../Button';
+import {lightboxRecipe} from './Lightbox.recipe';
 
 export type LightboxMediaType = 'image' | 'video';
 
@@ -99,132 +100,6 @@ export interface LightboxProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  dialog: css({
-    position: 'fixed',
-    inset: 0,
-    w: '100dvw',
-    h: '100dvh',
-    maxW: 'none',
-    maxH: 'none',
-    m: 0,
-    p: 0,
-    borderWidth: 0,
-    bg: 'transparent',
-    overflow: 'hidden',
-    outline: 'none',
-    _backdrop: {
-      bg: 'overlay.scrim.strong',
-      backdropFilter: 'blur(2px)',
-    },
-  }),
-  container: css({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: 'full',
-    h: 'full',
-    p: '8',
-  }),
-  mediaGroup: css({
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    maxW: 'full',
-    maxH: 'full',
-    minH: 0,
-  }),
-  mediaWrap: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    minH: 0,
-    userSelect: 'none',
-  }),
-  zoomable: css({cursor: 'zoom-in'}),
-  zoomed: css({cursor: 'grab'}),
-  dragging: css({cursor: 'grabbing'}),
-  image: css({
-    display: 'block',
-    maxW: '100%',
-    maxH: 'calc(100dvh - 7rem)',
-    objectFit: 'contain',
-    pointerEvents: 'none',
-    transitionProperty: 'transform',
-    transitionDuration: 'normal',
-    transitionTimingFunction: 'default',
-    '@media (prefers-reduced-motion: reduce)': {
-      transitionDuration: '0ms',
-    },
-  }),
-  imageDragging: css({transitionProperty: 'none'}),
-  video: css({
-    maxW: '100%',
-    maxH: 'calc(100dvh - 7rem)',
-    objectFit: 'contain',
-    outline: 'none',
-  }),
-  caption: css({
-    w: 'full',
-    maxW: 'min(90dvw, 48rem)',
-    px: '3',
-    pt: '2',
-    color: 'fg.onPrimary',
-    fontFamily: 'body',
-    fontSize: 'lg',
-    lineHeight: 'normal',
-    textAlign: 'center',
-  }),
-  close: css({
-    position: 'absolute',
-    top: '3',
-    right: '3',
-    zIndex: 1,
-  }),
-  nav: css({
-    position: 'absolute',
-    top: '50%',
-    zIndex: 1,
-    transform: 'translateY(-50%)',
-  }),
-  prev: css({left: '3'}),
-  next: css({right: '3'}),
-  counter: css({
-    position: 'absolute',
-    top: '3',
-    left: '3',
-    zIndex: 1,
-    color: 'fg.onPrimary',
-    fontFamily: 'body',
-    fontSize: 'md',
-  }),
-  controlButton: css({
-    bg: 'overlay.scrim',
-    color: 'fg.onPrimary',
-    _hover: {
-      bg: 'overlay.scrim.strong',
-    },
-    _active: {
-      bg: 'overlay.scrim.strong',
-    },
-  }),
-} as const;
-
-function useScrollLock(isLocked: boolean): void {
-  useEffect(() => {
-    if (!isLocked) {
-      return;
-    }
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isLocked]);
-}
-
 function isMediaArray(
   media: LightboxMedia | ReadonlyArray<LightboxMedia>,
 ): media is ReadonlyArray<LightboxMedia> {
@@ -276,6 +151,14 @@ export function Lightbox({
     zoom === 1
       ? undefined
       : `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`;
+  const cursor = isDragging
+    ? 'dragging'
+    : !isVideo && zoom > 1
+      ? 'zoomed'
+      : !isVideo && hasZoom && zoom === 1
+        ? 'zoomable'
+        : 'default';
+  const classes = lightboxRecipe({cursor, isDragging});
 
   useScrollLock(isOpen);
 
@@ -367,7 +250,7 @@ export function Lightbox({
   return (
     <dialog
       aria-label="Media lightbox"
-      className={cx(styles.dialog, className)}
+      className={cx(classes.dialog, className)}
       data-testid={dataTestId}
       onCancel={event => {
         event.preventDefault();
@@ -389,10 +272,10 @@ export function Lightbox({
       }}
       ref={mergeRefs(ref, dialogRef)}
       style={style}>
-      <div className={styles.container}>
-        <div className={styles.close}>
+      <div className={classes.container}>
+        <div className={classes.close}>
           <Button
-            className={styles.controlButton}
+            className={classes.controlButton}
             icon={X}
             isIconOnly
             label="Close"
@@ -400,9 +283,9 @@ export function Lightbox({
           />
         </div>
         {canPrev ? (
-          <div className={cx(styles.nav, styles.prev)}>
+          <div className={lightboxRecipe({position: 'prev'}).nav}>
             <Button
-              className={styles.controlButton}
+              className={classes.controlButton}
               icon={ChevronLeft}
               isIconOnly
               label="Previous"
@@ -411,15 +294,10 @@ export function Lightbox({
           </div>
         ) : null}
         {hasMedia ? (
-          <div className={styles.mediaGroup}>
+          <div className={classes.mediaGroup}>
             {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- media viewport supports image zoom/pan gestures */}
             <div
-              className={cx(
-                styles.mediaWrap,
-                !isVideo && hasZoom && zoom === 1 ? styles.zoomable : undefined,
-                !isVideo && zoom > 1 ? styles.zoomed : undefined,
-                isDragging ? styles.dragging : undefined,
-              )}
+              className={classes.mediaWrap}
               onDoubleClick={() => {
                 if (!hasZoom || isVideo) {
                   return;
@@ -444,7 +322,7 @@ export function Lightbox({
                 <video
                   aria-label={currentItem.alt}
                   autoPlay={hasAutoPlay}
-                  className={styles.video}
+                  className={classes.video}
                   controls
                   src={currentItem.src}>
                   {currentItem.captionsSrc != null ? (
@@ -458,10 +336,7 @@ export function Lightbox({
               ) : (
                 <img
                   alt={currentItem.alt}
-                  className={cx(
-                    styles.image,
-                    isDragging ? styles.imageDragging : undefined,
-                  )}
+                  className={classes.image}
                   draggable={false}
                   src={currentItem.src}
                   style={{transform: imageTransform}}
@@ -469,14 +344,14 @@ export function Lightbox({
               )}
             </div>
             {isReactNode(currentItem.caption) ? (
-              <div className={styles.caption}>{currentItem.caption}</div>
+              <div className={classes.caption}>{currentItem.caption}</div>
             ) : null}
           </div>
         ) : null}
         {canNext ? (
-          <div className={cx(styles.nav, styles.next)}>
+          <div className={lightboxRecipe({position: 'next'}).nav}>
             <Button
-              className={styles.controlButton}
+              className={classes.controlButton}
               icon={ChevronRight}
               isIconOnly
               label="Next"
@@ -485,7 +360,7 @@ export function Lightbox({
           </div>
         ) : null}
         {isGallery ? (
-          <div className={styles.counter}>
+          <div className={classes.counter}>
             {currentIndex + 1} / {mediaItems.length}
           </div>
         ) : null}

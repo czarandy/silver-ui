@@ -15,6 +15,7 @@ import {
 } from '../../internal/dismissBehavior';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useBackdropDismiss} from '../../internal/useBackdropDismiss';
+import {useScrollLock} from '../../internal/useScrollLock';
 import {dialogRecipe} from './Dialog.recipe';
 import {DialogContext} from './DialogContext';
 
@@ -161,16 +162,7 @@ export function Dialog({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   const positionStyle =
     position != null && !isFullscreen

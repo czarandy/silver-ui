@@ -7,6 +7,7 @@ import {
 } from '../../internal/dismissBehavior';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useBackdropDismiss} from '../../internal/useBackdropDismiss';
+import {useScrollLock} from '../../internal/useScrollLock';
 import {drawerRecipe} from './Drawer.recipe';
 
 export type DrawerPlacement = 'start' | 'end' | 'top' | 'bottom';
@@ -130,16 +131,7 @@ export function Drawer({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   const effectiveSize = size ?? DEFAULT_SIZES[placement];
   const sizeStyle = getSizeStyle(placement, effectiveSize);

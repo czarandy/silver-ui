@@ -6,6 +6,7 @@ import {useAppShellMobile} from '../../components/AppShell/AppShellMobileContext
 import {Button} from '../../components/Button';
 import {cx} from '../cx';
 import {mergeRefs} from '../mergeRefs';
+import {useScrollLock} from '../useScrollLock';
 import {mobileNavRecipe} from './MobileNav.recipe';
 
 export type MobileNavSide = 'start' | 'end';
@@ -169,17 +170,7 @@ export function MobileNav({
     }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, [isOpen]);
+  useScrollLock(isOpen);
 
   const formattedSize = formatSize(size);
 
