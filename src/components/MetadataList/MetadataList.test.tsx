@@ -88,6 +88,19 @@ describe('MetadataList', () => {
     expect(screen.getByText('Status').querySelector('svg')).toBeInTheDocument();
   });
 
+  it('renders an icon as a decorative element in the stacked layout', () => {
+    render(
+      <MetadataList labelPosition="top">
+        <MetadataListItem icon={CircleCheck} label="Status">
+          Active
+        </MetadataListItem>
+      </MetadataList>,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying decorative svg presence
+    expect(screen.getByText('Status').querySelector('svg')).toBeInTheDocument();
+  });
+
   it('applies className, style, data-testid, and ref to MetadataList', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 

@@ -1,7 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
+import {metadataListRecipe} from './MetadataList.recipe';
 import {useMetadataList} from './MetadataListContext';
 
 /**
@@ -38,34 +38,6 @@ export interface MetadataListItemProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  label: css({
-    color: 'fg.muted',
-    fontSize: 'md',
-    fontWeight: 'bold',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    m: 0,
-    minH: '6',
-  }),
-  value: css({
-    color: 'fg',
-    fontSize: 'md',
-    m: 0,
-    minH: '6',
-    overflowWrap: 'break-word',
-  }),
-  stacked: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-  }),
-  inline: css({
-    display: 'contents',
-  }),
-} as const;
-
 /**
  * A single label-value pair rendered inside a MetadataList.
  */
@@ -84,7 +56,7 @@ export function MetadataListItem({
     throw new Error('MetadataListItem must be rendered inside a MetadataList.');
   }
 
-  const isStacked = context?.labelPosition === 'top';
+  const styles = metadataListRecipe({labelPosition: context?.labelPosition});
   const labelContent = (
     <>
       {icon != null ? <Icon color="secondary" icon={icon} size="sm" /> : null}
@@ -92,22 +64,9 @@ export function MetadataListItem({
     </>
   );
 
-  if (isStacked) {
-    return (
-      <div
-        className={cx(styles.stacked, className)}
-        data-testid={dataTestId}
-        ref={ref}
-        style={style}>
-        <dt className={styles.label}>{labelContent}</dt>
-        <dd className={styles.value}>{children}</dd>
-      </div>
-    );
-  }
-
   return (
     <div
-      className={cx(styles.inline, className)}
+      className={cx(styles.item, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>

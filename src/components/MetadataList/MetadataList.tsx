@@ -5,9 +5,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {Heading} from '../Text';
+import {metadataListRecipe} from './MetadataList.recipe';
 import {MetadataListContext} from './MetadataListContext';
 
 export type MetadataListLabelPosition = 'start' | 'top';
@@ -44,24 +44,6 @@ export interface MetadataListProps {
   title?: string;
 }
 
-const styles = {
-  root: css({display: 'flex', flexDirection: 'column'}),
-  title: css({mb: '3'}),
-  dl: css({m: 0, p: 0}),
-  grid: css({
-    display: 'grid',
-    gridTemplateColumns: 'auto 1fr',
-    rowGap: '3',
-    columnGap: '6',
-    alignItems: 'start',
-  }),
-  gridStacked: css({
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: '3',
-  }),
-} as const;
-
 /**
  * Displays a list of label-value metadata pairs in configurable layouts.
  */
@@ -76,8 +58,7 @@ export function MetadataList({
 }: MetadataListProps): React.JSX.Element {
   const titleId = useId();
   const contextValue = useMemo(() => ({labelPosition}), [labelPosition]);
-  const dlClassName =
-    labelPosition === 'top' ? styles.gridStacked : styles.grid;
+  const styles = metadataListRecipe({labelPosition});
 
   return (
     <MetadataListContext value={contextValue}>
@@ -93,7 +74,7 @@ export function MetadataList({
         ) : null}
         <dl
           aria-labelledby={title != null ? titleId : undefined}
-          className={cx(styles.dl, dlClassName)}>
+          className={styles.dl}>
           {children}
         </dl>
       </div>
