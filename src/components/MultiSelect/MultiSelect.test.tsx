@@ -514,4 +514,42 @@ describe('MultiSelect', () => {
       screen.getByRole('combobox', {name: 'Columns'}),
     );
   });
+
+  it('forwards className and style to the field root', () => {
+    const {container} = render(
+      <MultiSelect
+        className="custom-field"
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        style={{marginBottom: '8px'}}
+        value={[]}
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- className/style land on the Field root, which has no role or testid
+    const root = container.querySelector('.custom-field');
+    expect(root).toBeInTheDocument();
+    expect(root).toHaveStyle({marginBottom: '8px'});
+  });
+
+  it('opens the dropdown on mount when isDefaultOpen is set', () => {
+    render(
+      <MultiSelect
+        isDefaultOpen
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={[]}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', {name: 'Columns'})).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(
+      screen.getByRole('listbox', {hidden: true, name: 'Columns options'}),
+    ).toBeInTheDocument();
+  });
 });

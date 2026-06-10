@@ -6,7 +6,6 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {
   renderSelectListboxOptions,
@@ -27,6 +26,10 @@ import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
 import {Spinner} from '../Spinner';
 import {Text} from '../Text';
+import {
+  multiSelectMenuRecipe,
+  multiSelectTriggerRecipe,
+} from './MultiSelect.recipe';
 
 export interface MultiSelectOptionData extends SelectListboxOptionData {
   /**
@@ -201,139 +204,6 @@ export type MultiSelectProps = {
   value: string[];
 } & FieldNecessity;
 
-const styles = {
-  wrapper: css({
-    cursor: 'pointer',
-  }),
-  wrapperDisabled: css({
-    cursor: 'not-allowed',
-  }),
-  trigger: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '2',
-    flex: 1,
-    minW: 0,
-    p: 0,
-    borderWidth: 0,
-    bg: 'transparent',
-    color: 'inherit',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    outline: 'none',
-    textAlign: 'start',
-    _disabled: {cursor: 'not-allowed'},
-  }),
-  triggerText: css({
-    flex: 1,
-    minW: 0,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  }),
-  placeholder: css({color: 'fg.muted'}),
-  iconSlot: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    color: 'fg.muted',
-  }),
-  badges: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '1',
-    minW: 0,
-    overflow: 'hidden',
-  }),
-  menu: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    maxH: '80',
-    overflowY: 'auto',
-    p: '1',
-  }),
-  search: css({
-    w: 'full',
-    px: '2',
-    py: '1',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'border.emphasized',
-    borderRadius: 'md',
-    fontFamily: 'body',
-    outline: 'none',
-    _focus: {borderColor: 'primary'},
-  }),
-  option: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    w: 'full',
-    px: '2',
-    py: '2',
-    borderWidth: 0,
-    borderRadius: 'md',
-    bg: 'transparent',
-    color: 'fg',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    textAlign: 'start',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffsetTight',
-    },
-    '&[aria-disabled="true"]': {
-      opacity: 0.55,
-      cursor: 'not-allowed',
-      pointerEvents: 'none',
-    },
-  }),
-  checkbox: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    w: '5',
-    h: '5',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'fg.muted',
-    borderRadius: 'sm',
-    bg: 'bg',
-    color: 'fg.onPrimary',
-  }),
-  checkboxSelected: css({
-    bg: 'primary',
-    borderColor: 'primary',
-  }),
-  optionHighlighted: css({bg: 'bg.subtle'}),
-  optionContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '2',
-    minW: 0,
-    flex: 1,
-  }),
-  sectionHeading: css({
-    px: '2',
-    py: '1',
-    color: 'fg.muted',
-    fontFamily: 'body',
-    fontSize: 'sm',
-    fontWeight: 'semibold',
-  }),
-  divider: css({
-    h: '1px',
-    bg: 'border',
-    my: '1',
-  }),
-} as const;
-
 /**
  * Multi-select dropdown field with checkbox-style options.
  */
@@ -369,12 +239,6 @@ export function MultiSelect({
   value,
 }: MultiSelectProps): React.JSX.Element {
   const selectedValues = useMemo(() => new Set(value), [value]);
-  const commitChange = useCallback(
-    (nextValue: string[]) => {
-      onChange(nextValue);
-    },
-    [onChange],
-  );
 
   const toggleValue = useCallback(
     (option: MultiSelectOptionData): boolean => {
@@ -388,10 +252,10 @@ export function MultiSelect({
       } else {
         nextValues.add(option.value);
       }
-      commitChange(Array.from(nextValues));
+      onChange(Array.from(nextValues));
       return true;
     },
-    [commitChange, value],
+    [onChange, value],
   );
 
   const {
@@ -442,7 +306,7 @@ export function MultiSelect({
 
   const toggleAll = useCallback(() => {
     if (allSelected) {
-      commitChange(
+      onChange(
         value.filter(
           optionValue =>
             !enabledVisibleOptions.some(option => option.value === optionValue),
@@ -455,28 +319,32 @@ export function MultiSelect({
     for (const option of enabledVisibleOptions) {
       nextValues.add(option.value);
     }
-    commitChange(Array.from(nextValues));
-  }, [allSelected, commitChange, enabledVisibleOptions, value]);
+    onChange(Array.from(nextValues));
+  }, [allSelected, onChange, enabledVisibleOptions, value]);
+
+  const menuClasses = multiSelectMenuRecipe();
+  const triggerClasses = multiSelectTriggerRecipe({
+    isDisabled: isInteractionDisabled,
+    isPlaceholder: selectedOptions.length === 0,
+  });
 
   const renderTriggerValue = (): ReactNode => {
     if (selectedOptions.length === 0) {
-      return (
-        <span className={cx(styles.triggerText, styles.placeholder)}>
-          {placeholder}
-        </span>
-      );
+      return <span className={triggerClasses.triggerText}>{placeholder}</span>;
     }
     if (triggerDisplay === 'labels') {
       const labels = selectedOptions.map(
         option => option.label ?? option.value,
       );
-      return <span className={styles.triggerText}>{labels.join(', ')}</span>;
+      return (
+        <span className={triggerClasses.triggerText}>{labels.join(', ')}</span>
+      );
     }
     if (triggerDisplay === 'badges') {
       const visible = selectedOptions.slice(0, maxBadges);
       const overflow = selectedOptions.length - visible.length;
       return (
-        <span className={styles.badges}>
+        <span className={triggerClasses.badges}>
           {visible.map(option => (
             <Badge key={option.value} label={option.label ?? option.value} />
           ))}
@@ -489,7 +357,7 @@ export function MultiSelect({
       );
     }
     return (
-      <span className={styles.triggerText}>
+      <span className={triggerClasses.triggerText}>
         {selectedOptions.length} selected
       </span>
     );
@@ -501,15 +369,13 @@ export function MultiSelect({
     }
     const isSelected = selectedValues.has(option.value);
     const isHighlighted = highlightedValue === option.value;
+    const optionClasses = multiSelectMenuRecipe({isHighlighted, isSelected});
     return (
       // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
       <div
         aria-disabled={option.isDisabled ?? undefined}
         aria-selected={isSelected}
-        className={cx(
-          styles.option,
-          isHighlighted ? styles.optionHighlighted : undefined,
-        )}
+        className={optionClasses.option}
         data-value={option.value}
         id={getOptionId(option.value)}
         key={option.value}
@@ -517,19 +383,14 @@ export function MultiSelect({
         onMouseEnter={handleOptionMouseEnter}
         role="option"
         tabIndex={isHighlighted ? 0 : -1}>
-        <span
-          aria-hidden="true"
-          className={cx(
-            styles.checkbox,
-            isSelected ? styles.checkboxSelected : undefined,
-          )}>
+        <span aria-hidden="true" className={optionClasses.checkbox}>
           {isSelected ? <Icon icon={Check} size="sm" /> : null}
         </span>
-        <span className={styles.optionContent}>
+        <span className={optionClasses.optionContent}>
           {children == null ? (
             <>
               {option.icon != null ? (
-                <span className={styles.iconSlot}>
+                <span className={optionClasses.iconSlot}>
                   <Icon color="secondary" icon={option.icon} size="sm" />
                 </span>
               ) : null}
@@ -544,12 +405,14 @@ export function MultiSelect({
   };
 
   const optionNodes = renderSelectListboxOptions({
-    dividerClassName: styles.divider,
+    dividerClassName: menuClasses.divider ?? '',
     inputId,
     options,
     renderOption,
-    sectionHeadingClassName: styles.sectionHeading,
+    sectionHeadingClassName: menuClasses.sectionHeading ?? '',
   });
+
+  const selectAllClasses = multiSelectMenuRecipe({isSelected: allSelected});
 
   const menu = (
     <>
@@ -559,7 +422,7 @@ export function MultiSelect({
           aria-autocomplete="list"
           aria-controls={listboxId}
           aria-label={`Search ${label}`}
-          className={styles.search}
+          className={menuClasses.search}
           onChange={event => {
             setQuery(event.target.value);
             setHighlightedValue(null);
@@ -573,26 +436,23 @@ export function MultiSelect({
       <div
         aria-label={`${label} options`}
         aria-multiselectable="true"
-        className={styles.menu}
+        className={menuClasses.menu}
         id={listboxId}
         role="listbox">
         {hasSelectAll ? (
           // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
           <div
             aria-selected={allSelected}
-            className={styles.option}
+            className={selectAllClasses.option}
             onClick={toggleAll}
             role="option"
             tabIndex={-1}>
-            <span
-              aria-hidden="true"
-              className={cx(
-                styles.checkbox,
-                allSelected ? styles.checkboxSelected : undefined,
-              )}>
+            <span aria-hidden="true" className={selectAllClasses.checkbox}>
               {allSelected ? <Icon icon={Check} size="sm" /> : null}
             </span>
-            <span className={styles.optionContent}>{selectAllLabel}</span>
+            <span className={selectAllClasses.optionContent}>
+              {selectAllLabel}
+            </span>
           </div>
         ) : null}
         {optionNodes}
@@ -609,8 +469,7 @@ export function MultiSelect({
           status: status?.type,
           isDisabled,
         }),
-        styles.wrapper,
-        isInteractionDisabled ? styles.wrapperDisabled : undefined,
+        triggerClasses.wrapper,
       )}
       onClick={() => {
         if (!isInteractionDisabled) {
@@ -619,7 +478,7 @@ export function MultiSelect({
       }}
       ref={triggerRef}>
       {startIcon != null ? (
-        <span className={styles.iconSlot}>
+        <span className={menuClasses.iconSlot}>
           <Icon color="secondary" icon={startIcon} size="sm" />
         </span>
       ) : null}
@@ -631,7 +490,7 @@ export function MultiSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
-        className={styles.trigger}
+        className={triggerClasses.trigger}
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
         id={inputId}
@@ -649,13 +508,13 @@ export function MultiSelect({
           label={`Clear ${label}`}
           onClick={event => {
             event.stopPropagation();
-            commitChange([]);
+            onChange([]);
           }}
           size="sm"
           variant="ghost"
         />
       ) : null}
-      <span className={styles.iconSlot}>
+      <span className={menuClasses.iconSlot}>
         <Icon icon={ChevronDown} size="sm" />
       </span>
     </div>
