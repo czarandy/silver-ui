@@ -58,6 +58,24 @@ describe('Item', () => {
     expect(screen.getByTestId('item')).toHaveTextContent(/^1\.MProject/u);
   });
 
+  it('renders trailingContent after the interactive content', () => {
+    render(
+      <Item
+        data-testid="item"
+        endContent={<span>E</span>}
+        label="Project"
+        onClick={() => {}}
+        startContent={<span>S</span>}
+        trailingContent={<span>T</span>}
+      />,
+    );
+
+    // Trailing content sits outside and after the interactive area, whose own
+    // slots render in start -> label -> end order.
+    expect(screen.getByTestId('item')).toHaveTextContent(/^SProjectET$/u);
+    expect(screen.getByRole('button')).toHaveTextContent(/^SProjectE$/u);
+  });
+
   it('fires onClick from the invisible button', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
@@ -80,6 +98,51 @@ describe('Item', () => {
     const link = screen.getByRole('link', {name: 'Disabled link'});
     expect(link).toHaveAttribute('aria-disabled', 'true');
     expect(link).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('does not double-dim end content when disabled', () => {
+    // Disabling dims the content wrapper via opacity, which compounds through
+    // the tree. The nested end-content slots must not add their own opacity, or
+    // they would render at half the intended dimming. The wrapper span should
+    // therefore carry identical classes whether or not the item is disabled.
+    render(
+      <>
+        <Item
+          endContent={<span data-testid="enabled-end">T</span>}
+          label="Enabled"
+        />
+        <Item
+          endContent={<span data-testid="disabled-end">T</span>}
+          isDisabled
+          label="Disabled"
+        />
+        <Item
+          endContent={<span data-testid="enabled-inline">T</span>}
+          endContentPosition="inline"
+          label="Enabled inline"
+        />
+        <Item
+          endContent={<span data-testid="disabled-inline">T</span>}
+          endContentPosition="inline"
+          isDisabled
+          label="Disabled inline"
+        />
+      </>,
+    );
+
+    /* eslint-disable testing-library/no-node-access -- the end-content wrapper span has no role or testid */
+    expect(screen.getByTestId('disabled-end').parentElement).toHaveAttribute(
+      'class',
+      screen.getByTestId('enabled-end').parentElement?.getAttribute('class') ??
+        '',
+    );
+    expect(screen.getByTestId('disabled-inline').parentElement).toHaveAttribute(
+      'class',
+      screen
+        .getByTestId('enabled-inline')
+        .parentElement?.getAttribute('class') ?? '',
+    );
+    /* eslint-enable testing-library/no-node-access */
   });
 
   it('renders a link and adds safe rel for blank targets', () => {
@@ -234,6 +297,68 @@ describe('Item', () => {
     render(<Item label="Clickable" onClick={onClick} />);
 
     await user.click(screen.getByRole('button', {name: 'Clickable'}));
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+
+  it('does not fire the row action when a nested native control is clicked', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    const onNestedClick = vi.fn();
+
+    render(
+      <Item
+        label="Row"
+        onClick={onClick}
+        trailingContent={
+          <button onClick={onNestedClick} type="button">
+            Delete
+          </button>
+        }
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Delete'}));
+    expect(onNestedClick).toHaveBeenCalledOnce();
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not fire the row action when a nested custom interactive element is clicked', async () => {
+    // The old implementation only matched native interactive tags, so a custom
+    // control like role="button" would wrongly also trigger the row action.
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    const onNestedClick = vi.fn();
+
+    render(
+      <Item
+        label="Row"
+        onClick={onClick}
+        trailingContent={
+          <div
+            onClick={onNestedClick}
+            onKeyDown={() => {}}
+            role="button"
+            tabIndex={0}>
+            Action
+          </div>
+        }
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Action'}));
+    expect(onNestedClick).toHaveBeenCalledOnce();
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('fires the row action when non-interactive content is clicked', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <Item label="Row" leadingContent={<span>Lead</span>} onClick={onClick} />,
+    );
+
+    await user.click(screen.getByText('Lead'));
     expect(onClick).toHaveBeenCalledOnce();
   });
 

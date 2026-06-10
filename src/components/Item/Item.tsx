@@ -1,20 +1,22 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as/link component props */
 
-import type {
-  AriaAttributes,
-  CSSProperties,
-  MouseEvent,
-  MouseEventHandler,
-  ReactNode,
-  Ref,
+import {
+  useCallback,
+  useRef,
+  type AriaAttributes,
+  type CSSProperties,
+  type MouseEvent,
+  type MouseEventHandler,
+  type ReactNode,
+  type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {useRel} from '../../internal/linkAccessibility';
 import type {LinkComponent as LinkComponentType} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Text} from '../Text';
+import {itemRecipe} from './Item.recipe';
 
 const SELECTABLE_ROLES = new Set([
   'option',
@@ -145,101 +147,33 @@ export interface ItemProps {
   width?: 'full' | 'auto';
 }
 
-const styles = {
-  root: css({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    px: '2',
-    py: '2',
-    textAlign: 'start',
-    borderRadius: 'md',
-  }),
-  widthFull: css({
-    w: 'full',
-  }),
-  alignStart: css({
-    alignItems: 'flex-start',
-  }),
-  interactive: css({
-    cursor: 'pointer',
-    transitionProperty: 'background-color',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    _hover: {bg: 'bg.subtle'},
-    _active: {bg: 'bg.hover'},
-    '&:has(:focus-visible)': {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  highlighted: css({
-    bg: 'bg.subtle',
-  }),
-  selected: css({
-    bg: 'bg.selected',
-  }),
-  disabled: css({
-    cursor: 'not-allowed',
-    pointerEvents: 'none',
-  }),
-  disabledContent: css({
-    opacity: 0.5,
-  }),
-  interactiveContent: css({
-    cursor: 'inherit',
-    color: 'inherit',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    flex: 1,
-    minW: 0,
-    textAlign: 'start',
-    textDecoration: 'none',
-  }),
-  content: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    flex: 1,
-    minW: 0,
-    textAlign: 'start',
-  }),
-  textContent: css({
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-    minW: 0,
-  }),
-  startContent: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-  }),
-  endContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    marginInlineStart: 'auto',
-  }),
-  endContentInline: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-  labelRow: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-  }),
-  trailingContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-} as const;
+// Native and ARIA interactive elements that own their own click, plus anything
+// explicitly placed in the tab order or made editable. Used as a safety net so
+// the row action does not also fire when a consumer-provided control in a slot
+// is clicked.
+const INTERACTIVE_SELECTOR = [
+  'button',
+  'a[href]',
+  'input',
+  'select',
+  'textarea',
+  '[role="button"]',
+  '[role="link"]',
+  '[role="checkbox"]',
+  '[role="switch"]',
+  '[role="menuitem"]',
+  '[role="menuitemcheckbox"]',
+  '[role="menuitemradio"]',
+  '[role="tab"]',
+  '[role="radio"]',
+  '[role="option"]',
+  '[contenteditable="true"]',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+function isInteractiveTarget(element: HTMLElement): boolean {
+  return element.closest(INTERACTIVE_SELECTOR) != null;
+}
 
 function getMaxLines(
   explicitLines: number | undefined,
@@ -287,22 +221,35 @@ export function Item({
   const linkRel = useRel({target, rel});
   const isInteractive = href != null || onClick != null;
   const hasParentRole = role != null;
+  // The item renders its own interactive control (link/button) only when it is
+  // interactive and no parent widget owns the role. Otherwise it renders a
+  // plain content wrapper and any interaction is handled by the parent.
+  const ownsInteraction = isInteractive && !hasParentRole;
+  // Tracks the inner interactive control (button/link) so the row handler can
+  // tell, precisely, when a click already fired on our own element.
+  const interactiveRef = useRef<HTMLElement | null>(null);
+  const setInteractiveRef = useCallback((node: HTMLElement | null) => {
+    interactiveRef.current = node;
+  }, []);
+  const classes = itemRecipe({
+    align,
+    width,
+    isInteractive,
+    isHighlighted,
+    isSelected,
+    isDisabled,
+    hasParentRole,
+  });
 
   const inlineEndContent =
     isReactNode(endContent) && endContentPosition === 'inline' ? (
-      <span
-        className={cx(
-          styles.endContentInline,
-          isDisabled ? styles.disabledContent : undefined,
-        )}>
-        {endContent}
-      </span>
+      <span className={classes.endContentInline}>{endContent}</span>
     ) : null;
 
   const labelAndDescription = (
     <>
       {inlineEndContent != null ? (
-        <span className={styles.labelRow}>
+        <span className={classes.labelRow}>
           <Text as="span" maxLines={getMaxLines(labelLines, label)} type="body">
             {label}
           </Text>
@@ -330,7 +277,13 @@ export function Item({
     }
 
     const targetElement = event.target as HTMLElement;
-    if (targetElement.closest('button, a, input, select, textarea')) {
+    // Our own interactive control already fired its onClick; don't double-fire.
+    if (interactiveRef.current?.contains(targetElement)) {
+      return;
+    }
+    // A consumer-provided interactive control in a slot owns its own click, so
+    // the row action should not also fire.
+    if (isInteractiveTarget(targetElement)) {
       return;
     }
 
@@ -340,37 +293,22 @@ export function Item({
   const innerSlots = (
     <>
       {isReactNode(startContent) ? (
-        <span className={styles.startContent}>{startContent}</span>
+        <span className={classes.startContent}>{startContent}</span>
       ) : null}
-      <span className={styles.textContent}>{labelAndDescription}</span>
+      <span className={classes.textContent}>{labelAndDescription}</span>
       {isReactNode(endContent) && endContentPosition !== 'inline' ? (
-        <span
-          className={cx(
-            styles.endContent,
-            isDisabled ? styles.disabledContent : undefined,
-          )}>
-          {endContent}
-        </span>
+        <span className={classes.endContent}>{endContent}</span>
       ) : null}
     </>
   );
 
-  const content = hasParentRole ? (
-    <span
-      className={cx(
-        styles.content,
-        isDisabled ? styles.disabledContent : undefined,
-      )}>
-      {innerSlots}
-    </span>
+  const content = !ownsInteraction ? (
+    <span className={classes.content}>{innerSlots}</span>
   ) : href != null ? (
     <LinkComponent
       aria-current={ariaCurrent ?? undefined}
       aria-disabled={isDisabled || undefined}
-      className={cx(
-        styles.interactiveContent,
-        isDisabled ? styles.disabledContent : undefined,
-      )}
+      className={classes.interactiveContent}
       href={href}
       onClick={(e: MouseEvent<HTMLElement>) => {
         if (isDisabled) {
@@ -379,33 +317,23 @@ export function Item({
         }
         onClick?.(e);
       }}
-      ref={undefined}
+      ref={setInteractiveRef}
       rel={linkRel}
       tabIndex={isDisabled ? -1 : undefined}
       target={target}
       to={LinkComponent === 'a' ? undefined : href}>
       {innerSlots}
     </LinkComponent>
-  ) : onClick != null ? (
+  ) : (
     <button
       aria-current={ariaCurrent ?? undefined}
-      className={cx(
-        styles.interactiveContent,
-        isDisabled ? styles.disabledContent : undefined,
-      )}
+      className={classes.interactiveContent}
       disabled={isDisabled}
       onClick={onClick}
+      ref={setInteractiveRef}
       type="button">
       {innerSlots}
     </button>
-  ) : (
-    <span
-      className={cx(
-        styles.content,
-        isDisabled ? styles.disabledContent : undefined,
-      )}>
-      {innerSlots}
-    </span>
   );
 
   return (
@@ -416,21 +344,12 @@ export function Item({
           ? true
           : undefined
       }
-      className={cx(
-        styles.root,
-        width === 'full' ? styles.widthFull : undefined,
-        align === 'start' ? styles.alignStart : undefined,
-        isInteractive ? styles.interactive : undefined,
-        isHighlighted ? styles.highlighted : undefined,
-        isSelected ? styles.selected : undefined,
-        isDisabled && !hasParentRole ? styles.disabled : undefined,
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       onClick={
         hasParentRole
           ? onClick
-          : isInteractive
+          : ownsInteraction
             ? handleContainerClick
             : undefined
       }
@@ -440,7 +359,7 @@ export function Item({
       {leadingContent}
       {content}
       {isReactNode(trailingContent) ? (
-        <span className={styles.trailingContent}>{trailingContent}</span>
+        <span className={classes.trailingContent}>{trailingContent}</span>
       ) : null}
     </Component>
   );
