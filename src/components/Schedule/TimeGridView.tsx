@@ -13,11 +13,11 @@ import {
   type PlainDate,
 } from '../../internal/plainDate';
 import {Heading, Text} from '../Text';
+import {scheduleEventRecipe} from './ScheduleEvent.recipe';
 import {useScheduleContext} from './context';
 import {eventOccursOnDate, isDayEvent} from './dateMath';
 import {
   CalendarEventPill,
-  eventColorClassName,
   formatHour,
   formatTimezoneAbbreviation,
   getCategory,
@@ -25,7 +25,7 @@ import {
   getEventTimeLabel,
   getMinutesSinceStartOfDay,
   isEventInPast,
-  styles as sharedStyles,
+  scheduleClasses,
 } from './shared';
 import type {CalendarEvent, CalendarInstantEvent} from './types';
 import {useCurrentTime} from './useCurrentTime';
@@ -141,41 +141,6 @@ const styles = {
   }),
   lastRow: css({
     borderBlockEndWidth: 0,
-  }),
-  timedEvent: css({
-    position: 'absolute',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 0,
-    minH: '9',
-    minW: 0,
-    overflow: 'hidden',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'var(--schedule-event-border)',
-    borderRadius: 'sm',
-    px: '1',
-    py: '0.5',
-    fontSize: 'xs',
-    lineHeight: 'tight',
-    bg: 'var(--schedule-event-bg)',
-    color: 'var(--schedule-event-fg)',
-    _hover: {
-      bg: 'var(--schedule-event-bg-hover)',
-    },
-  }),
-  timedEventTitle: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    fontWeight: 'bold',
-  }),
-  timedEventTime: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    flexShrink: 0,
-    fontWeight: 'normal',
   }),
   events: css({
     display: 'flex',
@@ -420,12 +385,27 @@ export function TimeGridView({
     height: normalizedHourHeight,
     minHeight: normalizedHourHeight,
   };
+  // Layout is independent of the hour row, so compute it once per day and reuse
+  // it across all hour cells rather than recomputing for every (day, hour) pair.
+  const timedEventLayoutsByDay = days.map(day =>
+    getTimedEventLayouts({
+      day,
+      events: events.filter(
+        (event): event is CalendarInstantEvent =>
+          !isDayEvent(event) && eventOccursOnDate(event, day, timezoneID),
+      ),
+      hourHeight: normalizedHourHeight,
+      maxHour: normalizedMaxHour,
+      minHour: normalizedMinHour,
+      timezoneID,
+    }),
+  );
 
   return (
     <div
       aria-label="Schedule time grid"
       aria-readonly="true"
-      className={cx(sharedStyles.surface, styles.grid)}
+      className={cx(scheduleClasses.surface, styles.grid)}
       role="grid"
       style={gridStyle}>
       <div className={styles.rowContents} role="row">
@@ -533,18 +513,9 @@ export function TimeGridView({
                 const hourEvents = events.filter(event =>
                   eventOverlapsHour(event, day, hour, timezoneID),
                 );
-                const visibleTimedEventLayouts = getTimedEventLayouts({
-                  day,
-                  events: events.filter(
-                    (event): event is CalendarInstantEvent =>
-                      !isDayEvent(event) &&
-                      eventOccursOnDate(event, day, timezoneID),
-                  ),
-                  hourHeight: normalizedHourHeight,
-                  maxHour: normalizedMaxHour,
-                  minHour: normalizedMinHour,
-                  timezoneID,
-                }).filter(layout => layout.startHour === hour);
+                const visibleTimedEventLayouts = timedEventLayoutsByDay[
+                  index
+                ].filter(layout => layout.startHour === hour);
                 const currentTimeTop = getCurrentTimeTopForHour({
                   currentTime,
                   day,
@@ -583,26 +554,27 @@ export function TimeGridView({
                       {visibleTimedEventLayouts.map(layout => {
                         const {event} = layout;
                         const category = getCategory(categories, event);
+                        const isPast = isEventInPast(
+                          event,
+                          currentTime,
+                          timezoneID,
+                        );
+                        const eventClasses = scheduleEventRecipe({
+                          layout: 'block',
+                          color: category.color,
+                          isPast,
+                        });
                         return (
                           <div
-                            className={cx(
-                              styles.timedEvent,
-                              eventColorClassName(category.color),
-                              isEventInPast(event, currentTime, timezoneID) &&
-                                sharedStyles.eventPast,
-                            )}
-                            data-state={
-                              isEventInPast(event, currentTime, timezoneID)
-                                ? 'past'
-                                : undefined
-                            }
+                            className={eventClasses.event}
+                            data-state={isPast ? 'past' : undefined}
                             data-testid={`schedule-event-${event.id}`}
                             key={event.id}
                             style={getTimedEventStyle(layout)}>
-                            <span className={styles.timedEventTitle}>
+                            <span className={eventClasses.title}>
                               {event.title}
                             </span>
-                            <span className={styles.timedEventTime}>
+                            <span className={eventClasses.time}>
                               {getEventTimeLabel(event, timezoneID)}
                             </span>
                           </div>

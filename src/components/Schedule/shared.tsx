@@ -1,7 +1,5 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {ReactNode} from 'react';
-import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import {
   DATE_FORMAT_MONTH_YEAR,
   DATE_FORMAT_WITH_WEEKDAY,
@@ -13,202 +11,24 @@ import {
 } from '../../internal/plainDate';
 import {Spinner} from '../Spinner';
 import {Heading} from '../Text';
+import {scheduleRecipe} from './Schedule.recipe';
+import {scheduleEventRecipe} from './ScheduleEvent.recipe';
 import {useScheduleContext} from './context';
 import {isDayEvent} from './dateMath';
 import type {
   CalendarEvent,
   ScheduleCategory,
-  ScheduleEventColor,
   ScheduleHeaderContent,
 } from './types';
 
-export const styles = {
-  root: css({
-    color: 'fg',
-    fontFamily: 'body',
-    w: 'full',
-  }),
-  frame: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '3',
-    w: 'full',
-  }),
-  header: css({
-    display: 'grid',
-    gridTemplateColumns: '1fr auto 1fr',
-    alignItems: 'center',
-    gap: '3',
-  }),
-  headerSlotStart: css({
-    display: 'flex',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    gap: '2',
-  }),
-  headerSlotCenter: css({
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '2',
-    textAlign: 'center',
-  }),
-  headerSlotEnd: css({
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: '2',
-  }),
-  headerTitleContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '2',
-  }),
-  surface: css({
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'border',
-    borderRadius: 'md',
-    overflow: 'hidden',
-    bg: 'bg',
-  }),
-  event: css({
-    display: 'inline-flex',
-    alignItems: 'baseline',
-    gap: '1',
-    maxW: 'full',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    borderWidth: 'default',
-    borderStyle: 'solid',
-    borderColor: 'var(--schedule-event-border)',
-    borderRadius: 'sm',
-    px: '1',
-    py: '0.5',
-    fontSize: 'xs',
-    fontWeight: 'medium',
-    lineHeight: 'tight',
-    bg: 'var(--schedule-event-bg)',
-    color: 'var(--schedule-event-fg)',
-    _hover: {
-      bg: 'var(--schedule-event-bg-hover)',
-    },
-  }),
-  eventPast: css({
-    '--schedule-event-bg':
-      'color-mix(in srgb, var(--schedule-event-dot) 10%, token(colors.bg))',
-    '--schedule-event-bg-hover':
-      'color-mix(in srgb, var(--schedule-event-dot) 14%, token(colors.bg))',
-    '--schedule-event-border':
-      'color-mix(in srgb, var(--schedule-event-dot) 48%, token(colors.border))',
-    '--schedule-event-fg':
-      'color-mix(in srgb, var(--schedule-event-fg-base) 52%, token(colors.fg.muted))',
-  }),
-  eventDot: css({
-    display: 'inline-block',
-    w: '2',
-    h: '2',
-    borderRadius: 'full',
-    bg: 'var(--schedule-event-dot)',
-    flexShrink: 0,
-  }),
-  eventTime: css({
-    flexShrink: 0,
-    fontWeight: 'normal',
-  }),
-  eventTitle: css({
-    fontWeight: 'bold',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  }),
-} as const;
+/**
+ * Static slot classes for the schedule shell (root, frame/header, surface).
+ * The recipe carries no variants, so a single evaluation is shared by the
+ * shell and every view.
+ */
+export const scheduleClasses = scheduleRecipe();
 
 const categoryFallback: ScheduleCategory = {label: 'Event', color: 'blue'};
-
-const colorStyles = {
-  blue: css({
-    '--schedule-event-bg': 'token(colors.surface.blue)',
-    '--schedule-event-bg-hover': 'token(colors.surface.blue.hover)',
-    '--schedule-event-border': 'token(colors.surface.blue.accent)',
-    '--schedule-event-fg': 'token(colors.surface.blue.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.blue.fg)',
-    '--schedule-event-dot': 'token(colors.surface.blue.accent)',
-  }),
-  cyan: css({
-    '--schedule-event-bg': 'token(colors.surface.cyan)',
-    '--schedule-event-bg-hover': 'token(colors.surface.cyan.hover)',
-    '--schedule-event-border': 'token(colors.surface.cyan.accent)',
-    '--schedule-event-fg': 'token(colors.surface.cyan.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.cyan.fg)',
-    '--schedule-event-dot': 'token(colors.surface.cyan.accent)',
-  }),
-  gray: css({
-    '--schedule-event-bg': 'token(colors.surface.gray)',
-    '--schedule-event-bg-hover': 'token(colors.surface.gray.hover)',
-    '--schedule-event-border': 'token(colors.surface.gray.accent)',
-    '--schedule-event-fg': 'token(colors.surface.gray.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.gray.fg)',
-    '--schedule-event-dot': 'token(colors.surface.gray.accent)',
-  }),
-  green: css({
-    '--schedule-event-bg': 'token(colors.surface.green)',
-    '--schedule-event-bg-hover': 'token(colors.surface.green.hover)',
-    '--schedule-event-border': 'token(colors.surface.green.accent)',
-    '--schedule-event-fg': 'token(colors.surface.green.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.green.fg)',
-    '--schedule-event-dot': 'token(colors.surface.green.accent)',
-  }),
-  orange: css({
-    '--schedule-event-bg': 'token(colors.surface.orange)',
-    '--schedule-event-bg-hover': 'token(colors.surface.orange.hover)',
-    '--schedule-event-border': 'token(colors.surface.orange.accent)',
-    '--schedule-event-fg': 'token(colors.surface.orange.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.orange.fg)',
-    '--schedule-event-dot': 'token(colors.surface.orange.accent)',
-  }),
-  pink: css({
-    '--schedule-event-bg': 'token(colors.surface.pink)',
-    '--schedule-event-bg-hover': 'token(colors.surface.pink.hover)',
-    '--schedule-event-border': 'token(colors.surface.pink.accent)',
-    '--schedule-event-fg': 'token(colors.surface.pink.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.pink.fg)',
-    '--schedule-event-dot': 'token(colors.surface.pink.accent)',
-  }),
-  purple: css({
-    '--schedule-event-bg': 'token(colors.surface.purple)',
-    '--schedule-event-bg-hover': 'token(colors.surface.purple.hover)',
-    '--schedule-event-border': 'token(colors.surface.purple.accent)',
-    '--schedule-event-fg': 'token(colors.surface.purple.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.purple.fg)',
-    '--schedule-event-dot': 'token(colors.surface.purple.accent)',
-  }),
-  red: css({
-    '--schedule-event-bg': 'token(colors.surface.red)',
-    '--schedule-event-bg-hover': 'token(colors.surface.red.hover)',
-    '--schedule-event-border': 'token(colors.surface.red.accent)',
-    '--schedule-event-fg': 'token(colors.surface.red.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.red.fg)',
-    '--schedule-event-dot': 'token(colors.surface.red.accent)',
-  }),
-  teal: css({
-    '--schedule-event-bg': 'token(colors.surface.teal)',
-    '--schedule-event-bg-hover': 'token(colors.surface.teal.hover)',
-    '--schedule-event-border': 'token(colors.surface.teal.accent)',
-    '--schedule-event-fg': 'token(colors.surface.teal.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.teal.fg)',
-    '--schedule-event-dot': 'token(colors.surface.teal.accent)',
-  }),
-  yellow: css({
-    '--schedule-event-bg': 'token(colors.surface.yellow)',
-    '--schedule-event-bg-hover': 'token(colors.surface.yellow.hover)',
-    '--schedule-event-border': 'token(colors.surface.yellow.accent)',
-    '--schedule-event-fg': 'token(colors.surface.yellow.fg)',
-    '--schedule-event-fg-base': 'token(colors.surface.yellow.fg)',
-    '--schedule-event-dot': 'token(colors.surface.yellow.accent)',
-  }),
-} satisfies Record<ScheduleEventColor, string>;
 
 export function getCategory(
   categories: ReadonlyArray<ScheduleCategory>,
@@ -220,12 +40,6 @@ export function getCategory(
       ? {label: event.category, color: categoryFallback.color}
       : categoryFallback)
   );
-}
-
-export function eventColorClassName(
-  color: ScheduleEventColor | undefined,
-): string {
-  return colorStyles[color ?? categoryFallback.color];
 }
 
 export function formatDate(date: PlainDate): string {
@@ -347,16 +161,13 @@ export function CalendarEventPill({
 }): React.JSX.Element {
   const {categories, timezoneID} = useScheduleContext();
   const category = getCategory(categories, event);
+  const classes = scheduleEventRecipe({color: category.color, isPast});
   return (
     <span
-      className={cx(
-        styles.event,
-        eventColorClassName(category.color),
-        isPast && styles.eventPast,
-      )}
+      className={classes.event}
       data-state={isPast ? 'past' : undefined}
       data-testid={`schedule-event-${event.id}`}>
-      <span className={styles.eventTitle}>
+      <span className={classes.title}>
         {isDayEvent(event)
           ? event.title
           : getEventAccessibleLabel(event, categories, timezoneID)}
@@ -375,20 +186,20 @@ export function CalendarMonthEventPill({
   const {categories, timezoneID} = useScheduleContext();
   const category = getCategory(categories, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);
+  const classes = scheduleEventRecipe({
+    color: category.color,
+    isPast,
+    isFullWidth: true,
+  });
   return (
     <span
-      className={cx(
-        styles.event,
-        css({w: 'full'}),
-        eventColorClassName(category.color),
-        isPast && styles.eventPast,
-      )}
+      className={classes.event}
       data-state={isPast ? 'past' : undefined}
       data-testid={`schedule-event-${event.id}`}>
       {startTimeLabel != null ? (
-        <span className={styles.eventTime}>{startTimeLabel}</span>
+        <span className={classes.time}>{startTimeLabel}</span>
       ) : null}
-      <span className={styles.eventTitle}>{event.title}</span>
+      <span className={classes.title}>{event.title}</span>
     </span>
   );
 }
@@ -418,7 +229,7 @@ export function ScheduleFrame({
   const initialHeader: ScheduleHeaderContent = {
     startContent: null,
     centerContent: (
-      <span className={styles.headerTitleContent}>
+      <span className={scheduleClasses.headerTitleContent}>
         <Heading level={2}>{title}</Heading>
         {isLoading ? <Spinner aria-label="Loading events" size="sm" /> : null}
       </span>
@@ -436,11 +247,15 @@ export function ScheduleFrame({
   );
 
   return (
-    <section aria-label={titleLabel} className={styles.frame}>
-      <div className={styles.header}>
-        <div className={styles.headerSlotStart}>{header.startContent}</div>
-        <div className={styles.headerSlotCenter}>{header.centerContent}</div>
-        <div className={styles.headerSlotEnd}>{header.endContent}</div>
+    <section aria-label={titleLabel} className={scheduleClasses.frame}>
+      <div className={scheduleClasses.header}>
+        <div className={scheduleClasses.headerSlotStart}>
+          {header.startContent}
+        </div>
+        <div className={scheduleClasses.headerSlotCenter}>
+          {header.centerContent}
+        </div>
+        <div className={scheduleClasses.headerSlotEnd}>{header.endContent}</div>
       </div>
       {children}
     </section>

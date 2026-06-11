@@ -17,11 +17,11 @@ import {useScheduleContext} from './context';
 import {eventOccursOnDate, isDayEvent} from './dateMath';
 import {
   CalendarMonthEventPill,
-  ScheduleFrame,
   formatMonthTitle,
   getEventAccessibleLabel,
   isEventInPast,
-  styles as sharedStyles,
+  scheduleClasses,
+  ScheduleFrame,
 } from './shared';
 import type {
   CalendarEvent,
@@ -316,7 +316,7 @@ function ScheduleMonthlyView({
     <ScheduleFrame title={title} titleLabel={title}>
       <div
         aria-label={title}
-        className={cx(sharedStyles.surface, styles.grid)}
+        className={cx(scheduleClasses.surface, styles.grid)}
         role="grid">
         {weekdays.map((weekday, index) => (
           <div

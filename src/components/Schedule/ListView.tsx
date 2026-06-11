@@ -10,16 +10,16 @@ import {
 } from '../../internal/plainDate';
 import {Text} from '../Text';
 import {Tooltip} from '../Tooltip';
+import {scheduleEventRecipe} from './ScheduleEvent.recipe';
 import {useScheduleContext} from './context';
 import {enumerateDates, eventOccursOnDate, isDayEvent} from './dateMath';
 import {
-  eventColorClassName,
   getCategory,
   getEventTimeLabel,
   isEventInPast,
   formatListRangeTitle,
+  scheduleClasses,
   ScheduleFrame,
-  styles as sharedStyles,
 } from './shared';
 import type {
   CalendarEvent,
@@ -140,10 +140,7 @@ function ListEvent({
         <Tooltip content={category.label} hasHoverIndication={false}>
           <span
             aria-label={category.label}
-            className={cx(
-              sharedStyles.eventDot,
-              eventColorClassName(category.color),
-            )}
+            className={scheduleEventRecipe({color: category.color}).dot}
             role="img"
           />
         </Tooltip>
@@ -187,7 +184,7 @@ function ScheduleListView(
 
   return (
     <ScheduleFrame title={title} titleLabel={title}>
-      <div className={cx(sharedStyles.surface, styles.list)}>
+      <div className={cx(scheduleClasses.surface, styles.list)}>
         {visibleDays.map(
           ({day, dayEvents, isCurrentDay, isHighlightedDay}, index) => {
             const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);

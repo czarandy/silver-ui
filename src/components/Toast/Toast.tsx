@@ -88,9 +88,11 @@ export function Toast({
   const remainingRef = useRef(autoHideDuration);
   const isPausedRef = useRef(false);
   const onDismissRef = useRef(onDismiss);
-  useEffect(() => {
-    onDismissRef.current = onDismiss;
-  });
+  // Keep the ref pointed at the latest onDismiss without an effect. Writing a
+  // ref during render is safe here: it is idempotent and only read later from
+  // timer callbacks, never during this render.
+  // eslint-disable-next-line @eslint-react/refs -- intentional latest-value ref kept in sync during render
+  onDismissRef.current = onDismiss;
 
   const startTimer = useCallback(() => {
     if (!isAutoHide) {

@@ -233,7 +233,14 @@ export default tseslint.config(
       '@eslint-react/immutability': 'error',
       '@eslint-react/refs': 'error',
       '@eslint-react/unsupported-syntax': 'error',
-      '@eslint-react/exhaustive-deps': 'error',
+      // requireExplicitEffectDeps flags effect hooks called without a
+      // dependency array (e.g. useEffect(fn)), which re-runs every render and is
+      // almost always a forgotten deps array. An explicit `undefined` is still
+      // allowed as a deliberate "run every render" opt-in.
+      '@eslint-react/exhaustive-deps': [
+        'error',
+        {requireExplicitEffectDeps: true},
+      ],
 
       // Component structure bugs
       '@eslint-react/static-components': 'error',

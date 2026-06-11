@@ -12,7 +12,7 @@ import {getBrowserTimezoneID, nowEpochMilliseconds} from '../../internal/time';
 import {ScheduleContext} from './context';
 import {eventOverlapsRange, sortEvents} from './dateMath';
 import {defaultSchedulePlugins} from './plugins';
-import {styles} from './shared';
+import {scheduleClasses} from './shared';
 import type {
   CalendarEvent,
   Instant,
@@ -153,17 +153,20 @@ function resolveEvents(
   );
 }
 
-function getRange<Options extends ScheduleViewOptions>(
+function useRange<Options extends ScheduleViewOptions>(
   view: ScheduleView<Options>,
   date: ZonedDateTime,
 ): ScheduleRange {
   const [start, end] = view.getDateRange(date);
-  return {
-    end: end.instant,
-    endDate: plainDateFromInstant(end.instant, end.timezoneID),
-    start: start.instant,
-    startDate: plainDateFromInstant(start.instant, start.timezoneID),
-  };
+  return useMemo(
+    () => ({
+      end: end.instant,
+      endDate: plainDateFromInstant(end.instant, end.timezoneID),
+      start: start.instant,
+      startDate: plainDateFromInstant(start.instant, start.timezoneID),
+    }),
+    [start.instant, end.instant, start.timezoneID, end.timezoneID],
+  );
 }
 
 function ScheduleViewContent<Options extends ScheduleViewOptions>({
@@ -196,7 +199,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   viewDate: ZonedDateTime;
 }): React.JSX.Element {
   const Component = view.component;
-  const range = getRange(view, viewDate);
+  const range = useRange(view, viewDate);
   const contextValue = useMemo(() => {
     const events = isLoading
       ? []
@@ -311,7 +314,7 @@ export function Schedule({
 
   return (
     <div
-      className={cx(styles.root, className)}
+      className={cx(scheduleClasses.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
