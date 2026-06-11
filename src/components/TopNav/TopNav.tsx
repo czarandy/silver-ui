@@ -1,16 +1,11 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {MobileNav, MobileNavToggle} from '../../internal/MobileNav';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Divider} from '../Divider';
 import {topNavRecipe} from './TopNav.recipe';
-import {
-  TopNavSlotContext,
-  useTopNavMobileContent,
-  useTopNavRenderMode,
-} from './TopNavContext';
+import {useTopNavMobileContent, useTopNavRenderMode} from './TopNavContext';
 
 export interface TopNavProps {
   /**
@@ -57,59 +52,6 @@ export interface TopNavProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  leftSection: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4',
-    flex: '1 1 0%',
-    minW: 0,
-  }),
-  heading: css({
-    display: 'flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-  startContent: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-  }),
-  centerContent: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '1',
-  }),
-  rightSection: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '1',
-  }),
-  endContent: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-    flexShrink: 0,
-    ms: 'auto',
-  }),
-  mobileEnd: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-    ms: 'auto',
-  }),
-  drawerItems: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-  }),
-  drawerDivider: css({
-    my: '2',
-  }),
-};
-
 /**
  * Horizontal top navigation bar with heading, start, center, and end
  * content slots. Adapts to mobile layouts when rendered inside AppShell.
@@ -130,6 +72,17 @@ export function TopNav({
   const mobileContent = useTopNavMobileContent();
   const {hasAutoToggle} = useAppShellMobile();
   const resolvedStartContent = startContent ?? children;
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (isReactNode(startContent) && isReactNode(children)) {
+      console.warn(
+        'TopNav: both `startContent` and `children` were provided. ' +
+          '`startContent` takes precedence and `children` is ignored. ' +
+          'Provide only one.',
+      );
+    }
+  }
+
   const hasCenterContent = isReactNode(centerContent);
   const hasCollapsibleContent =
     isReactNode(resolvedStartContent) || isReactNode(centerContent);
@@ -137,17 +90,18 @@ export function TopNav({
     hasCollapsibleContent || isReactNode(mobileContent);
 
   if (renderMode === 'mobile-bar') {
+    const classes = topNavRecipe({layout: 'mobile'});
     return (
       <nav
         aria-label={label}
-        className={cx(topNavRecipe({layout: 'mobile'}), className)}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={ref}
         style={style}>
         {isReactNode(heading) ? (
-          <div className={styles.heading}>{heading}</div>
+          <div className={classes.heading}>{heading}</div>
         ) : null}
-        <div className={styles.mobileEnd}>
+        <div className={classes.mobileEnd}>
           {endContent}
           {hasMobileDrawerContent && hasAutoToggle ? <MobileNavToggle /> : null}
         </div>
@@ -160,18 +114,17 @@ export function TopNav({
       return null;
     }
 
+    const classes = topNavRecipe();
     return (
       <MobileNav header={heading}>
         {hasCollapsibleContent ? (
-          <TopNavSlotContext value="start">
-            <div className={styles.drawerItems}>
-              {resolvedStartContent}
-              {centerContent}
-            </div>
-          </TopNavSlotContext>
+          <div className={classes.drawerItems}>
+            {resolvedStartContent}
+            {centerContent}
+          </div>
         ) : null}
         {hasCollapsibleContent && isReactNode(mobileContent) ? (
-          <div className={styles.drawerDivider}>
+          <div className={classes.drawerDivider}>
             <Divider />
           </div>
         ) : null}
@@ -180,39 +133,29 @@ export function TopNav({
     );
   }
 
+  const classes = topNavRecipe({layout: hasCenterContent ? 'grid' : 'flex'});
   return (
     <nav
       aria-label={label}
-      className={cx(
-        topNavRecipe({layout: hasCenterContent ? 'grid' : 'flex'}),
-        className,
-      )}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      <div className={styles.leftSection}>
+      <div className={classes.leftSection}>
         {isReactNode(heading) ? (
-          <div className={styles.heading}>{heading}</div>
+          <div className={classes.heading}>{heading}</div>
         ) : null}
         {isReactNode(resolvedStartContent) ? (
-          <TopNavSlotContext value="start">
-            <div className={styles.startContent}>{resolvedStartContent}</div>
-          </TopNavSlotContext>
+          <div className={classes.startContent}>{resolvedStartContent}</div>
         ) : null}
       </div>
       {hasCenterContent ? (
-        <TopNavSlotContext value="center">
-          <div className={styles.centerContent}>{centerContent}</div>
-        </TopNavSlotContext>
+        <div className={classes.centerContent}>{centerContent}</div>
       ) : null}
       {hasCenterContent ? (
-        <div className={styles.rightSection}>
-          <TopNavSlotContext value="end">{endContent}</TopNavSlotContext>
-        </div>
+        <div className={classes.rightSection}>{endContent}</div>
       ) : isReactNode(endContent) ? (
-        <div className={styles.endContent}>
-          <TopNavSlotContext value="end">{endContent}</TopNavSlotContext>
-        </div>
+        <div className={classes.endContent}>{endContent}</div>
       ) : null}
     </nav>
   );

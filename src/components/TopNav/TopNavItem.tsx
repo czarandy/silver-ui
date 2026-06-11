@@ -1,7 +1,9 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {VisuallyHidden} from '../../internal';
 import {cx} from '../../internal/cx';
+import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
@@ -28,9 +30,10 @@ export interface TopNavItemProps {
    */
   'data-testid'?: string;
   /**
-   * Link destination.
+   * Link destination. When set, the item renders as a link. When omitted,
+   * the item renders as a button driven by `onClick`.
    */
-  href: string;
+  href?: string;
   /**
    * Icon rendered before the label.
    */
@@ -59,11 +62,13 @@ export interface TopNavItemProps {
    */
   onClick?: MouseEventHandler<HTMLElement>;
   /**
-   * Ref forwarded to the anchor element.
+   * Ref forwarded to the anchor or button element.
    */
-  ref?: Ref<HTMLAnchorElement>;
+  ref?: Ref<HTMLElement>;
   /**
-   * The `rel` attribute for the anchor element.
+   * The `rel` attribute for the anchor element. `noopener noreferrer` are
+   * added automatically for `target="_blank"`. Ignored when rendering as a
+   * button (no `href`).
    */
   rel?: string;
   /**
@@ -71,14 +76,16 @@ export interface TopNavItemProps {
    */
   style?: CSSProperties;
   /**
-   * The `target` attribute for the anchor element.
+   * The `target` attribute for the anchor element. Ignored when rendering as
+   * a button (no `href`).
    */
   target?: string;
 }
 
 /**
- * A single navigation link inside a TopNav. Supports icons, selected
- * state, and adapts to drawer layout on mobile.
+ * A single navigation item inside a TopNav. Renders as a link when `href`
+ * is provided, or a button driven by `onClick` otherwise. Supports icons,
+ * selected state, and adapts to drawer layout on mobile.
  */
 export function TopNavItem({
   as,
@@ -101,45 +108,80 @@ export function TopNavItem({
   const renderMode = useTopNavRenderMode();
   const {closeMobileNav} = useAppShellMobile();
   const isDrawer = renderMode === 'drawer';
+  const opensInNewTab = target === '_blank';
+  const linkRel = useRel({target, rel});
   const labelContent = children ?? (
     <Text color="inherit" size="md" type="body" weight="inherit">
       {label}
     </Text>
   );
 
-  return (
-    <LinkComponent
-      aria-current={isSelected ? 'page' : undefined}
-      aria-disabled={isDisabled || undefined}
-      aria-label={isIconOnly ? label : undefined}
-      className={cx(
-        topNavItemRecipe({isSelected, isDisabled, isIconOnly, isDrawer}),
-        className,
-      )}
-      data-testid={dataTestId}
-      href={href}
-      onClick={event => {
-        if (isDisabled) {
-          event.preventDefault();
-          return;
-        }
+  const handleClick: MouseEventHandler<HTMLElement> = event => {
+    if (isDisabled) {
+      event.preventDefault();
+      return;
+    }
 
-        onClick?.(event);
+    onClick?.(event);
 
-        if (isDrawer) {
-          closeMobileNav();
-        }
-      }}
-      ref={ref}
-      rel={rel}
-      style={style}
-      tabIndex={isDisabled ? -1 : undefined}
-      target={target}
-      to={LinkComponent === 'a' ? undefined : href}>
+    if (isDrawer) {
+      closeMobileNav();
+    }
+  };
+
+  const className_ = cx(
+    topNavItemRecipe({isSelected, isDisabled, isIconOnly, isDrawer}),
+    className,
+  );
+
+  const content = (
+    <>
       {icon != null ? (
         <Icon aria-hidden="true" color="inherit" icon={icon} size="md" />
       ) : null}
       {!isIconOnly ? labelContent : null}
+    </>
+  );
+
+  if (href == null) {
+    return (
+      <button
+        aria-current={isSelected ? 'page' : undefined}
+        aria-label={isIconOnly ? label : undefined}
+        className={className_}
+        data-testid={dataTestId}
+        disabled={isDisabled}
+        onClick={handleClick}
+        ref={ref as Ref<HTMLButtonElement>}
+        style={style}
+        type="button">
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <LinkComponent
+      aria-current={isSelected ? 'page' : undefined}
+      aria-disabled={isDisabled || undefined}
+      aria-label={isIconOnly ? getAriaLabel(label, opensInNewTab) : undefined}
+      className={className_}
+      data-testid={dataTestId}
+      href={href}
+      onClick={handleClick}
+      ref={ref as Ref<HTMLAnchorElement>}
+      rel={linkRel}
+      style={style}
+      tabIndex={isDisabled ? -1 : undefined}
+      target={target}
+      to={LinkComponent === 'a' ? undefined : href}>
+      {content}
+      {opensInNewTab && !isIconOnly ? (
+        <>
+          {' '}
+          <VisuallyHidden>(opens in new tab)</VisuallyHidden>
+        </>
+      ) : null}
     </LinkComponent>
   );
 }

@@ -58,6 +58,38 @@ describe('TopNav', () => {
     expect(screen.queryByRole('link', {name: 'Child'})).not.toBeInTheDocument();
   });
 
+  it('warns when both startContent and children are provided', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(
+      <TopNav
+        label="Nav"
+        startContent={<TopNavItem href="/start" label="Start" />}>
+        <TopNavItem href="/child" label="Child" />
+      </TopNav>,
+    );
+
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining('`startContent` takes precedence'),
+    );
+
+    warn.mockRestore();
+  });
+
+  it('does not warn when only children are provided', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(
+      <TopNav label="Nav">
+        <TopNavItem href="/child" label="Child" />
+      </TopNav>,
+    );
+
+    expect(warn).not.toHaveBeenCalled();
+
+    warn.mockRestore();
+  });
+
   it('renders without a heading', () => {
     render(
       <TopNav data-testid="nav" label="Nav">
@@ -83,6 +115,17 @@ describe('TopNav', () => {
     const nav = screen.getByTestId('nav');
     expect(nav).toHaveClass('custom-nav');
     expect(nav).toHaveStyle({color: 'rgb(255, 0, 0)'});
+  });
+
+  it('forwards ref to the nav element', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+    render(
+      <TopNav data-testid="nav" label="Nav" ref={ref}>
+        <TopNavItem href="/home" label="Home" />
+      </TopNav>,
+    );
+
+    expect(ref).toHaveBeenCalledWith(screen.getByTestId('nav'));
   });
 
   it('renders heading and end content in mobile-bar mode', () => {
@@ -148,6 +191,49 @@ describe('TopNavItem', () => {
     expect(spy).toHaveBeenCalled();
   });
 
+  it('renders a button when href is omitted', () => {
+    const onClick = vi.fn();
+    render(
+      <TopNav label="Nav">
+        <TopNavItem label="Action" onClick={onClick} />
+      </TopNav>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Action'});
+    expect(button).toHaveAttribute('type', 'button');
+    expect(
+      screen.queryByRole('link', {name: 'Action'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('calls onClick when the button item is clicked', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <TopNav label="Nav">
+        <TopNavItem label="Action" onClick={onClick} />
+      </TopNav>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Action'}));
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the button and skips onClick when isDisabled', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <TopNav label="Nav">
+        <TopNavItem isDisabled label="Action" onClick={onClick} />
+      </TopNav>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Action'});
+    expect(button).toBeDisabled();
+    await user.click(button);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   it('renders icon-only items with aria-label and hidden text', () => {
     render(
       <TopNav label="Nav">
@@ -183,6 +269,85 @@ describe('TopNavItem', () => {
     // eslint-disable-next-line testing-library/no-node-access -- verifying decorative svg presence
     expect(screen.getByTestId('item').querySelector('svg')).toBeInTheDocument();
     expect(screen.getByText('Home')).toBeInTheDocument();
+  });
+
+  it('passes rel and target through to the anchor', () => {
+    render(
+      <TopNav label="Nav">
+        <TopNavItem href="/docs" label="Docs" rel="author" target="_self" />
+      </TopNav>,
+    );
+
+    const link = screen.getByRole('link', {name: 'Docs'});
+    expect(link).toHaveAttribute('target', '_self');
+    expect(link).toHaveAttribute('rel', 'author');
+  });
+
+  it('adds noopener noreferrer for target="_blank"', () => {
+    render(
+      <TopNav label="Nav">
+        <TopNavItem href="/docs" label="Docs" target="_blank" />
+      </TopNav>,
+    );
+
+    const link = screen.getByRole('link', {name: /Docs/});
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('merges an explicit rel with the noopener noreferrer for _blank', () => {
+    render(
+      <TopNav label="Nav">
+        <TopNavItem href="/docs" label="Docs" rel="author" target="_blank" />
+      </TopNav>,
+    );
+
+    const rel = screen.getByRole('link', {name: /Docs/}).getAttribute('rel');
+    expect(rel?.split(' ').sort()).toEqual([
+      'author',
+      'noopener',
+      'noreferrer',
+    ]);
+  });
+
+  it('announces new-tab links with visually hidden text', () => {
+    render(
+      <TopNav label="Nav">
+        <TopNavItem href="/docs" label="Docs" target="_blank" />
+      </TopNav>,
+    );
+
+    expect(
+      screen.getByRole('link', {name: 'Docs (opens in new tab)'}),
+    ).toBeInTheDocument();
+  });
+
+  it('folds the new-tab hint into aria-label for icon-only items', () => {
+    render(
+      <TopNav label="Nav">
+        <TopNavItem
+          href="/docs"
+          icon={Search}
+          isIconOnly
+          label="Docs"
+          target="_blank"
+        />
+      </TopNav>,
+    );
+
+    expect(
+      screen.getByRole('link', {name: 'Docs (opens in new tab)'}),
+    ).toHaveAttribute('aria-label', 'Docs (opens in new tab)');
+  });
+
+  it('forwards ref to the button when no href is provided', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+    render(
+      <TopNav label="Nav">
+        <TopNavItem label="Action" onClick={() => {}} ref={ref} />
+      </TopNav>,
+    );
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLButtonElement));
   });
 });
 
@@ -253,6 +418,20 @@ describe('TopNavHeading', () => {
     );
 
     expect(screen.getByTestId('heading')).toHaveAttribute('aria-label', 'Home');
+  });
+
+  it('forwards ref to the div when no href is provided', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+    render(<TopNavHeading heading="App" ref={ref} />);
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+
+  it('forwards ref to the anchor when href is provided', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+    render(<TopNavHeading heading="App" href="/home" ref={ref} />);
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLAnchorElement));
   });
 });
 

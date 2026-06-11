@@ -111,6 +111,28 @@ export const IconOnlyItems: Story = {
   ),
 };
 
+export const ButtonItems: Story = {
+  render: args => (
+    <TopNav {...args} heading={<TopNavHeading heading="Silver UI" />}>
+      <TopNavItem href="/docs" isSelected label="Docs" />
+      <TopNavItem
+        icon={Search}
+        label="Search"
+        onClick={() => {
+          // Action-only item (no href) renders as a button.
+        }}
+      />
+      <TopNavItem
+        icon={Settings}
+        label="Settings"
+        onClick={() => {
+          // Action-only item (no href) renders as a button.
+        }}
+      />
+    </TopNav>
+  ),
+};
+
 export const ItemsWithIcons: Story = {
   render: args => (
     <TopNav {...args} heading={<TopNavHeading heading="Silver UI" />}>

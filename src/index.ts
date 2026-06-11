@@ -367,12 +367,10 @@ export {
   TopNavItem,
   TopNavMobileContentContext,
   TopNavRenderContext,
-  TopNavSlotContext,
   type TopNavHeadingProps,
   type TopNavItemProps,
   type TopNavProps,
   type TopNavRenderMode,
-  type TopNavSlot,
 } from './components/TopNav';
 export {
   Link,
