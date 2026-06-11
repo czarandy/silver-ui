@@ -10,6 +10,7 @@ import {
 } from 'react';
 import {cx} from '../../internal/cx';
 import {nowMonotonicMilliseconds} from '../../internal/time';
+import useLatest from '../../internal/useLatest';
 import {Button} from '../Button';
 import {toastRecipe} from './Toast.recipe';
 import type {ToastDismissReason, ToastType} from './types';
@@ -78,7 +79,7 @@ export function Toast({
   endContent,
   isAutoHide,
   isExiting = false,
-  onDismiss,
+  onDismiss: onDismissFromProps,
   ref,
   style,
   type,
@@ -87,12 +88,7 @@ export function Toast({
   const startedAtRef = useRef<number | null>(null);
   const remainingRef = useRef(autoHideDuration);
   const isPausedRef = useRef(false);
-  const onDismissRef = useRef(onDismiss);
-  // Keep the ref pointed at the latest onDismiss without an effect. Writing a
-  // ref during render is safe here: it is idempotent and only read later from
-  // timer callbacks, never during this render.
-  // eslint-disable-next-line @eslint-react/refs -- intentional latest-value ref kept in sync during render
-  onDismissRef.current = onDismiss;
+  const onDismissRef = useLatest(onDismissFromProps);
 
   const startTimer = useCallback(() => {
     if (!isAutoHide) {
@@ -167,7 +163,7 @@ export function Toast({
             icon={X}
             isIconOnly
             label="Dismiss notification"
-            onClick={() => onDismiss('manual')}
+            onClick={() => onDismissRef.current('manual')}
             size="sm"
             variant="onSolid"
           />

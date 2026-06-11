@@ -4,6 +4,7 @@ import plugin from './silver-ui-plugin.js';
 
 const requireComponentPropsRule = plugin.rules['require-component-props'];
 const booleanPropNamingRule = plugin.rules['boolean-prop-naming'];
+const exhaustiveDepsRule = plugin.rules['exhaustive-deps'];
 const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
 const noRedundantBoxSizingRule = plugin.rules['no-redundant-box-sizing'];
 const noRecipeExportsRule = plugin.rules['no-recipe-exports'];
@@ -30,6 +31,57 @@ const typeAwareLanguageOptions = {
     tsconfigRootDir: import.meta.dirname + '/..',
   },
 };
+
+tester.run('exhaustive-deps', exhaustiveDepsRule, {
+  valid: [
+    {
+      name: 'allows configured stable hooks to be omitted from dependencies',
+      code: `
+        function Example({ value }) {
+          const latest = useLatest(value);
+
+          useEffect(() => {
+            latest.current();
+          }, []);
+        }
+      `,
+      options: [{stableHooks: ['useLatest']}],
+    },
+    {
+      name: 'preserves upstream useRef behavior',
+      code: `
+        function Example({ value }) {
+          const latest = useRef(value);
+
+          useEffect(() => {
+            latest.current();
+          }, []);
+        }
+      `,
+    },
+  ],
+  invalid: [
+    {
+      name: 'reports stable hook values without the stableHooks option',
+      code: `
+        function Example({ value }) {
+          const latest = useLatest(value);
+
+          useEffect(() => {
+            latest.current();
+          }, []);
+        }
+      `,
+      errors: [
+        {
+          message:
+            "React Hook useEffect has a missing dependency: 'latest'. Either include it or remove the dependency array.",
+          suggestions: 1,
+        },
+      ],
+    },
+  ],
+});
 
 tester.run('require-component-props', requireComponentPropsRule, {
   valid: [

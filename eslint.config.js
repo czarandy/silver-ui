@@ -237,9 +237,9 @@ export default tseslint.config(
       // dependency array (e.g. useEffect(fn)), which re-runs every render and is
       // almost always a forgotten deps array. An explicit `undefined` is still
       // allowed as a deliberate "run every render" opt-in.
-      '@eslint-react/exhaustive-deps': [
+      'silver-ui/exhaustive-deps': [
         'error',
-        {requireExplicitEffectDeps: true},
+        {requireExplicitEffectDeps: true, stableHooks: ['useLatest']},
       ],
 
       // Component structure bugs

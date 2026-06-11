@@ -1,4 +1,5 @@
 import path from 'node:path';
+import eslintReact from '@eslint-react/eslint-plugin';
 
 /**
  * Custom ESLint plugin for silver-ui component conventions.
@@ -7,8 +8,80 @@ import path from 'node:path';
  * - silver-ui/require-component-props: Components must accept className, style, ref, and data-testid
  * - silver-ui/boolean-prop-naming: Boolean props must start with is or has
  * - silver-ui/no-direct-color-tokens: Source must use semantic color tokens instead of primitive color tokens
+ * - silver-ui/exhaustive-deps: React exhaustive deps with silver-ui stable hook support
  * - silver-ui/prefer-is-react-node: ReactNode null checks must use isReactNode
  */
+
+const reactExhaustiveDeps = eslintReact.rules['exhaustive-deps'];
+
+const exhaustiveDeps = {
+  ...reactExhaustiveDeps,
+  meta: {
+    ...reactExhaustiveDeps.meta,
+    schema: [
+      {
+        ...reactExhaustiveDeps.meta.schema[0],
+        properties: {
+          ...reactExhaustiveDeps.meta.schema[0].properties,
+          stableHooks: {
+            type: 'array',
+            items: {type: 'string'},
+          },
+        },
+      },
+    ],
+  },
+  create(context) {
+    const upstreamVisitors = reactExhaustiveDeps.create(context);
+    const callExpressionVisitor = upstreamVisitors.CallExpression;
+    const stableHookNames = new Set(
+      (context.options?.[0]?.stableHooks ?? []).filter(
+        hookName => typeof hookName === 'string',
+      ),
+    );
+
+    if (stableHookNames.size === 0 || callExpressionVisitor == null) {
+      return upstreamVisitors;
+    }
+
+    let stableHookCallees = null;
+
+    function withStableHooksAsRefs(callback) {
+      const replacements = getStableHookCallees();
+
+      for (const callee of replacements) {
+        callee.name = 'useRef';
+      }
+
+      try {
+        return callback();
+      } finally {
+        for (const callee of replacements) {
+          callee.name = callee.originalName;
+        }
+      }
+    }
+
+    function getStableHookCallees() {
+      if (stableHookCallees == null) {
+        const sourceCode = context.sourceCode || context.getSourceCode();
+        stableHookCallees = collectStableHookCallees(
+          sourceCode.ast,
+          stableHookNames,
+        );
+      }
+
+      return stableHookCallees;
+    }
+
+    return {
+      ...upstreamVisitors,
+      CallExpression(node) {
+        return withStableHooksAsRefs(() => callExpressionVisitor(node));
+      },
+    };
+  },
+};
 
 const requireComponentProps = {
   meta: {
@@ -121,6 +194,80 @@ function getPropertyName(node) {
 
   if (node.key.type === 'Literal' && typeof node.key.value === 'string') {
     return node.key.value;
+  }
+
+  return null;
+}
+
+function collectStableHookCallees(root, stableHookNames) {
+  const callees = [];
+  const seen = new WeakSet();
+
+  function visit(node) {
+    if (node == null || typeof node !== 'object' || seen.has(node)) {
+      return;
+    }
+
+    seen.add(node);
+
+    if (node.type === 'CallExpression') {
+      const callee = getStableHookCallee(node.callee, stableHookNames);
+      if (callee != null) {
+        callees.push(callee);
+      }
+    }
+
+    for (const [key, value] of Object.entries(node)) {
+      if (
+        key === 'parent' ||
+        key === 'loc' ||
+        key === 'range' ||
+        key === 'tokens' ||
+        key === 'comments'
+      ) {
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        for (const child of value) {
+          visit(child);
+        }
+      } else {
+        visit(value);
+      }
+    }
+  }
+
+  visit(root);
+  return callees;
+}
+
+function getStableHookCallee(callee, stableHookNames) {
+  if (
+    callee.type === 'Identifier' &&
+    stableHookNames.has(callee.name)
+  ) {
+    return {
+      originalName: callee.name,
+      set name(value) {
+        callee.name = value;
+      },
+    };
+  }
+
+  if (
+    callee.type === 'MemberExpression' &&
+    !callee.computed &&
+    callee.property.type === 'Identifier' &&
+    stableHookNames.has(callee.property.name)
+  ) {
+    return {
+      name: callee.property.name,
+      originalName: callee.property.name,
+      set name(value) {
+        callee.property.name = value;
+      },
+    };
   }
 
   return null;
@@ -881,6 +1028,7 @@ const plugin = {
   },
   rules: {
     'boolean-prop-naming': booleanPropNaming,
+    'exhaustive-deps': exhaustiveDeps,
     'no-direct-color-tokens': noDirectColorTokens,
     'no-recipe-exports': noRecipeExports,
     'no-redundant-box-sizing': noRedundantBoxSizing,
