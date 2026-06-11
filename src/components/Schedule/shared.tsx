@@ -91,7 +91,7 @@ export function formatTimezoneAbbreviation(
   return parts.find(part => part.type === 'timeZoneName')?.value ?? timezoneID;
 }
 
-export function formatHour(hour: number, _timezoneID: string): string {
+export function formatHour(hour: number): string {
   return Temporal.PlainTime.from({hour}).toLocaleString(undefined, {
     hour: 'numeric',
   });

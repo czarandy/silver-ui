@@ -13,12 +13,7 @@ export interface ScheduleContextValue {
   events: ReadonlyArray<CalendarEvent>;
   highlightDate: ZonedDateTime;
   isLoading: boolean;
-  nextDateLabel: string;
-  onNextDate: () => void;
-  onPreviousDate: () => void;
-  onToday: () => void;
   plugins: ReadonlyArray<SchedulePlugin>;
-  previousDateLabel: string;
   range: ScheduleRange;
   timezoneID: string;
   view: ScheduleViewBase;

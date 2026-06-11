@@ -637,6 +637,54 @@ describe('Schedule', () => {
     });
   });
 
+  it('includes month events in each covered day cell label', () => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Planning',
+            end: '2026-05-15',
+            id: 'multi-day-month',
+            start: '2026-05-13',
+            title: 'Launch window',
+          }),
+          createEventFromISO({
+            category: 'Migration',
+            end: '2026-05-14T02:00:00.000Z',
+            id: 'overnight-month',
+            start: '2026-05-13T23:00:00.000Z',
+            title: 'Overnight migration',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByRole('gridcell', {
+        name: /Wednesday, May 13, 2026.*Launch window.*Overnight migration/,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('gridcell', {
+        name: /Thursday, May 14, 2026.*Launch window.*Overnight migration/,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('gridcell', {
+        name: /Friday, May 15, 2026.*Launch window/,
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('gridcell', {
+        name: /Friday, May 15, 2026.*Overnight migration/,
+      }),
+    ).not.toBeInTheDocument();
+  });
+
   it('exposes time grid views as ARIA grids', () => {
     render(
       <Schedule
@@ -1011,16 +1059,24 @@ describe('Schedule', () => {
 
   it('calls onViewDateChange with the previous view date preserving time of day', () => {
     const onViewDateChange = vi.fn();
-    render(
-      <Schedule
-        categories={categories}
-        events={events}
-        onViewDateChange={onViewDateChange}
-        timezoneID="UTC"
-        view={createScheduleDayView()}
-        viewDate={instantUTC(2026, 4, 13, 15, 6)}
-      />,
-    );
+
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange,
+      });
+      return (
+        <Schedule
+          categories={categories}
+          events={events}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={createScheduleDayView()}
+          viewDate={instantUTC(2026, 4, 13, 15, 6)}
+        />
+      );
+    }
+
+    render(<Fixture />);
 
     fireEvent.click(screen.getByRole('button', {name: 'Previous day'}));
     expect(onViewDateChange).toHaveBeenCalledWith(
@@ -1031,11 +1087,14 @@ describe('Schedule', () => {
   it('navigates monthly view across February and varying month lengths', () => {
     function Fixture(): React.JSX.Element {
       const [viewDate, setViewDate] = useState(() => instantUTC(2026, 1, 15));
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange: setViewDate,
+      });
       return (
         <Schedule
           events={events}
           highlightDate={instantUTC(2026, 1, 15)}
-          onViewDateChange={setViewDate}
+          plugins={[paginationPlugin]}
           timezoneID="UTC"
           view={createScheduleMonthlyView()}
           viewDate={viewDate}
@@ -1063,22 +1122,29 @@ describe('Schedule', () => {
     vi.spyOn(Temporal.Now, 'instant').mockReturnValue(now);
     const onViewDateChange = vi.fn();
 
-    render(
-      <Schedule
-        events={events}
-        onViewDateChange={onViewDateChange}
-        timezoneID="UTC"
-        view={createScheduleDayView()}
-        viewDate={instantUTC(2026, 4, 13)}
-      />,
-    );
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange,
+      });
+      return (
+        <Schedule
+          events={events}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={createScheduleDayView()}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    render(<Fixture />);
 
     fireEvent.click(screen.getByRole('button', {name: 'Today'}));
 
     expect(onViewDateChange).toHaveBeenCalledWith(now.epochMilliseconds);
   });
 
-  it('renders pagination controls with the default button variant', () => {
+  it('does not render pagination controls unless the pagination plugin is configured', () => {
     render(
       <Schedule
         events={events}
@@ -1087,6 +1153,35 @@ describe('Schedule', () => {
         viewDate={instantUTC(2026, 4, 13)}
       />,
     );
+
+    expect(
+      screen.queryByRole('button', {name: 'Previous day'}),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {name: 'Today'}),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {name: 'Next day'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders pagination controls with the default button variant', () => {
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange: vi.fn(),
+      });
+      return (
+        <Schedule
+          events={events}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={createScheduleDayView()}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    render(<Fixture />);
 
     const defaultIconButtonClassName = buttonRecipe({
       iconOnly: true,
@@ -1250,7 +1345,9 @@ describe('Schedule', () => {
     };
 
     function ScheduleWithStartPlugins() {
-      const paginationPlugin = useSchedulePaginationPlugin();
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange: vi.fn(),
+      });
       return (
         <Schedule
           categories={categories}

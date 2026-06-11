@@ -1,39 +1,71 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
-import {useMemo, type ReactNode} from 'react';
+import {useCallback, useMemo, type ReactNode} from 'react';
+import {nowEpochMilliseconds} from '../../../internal/time';
 import {Button} from '../../Button';
 import {ButtonGroup} from '../../ButtonGroup';
 import {useScheduleContext} from '../context';
 import type {
+  Instant,
   ScheduleHeaderContent,
   SchedulePlugin,
   SchedulePluginPosition,
+  ZonedDateTimeRange,
 } from '../types';
 
 export interface SchedulePaginationPluginOptions {
+  onViewDateChange: (date: Instant) => void;
   position?: SchedulePluginPosition;
 }
 
-function SchedulePaginationControls(): React.JSX.Element {
-  const {
-    nextDateLabel,
-    onNextDate,
-    onPreviousDate,
-    onToday,
-    previousDateLabel,
-  } = useScheduleContext();
+function SchedulePaginationControls({
+  onViewDateChange,
+}: {
+  onViewDateChange: (date: Instant) => void;
+}): React.JSX.Element {
+  const {view, viewDate} = useScheduleContext();
+  const currentRange = useMemo(
+    () => view.getDateRange(viewDate),
+    [view, viewDate],
+  );
+  const previousDateRange = useMemo(
+    () => view.getPreviousDateRange(viewDate),
+    [view, viewDate],
+  );
+  const nextDateRange = useMemo(
+    () => view.getNextDateRange(viewDate),
+    [view, viewDate],
+  );
+  const shiftToRange = useCallback(
+    (nextRange: ZonedDateTimeRange) => {
+      onViewDateChange(
+        viewDate.instant + nextRange[0].instant - currentRange[0].instant,
+      );
+    },
+    [currentRange, onViewDateChange, viewDate],
+  );
+  const onPreviousDate = useCallback(() => {
+    shiftToRange(previousDateRange.range);
+  }, [previousDateRange, shiftToRange]);
+  const onToday = useCallback(() => {
+    onViewDateChange(nowEpochMilliseconds());
+  }, [onViewDateChange]);
+  const onNextDate = useCallback(() => {
+    shiftToRange(nextDateRange.range);
+  }, [nextDateRange, shiftToRange]);
+
   return (
     <ButtonGroup label="Schedule pagination" size="sm">
       <Button
         icon={ChevronLeft}
         isIconOnly
-        label={previousDateLabel}
+        label={previousDateRange.label}
         onClick={onPreviousDate}
       />
       <Button label="Today" onClick={onToday} size="sm" />
       <Button
         icon={ChevronRight}
         isIconOnly
-        label={nextDateLabel}
+        label={nextDateRange.label}
         onClick={onNextDate}
       />
     </ButtonGroup>
@@ -41,15 +73,18 @@ function SchedulePaginationControls(): React.JSX.Element {
 }
 
 function createSchedulePaginationPlugin({
+  onViewDateChange,
   position = 'start',
-}: SchedulePaginationPluginOptions = {}): SchedulePlugin {
+}: SchedulePaginationPluginOptions): SchedulePlugin {
   return {
     renderHeader(
       startContent: ReactNode,
       centerContent: ReactNode,
       endContent: ReactNode,
     ): ScheduleHeaderContent {
-      const controls = <SchedulePaginationControls />;
+      const controls = (
+        <SchedulePaginationControls onViewDateChange={onViewDateChange} />
+      );
       return position === 'start'
         ? {
             centerContent,
@@ -75,10 +110,12 @@ function createSchedulePaginationPlugin({
   };
 }
 
-export const defaultSchedulePaginationPlugin = createSchedulePaginationPlugin();
-
 export function useSchedulePaginationPlugin({
+  onViewDateChange,
   position = 'start',
-}: SchedulePaginationPluginOptions = {}): SchedulePlugin {
-  return useMemo(() => createSchedulePaginationPlugin({position}), [position]);
+}: SchedulePaginationPluginOptions): SchedulePlugin {
+  return useMemo(
+    () => createSchedulePaginationPlugin({onViewDateChange, position}),
+    [onViewDateChange, position],
+  );
 }

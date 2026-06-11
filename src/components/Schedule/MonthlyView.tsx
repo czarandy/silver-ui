@@ -14,7 +14,7 @@ import {
 } from '../../internal/plainDate';
 import {Heading, Text} from '../Text';
 import {useScheduleContext} from './context';
-import {eventOccursOnDate, isDayEvent} from './dateMath';
+import {isDayEvent} from './dateMath';
 import {
   CalendarMonthEventPill,
   formatMonthTitle,
@@ -178,6 +178,71 @@ function getEventDateSpan(
   ];
 }
 
+function getEventVisibleDateIndexes({
+  event,
+  firstDay,
+  lastDay,
+  timezoneID,
+}: {
+  event: CalendarEvent;
+  firstDay: PlainDate;
+  lastDay: PlainDate;
+  timezoneID: string;
+}): [number, number] | null {
+  const [eventStart, eventEnd] = getEventDateSpan(event, timezoneID);
+  if (
+    plainDateIsBefore(eventEnd, firstDay) ||
+    plainDateIsAfter(eventStart, lastDay)
+  ) {
+    return null;
+  }
+
+  const startIndex = plainDateIsBefore(eventStart, firstDay)
+    ? 0
+    : firstDay.until(eventStart).days;
+  const endIndex = plainDateIsAfter(eventEnd, lastDay)
+    ? firstDay.until(lastDay).days
+    : firstDay.until(eventEnd).days;
+
+  return [startIndex, endIndex];
+}
+
+function getEventsByDate(
+  events: ReadonlyArray<CalendarEvent>,
+  days: ReadonlyArray<PlainDate>,
+  timezoneID: string,
+): Map<string, CalendarEvent[]> {
+  const eventsByDate = new Map<string, CalendarEvent[]>();
+  if (days.length === 0) {
+    return eventsByDate;
+  }
+  const firstDay = days[0];
+  const lastDay = days[days.length - 1];
+
+  days.forEach(day => {
+    eventsByDate.set(day.toString(), []);
+  });
+
+  events.forEach(event => {
+    const indexes = getEventVisibleDateIndexes({
+      event,
+      firstDay,
+      lastDay,
+      timezoneID,
+    });
+    if (indexes == null) {
+      return;
+    }
+
+    const [startIndex, endIndex] = indexes;
+    for (let index = startIndex; index <= endIndex; index += 1) {
+      eventsByDate.get(days[index].toString())?.push(event);
+    }
+  });
+
+  return eventsByDate;
+}
+
 function getAvailableLevel(levels: number[], columnStart: number): number {
   const level = levels.findIndex(columnEnd => columnStart > columnEnd);
   return level >= 0 ? level : levels.length;
@@ -190,22 +255,24 @@ function getMonthEventSegments(
 ): MonthEventSegment[] {
   const segments: MonthEventSegment[] = [];
   const levelsByWeek: number[][] = [];
+  if (days.length === 0) {
+    return segments;
+  }
   const firstDay = days[0];
   const lastDay = days[days.length - 1];
 
   const monthEvents = events
     .map(event => {
-      const [eventStart, eventEnd] = getEventDateSpan(event, timezoneID);
-      const startIndex = days.findIndex(
-        day => !plainDateIsBefore(day, eventStart),
-      );
-      const endIndexFromRight = [...days]
-        .reverse()
-        .findIndex(day => !plainDateIsAfter(day, eventEnd));
-      if (startIndex < 0 || endIndexFromRight < 0) {
+      const indexes = getEventVisibleDateIndexes({
+        event,
+        firstDay,
+        lastDay,
+        timezoneID,
+      });
+      if (indexes == null) {
         return null;
       }
-      const endIndex = days.length - 1 - endIndexFromRight;
+      const [startIndex, endIndex] = indexes;
       return {
         endIndex,
         event,
@@ -239,14 +306,6 @@ function getMonthEventSegments(
     });
 
   monthEvents.forEach(({endIndex, event, startIndex}) => {
-    const [eventStart, eventEnd] = getEventDateSpan(event, timezoneID);
-    if (
-      plainDateIsBefore(eventEnd, firstDay) ||
-      plainDateIsAfter(eventStart, lastDay)
-    ) {
-      return;
-    }
-
     for (
       let week = Math.floor(startIndex / 7);
       week <= Math.floor(endIndex / 7);
@@ -310,6 +369,7 @@ function ScheduleMonthlyView({
   const title = formatMonthTitle(month);
   const days = getMonthDays(month, options.weekCount ?? 6);
   const eventSegments = getMonthEventSegments(events, days, timezoneID);
+  const eventsByDate = getEventsByDate(events, days, timezoneID);
   const today = highlightDate.toPlainDate();
 
   return (
@@ -333,9 +393,7 @@ function ScheduleMonthlyView({
         <div className={styles.monthSurface}>
           <div className={styles.monthCellGrid}>
             {days.map((day, index) => {
-              const dayEvents = events.filter(event =>
-                eventOccursOnDate(event, day, timezoneID),
-              );
+              const dayEvents = eventsByDate.get(day.toString()) ?? [];
               const isCurrentMonth =
                 day.month === month.month && day.year === month.year;
               const isLastColumn = index % 7 === 6;

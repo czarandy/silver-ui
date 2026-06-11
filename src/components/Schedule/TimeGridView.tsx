@@ -497,7 +497,7 @@ export function TimeGridView({
         </div>
       </div>
       {hours.map(hour => {
-        const hourLabel = formatHour(hour, timezoneID);
+        const hourLabel = formatHour(hour);
         const isLastHour = hour === hours[hours.length - 1];
         return (
           <div className={styles.rowContents} key={hour} role="row">

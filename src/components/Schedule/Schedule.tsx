@@ -1,11 +1,4 @@
-import {
-  Suspense,
-  useCallback,
-  useMemo,
-  useState,
-  type CSSProperties,
-  type Ref,
-} from 'react';
+import {Suspense, useMemo, useState, type CSSProperties, type Ref} from 'react';
 import {cx} from '../../internal/cx';
 import {plainDateFromInstant} from '../../internal/plainDate';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from '../../internal/time';
@@ -23,7 +16,6 @@ import type {
   ScheduleView,
   ScheduleViewOptions,
   ZonedDateTime,
-  ZonedDateTimeRange,
 } from './types';
 import {createZonedDateTime} from './zonedDateTime';
 
@@ -53,11 +45,7 @@ export interface ScheduleProps<
    */
   highlightDate?: Instant;
   /**
-   * Called by navigation plugins when the visible date changes.
-   */
-  onViewDateChange?: (date: Instant) => void;
-  /**
-   * Header/rendering plugins. Defaults to pagination controls.
+   * Header/rendering plugins.
    */
   plugins?: ReadonlyArray<SchedulePlugin>;
   /**
@@ -175,12 +163,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   eventSource,
   highlightDate,
   isLoading,
-  nextDateLabel,
-  onNextDate,
-  onPreviousDate,
-  onToday,
   plugins,
-  previousDateLabel,
   view,
   viewDate,
 }: {
@@ -189,12 +172,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   eventSource: ScheduleEventSource;
   highlightDate: ZonedDateTime;
   isLoading: boolean;
-  nextDateLabel: string;
-  onNextDate: () => void;
-  onPreviousDate: () => void;
-  onToday: () => void;
   plugins: ReadonlyArray<SchedulePlugin>;
-  previousDateLabel: string;
   view: ScheduleView<Options>;
   viewDate: ZonedDateTime;
 }): React.JSX.Element {
@@ -209,12 +187,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
       events,
       highlightDate,
       isLoading,
-      nextDateLabel,
-      onNextDate,
-      onPreviousDate,
-      onToday,
       plugins,
-      previousDateLabel,
       range,
       timezoneID: viewDate.timezoneID,
       view,
@@ -226,12 +199,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
     eventSource,
     highlightDate,
     isLoading,
-    nextDateLabel,
-    onNextDate,
-    onPreviousDate,
-    onToday,
     plugins,
-    previousDateLabel,
     range,
     view,
     viewDate,
@@ -253,7 +221,6 @@ export function Schedule({
   'data-testid': dataTestId,
   events,
   highlightDate: highlightDateFromProps,
-  onViewDateChange,
   plugins = defaultSchedulePlugins,
   ref,
   style,
@@ -279,38 +246,6 @@ export function Schedule({
     () => createZonedDateTime(highlightDate, timezoneID),
     [highlightDate, timezoneID],
   );
-  const updateViewDate = useCallback(
-    (nextViewDate: Instant) => {
-      onViewDateChange?.(nextViewDate);
-    },
-    [onViewDateChange],
-  );
-  const shiftToRange = useCallback(
-    (nextRange: ZonedDateTimeRange) => {
-      const currentRange = view.getDateRange(zonedDateTime);
-      updateViewDate(
-        zonedDateTime.instant + nextRange[0].instant - currentRange[0].instant,
-      );
-    },
-    [updateViewDate, view, zonedDateTime],
-  );
-  const previousDateRange = useMemo(
-    () => view.getPreviousDateRange(zonedDateTime),
-    [view, zonedDateTime],
-  );
-  const nextDateRange = useMemo(
-    () => view.getNextDateRange(zonedDateTime),
-    [view, zonedDateTime],
-  );
-  const onPreviousDate = useCallback(() => {
-    shiftToRange(previousDateRange.range);
-  }, [previousDateRange, shiftToRange]);
-  const onToday = useCallback(() => {
-    updateViewDate(nowEpochMilliseconds());
-  }, [updateViewDate]);
-  const onNextDate = useCallback(() => {
-    shiftToRange(nextDateRange.range);
-  }, [nextDateRange, shiftToRange]);
 
   return (
     <div
@@ -326,12 +261,7 @@ export function Schedule({
             eventSource={[]}
             highlightDate={highlightZonedDateTime}
             isLoading
-            nextDateLabel={nextDateRange.label}
-            onNextDate={onNextDate}
-            onPreviousDate={onPreviousDate}
-            onToday={onToday}
             plugins={plugins}
-            previousDateLabel={previousDateRange.label}
             view={view}
             viewDate={zonedDateTime}
           />
@@ -342,12 +272,7 @@ export function Schedule({
           eventSource={events}
           highlightDate={highlightZonedDateTime}
           isLoading={false}
-          nextDateLabel={nextDateRange.label}
-          onNextDate={onNextDate}
-          onPreviousDate={onPreviousDate}
-          onToday={onToday}
           plugins={plugins}
-          previousDateLabel={previousDateRange.label}
           view={view}
           viewDate={zonedDateTime}
         />

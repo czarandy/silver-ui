@@ -10,6 +10,7 @@ import {createScheduleListView} from './ListView';
 import {createScheduleMonthlyView} from './MonthlyView';
 import {Schedule} from './Schedule';
 import {createScheduleWeeklyView} from './WeeklyView';
+import {useSchedulePaginationPlugin} from './plugins/PaginationPlugin';
 import {useScheduleViewSelectorPlugin} from './plugins/ViewSelectorPlugin';
 import type {
   Instant,
@@ -265,13 +266,15 @@ function ScheduleStory({
   viewDate?: Instant;
 }) {
   const [viewDate, setViewDate] = useState<Instant>(() => initialViewDate);
+  const paginationPlugin = useSchedulePaginationPlugin({
+    onViewDateChange: setViewDate,
+  });
   return (
     <Schedule
       categories={storyCategories}
       events={storyEvents}
       highlightDate={highlightDate}
-      onViewDateChange={setViewDate}
-      plugins={plugins}
+      plugins={plugins ?? [paginationPlugin]}
       timezoneID={timezoneID}
       view={view}
       viewDate={viewDate}
