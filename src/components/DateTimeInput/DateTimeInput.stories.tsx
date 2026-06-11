@@ -8,7 +8,7 @@ import {
 } from './DateTimeInput';
 
 function DateTimeStory(args: DateTimeInputProps): React.JSX.Element {
-  const [value, setValue] = useState<PlainDateTime | undefined>(args.value);
+  const [value, setValue] = useState<PlainDateTime | null>(args.value);
   return <DateTimeInput {...args} onChange={setValue} value={value} />;
 }
 

@@ -106,7 +106,7 @@ export type DateRangeInputProps = {
   /**
    * Called when the selected date range changes.
    */
-  onChange: (value: DateRange | undefined) => void;
+  onChange: (value: DateRange | null) => void;
   /**
    * Placeholder text shown when no range is selected.
    */
@@ -129,12 +129,12 @@ export type DateRangeInputProps = {
    */
   style?: CSSProperties;
   /**
-   * Currently selected date range.
+   * Currently selected date range. Pass `null` for an empty input.
    */
-  value: DateRange | undefined;
+  value: DateRange | null;
 } & FieldNecessity;
 
-function formatRange(value: DateRange | undefined): string {
+function formatRange(value: DateRange | null | undefined): string {
   if (value == null) {
     return '';
   }
@@ -218,7 +218,7 @@ export function DateRangeInput({
                 onChange(nextValue);
                 setIsOpen(false);
               }}
-              value={value}
+              value={value ?? undefined}
               viewDate={value?.start}
             />
           }
@@ -262,7 +262,7 @@ export function DateRangeInput({
             icon={X}
             isIconOnly
             label={`Clear ${label}`}
-            onClick={() => onChange(undefined)}
+            onClick={() => onChange(null)}
             size="sm"
             variant="ghost"
           />

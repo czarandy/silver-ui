@@ -7,9 +7,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
+import {segmentedControlRecipe} from './SegmentedControl.recipe';
 import {
   SegmentedControlContext,
   type SegmentedControlLayout,
@@ -66,25 +66,6 @@ export interface SegmentedControlProps<TValue extends string = string> {
   value: TValue;
 }
 
-const styles = {
-  root: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5',
-    p: '0.5',
-    bg: 'surface.gray',
-    borderRadius: 'md',
-  }),
-  fill: css({
-    display: 'flex',
-    w: 'full',
-  }),
-  disabled: css({
-    opacity: 0.5,
-    pointerEvents: 'none',
-  }),
-} as const;
-
 /**
  * Segmented toggle control for selecting one option from a small set.
  *
@@ -117,6 +98,7 @@ export function SegmentedControl<TValue extends string = string>({
     () => ({isDisabled, layout, onChange: handleChange, size, value}),
     [handleChange, isDisabled, layout, size, value],
   );
+  const classes = segmentedControlRecipe({isDisabled, layout});
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
@@ -184,12 +166,7 @@ export function SegmentedControl<TValue extends string = string>({
         aria-disabled={isDisabled || undefined}
         aria-label={label}
         aria-orientation="horizontal"
-        className={cx(
-          styles.root,
-          layout === 'fill' ? styles.fill : undefined,
-          isDisabled ? styles.disabled : undefined,
-          className,
-        )}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         onKeyDown={handleKeyDown}
         ref={mergeRefs(ref, containerRef)}

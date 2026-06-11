@@ -111,7 +111,7 @@ export type TimeInputProps = {
   /**
    * Called when the time value changes.
    */
-  onChange: (value: PlainTime | undefined) => void;
+  onChange: (value: PlainTime | null) => void;
   /**
    * Called when the input gains focus.
    */
@@ -143,13 +143,13 @@ export type TimeInputProps = {
    */
   style?: CSSProperties;
   /**
-   * Controlled time value.
+   * Controlled time value. Pass `null` for an empty input.
    */
-  value: PlainTime | undefined;
+  value: PlainTime | null;
 } & FieldNecessity;
 
 function toInputString(
-  time: PlainTime | undefined,
+  time: PlainTime | null | undefined,
   hasSeconds: boolean,
 ): string {
   if (time == null) {
@@ -160,14 +160,14 @@ function toInputString(
   });
 }
 
-function fromInputString(value: string): PlainTime | undefined {
+function fromInputString(value: string): PlainTime | null {
   if (value === '') {
-    return undefined;
+    return null;
   }
   try {
     return Temporal.PlainTime.from(value);
   } catch {
-    return undefined;
+    return null;
   }
 }
 
@@ -266,7 +266,7 @@ export function TimeInput({
             icon={X}
             isIconOnly
             label={`Clear ${label}`}
-            onClick={() => onChange(undefined)}
+            onClick={() => onChange(null)}
             size="sm"
             variant="ghost"
           />

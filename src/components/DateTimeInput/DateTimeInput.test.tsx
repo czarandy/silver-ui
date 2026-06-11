@@ -26,9 +26,7 @@ describe('DateTimeInput', () => {
   it('auto-fills current time when only date is set', () => {
     const onChange = vi.fn();
 
-    render(
-      <DateTimeInput label="Meeting" onChange={onChange} value={undefined} />,
-    );
+    render(<DateTimeInput label="Meeting" onChange={onChange} value={null} />);
 
     fireEvent.change(screen.getByLabelText('Meeting date'), {
       target: {value: '2026-06-15'},
@@ -45,9 +43,7 @@ describe('DateTimeInput', () => {
     const onChange = vi.fn();
     const today = Temporal.Now.plainDateISO();
 
-    render(
-      <DateTimeInput label="Meeting" onChange={onChange} value={undefined} />,
-    );
+    render(<DateTimeInput label="Meeting" onChange={onChange} value={null} />);
 
     fireEvent.change(screen.getByLabelText('Meeting time'), {
       target: {value: '14:30'},
@@ -68,7 +64,7 @@ describe('DateTimeInput', () => {
         isDisabled
         label="Meeting"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -82,7 +78,7 @@ describe('DateTimeInput', () => {
         label="Meeting"
         onChange={() => {}}
         status={{message: 'Invalid date-time', type: 'error'}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -90,9 +86,7 @@ describe('DateTimeInput', () => {
   });
 
   it('associates the field label with the date input', () => {
-    render(
-      <DateTimeInput label="Meeting" onChange={() => {}} value={undefined} />,
-    );
+    render(<DateTimeInput label="Meeting" onChange={() => {}} value={null} />);
 
     const dateInput = screen.getByLabelText('Meeting date');
     const dateInputId = dateInput.getAttribute('id');
@@ -112,7 +106,7 @@ describe('DateTimeInput', () => {
         label="Meeting"
         onChange={() => {}}
         ref={ref}
-        value={undefined}
+        value={null}
       />,
     );
 

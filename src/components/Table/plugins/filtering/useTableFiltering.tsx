@@ -403,7 +403,7 @@ function DateFilterControl({
       }}
       placeholder={`Filter ${header}`}
       size={size}
-      value={value instanceof Temporal.PlainDate ? value : undefined}
+      value={value instanceof Temporal.PlainDate ? value : null}
     />
   );
 }
@@ -433,7 +433,7 @@ function TimeFilterControl({
       }}
       placeholder={`Filter ${header}`}
       size={size}
-      value={value instanceof Temporal.PlainTime ? value : undefined}
+      value={value instanceof Temporal.PlainTime ? value : null}
     />
   );
 }

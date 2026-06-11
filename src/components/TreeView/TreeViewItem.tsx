@@ -474,8 +474,7 @@ export function TreeViewItem({
           )}
           onClick={handleRowClick}
           onPointerDown={handlePointerDown}
-          style={{marginLeft}}
-          tabIndex={undefined}>
+          style={{marginLeft}}>
           {content}
         </div>
       </div>

@@ -28,16 +28,14 @@ const defaultRange: DateRange = {
 
 export const Default: Story = {
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
 
 export const Empty: Story = {
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>();
+    const [value, setValue] = useState<DateRange | null>(null);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -45,18 +43,14 @@ export const Empty: Story = {
 export const WithClear: Story = {
   args: {hasClear: true},
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
 
 export const WithConstraints: Story = {
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return (
       <DateRangeInput
         {...args}
@@ -71,9 +65,7 @@ export const WithConstraints: Story = {
 
 export const DisabledWeekends: Story = {
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return (
       <DateRangeInput
         {...args}
@@ -102,9 +94,7 @@ export const Loading: Story = {
 export const ErrorStatus: Story = {
   args: {status: {message: 'End date must be after start date', type: 'error'}},
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -112,9 +102,7 @@ export const ErrorStatus: Story = {
 export const WarningStatus: Story = {
   args: {status: {message: 'Range exceeds 7 days', type: 'warning'}},
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -122,9 +110,7 @@ export const WarningStatus: Story = {
 export const SingleMonth: Story = {
   args: {numberOfMonths: 1},
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -132,18 +118,16 @@ export const SingleMonth: Story = {
 export const WithDescription: Story = {
   args: {description: 'Select a check-in and check-out date.'},
   render: (args: DateRangeInputProps) => {
-    const [value, setValue] = useState<DateRange | undefined>(
-      () => defaultRange,
-    );
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
 
 export const Sizes: Story = {
   render: () => {
-    const [sm, setSm] = useState<DateRange | undefined>(() => defaultRange);
-    const [md, setMd] = useState<DateRange | undefined>(() => defaultRange);
-    const [lg, setLg] = useState<DateRange | undefined>(() => defaultRange);
+    const [sm, setSm] = useState<DateRange | null>(() => defaultRange);
+    const [md, setMd] = useState<DateRange | null>(() => defaultRange);
+    const [lg, setLg] = useState<DateRange | null>(() => defaultRange);
     return (
       <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
         <DateRangeInput label="Small" onChange={setSm} size="sm" value={sm} />

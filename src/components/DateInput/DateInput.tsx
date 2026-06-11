@@ -111,7 +111,7 @@ export type DateInputProps = {
   /**
    * Called when the selected date changes.
    */
-  onChange: (value: PlainDate | undefined) => void;
+  onChange: (value: PlainDate | null) => void;
   /**
    * Placeholder text shown when no date is selected. Typed dates accept a
    * range of formats, including "May 21, 2026", "5/21/2026", and "2026-05-21".
@@ -136,12 +136,12 @@ export type DateInputProps = {
    */
   style?: CSSProperties;
   /**
-   * Currently selected date.
+   * Currently selected date. Pass `null` for an empty input.
    */
-  value: PlainDate | undefined;
+  value: PlainDate | null;
 } & FieldNecessity;
 
-function formatDate(value: PlainDate | undefined): string {
+function formatDate(value: PlainDate | null | undefined): string {
   return value == null ? '' : plainDateFormat(value, DATE_FORMAT_LONG);
 }
 
@@ -246,7 +246,7 @@ export function DateInput({
 
     if (pendingInput.trim() === '') {
       if (value != null) {
-        onChange(undefined);
+        onChange(null);
       }
       setPendingInput(null);
       return;
@@ -277,7 +277,7 @@ export function DateInput({
   );
 
   const handleClear = useCallback(() => {
-    onChange(undefined);
+    onChange(null);
     setPendingInput(null);
     inputRef.current?.focus();
   }, [onChange]);
@@ -317,8 +317,8 @@ export function DateInput({
               min={min}
               onChange={handleCalendarChange}
               ref={calendarRef}
-              value={value}
-              viewDate={value}
+              value={value ?? undefined}
+              viewDate={value ?? undefined}
             />
           }
           hasAutoFocus={false}

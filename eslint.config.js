@@ -309,6 +309,9 @@ export default tseslint.config(
       // Complements jsx-no-useless-fragment, which ignores fragments that
       // contain a comment (e.g. <>{/* note */}<Foo /></>).
       'silver-ui/no-useless-fragment-with-comment': 'error',
+      // bar={undefined} is the same as omitting the prop (unless it follows a
+      // spread, which the rule allows).
+      'silver-ui/no-useless-undefined-prop': 'error',
 
       // Naming conventions
       '@eslint-react/naming-convention-context-name': 'error',

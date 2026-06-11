@@ -28,7 +28,7 @@ type Story = StoryObj<TimeInputProps>;
 
 export const Default: Story = {
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_0900);
+    const [value, setValue] = useState<PlainTime | null>(TIME_0900);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -36,7 +36,7 @@ export const Default: Story = {
 export const WithSeconds: Story = {
   args: {hasSeconds: true},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_090030);
+    const [value, setValue] = useState<PlainTime | null>(TIME_090030);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -44,7 +44,7 @@ export const WithSeconds: Story = {
 export const WithClear: Story = {
   args: {hasClear: true},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_1430);
+    const [value, setValue] = useState<PlainTime | null>(TIME_1430);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -52,7 +52,7 @@ export const WithClear: Story = {
 export const WithConstraints: Story = {
   args: {max: TIME_1700, min: TIME_0900},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_1200);
+    const [value, setValue] = useState<PlainTime | null>(TIME_1200);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -74,7 +74,7 @@ export const Loading: Story = {
 export const ErrorStatus: Story = {
   args: {status: {message: 'Time is required', type: 'error'}},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>();
+    const [value, setValue] = useState<PlainTime | null>(null);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -82,7 +82,7 @@ export const ErrorStatus: Story = {
 export const WarningStatus: Story = {
   args: {status: {message: 'Outside business hours', type: 'warning'}},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_2200);
+    const [value, setValue] = useState<PlainTime | null>(TIME_2200);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -90,16 +90,16 @@ export const WarningStatus: Story = {
 export const SuccessStatus: Story = {
   args: {status: {message: 'Time slot available', type: 'success'}},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_1000);
+    const [value, setValue] = useState<PlainTime | null>(TIME_1000);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
 
 export const Sizes: Story = {
   render: () => {
-    const [sm, setSm] = useState<PlainTime | undefined>(TIME_0900);
-    const [md, setMd] = useState<PlainTime | undefined>(TIME_0900);
-    const [lg, setLg] = useState<PlainTime | undefined>(TIME_0900);
+    const [sm, setSm] = useState<PlainTime | null>(TIME_0900);
+    const [md, setMd] = useState<PlainTime | null>(TIME_0900);
+    const [lg, setLg] = useState<PlainTime | null>(TIME_0900);
     return (
       <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
         <TimeInput label="Small" onChange={setSm} size="sm" value={sm} />
@@ -113,7 +113,7 @@ export const Sizes: Story = {
 export const Required: Story = {
   args: {isRequired: true},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_0900);
+    const [value, setValue] = useState<PlainTime | null>(TIME_0900);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -121,7 +121,7 @@ export const Required: Story = {
 export const Optional: Story = {
   args: {isOptional: true},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_0900);
+    const [value, setValue] = useState<PlainTime | null>(TIME_0900);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -129,7 +129,7 @@ export const Optional: Story = {
 export const WithDescription: Story = {
   args: {description: 'Select a time in your local timezone.'},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_0900);
+    const [value, setValue] = useState<PlainTime | null>(TIME_0900);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -137,7 +137,7 @@ export const WithDescription: Story = {
 export const HiddenLabel: Story = {
   args: {isLabelHidden: true},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_0900);
+    const [value, setValue] = useState<PlainTime | null>(TIME_0900);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
@@ -145,7 +145,7 @@ export const HiddenLabel: Story = {
 export const WithLabelTooltip: Story = {
   args: {labelTooltip: 'Times are shown in your local timezone.'},
   render: (args: TimeInputProps) => {
-    const [value, setValue] = useState<PlainTime | undefined>(TIME_0900);
+    const [value, setValue] = useState<PlainTime | null>(TIME_0900);
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };

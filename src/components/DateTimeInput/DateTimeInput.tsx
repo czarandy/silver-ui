@@ -83,7 +83,7 @@ export type DateTimeInputProps = {
   /**
    * Called when the selected date-time changes.
    */
-  onChange: (value: PlainDateTime | undefined) => void;
+  onChange: (value: PlainDateTime | null) => void;
   /**
    * Ref forwarded to the date input element.
    */
@@ -102,9 +102,9 @@ export type DateTimeInputProps = {
    */
   style?: CSSProperties;
   /**
-   * Currently selected date-time.
+   * Currently selected date-time. Pass `null` for an empty input.
    */
-  value: PlainDateTime | undefined;
+  value: PlainDateTime | null;
 } & FieldNecessity;
 
 const styles = {
@@ -115,7 +115,7 @@ const styles = {
   }),
 } as const;
 
-function splitDateTime(value: PlainDateTime | undefined): {
+function splitDateTime(value: PlainDateTime | null | undefined): {
   date: PlainDate | undefined;
   time: PlainTime | undefined;
 } {
@@ -129,11 +129,11 @@ function splitDateTime(value: PlainDateTime | undefined): {
 }
 
 function combineDateTime(
-  date: PlainDate | undefined,
-  time: PlainTime | undefined,
-): PlainDateTime | undefined {
+  date: PlainDate | null | undefined,
+  time: PlainTime | null | undefined,
+): PlainDateTime | null {
   if (date == null && time == null) {
-    return undefined;
+    return null;
   }
   const resolvedDate = date ?? Temporal.Now.plainDateISO();
   const resolvedTime = time ?? Temporal.Now.plainTimeISO();
@@ -186,7 +186,7 @@ export function DateTimeInput({
   const maxParts = useMemo(() => splitDateTime(max), [max]);
 
   const handleDateChange = useCallback(
-    (nextDate: PlainDate | undefined) => {
+    (nextDate: PlainDate | null) => {
       if (nextDate == null || time == null) {
         onChange(combineDateTime(nextDate, time));
         return;
@@ -209,8 +209,7 @@ export function DateTimeInput({
     [onChange, time, min, max],
   );
   const handleTimeChange = useCallback(
-    (nextTime: PlainTime | undefined) =>
-      onChange(combineDateTime(date, nextTime)),
+    (nextTime: PlainTime | null) => onChange(combineDateTime(date, nextTime)),
     [onChange, date],
   );
 
@@ -243,7 +242,7 @@ export function DateTimeInput({
           onChange={handleDateChange}
           ref={ref}
           size={size}
-          value={date}
+          value={date ?? null}
         />
         <TimeInput
           hasSeconds={hasSeconds}
@@ -267,7 +266,7 @@ export function DateTimeInput({
           }
           onChange={handleTimeChange}
           size={size}
-          value={time}
+          value={time ?? null}
         />
       </div>
     </Field>

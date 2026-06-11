@@ -155,7 +155,6 @@ export const OptionRole: Story = {
   render: () => (
     <div aria-label="People" role="listbox">
       <Item
-        aria-current={undefined}
         isSelected
         label="Ada Lovelace"
         onClick={() => {}}

@@ -205,7 +205,7 @@ function TimeEditor({
       value={
         filterValue?.type === 'time'
           ? Temporal.PlainTime.from(filterValue.value)
-          : undefined
+          : null
       }
     />
   );
@@ -235,7 +235,7 @@ function DateAbsoluteEditor({
       value={
         filterValue?.type === 'date_absolute'
           ? plainDateFromUnixSeconds(filterValue.unixSeconds, timezoneID)
-          : undefined
+          : null
       }
     />
   );
@@ -313,14 +313,14 @@ function DateRangeEditor({
           filterValue.value.start.unixSeconds,
           timezoneID,
         )
-      : undefined;
+      : null;
   const endValue =
     filterValue?.type === 'date_range' &&
     filterValue.value.end.type === 'ABSOLUTE'
       ? plainDateFromUnixSeconds(filterValue.value.end.unixSeconds, timezoneID)
-      : undefined;
+      : null;
   const handleStartChange = useCallback(
-    (value: PlainDate | undefined) => {
+    (value: PlainDate | null) => {
       const existingEnd =
         filterValue?.type === 'date_range'
           ? filterValue.value.end
@@ -340,7 +340,7 @@ function DateRangeEditor({
     [filterValue, onChange, timezoneID],
   );
   const handleEndChange = useCallback(
-    (value: PlainDate | undefined) => {
+    (value: PlainDate | null) => {
       const existingStart =
         filterValue?.type === 'date_range'
           ? filterValue.value.start

@@ -10,6 +10,8 @@ const noRecipeExportsRule = plugin.rules['no-recipe-exports'];
 const preferIsReactNodeRule = plugin.rules['prefer-is-react-node'];
 const noUselessFragmentWithCommentRule =
   plugin.rules['no-useless-fragment-with-comment'];
+const noUselessUndefinedPropRule =
+  plugin.rules['no-useless-undefined-prop'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -835,3 +837,54 @@ tester.run(
     ],
   },
 );
+
+tester.run('no-useless-undefined-prop', noUselessUndefinedPropRule, {
+  valid: [
+    {
+      name: 'prop with a real value',
+      code: 'const x = <Foo bar={value} />;',
+    },
+    {
+      name: 'prop omitted entirely',
+      code: 'const x = <Foo />;',
+    },
+    {
+      name: 'undefined as a ternary branch',
+      code: 'const x = <Foo bar={cond ? value : undefined} />;',
+    },
+    {
+      name: 'undefined override after a spread',
+      code: 'const x = <Foo {...props} bar={undefined} />;',
+    },
+    {
+      name: 'undefined override after a spread, with an attr between',
+      code: 'const x = <Foo {...props} a={1} bar={undefined} />;',
+    },
+  ],
+  invalid: [
+    {
+      name: 'lone undefined prop',
+      code: 'const x = <Foo bar={undefined} />;',
+      output: 'const x = <Foo />;',
+      errors: [{messageId: 'uselessUndefinedProp', data: {name: 'bar'}}],
+    },
+    {
+      name: 'undefined prop between other props',
+      code: 'const x = <Foo a={1} bar={undefined} c={2} />;',
+      output: 'const x = <Foo a={1} c={2} />;',
+      errors: [{messageId: 'uselessUndefinedProp', data: {name: 'bar'}}],
+    },
+    {
+      name: 'spread comes after, so undefined is still useless',
+      code: 'const x = <Foo bar={undefined} {...props} />;',
+      output: 'const x = <Foo {...props} />;',
+      errors: [{messageId: 'uselessUndefinedProp', data: {name: 'bar'}}],
+    },
+    {
+      name: 'multiline attribute',
+      code: 'const x = (\n  <Foo\n    bar={undefined}\n    c={2}\n  />\n);',
+      output: 'const x = (\n  <Foo\n    c={2}\n  />\n);',
+      errors: [{messageId: 'uselessUndefinedProp', data: {name: 'bar'}}],
+    },
+  ],
+});

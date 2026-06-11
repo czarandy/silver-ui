@@ -44,9 +44,9 @@ function ControlledDateInput({
   label?: string;
   max?: PlainDate;
   min?: PlainDate;
-  onChange?: (value: PlainDate | undefined) => void;
+  onChange?: (value: PlainDate | null) => void;
 }): React.JSX.Element {
-  const [value, setValue] = useState<PlainDate | undefined>(initialValue);
+  const [value, setValue] = useState<PlainDate | null>(initialValue ?? null);
   return (
     <DateInput
       getIsDateDisabled={getIsDateDisabled}
@@ -80,13 +80,11 @@ describe('DateInput', () => {
       'May 21, 2026',
     );
     await user.click(screen.getByRole('button', {name: 'Clear Due date'}));
-    expect(onChange).toHaveBeenCalledWith(undefined);
+    expect(onChange).toHaveBeenCalledWith(null);
   });
 
   it('renders the default placeholder when no value is set', () => {
-    render(
-      <DateInput label="Due date" onChange={() => {}} value={undefined} />,
-    );
+    render(<DateInput label="Due date" onChange={() => {}} value={null} />);
 
     expect(screen.getByRole('combobox', {name: 'Due date'})).toHaveAttribute(
       'placeholder',
@@ -162,7 +160,7 @@ describe('DateInput', () => {
         label="Due date"
         onChange={() => {}}
         status={{message: 'Date is required', type: 'error'}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -180,7 +178,7 @@ describe('DateInput', () => {
         isRequired
         label="Due date"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -193,7 +191,7 @@ describe('DateInput', () => {
         isOptional
         label="Due date"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -206,7 +204,7 @@ describe('DateInput', () => {
         isLabelHidden
         label="Due date"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -220,7 +218,7 @@ describe('DateInput', () => {
         data-testid="date-field"
         label="Due date"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -237,7 +235,7 @@ describe('DateInput', () => {
         ref={node => {
           inputEl = node;
         }}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -308,7 +306,7 @@ describe('DateInput', () => {
       await user.clear(input);
       await user.keyboard('{Enter}');
 
-      expect(onChange).toHaveBeenLastCalledWith(undefined);
+      expect(onChange).toHaveBeenLastCalledWith(null);
       expect(input).toHaveValue('');
     });
 
@@ -359,7 +357,7 @@ describe('DateInput', () => {
       await user.clear(input);
       await user.tab();
 
-      expect(onChange).toHaveBeenLastCalledWith(undefined);
+      expect(onChange).toHaveBeenLastCalledWith(null);
       expect(input).toHaveValue('');
     });
 
@@ -419,7 +417,7 @@ describe('DateInput', () => {
           htmlId="due"
           label="Due date"
           onChange={() => {}}
-          value={undefined}
+          value={null}
         />,
       );
 
@@ -432,9 +430,7 @@ describe('DateInput', () => {
     it('reflects the open calendar with aria-expanded', async () => {
       const user = userEvent.setup();
 
-      render(
-        <DateInput label="Due date" onChange={() => {}} value={undefined} />,
-      );
+      render(<DateInput label="Due date" onChange={() => {}} value={null} />);
 
       const input = screen.getByRole('combobox', {name: 'Due date'});
       expect(input).toHaveAttribute('aria-expanded', 'false');
@@ -532,9 +528,7 @@ describe('DateInput', () => {
       const today = plainDateToday(getBrowserTimezoneID());
       const todayLabel = plainDateFormat(today, DATE_FORMAT_LONG);
 
-      render(
-        <DateInput label="Due date" onChange={() => {}} value={undefined} />,
-      );
+      render(<DateInput label="Due date" onChange={() => {}} value={null} />);
 
       await user.click(screen.getByRole('button', {name: 'Choose Due date'}));
 

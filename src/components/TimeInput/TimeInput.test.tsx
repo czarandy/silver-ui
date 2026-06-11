@@ -33,7 +33,7 @@ describe('TimeInput', () => {
     fireEvent.change(screen.getByLabelText('Start time'), {
       target: {value: ''},
     });
-    expect(onChange).toHaveBeenLastCalledWith(undefined);
+    expect(onChange).toHaveBeenLastCalledWith(null);
   });
 
   it('renders with hasSeconds and includes seconds in value', () => {
@@ -93,14 +93,14 @@ describe('TimeInput', () => {
     expect(clearButton).toBeInTheDocument();
 
     await user.click(clearButton);
-    expect(onChange).toHaveBeenCalledWith(undefined);
+    expect(onChange).toHaveBeenCalledWith(null);
   });
 
   it('does not render a clear button when value is undefined', () => {
     const onChange = vi.fn();
 
     render(
-      <TimeInput hasClear label="Time" onChange={onChange} value={undefined} />,
+      <TimeInput hasClear label="Time" onChange={onChange} value={null} />,
     );
 
     expect(
@@ -148,12 +148,7 @@ describe('TimeInput', () => {
     const onChange = vi.fn();
 
     render(
-      <TimeInput
-        isDisabled
-        label="Time"
-        onChange={onChange}
-        value={undefined}
-      />,
+      <TimeInput isDisabled label="Time" onChange={onChange} value={null} />,
     );
 
     expect(screen.getByLabelText('Time')).toBeDisabled();
@@ -163,12 +158,7 @@ describe('TimeInput', () => {
     const onChange = vi.fn();
 
     render(
-      <TimeInput
-        isLoading
-        label="Time"
-        onChange={onChange}
-        value={undefined}
-      />,
+      <TimeInput isLoading label="Time" onChange={onChange} value={null} />,
     );
 
     expect(screen.getByLabelText('Time')).toHaveAttribute('aria-busy', 'true');
@@ -178,12 +168,7 @@ describe('TimeInput', () => {
     const onChange = vi.fn();
 
     render(
-      <TimeInput
-        isLoading
-        label="Time"
-        onChange={onChange}
-        value={undefined}
-      />,
+      <TimeInput isLoading label="Time" onChange={onChange} value={null} />,
     );
 
     expect(screen.getByRole('status', {name: 'Loading'})).toBeInTheDocument();
@@ -234,7 +219,7 @@ describe('TimeInput', () => {
         description="Use 24-hour format"
         label="Time"
         onChange={onChange}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -250,12 +235,7 @@ describe('TimeInput', () => {
     const onChange = vi.fn();
 
     render(
-      <TimeInput
-        isLabelHidden
-        label="Time"
-        onChange={onChange}
-        value={undefined}
-      />,
+      <TimeInput isLabelHidden label="Time" onChange={onChange} value={null} />,
     );
 
     // The label should still be accessible (the input is labelable)
@@ -267,12 +247,7 @@ describe('TimeInput', () => {
     const ref = vi.fn<(el: HTMLInputElement | null) => void>();
 
     render(
-      <TimeInput
-        label="Time"
-        onChange={onChange}
-        ref={ref}
-        value={undefined}
-      />,
+      <TimeInput label="Time" onChange={onChange} ref={ref} value={null} />,
     );
 
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLInputElement));
@@ -282,12 +257,7 @@ describe('TimeInput', () => {
     const onChange = vi.fn();
 
     render(
-      <TimeInput
-        isOptional
-        label="Time"
-        onChange={onChange}
-        value={undefined}
-      />,
+      <TimeInput isOptional label="Time" onChange={onChange} value={null} />,
     );
 
     expect(screen.getByText('Optional')).toBeInTheDocument();
@@ -297,12 +267,7 @@ describe('TimeInput', () => {
     const onChange = vi.fn();
 
     render(
-      <TimeInput
-        isRequired
-        label="Time"
-        onChange={onChange}
-        value={undefined}
-      />,
+      <TimeInput isRequired label="Time" onChange={onChange} value={null} />,
     );
 
     expect(screen.getByText('Required')).toBeInTheDocument();
@@ -317,7 +282,7 @@ describe('TimeInput', () => {
         label="Time"
         onChange={onChange}
         placeholder="HH:MM"
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -330,7 +295,7 @@ describe('TimeInput', () => {
   it('applies the default placeholder', () => {
     const onChange = vi.fn();
 
-    render(<TimeInput label="Time" onChange={onChange} value={undefined} />);
+    render(<TimeInput label="Time" onChange={onChange} value={null} />);
 
     expect(screen.getByLabelText('Time')).toHaveAttribute(
       'placeholder',
@@ -346,7 +311,7 @@ describe('TimeInput', () => {
         data-testid="my-time"
         label="Time"
         onChange={onChange}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -362,7 +327,7 @@ describe('TimeInput', () => {
         htmlName="start_time"
         label="Time"
         onChange={onChange}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -372,7 +337,7 @@ describe('TimeInput', () => {
   it('renders input type="time"', () => {
     const onChange = vi.fn();
 
-    render(<TimeInput label="Time" onChange={onChange} value={undefined} />);
+    render(<TimeInput label="Time" onChange={onChange} value={null} />);
 
     expect(screen.getByLabelText('Time')).toHaveAttribute('type', 'time');
   });
@@ -387,7 +352,7 @@ describe('TimeInput', () => {
         label="Time"
         onBlur={onBlur}
         onChange={onChange}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -407,7 +372,7 @@ describe('TimeInput', () => {
         label="Time"
         onChange={onChange}
         onFocus={onFocus}
-        value={undefined}
+        value={null}
       />,
     );
 

@@ -1,8 +1,8 @@
 import type {CSSProperties, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
+import {segmentedControlRecipe} from './SegmentedControl.recipe';
 import {useSegmentedControlContext} from './SegmentedControlContext';
 
 export interface SegmentedControlItemProps<TValue extends string = string> {
@@ -46,80 +46,6 @@ export interface SegmentedControlItemProps<TValue extends string = string> {
   value: TValue;
 }
 
-const styles = {
-  item: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '1',
-    borderWidth: 0,
-    borderStyle: 'none',
-    bg: 'transparent',
-    color: 'fg.muted',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    fontWeight: 'medium',
-    lineHeight: 'normal',
-    transitionProperty: 'background-color, color, box-shadow',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    _hover: {
-      bg: 'bg.subtle',
-    },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  selected: css({
-    bg: 'bg',
-    color: 'fg',
-    fontWeight: 'semibold',
-    boxShadow: 'sm',
-    _hover: {
-      bg: 'bg',
-    },
-  }),
-  disabled: css({
-    color: 'fg.disabled',
-    cursor: 'default',
-    _hover: {
-      bg: 'transparent',
-    },
-  }),
-  fill: css({
-    flex: 1,
-  }),
-  icon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }),
-  size: {
-    sm: css({
-      h: '7',
-      px: '2',
-      borderRadius: 'sm',
-      fontSize: 'sm',
-    }),
-    md: css({
-      h: '9',
-      px: '3',
-      borderRadius: 'sm',
-      fontSize: 'sm',
-    }),
-    lg: css({
-      h: '11',
-      px: '3',
-      borderRadius: 'md',
-      fontSize: 'md',
-    }),
-  },
-} as const;
-
 /**
  * Individual segment within a `SegmentedControl`.
  */
@@ -137,20 +63,19 @@ export function SegmentedControlItem<TValue extends string = string>({
   const context = useSegmentedControlContext();
   const isSelected = context.value === value;
   const isItemDisabled = context.isDisabled || isDisabled;
+  const classes = segmentedControlRecipe({
+    size: context.size,
+    layout: context.layout,
+    isSelected,
+    isDisabled: isItemDisabled,
+  });
 
   return (
     <button
       aria-checked={isSelected}
       aria-disabled={isItemDisabled || undefined}
       aria-label={isLabelHidden ? label : undefined}
-      className={cx(
-        styles.item,
-        styles.size[context.size],
-        context.layout === 'fill' ? styles.fill : undefined,
-        isSelected ? styles.selected : undefined,
-        isItemDisabled ? styles.disabled : undefined,
-        className,
-      )}
+      className={cx(classes.item, className)}
       data-testid={dataTestId}
       data-value={value}
       onClick={() => {
@@ -164,7 +89,7 @@ export function SegmentedControlItem<TValue extends string = string>({
       tabIndex={isSelected ? 0 : -1}
       type="button">
       {icon != null ? (
-        <span className={styles.icon}>
+        <span className={classes.icon}>
           <Icon icon={icon} size={context.size} />
         </span>
       ) : null}

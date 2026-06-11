@@ -43,13 +43,11 @@ describe('DateRangeInput', () => {
       'May 10, 2026 - May 12, 2026',
     );
     await user.click(screen.getByRole('button', {name: 'Clear Window'}));
-    expect(onChange).toHaveBeenCalledWith(undefined);
+    expect(onChange).toHaveBeenCalledWith(null);
   });
 
   it('renders placeholder when value is undefined', () => {
-    render(
-      <DateRangeInput label="Window" onChange={() => {}} value={undefined} />,
-    );
+    render(<DateRangeInput label="Window" onChange={() => {}} value={null} />);
 
     expect(screen.getByRole('combobox', {name: 'Window'})).toHaveAttribute(
       'placeholder',
@@ -77,7 +75,7 @@ describe('DateRangeInput', () => {
         hasClear
         label="Window"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -152,7 +150,7 @@ describe('DateRangeInput', () => {
         label="Window"
         onChange={() => {}}
         status={{message: 'Range is required', type: 'error'}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -170,7 +168,7 @@ describe('DateRangeInput', () => {
         isRequired
         label="Window"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -183,7 +181,7 @@ describe('DateRangeInput', () => {
         isOptional
         label="Window"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -196,7 +194,7 @@ describe('DateRangeInput', () => {
         description="Select check-in and check-out."
         label="Window"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -211,7 +209,7 @@ describe('DateRangeInput', () => {
         data-testid="range-field"
         label="Window"
         onChange={() => {}}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -228,7 +226,7 @@ describe('DateRangeInput', () => {
         ref={node => {
           inputEl = node;
         }}
-        value={undefined}
+        value={null}
       />,
     );
 
@@ -253,7 +251,7 @@ describe('DateRangeInput', () => {
   describe('accessibility', () => {
     it('exposes combobox semantics that announce the calendar popover', () => {
       render(
-        <DateRangeInput label="Window" onChange={() => {}} value={undefined} />,
+        <DateRangeInput label="Window" onChange={() => {}} value={null} />,
       );
 
       const input = screen.getByRole('combobox', {name: 'Window'});
@@ -266,7 +264,7 @@ describe('DateRangeInput', () => {
       const user = userEvent.setup();
 
       render(
-        <DateRangeInput label="Window" onChange={() => {}} value={undefined} />,
+        <DateRangeInput label="Window" onChange={() => {}} value={null} />,
       );
 
       const input = screen.getByRole('combobox', {name: 'Window'});

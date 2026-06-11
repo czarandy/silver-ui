@@ -803,6 +803,77 @@ const noUselessFragmentWithComment = {
   },
 };
 
+/**
+ * Disallow JSX props explicitly set to the bare identifier `undefined`, e.g.
+ * `bar={undefined}`.
+ *
+ * In React, passing `undefined` is equivalent to omitting the prop: it does not
+ * distinguish "present but undefined" from "absent" when rendering, and default
+ * parameter values treat both the same. So a literal `bar={undefined}` is just
+ * noise — omit it.
+ *
+ * Two intentional patterns are left alone:
+ * - An expression result, e.g. `bar={cond ? value : undefined}`, where a branch
+ *   genuinely needs to evaluate to undefined and omitting is not an option.
+ * - An override after a spread, e.g. `<Foo {...props} bar={undefined} />`, which
+ *   force-clears a value that the spread might otherwise supply.
+ *
+ * The autofix removes the attribute (and its leading whitespace).
+ */
+const noUselessUndefinedProp = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description:
+        'Disallow JSX props set to a bare `undefined`; omit the prop instead (unless it follows a spread).',
+    },
+    fixable: 'code',
+    messages: {
+      uselessUndefinedProp:
+        'Prop "{{name}}" is set to `undefined`, which is the same as omitting it. Remove it.',
+    },
+    schema: [],
+  },
+  create(context) {
+    return {
+      JSXAttribute(node) {
+        if (
+          node.value == null ||
+          node.value.type !== 'JSXExpressionContainer' ||
+          node.value.expression.type !== 'Identifier' ||
+          node.value.expression.name !== 'undefined'
+        ) {
+          return;
+        }
+
+        // Allow overriding a spread: `<Foo {...props} bar={undefined} />`.
+        const attributes = node.parent.attributes;
+        const index = attributes.indexOf(node);
+        const hasSpreadBefore = attributes
+          .slice(0, index)
+          .some(attribute => attribute.type === 'JSXSpreadAttribute');
+        if (hasSpreadBefore) {
+          return;
+        }
+
+        const name =
+          node.name.type === 'JSXIdentifier' ? node.name.name : 'prop';
+
+        context.report({
+          node,
+          messageId: 'uselessUndefinedProp',
+          data: {name},
+          fix(fixer) {
+            const sourceCode = context.sourceCode || context.getSourceCode();
+            const tokenBefore = sourceCode.getTokenBefore(node);
+            return fixer.removeRange([tokenBefore.range[1], node.range[1]]);
+          },
+        });
+      },
+    };
+  },
+};
+
 const plugin = {
   meta: {
     name: 'eslint-plugin-silver-ui',
@@ -814,6 +885,7 @@ const plugin = {
     'no-recipe-exports': noRecipeExports,
     'no-redundant-box-sizing': noRedundantBoxSizing,
     'no-useless-fragment-with-comment': noUselessFragmentWithComment,
+    'no-useless-undefined-prop': noUselessUndefinedProp,
     'prefer-is-react-node': preferIsReactNode,
     'require-component-props': requireComponentProps,
   },
