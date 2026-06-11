@@ -5,8 +5,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {tabsRecipe} from './Tabs.recipe';
 import {TabsContext, type TabsLayout, type TabsSize} from './TabsContext';
 
 export interface TabsProps {
@@ -60,23 +60,6 @@ export interface TabsProps {
   value: string;
 }
 
-const styles = {
-  root: css({
-    display: 'flex',
-    alignItems: 'stretch',
-    maxW: 'full',
-    minW: 0,
-  }),
-  fill: css({
-    w: 'full',
-  }),
-  divider: css({
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-} as const;
-
 /**
  * Controlled tab wrapper.
  *
@@ -102,6 +85,7 @@ export function Tabs({
     () => ({layout, onChange, size, value}),
     [layout, onChange, size, value],
   );
+  const classes = tabsRecipe({hasDivider, layout});
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
     if (
@@ -153,12 +137,7 @@ export function Tabs({
     <TabsContext value={contextValue}>
       <div
         aria-label={label}
-        className={cx(
-          styles.root,
-          layout === 'fill' ? styles.fill : undefined,
-          hasDivider ? styles.divider : undefined,
-          className,
-        )}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         onKeyDown={handleKeyDown}
         ref={ref as Ref<HTMLDivElement>}

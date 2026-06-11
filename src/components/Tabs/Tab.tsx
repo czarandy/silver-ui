@@ -1,11 +1,11 @@
 /* eslint-disable @eslint-react/static-components */
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
+import {tabsRecipe} from './Tabs.recipe';
 import {useTabsContext} from './TabsContext';
 
 export interface TabProps {
@@ -72,88 +72,6 @@ export interface TabProps {
   value: string;
 }
 
-const styles = {
-  root: css({
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '1',
-    mb: '-1px',
-    px: '3',
-    borderWidth: 0,
-    borderBottomWidth: 'emphasized',
-    borderBottomStyle: 'solid',
-    borderBottomColor: 'transparent',
-    bg: 'transparent',
-    color: 'fg.muted',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    fontSize: 'md',
-    fontWeight: 'normal',
-    lineHeight: 'normal',
-    textDecoration: 'none',
-    whiteSpace: 'nowrap',
-    transitionProperty: 'color, background-color, border-color',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-    _hover: {
-      bg: 'bg.subtle',
-    },
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  selected: css({
-    borderBottomColor: 'fg',
-    color: 'fg',
-    fontWeight: 'semibold',
-  }),
-  disabled: css({
-    color: 'fg.disabled',
-    cursor: 'not-allowed',
-    _hover: {
-      bg: 'transparent',
-    },
-  }),
-  fill: css({
-    flex: 1,
-  }),
-  icon: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  }),
-  label: css({
-    display: 'inline-grid',
-  }),
-  labelText: css({
-    gridRowStart: 1,
-    gridColumnStart: 1,
-  }),
-  labelSizer: css({
-    gridRowStart: 1,
-    gridColumnStart: 1,
-    visibility: 'hidden',
-    pointerEvents: 'none',
-    fontWeight: 'semibold',
-  }),
-  endContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-  size: {
-    sm: css({h: 'component.sm'}),
-    md: css({h: 'component.md'}),
-    lg: css({h: 'component.lg'}),
-  },
-} as const;
-
 /**
  * A single tab inside `Tabs`.
  */
@@ -177,29 +95,28 @@ export function Tab({
   const LinkComponent = useLinkComponent(as);
   const isSelected = context.value === value;
   const displayIcon = isSelected && selectedIcon != null ? selectedIcon : icon;
-  const rootClassName = cx(
-    styles.root,
-    styles.size[context.size],
-    isSelected ? styles.selected : undefined,
-    isDisabled ? styles.disabled : undefined,
-    context.layout === 'fill' ? styles.fill : undefined,
-    className,
-  );
+  const classes = tabsRecipe({
+    size: context.size,
+    layout: context.layout,
+    isSelected,
+    isDisabled,
+  });
+  const rootClassName = cx(classes.tab, className);
   const content = (
     <>
       {displayIcon != null ? (
-        <span className={styles.icon}>
+        <span className={classes.icon}>
           <Icon icon={displayIcon} size={context.size} />
         </span>
       ) : null}
-      <span className={styles.label}>
-        <span className={styles.labelText}>{label}</span>
-        <span aria-hidden="true" className={styles.labelSizer}>
+      <span className={classes.label}>
+        <span className={classes.labelText}>{label}</span>
+        <span aria-hidden="true" className={classes.labelSizer}>
           {label}
         </span>
       </span>
       {isReactNode(endContent) ? (
-        <span className={styles.endContent}>{endContent}</span>
+        <span className={classes.endContent}>{endContent}</span>
       ) : null}
     </>
   );

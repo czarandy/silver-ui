@@ -328,6 +328,43 @@ describe('Tabs', () => {
     expect(trigger).toHaveFocus();
   });
 
+  it('moves to the first and last TabMenu items with Home and End', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <Tabs onChange={onChange} value="overview">
+        <Tab label="Overview" value="overview" />
+        <TabMenu
+          label="More"
+          options={[
+            {label: 'Analytics', value: 'analytics'},
+            {label: 'Reports', value: 'reports'},
+            {label: 'Audience', value: 'audience'},
+          ]}
+        />
+      </Tabs>,
+    );
+
+    await user.click(screen.getByRole('tab', {name: /More/}));
+
+    const analytics = screen.getByRole('menuitem', {
+      hidden: true,
+      name: 'Analytics',
+    });
+    const audience = screen.getByRole('menuitem', {
+      hidden: true,
+      name: 'Audience',
+    });
+    analytics.focus();
+
+    fireEvent.keyDown(analytics, {key: 'End'});
+    expect(audience).toHaveFocus();
+
+    fireEvent.keyDown(audience, {key: 'Home'});
+    expect(analytics).toHaveFocus();
+  });
+
   it('selects a TabMenu option and closes the menu', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

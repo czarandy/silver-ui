@@ -6,11 +6,12 @@ import {
   type KeyboardEvent,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';
+import {tabMenuRecipe} from './TabMenu.recipe';
+import {tabsRecipe} from './Tabs.recipe';
 import {useTabsContext} from './TabsContext';
 
 export interface TabMenuOption {
@@ -64,102 +65,6 @@ export interface TabMenuProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  trigger: css({
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '1',
-    mb: '-1px',
-    px: '3',
-    borderWidth: 0,
-    borderBottomWidth: 'emphasized',
-    borderBottomStyle: 'solid',
-    borderBottomColor: 'transparent',
-    bg: 'transparent',
-    color: 'fg.muted',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    fontSize: 'md',
-    fontWeight: 'normal',
-    lineHeight: 'normal',
-    whiteSpace: 'nowrap',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  triggerSelected: css({
-    borderBottomColor: 'fg',
-    color: 'fg',
-    fontWeight: 'semibold',
-  }),
-  triggerDisabled: css({
-    color: 'fg.disabled',
-    cursor: 'not-allowed',
-    _hover: {bg: 'transparent'},
-  }),
-  fill: css({flex: 1}),
-  size: {
-    sm: css({h: 'component.sm'}),
-    md: css({h: 'component.md'}),
-    lg: css({h: 'component.lg'}),
-  },
-  chevron: css({
-    display: 'inline-flex',
-  }),
-  chevronOpen: css({transform: 'rotate(180deg)'}),
-  menu: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    minW: '40',
-    p: '1',
-  }),
-  item: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '2',
-    w: 'full',
-    px: '2',
-    py: '2',
-    borderWidth: 0,
-    borderRadius: 'md',
-    bg: 'transparent',
-    color: 'fg',
-    cursor: 'pointer',
-    fontFamily: 'body',
-    textAlign: 'start',
-    _hover: {bg: 'bg.subtle'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffsetTight',
-    },
-  }),
-  itemSelected: css({fontWeight: 'medium'}),
-  itemContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '2',
-    minW: 0,
-  }),
-  itemIcon: css({
-    display: 'inline-flex',
-    color: 'fg.muted',
-  }),
-  check: css({
-    display: 'inline-flex',
-    color: 'primary',
-  }),
-} as const;
-
 /**
  * Overflow menu for additional tabs.
  */
@@ -179,6 +84,13 @@ export function TabMenu({
   const selectedOption = options.find(option => option.value === context.value);
   const triggerLabel = selectedOption?.label ?? label;
   const hasSelectedOption = selectedOption != null;
+  const triggerClasses = tabsRecipe({
+    size: context.size,
+    layout: context.layout,
+    isSelected: hasSelectedOption,
+    isDisabled,
+  });
+  const classes = tabMenuRecipe({isOpen});
 
   const focusMenuItem = (
     event: KeyboardEvent<HTMLElement>,
@@ -240,16 +152,13 @@ export function TabMenu({
   return (
     <Popover
       content={
-        <div className={styles.menu}>
+        <div className={classes.menu}>
           {options.map(option => {
             const isSelected = option.value === context.value;
             return (
               <button
                 aria-current={isSelected ? 'true' : undefined}
-                className={cx(
-                  styles.item,
-                  isSelected ? styles.itemSelected : undefined,
-                )}
+                className={tabMenuRecipe({isItemSelected: isSelected}).item}
                 key={option.value}
                 onClick={() => {
                   context.onChange(option.value);
@@ -258,16 +167,16 @@ export function TabMenu({
                 onKeyDown={handleMenuKeyDown}
                 role="menuitem"
                 type="button">
-                <span className={styles.itemContent}>
+                <span className={classes.itemContent}>
                   {option.icon != null ? (
-                    <span className={styles.itemIcon}>
+                    <span className={classes.itemIcon}>
                       <Icon color="secondary" icon={option.icon} size="sm" />
                     </span>
                   ) : null}
                   {option.label}
                 </span>
                 {isSelected ? (
-                  <span className={styles.check}>
+                  <span className={classes.check}>
                     <Icon color="accent" icon={Check} size="sm" />
                   </span>
                 ) : null}
@@ -286,14 +195,7 @@ export function TabMenu({
       <button
         aria-disabled={isDisabled || undefined}
         aria-selected={hasSelectedOption}
-        className={cx(
-          styles.trigger,
-          styles.size[context.size],
-          hasSelectedOption ? styles.triggerSelected : undefined,
-          isDisabled ? styles.triggerDisabled : undefined,
-          context.layout === 'fill' ? styles.fill : undefined,
-          className,
-        )}
+        className={cx(triggerClasses.tab, className)}
         data-tab-disabled={isDisabled ? 'true' : undefined}
         data-tab-value={
           hasSelectedOption && !isDisabled ? context.value : undefined
@@ -315,11 +217,7 @@ export function TabMenu({
         tabIndex={hasSelectedOption && !isDisabled ? 0 : -1}
         type="button">
         {triggerLabel}
-        <span
-          className={cx(
-            styles.chevron,
-            isOpen ? styles.chevronOpen : undefined,
-          )}>
+        <span className={classes.chevron}>
           <Icon icon={ChevronDown} size="sm" />
         </span>
       </button>
