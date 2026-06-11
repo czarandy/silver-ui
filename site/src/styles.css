@@ -44,6 +44,15 @@ body {
 }
 
 /*
+ * The wordmark SVG is grayscale with near-black text, which disappears on the
+ * dark background. Invert it in dark mode: the text flips to near-white and,
+ * since the art has no hue, the rest stays color-accurate.
+ */
+[data-theme='dark'] .brand__wordmark {
+  filter: invert(1);
+}
+
+/*
  * The nav links live in TopNav's `startContent` slot so they collapse into the
  * AppShell drawer on mobile. On desktop we push them to the far right of the
  * left section (flex auto-margin) so the bar reads: logo … links + toggle,
