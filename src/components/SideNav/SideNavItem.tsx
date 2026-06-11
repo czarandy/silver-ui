@@ -3,7 +3,6 @@
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useCallback, useId, useState} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
@@ -12,6 +11,7 @@ import {Item} from '../Item';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {useSideNavCollapse} from './SideNavContext';
+import {sideNavItemRecipe} from './SideNavItem.recipe';
 
 export interface SideNavItemProps {
   /**
@@ -80,124 +80,6 @@ export interface SideNavItemProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  navItem: css({
-    color: 'fg.muted',
-    fontSize: 'sm',
-    fontWeight: 'medium',
-    minH: '8',
-    py: '0.5',
-    // Override Item's default `bg.subtle` hover, which is invisible when the
-    // SideNav sits on the AppShell's `bg.subtle` surface. Match TopNavItem's
-    // darker `bg.hover` so the hover is visible in both navs.
-    _hover: {bg: 'bg.hover'},
-  }),
-  navItemSelected: css({
-    bg: 'bg.hover',
-    color: 'fg',
-    fontWeight: 'semibold',
-  }),
-  icon: css({
-    flexShrink: 0,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 'var(--silver-sizes-icon-md)',
-  }),
-  collapsed: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: '10',
-    minH: '8',
-    px: 0,
-    py: '1.5',
-    borderRadius: 'md',
-    color: 'fg.muted',
-    textDecoration: 'none',
-    bg: 'transparent',
-    borderWidth: 0,
-    cursor: 'pointer',
-    _hover: {bg: 'bg.hover'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  collapsedSelected: css({
-    bg: 'bg.hover',
-    color: 'fg',
-  }),
-  collapsedDisabled: css({
-    opacity: 0.5,
-    cursor: 'not-allowed',
-    pointerEvents: 'none',
-  }),
-  toggleRow: css({
-    display: 'flex',
-    w: '100%',
-    cursor: 'pointer',
-    borderRadius: 'md',
-    _hover: {bg: 'bg.hover'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  toggleRowDisabled: css({
-    opacity: 0.5,
-    cursor: 'not-allowed',
-    pointerEvents: 'none',
-  }),
-  chevron: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    transitionProperty: 'transform',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-  }),
-  chevronExpanded: css({
-    transform: 'rotate(180deg)',
-  }),
-  toggleButton: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    w: '7',
-    h: '7',
-    borderRadius: 'md',
-    cursor: 'pointer',
-    color: 'fg.muted',
-    _hover: {bg: 'bg.hover'},
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-      outlineOffset: 'focusOffset',
-    },
-  }),
-  childrenContainer: css({
-    display: 'grid',
-    gridTemplateRows: '1fr',
-    transitionProperty: 'grid-template-rows',
-    transitionDuration: 'fast',
-    transitionTimingFunction: 'default',
-  }),
-  childrenCollapsed: css({
-    gridTemplateRows: '0fr',
-  }),
-  childrenInner: css({
-    overflow: 'hidden',
-    ps: '6',
-  }),
-};
-
 /**
  * A single navigation item inside a SideNav. Renders as a link when
  * `href` is provided, or a button otherwise. Supports nested sub-items
@@ -221,7 +103,7 @@ export function SideNavItem({
   style,
 }: SideNavItemProps): React.JSX.Element {
   const LinkComponent = useLinkComponent(as);
-  const {closeMobileNav} = useAppShellMobile();
+  const {closeMobileNav, isMobileNavOpen} = useAppShellMobile();
   const {isCollapsed} = useSideNavCollapse();
   const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
   const childrenId = useId();
@@ -229,6 +111,14 @@ export function SideNavItem({
   const hasChildren = isReactNode(children);
   const isExpandable = hasChildren && isItemCollapsible;
   const hasPrimaryAction = href != null || onClick != null;
+
+  const classes = sideNavItemRecipe({
+    isSelected,
+    isDisabled,
+    // Only expandable items animate their children open/closed and rotate a
+    // chevron; non-expandable items keep their children fully shown.
+    isExpanded: !isExpandable || isExpanded,
+  });
 
   const toggleExpanded = useCallback(() => {
     setIsExpanded(prev => !prev);
@@ -240,24 +130,23 @@ export function SideNavItem({
       return;
     }
     onClick?.(event);
-    closeMobileNav();
+    // Dismiss the mobile drawer after navigating, but only when it is actually
+    // open so non-mobile render modes don't fire a no-op close on every click.
+    if (isMobileNavOpen) {
+      closeMobileNav();
+    }
   };
 
   const iconSlot =
     icon != null ? (
-      <span aria-hidden="true" className={styles.icon}>
+      <span aria-hidden="true" className={classes.icon}>
         <Icon icon={icon} size="sm" />
       </span>
     ) : undefined;
 
   // --- Collapsed sidebar: icon-only rendering ---
   if (isCollapsed) {
-    const collapsedClassNames = cx(
-      styles.collapsed,
-      isSelected && styles.collapsedSelected,
-      isDisabled && styles.collapsedDisabled,
-      className,
-    );
+    const collapsedClassNames = cx(classes.collapsed, className);
 
     if (href != null && !isDisabled) {
       return (
@@ -295,20 +184,14 @@ export function SideNavItem({
   // --- Expanded sidebar ---
 
   const chevronSlot = isExpandable ? (
-    <span className={cx(styles.chevron, isExpanded && styles.chevronExpanded)}>
+    <span className={classes.chevron}>
       <Icon icon={ChevronDown} size="sm" />
     </span>
   ) : null;
 
   const childrenContainer = isReactNode(children) ? (
-    <div
-      className={cx(
-        styles.childrenContainer,
-        isExpandable && !isExpanded && styles.childrenCollapsed,
-      )}
-      id={childrenId}
-      role="group">
-      <div className={styles.childrenInner}>{children}</div>
+    <div className={classes.childrenContainer} id={childrenId} role="group">
+      <div className={classes.childrenInner}>{children}</div>
     </div>
   ) : null;
 
@@ -319,12 +202,7 @@ export function SideNavItem({
         <button
           aria-controls={childrenId}
           aria-expanded={isExpanded}
-          className={cx(
-            styles.toggleRow,
-            isSelected && styles.navItemSelected,
-            isDisabled && styles.toggleRowDisabled,
-            className,
-          )}
+          className={cx(classes.toggleRow, className)}
           data-testid={dataTestId}
           disabled={isDisabled}
           onClick={toggleExpanded}
@@ -333,7 +211,7 @@ export function SideNavItem({
           type="button">
           <Item
             as="span"
-            className={styles.navItem}
+            className={classes.toggleLabel}
             endContent={chevronSlot}
             label={label}
             startContent={iconSlot}
@@ -350,11 +228,7 @@ export function SideNavItem({
       <>
         <Item
           aria-current={isSelected ? 'page' : undefined}
-          className={cx(
-            styles.navItem,
-            isSelected && styles.navItemSelected,
-            className,
-          )}
+          className={cx(classes.item, className)}
           data-testid={dataTestId}
           endContent={endContent}
           href={isDisabled ? undefined : href}
@@ -370,7 +244,7 @@ export function SideNavItem({
               aria-controls={childrenId}
               aria-expanded={isExpanded}
               aria-label={isExpanded ? `Collapse ${label}` : `Expand ${label}`}
-              className={styles.toggleButton}
+              className={classes.toggleButton}
               onClick={toggleExpanded}
               type="button">
               {chevronSlot}
@@ -387,11 +261,7 @@ export function SideNavItem({
     <>
       <Item
         aria-current={isSelected ? 'page' : undefined}
-        className={cx(
-          styles.navItem,
-          isSelected && styles.navItemSelected,
-          className,
-        )}
+        className={cx(classes.item, className)}
         data-testid={dataTestId}
         endContent={endContent}
         href={isDisabled ? undefined : href}

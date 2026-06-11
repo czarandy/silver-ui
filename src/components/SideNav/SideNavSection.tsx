@@ -74,7 +74,6 @@ export function SideNavSection({
         <Text
           as="span"
           color="secondary"
-          data-testid={undefined}
           id={titleId}
           type="supporting"
           weight="semibold">

@@ -142,6 +142,7 @@ export function SideNav({
       <div
         className={cx(sideNavRecipe({mode: 'topbar'}), className)}
         data-testid={dataTestId}
+        ref={ref as Ref<HTMLDivElement>}
         style={style}>
         {header}
         <div className={styles.topbarIcons}>{footerIcons}</div>
@@ -151,7 +152,10 @@ export function SideNav({
 
   if (renderMode === 'drawer') {
     return (
-      <MobileNav data-testid={dataTestId} header={header}>
+      <MobileNav
+        data-testid={dataTestId}
+        header={header}
+        ref={ref as Ref<HTMLDialogElement>}>
         {topContent}
         {children}
         {footer}
@@ -178,7 +182,6 @@ export function SideNav({
         className={cx(sideNavRecipe({isCollapsed}), className)}
         data-testid={dataTestId}
         ref={ref}
-        role="navigation"
         style={style}>
         {isReactNode(header) || (!isCollapsed && isReactNode(topContent)) ? (
           <div className={styles.stickyTop}>

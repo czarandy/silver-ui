@@ -5,6 +5,7 @@ import type {ComponentPropsWithRef, ReactNode, Ref} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {LinkProvider} from '../Link';
 import {SideNav} from './SideNav';
+import {SideNavRenderContext} from './SideNavContext';
 import {SideNavHeading} from './SideNavHeading';
 import {SideNavItem} from './SideNavItem';
 import {SideNavSection} from './SideNavSection';
@@ -112,6 +113,93 @@ describe('SideNav', () => {
     expect(nav).toHaveClass('custom-nav');
     expect(nav).toHaveStyle({width: '300px'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
+  });
+});
+
+describe('SideNav render modes', () => {
+  it('renders a non-landmark topbar in topbar render mode', () => {
+    const ref = vi.fn<(el: HTMLElement | null) => void>();
+    render(
+      <SideNavRenderContext value="topbar">
+        <SideNav
+          data-testid="side-nav"
+          footerIcons={<span data-testid="footer-icons">Icons</span>}
+          header={<span data-testid="topbar-header">Brand</span>}
+          ref={ref}>
+          <SideNavItem href="/home" icon={Home} label="Home" />
+        </SideNav>
+      </SideNavRenderContext>,
+    );
+
+    // Topbar renders a plain div with only the header and footer icons; it is
+    // not a navigation landmark and omits the scrollable item list.
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+    expect(screen.getByTestId('side-nav').tagName).toBe('DIV');
+    expect(screen.getByTestId('topbar-header')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+    expect(screen.queryByRole('link', {name: 'Home'})).not.toBeInTheDocument();
+    expect(ref).toHaveBeenCalledWith(screen.getByTestId('side-nav'));
+  });
+
+  it('renders content inside a drawer in drawer render mode', () => {
+    const ref = vi.fn<(el: HTMLElement | null) => void>();
+    render(
+      <SideNavRenderContext value="drawer">
+        <SideNav
+          data-testid="side-nav"
+          footer={<span data-testid="footer-content">Footer</span>}
+          footerIcons={<span data-testid="footer-icons">Icons</span>}
+          header={<span data-testid="drawer-header">Brand</span>}
+          ref={ref}
+          topContent={<span data-testid="top-content">Search</span>}>
+          <SideNavItem
+            data-testid="home-item"
+            href="/home"
+            icon={Home}
+            label="Home"
+          />
+        </SideNav>
+      </SideNavRenderContext>,
+    );
+
+    // Drawer mode wraps the nav content in MobileNav's dialog rather than a
+    // nav landmark, forwarding header, topContent, children, and footers.
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+    expect(screen.getByTestId('side-nav').tagName).toBe('DIALOG');
+    expect(screen.getByTestId('drawer-header')).toBeInTheDocument();
+    expect(screen.getByTestId('top-content')).toBeInTheDocument();
+    expect(screen.getByTestId('home-item')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-content')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+    // ref is forwarded to the underlying drawer dialog.
+    expect(ref).toHaveBeenCalledWith(screen.getByTestId('side-nav'));
+  });
+
+  it('renders bare content in drawer-content render mode', () => {
+    render(
+      <SideNavRenderContext value="drawer-content">
+        <SideNav
+          footer={<span data-testid="footer-content">Footer</span>}
+          footerIcons={<span data-testid="footer-icons">Icons</span>}
+          topContent={<span data-testid="top-content">Search</span>}>
+          <SideNavItem
+            data-testid="home-item"
+            href="/home"
+            icon={Home}
+            label="Home"
+          />
+        </SideNav>
+      </SideNavRenderContext>,
+    );
+
+    // drawer-content renders a bare fragment: no nav landmark and no drawer
+    // dialog, just the forwarded content.
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByTestId('top-content')).toBeInTheDocument();
+    expect(screen.getByTestId('home-item')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-content')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
   });
 });
 
