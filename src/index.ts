@@ -186,13 +186,10 @@ export {
   type CodeBlockSize,
 } from './components/CodeBlock';
 export {
-  Step,
   Stepper,
-  useStepperContext,
-  type StepperContextValue,
+  type StepConfig,
   type StepperOrientation,
   type StepperProps,
-  type StepProps,
   type StepState,
 } from './components/Stepper';
 export {

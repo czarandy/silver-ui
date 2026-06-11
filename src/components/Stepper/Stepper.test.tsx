@@ -1,18 +1,17 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {Step} from './Step';
-import {Stepper} from './Stepper';
+import {Stepper, type StepConfig} from './Stepper';
+
+const threeSteps: StepConfig[] = [
+  {id: 'account', label: 'Step 1'},
+  {id: 'profile', label: 'Step 2'},
+  {id: 'review', label: 'Step 3'},
+];
 
 describe('Stepper', () => {
   it('renders a navigation landmark with steps', () => {
-    render(
-      <Stepper activeStep={0}>
-        <Step label="Step 1" step={0} />
-        <Step label="Step 2" step={1} />
-        <Step label="Step 3" step={2} />
-      </Stepper>,
-    );
+    render(<Stepper activeStep="account" steps={threeSteps} />);
 
     expect(
       screen.getByRole('navigation', {name: 'Progress'}),
@@ -24,11 +23,14 @@ describe('Stepper', () => {
 
   it('marks the active step with aria-current', () => {
     render(
-      <Stepper activeStep={1}>
-        <Step data-testid="step-0" label="Step 1" step={0} />
-        <Step data-testid="step-1" label="Step 2" step={1} />
-        <Step data-testid="step-2" label="Step 3" step={2} />
-      </Stepper>,
+      <Stepper
+        activeStep="profile"
+        steps={[
+          {id: 'account', label: 'Step 1', 'data-testid': 'step-0'},
+          {id: 'profile', label: 'Step 2', 'data-testid': 'step-1'},
+          {id: 'review', label: 'Step 3', 'data-testid': 'step-2'},
+        ]}
+      />,
     );
 
     expect(screen.getByTestId('step-0')).not.toHaveAttribute('aria-current');
@@ -41,10 +43,14 @@ describe('Stepper', () => {
 
   it('renders descriptions and custom navigation label', () => {
     render(
-      <Stepper activeStep={0} label="Checkout progress">
-        <Step description="Review your cart" label="Cart" step={0} />
-        <Step label="Payment" step={1} />
-      </Stepper>,
+      <Stepper
+        activeStep="cart"
+        label="Checkout progress"
+        steps={[
+          {id: 'cart', label: 'Cart', description: 'Review your cart'},
+          {id: 'payment', label: 'Payment'},
+        ]}
+      />,
     );
 
     expect(
@@ -55,27 +61,33 @@ describe('Stepper', () => {
 
   it('supports vertical orientation with step content', () => {
     render(
-      <Stepper activeStep={0} orientation="vertical">
-        <Step label="Account" step={0}>
-          <div>Account form</div>
-        </Step>
-        <Step label="Review" step={1} />
-      </Stepper>,
+      <Stepper
+        activeStep="account"
+        orientation="vertical"
+        steps={[
+          {id: 'account', label: 'Account', content: <div>Account form</div>},
+          {id: 'review', label: 'Review'},
+        ]}
+      />,
     );
 
     expect(screen.getByText('Account form')).toBeInTheDocument();
   });
 
-  it('calls onStepClick for completed and active steps', async () => {
+  it('calls onStepClick with the id for completed and active steps', async () => {
     const user = userEvent.setup();
     const onStepClick = vi.fn();
 
     render(
-      <Stepper activeStep={1} onStepClick={onStepClick}>
-        <Step label="Account" step={0} />
-        <Step label="Profile" step={1} />
-        <Step label="Review" step={2} />
-      </Stepper>,
+      <Stepper
+        activeStep="profile"
+        onStepClick={onStepClick}
+        steps={[
+          {id: 'account', label: 'Account'},
+          {id: 'profile', label: 'Profile'},
+          {id: 'review', label: 'Review'},
+        ]}
+      />,
     );
 
     await user.click(
@@ -85,8 +97,8 @@ describe('Stepper', () => {
       screen.getByRole('button', {name: 'Go to step 2: Profile'}),
     );
 
-    expect(onStepClick).toHaveBeenCalledWith(0);
-    expect(onStepClick).toHaveBeenCalledWith(1);
+    expect(onStepClick).toHaveBeenCalledWith('account');
+    expect(onStepClick).toHaveBeenCalledWith('profile');
   });
 
   it('calls onStepClick in vertical orientation', async () => {
@@ -94,26 +106,35 @@ describe('Stepper', () => {
     const onStepClick = vi.fn();
 
     render(
-      <Stepper activeStep={1} onStepClick={onStepClick} orientation="vertical">
-        <Step label="Account" step={0} />
-        <Step label="Profile" step={1} />
-        <Step label="Review" step={2} />
-      </Stepper>,
+      <Stepper
+        activeStep="profile"
+        onStepClick={onStepClick}
+        orientation="vertical"
+        steps={[
+          {id: 'account', label: 'Account'},
+          {id: 'profile', label: 'Profile'},
+          {id: 'review', label: 'Review'},
+        ]}
+      />,
     );
 
     await user.click(
       screen.getByRole('button', {name: 'Go to step 1: Account'}),
     );
-    expect(onStepClick).toHaveBeenCalledWith(0);
+    expect(onStepClick).toHaveBeenCalledWith('account');
   });
 
   it('does not render buttons for upcoming or disabled steps', () => {
     render(
-      <Stepper activeStep={1} onStepClick={() => {}}>
-        <Step isDisabled label="Account" step={0} />
-        <Step label="Profile" step={1} />
-        <Step label="Review" step={2} />
-      </Stepper>,
+      <Stepper
+        activeStep="profile"
+        onStepClick={() => {}}
+        steps={[
+          {id: 'account', label: 'Account', isDisabled: true},
+          {id: 'profile', label: 'Profile'},
+          {id: 'review', label: 'Review'},
+        ]}
+      />,
     );
 
     expect(
@@ -126,17 +147,20 @@ describe('Stepper', () => {
 
   it('renders error state with error indicator', () => {
     render(
-      <Stepper activeStep={1}>
-        <Step label="Account" step={0} />
-        <Step
-          data-testid="error-step"
-          description="Fix the errors below"
-          hasError
-          label="Profile"
-          step={1}
-        />
-        <Step label="Review" step={2} />
-      </Stepper>,
+      <Stepper
+        activeStep="profile"
+        steps={[
+          {id: 'account', label: 'Account'},
+          {
+            id: 'profile',
+            label: 'Profile',
+            description: 'Fix the errors below',
+            hasError: true,
+            'data-testid': 'error-step',
+          },
+          {id: 'review', label: 'Review'},
+        ]}
+      />,
     );
 
     expect(screen.getByTestId('error-step')).toBeInTheDocument();
@@ -146,10 +170,13 @@ describe('Stepper', () => {
 
   it('renders check icon when isCompleted overrides active step', () => {
     render(
-      <Stepper activeStep={0}>
-        <Step isCompleted label="Done" step={0} />
-        <Step label="Upcoming" step={1} />
-      </Stepper>,
+      <Stepper
+        activeStep="done"
+        steps={[
+          {id: 'done', label: 'Done', isCompleted: true},
+          {id: 'upcoming', label: 'Upcoming'},
+        ]}
+      />,
     );
 
     expect(screen.getByText('Done')).toBeInTheDocument();
@@ -157,25 +184,31 @@ describe('Stepper', () => {
 
   it('renders custom icon', () => {
     render(
-      <Stepper activeStep={0}>
-        <Step
-          icon={<span data-testid="custom-icon">I</span>}
-          label="Custom"
-          step={0}
-        />
-      </Stepper>,
+      <Stepper
+        activeStep="custom"
+        steps={[
+          {
+            id: 'custom',
+            label: 'Custom',
+            icon: <span data-testid="custom-icon">I</span>,
+          },
+        ]}
+      />,
     );
 
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
   });
 
-  it('marks all steps completed when activeStep exceeds range', () => {
+  it('leaves all steps inactive when activeStep id is not in steps', () => {
     render(
-      <Stepper activeStep={3}>
-        <Step data-testid="step-0" label="Step 1" step={0} />
-        <Step data-testid="step-1" label="Step 2" step={1} />
-        <Step data-testid="step-2" label="Step 3" step={2} />
-      </Stepper>,
+      <Stepper
+        activeStep="missing"
+        steps={[
+          {id: 'account', label: 'Step 1', 'data-testid': 'step-0'},
+          {id: 'profile', label: 'Step 2', 'data-testid': 'step-1'},
+          {id: 'review', label: 'Step 3', 'data-testid': 'step-2'},
+        ]}
+      />,
     );
 
     expect(screen.getByTestId('step-0')).not.toHaveAttribute('aria-current');
@@ -188,26 +221,28 @@ describe('Stepper', () => {
 
     render(
       <Stepper
-        activeStep={0}
+        activeStep="account"
         className="custom-stepper"
         data-testid="stepper"
         ref={ref}
-        style={{maxWidth: 600}}>
-        <Step label="Step 1" step={0} />
-      </Stepper>,
+        steps={[{id: 'account', label: 'Step 1'}]}
+        style={{maxWidth: 600}}
+      />,
     );
 
     const stepper = screen.getByTestId('stepper');
     expect(stepper).toHaveClass('custom-stepper');
     expect(stepper).toHaveStyle({maxWidth: '600px'});
-    expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
+    // ref, className, style, and data-testid all target the same <nav> root.
+    expect(ref).toHaveBeenCalledWith(stepper);
   });
 
-  it('forwards data-testid on Step', () => {
+  it('forwards data-testid on each step', () => {
     render(
-      <Stepper activeStep={0}>
-        <Step data-testid="my-step" label="Step 1" step={0} />
-      </Stepper>,
+      <Stepper
+        activeStep="account"
+        steps={[{id: 'account', label: 'Step 1', 'data-testid': 'my-step'}]}
+      />,
     );
 
     expect(screen.getByTestId('my-step')).toBeInTheDocument();
@@ -218,10 +253,14 @@ describe('Stepper', () => {
     const onStepClick = vi.fn();
 
     render(
-      <Stepper activeStep={1} onStepClick={onStepClick}>
-        <Step label="Account" step={0} />
-        <Step hasError label="Profile" step={1} />
-      </Stepper>,
+      <Stepper
+        activeStep="profile"
+        onStepClick={onStepClick}
+        steps={[
+          {id: 'account', label: 'Account'},
+          {id: 'profile', label: 'Profile', hasError: true},
+        ]}
+      />,
     );
 
     const button = screen.getByRole('button', {
@@ -229,15 +268,24 @@ describe('Stepper', () => {
     });
     expect(button).toBeInTheDocument();
     await user.click(button);
-    expect(onStepClick).toHaveBeenCalledWith(1);
+    expect(onStepClick).toHaveBeenCalledWith('profile');
   });
 
   it('renders disabled steps without a clickable button', () => {
     render(
-      <Stepper activeStep={0} onStepClick={() => {}}>
-        <Step label="Account" step={0} />
-        <Step data-testid="disabled-step" isDisabled label="Profile" step={1} />
-      </Stepper>,
+      <Stepper
+        activeStep="account"
+        onStepClick={() => {}}
+        steps={[
+          {id: 'account', label: 'Account'},
+          {
+            id: 'profile',
+            label: 'Profile',
+            isDisabled: true,
+            'data-testid': 'disabled-step',
+          },
+        ]}
+      />,
     );
 
     expect(screen.getByTestId('disabled-step')).toBeInTheDocument();
