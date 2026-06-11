@@ -221,6 +221,7 @@ export default tseslint.config(
     plugins: {
       ...eslintReact.configs.recommended.plugins,
       'react-compiler': reactCompiler,
+      'silver-ui': silverUiPlugin,
     },
     rules: {
       // React Compiler compatibility
@@ -305,6 +306,9 @@ export default tseslint.config(
       '@eslint-react/jsx-no-key-after-spread': 'error',
       '@eslint-react/jsx-no-leaked-semicolon': 'error',
       '@eslint-react/jsx-no-useless-fragment': 'error',
+      // Complements jsx-no-useless-fragment, which ignores fragments that
+      // contain a comment (e.g. <>{/* note */}<Foo /></>).
+      'silver-ui/no-useless-fragment-with-comment': 'error',
 
       // Naming conventions
       '@eslint-react/naming-convention-context-name': 'error',

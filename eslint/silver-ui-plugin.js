@@ -693,6 +693,116 @@ const noRecipeExports = {
   },
 };
 
+/**
+ * Disallow fragments whose only renderable child is a single element but that
+ * also contain JSX comments.
+ *
+ * `@eslint-react/jsx-no-useless-fragment` (and the eslint-plugin-react rule it
+ * descends from) treats a JSX comment as a real child, so a single-element
+ * fragment escapes detection the moment a JSX comment is added. The fragment is
+ * still useless — the comment can live as a plain JS comment instead.
+ *
+ * The autofix peels the opening/closing fragment tags away. When the fragment
+ * sits in expression position (return value, assignment, ternary, ...) each JSX
+ * comment is converted to a bare block comment by removing its braces, since a
+ * JSX comment is only valid as a JSX child. When the fragment is itself a JSX
+ * child the comment braces are kept so the comment stays a JSX comment in its
+ * new home.
+ */
+const noUselessFragmentWithComment = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description:
+        'Disallow fragments that wrap a single element alongside only comments; the fragment is unnecessary.',
+    },
+    fixable: 'code',
+    messages: {
+      uselessFragment:
+        'Fragment wraps a single element and only comments — remove the fragment.',
+    },
+    schema: [],
+  },
+  create(context) {
+    function isCommentContainer(child) {
+      return (
+        child.type === 'JSXExpressionContainer' &&
+        child.expression.type === 'JSXEmptyExpression'
+      );
+    }
+
+    return {
+      JSXFragment(node) {
+        const renderableChildren = [];
+        const commentContainers = [];
+        let hasOtherChild = false;
+
+        for (const child of node.children) {
+          if (child.type === 'JSXText') {
+            if (child.value.trim() !== '') {
+              hasOtherChild = true;
+            }
+          } else if (isCommentContainer(child)) {
+            commentContainers.push(child);
+          } else if (
+            child.type === 'JSXElement' ||
+            child.type === 'JSXFragment'
+          ) {
+            renderableChildren.push(child);
+          } else {
+            // Expression containers with a value, spreads, etc. The fragment may
+            // be load-bearing (e.g. a keyed list) — leave it alone.
+            hasOtherChild = true;
+          }
+        }
+
+        if (
+          hasOtherChild ||
+          renderableChildren.length !== 1 ||
+          commentContainers.length === 0
+        ) {
+          return;
+        }
+
+        const isJsxChild =
+          node.parent != null &&
+          (node.parent.type === 'JSXElement' ||
+            node.parent.type === 'JSXFragment');
+
+        context.report({
+          node,
+          messageId: 'uselessFragment',
+          fix(fixer) {
+            const sourceCode = context.sourceCode || context.getSourceCode();
+            const innerStart = node.openingFragment.range[1];
+            let text = sourceCode
+              .getText()
+              .slice(innerStart, node.closingFragment.range[0]);
+
+            // In expression position a JSX comment is invalid, so unwrap each
+            // comment container by removing its surrounding braces, turning the
+            // JSX comment into a plain block comment. Remove from right to left
+            // so earlier offsets stay valid.
+            if (!isJsxChild) {
+              const bracePositions = [];
+              for (const container of commentContainers) {
+                bracePositions.push(container.range[1] - 1 - innerStart);
+                bracePositions.push(container.range[0] - innerStart);
+              }
+              bracePositions.sort((a, b) => b - a);
+              for (const position of bracePositions) {
+                text = text.slice(0, position) + text.slice(position + 1);
+              }
+            }
+
+            return fixer.replaceText(node, text.trim());
+          },
+        });
+      },
+    };
+  },
+};
+
 const plugin = {
   meta: {
     name: 'eslint-plugin-silver-ui',
@@ -703,6 +813,7 @@ const plugin = {
     'no-direct-color-tokens': noDirectColorTokens,
     'no-recipe-exports': noRecipeExports,
     'no-redundant-box-sizing': noRedundantBoxSizing,
+    'no-useless-fragment-with-comment': noUselessFragmentWithComment,
     'prefer-is-react-node': preferIsReactNode,
     'require-component-props': requireComponentProps,
   },

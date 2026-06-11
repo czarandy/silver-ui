@@ -507,133 +507,131 @@ export function TagsInput<T extends SearchableItem>({
   ));
 
   const wrapperContent = (
-    <>
-      {/* eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- pointerdown delegates to inner input for focus convenience */}
-      <div
-        aria-label={label}
-        className={cx(
-          inputRecipe({
-            size,
-            status: status?.type,
-            isDisabled,
-          }),
-          classes.wrapper,
-        )}
-        data-testid={dataTestId}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        onPointerDown={handleWrapperPointerDown}
-        ref={wrapperRef}
-        role="group">
-        {startIcon != null ? (
-          <span className={inputStyles.iconSlot}>
-            <Icon color="secondary" icon={startIcon} size="sm" />
-          </span>
-        ) : null}
-        {isTruncated ? (
-          <OverflowList
-            behavior="observeParent"
-            gap={4}
-            overflowRenderer={overflowItems => (
-              <span className={classes.overflowText}>
-                +{overflowItems.length} more
-              </span>
-            )}>
-            {tokens}
-          </OverflowList>
-        ) : (
-          tokens
-        )}
-        <BaseAutocompleteInput
-          anchorRef={wrapperRef}
-          ariaDescribedBy={describedBy}
-          className={classes.input}
-          debounceMs={debounceMs}
-          emptySearchResultsText={emptySearchResultsText}
-          hasAutoFocus={hasAutoFocus}
-          hasEntriesOnFocus={hasEntriesOnFocus}
-          hasReopenOnSelect={hasEntriesOnFocus}
-          inputId={inputId}
-          isDisabled={isDisabled || isReadOnly || isAtMax}
-          maxMenuItems={maxMenuItems}
-          onChange={item => {
-            if (item == null) {
-              return;
-            }
-            if (isCreatableItem(item)) {
-              const rawValue =
-                typeof item.auxiliaryData === 'object' &&
-                item.auxiliaryData != null &&
-                'value' in item.auxiliaryData
-                  ? String(item.auxiliaryData.value)
-                  : item.label;
-              // `createItem` is guaranteed present for item types that need it
-              // (see TagsInputCreateProps); the default builder is only reached
-              // when `{id, label}` is a valid `T`, so the assertion is sound.
-              const createdItem =
-                createItem?.(rawValue) ??
-                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-                ({id: rawValue, label: rawValue} as T);
-              onChangeRef.current([...valueRef.current, createdItem], {
-                item: createdItem,
-                type: 'create',
-              });
-              announce(`Added ${rawValue}`);
-              return;
-            }
-            onChangeRef.current([...valueRef.current, item], {
-              item,
-              type: 'add',
-            });
-            announce(`Added ${item.label}`);
-          }}
-          onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
-            if (
-              event.key === 'Backspace' &&
-              event.currentTarget.value === '' &&
-              valueRef.current.length > 0
-            ) {
-              const item = valueRef.current[valueRef.current.length - 1];
-              removeItem(item);
-            }
-          }}
-          onQueryChange={nextQuery => {
-            setQueryValue(nextQuery);
-            onQueryChange?.(nextQuery);
-          }}
-          placeholder={value.length === 0 ? placeholder : undefined}
-          query={queryValue}
-          ref={inputRef}
-          renderItem={renderItem}
-          searchSource={filteredSource}
-          size={size}
-          value={null}
-        />
-        {isReactNode(endContent) ? (
-          <span className={classes.endContent}>{endContent}</span>
-        ) : null}
-        {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
-          <Button
-            icon={X}
-            isIconOnly
-            label={`Clear ${label}`}
-            onClick={event => {
-              event.stopPropagation();
-              onChangeRef.current([], {
-                items: valueRef.current,
-                type: 'remove-all',
-              });
-              announce('Cleared all tags');
-            }}
-            size="sm"
-            variant="ghost"
-          />
-        ) : null}
-        <span aria-live="polite" className={classes.liveRegion} role="status">
-          {announcement}
+    /* eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- pointerdown delegates to inner input for focus convenience */
+    <div
+      aria-label={label}
+      className={cx(
+        inputRecipe({
+          size,
+          status: status?.type,
+          isDisabled,
+        }),
+        classes.wrapper,
+      )}
+      data-testid={dataTestId}
+      onBlur={handleBlur}
+      onFocus={handleFocus}
+      onPointerDown={handleWrapperPointerDown}
+      ref={wrapperRef}
+      role="group">
+      {startIcon != null ? (
+        <span className={inputStyles.iconSlot}>
+          <Icon color="secondary" icon={startIcon} size="sm" />
         </span>
-      </div>
-    </>
+      ) : null}
+      {isTruncated ? (
+        <OverflowList
+          behavior="observeParent"
+          gap={4}
+          overflowRenderer={overflowItems => (
+            <span className={classes.overflowText}>
+              +{overflowItems.length} more
+            </span>
+          )}>
+          {tokens}
+        </OverflowList>
+      ) : (
+        tokens
+      )}
+      <BaseAutocompleteInput
+        anchorRef={wrapperRef}
+        ariaDescribedBy={describedBy}
+        className={classes.input}
+        debounceMs={debounceMs}
+        emptySearchResultsText={emptySearchResultsText}
+        hasAutoFocus={hasAutoFocus}
+        hasEntriesOnFocus={hasEntriesOnFocus}
+        hasReopenOnSelect={hasEntriesOnFocus}
+        inputId={inputId}
+        isDisabled={isDisabled || isReadOnly || isAtMax}
+        maxMenuItems={maxMenuItems}
+        onChange={item => {
+          if (item == null) {
+            return;
+          }
+          if (isCreatableItem(item)) {
+            const rawValue =
+              typeof item.auxiliaryData === 'object' &&
+              item.auxiliaryData != null &&
+              'value' in item.auxiliaryData
+                ? String(item.auxiliaryData.value)
+                : item.label;
+            // `createItem` is guaranteed present for item types that need it
+            // (see TagsInputCreateProps); the default builder is only reached
+            // when `{id, label}` is a valid `T`, so the assertion is sound.
+            const createdItem =
+              createItem?.(rawValue) ??
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              ({id: rawValue, label: rawValue} as T);
+            onChangeRef.current([...valueRef.current, createdItem], {
+              item: createdItem,
+              type: 'create',
+            });
+            announce(`Added ${rawValue}`);
+            return;
+          }
+          onChangeRef.current([...valueRef.current, item], {
+            item,
+            type: 'add',
+          });
+          announce(`Added ${item.label}`);
+        }}
+        onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
+          if (
+            event.key === 'Backspace' &&
+            event.currentTarget.value === '' &&
+            valueRef.current.length > 0
+          ) {
+            const item = valueRef.current[valueRef.current.length - 1];
+            removeItem(item);
+          }
+        }}
+        onQueryChange={nextQuery => {
+          setQueryValue(nextQuery);
+          onQueryChange?.(nextQuery);
+        }}
+        placeholder={value.length === 0 ? placeholder : undefined}
+        query={queryValue}
+        ref={inputRef}
+        renderItem={renderItem}
+        searchSource={filteredSource}
+        size={size}
+        value={null}
+      />
+      {isReactNode(endContent) ? (
+        <span className={classes.endContent}>{endContent}</span>
+      ) : null}
+      {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
+        <Button
+          icon={X}
+          isIconOnly
+          label={`Clear ${label}`}
+          onClick={event => {
+            event.stopPropagation();
+            onChangeRef.current([], {
+              items: valueRef.current,
+              type: 'remove-all',
+            });
+            announce('Cleared all tags');
+          }}
+          size="sm"
+          variant="ghost"
+        />
+      ) : null}
+      <span aria-live="polite" className={classes.liveRegion} role="status">
+        {announcement}
+      </span>
+    </div>
   );
 
   const popoverOverrideStyle: CSSProperties = {

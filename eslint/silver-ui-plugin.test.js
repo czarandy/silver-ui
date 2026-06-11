@@ -8,6 +8,8 @@ const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
 const noRedundantBoxSizingRule = plugin.rules['no-redundant-box-sizing'];
 const noRecipeExportsRule = plugin.rules['no-recipe-exports'];
 const preferIsReactNodeRule = plugin.rules['prefer-is-react-node'];
+const noUselessFragmentWithCommentRule =
+  plugin.rules['no-useless-fragment-with-comment'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -777,3 +779,59 @@ tester.run('no-recipe-exports', noRecipeExportsRule, {
     },
   ],
 });
+
+tester.run(
+  'no-useless-fragment-with-comment',
+  noUselessFragmentWithCommentRule,
+  {
+    valid: [
+      {
+        // Handled by @eslint-react/jsx-no-useless-fragment, not this rule.
+        name: 'single element, no comment',
+        code: 'const x = <><Foo /></>;',
+      },
+      {
+        name: 'comment plus two renderable children',
+        code: 'const x = <>{/* note */}<Foo /><Bar /></>;',
+      },
+      {
+        name: 'comment but no renderable child',
+        code: 'const x = <>{/* note */}</>;',
+      },
+      {
+        name: 'comment beside a value expression container (may be load-bearing)',
+        code: 'const x = <>{/* note */}{value}</>;',
+      },
+      {
+        name: 'comment inside a non-fragment element',
+        code: 'const x = <div>{/* note */}<Foo /></div>;',
+      },
+    ],
+    invalid: [
+      {
+        name: 'comment before single element in expression position',
+        code: 'const x = <>{/* note */}<Foo /></>;',
+        output: 'const x = /* note */<Foo />;',
+        errors: [{messageId: 'uselessFragment'}],
+      },
+      {
+        name: 'comment after single element in expression position',
+        code: 'const x = <><Foo />{/* note */}</>;',
+        output: 'const x = <Foo />/* note */;',
+        errors: [{messageId: 'uselessFragment'}],
+      },
+      {
+        name: 'fragment is a JSX child — comment braces are kept',
+        code: 'const x = <div><>{/* note */}<Foo /></></div>;',
+        output: 'const x = <div>{/* note */}<Foo /></div>;',
+        errors: [{messageId: 'uselessFragment'}],
+      },
+      {
+        name: 'multiline fragment in expression position',
+        code: 'const x = (\n  <>\n    {/* note */}\n    <Foo />\n  </>\n);',
+        output: 'const x = (\n  /* note */\n    <Foo />\n);',
+        errors: [{messageId: 'uselessFragment'}],
+      },
+    ],
+  },
+);
