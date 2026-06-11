@@ -147,6 +147,12 @@ export const Disabled: Story = {
   args: {isDisabled: true},
 };
 
+// `hasClear` is set to show that read-only suppresses the clear button (and
+// typing) without applying the disabled opacity.
+export const ReadOnly: Story = {
+  args: {hasClear: true, isReadOnly: true},
+};
+
 export const Small: Story = {
   args: {size: 'sm'},
 };

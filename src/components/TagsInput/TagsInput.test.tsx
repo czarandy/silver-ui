@@ -14,7 +14,7 @@ const items: SearchableItem[] = [
   {id: 'katherine', label: 'Katherine Johnson'},
 ];
 
-const emptySource = createStaticSearchSource([]);
+const emptySource = createStaticSearchSource<SearchableItem>([]);
 const showPopover = vi.fn(function (this: HTMLElement) {
   this.setAttribute('popover-open', '');
 });
@@ -276,6 +276,40 @@ describe('TagsInput', () => {
     expect(call[0][0].label).toBe('new-tag');
     expect(call[1].type).toBe('create');
     expect(call[1].item.id).toBe('new-tag');
+  });
+
+  it('uses createItem to build the committed item when provided', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <TagsInput
+        createItem={rawValue => ({
+          id: `custom-${rawValue}`,
+          label: rawValue.toUpperCase(),
+        })}
+        debounceMs={0}
+        hasCreate
+        label="Tags"
+        onChange={onChange}
+        searchSource={emptySource}
+        value={[]}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Tags'}), 'new-tag');
+    await act(async () => {
+      await tick();
+    });
+    await user.click(screen.getByText('Create "new-tag"'));
+
+    const call = onChange.mock.calls[0] as [
+      SearchableItem[],
+      {item: SearchableItem; type: string},
+    ];
+    expect(call[0][0].id).toBe('custom-new-tag');
+    expect(call[0][0].label).toBe('NEW-TAG');
+    expect(call[1].type).toBe('create');
   });
 
   it('truncates tags when tagOverflowBehavior is unfocusedInline and unfocused', () => {

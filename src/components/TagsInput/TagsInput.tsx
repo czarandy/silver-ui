@@ -12,7 +12,6 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {OverflowList} from '../../internal/OverflowList';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
@@ -31,6 +30,7 @@ import {inputRecipe, inputStyles} from '../Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
 import {Tag} from '../Tag';
+import {tagsInputRecipe} from './TagsInput.recipe';
 
 export type TagsInputChange<T extends SearchableItem> =
   | {item: T; type: 'add'}
@@ -53,6 +53,58 @@ export interface TagsInputHandle {
    */
   focus(): void;
 }
+
+/**
+ * Props that gate free-text tag creation.
+ *
+ * Selecting the "Create …" suggestion mints a new item from the typed text via
+ * `createItem`. The default builder produces `{id, label}` (both set to the raw
+ * text):
+ *
+ * - When that shape satisfies `T` (e.g. the default `SearchableItem`),
+ *   `createItem` is optional and `hasCreate` is a plain boolean toggle.
+ * - When `T` has additional required fields the default builder cannot supply,
+ *   creation requires an explicit `createItem`, so enabling it is expressed as
+ *   `hasCreate` + `createItem` together (and may be omitted entirely).
+ */
+export type TagsInputCreateProps<T extends SearchableItem> = {
+  id: string;
+  label: string;
+} extends T
+  ? {
+      /**
+       * Whether users can create a tag from free text.
+       * @default false
+       */
+      hasCreate?: boolean;
+      /**
+       * Builds the committed item from the typed text. Optional for this item
+       * type because the default builder — `rawValue => ({id: rawValue, label:
+       * rawValue})` — already produces a valid item.
+       */
+      createItem?: (rawValue: string) => T;
+    }
+  :
+      | {
+          /**
+           * Whether users can create a tag from free text.
+           * @default false
+           */
+          hasCreate?: false;
+          createItem?: never;
+        }
+      | {
+          /**
+           * Whether users can create a tag from free text.
+           */
+          hasCreate: true;
+          /**
+           * Builds the committed item from the typed text. Required for this
+           * item type because it has fields the default `{id, label}` builder
+           * cannot supply.
+           */
+          createItem: (rawValue: string) => T;
+        };
 
 export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
   /**
@@ -95,11 +147,6 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    * @default false
    */
   hasClear?: boolean;
-  /**
-   * Whether users can create a tag from free text.
-   * @default false
-   */
-  hasCreate?: boolean;
   /**
    * Whether to show bootstrap results on focus before typing.
    * @default false
@@ -209,70 +256,10 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    * Selected items.
    */
   value: T[];
-} & FieldNecessity;
+} & FieldNecessity &
+  TagsInputCreateProps<T>;
 
 const CREATABLE_ID_PREFIX = '__silver_create__';
-
-const styles = {
-  wrapper: css({
-    cursor: 'text',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    h: 'auto',
-  }),
-  wrapperWithTags: css({
-    rowGap: '1',
-  }),
-  wrapperWithTagsSize: {
-    sm: css({pt: '0px', pb: '0.5'}),
-    md: css({py: '1'}),
-    lg: css({py: '1'}),
-  },
-  layerPopover: css({
-    w: 'anchor-size(width)',
-  }),
-  truncatedWrapper: css({
-    flexWrap: 'nowrap',
-    overflow: 'hidden',
-  }),
-  truncatedSize: {
-    sm: css({h: 'component.sm'}),
-    md: css({h: 'component.md'}),
-    lg: css({h: 'component.lg'}),
-  },
-  tag: css({flexShrink: 0}),
-  input: css({
-    minW: '10',
-    flex: '1 1 40px',
-  }),
-  inputHidden: css({
-    position: 'absolute',
-    opacity: 0,
-    w: 0,
-    minW: 0,
-    flexBasis: 0,
-  }),
-  endContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-  overflowText: css({
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
-    fontSize: 'sm',
-    color: 'fg.muted',
-    px: '1',
-  }),
-  liveRegion: css({
-    position: 'absolute',
-    w: '1px',
-    h: '1px',
-    overflow: 'hidden',
-    clip: 'rect(0 0 0 0)',
-    whiteSpace: 'nowrap',
-  }),
-} as const;
 
 function isCreatableItem<T extends SearchableItem>(item: T): boolean {
   return item.id.startsWith(CREATABLE_ID_PREFIX);
@@ -288,6 +275,7 @@ export function TagsInput<T extends SearchableItem>({
   description,
   emptySearchResultsText,
   endContent,
+  createItem,
   hasAutoFocus = false,
   hasClear = false,
   hasCreate = false,
@@ -342,6 +330,20 @@ export function TagsInput<T extends SearchableItem>({
   isAtMaxRef.current = isAtMax;
   const isTruncated =
     !isFocusedWithin && tagOverflowBehavior !== 'none' && value.length > 0;
+  const classes = tagsInputRecipe({
+    size,
+    hasTags: value.length > 0,
+    isTruncated,
+    hasFixedHeight: isTruncated,
+    isInputHidden: isAtMax || isTruncated,
+  });
+  // Collapsed single-line placeholder shown behind the layer popover: always
+  // fixed-height, never hides the input.
+  const placeholderClasses = tagsInputRecipe({
+    size,
+    isTruncated,
+    hasFixedHeight: true,
+  });
 
   const placeholderRef = useCallback(
     (element: HTMLElement | null) => {
@@ -490,7 +492,7 @@ export function TagsInput<T extends SearchableItem>({
   const necessity = getNecessity(isOptional, isRequired);
 
   const tokens = value.map(item => (
-    <span className={styles.tag} key={item.id}>
+    <span className={classes.tag} key={item.id}>
       {renderTag == null ? (
         <Tag
           isDisabled={isDisabled}
@@ -515,13 +517,7 @@ export function TagsInput<T extends SearchableItem>({
             status: status?.type,
             isDisabled,
           }),
-          styles.wrapper,
-          value.length > 0 && !isTruncated ? styles.wrapperWithTags : undefined,
-          value.length > 0 && !isTruncated
-            ? styles.wrapperWithTagsSize[size]
-            : undefined,
-          isTruncated ? styles.truncatedWrapper : undefined,
-          isTruncated ? styles.truncatedSize[size] : undefined,
+          classes.wrapper,
         )}
         data-testid={dataTestId}
         onBlur={handleBlur}
@@ -539,7 +535,7 @@ export function TagsInput<T extends SearchableItem>({
             behavior="observeParent"
             gap={4}
             overflowRenderer={overflowItems => (
-              <span className={styles.overflowText}>
+              <span className={classes.overflowText}>
                 +{overflowItems.length} more
               </span>
             )}>
@@ -551,10 +547,7 @@ export function TagsInput<T extends SearchableItem>({
         <BaseAutocompleteInput
           anchorRef={wrapperRef}
           ariaDescribedBy={describedBy}
-          className={cx(
-            styles.input,
-            isAtMax || isTruncated ? styles.inputHidden : undefined,
-          )}
+          className={classes.input}
           debounceMs={debounceMs}
           emptySearchResultsText={emptySearchResultsText}
           hasAutoFocus={hasAutoFocus}
@@ -574,11 +567,13 @@ export function TagsInput<T extends SearchableItem>({
                 'value' in item.auxiliaryData
                   ? String(item.auxiliaryData.value)
                   : item.label;
-              const createdItem = {
-                ...item,
-                id: rawValue,
-                label: rawValue,
-              };
+              // `createItem` is guaranteed present for item types that need it
+              // (see TagsInputCreateProps); the default builder is only reached
+              // when `{id, label}` is a valid `T`, so the assertion is sound.
+              const createdItem =
+                createItem?.(rawValue) ??
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                ({id: rawValue, label: rawValue} as T);
               onChangeRef.current([...valueRef.current, createdItem], {
                 item: createdItem,
                 type: 'create',
@@ -615,7 +610,7 @@ export function TagsInput<T extends SearchableItem>({
           value={null}
         />
         {isReactNode(endContent) ? (
-          <span className={styles.endContent}>{endContent}</span>
+          <span className={classes.endContent}>{endContent}</span>
         ) : null}
         {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
           <Button
@@ -634,7 +629,7 @@ export function TagsInput<T extends SearchableItem>({
             variant="ghost"
           />
         ) : null}
-        <span aria-live="polite" className={styles.liveRegion} role="status">
+        <span aria-live="polite" className={classes.liveRegion} role="status">
           {announcement}
         </span>
       </div>
@@ -657,9 +652,7 @@ export function TagsInput<T extends SearchableItem>({
             status: status?.type,
             isDisabled,
           }),
-          styles.wrapper,
-          isTruncated ? styles.truncatedWrapper : undefined,
-          styles.truncatedSize[size],
+          placeholderClasses.wrapper,
         )}
         onPointerDown={handleWrapperPointerDown}
         ref={placeholderRef}>
@@ -674,7 +667,7 @@ export function TagsInput<T extends SearchableItem>({
               behavior="observeParent"
               gap={4}
               overflowRenderer={overflowItems => (
-                <span className={styles.overflowText}>
+                <span className={classes.overflowText}>
                   +{overflowItems.length} more
                 </span>
               )}>
@@ -691,7 +684,7 @@ export function TagsInput<T extends SearchableItem>({
         </div>,
         {
           alignment: 'start',
-          className: styles.layerPopover,
+          className: classes.layerPopover,
           placement: 'below',
           style: popoverOverrideStyle,
         },
