@@ -416,6 +416,142 @@ describe('edit popover focus', () => {
     value: {type: 'string', value: 'John'},
   } as const;
 
+  it('saves the filter when Enter is pressed in the value editor', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    const valueInput = await screen.findByPlaceholderText('Enter value...');
+    await user.clear(valueInput);
+    await user.type(valueInput, 'Jane');
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'name',
+          operator: 'contains',
+          value: {type: 'string', value: 'Jane'},
+        },
+      ],
+      'edit',
+      0,
+    );
+  });
+
+  it('does not save when Enter is pressed with an empty (incomplete) filter', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput config={config} filters={[]} onChange={onChange} />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Search'});
+    await user.type(input, 'Name');
+    await user.click(await screen.findByText('Name'));
+    const valueInput = await screen.findByPlaceholderText('Enter value...');
+    await user.click(valueInput);
+    await user.keyboard('{Enter}');
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('preserves a changed group operator when a nested sub-filter is edited', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const nestedConfig: SearchFilterInputConfig = {
+      fields: [
+        {
+          key: 'group',
+          label: 'Group',
+          operators: [
+            {key: 'and', label: 'All of', value: {type: 'nested'}},
+            {key: 'or', label: 'Any of', value: {type: 'nested'}},
+          ],
+        },
+        {
+          key: 'name',
+          label: 'Name',
+          operators: [
+            {key: 'contains', label: 'contains', value: {type: 'string'}},
+          ],
+        },
+      ],
+      name: 'NestedTestConfig',
+    };
+
+    render(
+      <SearchFilterInput
+        config={nestedConfig}
+        filters={[
+          {
+            field: 'group',
+            operator: 'and',
+            value: {
+              type: 'nested',
+              value: [
+                {
+                  field: 'name',
+                  operator: 'contains',
+                  value: {type: 'string', value: 'John'},
+                },
+              ],
+            },
+          },
+        ]}
+        onChange={onChange}
+      />,
+    );
+
+    // Open the nested filter editor.
+    await user.click(screen.getByText(/Group/));
+
+    // Change the group operator — this updates partialFilter.operator in the
+    // parent.
+    await user.click(
+      await screen.findByRole('combobox', {name: 'Group operator'}),
+    );
+    await user.click(screen.getByText('Any of'));
+
+    // Edit the nested sub-filter's value. This fires syncToParent, which must
+    // merge into the *latest* parent state (operator 'or') rather than a value
+    // captured at an earlier render, and must not run as a side effect inside
+    // the setSubFilters updater.
+    const valueInput = screen.getByPlaceholderText('Enter value...');
+    await user.clear(valueInput);
+    await user.type(valueInput, 'Jane');
+
+    await user.click(screen.getByRole('button', {name: 'Apply'}));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'group',
+          operator: 'or',
+          value: {
+            type: 'nested',
+            value: [
+              {
+                field: 'name',
+                operator: 'contains',
+                value: {type: 'string', value: 'Jane'},
+              },
+            ],
+          },
+        },
+      ],
+      'edit',
+      0,
+    );
+  });
+
   it('does not flash the input focused after cancelling a tag edit', async () => {
     const user = userEvent.setup();
     render(
@@ -507,6 +643,264 @@ describe('edit popover focus', () => {
   });
 });
 
+describe('SearchFilterInput interactions', () => {
+  beforeAll(() => {
+    globalThis.ResizeObserver = class {
+      observe(): void {}
+      unobserve(): void {}
+      disconnect(): void {}
+    };
+    // jsdom defaults `[popover]` elements to `display: none` and lacks
+    // showPopover/hidePopover; toggle inline display so opened popover content
+    // is queryable/clickable in tests.
+    Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+      configurable: true,
+      value(this: HTMLElement) {
+        this.style.display = 'block';
+      },
+    });
+    Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
+      configurable: true,
+      value(this: HTMLElement) {
+        this.style.display = 'none';
+      },
+    });
+  });
+
+  const nameFilter = {
+    field: 'name',
+    operator: 'contains',
+    value: {type: 'string', value: 'John'},
+  } as const;
+
+  it('adds a string filter through the combobox and Apply button', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput config={config} filters={[]} onChange={onChange} />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Search'}), 'Name');
+    await user.click(await screen.findByText('Name'));
+
+    const valueInput = await screen.findByPlaceholderText('Enter value...');
+    await user.type(valueInput, 'Alice');
+    await user.click(screen.getByRole('button', {name: 'Apply'}));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'name',
+          operator: 'contains',
+          value: {type: 'string', value: 'Alice'},
+        },
+      ],
+      'add',
+      0,
+    );
+  });
+
+  it('adds an enum filter that auto-saves when a value is selected', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput config={config} filters={[]} onChange={onChange} />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Search'}), 'Status');
+    await user.click(await screen.findByText('Status'));
+
+    // Enum value editor is a Select; choosing a value commits immediately
+    // (shouldSave), with no Apply click needed.
+    await user.click(await screen.findByRole('combobox', {name: 'Value'}));
+    await user.click(screen.getByText('Active'));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'status',
+          operator: 'is',
+          value: {type: 'enum', value: 'active'},
+        },
+      ],
+      'add',
+      0,
+    );
+  });
+
+  it('edits a filter value by clicking its tag and applying', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    const valueInput = await screen.findByPlaceholderText('Enter value...');
+    await user.clear(valueInput);
+    await user.type(valueInput, 'Jane');
+    await user.click(screen.getByRole('button', {name: 'Apply'}));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'name',
+          operator: 'contains',
+          value: {type: 'string', value: 'Jane'},
+        },
+      ],
+      'edit',
+      0,
+    );
+  });
+
+  it('edits a filter operator while preserving the value', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('combobox', {name: 'Operator'}));
+    await user.click(screen.getByText('is not'));
+    await user.click(screen.getByRole('button', {name: 'Apply'}));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'name',
+          operator: 'is_not',
+          value: {type: 'string', value: 'John'},
+        },
+      ],
+      'edit',
+      0,
+    );
+  });
+
+  it('removes a filter via the tag remove button', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[
+          nameFilter,
+          {
+            field: 'status',
+            operator: 'is',
+            value: {type: 'enum', value: 'active'},
+          },
+        ]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(
+      screen.getByRole('button', {name: /Remove Name contains/}),
+    );
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'status',
+          operator: 'is',
+          value: {type: 'enum', value: 'active'},
+        },
+      ],
+      'remove',
+      0,
+    );
+  });
+
+  it('does not commit changes when the edit popover is cancelled', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    const valueInput = await screen.findByPlaceholderText('Enter value...');
+    await user.clear(valueInput);
+    await user.type(valueInput, 'Zzz');
+    await user.click(screen.getByRole('button', {name: 'Cancel'}));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole('button', {name: 'Apply'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('deletes a filter via the edit popover Delete button', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('button', {name: 'Delete'}));
+
+    expect(onChange).toHaveBeenCalledWith([], 'remove', 0);
+  });
+
+  it('uses a custom popoverSaveButtonLabel and saves with it', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={onChange}
+        popoverSaveButtonLabel="Save filter"
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+
+    // The custom label replaces the default "Apply".
+    const saveButton = await screen.findByRole('button', {name: 'Save filter'});
+    expect(
+      screen.queryByRole('button', {name: 'Apply'}),
+    ).not.toBeInTheDocument();
+
+    const valueInput = screen.getByPlaceholderText('Enter value...');
+    await user.clear(valueInput);
+    await user.type(valueInput, 'Jane');
+    await user.click(saveButton);
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'name',
+          operator: 'contains',
+          value: {type: 'string', value: 'Jane'},
+        },
+      ],
+      'edit',
+      0,
+    );
+  });
+});
+
 describe('formatFilterValue', () => {
   const nameField = config.fields.find(f => f.key === 'name');
   const statusField = config.fields.find(f => f.key === 'status');
@@ -526,19 +920,13 @@ describe('formatFilterValue', () => {
 
   it('formats string values', () => {
     expect(
-      formatFilterValue(
-        config as never,
-        containsOp.value,
-        {type: 'string', value: 'hello'},
-        40,
-      ),
+      formatFilterValue(containsOp.value, {type: 'string', value: 'hello'}, 40),
     ).toBe('hello');
   });
 
   it('truncates long string values', () => {
     const long = 'a'.repeat(50);
     const result = formatFilterValue(
-      config as never,
       containsOp.value,
       {type: 'string', value: long},
       20,
@@ -549,23 +937,13 @@ describe('formatFilterValue', () => {
 
   it('formats enum values with labels', () => {
     expect(
-      formatFilterValue(
-        config as never,
-        isOp.value,
-        {type: 'enum', value: 'active'},
-        40,
-      ),
+      formatFilterValue(isOp.value, {type: 'enum', value: 'active'}, 40),
     ).toBe('Active');
   });
 
   it('formats integer values', () => {
     expect(
-      formatFilterValue(
-        config as never,
-        equalsOp.value,
-        {type: 'integer', value: 42},
-        40,
-      ),
+      formatFilterValue(equalsOp.value, {type: 'integer', value: 42}, 40),
     ).toBe('42');
   });
 });

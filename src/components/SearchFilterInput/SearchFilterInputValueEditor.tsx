@@ -33,7 +33,6 @@ export interface SearchFilterInputValueEditorProps {
   filterValue: FilterValue | undefined;
   isDisabled?: boolean;
   onChange: (value: FilterValue, shouldSave?: boolean) => void;
-  onEnter?: () => void;
   operatorValue: OperatorValue;
   timezoneID?: string;
 }
@@ -524,7 +523,6 @@ export function SearchFilterInputValueEditor({
   filterValue,
   isDisabled,
   onChange,
-  onEnter,
   operatorValue,
   timezoneID,
 }: SearchFilterInputValueEditorProps): React.JSX.Element | null {
@@ -632,5 +630,4 @@ export function SearchFilterInputValueEditor({
         />
       );
   }
-  void onEnter;
 }

@@ -1,6 +1,4 @@
 import type {
-  ComponentType,
-  CSSProperties,
   HTMLAttributes,
   ReactNode,
   Ref,
@@ -112,22 +110,6 @@ export interface TableCellComponentProps extends TdHTMLAttributes<HTMLTableCellE
 export interface TableHeaderCellComponentProps extends ThHTMLAttributes<HTMLTableCellElement> {
   children?: ReactNode;
   className?: string;
-}
-
-export interface BaseTableProps<T extends Record<string, unknown>> {
-  children?: ReactNode;
-  className?: string;
-  columns?: TableColumn<T>[];
-  data?: T[];
-  'data-testid'?: string;
-  emptyState?: ReactNode | false;
-  idKey?: (keyof T & string) | ((item: T) => number | string);
-  plugins?: TablePlugin<T>[];
-  ref?: Ref<HTMLTableElement>;
-  scrollWrapper?: ComponentType<{children: ReactNode}>;
-  style?: CSSProperties;
-  tableProps?: HTMLAttributes<HTMLTableElement>;
-  textOverflow?: 'truncate' | 'wrap';
 }
 
 export type TableDensity = 'balanced' | 'compact' | 'spacious';

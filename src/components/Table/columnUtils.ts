@@ -95,6 +95,8 @@ export function capitalize(value: string): string {
     : value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+const warnedUnsupportedCellKeys = new Set<string>();
+
 export function defaultCellRenderer<T extends Record<string, unknown>>(
   item: T,
   key: string,
@@ -121,6 +123,22 @@ export function defaultCellRenderer<T extends Record<string, unknown>>(
     typeof value === 'string'
   ) {
     return String(value);
+  }
+  // Unsupported type (object, array, native Date, function, …). This renders an
+  // empty cell, which usually means a `renderCell` is missing for the column.
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    !warnedUnsupportedCellKeys.has(key)
+  ) {
+    warnedUnsupportedCellKeys.add(key);
+    const typeName =
+      typeof value === 'object'
+        ? Object.prototype.toString.call(value).slice(8, -1)
+        : typeof value;
+    console.warn(
+      `[Table] Column "${key}" has a value of unsupported type ${typeName} and ` +
+        'rendered as an empty cell. Provide a `renderCell` for this column.',
+    );
   }
   return '';
 }

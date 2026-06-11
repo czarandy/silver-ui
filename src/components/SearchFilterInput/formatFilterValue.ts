@@ -1,4 +1,3 @@
-import type {InternalSearchFilterInputConfig} from './internalConfig';
 import type {EnumItem, FilterValue, OperatorValue} from './types';
 
 function truncate(value: string, maxLength: number): string {
@@ -17,7 +16,6 @@ function numberValue(value: number, units?: string): string {
 }
 
 export function formatFilterValue(
-  _config: InternalSearchFilterInputConfig,
   operatorValue: OperatorValue,
   filterValue: FilterValue,
   maxLength: number,

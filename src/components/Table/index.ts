@@ -1,4 +1,3 @@
-export {BaseTable} from './BaseTable';
 export {
   capitalize,
   defaultCellRenderer,
@@ -17,7 +16,6 @@ export {TableFooter, type TableFooterProps} from './TableFooter';
 export {TableHeader, type TableHeaderProps} from './TableHeader';
 export {TableHeaderCell, type TableHeaderCellProps} from './TableHeaderCell';
 export {TableRow, type TableRowProps} from './TableRow';
-export {useBaseTablePlugins} from './useBaseTablePlugins';
 export * from './plugins/columnResize';
 export * from './plugins/columnSettings';
 export * from './plugins/filtering';
@@ -25,7 +23,6 @@ export * from './plugins/pagination';
 export * from './plugins/selection';
 export * from './plugins/sortable';
 export type {
-  BaseTableProps,
   BodyCellRenderProps,
   BodyRowRenderProps,
   ColumnWidth,

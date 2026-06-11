@@ -28,13 +28,13 @@ function orderNamedPlugins<T extends Record<string, unknown>>(
 }
 
 export function useBaseTablePlugins<T extends Record<string, unknown>>(
-  basePlugins: TablePlugin<T>[],
   userPlugins?: Record<string, TablePlugin<T>> | TablePlugin<T>[],
 ): TablePlugin<T>[] {
-  return useMemo(() => {
-    const plugins = Array.isArray(userPlugins)
-      ? userPlugins
-      : orderNamedPlugins(userPlugins ?? {});
-    return [...basePlugins, ...plugins];
-  }, [basePlugins, userPlugins]);
+  return useMemo(
+    () =>
+      Array.isArray(userPlugins)
+        ? userPlugins
+        : orderNamedPlugins(userPlugins ?? {}),
+    [userPlugins],
+  );
 }

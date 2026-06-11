@@ -19,7 +19,6 @@ export {
   type ThemeTokens,
 } from './components/Theme';
 export {
-  BaseTable,
   capitalize,
   defaultCellRenderer,
   DEFAULT_MIN_COLUMN_WIDTH,
@@ -36,7 +35,6 @@ export {
   TableHeaderCell,
   TableRow,
   toSearchFilters,
-  useBaseTablePlugins,
   useTableColumnResize,
   useTableColumnSettings,
   useTableColumnSettingsState,
@@ -47,7 +45,6 @@ export {
   useTableSelectionState,
   useTableSortable,
   useTableSortableState,
-  type BaseTableProps,
   type BodyCellRenderProps,
   type BodyRowRenderProps,
   type ColumnWidth,

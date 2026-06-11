@@ -211,9 +211,13 @@ export function useTableSelection<T extends Record<string, unknown>>(
   const store = storeRef.current;
   /* eslint-enable @eslint-react/refs */
 
+  // Re-notify subscribers only when the selection config changes (new selected
+  // keys, data, or predicates). `config` is memoized upstream by
+  // `useTableSelectionState`, so unrelated parent re-renders skip the
+  // notification and its downstream snapshot re-evaluations.
   useEffect(() => {
     store.notify();
-  });
+  }, [config, store]);
 
   const selectionColumn = useMemo(
     (): TableColumn<T> => ({

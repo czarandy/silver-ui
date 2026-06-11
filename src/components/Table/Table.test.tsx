@@ -11,6 +11,7 @@ import {useMemo, useState} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import type {SearchFilterInputConfig} from '../SearchFilterInput';
 import {Table} from './Table';
+import {TableFooter} from './TableFooter';
 import {
   defaultCellRenderer,
   generateColumns,
@@ -99,6 +100,35 @@ describe('Table', () => {
 
     expect(screen.queryByText('No data')).not.toBeInTheDocument();
     expect(screen.getAllByRole('columnheader')).toHaveLength(3);
+  });
+
+  it('renders a custom empty state and suppresses it with null', () => {
+    const {rerender} = render(
+      <Table
+        columns={columns}
+        data={[]}
+        emptyState={<span>Nothing here</span>}
+      />,
+    );
+
+    expect(screen.getByText('Nothing here')).toBeInTheDocument();
+    expect(screen.queryByText('No data')).not.toBeInTheDocument();
+
+    rerender(<Table columns={columns} data={[]} emptyState={null} />);
+
+    expect(screen.queryByText('Nothing here')).not.toBeInTheDocument();
+    expect(screen.queryByText('No data')).not.toBeInTheDocument();
+    expect(screen.queryAllByRole('cell')).toHaveLength(0);
+  });
+
+  it('uses a function idKey for row identity', () => {
+    const idKey = vi.fn((item: PersonRow) => `row-${item.id}`);
+    render(<Table columns={columns} data={data} idKey={idKey} />);
+
+    expect(idKey).toHaveBeenCalledWith(data[0]);
+    expect(idKey).toHaveBeenCalledWith(data[1]);
+    expect(screen.getByRole('cell', {name: 'Alice'})).toBeInTheDocument();
+    expect(screen.getByRole('cell', {name: 'Bob'})).toBeInTheDocument();
   });
 
   it('applies visual context props through row and cell classes', () => {
@@ -251,9 +281,36 @@ describe('Table', () => {
   });
 });
 
+describe('TableFooter', () => {
+  it('forwards props to the tfoot element and renders children', () => {
+    let footerRef: HTMLTableSectionElement | null = null;
+    render(
+      <table>
+        <TableFooter
+          className="custom-footer"
+          data-testid="footer"
+          ref={element => {
+            footerRef = element;
+          }}
+          style={{color: 'rgb(255, 0, 0)'}}>
+          <tr>
+            <td>Total</td>
+          </tr>
+        </TableFooter>
+      </table>,
+    );
+
+    const footer = screen.getByTestId('footer');
+    expect(footer.tagName).toBe('TFOOT');
+    expect(footer).toBe(footerRef);
+    expect(footer).toHaveClass('custom-footer');
+    expect(footer).toHaveStyle({color: 'rgb(255, 0, 0)'});
+    expect(screen.getByRole('cell', {name: 'Total'})).toBeInTheDocument();
+  });
+});
+
 describe('Table plugins', () => {
-  it('orders named first-party plugin records after base plugins', () => {
-    const basePlugin: TablePlugin<PersonRow> = {};
+  it('orders named first-party plugin records canonically', () => {
     const columnSettingsPlugin: TablePlugin<PersonRow> = {};
     const sortPlugin: TablePlugin<PersonRow> = {};
     const selectionPlugin: TablePlugin<PersonRow> = {};
@@ -262,7 +319,7 @@ describe('Table plugins', () => {
     const paginationPlugin: TablePlugin<PersonRow> = {};
 
     const {result} = renderHook(() =>
-      useBaseTablePlugins<PersonRow>([basePlugin], {
+      useBaseTablePlugins<PersonRow>({
         pagination: paginationPlugin,
         selection: selectionPlugin,
         columnResize: columnResizePlugin,
@@ -273,7 +330,6 @@ describe('Table plugins', () => {
     );
 
     expect(result.current).toEqual([
-      basePlugin,
       columnSettingsPlugin,
       sortPlugin,
       selectionPlugin,
@@ -284,13 +340,12 @@ describe('Table plugins', () => {
   });
 
   it('preserves custom named plugin order after known plugins', () => {
-    const basePlugin: TablePlugin<PersonRow> = {};
     const selectionPlugin: TablePlugin<PersonRow> = {};
     const customBeforePlugin: TablePlugin<PersonRow> = {};
     const customAfterPlugin: TablePlugin<PersonRow> = {};
 
     const {result} = renderHook(() =>
-      useBaseTablePlugins<PersonRow>([basePlugin], {
+      useBaseTablePlugins<PersonRow>({
         customBefore: customBeforePlugin,
         selection: selectionPlugin,
         customAfter: customAfterPlugin,
@@ -298,28 +353,26 @@ describe('Table plugins', () => {
     );
 
     expect(result.current).toEqual([
-      basePlugin,
       selectionPlugin,
       customBeforePlugin,
       customAfterPlugin,
     ]);
   });
 
-  it('preserves plugin array order exactly after base plugins', () => {
-    const basePlugin: TablePlugin<PersonRow> = {};
+  it('preserves plugin array order exactly', () => {
     const paginationPlugin: TablePlugin<PersonRow> = {};
     const selectionPlugin: TablePlugin<PersonRow> = {};
     const columnSettingsPlugin: TablePlugin<PersonRow> = {};
 
     const {result} = renderHook(() =>
-      useBaseTablePlugins<PersonRow>(
-        [basePlugin],
-        [paginationPlugin, selectionPlugin, columnSettingsPlugin],
-      ),
+      useBaseTablePlugins<PersonRow>([
+        paginationPlugin,
+        selectionPlugin,
+        columnSettingsPlugin,
+      ]),
     );
 
     expect(result.current).toEqual([
-      basePlugin,
       paginationPlugin,
       selectionPlugin,
       columnSettingsPlugin,

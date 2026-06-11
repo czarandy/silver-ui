@@ -257,7 +257,6 @@ export function SearchFilterInput({
           operator == null
             ? ''
             : formatFilterValue(
-                config,
                 operator.value,
                 filter.value,
                 maxTagLength,
@@ -439,7 +438,6 @@ export function SearchFilterInput({
     const value =
       operator != null && filter != null
         ? formatFilterValue(
-            config,
             operator.value,
             filter.value,
             Math.max(

@@ -1,6 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {tableRecipe} from './Table.recipe';
 import {useTableContext} from './TableContext';
 
 export interface TableRowProps {
@@ -26,36 +26,6 @@ export interface TableRowProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  base: css({
-    transitionDuration: 'fast',
-    transitionProperty: 'background-color',
-    transitionTimingFunction: 'default',
-  }),
-  hover: css({
-    _hover: {
-      '@media (hover: hover)': {
-        bg: 'bg.subtle',
-      },
-    },
-  }),
-  striped: css({
-    _even: {
-      bg: 'bg.subtle',
-    },
-  }),
-  stripedHover: css({
-    _even: {
-      bg: 'bg.subtle',
-    },
-    _hover: {
-      '@media (hover: hover)': {
-        bg: 'bg.hover',
-      },
-    },
-  }),
-} as const;
-
 /**
  * Table row with hover and striped styling from context.
  */
@@ -67,20 +37,15 @@ export function TableRow({
   style,
 }: TableRowProps): React.JSX.Element {
   const context = useTableContext();
-  const rowClassName =
-    context == null
-      ? undefined
-      : context.isStriped && context.hasHover
-        ? styles.stripedHover
-        : context.isStriped
-          ? styles.striped
-          : context.hasHover
-            ? styles.hover
-            : undefined;
+  const classes = tableRecipe({
+    isStriped: context?.isStriped,
+    hasHover: context?.hasHover,
+  });
 
   return (
     <tr
-      className={cx('silver-table-row', styles.base, rowClassName, className)}
+      className={cx(classes.row, className)}
+      data-part="row"
       data-testid={dataTestId}
       ref={ref}
       style={style}>

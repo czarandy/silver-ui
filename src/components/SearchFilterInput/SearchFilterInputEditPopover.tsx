@@ -1,7 +1,15 @@
 /* eslint-disable silver-ui/require-component-props, jsx-a11y-x/no-static-element-interactions, @eslint-react/no-array-index-key */
 
 import {X} from 'lucide-react';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import {css} from 'styled-system/css';
 import {Button} from '../Button';
 import {Select} from '../Select';
@@ -319,7 +327,7 @@ function NestedEditor({
   config: InternalSearchFilterInputConfig;
   isReadOnly: boolean;
   onOperatorChange: (operatorKey: string) => void;
-  onPartialFilterChange: (filter: PartialFilter) => void;
+  onPartialFilterChange: Dispatch<SetStateAction<PartialFilter>>;
   operatorOptions: {label: string; value: string}[];
   partialFilter: PartialFilter;
 }): React.JSX.Element {
@@ -332,28 +340,33 @@ function NestedEditor({
     return [];
   });
 
+  // Pushes the edited sub-filter list back up to the parent. Uses the
+  // functional updater form so it always merges into the *latest* parent state
+  // (preserving field/operator) rather than a value captured at render time,
+  // and is invoked as a sibling of setSubFilters — never inside its updater —
+  // to keep both state updaters pure.
   const syncToParent = useCallback(
     (nextSubFilters: EditablePartialFilter[]) => {
-      if (
+      const isComplete =
         nextSubFilters.length > 0 &&
-        nextSubFilters.every(filter => isEditableFilterComplete(config, filter))
-      ) {
-        onPartialFilterChange({
-          ...partialFilter,
-          value: {
-            type: 'nested',
-            value: nextSubFilters
-              .map(filter => editableToCompleteFilter(config, filter))
-              .filter(
-                (filter): filter is SearchFilterInputFilter => filter != null,
-              ),
-          },
-        });
-      } else {
-        onPartialFilterChange({...partialFilter, value: undefined});
-      }
+        nextSubFilters.every(filter =>
+          isEditableFilterComplete(config, filter),
+        );
+      onPartialFilterChange(previous => ({
+        ...previous,
+        value: isComplete
+          ? {
+              type: 'nested',
+              value: nextSubFilters
+                .map(filter => editableToCompleteFilter(config, filter))
+                .filter(
+                  (filter): filter is SearchFilterInputFilter => filter != null,
+                ),
+            }
+          : undefined,
+      }));
     },
-    [config, onPartialFilterChange, partialFilter],
+    [config, onPartialFilterChange],
   );
 
   const addSubFilter = () => {
@@ -369,31 +382,26 @@ function NestedEditor({
       value: undefined,
       _subFilters: operator?.value.type === 'nested' ? [] : undefined,
     };
-    setSubFilters(previous => {
-      const updated = [...previous, next];
-      syncToParent(updated);
-      return updated;
-    });
+    const updated = [...subFilters, next];
+    setSubFilters(updated);
+    syncToParent(updated);
   };
 
   const updateSubFilter = (
     index: number,
     nextSubFilter: EditablePartialFilter,
   ) => {
-    setSubFilters(previous => {
-      const updated = [...previous];
-      updated[index] = nextSubFilter;
-      syncToParent(updated);
-      return updated;
-    });
+    const updated = subFilters.map((subFilter, i) =>
+      i === index ? nextSubFilter : subFilter,
+    );
+    setSubFilters(updated);
+    syncToParent(updated);
   };
 
   const removeSubFilter = (index: number) => {
-    setSubFilters(previous => {
-      const updated = previous.filter((_, i) => i !== index);
-      syncToParent(updated);
-      return updated;
-    });
+    const updated = subFilters.filter((_, i) => i !== index);
+    setSubFilters(updated);
+    syncToParent(updated);
   };
 
   return (
@@ -630,7 +638,6 @@ export function SearchFilterInputEditPopover({
                       });
                     }
                   }}
-                  onEnter={handleSave}
                   operatorValue={operatorValue}
                 />
               </div>

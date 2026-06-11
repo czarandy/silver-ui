@@ -1,6 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import {tableRecipe} from './Table.recipe';
 import {useTableContext} from './TableContext';
 
 export interface TableHeaderCellProps {
@@ -31,36 +31,6 @@ export interface TableHeaderCellProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  base: css({
-    color: 'fg.muted',
-    fontWeight: 'semibold',
-    maxWidth: 0,
-    overflow: 'hidden',
-    textAlign: 'start',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  }),
-  density: {
-    balanced: css({fontSize: 'md', px: '3', py: '2'}),
-    compact: css({fontSize: 'md', px: '2', py: '1'}),
-    spacious: css({fontSize: 'md', px: '4', py: '3'}),
-  },
-  dividerBottom: css({
-    borderBottomWidth: 'default',
-    borderBottomStyle: 'solid',
-    borderBottomColor: 'border',
-  }),
-  dividerColumns: css({
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-    _last: {
-      borderInlineEndWidth: 0,
-    },
-  }),
-} as const;
-
 /**
  * Table header cell with density and divider styling from context.
  */
@@ -73,18 +43,14 @@ export function TableHeaderCell({
   style,
 }: TableHeaderCellProps): React.JSX.Element {
   const context = useTableContext();
+  const classes = tableRecipe({
+    density: context?.density,
+    dividers: context?.dividers,
+  });
   return (
     <th
-      className={cx(
-        'silver-table-header-cell',
-        styles.base,
-        styles.dividerBottom,
-        context == null ? undefined : styles.density[context.density],
-        context?.dividers === 'columns' || context?.dividers === 'grid'
-          ? styles.dividerColumns
-          : undefined,
-        className,
-      )}
+      className={cx(classes.headerCell, className)}
+      data-part="header-cell"
       data-testid={dataTestId}
       ref={ref}
       scope={scope}
