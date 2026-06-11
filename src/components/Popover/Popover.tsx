@@ -11,7 +11,6 @@ import {token} from 'styled-system/tokens';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {nowMonotonicMilliseconds} from '../../internal/time';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
 import {usePopover} from './usePopover';
@@ -166,7 +165,6 @@ export function Popover({
 }: PopoverProps): React.JSX.Element {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isControlled = isOpen !== undefined;
-  const lastHideTimeRef = useRef(0);
 
   const popover = usePopover({
     closeButtonLabel,
@@ -175,20 +173,13 @@ export function Popover({
     isDismissable,
     label,
     layerId: id,
-    onHide: () => {
-      lastHideTimeRef.current = nowMonotonicMilliseconds();
-      onOpenChange?.(false);
-    },
+    onHide: () => onOpenChange?.(false),
     onShow: () => onOpenChange?.(true),
     role,
   });
 
   const handleTriggerClick = useCallback(() => {
     if (!isEnabled) {
-      return;
-    }
-
-    if (nowMonotonicMilliseconds() - lastHideTimeRef.current < 50) {
       return;
     }
 
@@ -205,6 +196,15 @@ export function Popover({
     [handleTriggerClick],
   );
 
+  // ARIA and listeners are applied imperatively because the trigger button can
+  // be any element the consumer renders — nested anywhere inside `children`, or
+  // an entirely external element via `anchorRef` — so Popover cannot inject
+  // props through JSX. This is safe: React only reconciles attributes present
+  // in its own virtual DOM, so it never clobbers these imperatively-set ones on
+  // re-render. The only dynamic attribute, `aria-expanded`, stays in sync
+  // because `popover.triggerProps` is memoized on the open state, so this
+  // callback (and the effect below that re-runs it) re-applies the fresh value
+  // on every toggle. Keep `triggerProps` in the dep arrays or that sync breaks.
   const attachTrigger = useCallback(
     (button: HTMLElement) => {
       button.setAttribute(

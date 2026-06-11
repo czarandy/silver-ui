@@ -139,7 +139,29 @@ export function usePopover({
   layerId,
 }: UsePopoverOptions = {}): UsePopoverReturn {
   const skipAutoFocusRef = useRef(false);
-  const layer = useLayer({isDismissable, id: layerId, onShow, onHide});
+  // Guards against a light-dismiss close immediately re-opening the popover.
+  // When the trigger is clicked while the popover is open, the browser's native
+  // light dismiss closes it (firing `onHide`) *before* the trigger's own click
+  // handler runs `toggle()` — which would otherwise re-open it. The flag is
+  // cleared on the next animation frame: the browser never paints mid-gesture,
+  // so it is reliably still set when the spurious click arrives, yet cleared
+  // before any genuine later click.
+  const isDismissingRef = useRef(false);
+
+  const handleHide = useCallback(() => {
+    isDismissingRef.current = true;
+    requestAnimationFrame(() => {
+      isDismissingRef.current = false;
+    });
+    onHide?.();
+  }, [onHide]);
+
+  const layer = useLayer({
+    isDismissable,
+    id: layerId,
+    onShow,
+    onHide: handleHide,
+  });
   const {containerRef: contentRef, focusFirst} = useFocusTrap<HTMLDivElement>({
     isActive: layer.isOpen,
     onEscape: layer.hide,
@@ -165,6 +187,10 @@ export function usePopover({
   );
 
   const toggle = useCallback(() => {
+    if (isDismissingRef.current) {
+      return;
+    }
+
     if (layer.isOpen) {
       layer.hide();
       return;
