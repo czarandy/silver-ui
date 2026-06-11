@@ -417,6 +417,18 @@ describe('TreeView', () => {
     expect(ref).toHaveBeenCalledWith(tree);
   });
 
+  it('forwards the style prop to the root element', () => {
+    render(
+      <TreeView
+        data-testid="tree"
+        items={simpleItems}
+        style={{maxWidth: '320px'}}
+      />,
+    );
+
+    expect(screen.getByTestId('tree')).toHaveStyle({maxWidth: '320px'});
+  });
+
   it('separates item click from child toggle when both exist', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

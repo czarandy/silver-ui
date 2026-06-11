@@ -2,11 +2,11 @@
 
 import {ChevronRight} from 'lucide-react';
 import {useCallback, useId, useRef, type ReactNode, type Ref} from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Icon} from '../Icon';
 import {TreeViewBranches} from './TreeViewBranches';
+import {treeViewItemRecipe} from './TreeViewItem.recipe';
 import type {TreeViewDensity} from './types';
 
 interface TreeViewItemProps {
@@ -55,10 +55,6 @@ interface TreeViewItemProps {
    * Whether this item currently owns roving focus.
    */
   isFocused: boolean;
-  /**
-   * Whether this item is the last sibling at its level.
-   */
-  isLast: boolean;
   /**
    * Whether the item is selected.
    * @default false
@@ -113,151 +109,6 @@ interface TreeViewItemProps {
   target?: string;
 }
 
-const styles = {
-  childGroup: css({
-    m: 0,
-    p: 0,
-    listStyleType: 'none',
-  }),
-  content: css({
-    display: 'flex',
-    flex: 1,
-    minW: 0,
-    flexDirection: 'column',
-    textAlign: 'start',
-  }),
-  contentWrapper: css({
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    overflow: 'hidden',
-    px: '2',
-    borderRadius: 'md',
-    outline: 'none',
-    textAlign: 'start',
-  }),
-  density: {
-    balanced: css({
-      py: '2',
-      fontSize: 'sm',
-      lineHeight: 'normal',
-    }),
-    compact: css({
-      py: '1',
-      fontSize: 'sm',
-      lineHeight: 'normal',
-    }),
-    spacious: css({
-      py: '3',
-      fontSize: 'sm',
-      lineHeight: 'normal',
-    }),
-  },
-  description: css({
-    color: 'fg.muted',
-    fontSize: 'xs',
-    lineHeight: 'normal',
-  }),
-  disabled: css({
-    cursor: 'not-allowed',
-    opacity: 0.5,
-    pointerEvents: 'none',
-  }),
-  endContent: css({
-    display: 'flex',
-    alignItems: 'center',
-    flexShrink: 0,
-    ml: 'auto',
-  }),
-  interactive: css({
-    cursor: 'pointer',
-    transitionDuration: 'fast',
-    transitionProperty: 'background-color',
-    transitionTimingFunction: 'default',
-    _active: {
-      bg: 'bg.hover',
-    },
-    _hover: {
-      '@media (hover: hover)': {
-        bg: 'bg.subtle',
-      },
-    },
-  }),
-  invisibleAction: css({
-    display: 'flex',
-    flex: 1,
-    minW: 0,
-    flexDirection: 'column',
-    color: 'inherit',
-    cursor: 'inherit',
-    font: 'inherit',
-    textAlign: 'start',
-    textDecoration: 'none',
-    outline: 'none',
-  }),
-  label: css({
-    color: 'fg',
-  }),
-  rowWrapper: css({
-    position: 'relative',
-  }),
-  selected: css({
-    bg: 'bg.selected',
-  }),
-  focused: css({
-    outlineWidth: 'focus',
-    outlineStyle: 'solid',
-    outlineColor: 'primary',
-    outlineOffset: 'focusOffset',
-  }),
-  startContent: css({
-    display: 'flex',
-    alignItems: 'center',
-    flexShrink: 0,
-  }),
-  toggleButton: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    w: '4',
-    h: '4',
-    borderRadius: 'sm',
-    color: 'fg.muted',
-    cursor: 'pointer',
-  }),
-  toggleIcon: css({
-    display: 'flex',
-    transitionDuration: 'fast',
-    transitionProperty: 'transform',
-    transitionTimingFunction: 'default',
-  }),
-  toggleIconExpanded: css({
-    transform: 'rotate(90deg)',
-  }),
-  toggleSpacer: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-    w: '4',
-    h: '4',
-    color: 'fg.muted',
-  }),
-  treeBranches: css({
-    ps: '2',
-  }),
-  wrapper: css({
-    position: 'relative',
-    m: 0,
-    p: 0,
-    w: 'full',
-    listStyleType: 'none',
-    outline: 'none',
-  }),
-} as const;
-
 /**
  * Renders a single tree item with toggle, branch lines, and optional link or button action.
  */
@@ -273,7 +124,6 @@ export function TreeViewItem({
   isDisabled = false,
   isExpanded,
   isFocused,
-  isLast: _isLast,
   isSelected = false,
   label,
   nestedLevel,
@@ -292,6 +142,14 @@ export function TreeViewItem({
   const actionRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
   const isInteractive = onClick != null || href != null;
   const togglesOnRow = hasChildren && onClick == null && onToggle != null;
+  const styles = treeViewItemRecipe({
+    density,
+    isInteractive: isInteractive || togglesOnRow,
+    isDisabled,
+    isSelected,
+    isFocused,
+    isExpanded,
+  });
   const textLabel =
     ariaLabel ??
     (typeof label === 'string' || typeof label === 'number'
@@ -373,11 +231,7 @@ export function TreeViewItem({
   );
 
   const toggleIcon = (
-    <span
-      className={cx(
-        styles.toggleIcon,
-        isExpanded ? styles.toggleIconExpanded : undefined,
-      )}>
+    <span className={styles.toggleIcon}>
       <Icon icon={ChevronRight} size="sm" />
     </span>
   );
@@ -463,15 +317,7 @@ export function TreeViewItem({
       <div className={styles.rowWrapper}>
         {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard interaction is handled by the parent treeitem for roving focus. */}
         <div
-          className={cx(
-            'silver-tree-view-item',
-            styles.contentWrapper,
-            styles.density[density],
-            isInteractive || togglesOnRow ? styles.interactive : undefined,
-            isDisabled ? styles.disabled : undefined,
-            isSelected ? styles.selected : undefined,
-            isFocused ? styles.focused : undefined,
-          )}
+          className={cx('silver-tree-view-item', styles.contentWrapper)}
           onClick={handleRowClick}
           onPointerDown={handlePointerDown}
           style={{marginLeft}}>

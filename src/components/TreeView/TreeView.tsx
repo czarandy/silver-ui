@@ -12,9 +12,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
+import {treeViewRecipe} from './TreeView.recipe';
 import {TreeViewItem} from './TreeViewItem';
 import type {TreeViewDensity, TreeViewItemData} from './types';
 
@@ -51,19 +51,7 @@ export interface TreeViewProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  header: css({
-    mb: '2',
-  }),
-  list: css({
-    m: 0,
-    p: 0,
-    listStyleType: 'none',
-  }),
-  root: css({
-    position: 'relative',
-  }),
-} as const;
+const styles = treeViewRecipe();
 
 interface VisibleTreeItem {
   hasChildren: boolean;
@@ -241,17 +229,6 @@ export function TreeView({
     inputModalityRef.current = 'pointer';
   }, []);
 
-  const registerItem = useCallback(
-    (id: string) => (element: HTMLLIElement | null) => {
-      if (element == null) {
-        itemElementsRef.current.delete(id);
-        return;
-      }
-      itemElementsRef.current.set(id, element);
-    },
-    [],
-  );
-
   const handleItemKeyDown = useCallback(
     (event: KeyboardEvent<HTMLLIElement>, id: string) => {
       const currentIndex = focusableItems.findIndex(item => item.id === id);
@@ -385,7 +362,6 @@ export function TreeView({
             isDisabled={item.isDisabled}
             isExpanded={isExpanded}
             isFocused={hasFocusWithin && focusVisibleId === item.id}
-            isLast={isLast}
             isSelected={item.isSelected}
             key={item.id}
             label={item.label}
@@ -394,7 +370,13 @@ export function TreeView({
             onFocusItem={handleItemFocus}
             onItemKeyDown={handleItemKeyDown}
             onToggle={handleToggle}
-            ref={registerItem(item.id)}
+            ref={(element: HTMLLIElement | null) => {
+              if (element == null) {
+                itemElementsRef.current.delete(item.id);
+              } else {
+                itemElementsRef.current.set(item.id, element);
+              }
+            }}
             renderedChildren={renderedChildren}
             startContent={item.startContent}
             tabIndex={activeFocusedId === item.id ? 0 : -1}
@@ -412,13 +394,12 @@ export function TreeView({
       handleItemFocus,
       handleItemKeyDown,
       handleToggle,
-      registerItem,
     ],
   );
 
   return (
     <div
-      className={cx('silver-tree-view', styles.root, className)}
+      className={cx(styles.root, className)}
       data-testid={dataTestId}
       onBlurCapture={handleBlurCapture}
       onFocusCapture={handleFocusCapture}

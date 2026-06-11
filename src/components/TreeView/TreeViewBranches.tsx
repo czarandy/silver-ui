@@ -1,23 +1,8 @@
 /* eslint-disable silver-ui/require-component-props -- internal presentational connector */
 
-import {css} from 'styled-system/css';
+import {treeViewBranchesRecipe} from './TreeViewBranches.recipe';
 
-const styles = {
-  container: css({
-    position: 'absolute',
-    h: 'full',
-    w: '5',
-  }),
-  line: css({
-    position: 'absolute',
-    insetInline: 0,
-    m: 'auto',
-    w: '1px',
-    h: 'calc(100% + 1px)',
-    borderRadius: 'xs',
-    bg: 'border.emphasized',
-  }),
-} as const;
+const styles = treeViewBranchesRecipe();
 
 const branchOffset = '6px';
 
