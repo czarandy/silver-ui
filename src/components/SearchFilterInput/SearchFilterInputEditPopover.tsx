@@ -11,6 +11,7 @@ import {
   type SetStateAction,
 } from 'react';
 import {Button} from 'components/Button';
+import {searchFilterInputEditPopoverRecipe} from 'components/SearchFilterInput/SearchFilterInputEditPopover.recipe';
 import {SearchFilterInputValueEditor} from 'components/SearchFilterInput/SearchFilterInputValueEditor';
 import type {InternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';
 import type {
@@ -21,7 +22,7 @@ import type {
 } from 'components/SearchFilterInput/types';
 import {Select} from 'components/Select';
 import {HStack, VStack} from 'components/Stack';
-import {css} from 'styled-system/css';
+import {cx} from 'internal/cx';
 
 export interface SearchFilterInputEditPopoverProps {
   /**
@@ -67,65 +68,7 @@ interface EditablePartialFilter {
   value?: FilterValue;
 }
 
-const styles = {
-  root: css({
-    overflow: 'hidden',
-    minW: '100',
-  }),
-  content: css({
-    p: '4',
-  }),
-  footer: css({
-    px: '3',
-    pb: '3',
-  }),
-  fieldSelector: css({
-    flexShrink: 0,
-  }),
-  operatorSelector: css({
-    flex: '1 0 auto',
-  }),
-  valueEditor: css({
-    flex: '2 1 0',
-    minW: 0,
-  }),
-  nestedList: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2',
-    w: 'full',
-    listStyleType: 'none',
-    m: 0,
-    p: 0,
-  }),
-  nestedNode: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2',
-    ps: '3',
-    borderInlineStartWidth: 'default',
-    borderInlineStartStyle: 'solid',
-    borderColor: 'border',
-  }),
-  nestedRow: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    w: 'full',
-  }),
-  nestedCell: css({
-    minW: 0,
-  }),
-  nestedField: css({
-    flex: '0 0 200px',
-  }),
-  nestedOperator: css({
-    flex: '0 0 180px',
-  }),
-  nestedValue: css({
-    flex: '2 1 0',
-  }),
-} as const;
+const styles = searchFilterInputEditPopoverRecipe();
 
 function initEditableFilter(
   config: InternalSearchFilterInputConfig,
@@ -233,7 +176,7 @@ function NestedSubFilterRow({
 
   return (
     <div className={styles.nestedRow}>
-      <div className={`${styles.nestedCell} ${styles.nestedField}`}>
+      <div className={cx(styles.nestedCell, styles.nestedField)}>
         <Select
           isDisabled={isReadOnly}
           isLabelHidden
@@ -260,7 +203,7 @@ function NestedSubFilterRow({
         />
       </div>
       {operatorOptions.length > 0 ? (
-        <div className={`${styles.nestedCell} ${styles.nestedOperator}`}>
+        <div className={cx(styles.nestedCell, styles.nestedOperator)}>
           <Select
             isDisabled={isReadOnly}
             isLabelHidden
@@ -292,7 +235,7 @@ function NestedSubFilterRow({
         </div>
       ) : null}
       {operatorValue != null && !isEmpty && !isNested ? (
-        <div className={`${styles.nestedCell} ${styles.nestedValue}`}>
+        <div className={cx(styles.nestedCell, styles.nestedValue)}>
           <SearchFilterInputValueEditor
             config={config}
             filterValue={subFilter.value}

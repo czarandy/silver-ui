@@ -902,6 +902,51 @@ describe('Schedule', () => {
     ).toHaveAttribute('aria-colindex', '2');
   });
 
+  it('collapses overflowing all-day time grid events into a see-more popover', () => {
+    mockCurrentTime('2026-05-12T12:00:00Z');
+
+    const overflowEvents = Array.from({length: 5}, (_, index) =>
+      createEventFromISO({
+        category: 'Sync',
+        end: '2026-05-13',
+        id: `all-day-overflow-${index + 1}`,
+        start: '2026-05-13',
+        title: `All-day overflow ${index + 1}`,
+      }),
+    );
+
+    render(
+      <Schedule
+        categories={categories}
+        events={overflowEvents}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 10, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const seeMore = screen.getByRole('button', {
+      name: 'Show 2 more all-day events for Wednesday, May 13, 2026',
+    });
+    expect(seeMore).toHaveTextContent('+2 more');
+
+    fireEvent.click(seeMore);
+    expect(seeMore).toHaveAttribute('aria-expanded', 'true');
+
+    const popover = screen.getByTestId('schedule-all-day-see-more-2026-05-13');
+    expect(
+      within(popover).getByText('Wednesday, May 13, 2026'),
+    ).toBeInTheDocument();
+    expect(
+      within(popover).getByTestId('schedule-event-all-day-overflow-1'),
+    ).toHaveTextContent('All-day overflow 1');
+    expect(
+      within(popover).getByTestId('schedule-event-all-day-overflow-5'),
+    ).toHaveClass(
+      scheduleEventRecipe({color: 'blue', isFullWidth: true}).event as string,
+    );
+  });
+
   it('exposes timed events in accessible time grid cells', () => {
     render(
       <Schedule

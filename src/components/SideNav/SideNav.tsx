@@ -9,7 +9,6 @@ import {SideNavCollapseButton} from 'components/SideNav/internal/SideNavCollapse
 import {MobileNav} from 'internal/MobileNav';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
-import {css} from 'styled-system/css';
 
 export interface SideNavProps {
   /**
@@ -55,65 +54,6 @@ export interface SideNavProps {
   topContent?: ReactNode;
 }
 
-const styles = {
-  stickyTop: css({
-    display: 'flex',
-    flexDirection: 'column',
-    flexShrink: 0,
-    p: '2',
-    gap: '2',
-  }),
-  scrollable: css({
-    flex: 1,
-    overflowY: 'auto',
-    overflowX: 'hidden',
-    px: '2',
-  }),
-  scrollableCollapsed: css({
-    flex: 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  }),
-  stickyBottom: css({
-    display: 'flex',
-    flexDirection: 'column',
-    flexShrink: 0,
-    mt: 'auto',
-    p: '2',
-    gap: '2',
-    borderBlockStartWidth: 'default',
-    borderBlockStartStyle: 'solid',
-    borderBlockStartColor: 'border',
-  }),
-  footerRow: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-  }),
-  footerRowCollapsed: css({
-    flexDirection: 'column-reverse',
-    alignItems: 'center',
-  }),
-  footerIcons: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-    ms: 'auto',
-  }),
-  footerIconsCollapsed: css({
-    flexDirection: 'column',
-    alignItems: 'center',
-    ms: '0',
-  }),
-  topbarIcons: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1',
-    ms: 'auto',
-  }),
-};
-
 /**
  * Vertical side navigation panel with optional collapsing support.
  * Adapts to AppShell render modes (inline, drawer, topbar).
@@ -141,14 +81,16 @@ export function SideNav({
   );
 
   if (renderMode === 'topbar') {
+    const classes = sideNavRecipe({mode: 'topbar'});
+
     return (
       <div
-        className={cx(sideNavRecipe({mode: 'topbar'}), className)}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={ref as Ref<HTMLDivElement>}
         style={style}>
         {header}
-        <div className={styles.topbarIcons}>{footerIcons}</div>
+        <div className={classes.topbarIcons}>{footerIcons}</div>
       </div>
     );
   }
@@ -178,44 +120,30 @@ export function SideNav({
     );
   }
 
+  const classes = sideNavRecipe({isCollapsed});
+
   return (
     <SideNavCollapseContext value={collapseContext}>
       <nav
         aria-label="Side navigation"
-        className={cx(sideNavRecipe({isCollapsed}), className)}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={ref}
         style={style}>
         {isReactNode(header) || (!isCollapsed && isReactNode(topContent)) ? (
-          <div className={styles.stickyTop}>
+          <div className={classes.stickyTop}>
             {header}
             {!isCollapsed ? topContent : null}
           </div>
         ) : null}
-        <div
-          className={cx(
-            styles.scrollable,
-            isCollapsed && styles.scrollableCollapsed,
-          )}>
-          {children}
-        </div>
+        <div className={classes.scrollable}>{children}</div>
         {isReactNode(footer) || isReactNode(footerIcons) || isCollapsible ? (
-          <div className={styles.stickyBottom}>
+          <div className={classes.stickyBottom}>
             {footer}
-            <div
-              className={cx(
-                styles.footerRow,
-                isCollapsed && styles.footerRowCollapsed,
-              )}>
+            <div className={classes.footerRow}>
               {isCollapsible ? <SideNavCollapseButton /> : null}
               {isReactNode(footerIcons) ? (
-                <div
-                  className={cx(
-                    styles.footerIcons,
-                    isCollapsed && styles.footerIconsCollapsed,
-                  )}>
-                  {footerIcons}
-                </div>
+                <div className={classes.footerIcons}>{footerIcons}</div>
               ) : null}
             </div>
           </div>

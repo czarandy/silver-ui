@@ -1,8 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
 import type {CSSProperties} from 'react';
-import {Link} from 'components/Link';
-import {Popover} from 'components/Popover';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
@@ -13,6 +11,7 @@ import {
   hasEventPopoverPlugin,
   isEventInPast,
   scheduleClasses,
+  ScheduleEventOverflowPopover,
   ScheduleFrame,
 } from 'components/Schedule/shared';
 import type {
@@ -565,40 +564,22 @@ function ScheduleMonthlyView({
                     dayIndex,
                     level: Math.max(0, monthEventLevelCount - 1),
                   })}>
-                  <Popover
-                    content={
-                      <div className={styles.monthPopoverContent}>
-                        <Heading level={4}>{dateLabel}</Heading>
-                        <ul className={styles.monthPopoverEvents}>
-                          {(eventsByDate.get(day.toString()) ?? []).map(
-                            event => (
-                              <li key={event.id}>
-                                <CalendarMonthEventPill
-                                  event={event}
-                                  isPast={isEventInPast(
-                                    event,
-                                    currentTime,
-                                    timezoneID,
-                                  )}
-                                />
-                              </li>
-                            ),
-                          )}
-                        </ul>
-                      </div>
-                    }
-                    data-testid={`schedule-month-see-more-${day.toString()}`}
+                  <ScheduleEventOverflowPopover
+                    buttonClassName={styles.monthSeeMoreButton}
+                    contentClassName={styles.monthPopoverContent}
+                    events={eventsByDate.get(day.toString()) ?? []}
+                    eventsClassName={styles.monthPopoverEvents}
+                    hiddenEventCount={hiddenEvents.length}
                     label={label}
-                    width={320}>
-                    <Link
-                      className={styles.monthSeeMoreButton}
-                      color="primary"
-                      label={label}
-                      size="xs"
-                      weight="medium">
-                      +{hiddenEvents.length} more
-                    </Link>
-                  </Popover>
+                    renderEvent={event => (
+                      <CalendarMonthEventPill
+                        event={event}
+                        isPast={isEventInPast(event, currentTime, timezoneID)}
+                      />
+                    )}
+                    testId={`schedule-month-see-more-${day.toString()}`}
+                    title={dateLabel}
+                  />
                 </div>
               );
             })}

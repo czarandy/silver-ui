@@ -17,6 +17,12 @@ import {plainDateDayOfWeek, type PlainDate} from 'internal/plainDate';
 
 export interface ScheduleWeeklyViewOptions {
   /**
+   * Maximum number of all-day events shown before the rest collapse into a
+   * popover.
+   * @default 3
+   */
+  allDayEventLimit?: number;
+  /**
    * Pixel height used for each hourly row.
    * @default 100
    */
@@ -50,6 +56,7 @@ function ScheduleWeeklyView({
   return (
     <ScheduleFrame title={title} titleLabel={title}>
       <TimeGridView
+        allDayEventLimit={options.allDayEventLimit}
         days={days}
         hourHeight={options.hourHeight}
         maxHour={options.maxHour}
@@ -63,6 +70,7 @@ function ScheduleWeeklyView({
  * Creates a weekly schedule view configuration.
  */
 export function createScheduleWeeklyView({
+  allDayEventLimit = 3,
   hourHeight = 100,
   maxHour = 24,
   minHour = 0,
@@ -93,7 +101,7 @@ export function createScheduleWeeklyView({
       label: 'Previous week',
       range: getWeekRange(date.addDays(-7)),
     }),
-    options: {hourHeight, maxHour, minHour, weekStartsOn},
+    options: {allDayEventLimit, hourHeight, maxHour, minHour, weekStartsOn},
   };
 }
 

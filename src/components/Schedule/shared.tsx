@@ -5,6 +5,8 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
+import {Link} from 'components/Link';
+import {Popover} from 'components/Popover';
 import {usePopover} from 'components/Popover/usePopover';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
@@ -342,9 +344,11 @@ function EventPillRoot({
  */
 export function CalendarEventPill({
   event,
+  isFullWidth = false,
   isPast = false,
 }: {
   event: CalendarEvent;
+  isFullWidth?: boolean;
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
@@ -352,6 +356,7 @@ export function CalendarEventPill({
   const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({
     color: category.color,
+    isFullWidth,
     isPast,
     isInteractive: triggerProps != null,
   });
@@ -404,6 +409,58 @@ export function CalendarMonthEventPill({
       </EventPillRoot>
       {popover}
     </>
+  );
+}
+
+/**
+ * Shared "+N more" overflow popover used by schedule views that collapse dense
+ * event lists.
+ */
+export function ScheduleEventOverflowPopover({
+  buttonClassName,
+  contentClassName,
+  events,
+  eventsClassName,
+  hiddenEventCount,
+  label,
+  renderEvent,
+  testId,
+  title,
+}: {
+  buttonClassName?: string;
+  contentClassName?: string;
+  events: ReadonlyArray<CalendarEvent>;
+  eventsClassName?: string;
+  hiddenEventCount: number;
+  label: string;
+  renderEvent: (event: CalendarEvent) => ReactNode;
+  testId: string;
+  title: ReactNode;
+}): React.JSX.Element {
+  return (
+    <Popover
+      content={
+        <div className={contentClassName}>
+          <Heading level={4}>{title}</Heading>
+          <ul className={eventsClassName}>
+            {events.map(event => (
+              <li key={event.id}>{renderEvent(event)}</li>
+            ))}
+          </ul>
+        </div>
+      }
+      data-testid={testId}
+      label={label}
+      width={320}>
+      <Link
+        className={buttonClassName}
+        color="primary"
+        label={label}
+        size="xs"
+        weight="medium">
+        +{hiddenEventCount} more
+      </Link>
+    </Popover>
   );
 }
 

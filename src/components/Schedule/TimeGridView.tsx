@@ -17,6 +17,7 @@ import {
   isEventInPast,
   scheduleClasses,
   ScheduleCurrentTimeIndicator,
+  ScheduleEventOverflowPopover,
   useScheduleEventPopover,
 } from 'components/Schedule/shared';
 import type {
@@ -261,11 +262,18 @@ function getCellName({
  * Shared time grid layout used by day and week views with hourly rows.
  */
 export function TimeGridView({
+  allDayEventLimit = 3,
   days,
   hourHeight = 100,
   maxHour = 24,
   minHour = 0,
 }: {
+  /**
+   * Maximum number of all-day events shown before the rest collapse into a
+   * popover.
+   * @default 3
+   */
+  allDayEventLimit?: number;
   /**
    * Days to display as columns in the grid.
    */
@@ -306,6 +314,9 @@ export function TimeGridView({
     '--schedule-day-count': String(days.length),
   };
   const normalizedHourHeight = Math.max(1, Math.floor(hourHeight));
+  const normalizedAllDayEventLimit = Number.isFinite(allDayEventLimit)
+    ? Math.max(0, Math.floor(allDayEventLimit))
+    : 3;
   const hourStyle: HourStyle = {
     height: normalizedHourHeight,
     minHeight: normalizedHourHeight,
@@ -388,9 +399,16 @@ export function TimeGridView({
               event =>
                 isDayEvent(event) && eventOccursOnDate(event, day, timezoneID),
             );
+            const visibleDayEvents = dayEvents.slice(
+              0,
+              normalizedAllDayEventLimit,
+            );
+            const hiddenDayEvents = dayEvents.slice(normalizedAllDayEventLimit);
             const dayCellClasses = scheduleTimeGridViewRecipe({
               isLastColumn: index === days.length - 1,
             });
+            const dateLabel = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
+            const seeMoreLabel = `Show ${hiddenDayEvents.length} more all-day events for ${dateLabel}`;
             return (
               <div
                 aria-colindex={index + 2}
@@ -405,13 +423,32 @@ export function TimeGridView({
                 key={`${day.toString()}-all-day`}
                 role="gridcell">
                 <div className={styles.allDayEvents}>
-                  {dayEvents.map(event => (
+                  {visibleDayEvents.map(event => (
                     <CalendarEventPill
                       event={event}
                       isPast={isEventInPast(event, currentTime, timezoneID)}
                       key={event.id}
                     />
                   ))}
+                  {hiddenDayEvents.length > 0 ? (
+                    <ScheduleEventOverflowPopover
+                      buttonClassName={styles.allDaySeeMoreButton}
+                      contentClassName={styles.allDayPopoverContent}
+                      events={dayEvents}
+                      eventsClassName={styles.allDayPopoverEvents}
+                      hiddenEventCount={hiddenDayEvents.length}
+                      label={seeMoreLabel}
+                      renderEvent={event => (
+                        <CalendarEventPill
+                          event={event}
+                          isFullWidth
+                          isPast={isEventInPast(event, currentTime, timezoneID)}
+                        />
+                      )}
+                      testId={`schedule-all-day-see-more-${day.toString()}`}
+                      title={dateLabel}
+                    />
+                  ) : null}
                 </div>
               </div>
             );

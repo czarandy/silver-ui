@@ -17,6 +17,12 @@ import type {
 
 export interface ScheduleDayViewOptions {
   /**
+   * Maximum number of all-day events shown before the rest collapse into a
+   * popover.
+   * @default 3
+   */
+  allDayEventLimit?: number;
+  /**
    * Pixel height used for each hourly row.
    * @default 100
    */
@@ -44,6 +50,7 @@ function ScheduleDayView({
   return (
     <ScheduleFrame title={formatMonthTitle(day)} titleLabel={formatDate(day)}>
       <TimeGridView
+        allDayEventLimit={options.allDayEventLimit}
         days={[day]}
         hourHeight={options.hourHeight}
         maxHour={options.maxHour}
@@ -57,6 +64,7 @@ function ScheduleDayView({
  * Creates a single-day schedule view configuration.
  */
 export function createScheduleDayView({
+  allDayEventLimit = 3,
   hourHeight = 100,
   maxHour = 24,
   minHour = 0,
@@ -80,6 +88,6 @@ export function createScheduleDayView({
       label: 'Previous day',
       range: [date.startOfDay().addDays(-1), date.startOfDay()],
     }),
-    options: {hourHeight, maxHour, minHour},
+    options: {allDayEventLimit, hourHeight, maxHour, minHour},
   };
 }
