@@ -5,7 +5,7 @@ import {
   neutralTheme,
   nordTheme,
   solarizedTheme,
-} from '../../themes/presets';
+} from 'themes/presets';
 import {Alert} from '../Alert';
 import {Badge, type BadgeColor} from '../Badge';
 import {Button} from '../Button';

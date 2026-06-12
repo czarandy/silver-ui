@@ -13,6 +13,7 @@ export const scheduleRecipe = sva({
     'headerSlotCenter',
     'headerSlotEnd',
     'headerTitleContent',
+    'headerTitleSpinner',
     'surface',
   ],
   base: {
@@ -56,6 +57,10 @@ export const scheduleRecipe = sva({
       display: 'inline-flex',
       alignItems: 'center',
       gap: '2',
+    },
+    headerTitleSpinner: {
+      marginInlineStart: '4px',
+      marginBlockStart: '4px',
     },
     surface: {
       borderWidth: 'default',

@@ -17,6 +17,7 @@ const config: StorybookConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       'styled-system': resolve(__dirname, '../styled-system'),
+      themes: resolve(__dirname, '../src/themes'),
     };
     config.build = {
       ...config.build,

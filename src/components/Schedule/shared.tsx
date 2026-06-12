@@ -244,7 +244,13 @@ export function ScheduleFrame({
     centerContent: (
       <span className={scheduleClasses.headerTitleContent}>
         <Heading level={2}>{title}</Heading>
-        {isLoading ? <Spinner aria-label="Loading events" size="sm" /> : null}
+        {isLoading ? (
+          <Spinner
+            aria-label="Loading events"
+            className={scheduleClasses.headerTitleSpinner}
+            size="sm"
+          />
+        ) : null}
       </span>
     ),
     endContent: null,
