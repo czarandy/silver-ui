@@ -13,6 +13,15 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import silverUiPlugin from './eslint/silver-ui-plugin.js';
 
+const restrictedImportPaths = [
+  {
+    name: 'react',
+    importNames: ['useLayoutEffect'],
+    message:
+      'useLayoutEffect warns during SSR. Import useIsomorphicLayoutEffect from lib/useIsomorphicLayoutEffect instead.',
+  },
+];
+
 export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -50,14 +59,7 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
-          paths: [
-            {
-              name: 'react',
-              importNames: ['useLayoutEffect'],
-              message:
-                'useLayoutEffect warns during SSR. Import useIsomorphicLayoutEffect from lib/useIsomorphicLayoutEffect instead.',
-            },
-          ],
+          paths: restrictedImportPaths,
         },
       ],
       curly: 'error',
@@ -75,13 +77,6 @@ export default tseslint.config(
       ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'error',
-    },
-  },
-  // Allow useLayoutEffect in the isomorphic wrapper itself
-  {
-    files: ['src/internal/useIsomorphicLayoutEffect.ts'],
-    rules: {
-      'no-restricted-imports': 'off',
     },
   },
   // Date/time — use Temporal instead of raw JavaScript Date
@@ -144,6 +139,19 @@ export default tseslint.config(
       'import-x/no-self-import': 'error',
       'import-x/export': 'error',
       'import-x/no-useless-path-segments': 'error',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: restrictedImportPaths,
+          patterns: [
+            {
+              group: ['./*', '../*'],
+              message:
+                'Use configured path aliases instead of relative imports in src.',
+            },
+          ],
+        },
+      ],
       'import-x/order': [
         'error',
         {
@@ -158,6 +166,13 @@ export default tseslint.config(
           alphabetize: {order: 'asc'},
         },
       ],
+    },
+  },
+  // Allow useLayoutEffect in the isomorphic wrapper itself
+  {
+    files: ['src/internal/useIsomorphicLayoutEffect.ts'],
+    rules: {
+      'no-restricted-imports': 'off',
     },
   },
   // Type-aware rules — catches async/type bugs that syntax-only lint cannot see
