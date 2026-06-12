@@ -1,5 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
+import {scheduleListViewRecipe} from 'components/Schedule/ListView.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {
@@ -33,7 +34,6 @@ import {
   plainDateFromInstant,
   plainDateIsEqual,
 } from 'internal/plainDate';
-import {css} from 'styled-system/css';
 
 export interface ScheduleListViewOptions {
   /**
@@ -43,96 +43,7 @@ export interface ScheduleListViewOptions {
   days?: number;
 }
 
-const styles = {
-  list: css({
-    display: 'flex',
-    flexDirection: 'column',
-  }),
-  day: css({
-    display: 'grid',
-    gridTemplateColumns: '112px minmax(0, 1fr)',
-    alignItems: 'start',
-    columnGap: '3',
-    p: '3',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  dayLast: css({
-    borderBlockEndWidth: 0,
-  }),
-  dayHeading: css({
-    m: 0,
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: '2',
-    color: 'fg.muted',
-    fontFamily: 'body',
-    fontSize: 'lg',
-    fontWeight: 'semibold',
-    lineHeight: 'tight',
-    whiteSpace: 'nowrap',
-  }),
-  dayWeekday: css({
-    display: 'inline-block',
-    fontSize: 'lg',
-  }),
-  dayNumber: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: '30px',
-    h: '30px',
-    borderRadius: 'full',
-    fontWeight: 'bold',
-  }),
-  dayNumberCurrent: css({
-    bg: 'primary',
-    color: 'fg.onPrimary',
-  }),
-  events: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2',
-  }),
-  eventRow: css({
-    display: 'grid',
-    gridTemplateColumns: '160px minmax(0, 1fr)',
-    alignItems: 'center',
-    gap: '3',
-  }),
-  eventPast: css({
-    opacity: 0.64,
-  }),
-  eventContent: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
-    minW: 0,
-  }),
-  eventContentButton: css({
-    appearance: 'none',
-    bg: 'none',
-    borderWidth: 0,
-    p: 0,
-    m: 0,
-    font: 'inherit',
-    textAlign: 'inherit',
-    color: 'inherit',
-    cursor: 'pointer',
-    borderRadius: 'sm',
-    _focusVisible: {
-      outlineWidth: 'focus',
-      outlineStyle: 'solid',
-      outlineColor: 'primary',
-    },
-  }),
-  eventTime: css({
-    whiteSpace: 'nowrap',
-  }),
-} as const;
+const styles = scheduleListViewRecipe();
 
 /**
  * Renders a single event row in the list view.
@@ -148,6 +59,10 @@ function ListEvent({
   const {popover, triggerProps} = useScheduleEventPopover(event);
   const category = getCategory(categoryMap, event);
   const eventDataState = isPast ? 'past' : undefined;
+  const classes = scheduleListViewRecipe({
+    isInteractiveEvent: triggerProps != null,
+    isPastEvent: isPast,
+  });
   const eventContent = (
     <>
       <Tooltip content={category.label} hoverIndication="never">
@@ -161,15 +76,13 @@ function ListEvent({
     </>
   );
   return (
-    <div
-      className={cx(styles.eventRow, isPast && styles.eventPast)}
-      data-state={eventDataState}>
-      <Text className={styles.eventTime} color="secondary" type="supporting">
+    <div className={classes.eventRow} data-state={eventDataState}>
+      <Text className={classes.eventTime} color="secondary" type="supporting">
         {isDayEvent(event) ? 'All day' : getEventTimeLabel(event, timezoneID)}
       </Text>
       {triggerProps != null ? (
         <button
-          className={cx(styles.eventContent, styles.eventContentButton)}
+          className={classes.eventContent}
           data-state={eventDataState}
           data-testid={`schedule-event-${event.id}`}
           type="button"
@@ -178,7 +91,7 @@ function ListEvent({
         </button>
       ) : (
         <div
-          className={styles.eventContent}
+          className={classes.eventContent}
           data-state={eventDataState}
           data-testid={`schedule-event-${event.id}`}>
           {eventContent}
@@ -225,29 +138,22 @@ function ScheduleListView(): React.JSX.Element {
         {visibleDays.map(
           ({day, dayEvents, isCurrentDay, isHighlightedDay}, index) => {
             const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
+            const dayClasses = scheduleListViewRecipe({
+              isHighlightedDay,
+              isLastDay: index === visibleDays.length - 1,
+            });
             return (
-              <section
-                className={cx(
-                  styles.day,
-                  index === visibleDays.length - 1 && styles.dayLast,
-                )}
-                key={day.toString()}>
+              <section className={dayClasses.day} key={day.toString()}>
                 <h4
                   aria-current={isHighlightedDay ? 'date' : undefined}
                   aria-label={fullDate}
-                  className={styles.dayHeading}>
-                  <span
-                    className={cx(
-                      styles.dayNumber,
-                      isHighlightedDay && styles.dayNumberCurrent,
-                    )}>
-                    {day.day}
-                  </span>
-                  <span className={styles.dayWeekday}>
+                  className={dayClasses.dayHeading}>
+                  <span className={dayClasses.dayNumber}>{day.day}</span>
+                  <span className={dayClasses.dayWeekday}>
                     {plainDateFormat(day, {weekday: 'short'})}
                   </span>
                 </h4>
-                <div className={styles.events}>
+                <div className={dayClasses.events}>
                   {renderListRows({
                     currentTime,
                     events: dayEvents,

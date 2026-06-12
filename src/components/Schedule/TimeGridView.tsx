@@ -3,6 +3,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {CSSProperties} from 'react';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
+import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {eventOccursOnDate, isDayEvent} from 'components/Schedule/dateMath';
 import {
@@ -33,134 +34,11 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from 'internal/plainDate';
-import {css} from 'styled-system/css';
 
 type GridStyle = CSSProperties & {'--schedule-day-count': string};
 type HourStyle = Pick<CSSProperties, 'height' | 'minHeight'>;
 
-const styles = {
-  grid: css({
-    display: 'grid',
-    gridTemplateColumns: '72px 1fr',
-    overflow: 'auto',
-  }),
-  header: css({
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(var(--schedule-day-count), minmax(160px, 1fr))',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  corner: css({
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  dayHeader: css({
-    p: '2',
-    textAlign: 'center',
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-  }),
-  lastColumn: css({
-    borderInlineEndWidth: 0,
-  }),
-  dayHeaderContent: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '1',
-  }),
-  dayHeaderDayNumber: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minW: '30px',
-    h: '30px',
-    lineHeight: '30px',
-    borderRadius: 'full',
-  }),
-  dayHeaderCurrent: css({
-    bg: 'primary',
-    color: 'fg.onPrimary',
-  }),
-  allDayLabel: css({
-    display: 'flex',
-    alignItems: 'flex-start',
-    justifyContent: 'flex-end',
-    py: '0.5',
-    px: '2',
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  allDayRow: css({
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(var(--schedule-day-count), minmax(160px, 1fr))',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  dayCell: css({
-    minH: 0,
-    p: '0.5',
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-  }),
-  timeLabel: css({
-    p: '2',
-    color: 'fg.muted',
-    textAlign: 'end',
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  timeRow: css({
-    display: 'grid',
-    gridTemplateColumns:
-      'repeat(var(--schedule-day-count), minmax(160px, 1fr))',
-  }),
-  hourCell: css({
-    position: 'relative',
-    minH: '14',
-    p: '1',
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  lastRow: css({
-    borderBlockEndWidth: 0,
-  }),
-  events: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1',
-  }),
-  allDayEvents: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-  }),
-  rowContents: css({
-    display: 'contents',
-  }),
-} as const;
+const styles = scheduleTimeGridViewRecipe();
 
 function eventOverlapsHour(
   event: CalendarEvent,
@@ -463,38 +341,35 @@ export function TimeGridView({
           role="columnheader"
         />
         <div className={styles.header}>
-          {days.map((day, index) => (
-            <div
-              aria-colindex={index + 2}
-              aria-current={
-                plainDateIsEqual(day, highlightPlainDate) ? 'date' : undefined
-              }
-              aria-label={plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY)}
-              className={cx(
-                styles.dayHeader,
-                index === days.length - 1 && styles.lastColumn,
-              )}
-              key={day.toString()}
-              role="columnheader">
-              <Heading
-                aria-hidden="true"
-                color="secondary"
-                level={4}
-                textWrap="nowrap">
-                <span className={styles.dayHeaderContent}>
-                  {plainDateFormat(day, {weekday: 'short'})}
-                  <span
-                    className={cx(
-                      styles.dayHeaderDayNumber,
-                      plainDateIsEqual(day, highlightPlainDate) &&
-                        styles.dayHeaderCurrent,
-                    )}>
-                    {day.day}
+          {days.map((day, index) => {
+            const isCurrentDay = plainDateIsEqual(day, highlightPlainDate);
+            const dayHeaderClasses = scheduleTimeGridViewRecipe({
+              isCurrentDay,
+              isLastColumn: index === days.length - 1,
+            });
+            return (
+              <div
+                aria-colindex={index + 2}
+                aria-current={isCurrentDay ? 'date' : undefined}
+                aria-label={plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY)}
+                className={dayHeaderClasses.dayHeader}
+                key={day.toString()}
+                role="columnheader">
+                <Heading
+                  aria-hidden="true"
+                  color="secondary"
+                  level={4}
+                  textWrap="nowrap">
+                  <span className={styles.dayHeaderContent}>
+                    {plainDateFormat(day, {weekday: 'short'})}
+                    <span className={dayHeaderClasses.dayHeaderDayNumber}>
+                      {day.day}
+                    </span>
                   </span>
-                </span>
-              </Heading>
-            </div>
-          ))}
+                </Heading>
+              </div>
+            );
+          })}
         </div>
       </div>
       <div className={styles.rowContents} role="row">
@@ -513,6 +388,9 @@ export function TimeGridView({
               event =>
                 isDayEvent(event) && eventOccursOnDate(event, day, timezoneID),
             );
+            const dayCellClasses = scheduleTimeGridViewRecipe({
+              isLastColumn: index === days.length - 1,
+            });
             return (
               <div
                 aria-colindex={index + 2}
@@ -523,10 +401,7 @@ export function TimeGridView({
                   hourLabel: 'all day',
                   timezoneID,
                 })}
-                className={cx(
-                  styles.dayCell,
-                  index === days.length - 1 && styles.lastColumn,
-                )}
+                className={dayCellClasses.dayCell}
                 key={`${day.toString()}-all-day`}
                 role="gridcell">
                 <div className={styles.allDayEvents}>
@@ -546,11 +421,14 @@ export function TimeGridView({
       {hours.map(hour => {
         const hourLabel = formatHour(hour);
         const isLastHour = hour === hours[hours.length - 1];
+        const timeLabelClasses = scheduleTimeGridViewRecipe({
+          isLastRow: isLastHour,
+        });
         return (
           <div className={styles.rowContents} key={hour} role="row">
             <div
               aria-colindex={1}
-              className={cx(styles.timeLabel, isLastHour && styles.lastRow)}
+              className={timeLabelClasses.timeLabel}
               role="rowheader"
               style={hourStyle}>
               {hourLabel}
@@ -571,6 +449,10 @@ export function TimeGridView({
                   minHour: normalizedMinHour,
                   timezoneID,
                 });
+                const hourCellClasses = scheduleTimeGridViewRecipe({
+                  isLastColumn: index === days.length - 1,
+                  isLastRow: isLastHour,
+                });
                 return (
                   <div
                     aria-colindex={index + 2}
@@ -581,11 +463,7 @@ export function TimeGridView({
                       hourLabel,
                       timezoneID,
                     })}
-                    className={cx(
-                      styles.hourCell,
-                      index === days.length - 1 && styles.lastColumn,
-                      isLastHour && styles.lastRow,
-                    )}
+                    className={hourCellClasses.hourCell}
                     key={`${day.toString()}-${hour}`}
                     role="gridcell"
                     style={hourStyle}>

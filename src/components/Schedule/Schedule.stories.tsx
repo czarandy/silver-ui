@@ -329,9 +329,66 @@ export const Month: Story = {
   render: () => <ScheduleStory view={createScheduleMonthlyView()} />,
 };
 
+// Five all-day events on the base day to show a busy all-day section, plus a
+// couple of timed events for context.
+const weekEvents = [
+  createEventFromISO({
+    category: 'Planning',
+    end: allDayISO(0),
+    id: 'week-all-day-1',
+    start: allDayISO(0),
+    title: 'Planning offsite',
+  }),
+  createEventFromISO({
+    category: 'Operations',
+    end: allDayISO(0),
+    id: 'week-all-day-2',
+    start: allDayISO(0),
+    title: 'Release freeze',
+  }),
+  createEventFromISO({
+    category: 'Design',
+    end: allDayISO(0),
+    id: 'week-all-day-3',
+    start: allDayISO(0),
+    title: 'Design review',
+  }),
+  createEventFromISO({
+    category: 'Customer',
+    end: allDayISO(0),
+    id: 'week-all-day-4',
+    start: allDayISO(0),
+    title: 'Customer summit',
+  }),
+  createEventFromISO({
+    category: 'Research',
+    end: allDayISO(0),
+    id: 'week-all-day-5',
+    start: allDayISO(0),
+    title: 'Research sprint',
+  }),
+  createEventFromISO({
+    category: 'Sync',
+    end: timedISO(0, 11),
+    id: 'week-timed-1',
+    start: timedISO(0, 10),
+    title: 'Team sync',
+  }),
+  createEventFromISO({
+    category: 'Design',
+    end: timedISO(2, 15),
+    id: 'week-timed-2',
+    start: timedISO(2, 14),
+    title: 'Prototype critique',
+  }),
+];
+
 export const Week: Story = {
   render: () => (
-    <ScheduleStory view={createScheduleWeeklyView({maxHour: 18, minHour: 8})} />
+    <ScheduleStory
+      events={weekEvents}
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+    />
   ),
 };
 
