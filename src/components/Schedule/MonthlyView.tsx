@@ -162,7 +162,7 @@ const styles = {
   monthPopoverContent: css({
     display: 'flex',
     flexDirection: 'column',
-    gap: '2',
+    gap: '1',
     p: '3',
   }),
   monthPopoverEvents: css({
