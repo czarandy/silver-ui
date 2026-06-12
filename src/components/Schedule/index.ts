@@ -41,6 +41,6 @@ export type {
   ScheduleView,
   ScheduleViewBase,
   ScheduleViewOptions,
-  ZonedDateTime,
-  ZonedDateTimeRange,
+  ScheduleZonedInstant,
+  ScheduleZonedInstantRange,
 } from './types';

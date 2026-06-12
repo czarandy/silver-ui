@@ -25,7 +25,7 @@ import type {
   CalendarEvent,
   Instant,
   ScheduleView,
-  ZonedDateTime,
+  ScheduleZonedInstant,
 } from './types';
 import {useCurrentTime} from './useCurrentTime';
 
@@ -274,7 +274,7 @@ export function createScheduleListView({
 }: ScheduleListViewOptions = {}): ScheduleView<ScheduleListViewOptions> {
   return {
     component: ScheduleListView,
-    getDateRange: (date: ZonedDateTime) => [
+    getDateRange: (date: ScheduleZonedInstant) => [
       date.startOfDay(),
       date.startOfDay().addDays(days),
     ],

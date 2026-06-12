@@ -5,31 +5,34 @@ import {
 } from '../../internal/plainDate';
 import type {Instant, ScheduleDate, ScheduleRange} from './types';
 
-export interface ZonedDateTime {
-  addDays: (days: number) => ZonedDateTime;
+export interface ScheduleZonedInstant {
+  addDays: (days: number) => ScheduleZonedInstant;
   instant: Instant;
-  startOfDay: () => ZonedDateTime;
+  startOfDay: () => ScheduleZonedInstant;
   timezoneID: string;
   toPlainDate: () => PlainDate;
 }
 
-export type ZonedDateTimeRange = [ZonedDateTime, ZonedDateTime];
+export type ScheduleZonedInstantRange = [
+  ScheduleZonedInstant,
+  ScheduleZonedInstant,
+];
 
-export function createZonedDateTime(
+export function createScheduleZonedInstant(
   date: ScheduleDate,
   timezoneID: string,
-): ZonedDateTime {
-  return zonedDateTimeFromInstant(date, timezoneID);
+): ScheduleZonedInstant {
+  return scheduleZonedInstantFromInstant(date, timezoneID);
 }
 
-export function zonedDateTimeFromInstant(
+export function scheduleZonedInstantFromInstant(
   instant: Instant,
   timezoneID: string,
-): ZonedDateTime {
+): ScheduleZonedInstant {
   return {
     addDays: days => {
       const date = plainDateFromInstant(instant, timezoneID).add({days});
-      return zonedDateTimeFromInstant(
+      return scheduleZonedInstantFromInstant(
         plainDateToInstant(date, timezoneID),
         timezoneID,
       );
@@ -37,7 +40,7 @@ export function zonedDateTimeFromInstant(
     instant,
     startOfDay: () => {
       const date = plainDateFromInstant(instant, timezoneID);
-      return zonedDateTimeFromInstant(
+      return scheduleZonedInstantFromInstant(
         plainDateToInstant(date, timezoneID),
         timezoneID,
       );
@@ -47,12 +50,12 @@ export function zonedDateTimeFromInstant(
   };
 }
 
-export function scheduleRangeToZonedDateTimeRange(
+export function scheduleRangeToScheduleZonedInstantRange(
   range: ScheduleRange,
   timezoneID: string,
-): ZonedDateTimeRange {
+): ScheduleZonedInstantRange {
   return [
-    zonedDateTimeFromInstant(range.start, timezoneID),
-    zonedDateTimeFromInstant(range.end, timezoneID),
+    scheduleZonedInstantFromInstant(range.start, timezoneID),
+    scheduleZonedInstantFromInstant(range.end, timezoneID),
   ];
 }

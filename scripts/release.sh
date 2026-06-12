@@ -189,6 +189,10 @@ info "Validating package exports (publint)"
 pnpm exec publint
 ok "publint passed"
 
+info "Running package smoke test"
+node scripts/package-smoke-test.mjs
+ok "Package smoke test passed"
+
 bold "Tarball contents"
 pnpm pack --dry-run
 echo

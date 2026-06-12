@@ -54,6 +54,7 @@
     "build:site": "pnpm sync:brand && pnpm build && pnpm -C site build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "smoke:package": "pnpm build && node scripts/package-smoke-test.mjs",
     "lint": "eslint --cache .",
     "lint:fix": "eslint --cache --fix .",
     "format": "prettier --write .",

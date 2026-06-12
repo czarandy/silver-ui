@@ -25,6 +25,11 @@ import {
 } from './dateMath';
 import {useSchedulePaginationPlugin} from './plugins/PaginationPlugin';
 import {useScheduleViewSelectorPlugin} from './plugins/ViewSelectorPlugin';
+import {
+  createScheduleZonedInstant,
+  scheduleRangeToScheduleZonedInstantRange,
+  scheduleZonedInstantFromInstant,
+} from './scheduleZonedInstant';
 import type {
   CalendarEvent,
   Instant,
@@ -32,11 +37,6 @@ import type {
   SchedulePlugin,
   ScheduleView,
 } from './types';
-import {
-  createZonedDateTime,
-  scheduleRangeToZonedDateTimeRange,
-  zonedDateTimeFromInstant,
-} from './zonedDateTime';
 
 class ErrorBoundary extends Component<
   {children: ReactNode},
@@ -125,6 +125,17 @@ describe('createEventFromISO', () => {
     expect(event.start).toBe(
       Temporal.Instant.from('2026-05-13T16:00:00.000Z').epochMilliseconds,
     );
+  });
+
+  it('rejects invalid date-only ISO strings', () => {
+    expect(() =>
+      createEventFromISO({
+        end: '2026-13-45',
+        id: 'invalid-date',
+        start: '2026-13-44',
+        title: 'Invalid date',
+      }),
+    ).toThrow(RangeError);
   });
 });
 
@@ -1454,6 +1465,72 @@ describe('Schedule', () => {
     );
   });
 
+  it('composes pagination, view selector, and custom header plugins', () => {
+    const onViewDateChange = vi.fn();
+    const onChangeView = vi.fn();
+    const dayView = createScheduleDayView();
+    const monthView = createScheduleMonthlyView();
+    const viewOptions: {label: string; view: ScheduleView}[] = [
+      {label: 'Month', view: monthView},
+      {label: 'Day', view: dayView},
+    ];
+    const customPlugin: SchedulePlugin = {
+      renderHeader: (startContent, centerContent, endContent) => ({
+        centerContent,
+        endContent: (
+          <>
+            {endContent}
+            <span data-testid="composed-end">Composed end</span>
+          </>
+        ),
+        startContent: (
+          <>
+            {startContent}
+            <span data-testid="composed-start">Composed start</span>
+          </>
+        ),
+      }),
+    };
+
+    function ScheduleWithComposedPlugins() {
+      const paginationPlugin = useSchedulePaginationPlugin({onViewDateChange});
+      const viewSelectorPlugin = useScheduleViewSelectorPlugin(viewOptions, {
+        onChangeView,
+      });
+      return (
+        <Schedule
+          categories={categories}
+          events={events}
+          plugins={[paginationPlugin, viewSelectorPlugin, customPlugin]}
+          timezoneID="UTC"
+          view={dayView}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    render(<ScheduleWithComposedPlugins />);
+
+    const previousButton = screen.getByRole('button', {name: 'Previous day'});
+    const selectorButton = screen.getByRole('button', {name: /Day/});
+    expect(previousButton).toBeEnabled();
+    expect(selectorButton).toBeEnabled();
+    expect(screen.getByTestId('composed-start')).toBeInTheDocument();
+    expect(screen.getByTestId('composed-end')).toBeInTheDocument();
+    expect(previousButton.compareDocumentPosition(selectorButton)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+
+    fireEvent.click(previousButton);
+    expect(onViewDateChange).toHaveBeenCalledWith(instantUTC(2026, 4, 12));
+
+    fireEvent.click(selectorButton);
+    fireEvent.click(
+      screen.getByRole('menuitem', {hidden: true, name: 'Month'}),
+    );
+    expect(onChangeView).toHaveBeenCalledWith(monthView);
+  });
+
   it('renders an enabled view selector plugin and calls the change handler', () => {
     const onChangeView = vi.fn();
     const dayView = createScheduleDayView();
@@ -1647,10 +1724,10 @@ describe('dateMath', () => {
   });
 });
 
-describe('zonedDateTime', () => {
-  it('creates zoned date-times from instants', () => {
+describe('scheduleZonedInstant', () => {
+  it('creates schedule zoned instants from instants', () => {
     const instant = instantUTC(2026, 4, 13, 7);
-    const zoned = createZonedDateTime(instant, 'America/Los_Angeles');
+    const zoned = createScheduleZonedInstant(instant, 'America/Los_Angeles');
 
     expect(zoned.instant).toBe(instant);
     expect(zoned.timezoneID).toBe('America/Los_Angeles');
@@ -1658,7 +1735,7 @@ describe('zonedDateTime', () => {
   });
 
   it('adds days and starts the day in the configured timezone', () => {
-    const zoned = zonedDateTimeFromInstant(
+    const zoned = scheduleZonedInstantFromInstant(
       instantUTC(2026, 2, 8, 12),
       'America/Los_Angeles',
     );
@@ -1667,13 +1744,13 @@ describe('zonedDateTime', () => {
     expect(zoned.addDays(1).toPlainDate().toString()).toBe('2026-03-09');
   });
 
-  it('converts schedule ranges to zoned date-time ranges', () => {
+  it('converts schedule ranges to schedule zoned instant ranges', () => {
     const range = getScheduleRangeFromDates({
       endDate: Temporal.PlainDate.from('2026-05-14'),
       startDate: Temporal.PlainDate.from('2026-05-13'),
       timezoneID: 'UTC',
     });
-    const [start, end] = scheduleRangeToZonedDateTimeRange(
+    const [start, end] = scheduleRangeToScheduleZonedInstantRange(
       range,
       'America/Los_Angeles',
     );

@@ -6,20 +6,20 @@ import type {
   SchedulePlugin,
   ScheduleRange,
   ScheduleViewBase,
-  ZonedDateTime,
+  ScheduleZonedInstant,
 } from './types';
 
 export interface ScheduleContextValue {
   categories: ReadonlyArray<ScheduleCategory>;
   categoryMap: ScheduleCategoryMap;
   events: ReadonlyArray<CalendarEvent>;
-  highlightDate: ZonedDateTime;
+  highlightDate: ScheduleZonedInstant;
   isLoading: boolean;
   plugins: ReadonlyArray<SchedulePlugin>;
   range: ScheduleRange;
   timezoneID: string;
   view: ScheduleViewBase;
-  viewDate: ZonedDateTime;
+  viewDate: ScheduleZonedInstant;
 }
 
 export const ScheduleContext = createContext<ScheduleContextValue | null>(null);

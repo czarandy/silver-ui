@@ -28,8 +28,8 @@ import type {
   CalendarEvent,
   ScheduleView,
   ScheduleViewComponentProps,
-  ZonedDateTime,
-  ZonedDateTimeRange,
+  ScheduleZonedInstant,
+  ScheduleZonedInstantRange,
 } from './types';
 import {useCurrentTime} from './useCurrentTime';
 
@@ -163,11 +163,11 @@ function getMonthDays(
 }
 
 function getVisibleMonthRange(
-  date: ZonedDateTime,
+  date: ScheduleZonedInstant,
   month: PlainDate,
   weekCount: number,
   weekStartsOn: DayOfWeek,
-): ZonedDateTimeRange {
+): ScheduleZonedInstantRange {
   const firstVisible = setStartOfWeek(month.with({day: 1}), weekStartsOn);
   const end = firstVisible.add({days: weekCount * 7});
   const currentDate = date.toPlainDate();

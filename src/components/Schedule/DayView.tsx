@@ -3,13 +3,13 @@
 import {TimeGridView} from './TimeGridView';
 import {useScheduleContext} from './context';
 import {getScheduleRangeFromDates} from './dateMath';
+import {scheduleRangeToScheduleZonedInstantRange} from './scheduleZonedInstant';
 import {ScheduleFrame, formatDate, formatMonthTitle} from './shared';
 import type {
   ScheduleView,
   ScheduleViewComponentProps,
-  ZonedDateTime,
+  ScheduleZonedInstant,
 } from './types';
-import {scheduleRangeToZonedDateTimeRange} from './zonedDateTime';
 
 export interface ScheduleDayViewOptions {
   /**
@@ -59,8 +59,8 @@ export function createScheduleDayView({
 }: ScheduleDayViewOptions = {}): ScheduleView<ScheduleDayViewOptions> {
   return {
     component: ScheduleDayView,
-    getDateRange: (date: ZonedDateTime) =>
-      scheduleRangeToZonedDateTimeRange(
+    getDateRange: (date: ScheduleZonedInstant) =>
+      scheduleRangeToScheduleZonedInstantRange(
         getScheduleRangeFromDates({
           endDate: date.toPlainDate().add({days: 1}),
           startDate: date.toPlainDate(),
@@ -68,11 +68,11 @@ export function createScheduleDayView({
         }),
         date.timezoneID,
       ),
-    getNextDateRange: (date: ZonedDateTime) => ({
+    getNextDateRange: (date: ScheduleZonedInstant) => ({
       label: 'Next day',
       range: [date.startOfDay().addDays(1), date.startOfDay().addDays(2)],
     }),
-    getPreviousDateRange: (date: ZonedDateTime) => ({
+    getPreviousDateRange: (date: ScheduleZonedInstant) => ({
       label: 'Previous day',
       range: [date.startOfDay().addDays(-1), date.startOfDay()],
     }),

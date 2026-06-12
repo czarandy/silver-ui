@@ -9,7 +9,7 @@ import type {
   ScheduleHeaderContent,
   SchedulePlugin,
   SchedulePluginPosition,
-  ZonedDateTimeRange,
+  ScheduleZonedInstantRange,
 } from '../types';
 
 export interface SchedulePaginationPluginOptions {
@@ -36,7 +36,7 @@ function SchedulePaginationControls({
     [view, viewDate],
   );
   const shiftToRange = useCallback(
-    (nextRange: ZonedDateTimeRange) => {
+    (nextRange: ScheduleZonedInstantRange) => {
       onViewDateChange(
         viewDate.instant + nextRange[0].instant - currentRange[0].instant,
       );

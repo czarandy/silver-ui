@@ -1,7 +1,10 @@
 import type {ReactNode} from 'react';
 import type {PlainDate} from '../../internal/dateTypes';
 import type {CalendarEvent, ScheduleCategory} from './CalendarEvent';
-import type {ZonedDateTime, ZonedDateTimeRange} from './zonedDateTime';
+import type {
+  ScheduleZonedInstant,
+  ScheduleZonedInstantRange,
+} from './scheduleZonedInstant';
 
 export type {PlainDate} from '../../internal/dateTypes';
 export type {
@@ -12,7 +15,10 @@ export type {
   ScheduleCategory,
   ScheduleEventColor,
 } from './CalendarEvent';
-export type {ZonedDateTime, ZonedDateTimeRange} from './zonedDateTime';
+export type {
+  ScheduleZonedInstant,
+  ScheduleZonedInstantRange,
+} from './scheduleZonedInstant';
 
 export type Instant = number;
 
@@ -41,7 +47,7 @@ export interface ScheduleViewComponentProps<
 
 export interface ScheduleNavigationRange {
   label: string;
-  range: ZonedDateTimeRange;
+  range: ScheduleZonedInstantRange;
 }
 
 export type ScheduleViewComponent<
@@ -49,9 +55,9 @@ export type ScheduleViewComponent<
 > = (props: ScheduleViewComponentProps<Options>) => ReactNode;
 
 export interface ScheduleViewBase {
-  getDateRange: (date: ZonedDateTime) => ZonedDateTimeRange;
-  getNextDateRange: (date: ZonedDateTime) => ScheduleNavigationRange;
-  getPreviousDateRange: (date: ZonedDateTime) => ScheduleNavigationRange;
+  getDateRange: (date: ScheduleZonedInstant) => ScheduleZonedInstantRange;
+  getNextDateRange: (date: ScheduleZonedInstant) => ScheduleNavigationRange;
+  getPreviousDateRange: (date: ScheduleZonedInstant) => ScheduleNavigationRange;
 }
 
 export interface ScheduleView<

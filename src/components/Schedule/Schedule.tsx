@@ -5,6 +5,7 @@ import {getBrowserTimezoneID, nowEpochMilliseconds} from '../../internal/time';
 import {ScheduleContext} from './context';
 import {eventOverlapsRange, sortEvents} from './dateMath';
 import {defaultSchedulePlugins} from './plugins';
+import {createScheduleZonedInstant} from './scheduleZonedInstant';
 import {createCategoryMap, scheduleClasses} from './shared';
 import type {
   CalendarEvent,
@@ -15,9 +16,8 @@ import type {
   ScheduleRange,
   ScheduleView,
   ScheduleViewOptions,
-  ZonedDateTime,
+  ScheduleZonedInstant,
 } from './types';
-import {createZonedDateTime} from './zonedDateTime';
 
 const EMPTY_CATEGORIES: ReadonlyArray<ScheduleCategory> = [];
 
@@ -143,7 +143,7 @@ function resolveEvents(
 
 function useRange<Options extends ScheduleViewOptions>(
   view: ScheduleView<Options>,
-  date: ZonedDateTime,
+  date: ScheduleZonedInstant,
 ): ScheduleRange {
   const [start, end] = view.getDateRange(date);
   return useMemo(
@@ -170,11 +170,11 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories: ReadonlyArray<ScheduleCategory>;
   eventCache: Map<string, EventRecord>;
   eventSource: ScheduleEventSource;
-  highlightDate: ZonedDateTime;
+  highlightDate: ScheduleZonedInstant;
   isLoading: boolean;
   plugins: ReadonlyArray<SchedulePlugin>;
   view: ScheduleView<Options>;
-  viewDate: ZonedDateTime;
+  viewDate: ScheduleZonedInstant;
 }): React.JSX.Element {
   const Component = view.component;
   const range = useRange(view, viewDate);
@@ -240,12 +240,12 @@ export function Schedule({
     nowEpochMilliseconds(),
   );
   const highlightDate = highlightDateFromProps ?? internalHighlightDate;
-  const zonedDateTime = useMemo(
-    () => createZonedDateTime(viewDate, timezoneID),
+  const scheduleZonedInstant = useMemo(
+    () => createScheduleZonedInstant(viewDate, timezoneID),
     [viewDate, timezoneID],
   );
-  const highlightZonedDateTime = useMemo(
-    () => createZonedDateTime(highlightDate, timezoneID),
+  const highlightScheduleZonedInstant = useMemo(
+    () => createScheduleZonedInstant(highlightDate, timezoneID),
     [highlightDate, timezoneID],
   );
 
@@ -261,22 +261,22 @@ export function Schedule({
             categories={categories}
             eventCache={eventCache}
             eventSource={[]}
-            highlightDate={highlightZonedDateTime}
+            highlightDate={highlightScheduleZonedInstant}
             isLoading
             plugins={plugins}
             view={view}
-            viewDate={zonedDateTime}
+            viewDate={scheduleZonedInstant}
           />
         }>
         <ScheduleViewContent
           categories={categories}
           eventCache={eventCache}
           eventSource={events}
-          highlightDate={highlightZonedDateTime}
+          highlightDate={highlightScheduleZonedInstant}
           isLoading={false}
           plugins={plugins}
           view={view}
-          viewDate={zonedDateTime}
+          viewDate={scheduleZonedInstant}
         />
       </Suspense>
     </div>

@@ -228,8 +228,8 @@ export {
   type ScheduleViewSelectorOption,
   type ScheduleViewSelectorPluginOptions,
   type ScheduleWeeklyViewOptions,
-  type ZonedDateTime,
-  type ZonedDateTimeRange,
+  type ScheduleZonedInstant,
+  type ScheduleZonedInstantRange,
 } from './components/Schedule';
 export {
   Icon,

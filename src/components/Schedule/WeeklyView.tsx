@@ -4,13 +4,13 @@ import {plainDateDayOfWeek, type PlainDate} from '../../internal/plainDate';
 import {TimeGridView} from './TimeGridView';
 import {useScheduleContext} from './context';
 import {enumerateDates, getScheduleRangeFromDates} from './dateMath';
+import {scheduleRangeToScheduleZonedInstantRange} from './scheduleZonedInstant';
 import {ScheduleFrame, formatWeekTitle} from './shared';
 import type {
   ScheduleView,
   ScheduleViewComponentProps,
-  ZonedDateTime,
+  ScheduleZonedInstant,
 } from './types';
-import {scheduleRangeToZonedDateTimeRange} from './zonedDateTime';
 
 export interface ScheduleWeeklyViewOptions {
   /**
@@ -65,11 +65,11 @@ export function createScheduleWeeklyView({
   minHour = 0,
   weekStartsOn = 0,
 }: ScheduleWeeklyViewOptions = {}): ScheduleView<ScheduleWeeklyViewOptions> {
-  const getWeekStart = (date: ZonedDateTime) =>
+  const getWeekStart = (date: ScheduleZonedInstant) =>
     setStartOfWeek(date.toPlainDate(), weekStartsOn);
-  const getWeekRange = (date: ZonedDateTime) => {
+  const getWeekRange = (date: ScheduleZonedInstant) => {
     const startDate = getWeekStart(date);
-    return scheduleRangeToZonedDateTimeRange(
+    return scheduleRangeToScheduleZonedInstantRange(
       getScheduleRangeFromDates({
         endDate: startDate.add({days: 7}),
         startDate,
