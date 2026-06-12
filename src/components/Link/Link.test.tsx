@@ -58,24 +58,23 @@ describe('Link', () => {
     expect(screen.getByRole('link')).toHaveAttribute('href', '/destination');
   });
 
-  it('uses a fallback href when href is omitted', () => {
+  it('renders as a button when href is omitted', () => {
     render(<Link>Action Link</Link>);
 
-    expect(screen.getByRole('link', {name: 'Action Link'})).toHaveAttribute(
-      'href',
-      '#',
+    expect(screen.getByRole('button', {name: 'Action Link'})).toHaveAttribute(
+      'type',
+      'button',
     );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('prevents fallback hash navigation while still handling clicks', async () => {
+  it('handles clicks when rendered as a button', async () => {
     const user = userEvent.setup();
-    const onClick = vi.fn((event: MouseEvent) => {
-      expect(event.defaultPrevented).toBe(true);
-    });
+    const onClick = vi.fn();
 
     render(<Link onClick={onClick}>Action Link</Link>);
 
-    await user.click(screen.getByRole('link', {name: 'Action Link'}));
+    await user.click(screen.getByRole('button', {name: 'Action Link'}));
     expect(onClick).toHaveBeenCalledOnce();
   });
 
@@ -213,6 +212,23 @@ describe('Link', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('supports disabled action buttons', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <Link isDisabled onClick={onClick}>
+        Disabled Action
+      </Link>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Disabled Action'});
+    expect(button).toBeDisabled();
+
+    await user.click(button);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   it('renders external link attributes and keeps visible text in the accessible name', () => {
     render(
       <Link href="https://example.com" isExternalLink rel="sponsored">
@@ -281,7 +297,7 @@ describe('Link', () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it('forwards ref', () => {
+  it('forwards ref to anchors', () => {
     const ref = vi.fn<(element: HTMLAnchorElement | null) => void>();
 
     render(
@@ -291,6 +307,14 @@ describe('Link', () => {
     );
 
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLAnchorElement));
+  });
+
+  it('forwards ref to buttons', () => {
+    const ref = vi.fn<(element: HTMLElement | null) => void>();
+
+    render(<Link ref={ref}>Test</Link>);
+
+    expect(ref).toHaveBeenCalledWith(expect.any(HTMLButtonElement));
   });
 
   it('renders tooltip content', () => {
@@ -484,12 +508,12 @@ describe('Link', () => {
     expect(link).toHaveAttribute('data-to', '/custom');
   });
 
-  it('passes fallback href and to to custom link components', () => {
+  it('does not use custom link components when href is omitted', () => {
     render(<Link as={ToBasedRouterLink}>Router Action</Link>);
 
-    const link = screen.getByRole('link', {name: 'Router Action'});
-    expect(link).toHaveAttribute('href', '#');
-    expect(link).toHaveAttribute('data-to', '#');
+    const button = screen.getByRole('button', {name: 'Router Action'});
+    expect(button).not.toHaveAttribute('data-router-link');
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 });
 

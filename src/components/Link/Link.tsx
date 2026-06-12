@@ -1,14 +1,12 @@
-/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
-
 import {ExternalLink} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {Icon} from 'components/Icon';
 import {linkRecipe} from 'components/Link/Link.recipe';
 import type {LinkComponent} from 'components/Link/types';
-import {useLinkComponent} from 'components/Link/useLinkComponent';
 import type {TextColor, TextSize, TextWeight} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'internal';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
 import {css} from 'styled-system/css';
@@ -95,8 +93,7 @@ export interface LinkProps {
   /**
    * URL destination. Custom link components receive this as both `href` and
    * `to` so router links and anchor-like links can share the same Silver UI API.
-   * When omitted, Link renders `href="#"` to preserve native link semantics and
-   * prevents the fallback hash navigation.
+   * When omitted, Link renders as a native `<button>`.
    */
   href?: string;
   /**
@@ -115,11 +112,11 @@ export interface LinkProps {
   /**
    * Click handler. Not called when the link is disabled.
    */
-  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  onClick?: MouseEventHandler<HTMLElement>;
   /**
-   * Ref forwarded to the underlying anchor element.
+   * Ref forwarded to the underlying anchor or button element.
    */
-  ref?: Ref<HTMLAnchorElement>;
+  ref?: Ref<HTMLElement>;
   /**
    * HTML rel attribute.
    */
@@ -178,11 +175,9 @@ export function Link({
   children,
   onClick,
 }: LinkProps): React.JSX.Element {
-  const Component = useLinkComponent(as);
-  const href = hrefFromProps ?? '#';
-  const isFallbackHref = hrefFromProps == null;
+  const renderAsLink = hrefFromProps != null;
   const target = targetFromProps ?? (isExternalLink ? '_blank' : undefined);
-  const opensInNewTab = target === '_blank';
+  const opensInNewTab = renderAsLink && target === '_blank';
   const rel = useRel({isExternalLink, target, rel: relFromProps});
 
   const ariaAttrs = {
@@ -200,12 +195,9 @@ export function Link({
     'aria-roledescription': ariaRoledescription,
   };
 
-  const handleClick: MouseEventHandler<HTMLAnchorElement> = event => {
-    if (isDisabled || isFallbackHref) {
-      event.preventDefault();
-    }
-
+  const handleClick: MouseEventHandler<HTMLElement> = event => {
     if (isDisabled) {
+      event.preventDefault();
       return;
     }
 
@@ -213,21 +205,22 @@ export function Link({
   };
 
   const element = (
-    <Component
+    <ActionElement
       {...ariaAttrs}
       aria-disabled={isDisabled || undefined}
       aria-label={getAriaLabel(label, opensInNewTab)}
+      as={as}
       className={cx(linkRecipe({color, hasUnderline, size, weight}), className)}
       data-testid={dataTestId}
-      href={isDisabled ? undefined : href}
+      disabled={!renderAsLink ? isDisabled : undefined}
+      href={isDisabled ? undefined : hrefFromProps}
       onClick={handleClick}
       ref={ref}
-      rel={isDisabled ? undefined : rel}
-      role={isDisabled && hrefFromProps != null ? 'link' : undefined}
+      rel={!isDisabled && renderAsLink ? rel : undefined}
+      renderAsLink={renderAsLink}
       style={style}
       tabIndex={isDisabled ? -1 : undefined}
-      target={isDisabled ? undefined : target}
-      to={isDisabled ? undefined : Component === 'a' ? undefined : href}>
+      target={!isDisabled && renderAsLink ? target : undefined}>
       {children}
       {opensInNewTab && label == null ? (
         <>
@@ -240,7 +233,7 @@ export function Link({
           <Icon icon={ExternalLink} size="sm" />
         </span>
       ) : null}
-    </Component>
+    </ActionElement>
   );
 
   if (tooltip != null) {

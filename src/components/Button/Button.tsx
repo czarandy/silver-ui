@@ -1,5 +1,3 @@
-/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
-
 import type {
   CSSProperties,
   JSX,
@@ -13,11 +11,11 @@ import {buttonRecipe} from 'components/Button/Button.recipe';
 import type {ButtonSize, ButtonVariant} from 'components/Button/Button.types';
 import {useButtonGroup} from 'components/ButtonGroup/ButtonGroupContext';
 import {Icon, type IconComponent} from 'components/Icon';
-import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'internal';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
@@ -248,7 +246,6 @@ export function Button({
   name,
   value,
 }: ButtonProps): JSX.Element {
-  const LinkComponent = useLinkComponent(as);
   const buttonGroup = useButtonGroup();
   const size = sizeProp ?? buttonGroup?.size ?? 'md';
   const buttonDisabled =
@@ -350,41 +347,30 @@ export function Button({
 
   const rootClassName = cx(classes.root, className);
 
-  const element = renderAsLink ? (
-    <LinkComponent
+  const element = (
+    <ActionElement
       {...ariaAttrs}
+      aria-busy={!renderAsLink && isLoading ? true : undefined}
+      aria-disabled={!renderAsLink && useAriaDisabled ? true : undefined}
       aria-label={ariaLabel}
+      as={as}
       className={rootClassName}
       data-testid={dataTestId}
-      href={href}
-      onClick={handleLinkClick}
-      onKeyDown={handleLinkKeyDown}
-      ref={ref as Ref<HTMLAnchorElement>}
-      rel={linkRel}
-      style={style}
-      target={target}
-      to={LinkComponent === 'a' ? undefined : href}>
-      {buttonContent}
-    </LinkComponent>
-  ) : (
-    <button
-      {...ariaAttrs}
-      aria-busy={isLoading || undefined}
-      aria-disabled={useAriaDisabled || undefined}
-      aria-label={ariaLabel}
-      className={rootClassName}
-      data-testid={dataTestId}
-      disabled={useAriaDisabled ? undefined : buttonDisabled}
+      disabled={!renderAsLink && !useAriaDisabled ? buttonDisabled : undefined}
       form={form}
+      href={renderAsLink ? href : undefined}
       name={name}
-      onClick={handleButtonClick}
-      onKeyDown={handleButtonKeyDown}
-      ref={ref as Ref<HTMLButtonElement>}
+      onClick={renderAsLink ? handleLinkClick : handleButtonClick}
+      onKeyDown={renderAsLink ? handleLinkKeyDown : handleButtonKeyDown}
+      ref={ref}
+      rel={renderAsLink ? linkRel : undefined}
+      renderAsLink={renderAsLink}
       style={style}
+      target={renderAsLink ? target : undefined}
       type={type}
       value={value}>
       {buttonContent}
-    </button>
+    </ActionElement>
   );
 
   if (tooltip != null) {

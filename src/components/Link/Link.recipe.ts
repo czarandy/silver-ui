@@ -3,11 +3,16 @@ import {cva, type RecipeVariantProps} from 'styled-system/css';
 export const linkRecipe = cva({
   base: {
     display: 'inline-flex',
+    appearance: 'none',
     alignItems: 'center',
+    padding: 0,
+    border: 0,
+    background: 'none',
     gap: '1',
     fontFamily: 'body',
     fontWeight: 'inherit',
     lineHeight: 'normal',
+    textAlign: 'inherit',
     textDecoration: 'none',
     cursor: 'pointer',
     transitionProperty: 'color, text-decoration-color, opacity',

@@ -28,6 +28,7 @@ describe('Button', () => {
   it('renders label as visible text', () => {
     render(<Button label="Click me" />);
     expect(screen.getByRole('button', {name: 'Click me'})).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('defaults type to button', () => {
