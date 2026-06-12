@@ -25,6 +25,17 @@ export interface ContextRenderProps {
    */
   className?: string;
   /**
+   * Horizontal offset in pixels applied after positioning. Positive values move
+   * the layer to the right.
+   */
+  offsetX?: number;
+  /**
+   * Vertical offset in pixels applied after positioning. Positive values move
+   * the layer down. Use this to add a gap between a `below`-placed layer and its
+   * trigger.
+   */
+  offsetY?: number;
+  /**
    * Which side of the anchor the layer is placed on. Defaults to `'above'`.
    */
   placement?: LayerPlacement;
@@ -227,12 +238,17 @@ export function useLayer({
     (children: ReactNode, props?: ContextRenderProps) => {
       const placement = props?.placement ?? 'above';
       const alignment = props?.alignment ?? 'center';
+      const {offsetX, offsetY} = props ?? {};
       const anchorStyle: React.CSSProperties = {
         border: 'none',
         positionAnchor: anchorId,
         positionArea: getPositionArea(placement, alignment),
         positionTryFallbacks: 'flip-block, flip-inline, flip-block flip-inline',
       };
+      const offsetStyle: React.CSSProperties =
+        offsetX != null || offsetY != null
+          ? {translate: `${offsetX ?? 0}px ${offsetY ?? 0}px`}
+          : {};
 
       const layerProps: LayerElementProps = {
         ref: popoverRefCallback,
@@ -240,7 +256,7 @@ export function useLayer({
         role: props?.role,
         popover: isDismissable ? 'auto' : 'manual',
         className: cx(styles.layer, props?.className),
-        style: {...anchorStyle, ...props?.style},
+        style: {...anchorStyle, ...offsetStyle, ...props?.style},
       };
 
       return createElement('div', layerProps, children);

@@ -286,7 +286,11 @@ export function useScheduleEventPopover(event: CalendarEvent): {
     return {};
   }
   return {
-    popover: popover.render(content, {placement: 'below', alignment: 'start'}),
+    popover: popover.render(content, {
+      alignment: 'start',
+      offsetY: 4,
+      placement: 'below',
+    }),
     triggerProps: {
       ...popover.triggerProps,
       onClick: popover.toggle,
