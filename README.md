@@ -202,71 +202,7 @@ mode details, scoped theming examples, and per-instance overrides.
 
 ## Contributing
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) >= 22
-- [pnpm](https://pnpm.io/) >= 11 (`corepack enable` uses the version pinned in `package.json`)
-
-### Setup
-
-```bash
-git clone <repo-url>
-cd silver-ui
-pnpm install
-```
-
-This runs `panda codegen` automatically via the `prepare` script.
-
-### Development
-
-Start Storybook for interactive component development:
-
-```bash
-pnpm dev
-```
-
-This launches Storybook at `http://localhost:6006`.
-
-### Scripts
-
-| Script                 | Description                  |
-| ---------------------- | ---------------------------- |
-| `pnpm storybook`       | Start Storybook dev server   |
-| `pnpm build`           | Build the library (JS + CSS) |
-| `pnpm build:storybook` | Build static Storybook site  |
-| `pnpm test`            | Run tests                    |
-| `pnpm test:watch`      | Run tests in watch mode      |
-| `pnpm lint`            | Run ESLint                   |
-| `pnpm lint:fix`        | Run ESLint with auto-fix     |
-| `pnpm format`          | Format code with Prettier    |
-| `pnpm format:check`    | Check formatting             |
-| `pnpm typecheck`       | Type-check with TypeScript   |
-| `pnpm clean`           | Remove build artifacts       |
-
-### Adding a new component
-
-1. Create a directory: `src/components/MyComponent/`
-2. Add the recipe file (`MyComponent.recipe.ts`) using `cva` or `sva`
-3. Add the component file (`MyComponent.tsx`) — must accept `className`, `style`, and `ref`
-4. Add tests (`MyComponent.test.tsx`) and stories (`MyComponent.stories.tsx`)
-5. Add a barrel export (`index.ts`) and re-export from `src/index.ts`
-
-### Pre-commit hooks
-
-Commits automatically run:
-
-- **ESLint** on staged `.ts`/`.tsx` files
-- **Prettier** on staged files
-- **TypeScript** type-checking on the full project
-
-### Build output
-
-`pnpm build` produces:
-
-- `dist/index.js` — ESM bundle
-- `dist/index.cjs` — CJS bundle
-- `dist/index.d.ts` — TypeScript declarations
-- `dist/styles.css` — All component styles (import this in consuming apps)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, development scripts, and component contribution guidelines.
 
 ## License
 
