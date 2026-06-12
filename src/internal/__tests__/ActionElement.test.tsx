@@ -52,7 +52,7 @@ describe('ActionElement', () => {
   });
 
   it('defaults href-less forced links to role link', () => {
-    render(<ActionElement renderAsLink>Disabled Link</ActionElement>);
+    render(<ActionElement isLink>Disabled Link</ActionElement>);
 
     const link = screen.getByRole('link', {name: 'Disabled Link'});
     expect(link).not.toHaveAttribute('href');
@@ -60,7 +60,7 @@ describe('ActionElement', () => {
 
   it('uses an explicit role when provided', () => {
     render(
-      <ActionElement renderAsLink role="menuitem">
+      <ActionElement isLink role="menuitem">
         Menu Item
       </ActionElement>,
     );

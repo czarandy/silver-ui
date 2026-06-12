@@ -105,7 +105,7 @@ interface ButtonBaseProps {
    */
   form?: string;
   /**
-   * URL to navigate to. When set and the button is not disabled, the component
+   * URL to navigate to. When set and the button is not isDisabled, the component
    * renders as a link element.
    */
   href?: string;
@@ -164,8 +164,10 @@ interface ButtonBaseProps {
    */
   target?: string;
   /**
-   * Tooltip text shown on hover. When set on a disabled button,
-   * `aria-disabled` is used instead of the `disabled` attribute so the
+   * Tooltip text shown on hover. Defaults to `label` when `isIconOnly` is true
+   * (since the label is otherwise not visible); pass an explicit value to
+   * override, or `undefined` to keep the default. When set on a disabled
+   * button, `aria-disabled` is used instead of the `disabled` attribute so the
    * tooltip remains accessible.
    */
   tooltip?: string;
@@ -250,6 +252,12 @@ export function Button({
   const size = sizeProp ?? buttonGroup?.size ?? 'md';
   const buttonDisabled =
     isDisabled || buttonGroup?.isDisabled === true || isLoading;
+  // Icon-only buttons have no visible text, so default their tooltip to the
+  // accessible `label` unless an explicit tooltip is provided.
+  const effectiveTooltip = tooltip ?? (isIconOnly ? label : undefined);
+  // Only an explicit tooltip swaps native `disabled` for `aria-disabled` (to
+  // keep the tooltip hoverable while disabled); the icon-only default must not
+  // change disabled semantics.
   const useAriaDisabled = tooltip != null && buttonDisabled;
   const renderAsLink = href != null && !buttonDisabled;
   const opensInNewTab = renderAsLink && target === '_blank';
@@ -356,15 +364,17 @@ export function Button({
       as={as}
       className={rootClassName}
       data-testid={dataTestId}
-      disabled={!renderAsLink && !useAriaDisabled ? buttonDisabled : undefined}
       form={form}
       href={renderAsLink ? href : undefined}
+      isDisabled={
+        !renderAsLink && !useAriaDisabled ? buttonDisabled : undefined
+      }
+      isLink={renderAsLink}
       name={name}
       onClick={renderAsLink ? handleLinkClick : handleButtonClick}
       onKeyDown={renderAsLink ? handleLinkKeyDown : handleButtonKeyDown}
       ref={ref}
       rel={renderAsLink ? linkRel : undefined}
-      renderAsLink={renderAsLink}
       style={style}
       target={renderAsLink ? target : undefined}
       type={type}
@@ -373,8 +383,8 @@ export function Button({
     </ActionElement>
   );
 
-  if (tooltip != null) {
-    return <Tooltip content={tooltip}>{element}</Tooltip>;
+  if (effectiveTooltip != null) {
+    return <Tooltip content={effectiveTooltip}>{element}</Tooltip>;
   }
 
   return element;

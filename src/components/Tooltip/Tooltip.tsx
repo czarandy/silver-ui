@@ -45,15 +45,15 @@ export interface TooltipProps {
    */
   focusTrigger?: TooltipFocusTrigger;
   /**
-   * Whether to show a dashed underline on text-only children.
-   * @default 'auto'
-   */
-  hasHoverIndication?: 'auto' | boolean;
-  /**
    * Delay in milliseconds before the tooltip hides after leaving.
    * @default 0
    */
   hideDelay?: number;
+  /**
+   * Dashed underline display for tooltip triggers.
+   * @default 'auto'
+   */
+  hoverIndication?: 'always' | 'auto' | 'never';
   /**
    * Whether the tooltip can be shown.
    * @default true
@@ -90,7 +90,7 @@ export function Tooltip({
   hideDelay = 0,
   focusTrigger = 'auto',
   isEnabled = true,
-  hasHoverIndication = 'auto',
+  hoverIndication = 'auto',
   className,
   'data-testid': dataTestId,
   style,
@@ -110,7 +110,7 @@ export function Tooltip({
       className={className}
       data-testid={dataTestId}
       describedBy={tooltip.describedBy}
-      hasHoverIndication={hasHoverIndication}
+      hoverIndication={hoverIndication}
       layer={tooltip.renderTooltip(content, {contentStyle})}
       nonTextWrapperElement="div"
       style={style}

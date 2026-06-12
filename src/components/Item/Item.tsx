@@ -307,8 +307,9 @@ export function Item({
       aria-disabled={href != null && isDisabled ? true : undefined}
       as={linkComponent}
       className={classes.interactiveContent}
-      disabled={href == null ? isDisabled : undefined}
       href={href}
+      isDisabled={href == null ? isDisabled : undefined}
+      isLink={href != null}
       onClick={(e: MouseEvent<HTMLElement>) => {
         if (isDisabled) {
           e.preventDefault();
@@ -318,7 +319,6 @@ export function Item({
       }}
       ref={setInteractiveRef}
       rel={href != null ? linkRel : undefined}
-      renderAsLink={href != null}
       tabIndex={href != null && isDisabled ? -1 : undefined}
       target={href != null ? target : undefined}>
       {innerSlots}

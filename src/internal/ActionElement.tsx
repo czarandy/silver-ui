@@ -32,16 +32,16 @@ export interface ActionElementProps {
   children?: ReactNode;
   className?: string;
   'data-testid'?: string;
-  disabled?: boolean;
   form?: string;
   href?: string;
   id?: string;
+  isDisabled?: boolean;
+  isLink?: boolean;
   name?: string;
   onClick?: MouseEventHandler<HTMLElement>;
   onKeyDown?: KeyboardEventHandler<HTMLElement>;
   ref?: Ref<HTMLElement>;
   rel?: string;
-  renderAsLink?: boolean;
   role?: string;
   style?: CSSProperties;
   tabIndex?: number;
@@ -53,7 +53,7 @@ export interface ActionElementProps {
 export function ActionElement({
   as,
   children,
-  disabled,
+  isDisabled,
   form,
   href,
   name,
@@ -61,7 +61,7 @@ export function ActionElement({
   onKeyDown,
   ref,
   rel,
-  renderAsLink = href != null,
+  isLink = href != null,
   role: roleFromProps,
   style,
   tabIndex,
@@ -71,10 +71,9 @@ export function ActionElement({
   ...props
 }: ActionElementProps): React.JSX.Element {
   const LinkComponent = useLinkComponent(as);
-  const role =
-    roleFromProps ?? (renderAsLink && href == null ? 'link' : undefined);
+  const role = roleFromProps ?? (isLink && href == null ? 'link' : undefined);
 
-  if (renderAsLink) {
+  if (isLink) {
     return (
       <LinkComponent
         {...props}
@@ -96,7 +95,7 @@ export function ActionElement({
   return (
     <button
       {...props}
-      disabled={disabled}
+      disabled={isDisabled}
       form={form}
       name={name}
       onClick={onClick}

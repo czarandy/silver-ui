@@ -94,11 +94,6 @@ export interface TextProps extends NativeTextProps {
    */
   hasTabularNumbers?: boolean;
   /**
-   * Whether to show a tooltip when text is truncated, or the tooltip placement.
-   * @default true
-   */
-  hasTruncateTooltip?: boolean | TruncateTooltipPlacement;
-  /**
    * Maximum number of visible lines before truncation. 0 disables truncation.
    * @default 0
    */
@@ -119,6 +114,11 @@ export interface TextProps extends NativeTextProps {
    * CSS text-wrap value.
    */
   textWrap?: TextWrap;
+  /**
+   * Tooltip placement shown when text is truncated. Set to false to disable.
+   * @default 'above'
+   */
+  truncateTooltip?: false | TruncateTooltipPlacement;
   /**
    * Typographic preset that determines font size and line height.
    * @default 'body'
@@ -153,7 +153,7 @@ function BaseText({
   weight,
   display = 'inline',
   maxLines: _maxLines,
-  hasTruncateTooltip: _hasTruncateTooltip,
+  truncateTooltip: _truncateTooltip,
   wordBreak: _wordBreak,
   textWrap,
   hasStrikethrough = false,
@@ -200,7 +200,7 @@ function TruncatedText({
   weight,
   display: _display,
   maxLines = 1,
-  hasTruncateTooltip = true,
+  truncateTooltip = 'above',
   wordBreak,
   textWrap,
   hasStrikethrough = false,
@@ -217,13 +217,10 @@ function TruncatedText({
   const truncation = useTruncation({maxLines});
   const resolvedColor = color ?? defaultColorByType[type];
   const resolvedWordBreak = wordBreak ?? 'break-word';
-  const tooltipPlacement =
-    typeof hasTruncateTooltip === 'string' ? hasTruncateTooltip : 'above';
-  const isTooltipEnabled =
-    hasTruncateTooltip !== false && truncation.isTruncated;
+  const isTooltipEnabled = truncateTooltip !== false && truncation.isTruncated;
 
   const tooltip = useTooltip({
-    placement: tooltipPlacement,
+    placement: truncateTooltip === false ? 'above' : truncateTooltip,
     isEnabled: isTooltipEnabled,
   });
 

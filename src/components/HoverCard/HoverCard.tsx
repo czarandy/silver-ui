@@ -41,15 +41,15 @@ export interface HoverCardProps {
    */
   focusTrigger?: HoverCardFocusTrigger;
   /**
-   * Whether to visually underline text triggers.
-   * @default 'auto'
-   */
-  hasHoverIndication?: 'auto' | boolean;
-  /**
    * Delay before closing after hover/focus leaves, in milliseconds.
    * @default 200
    */
   hideDelay?: number;
+  /**
+   * Dashed underline display for text triggers.
+   * @default 'auto'
+   */
+  hoverIndication?: 'always' | 'auto' | 'never';
   /**
    * Whether hover/focus interactions are enabled.
    * @default true
@@ -82,7 +82,7 @@ export function HoverCard({
   hideDelay = 200,
   focusTrigger = 'auto',
   isEnabled = true,
-  hasHoverIndication = 'auto',
+  hoverIndication = 'auto',
   className,
   style,
   ref,
@@ -102,9 +102,9 @@ export function HoverCard({
       className={className}
       data-testid={dataTestId}
       describedBy={hoverCard.describedBy}
-      hasHoverIndication={hasHoverIndication}
+      hoverIndication={hoverIndication}
+      isNonTextWrapperPropsForwarded={false}
       layer={hoverCard.renderHoverCard(content)}
-      shouldForwardNonTextWrapperProps={false}
       style={style}
       triggerRef={hoverCard.ref}
       wrapperRef={ref}>

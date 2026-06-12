@@ -64,11 +64,6 @@ export interface HeadingProps extends NativeHeadingProps {
    */
   hasStrikethrough?: boolean;
   /**
-   * Whether to show a tooltip when text is truncated, or the tooltip placement.
-   * @default true
-   */
-  hasTruncateTooltip?: boolean | HeadingTruncateTooltipPlacement;
-  /**
    * Semantic heading level that determines the rendered h1-h6 element.
    */
   level: HeadingLevel;
@@ -90,6 +85,11 @@ export interface HeadingProps extends NativeHeadingProps {
    */
   textWrap?: TextWrap;
   /**
+   * Tooltip placement shown when text is truncated. Set to false to disable.
+   * @default 'above'
+   */
+  truncateTooltip?: false | HeadingTruncateTooltipPlacement;
+  /**
    * Word-break strategy.
    */
   wordBreak?: TextWordBreak;
@@ -110,7 +110,7 @@ function BaseHeading({
   color = 'primary',
   display = 'block',
   maxLines: _maxLines,
-  hasTruncateTooltip: _hasTruncateTooltip,
+  truncateTooltip: _truncateTooltip,
   wordBreak: _wordBreak,
   textWrap,
   hasStrikethrough = false,
@@ -156,7 +156,7 @@ function TruncatedHeading({
   color = 'primary',
   display: _display,
   maxLines = 1,
-  hasTruncateTooltip = true,
+  truncateTooltip = 'above',
   wordBreak,
   textWrap,
   hasStrikethrough = false,
@@ -170,13 +170,10 @@ function TruncatedHeading({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const truncation = useTruncation({maxLines});
   const resolvedWordBreak = wordBreak ?? 'break-word';
-  const tooltipPlacement =
-    typeof hasTruncateTooltip === 'string' ? hasTruncateTooltip : 'above';
-  const isTooltipEnabled =
-    hasTruncateTooltip !== false && truncation.isTruncated;
+  const isTooltipEnabled = truncateTooltip !== false && truncation.isTruncated;
 
   const tooltip = useTooltip({
-    placement: tooltipPlacement,
+    placement: truncateTooltip === false ? 'above' : truncateTooltip,
     isEnabled: isTooltipEnabled,
   });
 

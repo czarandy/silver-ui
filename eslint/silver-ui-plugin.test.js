@@ -239,6 +239,14 @@ tester.run('boolean-prop-naming', booleanPropNamingRule, {
       `,
     },
     {
+      name: 'ignores mixed boolean unions without boolean prefixes',
+      code: `
+        type TooltipProps = {
+          hoverIndication?: 'auto' | boolean;
+        };
+      `,
+    },
+    {
       name: 'allows is and has prefixes on non-Props interfaces',
       code: `
         interface TruncationState {

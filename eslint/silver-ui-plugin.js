@@ -306,6 +306,50 @@ function includesBooleanType(typeAnnotation) {
   return false;
 }
 
+function isNullishType(typeNode) {
+  return (
+    typeNode.type === 'TSUndefinedKeyword' ||
+    typeNode.type === 'TSNullKeyword' ||
+    (typeNode.type === 'TSVoidKeyword')
+  );
+}
+
+function isBooleanLiteralType(typeNode) {
+  return (
+    typeNode.type === 'TSLiteralType' &&
+    typeof typeNode.literal.value === 'boolean'
+  );
+}
+
+function isPureBooleanType(typeAnnotation) {
+  if (!typeAnnotation) {
+    return false;
+  }
+
+  const typeNode =
+    typeAnnotation.type === 'TSTypeAnnotation'
+      ? typeAnnotation.typeAnnotation
+      : typeAnnotation;
+
+  if (typeNode.type === 'TSBooleanKeyword' || isBooleanLiteralType(typeNode)) {
+    return true;
+  }
+
+  if (typeNode.type === 'TSUnionType') {
+    const semanticTypes = typeNode.types.filter(type => !isNullishType(type));
+
+    return (
+      semanticTypes.length > 0 &&
+      semanticTypes.every(
+        type =>
+          type.type === 'TSBooleanKeyword' || isBooleanLiteralType(type),
+      )
+    );
+  }
+
+  return false;
+}
+
 function isBooleanFunctionType(typeAnnotation) {
   if (!typeAnnotation) {
     return false;
@@ -317,7 +361,8 @@ function isBooleanFunctionType(typeAnnotation) {
       : typeAnnotation;
 
   return (
-    typeNode.type === 'TSFunctionType' && includesBooleanType(typeNode.returnType)
+    typeNode.type === 'TSFunctionType' &&
+    isPureBooleanType(typeNode.returnType)
   );
 }
 
@@ -365,7 +410,10 @@ const booleanPropNaming = {
           continue;
         }
 
-        const isBoolean = includesBooleanType(identifier.typeAnnotation);
+        const isBoolean = isPureBooleanType(identifier.typeAnnotation);
+        const isBooleanCompatible = includesBooleanType(
+          identifier.typeAnnotation,
+        );
         const isPrefixed = hasBooleanPrefix(identifier.name);
 
         if (isBoolean && !isPrefixed) {
@@ -376,7 +424,7 @@ const booleanPropNaming = {
           });
         }
 
-        if (isPrefixed && !isBoolean) {
+        if (isPrefixed && !isBooleanCompatible) {
           context.report({
             node: identifier,
             messageId: 'invalidPrefixedParam',
@@ -393,7 +441,8 @@ const booleanPropNaming = {
           return;
         }
 
-        const isBoolean = includesBooleanType(node.typeAnnotation);
+        const isBoolean = isPureBooleanType(node.typeAnnotation);
+        const isBooleanCompatible = includesBooleanType(node.typeAnnotation);
         const isBooleanFunction = isBooleanFunctionType(node.typeAnnotation);
         const isPrefixed = hasBooleanPrefix(name);
         const isPredicatePrefixed = hasBooleanPredicatePrefix(name);
@@ -415,7 +464,7 @@ const booleanPropNaming = {
           });
         }
 
-        if (isPrefixed && !isBoolean) {
+        if (isPrefixed && !isBooleanCompatible) {
           context.report({
             node: node.key,
             messageId: 'invalidPrefixedProp',

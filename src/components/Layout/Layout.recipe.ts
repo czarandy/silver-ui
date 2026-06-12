@@ -123,7 +123,6 @@ export const layoutHeaderRecipe = sva({
     },
     inner: {
       display: 'flex',
-      alignItems: 'flex-start',
       justifyContent: 'space-between',
       gap: '3',
     },
@@ -146,6 +145,12 @@ export const layoutHeaderRecipe = sva({
     },
   },
   variants: {
+    // Cross-axis alignment of the start/title/end slots within the header row.
+    align: {
+      start: {inner: {alignItems: 'flex-start'}},
+      center: {inner: {alignItems: 'center'}},
+      end: {inner: {alignItems: 'flex-end'}},
+    },
     hasDivider: {
       true: {
         root: {
@@ -157,6 +162,7 @@ export const layoutHeaderRecipe = sva({
     },
   },
   defaultVariants: {
+    align: 'start',
     hasDivider: false,
   },
 });

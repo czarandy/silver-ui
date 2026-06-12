@@ -152,11 +152,11 @@ export function SideNavItem({
         as={as}
         className={collapsedClassNames}
         data-testid={dataTestId}
-        disabled={href == null || isDisabled ? isDisabled : undefined}
         href={isDisabled ? undefined : href}
+        isDisabled={href == null || isDisabled ? isDisabled : undefined}
+        isLink={href != null && !isDisabled}
         onClick={handleClick}
         ref={ref}
-        renderAsLink={href != null && !isDisabled}
         style={style}
         type="button">
         {iconSlot}

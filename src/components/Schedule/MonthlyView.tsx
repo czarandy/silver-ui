@@ -1,6 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
 import type {CSSProperties} from 'react';
+import {Link} from 'components/Link';
 import {Popover} from 'components/Popover';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
@@ -712,12 +713,14 @@ function ScheduleMonthlyView({
                     data-testid={`schedule-month-see-more-${day.toString()}`}
                     label={label}
                     width={320}>
-                    <button
-                      aria-label={label}
+                    <Link
                       className={styles.monthSeeMoreButton}
-                      type="button">
+                      color="primary"
+                      label={label}
+                      size="xs"
+                      weight="medium">
                       +{hiddenEvents.length} more
-                    </button>
+                    </Link>
                   </Popover>
                 </div>
               );

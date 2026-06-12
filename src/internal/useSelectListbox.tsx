@@ -65,16 +65,16 @@ function getSelectListboxOptions<TOption extends SelectListboxOptionData>(
 }
 
 export type UseSelectListboxOptions<TOption extends SelectListboxOptionData> = {
-  clearQueryOnCommit?: boolean;
-  closeOnCommit?: boolean;
   description: ReactNode;
   isDefaultOpen?: boolean;
   isDisabled?: boolean;
+  isHighlightClearedOnCommit?: boolean;
   isLoading?: boolean;
-  onCommitOption: (option: TOption) => boolean | undefined;
+  isListboxClosedOnCommit?: boolean;
+  isQueryClearedOnCommit?: boolean;
+  onCommitOption: (option: TOption) => unknown;
   options: ReadonlyArray<SelectListboxOption<TOption>>;
   selectedValues: ReadonlySet<string>;
-  shouldClearOnCommit?: boolean;
   status: InputStatus | undefined;
 };
 
@@ -106,16 +106,16 @@ export type UseSelectListboxResult<TOption extends SelectListboxOptionData> = {
 };
 
 export function useSelectListbox<TOption extends SelectListboxOptionData>({
-  clearQueryOnCommit = false,
-  closeOnCommit = false,
   description,
   isDefaultOpen = false,
   isDisabled = false,
+  isHighlightClearedOnCommit = true,
   isLoading = false,
+  isListboxClosedOnCommit = false,
+  isQueryClearedOnCommit = false,
   onCommitOption,
   options,
   selectedValues,
-  shouldClearOnCommit = true,
   status,
 }: UseSelectListboxOptions<TOption>): UseSelectListboxResult<TOption> {
   const inputId = useId();
@@ -175,17 +175,17 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
         return;
       }
 
-      if (closeOnCommit) {
+      if (isListboxClosedOnCommit) {
         setIsOpen(false);
       }
-      if (clearQueryOnCommit) {
+      if (isQueryClearedOnCommit) {
         setQuery('');
       }
     },
     onOpenChange: setIsOpen,
     options: visibleSelectableOptions,
     selectedValues,
-    shouldClearOnCommit,
+    shouldClearOnCommit: isHighlightClearedOnCommit,
   });
 
   const handleOptionClick = useCallback(
@@ -197,14 +197,19 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
         return;
       }
 
-      if (closeOnCommit) {
+      if (isListboxClosedOnCommit) {
         setIsOpen(false);
       }
-      if (clearQueryOnCommit) {
+      if (isQueryClearedOnCommit) {
         setQuery('');
       }
     },
-    [clearQueryOnCommit, closeOnCommit, onCommitOption, optionByValue],
+    [
+      isListboxClosedOnCommit,
+      isQueryClearedOnCommit,
+      onCommitOption,
+      optionByValue,
+    ],
   );
 
   const handleOptionMouseEnter = useCallback(

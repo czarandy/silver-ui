@@ -284,11 +284,11 @@ export function MultiSelect({
     description,
     isDefaultOpen,
     isDisabled,
+    isHighlightClearedOnCommit: false,
     isLoading,
     onCommitOption: toggleValue,
     options,
     selectedValues,
-    shouldClearOnCommit: false,
     status,
   });
 

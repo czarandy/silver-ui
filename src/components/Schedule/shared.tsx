@@ -9,6 +9,7 @@ import type {
   CalendarEvent,
   ScheduleCategory,
   ScheduleCategoryMap,
+  ScheduleEventPopoverControls,
   ScheduleHeaderContent,
   SchedulePlugin,
 } from 'components/Schedule/types';
@@ -199,19 +200,27 @@ export function useScheduleEventPopover(event: CalendarEvent): {
   triggerProps?: ScheduleEventTriggerProps;
 } {
   const {categoryMap, plugins, timezoneID} = useScheduleContext();
+  const popover = usePopover({
+    // Content renders its own close affordance via the `controls.close` passed
+    // to renderEventPopover, so suppress the built-in close button.
+    hasCloseButton: false,
+    label: getEventAccessibleLabel(event, categoryMap, timezoneID),
+    role: 'dialog',
+  });
+  const {hide} = popover;
+  const controls = useMemo(
+    (): ScheduleEventPopoverControls => ({close: hide}),
+    [hide],
+  );
   const content = useMemo((): ReactNode => {
     for (const plugin of plugins) {
-      const node = plugin.renderEventPopover?.(event);
+      const node = plugin.renderEventPopover?.(event, controls);
       if (isReactNode(node)) {
         return node;
       }
     }
     return null;
-  }, [event, plugins]);
-  const popover = usePopover({
-    label: getEventAccessibleLabel(event, categoryMap, timezoneID),
-    role: 'dialog',
-  });
+  }, [controls, event, plugins]);
   if (!isReactNode(content)) {
     return {};
   }

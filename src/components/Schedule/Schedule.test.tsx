@@ -1662,6 +1662,19 @@ describe('Schedule', () => {
       );
     });
 
+    it('closes the popover from the header close button', () => {
+      render(<ScheduleWithPopover view={createScheduleMonthlyView()} />);
+      const pill = screen.getByTestId('schedule-event-visible');
+      fireEvent.click(pill);
+      expect(pill).toHaveAttribute('aria-expanded', 'true');
+
+      const popover = screen.getByTestId('schedule-event-popover');
+      fireEvent.click(
+        within(popover).getByTestId('schedule-event-popover-close'),
+      );
+      expect(pill).toHaveAttribute('aria-expanded', 'false');
+    });
+
     it('omits action buttons when no callbacks are provided', () => {
       render(<ScheduleWithPopover view={createScheduleMonthlyView()} />);
       fireEvent.click(screen.getByTestId('schedule-event-visible'));

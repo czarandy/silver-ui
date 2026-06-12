@@ -290,6 +290,37 @@ describe('Button', () => {
     expect(onKeyDown).toHaveBeenCalledOnce();
   });
 
+  it('defaults the tooltip to the label for icon-only buttons', () => {
+    render(<Button icon={Home} isIconOnly label="Settings" />);
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Settings',
+    );
+  });
+
+  it('lets an explicit tooltip override the icon-only default', () => {
+    render(
+      <Button
+        icon={Home}
+        isIconOnly
+        label="Settings"
+        tooltip="Open settings"
+      />,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Open settings',
+    );
+  });
+
+  it('does not add a default tooltip when the label is visible', () => {
+    render(<Button icon={Home} label="Settings" />);
+
+    expect(
+      screen.queryByRole('tooltip', {hidden: true}),
+    ).not.toBeInTheDocument();
+  });
+
   it('defaults type to button and passes form attributes', () => {
     render(
       <Button

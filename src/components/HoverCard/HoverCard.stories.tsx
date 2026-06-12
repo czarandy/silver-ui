@@ -18,8 +18,11 @@ const meta: Meta<typeof HoverCard> = {
     },
     delay: {control: 'number'},
     hideDelay: {control: 'number'},
+    hoverIndication: {
+      control: {type: 'select'},
+      options: ['auto', 'always', 'never'],
+    },
     isEnabled: {control: 'boolean'},
-    hasHoverIndication: {control: 'boolean'},
   },
 };
 
@@ -146,13 +149,13 @@ export const HoverIndication: Story = {
         alignItems: 'start',
         gap: 16,
       }}>
-      <HoverCard content={previewContent} hasHoverIndication={false}>
+      <HoverCard content={previewContent} hoverIndication="never">
         No underline on hover
       </HoverCard>
-      <HoverCard content={previewContent} hasHoverIndication>
+      <HoverCard content={previewContent} hoverIndication="always">
         Always underline on hover
       </HoverCard>
-      <HoverCard content={previewContent} hasHoverIndication="auto">
+      <HoverCard content={previewContent} hoverIndication="auto">
         Auto (text triggers only)
       </HoverCard>
     </div>

@@ -25,9 +25,9 @@ const meta: Meta<typeof Tooltip> = {
       options: ['auto', 'always', 'never'],
     },
     isEnabled: {control: 'boolean'},
-    hasHoverIndication: {
+    hoverIndication: {
       control: {type: 'select'},
-      options: ['auto', true, false],
+      options: ['auto', 'always', 'never'],
     },
     content: {control: 'text'},
     children: {control: 'text'},
@@ -138,7 +138,7 @@ export const WithUseTooltipHook: Story = {
 export const HoverIndication: Story = {
   args: {
     children: 'Underlined on hover',
-    hasHoverIndication: true,
+    hoverIndication: 'always',
   },
 };
 

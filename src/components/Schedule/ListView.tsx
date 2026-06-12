@@ -153,7 +153,7 @@ function ListEvent({
   const category = getCategory(categoryMap, event);
   const eventContent = (
     <>
-      <Tooltip content={category.label} hasHoverIndication={false}>
+      <Tooltip content={category.label} hoverIndication="never">
         <span
           aria-label={category.label}
           className={scheduleEventRecipe({color: category.color}).dot}

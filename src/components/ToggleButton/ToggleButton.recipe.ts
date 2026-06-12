@@ -25,6 +25,13 @@ export const toggleButtonRecipe = sva({
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       minW: 0,
+      // The label is a (blockified) flex item, so `overflow: hidden` clips it to
+      // its line box. With a tight line-height that crops descenders (e.g. the
+      // "g" in "Going"), so pad the clip box vertically and cancel the padding
+      // with a negative margin to keep layout unchanged.
+      py: '0.25em',
+      mt: '-0.35em',
+      mb: '-0.25em',
     },
     widthReservation: {
       display: 'block',

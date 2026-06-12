@@ -129,9 +129,10 @@ export function Tab({
       data-tab-disabled={isDisabled ? 'true' : undefined}
       data-tab-value={isDisabled ? undefined : value}
       data-testid={dataTestId}
-      disabled={href == null ? isDisabled : undefined}
       href={href}
       id={id}
+      isDisabled={href == null ? isDisabled : undefined}
+      isLink={href != null}
       onClick={event => {
         if (isDisabled) {
           event.preventDefault();
@@ -141,7 +142,6 @@ export function Tab({
         context.onChange(value);
       }}
       ref={ref}
-      renderAsLink={href != null}
       role="tab"
       style={style}
       tabIndex={isSelected && !isDisabled ? 0 : -1}

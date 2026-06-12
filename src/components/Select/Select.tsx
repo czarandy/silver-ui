@@ -243,11 +243,11 @@ export function Select({
     statusMessageID,
     triggerRef,
   } = useSelectListbox({
-    clearQueryOnCommit: true,
-    closeOnCommit: true,
     description,
     isDisabled,
     isLoading,
+    isListboxClosedOnCommit: true,
+    isQueryClearedOnCommit: true,
     onCommitOption: commitOption,
     options,
     selectedValues,

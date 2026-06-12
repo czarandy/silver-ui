@@ -22,6 +22,11 @@ import type {SpacingToken} from 'internal/spacingTokens';
  */
 export interface LayoutHeaderProps {
   /**
+   * Cross-axis alignment of the start content, title, and end content within
+   * the header row. Default is `start`.
+   */
+  align?: 'start' | 'center' | 'end';
+  /**
    * Additional CSS class names applied to the header.
    */
   className?: string;
@@ -76,6 +81,7 @@ export interface LayoutHeaderProps {
  * on the parent Dialog and the title receives initial focus.
  */
 export function LayoutHeader({
+  align = 'start',
   className,
   'data-testid': dataTestId,
   endContent,
@@ -92,7 +98,7 @@ export function LayoutHeader({
   const dialogContext = useDialogContext();
   const hasDivider = dividerContext?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
-  const classes = layoutHeaderRecipe({hasDivider});
+  const classes = layoutHeaderRecipe({align, hasDivider});
 
   const closeButton =
     dialogContext != null ? (

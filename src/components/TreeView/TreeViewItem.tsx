@@ -266,11 +266,11 @@ export function TreeViewItem({
           aria-disabled={href != null && isDisabled ? true : undefined}
           aria-labelledby={labelId}
           className={styles.invisibleAction}
-          disabled={href == null ? isDisabled : undefined}
           href={href}
+          isDisabled={href == null ? isDisabled : undefined}
+          isLink={href != null}
           onClick={handleActionClick}
           ref={actionRef}
-          renderAsLink={href != null}
           tabIndex={-1}
           target={href != null ? target : undefined}>
           {labelAndDescription}

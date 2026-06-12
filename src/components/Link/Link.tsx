@@ -212,12 +212,12 @@ export function Link({
       as={as}
       className={cx(linkRecipe({color, hasUnderline, size, weight}), className)}
       data-testid={dataTestId}
-      disabled={!renderAsLink ? isDisabled : undefined}
       href={isDisabled ? undefined : hrefFromProps}
+      isDisabled={!renderAsLink ? isDisabled : undefined}
+      isLink={renderAsLink}
       onClick={handleClick}
       ref={ref}
       rel={!isDisabled && renderAsLink ? rel : undefined}
-      renderAsLink={renderAsLink}
       style={style}
       tabIndex={isDisabled ? -1 : undefined}
       target={!isDisabled && renderAsLink ? target : undefined}>

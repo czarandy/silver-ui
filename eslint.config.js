@@ -370,6 +370,18 @@ export default tseslint.config(
       'silver-ui/require-component-props': 'error',
     },
   },
+  // Internal React primitives use the same boolean prop naming convention as
+  // public components, but do not need the public component prop surface.
+  {
+    files: ['src/internal/**/*.tsx'],
+    ignores: ['**/*.test.tsx'],
+    plugins: {
+      'silver-ui': silverUiPlugin,
+    },
+    rules: {
+      'silver-ui/boolean-prop-naming': 'error',
+    },
+  },
   // Public component types must not depend on Panda recipe declarations
   {
     files: ['src/components/**/*.{ts,tsx}'],

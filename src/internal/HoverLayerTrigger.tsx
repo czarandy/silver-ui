@@ -10,17 +10,15 @@ import {mergeRefs} from 'internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
 
-export type HoverLayerTriggerIndication = 'auto' | boolean;
-
 export interface HoverLayerTriggerProps {
   children: ReactNode;
   className?: string;
   'data-testid'?: string;
   describedBy: string;
-  hasHoverIndication?: HoverLayerTriggerIndication;
+  hoverIndication?: 'always' | 'auto' | 'never';
+  isNonTextWrapperPropsForwarded?: boolean;
   layer: ReactNode;
   nonTextWrapperElement?: 'div' | 'span';
-  shouldForwardNonTextWrapperProps?: boolean;
   style?: CSSProperties;
   triggerRef: RefCallback<HTMLElement>;
   wrapperRef?: Ref<HTMLElement>;
@@ -55,10 +53,10 @@ export function HoverLayerTrigger({
   className,
   'data-testid': dataTestId,
   describedBy,
-  hasHoverIndication = 'auto',
+  hoverIndication = 'auto',
+  isNonTextWrapperPropsForwarded = true,
   layer,
   nonTextWrapperElement = 'span',
-  shouldForwardNonTextWrapperProps = true,
   style,
   triggerRef,
   wrapperRef,
@@ -66,7 +64,7 @@ export function HoverLayerTrigger({
   const ownWrapperRef = useRef<HTMLDivElement | HTMLSpanElement>(null);
   const textOnly = isTextOnly(children);
   const showHoverIndication =
-    hasHoverIndication === true || (hasHoverIndication === 'auto' && textOnly);
+    hoverIndication === 'always' || (hoverIndication === 'auto' && textOnly);
 
   useIsomorphicLayoutEffect(() => {
     if (textOnly) {
@@ -117,17 +115,17 @@ export function HoverLayerTrigger({
     );
   }
 
-  const nonTextWrapperRef = shouldForwardNonTextWrapperProps
+  const nonTextWrapperRef = isNonTextWrapperPropsForwarded
     ? mergeRefs(ownWrapperRef, wrapperRef)
     : ownWrapperRef;
   const nonTextWrapperClassName = cx(
     styles.wrapperContents,
-    shouldForwardNonTextWrapperProps ? className : undefined,
+    isNonTextWrapperPropsForwarded ? className : undefined,
   );
-  const nonTextWrapperTestId = shouldForwardNonTextWrapperProps
+  const nonTextWrapperTestId = isNonTextWrapperPropsForwarded
     ? dataTestId
     : undefined;
-  const nonTextWrapperStyle = shouldForwardNonTextWrapperProps
+  const nonTextWrapperStyle = isNonTextWrapperPropsForwarded
     ? style
     : undefined;
   const wrappedChildren =

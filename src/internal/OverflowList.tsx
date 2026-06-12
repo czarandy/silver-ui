@@ -59,9 +59,9 @@ const styles = {
 
 function getAvailableWidth(
   container: HTMLElement,
-  observeParent: boolean,
+  isObservingParent: boolean,
 ): number {
-  if (observeParent && container.parentElement != null) {
+  if (isObservingParent && container.parentElement != null) {
     const parent = container.parentElement;
     const parentStyle = window.getComputedStyle(parent);
     const paddingLeft = Number.parseFloat(parentStyle.paddingLeft) || 0;
@@ -86,7 +86,7 @@ export function OverflowList({
   // eslint-disable-next-line @eslint-react/no-children-to-array -- matches XDSOverflowList: normalizes children before width measurement
   const childArray = Children.toArray(children) as ReactElement[];
   const itemCount = childArray.length;
-  const observeParent = behavior === 'observeParent';
+  const isObservingParent = behavior === 'observeParent';
   const [visibleCount, setVisibleCount] = useState(itemCount);
   const containerRef = useRef<HTMLElement | null>(null);
   const measureRef = useRef<HTMLElement | null>(null);
@@ -99,7 +99,7 @@ export function OverflowList({
     }
 
     const availableWidth = Math.min(
-      getAvailableWidth(container, observeParent),
+      getAvailableWidth(container, isObservingParent),
       container.offsetWidth || Number.POSITIVE_INFINITY,
     );
     const allChildren = Array.from(measure.children) as HTMLElement[];
@@ -144,7 +144,7 @@ export function OverflowList({
 
     // eslint-disable-next-line @eslint-react/set-state-in-effect -- visible count is derived from measured DOM widths
     setVisibleCount(Math.max(Math.min(count, itemCount), minVisibleItems));
-  }, [collapseFrom, gap, itemCount, minVisibleItems, observeParent]);
+  }, [collapseFrom, gap, isObservingParent, itemCount, minVisibleItems]);
 
   const containerRefCallback = useCallback((element: HTMLDivElement | null) => {
     containerRef.current = element;
@@ -171,13 +171,13 @@ export function OverflowList({
     }
 
     const target =
-      observeParent && container.parentElement != null
+      isObservingParent && container.parentElement != null
         ? container.parentElement
         : container;
     const observer = new ResizeObserver(calculate);
     observer.observe(target);
     return () => observer.disconnect();
-  }, [calculate, observeParent]);
+  }, [calculate, isObservingParent]);
 
   const allItems: OverflowItem[] = childArray.map((child, index) => ({
     child,
@@ -210,7 +210,7 @@ export function OverflowList({
       <div
         className={cx(
           styles.container,
-          observeParent && hasOverflow ? styles.fillParent : undefined,
+          isObservingParent && hasOverflow ? styles.fillParent : undefined,
           className,
         )}
         ref={mergeRefs(ref, containerRefCallback)}

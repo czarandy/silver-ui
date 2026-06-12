@@ -246,7 +246,7 @@ export function Tag({
       <span {...sharedProps} aria-label={label} ref={ref} role="group">
         <ActionElement
           className={classes.body}
-          disabled={isDisabled}
+          isDisabled={isDisabled}
           onClick={onClick}>
           <TagBody {...bodyProps} />
         </ActionElement>
@@ -262,7 +262,7 @@ export function Tag({
     element = (
       <ActionElement
         {...sharedProps}
-        disabled={isDisabled}
+        isDisabled={isDisabled}
         onClick={onClick}
         ref={ref}>
         <TagBody {...bodyProps} />

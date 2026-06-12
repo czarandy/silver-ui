@@ -120,8 +120,8 @@ export function BreadcrumbItem({
           as={as}
           className={classes.link}
           href={href}
-          onClick={onClick}
-          renderAsLink={href != null}>
+          isLink={href != null}
+          onClick={onClick}>
           {content}
         </ActionElement>
       ) : (

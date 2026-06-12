@@ -2,6 +2,7 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Icon, type IconComponent} from 'components/Icon';
 import {metadataListRecipe} from 'components/MetadataList/MetadataList.recipe';
 import {useMetadataList} from 'components/MetadataList/MetadataListContext';
+import {VisuallyHidden} from 'internal';
 import {cx} from 'internal/cx';
 
 /**
@@ -25,6 +26,11 @@ export interface MetadataListItemProps {
    */
   icon?: IconComponent;
   /**
+   * Visually hides the label text, rendering only the icon while keeping the
+   * label available to assistive technology. Requires `icon`.
+   */
+  isIconOnly?: boolean;
+  /**
    * Descriptive label for this metadata entry.
    */
   label: string;
@@ -44,6 +50,7 @@ export interface MetadataListItemProps {
 export function MetadataListItem({
   children,
   icon,
+  isIconOnly = false,
   label,
   className,
   'data-testid': dataTestId,
@@ -60,7 +67,7 @@ export function MetadataListItem({
   const labelContent = (
     <>
       {icon != null ? <Icon color="secondary" icon={icon} size="sm" /> : null}
-      {label}
+      {isIconOnly ? <VisuallyHidden>{label}</VisuallyHidden> : label}
     </>
   );
 
