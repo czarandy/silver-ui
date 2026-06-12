@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 import type {PlainDate} from '../../internal/dateTypes';
-import type {CalendarEvent} from './CalendarEvent';
+import type {CalendarEvent, ScheduleCategory} from './CalendarEvent';
 import type {ZonedDateTime, ZonedDateTimeRange} from './zonedDateTime';
 
 export type {PlainDate} from '../../internal/dateTypes';
@@ -21,6 +21,8 @@ export type ScheduleEventSource =
   | ((start: Instant, end: Instant) => Promise<ReadonlyArray<CalendarEvent>>);
 
 export type ScheduleDate = Instant;
+
+export type ScheduleCategoryMap = ReadonlyMap<string, ScheduleCategory>;
 
 export interface ScheduleRange {
   end: Instant;

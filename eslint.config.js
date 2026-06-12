@@ -355,6 +355,21 @@ export default tseslint.config(
       'silver-ui/require-component-props': 'error',
     },
   },
+  // Public component types must not depend on Panda recipe declarations
+  {
+    files: ['src/components/**/*.{ts,tsx}'],
+    ignores: [
+      '**/*.recipe.ts',
+      '**/*.test.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+    ],
+    plugins: {
+      'silver-ui': silverUiPlugin,
+    },
+    rules: {
+      'silver-ui/no-recipe-type-imports': 'error',
+    },
+  },
   // Color tokens — source must use semantic color tokens for dark-mode support
   {
     files: ['src/**/*.{ts,tsx}'],

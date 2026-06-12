@@ -30,6 +30,7 @@ export type {
   Instant,
   PlainDate,
   ScheduleCategory,
+  ScheduleCategoryMap,
   ScheduleDate,
   ScheduleEventColor,
   ScheduleEventSource,

@@ -1,5 +1,7 @@
-import type {LayoutRegionVariants} from './Layout.recipe';
+import type {SpacingToken} from '../../internal/spacingTokens';
 
-export type {LayoutRegionVariants};
 export type {SpacingToken} from '../../internal/spacingTokens';
 export type LayoutHeight = 'fill' | 'auto';
+export interface LayoutRegionVariants {
+  padding?: SpacingToken;
+}

@@ -8,6 +8,7 @@ const exhaustiveDepsRule = plugin.rules['exhaustive-deps'];
 const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
 const noRedundantBoxSizingRule = plugin.rules['no-redundant-box-sizing'];
 const noRecipeExportsRule = plugin.rules['no-recipe-exports'];
+const noRecipeTypeImportsRule = plugin.rules['no-recipe-type-imports'];
 const preferIsReactNodeRule = plugin.rules['prefer-is-react-node'];
 const noUselessFragmentWithCommentRule =
   plugin.rules['no-useless-fragment-with-comment'];
@@ -830,6 +831,46 @@ tester.run('no-recipe-exports', noRecipeExportsRule, {
       code: "export {Skeleton, type SkeletonVariants} from './components/Skeleton';",
       filename: 'src/index.ts',
       errors: [{messageId: 'recipeNamedExport', data: {name: 'SkeletonVariants'}}],
+    },
+  ],
+});
+
+tester.run('no-recipe-type-imports', noRecipeTypeImportsRule, {
+  valid: [
+    {
+      name: 'allows component implementation to import recipe values',
+      code: "import {buttonRecipe} from './Button.recipe';",
+      filename: 'src/components/Button/Button.tsx',
+    },
+    {
+      name: 'allows public types from plain types modules',
+      code: "import type {ButtonSize} from './Button.types';",
+      filename: 'src/components/Button/Button.tsx',
+    },
+    {
+      name: 'allows value imports from another component recipe',
+      code: "import {buttonRecipe} from '../Button/Button.recipe';",
+      filename: 'src/components/ToggleButton/ToggleButton.tsx',
+    },
+  ],
+  invalid: [
+    {
+      name: 'reports mixed value and type imports from recipe modules',
+      code: "import {buttonRecipe, type ButtonVariants} from './Button.recipe';",
+      filename: 'src/components/Button/Button.tsx',
+      errors: [{messageId: 'recipeTypeImport'}],
+    },
+    {
+      name: 'reports type-only imports from recipe modules',
+      code: "import type {ButtonVariants} from './Button.recipe';",
+      filename: 'src/components/Button/Button.tsx',
+      errors: [{messageId: 'recipeTypeImport'}],
+    },
+    {
+      name: 'reports type re-exports from recipe modules',
+      code: "export type {ButtonVariants} from './Button.recipe';",
+      filename: 'src/components/Button/Button.types.ts',
+      errors: [{messageId: 'recipeTypeImport'}],
     },
   ],
 });

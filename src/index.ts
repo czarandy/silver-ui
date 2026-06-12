@@ -208,6 +208,7 @@ export {
   type Instant,
   type PlainDate,
   type ScheduleCategory,
+  type ScheduleCategoryMap,
   type ScheduleContextValue,
   type ScheduleDate,
   type ScheduleDayViewOptions,

@@ -10,6 +10,7 @@ import eslintReact from '@eslint-react/eslint-plugin';
  * - silver-ui/no-direct-color-tokens: Source must use semantic color tokens instead of primitive color tokens
  * - silver-ui/exhaustive-deps: React exhaustive deps with silver-ui stable hook support
  * - silver-ui/prefer-is-react-node: ReactNode null checks must use isReactNode
+ * - silver-ui/no-recipe-type-imports: Public types must not depend on Panda recipe modules
  */
 
 const reactExhaustiveDeps = eslintReact.rules['exhaustive-deps'];
@@ -841,6 +842,81 @@ const noRecipeExports = {
 };
 
 /**
+ * Disallow importing types from Panda recipe modules.
+ *
+ * Component implementation files may import the recipe value, e.g.
+ * `import {buttonRecipe} from './Button.recipe'`, because value-only imports do
+ * not appear in generated declaration files. Type imports from recipe modules
+ * are different: they pull `*.recipe.d.ts` into the public declaration graph,
+ * which exposes Panda's generated `styled-system/*` types to package
+ * consumers.
+ */
+const noRecipeTypeImports = {
+  meta: {
+    type: 'problem',
+    docs: {
+      description:
+        'Disallow type imports from Panda recipe modules; public component types should live in plain *.types modules.',
+    },
+    messages: {
+      recipeTypeImport:
+        'Do not import types from recipe module "{{source}}". Move public variant types to a plain "*.types" module instead.',
+    },
+    schema: [],
+  },
+  create(context) {
+    const recipeSourcePattern = /\.recipe(?:\.[cm]?[jt]sx?)?$/;
+
+    function isRecipeSource(source) {
+      return typeof source === 'string' && recipeSourcePattern.test(source);
+    }
+
+    function report(node, source) {
+      context.report({
+        node,
+        messageId: 'recipeTypeImport',
+        data: {source},
+      });
+    }
+
+    return {
+      ExportNamedDeclaration(node) {
+        if (node.source == null || !isRecipeSource(node.source.value)) {
+          return;
+        }
+
+        if (node.exportKind === 'type') {
+          report(node, node.source.value);
+          return;
+        }
+
+        for (const specifier of node.specifiers) {
+          if (specifier.exportKind === 'type') {
+            report(specifier, node.source.value);
+          }
+        }
+      },
+      ImportDeclaration(node) {
+        if (!isRecipeSource(node.source.value)) {
+          return;
+        }
+
+        if (node.importKind === 'type') {
+          report(node, node.source.value);
+          return;
+        }
+
+        for (const specifier of node.specifiers) {
+          if (specifier.importKind === 'type') {
+            report(specifier, node.source.value);
+          }
+        }
+      },
+    };
+  },
+};
+
+/**
  * Disallow fragments whose only renderable child is a single element but that
  * also contain JSX comments.
  *
@@ -1031,6 +1107,7 @@ const plugin = {
     'exhaustive-deps': exhaustiveDeps,
     'no-direct-color-tokens': noDirectColorTokens,
     'no-recipe-exports': noRecipeExports,
+    'no-recipe-type-imports': noRecipeTypeImports,
     'no-redundant-box-sizing': noRedundantBoxSizing,
     'no-useless-fragment-with-comment': noUselessFragmentWithComment,
     'no-useless-undefined-prop': noUselessUndefinedProp,

@@ -2,6 +2,7 @@ import {createContext, use} from 'react';
 import type {
   CalendarEvent,
   ScheduleCategory,
+  ScheduleCategoryMap,
   SchedulePlugin,
   ScheduleRange,
   ScheduleViewBase,
@@ -10,6 +11,7 @@ import type {
 
 export interface ScheduleContextValue {
   categories: ReadonlyArray<ScheduleCategory>;
+  categoryMap: ScheduleCategoryMap;
   events: ReadonlyArray<CalendarEvent>;
   highlightDate: ZonedDateTime;
   isLoading: boolean;

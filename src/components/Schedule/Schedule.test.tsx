@@ -14,6 +14,7 @@ import {createScheduleDayView} from './DayView';
 import {createScheduleListView} from './ListView';
 import {createScheduleMonthlyView} from './MonthlyView';
 import {Schedule} from './Schedule';
+import {scheduleEventRecipe} from './ScheduleEvent.recipe';
 import {createScheduleWeeklyView} from './WeeklyView';
 import {
   enumerateDates,
@@ -304,6 +305,30 @@ describe('Schedule', () => {
         name: 'Wednesday, May 13, 2026 1 PM. Open sync, Event, 1:00 PM - 1:30 PM',
       }),
     ).toBeInTheDocument();
+  });
+
+  it('applies category colors from the categories prop', () => {
+    render(
+      <Schedule
+        categories={[{color: 'yellow', label: 'Launch'}]}
+        events={[
+          createEventFromISO({
+            category: 'Launch',
+            end: '2026-05-13',
+            id: 'category-color',
+            start: '2026-05-13',
+            title: 'Launch review',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 9, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByTestId('schedule-event-category-color')).toHaveClass(
+      scheduleEventRecipe({color: 'yellow', isPast: true}).event as string,
+    );
   });
 
   it('renders loading state while async events are pending', () => {
@@ -611,6 +636,32 @@ describe('Schedule', () => {
     ).toHaveAttribute('aria-current', 'date');
   });
 
+  it('renders monthly view with a Monday-start week when configured', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView({weekStartsOn: 1})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByRole('columnheader', {name: 'Monday'})).toHaveAttribute(
+      'aria-colindex',
+      '1',
+    );
+    expect(screen.getByRole('columnheader', {name: 'Sunday'})).toHaveAttribute(
+      'aria-colindex',
+      '7',
+    );
+    expect(
+      screen.getByRole('gridcell', {name: /Monday, April 27, 2026/}),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('gridcell', {name: /Sunday, April 26, 2026/}),
+    ).not.toBeInTheDocument();
+  });
+
   it('visually spans multi-day events in month view', () => {
     render(
       <Schedule
@@ -634,6 +685,32 @@ describe('Schedule', () => {
       screen.getByTestId('schedule-event-span-multi-day-month'),
     ).toHaveStyle({
       gridColumn: '4 / 7',
+    });
+  });
+
+  it('visually spans month events against the configured week start', () => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Planning',
+            end: '2026-05-15',
+            id: 'monday-start-month',
+            start: '2026-05-13',
+            title: 'Launch window',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView({weekStartsOn: 1})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByTestId('schedule-event-span-monday-start-month'),
+    ).toHaveStyle({
+      gridColumn: '3 / 6',
     });
   });
 

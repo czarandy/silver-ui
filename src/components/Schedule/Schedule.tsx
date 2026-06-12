@@ -5,7 +5,7 @@ import {getBrowserTimezoneID, nowEpochMilliseconds} from '../../internal/time';
 import {ScheduleContext} from './context';
 import {eventOverlapsRange, sortEvents} from './dateMath';
 import {defaultSchedulePlugins} from './plugins';
-import {scheduleClasses} from './shared';
+import {createCategoryMap, scheduleClasses} from './shared';
 import type {
   CalendarEvent,
   Instant,
@@ -179,10 +179,12 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   const Component = view.component;
   const range = useRange(view, viewDate);
   const contextValue = useMemo(() => {
+    const categoryMap = createCategoryMap(categories);
     const events = isLoading
       ? []
       : resolveEvents(eventSource, range, viewDate.timezoneID, eventCache);
     return {
+      categoryMap,
       categories,
       events,
       highlightDate,

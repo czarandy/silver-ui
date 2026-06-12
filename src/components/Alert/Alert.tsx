@@ -19,20 +19,10 @@ import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {Icon} from '../Icon';
 import {Text} from '../Text';
-import {alertRecipe, type AlertVariants} from './Alert.recipe';
+import {alertRecipe} from './Alert.recipe';
+import type {AlertContainer, AlertStatus} from './Alert.types';
 
-/**
- * Derived from the recipe's `container` variant so the prop stays in sync with
- * the styles.
- */
-export type AlertContainer = NonNullable<
-  NonNullable<AlertVariants>['container']
->;
-/**
- * Derived from the recipe's `status` variant so the prop stays in sync with the
- * styles.
- */
-export type AlertStatus = NonNullable<NonNullable<AlertVariants>['status']>;
+export type {AlertContainer, AlertStatus} from './Alert.types';
 
 export interface AlertProps {
   /**

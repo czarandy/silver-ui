@@ -2,14 +2,15 @@
 
 import {css} from 'styled-system/css';
 import {cx} from '../../internal/cx';
+import type {DayOfWeek} from '../../internal/dateTypes';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
+  plainDateDayOfWeek,
   plainDateFormat,
   plainDateFromInstant,
   plainDateIsAfter,
   plainDateIsBefore,
   plainDateIsEqual,
-  plainDateSetStartOfWeek,
   type PlainDate,
 } from '../../internal/plainDate';
 import {Heading, Text} from '../Text';
@@ -38,6 +39,11 @@ export interface ScheduleMonthlyViewOptions {
    * @default 6
    */
   weekCount?: number;
+  /**
+   * Day used as the first day of the week, where 0 is Sunday and 6 is Saturday.
+   * @default 0
+   */
+  weekStartsOn?: DayOfWeek;
 }
 
 const styles = {
@@ -132,9 +138,25 @@ const weekdays = [
   {label: 'Saturday', shortLabel: 'Sat'},
 ];
 
-function getMonthDays(date: PlainDate, weekCount: number): PlainDate[] {
+function getWeekdays(weekStartsOn: DayOfWeek): typeof weekdays {
+  return Array.from(
+    {length: 7},
+    (_, index) => weekdays[(index + weekStartsOn) % 7],
+  );
+}
+
+function setStartOfWeek(date: PlainDate, weekStartsOn: DayOfWeek): PlainDate {
+  const daysSinceWeekStart = (plainDateDayOfWeek(date) - weekStartsOn + 7) % 7;
+  return date.add({days: -daysSinceWeekStart});
+}
+
+function getMonthDays(
+  date: PlainDate,
+  weekCount: number,
+  weekStartsOn: DayOfWeek,
+): PlainDate[] {
   const firstOfMonth = date.with({day: 1});
-  const firstVisibleDay = plainDateSetStartOfWeek(firstOfMonth);
+  const firstVisibleDay = setStartOfWeek(firstOfMonth, weekStartsOn);
   return Array.from({length: weekCount * 7}, (_, index) =>
     firstVisibleDay.add({days: index}),
   );
@@ -144,8 +166,9 @@ function getVisibleMonthRange(
   date: ZonedDateTime,
   month: PlainDate,
   weekCount: number,
+  weekStartsOn: DayOfWeek,
 ): ZonedDateTimeRange {
-  const firstVisible = plainDateSetStartOfWeek(month.with({day: 1}));
+  const firstVisible = setStartOfWeek(month.with({day: 1}), weekStartsOn);
   const end = firstVisible.add({days: weekCount * 7});
   const currentDate = date.toPlainDate();
   return [
@@ -340,16 +363,18 @@ function getMonthEventSegmentStyle({
 }
 
 function getGridCellName({
+  categoryMap,
   date,
   events,
   timezoneID,
 }: {
+  categoryMap: ReturnType<typeof useScheduleContext>['categoryMap'];
   date: PlainDate;
   events: CalendarEvent[];
   timezoneID: string;
 }): string {
   const eventLabels = events.map(event =>
-    getEventAccessibleLabel(event, [], timezoneID),
+    getEventAccessibleLabel(event, categoryMap, timezoneID),
   );
   const dateLabel = plainDateFormat(date, DATE_FORMAT_WITH_WEEKDAY);
   return eventLabels.length > 0
@@ -363,14 +388,17 @@ function getGridCellName({
 function ScheduleMonthlyView({
   options,
 }: ScheduleViewComponentProps<ScheduleMonthlyViewOptions>): React.JSX.Element {
-  const {events, highlightDate, timezoneID, viewDate} = useScheduleContext();
+  const {categoryMap, events, highlightDate, timezoneID, viewDate} =
+    useScheduleContext();
   const currentTime = useCurrentTime();
   const month = viewDate.toPlainDate();
   const title = formatMonthTitle(month);
-  const days = getMonthDays(month, options.weekCount ?? 6);
+  const weekStartsOn = options.weekStartsOn ?? 0;
+  const days = getMonthDays(month, options.weekCount ?? 6, weekStartsOn);
   const eventSegments = getMonthEventSegments(events, days, timezoneID);
   const eventsByDate = getEventsByDate(events, days, timezoneID);
   const today = highlightDate.toPlainDate();
+  const visibleWeekdays = getWeekdays(weekStartsOn);
 
   return (
     <ScheduleFrame title={title} titleLabel={title}>
@@ -378,7 +406,7 @@ function ScheduleMonthlyView({
         aria-label={title}
         className={cx(scheduleClasses.surface, styles.grid)}
         role="grid">
-        {weekdays.map((weekday, index) => (
+        {visibleWeekdays.map((weekday, index) => (
           <div
             aria-colindex={index + 1}
             aria-label={weekday.label}
@@ -404,6 +432,7 @@ function ScheduleMonthlyView({
                     plainDateIsEqual(day, today) ? 'date' : undefined
                   }
                   aria-label={getGridCellName({
+                    categoryMap,
                     date: day,
                     events: dayEvents,
                     timezoneID,
@@ -459,18 +488,19 @@ function ScheduleMonthlyView({
  */
 export function createScheduleMonthlyView({
   weekCount = 6,
+  weekStartsOn = 0,
 }: ScheduleMonthlyViewOptions = {}): ScheduleView<ScheduleMonthlyViewOptions> {
   return {
     component: ScheduleMonthlyView,
     getDateRange: date => {
       const month = date.toPlainDate();
-      return getVisibleMonthRange(date, month, weekCount);
+      return getVisibleMonthRange(date, month, weekCount, weekStartsOn);
     },
     getNextDateRange: date => {
       const nextMonth = date.toPlainDate().with({day: 1}).add({months: 1});
       return {
         label: 'Next month',
-        range: getVisibleMonthRange(date, nextMonth, weekCount),
+        range: getVisibleMonthRange(date, nextMonth, weekCount, weekStartsOn),
       };
     },
     getPreviousDateRange: date => {
@@ -480,9 +510,14 @@ export function createScheduleMonthlyView({
         .subtract({months: 1});
       return {
         label: 'Previous month',
-        range: getVisibleMonthRange(date, previousMonth, weekCount),
+        range: getVisibleMonthRange(
+          date,
+          previousMonth,
+          weekCount,
+          weekStartsOn,
+        ),
       };
     },
-    options: {weekCount},
+    options: {weekCount, weekStartsOn},
   };
 }

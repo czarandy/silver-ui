@@ -18,6 +18,7 @@ import {isDayEvent} from './dateMath';
 import type {
   CalendarEvent,
   ScheduleCategory,
+  ScheduleCategoryMap,
   ScheduleHeaderContent,
 } from './types';
 
@@ -30,12 +31,24 @@ export const scheduleClasses = scheduleRecipe();
 
 const categoryFallback: ScheduleCategory = {label: 'Event', color: 'blue'};
 
-export function getCategory(
+export function createCategoryMap(
   categories: ReadonlyArray<ScheduleCategory>,
+): ScheduleCategoryMap {
+  const categoryMap = new Map<string, ScheduleCategory>();
+  categories.forEach(category => {
+    if (!categoryMap.has(category.label)) {
+      categoryMap.set(category.label, category);
+    }
+  });
+  return categoryMap;
+}
+
+export function getCategory(
+  categoryMap: ScheduleCategoryMap,
   event: CalendarEvent,
 ): ScheduleCategory {
   return (
-    categories.find(category => category.label === event.category) ??
+    (event.category == null ? undefined : categoryMap.get(event.category)) ??
     (event.category != null
       ? {label: event.category, color: categoryFallback.color}
       : categoryFallback)
@@ -117,10 +130,10 @@ function getEventStartTimeLabel(
 
 export function getEventAccessibleLabel(
   event: CalendarEvent,
-  categories: ReadonlyArray<ScheduleCategory>,
+  categoryMap: ScheduleCategoryMap,
   timezoneID: string,
 ): string {
-  const category = getCategory(categories, event);
+  const category = getCategory(categoryMap, event);
   return `${event.title}, ${category.label}, ${getEventTimeLabel(event, timezoneID)}`;
 }
 
@@ -159,8 +172,8 @@ export function CalendarEventPill({
   event: CalendarEvent;
   isPast?: boolean;
 }): React.JSX.Element {
-  const {categories, timezoneID} = useScheduleContext();
-  const category = getCategory(categories, event);
+  const {categoryMap, timezoneID} = useScheduleContext();
+  const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({color: category.color, isPast});
   return (
     <span
@@ -170,7 +183,7 @@ export function CalendarEventPill({
       <span className={classes.title}>
         {isDayEvent(event)
           ? event.title
-          : getEventAccessibleLabel(event, categories, timezoneID)}
+          : getEventAccessibleLabel(event, categoryMap, timezoneID)}
       </span>
     </span>
   );
@@ -183,8 +196,8 @@ export function CalendarMonthEventPill({
   event: CalendarEvent;
   isPast?: boolean;
 }): React.JSX.Element {
-  const {categories, timezoneID} = useScheduleContext();
-  const category = getCategory(categories, event);
+  const {categoryMap, timezoneID} = useScheduleContext();
+  const category = getCategory(categoryMap, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);
   const classes = scheduleEventRecipe({
     color: category.color,

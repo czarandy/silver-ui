@@ -25,7 +25,6 @@ import type {
   CalendarEvent,
   Instant,
   ScheduleView,
-  ScheduleViewComponentProps,
   ZonedDateTime,
 } from './types';
 import {useCurrentTime} from './useCurrentTime';
@@ -127,8 +126,8 @@ function ListEvent({
   event: CalendarEvent;
   isPast: boolean;
 }): React.JSX.Element {
-  const {categories, timezoneID} = useScheduleContext();
-  const category = getCategory(categories, event);
+  const {categoryMap, timezoneID} = useScheduleContext();
+  const category = getCategory(categoryMap, event);
   return (
     <div
       className={cx(styles.eventRow, isPast && styles.eventPast)}
@@ -153,9 +152,7 @@ function ListEvent({
 /**
  * Internal view component that renders events as a chronological day-by-day list.
  */
-function ScheduleListView(
-  _props: ScheduleViewComponentProps<ScheduleListViewOptions>,
-): React.JSX.Element {
+function ScheduleListView(): React.JSX.Element {
   const {events, highlightDate, isLoading, range, timezoneID} =
     useScheduleContext();
   const days = enumerateDates(range.startDate, range.endDate);

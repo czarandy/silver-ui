@@ -19,10 +19,10 @@ import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';
 import {Spinner} from '../Spinner';
 import {Tooltip} from '../Tooltip';
-import {buttonRecipe, type ButtonVariants} from './Button.recipe';
+import {buttonRecipe} from './Button.recipe';
+import type {ButtonSize, ButtonVariant} from './Button.types';
 
-export type ButtonSize = NonNullable<ButtonVariants>['size'];
-type ButtonVariant = NonNullable<ButtonVariants>['variant'];
+export type {ButtonSize} from './Button.types';
 
 /**
  * A versatile action element that renders as a `<button>` or a link depending

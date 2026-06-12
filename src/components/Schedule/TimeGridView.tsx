@@ -311,13 +311,13 @@ function getTimedEventStyle({
 }
 
 function getCellName({
-  categories,
+  categoryMap,
   date,
   events,
   hourLabel,
   timezoneID,
 }: {
-  categories: ReturnType<typeof useScheduleContext>['categories'];
+  categoryMap: ReturnType<typeof useScheduleContext>['categoryMap'];
   date: PlainDate;
   events: CalendarEvent[];
   hourLabel: string;
@@ -325,7 +325,7 @@ function getCellName({
 }): string {
   const dateLabel = plainDateFormat(date, DATE_FORMAT_WITH_WEEKDAY);
   const eventLabels = events.map(event =>
-    getEventAccessibleLabel(event, categories, timezoneID),
+    getEventAccessibleLabel(event, categoryMap, timezoneID),
   );
   return eventLabels.length > 0
     ? `${dateLabel} ${hourLabel}. ${eventLabels.join('. ')}`
@@ -361,7 +361,7 @@ export function TimeGridView({
    */
   minHour?: number;
 }): React.JSX.Element {
-  const {categories, events, highlightDate, timezoneID} = useScheduleContext();
+  const {categoryMap, events, highlightDate, timezoneID} = useScheduleContext();
   const normalizedMinHour = Math.max(0, Math.min(23, Math.floor(minHour)));
   const normalizedMaxHour = Math.max(
     normalizedMinHour + 1,
@@ -470,7 +470,7 @@ export function TimeGridView({
               <div
                 aria-colindex={index + 2}
                 aria-label={getCellName({
-                  categories,
+                  categoryMap,
                   date: day,
                   events: dayEvents,
                   hourLabel: 'all day',
@@ -528,7 +528,7 @@ export function TimeGridView({
                   <div
                     aria-colindex={index + 2}
                     aria-label={getCellName({
-                      categories,
+                      categoryMap,
                       date: day,
                       events: hourEvents,
                       hourLabel,
@@ -553,7 +553,7 @@ export function TimeGridView({
                     <div className={styles.events}>
                       {visibleTimedEventLayouts.map(layout => {
                         const {event} = layout;
-                        const category = getCategory(categories, event);
+                        const category = getCategory(categoryMap, event);
                         const isPast = isEventInPast(
                           event,
                           currentTime,

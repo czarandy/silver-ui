@@ -16,16 +16,10 @@ Schedule is a read-only calendar shell supporting day, week, month, and list vie
 
 ### Medium
 
-- **`TimeGridView` recalculates `getTimedEventLayouts` for every hour cell per day**: Inside the hour loop, `getTimedEventLayouts` is called for each `(day, hour)` combination with the full events list, then filtered to `layout.startHour === hour`. This means the layout computation runs `hours.length * days.length` times, each time iterating all events. For a weekly view with 24 hours, that's 168 full layout computations. This should be computed once per day outside the hour loop.
-- **`useCurrentTime` uses a global `setInterval` shared across all Schedule instances**: The `useCurrentTime` hook uses a module-level `setInterval` that fires every 60 seconds. While efficient for single instances, the subscription mechanism calls every listener on every tick. The `getServerSnapshot` returns `0`, which means server-rendered schedules will show epoch time 0 for current-time-dependent features.
-- **`ScheduleViewContent` useMemo depends on `range` which is a new object every render**: `getRange()` is called during render and returns a new object. Since `range` is a dependency of the `useMemo` that creates `contextValue`, the context value changes every render, defeating memoization and causing all context consumers to re-render.
-- **Monthly view filters events per day cell with O(events \* days) complexity**: In `ScheduleMonthlyView`, each day cell runs `events.filter(event => eventOccursOnDate(event, day, timezoneID))` independently. For 42 days and many events, this is O(42 \* events) per render. Pre-grouping events by date would be more efficient.
 - **No error handling UI for async event loading failures**: When the async loader rejects, the error propagates to the nearest error boundary. There is no built-in fallback UI or `onError` callback prop on Schedule. Consumers must provide their own error boundary.
-- **`onViewDateChange` is required for navigation but not marked as such**: The `onViewDateChange` prop is optional, but without it, clicking Previous/Next/Today buttons has no effect (the view date doesn't change). This is confusing because the buttons are always rendered and appear clickable.
 
 ### Low
 
-- **`formatHour` accepts but ignores `_timezoneID` parameter**: The function signature includes `_timezoneID` but uses `Temporal.PlainTime` without timezone context. The parameter should be removed or used.
 - **No story for error handling with async events**: While there is an `AsyncEvents` story, there is no story showing what happens when async loading fails.
 - **`weekdays` array in `MonthlyView` is hardcoded to Sunday-start**: The monthly view always renders weekday headers starting from Sunday. Unlike the weekly view and Calendar component which support `weekStartsOn`, the monthly view has no such option.
 - **`ListView` does not use the `options` parameter**: The `ScheduleListView` component receives `_props` but destructures nothing from `options`. The `days` count is already baked into the view configuration, so the component ignores the parameter.
@@ -43,9 +37,3 @@ Schedule is a read-only calendar shell supporting day, week, month, and list vie
 - **Add `weekStartsOn` to monthly view** for consistency with weekly view and Calendar.
 - **Consider a built-in error fallback** for async event loading, or at minimum an `onError` prop.
 - The test coverage is excellent (35+ tests covering filtering, async loading, categories, loading state, error handling, list/week/day/month views, ARIA grid structure, event sizing, time labels, current time, navigation, plugins, view selectors, date math, and zoned date-time utilities). Stories are comprehensive with 16 stories covering all views, async events, plugins, categories, timezones, edge cases, and current-time scenarios.
-
-## SVA Conversion
-
-**Benefit: Strong**
-
-Schedule is the largest multi-element component in this batch, spread across `Schedule.tsx`, `shared.tsx`, and five view files. `shared.tsx` alone defines a standalone `styles` object with ~13 `css()` blocks (`root`, `frame`, `header`, `headerSlotStart`/`Center`/`End`, `headerTitleContent`, `surface`, `event`, `eventPast`, `eventDot`, `eventTime`, `eventTitle`) plus a 10-entry `colorStyles` map (one CSS-variable block per `ScheduleEventColor`) selected via `eventColorClassName()`. The view files add many more standalone blocks (TimeGridView ~21, MonthlyView ~14, ListView ~13), and event pills are composed with stacked `cx()` conditionals (`cx(styles.event, eventColorClassName(category.color), isPast && styles.eventPast)`). The real variant axes -- event `color` (10 values) and `isPast` state -- are currently applied by hand through `cx()` and a color-keyed map rather than recipe variants. An `sva` for the event pill (slots `event`/`dot`/`time`/`title` with `color` and `isPast` variants) plus a frame/header recipe would consolidate the color map and the past-state ternaries into recipe variants/compoundVariants, mirroring Divider's approach. The component's scale means full migration is large, but the consolidation payoff is high -- a Strong candidate, with the event pill being the highest-value slice.
