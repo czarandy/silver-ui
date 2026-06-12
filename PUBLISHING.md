@@ -22,6 +22,8 @@ badge linking it back to the exact commit and build.
 - [GitHub CLI](https://cli.github.com/) (`gh`), authenticated via `gh auth login`
 - Push access to the repo (cutting a release requires no npm credentials locally —
   CI publishes via the configured trusted publisher)
+- The npm trusted publisher for `silver-ui` is configured for this repository's
+  `.github/workflows/publish.yml` workflow
 
 ## Cutting a release
 
@@ -46,8 +48,9 @@ The script will:
      4) prerelease  — pre-release tag        (0.1.0 → 0.1.1-beta.0)
    ```
 
-3. **Run the gates** — `typecheck`, `test`, `lint`, `build`, `publint`, and
-   `pnpm pack --dry-run` (so you can eyeball the tarball contents).
+3. **Run the gates** — `typecheck`, `test`, `lint`, `build`, `publint`, the
+   package smoke test, and `pnpm pack --dry-run` (so you can eyeball the tarball
+   contents).
 4. **Bump + tag** — `npm version` updates `package.json` and creates the
    `vX.Y.Z` commit and tag.
 5. **Push** the commit and tag to origin (rolls the bump back locally if the
@@ -66,15 +69,17 @@ gh run watch        # or: gh run list --workflow=publish.yml
 pnpm release patch              # skip the type prompt
 pnpm release minor --yes        # also skip confirmation prompts
 pnpm release prerelease         # cut 0.1.1-beta.0 (CI publishes to the 'next' dist-tag)
-pnpm release patch --preid=rc   # use a different pre-release identifier
+pnpm release prerelease --preid=rc # use a different pre-release identifier
+pnpm release preminor           # start the next minor pre-release line
+pnpm release premajor           # start the next major pre-release line
 pnpm release --dry-run          # run all checks + build, but do NOT bump/tag/push/release
 ```
 
 ### Release notes
 
 The release notes live on the GitHub Release (independent of the npm publish).
-By default the script auto-generates a changelog from the merged PRs and commits
-since the previous tag.
+By default the script auto-generates a changelog from non-merge commit subjects
+since the previous `v*` tag.
 
 In an interactive run, the script **asks whether you want to edit the
 auto-generated notes** before submitting. Answer yes and it opens the generated
@@ -95,7 +100,9 @@ re-trigger a publish.
 ## Pre-releases
 
 Choosing `prerelease` (or passing it as an argument) produces a version like
-`0.1.1-beta.0` and marks the GitHub Release as a pre-release. CI detects that and
+`0.1.1-beta.0` and marks the GitHub Release as a pre-release. Use `prepatch`,
+`preminor`, or `premajor` to start a pre-release line for a specific bump size,
+and `--preid=rc` to use a different identifier. CI detects pre-releases and
 publishes under the **`next`** dist-tag instead of `latest`, so a plain
 `npm install silver-ui` never picks it up. Consumers opt in explicitly:
 
@@ -108,7 +115,7 @@ npm install silver-ui@next
 `publish.yml` runs on `release: published` and:
 
 - reinstalls with `--frozen-lockfile` and re-runs `typecheck`, `test`, `lint`,
-  `build`, and `publint` on a clean checkout;
+  `build`, `publint`, and the package smoke test on a clean checkout;
 - **verifies the release tag matches `package.json`'s version**, so a mistagged
   release can't publish the wrong thing;
 - upgrades to npm `>= 11.5.1` (required for OIDC; newer than the npm bundled with

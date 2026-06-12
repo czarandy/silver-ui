@@ -39,6 +39,7 @@ jobs:
       - run: pnpm lint
       - run: pnpm build
       - run: pnpm exec publint
+      - run: node scripts/package-smoke-test.mjs
 
       # Sanity check: the tag being released must match package.json's version,
       # so a mistagged release can never publish the wrong version.
