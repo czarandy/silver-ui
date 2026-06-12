@@ -52,6 +52,46 @@ describe('Popover', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('applies offsetX and offsetY as a translate on the layer', () => {
+    render(
+      <Popover
+        content={<div>Popover content</div>}
+        label="Actions"
+        offsetX={8}
+        offsetY={4}>
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    const style = getPopoverElement().getAttribute('style') ?? '';
+    expect(style).toContain('translate');
+    expect(style).toContain('8px 4px');
+  });
+
+  it('applies a single-axis offset, defaulting the other axis to zero', () => {
+    render(
+      <Popover content={<div>Popover content</div>} label="Actions" offsetY={4}>
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    expect(getPopoverElement().getAttribute('style') ?? '').toContain(
+      '0px 4px',
+    );
+  });
+
+  it('omits the translate when no offset is provided', () => {
+    render(
+      <Popover content={<div>Popover content</div>} label="Actions">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    expect(getPopoverElement().getAttribute('style') ?? '').not.toContain(
+      'translate',
+    );
+  });
+
   it('opens when the trigger is clicked', async () => {
     showPopoverMock.mockClear();
 

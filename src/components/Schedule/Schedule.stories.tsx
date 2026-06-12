@@ -23,143 +23,167 @@ import type {
 } from 'components/Schedule/types';
 import {ToastViewport, useToast} from 'components/Toast';
 
+// Anchor every story to the current date so the seeded events always fall in
+// the visible range. Offsets are measured in whole days from "today" (UTC).
+const today = Temporal.Now.plainDateISO('UTC');
+
+function allDayISO(dayOffset: number): string {
+  return today.add({days: dayOffset}).toString();
+}
+
+function timedISO(dayOffset: number, hour: number, minute = 0): string {
+  return today
+    .add({days: dayOffset})
+    .toZonedDateTime({
+      plainTime: Temporal.PlainTime.from({hour, minute}),
+      timeZone: 'UTC',
+    })
+    .toInstant()
+    .toString();
+}
+
+function dayInstant(dayOffset: number, timezoneID = 'UTC'): Instant {
+  return today.add({days: dayOffset}).toZonedDateTime(timezoneID)
+    .epochMilliseconds;
+}
+
 const events = [
   createEventFromISO({
     category: 'Planning',
-    end: '2026-05-13',
+    end: allDayISO(0),
     id: 'offsite',
-    start: '2026-05-13',
+    start: allDayISO(0),
     title: 'Planning offsite',
   }),
   createEventFromISO({
     category: 'Operations',
-    end: '2026-05-13',
+    end: allDayISO(0),
     id: 'release-freeze',
-    start: '2026-05-13',
+    start: allDayISO(0),
     title: 'Release freeze',
   }),
   createEventFromISO({
     category: 'Customer',
-    end: '2026-05-13T15:00:00.000Z',
+    end: timedISO(0, 15),
     id: 'customer-escalation',
-    start: '2026-05-13T14:00:00.000Z',
+    start: timedISO(0, 14),
     title: 'Customer escalation review',
   }),
   createEventFromISO({
     category: 'Design',
-    end: '2026-05-13T15:30:00.000Z',
+    end: timedISO(0, 15, 30),
     id: 'prototype-critique',
-    start: '2026-05-13T14:30:00.000Z',
+    start: timedISO(0, 14, 30),
     title: 'Prototype critique',
   }),
   createEventFromISO({
     category: 'Planning',
-    end: '2026-05-13T16:00:00.000Z',
+    end: timedISO(0, 16),
     id: 'launch-checklist',
-    start: '2026-05-13T15:30:00.000Z',
+    start: timedISO(0, 15, 30),
     title: 'Launch checklist',
   }),
   createEventFromISO({
     category: 'Sync',
-    end: '2026-05-13T16:30:00.000Z',
+    end: timedISO(0, 16, 30),
     id: 'sync',
-    start: '2026-05-13T16:00:00.000Z',
+    start: timedISO(0, 16),
     title: 'Team sync',
   }),
   createEventFromISO({
     category: 'Research',
-    end: '2026-05-13T17:30:00.000Z',
+    end: timedISO(0, 17, 30),
     id: 'study-readout',
-    start: '2026-05-13T16:45:00.000Z',
+    start: timedISO(0, 16, 45),
     title: 'Study readout',
   }),
   createEventFromISO({
     category: 'Operations',
-    end: '2026-05-14',
+    end: allDayISO(1),
     id: 'qa-window',
-    start: '2026-05-14',
+    start: allDayISO(1),
     title: 'QA window',
   }),
   createEventFromISO({
     category: 'Operations',
-    end: '2026-05-17',
+    end: allDayISO(4),
     id: 'launch-window-default',
-    start: '2026-05-15',
+    start: allDayISO(2),
     title: 'Launch window',
   }),
   createEventFromISO({
     category: 'Planning',
-    end: '2026-05-21',
+    end: allDayISO(8),
     id: 'research-summit',
-    start: '2026-05-19',
+    start: allDayISO(6),
     title: 'Research summit',
   }),
   createEventFromISO({
     category: 'Planning',
-    end: '2026-05-14T13:00:00.000Z',
+    end: timedISO(1, 13),
     id: 'roadmap-triage',
-    start: '2026-05-14T12:00:00.000Z',
+    start: timedISO(1, 12),
     title: 'Roadmap triage',
   }),
   createEventFromISO({
     category: 'Design',
-    end: '2026-05-14T18:00:00.000Z',
+    end: timedISO(1, 18),
     id: 'design',
-    start: '2026-05-14T17:00:00.000Z',
+    start: timedISO(1, 17),
     title: 'Design review',
   }),
   createEventFromISO({
     category: 'Sync',
-    end: '2026-05-15T10:45:00.000Z',
+    end: timedISO(2, 10, 45),
     id: 'partner-handoff',
-    start: '2026-05-15T09:30:00.000Z',
+    start: timedISO(2, 9, 30),
     title: 'Partner handoff',
   }),
   createEventFromISO({
     category: 'Customer',
-    end: '2026-05-15T16:30:00.000Z',
+    end: timedISO(2, 16, 30),
     id: 'account-planning',
-    start: '2026-05-15T15:00:00.000Z',
+    start: timedISO(2, 15),
     title: 'Account planning',
   }),
   createEventFromISO({
     category: 'Research',
-    end: '2026-05-18T12:00:00.000Z',
+    end: timedISO(5, 12),
     id: 'survey-results',
-    start: '2026-05-18T11:00:00.000Z',
+    start: timedISO(5, 11),
     title: 'Survey results review',
   }),
 ];
 
 const eventsWithoutCategories = [
   createEventFromISO({
-    end: '2026-05-13T16:30:00.000Z',
+    end: timedISO(0, 16, 30),
     id: 'open-sync',
-    start: '2026-05-13T16:00:00.000Z',
+    start: timedISO(0, 16),
     title: 'Open sync',
   }),
   createEventFromISO({
-    end: '2026-05-13T17:30:00.000Z',
+    end: timedISO(0, 17, 30),
     id: 'notes-review',
-    start: '2026-05-13T16:45:00.000Z',
+    start: timedISO(0, 16, 45),
     title: 'Notes review',
   }),
   createEventFromISO({
-    end: '2026-05-14',
+    end: allDayISO(1),
     id: 'maintenance',
-    start: '2026-05-14',
+    start: allDayISO(1),
     title: 'Maintenance window',
   }),
   createEventFromISO({
-    end: '2026-05-15T11:30:00.000Z',
+    end: timedISO(2, 11, 30),
     id: 'open-retro',
-    start: '2026-05-15T10:30:00.000Z',
+    start: timedISO(2, 10, 30),
     title: 'Open retro',
   }),
   createEventFromISO({
-    end: '2026-05-15T15:15:00.000Z',
+    end: timedISO(2, 15, 15),
     id: 'release-checklist',
-    start: '2026-05-15T14:00:00.000Z',
+    start: timedISO(2, 14),
     title: 'Release checklist',
   }),
 ];
@@ -167,37 +191,37 @@ const eventsWithoutCategories = [
 const multiDayEvents = [
   createEventFromISO({
     category: 'Planning',
-    end: '2026-05-15',
+    end: allDayISO(2),
     id: 'launch-window',
-    start: '2026-05-13',
+    start: allDayISO(0),
     title: 'Launch window',
   }),
   createEventFromISO({
     category: 'Operations',
-    end: '2026-05-16',
+    end: allDayISO(3),
     id: 'staged-rollout',
-    start: '2026-05-14',
+    start: allDayISO(1),
     title: 'Staged rollout',
   }),
   createEventFromISO({
     category: 'Sync',
-    end: '2026-05-14T02:00:00.000Z',
+    end: timedISO(1, 2),
     id: 'overnight-handoff',
-    start: '2026-05-13T23:00:00.000Z',
+    start: timedISO(0, 23),
     title: 'Overnight handoff',
   }),
   createEventFromISO({
     category: 'Customer',
-    end: '2026-05-15T01:30:00.000Z',
+    end: timedISO(2, 1, 30),
     id: 'regional-briefing',
-    start: '2026-05-14T22:00:00.000Z',
+    start: timedISO(1, 22),
     title: 'Regional briefing',
   }),
   createEventFromISO({
     category: 'Design',
-    end: '2026-05-15T18:00:00.000Z',
+    end: timedISO(2, 18),
     id: 'design-sprint',
-    start: '2026-05-15T09:00:00.000Z',
+    start: timedISO(2, 9),
     title: 'Design sprint',
   }),
 ];
@@ -224,8 +248,8 @@ const colorFallbackCategories: ScheduleCategory[] = [
   {color: 'yellow', label: 'Yellow'},
 ];
 
-const defaultHighlightDate = instantUTC(2026, 4, 13);
-const defaultViewDate = instantUTC(2026, 4, 13);
+const defaultHighlightDate: Instant = dayInstant(0);
+const defaultViewDate: Instant = dayInstant(0);
 
 const meta: Meta<typeof Schedule> = {
   title: 'Components/Schedule',
@@ -234,29 +258,6 @@ const meta: Meta<typeof Schedule> = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
-
-function instantUTC(year: number, monthIndex: number, day: number): Instant {
-  return Temporal.PlainDateTime.from({
-    day,
-    month: monthIndex + 1,
-    year,
-  }).toZonedDateTime('UTC').epochMilliseconds;
-}
-
-function instantInTimezone(
-  year: number,
-  monthIndex: number,
-  day: number,
-  hour: number,
-  timezoneID: string,
-): Instant {
-  return Temporal.PlainDateTime.from({
-    day,
-    hour,
-    month: monthIndex + 1,
-    year,
-  }).toZonedDateTime(timezoneID).epochMilliseconds;
-}
 
 function ScheduleStory({
   categories: storyCategories = categories,
@@ -488,12 +489,65 @@ export const CustomPlugin: Story = {
 };
 
 const eventPopoverEvents = [
+  // Several events land on "today" so the month view overflows into the
+  // "+N more" popover. Each remains an interactive event popover trigger.
   {
     ...createEventFromISO({
       category: 'Sync',
-      end: '2026-05-13T16:30:00.000Z',
+      end: timedISO(0, 9, 30),
+      id: 'standup',
+      start: timedISO(0, 9),
+      title: 'Daily standup',
+    }),
+    location: 'Room 1',
+  },
+  {
+    ...createEventFromISO({
+      category: 'Design',
+      end: timedISO(0, 11),
+      id: 'design-sync',
+      start: timedISO(0, 10),
+      title: 'Design sync',
+    }),
+    description: 'Align on the week’s design priorities.',
+    location: 'Design Studio',
+  },
+  {
+    ...createEventFromISO({
+      category: 'Customer',
+      end: timedISO(0, 12),
+      id: 'one-on-one',
+      start: timedISO(0, 11, 30),
+      title: '1:1 with Jordan',
+    }),
+  },
+  {
+    ...createEventFromISO({
+      category: 'Research',
+      end: timedISO(0, 13),
+      id: 'lunch-learn',
+      start: timedISO(0, 12),
+      title: 'Lunch & learn',
+    }),
+    description: 'Guest talk on accessible color systems.',
+    location: 'Cafeteria',
+  },
+  {
+    ...createEventFromISO({
+      category: 'Operations',
+      end: timedISO(0, 14, 30),
+      id: 'release-review',
+      start: timedISO(0, 14),
+      title: 'Release review',
+    }),
+    location: 'War room',
+  },
+  {
+    ...createEventFromISO({
+      category: 'Sync',
+      end: timedISO(0, 16, 30),
       id: 'team-sync',
-      start: '2026-05-13T16:00:00.000Z',
+      start: timedISO(0, 16),
       title: 'Team sync',
     }),
     description: 'Weekly status check-in and blockers review.',
@@ -501,10 +555,20 @@ const eventPopoverEvents = [
   },
   {
     ...createEventFromISO({
+      category: 'Planning',
+      end: timedISO(0, 17, 30),
+      id: 'retro',
+      start: timedISO(0, 17),
+      title: 'Sprint retro',
+    }),
+    description: 'What went well, what to improve.',
+  },
+  {
+    ...createEventFromISO({
       category: 'Design',
-      end: '2026-05-14',
+      end: allDayISO(1),
       id: 'design-review',
-      start: '2026-05-14',
+      start: allDayISO(1),
       title: 'Design review',
     }),
     description: 'Critique the latest prototype flows.',
@@ -513,9 +577,9 @@ const eventPopoverEvents = [
   {
     ...createEventFromISO({
       category: 'Planning',
-      end: '2026-05-15T15:00:00.000Z',
+      end: timedISO(2, 15),
       id: 'roadmap',
-      start: '2026-05-15T14:00:00.000Z',
+      start: timedISO(2, 14),
       title: 'Roadmap planning',
     }),
   },
@@ -621,23 +685,23 @@ export const ColorAndCategoryFallbacks: Story = {
       ...colorFallbackCategories.map((category, index) =>
         createEventFromISO({
           category: category.label,
-          end: `2026-05-13T${String(index + 9).padStart(2, '0')}:30:00.000Z`,
+          end: timedISO(0, index + 9, 30),
           id: `color-${category.color}`,
-          start: `2026-05-13T${String(index + 9).padStart(2, '0')}:00:00.000Z`,
+          start: timedISO(0, index + 9),
           title: `${category.label} category`,
         }),
       ),
       createEventFromISO({
         category: 'Unmapped',
-        end: '2026-05-14T15:30:00.000Z',
+        end: timedISO(1, 15, 30),
         id: 'unknown-category',
-        start: '2026-05-14T15:00:00.000Z',
+        start: timedISO(1, 15),
         title: 'Unknown category keeps label',
       }),
       createEventFromISO({
-        end: '2026-05-14T16:30:00.000Z',
+        end: timedISO(1, 16, 30),
         id: 'missing-category',
-        start: '2026-05-14T16:00:00.000Z',
+        start: timedISO(1, 16),
         title: 'Missing category uses default',
       }),
     ];
@@ -672,9 +736,9 @@ export const Timezones: Story = {
     const sameInstantEvents = [
       createEventFromISO({
         category: 'Sync',
-        end: '2026-05-13T19:00:00.000Z',
+        end: timedISO(0, 19),
         id: 'global-sync',
-        start: '2026-05-13T17:00:00.000Z',
+        start: timedISO(0, 17),
         title: 'Global sync',
       }),
     ];
@@ -685,13 +749,13 @@ export const Timezones: Story = {
           events={sameInstantEvents}
           timezoneID="UTC"
           view={createScheduleDayView({maxHour: 20, minHour: 8})}
-          viewDate={instantUTC(2026, 4, 13)}
+          viewDate={dayInstant(0)}
         />
         <ScheduleStory
           events={sameInstantEvents}
           timezoneID="America/Los_Angeles"
           view={createScheduleDayView({maxHour: 20, minHour: 8})}
-          viewDate={instantInTimezone(2026, 4, 13, 0, 'America/Los_Angeles')}
+          viewDate={dayInstant(0, 'America/Los_Angeles')}
         />
       </div>
     );
@@ -837,9 +901,9 @@ export const PastAndCurrentStates: Story = {
 export const HighlightDate: Story = {
   render: () => (
     <ScheduleStory
-      highlightDate={instantUTC(2026, 4, 15)}
+      highlightDate={dayInstant(2)}
       view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
-      viewDate={instantUTC(2026, 4, 13)}
+      viewDate={dayInstant(0)}
     />
   ),
 };

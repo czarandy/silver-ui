@@ -82,6 +82,16 @@ export interface PopoverProps {
    */
   label?: string;
   /**
+   * Horizontal offset in pixels applied after positioning. Positive values move
+   * the popover to the right.
+   */
+  offsetX?: number;
+  /**
+   * Vertical offset in pixels applied after positioning. Positive values move
+   * the popover down.
+   */
+  offsetY?: number;
+  /**
    * Callback fired when open state changes.
    */
   onOpenChange?: (isOpen: boolean) => void;
@@ -148,6 +158,8 @@ export function Popover({
   alignment = 'start',
   isOpen,
   onOpenChange,
+  offsetX,
+  offsetY,
   isEnabled = true,
   width,
   label,
@@ -294,6 +306,8 @@ export function Popover({
     {
       placement,
       alignment,
+      offsetX,
+      offsetY,
       className: styles.gap[placement],
       style: {minWidth: 'anchor-size(width)'},
     },
