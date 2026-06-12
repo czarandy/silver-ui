@@ -15,6 +15,7 @@ import {
   getMinutesSinceStartOfDay,
   isEventInPast,
   scheduleClasses,
+  ScheduleCurrentTimeIndicator,
   useScheduleEventPopover,
 } from 'components/Schedule/shared';
 import type {
@@ -150,26 +151,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '1',
-  }),
-  currentTimeLine: css({
-    position: 'absolute',
-    insetInline: '0',
-    borderBlockStartWidth: '2px',
-    borderBlockStartStyle: 'solid',
-    borderBlockStartColor: 'surface.orange.accent',
-    transform: 'translateY(2px)',
-    zIndex: '20',
-    pointerEvents: 'none',
-    _before: {
-      content: '""',
-      position: 'absolute',
-      insetInlineStart: '-6px',
-      top: '-6px',
-      w: '2.5',
-      h: '2.5',
-      borderRadius: 'full',
-      bg: 'surface.orange.accent',
-    },
   }),
   rowContents: css({
     display: 'contents',
@@ -604,11 +585,10 @@ export function TimeGridView({
                     role="gridcell"
                     style={hourStyle}>
                     {currentTimeTop != null ? (
-                      <div
-                        aria-hidden="true"
-                        className={styles.currentTimeLine}
-                        data-testid="schedule-current-time-line"
+                      <ScheduleCurrentTimeIndicator
+                        layout="timeGrid"
                         style={{top: `${currentTimeTop}%`}}
+                        testId="schedule-current-time-line"
                       />
                     ) : null}
                     <div className={styles.events}>

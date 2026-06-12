@@ -71,6 +71,28 @@ export const LabelsOnTopWithIcons: Story = {
   },
 };
 
+export const IconOnlyLabels: Story = {
+  args: {
+    title: 'Repository',
+    children: (
+      <>
+        <MetadataListItem icon={CircleCheck} isIconOnly label="Status">
+          Active
+        </MetadataListItem>
+        <MetadataListItem icon={User} isIconOnly label="Owner">
+          Design systems
+        </MetadataListItem>
+        <MetadataListItem icon={Calendar} isIconOnly label="Created">
+          May 27, 2026
+        </MetadataListItem>
+        <MetadataListItem icon={Eye} isIconOnly label="Visibility">
+          Internal
+        </MetadataListItem>
+      </>
+    ),
+  },
+};
+
 export const LongValues: Story = {
   args: {
     title: 'Project details',

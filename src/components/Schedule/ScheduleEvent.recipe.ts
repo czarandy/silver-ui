@@ -25,6 +25,16 @@ export const scheduleEventRecipe = sva({
       _hover: {
         bg: 'var(--schedule-event-bg-hover)',
       },
+      '&[data-state="past"]': {
+        '--schedule-event-bg':
+          'color-mix(in srgb, var(--schedule-event-dot) 10%, token(colors.bg))',
+        '--schedule-event-bg-hover':
+          'color-mix(in srgb, var(--schedule-event-dot) 14%, token(colors.bg))',
+        '--schedule-event-border':
+          'color-mix(in srgb, var(--schedule-event-dot) 48%, token(colors.border))',
+        '--schedule-event-fg':
+          'color-mix(in srgb, var(--schedule-event-fg-base) 52%, token(colors.fg.muted))',
+      },
     },
     dot: {
       display: 'inline-block',
@@ -214,6 +224,9 @@ export const scheduleEventRecipe = sva({
     isPast: {
       true: {
         event: {
+          // Keep `isPast` in the recipe API for class-based assertions and
+          // callers, but rely on `[data-state="past"]` for the actual variable
+          // overrides so the color variant cannot win by atomic CSS order.
           '--schedule-event-bg':
             'color-mix(in srgb, var(--schedule-event-dot) 10%, token(colors.bg))',
           '--schedule-event-bg-hover':

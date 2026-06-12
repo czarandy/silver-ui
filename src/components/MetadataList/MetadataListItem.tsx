@@ -63,7 +63,10 @@ export function MetadataListItem({
     throw new Error('MetadataListItem must be rendered inside a MetadataList.');
   }
 
-  const styles = metadataListRecipe({labelPosition: context?.labelPosition});
+  const styles = metadataListRecipe({
+    labelPosition: context?.labelPosition,
+    isIconOnly,
+  });
   const labelContent = (
     <>
       {icon != null ? <Icon color="secondary" icon={icon} size="sm" /> : null}

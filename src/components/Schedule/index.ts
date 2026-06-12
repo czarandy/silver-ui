@@ -25,7 +25,11 @@ export {
   useScheduleViewSelectorPlugin,
 } from 'components/Schedule/plugins';
 export type {ScheduleContextValue} from 'components/Schedule/context';
-export type {ScheduleEventPopoverPluginOptions} from 'components/Schedule/plugins/EventPopoverPlugin';
+export type {ScheduleEventPopoverContentProps} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
+export type {
+  ScheduleEventPopoverPluginOptions,
+  ScheduleEventPopoverRenderProps,
+} from 'components/Schedule/plugins/EventPopoverPlugin';
 export type {SchedulePaginationPluginOptions} from 'components/Schedule/plugins/PaginationPlugin';
 export type {
   ScheduleViewSelectorOption,

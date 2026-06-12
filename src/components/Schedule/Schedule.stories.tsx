@@ -12,6 +12,7 @@ import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
+import {ScheduleEventPopoverContent} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
 import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import type {
   Instant,
@@ -349,7 +350,57 @@ export const Day: Story = {
 };
 
 export const ListView: Story = {
-  render: () => <ScheduleStory view={createScheduleListView({days: 7})} />,
+  render: () => {
+    const now = Temporal.Now.instant();
+    const timezoneID = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const listEvents = [
+      createEventFromISO({
+        category: 'Sync',
+        end: now.subtract({minutes: 90}).toString(),
+        id: 'list-past-sync',
+        start: now.subtract({minutes: 150}).toString(),
+        title: 'Past sync',
+      }),
+      createEventFromISO({
+        category: 'Customer',
+        end: now.subtract({minutes: 20}).toString(),
+        id: 'list-past-escalation',
+        start: now.subtract({minutes: 80}).toString(),
+        title: 'Customer escalation review',
+      }),
+      createEventFromISO({
+        category: 'Design',
+        end: now.add({minutes: 45}).toString(),
+        id: 'list-current-review',
+        start: now.subtract({minutes: 15}).toString(),
+        title: 'Current design review',
+      }),
+      createEventFromISO({
+        category: 'Planning',
+        end: now.add({minutes: 135}).toString(),
+        id: 'list-future-planning',
+        start: now.add({minutes: 75}).toString(),
+        title: 'Future planning session',
+      }),
+      createEventFromISO({
+        category: 'Operations',
+        end: now.add({minutes: 240}).toString(),
+        id: 'list-future-release',
+        start: now.add({minutes: 180}).toString(),
+        title: 'Release readiness',
+      }),
+    ];
+
+    return (
+      <ScheduleStory
+        events={listEvents}
+        highlightDate={now.epochMilliseconds}
+        timezoneID={timezoneID}
+        view={createScheduleListView({days: 7})}
+        viewDate={now.epochMilliseconds}
+      />
+    );
+  },
 };
 
 export const AsyncEvents: Story = {
@@ -470,21 +521,44 @@ const eventPopoverEvents = [
   },
 ];
 
-function EventPopoverStory({view}: {view: ScheduleView}): React.JSX.Element {
+function EventPopoverStory(): React.JSX.Element {
+  const views = useMemo(
+    (): {label: string; view: ScheduleView}[] => [
+      {label: 'Month', view: createScheduleMonthlyView()},
+      {
+        label: 'Week',
+        view: createScheduleWeeklyView({maxHour: 18, minHour: 8}),
+      },
+      {label: 'Day', view: createScheduleDayView({maxHour: 18, minHour: 8})},
+      {label: 'List', view: createScheduleListView({days: 7})},
+    ],
+    [],
+  );
+  const [view, setView] = useState<ScheduleView>(views[0].view);
   const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
   const paginationPlugin = useSchedulePaginationPlugin({
     onViewDateChange: setViewDate,
   });
+  const viewSelectorPlugin = useScheduleViewSelectorPlugin(views, {
+    onChangeView: setView,
+  });
   const eventPopoverPlugin = useScheduleEventPopoverPlugin({
-    onDelete: event => window.alert(`Delete ${event.title}`),
-    onEdit: event => window.alert(`Edit ${event.title}`),
+    renderContent: ({event, close}) => (
+      <ScheduleEventPopoverContent
+        event={event}
+        onClose={close}
+        onDelete={e => window.alert(`Delete ${e.title}`)}
+        onEdit={e => window.alert(`Edit ${e.title}`)}
+        onRespond={(e, response) => window.alert(`${response} for ${e.title}`)}
+      />
+    ),
   });
   return (
     <Schedule
       categories={categories}
       events={eventPopoverEvents}
       highlightDate={defaultHighlightDate}
-      plugins={[paginationPlugin, eventPopoverPlugin]}
+      plugins={[paginationPlugin, viewSelectorPlugin, eventPopoverPlugin]}
       timezoneID="UTC"
       view={view}
       viewDate={viewDate}
@@ -493,7 +567,7 @@ function EventPopoverStory({view}: {view: ScheduleView}): React.JSX.Element {
 }
 
 export const EventPopover: Story = {
-  render: () => <EventPopoverStory view={createScheduleMonthlyView()} />,
+  render: () => <EventPopoverStory />,
 };
 
 export const EventPopoverCustomContent: Story = {
@@ -503,7 +577,7 @@ export const EventPopoverCustomContent: Story = {
       onViewDateChange: setViewDate,
     });
     const eventPopoverPlugin = useScheduleEventPopoverPlugin({
-      renderContent: event => (
+      renderContent: ({event}) => (
         <div
           style={{
             display: 'flex',

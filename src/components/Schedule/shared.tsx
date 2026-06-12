@@ -1,5 +1,10 @@
 import {Temporal} from '@js-temporal/polyfill';
-import {useMemo, type ReactNode, type RefCallback} from 'react';
+import {
+  useMemo,
+  type CSSProperties,
+  type ReactNode,
+  type RefCallback,
+} from 'react';
 import {usePopover} from 'components/Popover/usePopover';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
@@ -25,6 +30,7 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from 'internal/plainDate';
+import {cva} from 'styled-system/css';
 
 /**
  * Static slot classes for the schedule shell (root, frame/header, surface).
@@ -34,6 +40,61 @@ import {
 export const scheduleClasses = scheduleRecipe();
 
 const categoryFallback: ScheduleCategory = {label: 'Event', color: 'blue'};
+
+const currentTimeIndicator = cva({
+  base: {
+    h: '0.5',
+    bg: 'surface.orange.accent',
+    borderRadius: 'full',
+    pointerEvents: 'none',
+    _before: {
+      content: '""',
+      position: 'absolute',
+      insetInlineStart: '-6px',
+      top: '50%',
+      w: '2.5',
+      h: '2.5',
+      borderRadius: 'full',
+      bg: 'surface.orange.accent',
+      transform: 'translateY(-50%)',
+    },
+  },
+  variants: {
+    layout: {
+      list: {
+        position: 'relative',
+      },
+      timeGrid: {
+        position: 'absolute',
+        insetInline: '0',
+        transform: 'translateY(2px)',
+        zIndex: '20',
+      },
+    },
+  },
+});
+
+/**
+ * Shared current-time marker used by the list and time-grid schedule views.
+ */
+export function ScheduleCurrentTimeIndicator({
+  layout,
+  testId,
+  style,
+}: {
+  layout: 'list' | 'timeGrid';
+  testId: string;
+  style?: CSSProperties;
+}): React.JSX.Element {
+  return (
+    <div
+      aria-hidden="true"
+      className={currentTimeIndicator({layout})}
+      data-testid={testId}
+      style={style}
+    />
+  );
+}
 
 export function createCategoryMap(
   categories: ReadonlyArray<ScheduleCategory>,

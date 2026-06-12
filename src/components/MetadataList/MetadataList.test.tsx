@@ -19,6 +19,29 @@ describe('MetadataList', () => {
     expect(screen.getByText('Active').tagName).toBe('DD');
   });
 
+  it('visually hides the label but keeps it accessible for icon-only items', () => {
+    render(
+      <MetadataList>
+        <MetadataListItem icon={CircleCheck} isIconOnly label="Status">
+          Active
+        </MetadataListItem>
+      </MetadataList>,
+    );
+
+    // The label text remains in the accessibility tree (rendered, not removed)
+    // but is wrapped in a visually-hidden <span> rather than shown inline in the
+    // <dt> (contrast with the non-icon-only case above, where it is the <dt>).
+    const label = screen.getByText('Status');
+    expect(label).toBeInTheDocument();
+    expect(label.tagName).toBe('SPAN');
+
+    // The icon is still rendered in the label slot (the <dt>).
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    const dt = assertNonNull(label.closest('dt'));
+    // eslint-disable-next-line testing-library/no-node-access -- verifying icon SVG presence
+    expect(dt.querySelector('svg')).toBeInTheDocument();
+  });
+
   it('labels the dl with the title via aria-labelledby', () => {
     render(
       <MetadataList title="Details">

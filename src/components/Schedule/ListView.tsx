@@ -13,6 +13,7 @@ import {
   isEventInPast,
   formatListRangeTitle,
   scheduleClasses,
+  ScheduleCurrentTimeIndicator,
   ScheduleFrame,
   useScheduleEventPopover,
 } from 'components/Schedule/shared';
@@ -131,11 +132,6 @@ const styles = {
   eventTime: css({
     whiteSpace: 'nowrap',
   }),
-  nowRow: css({
-    h: '0.5',
-    bg: 'fg.danger',
-    borderRadius: 'full',
-  }),
 } as const;
 
 /**
@@ -151,6 +147,7 @@ function ListEvent({
   const {categoryMap, timezoneID} = useScheduleContext();
   const {popover, triggerProps} = useScheduleEventPopover(event);
   const category = getCategory(categoryMap, event);
+  const eventDataState = isPast ? 'past' : undefined;
   const eventContent = (
     <>
       <Tooltip content={category.label} hoverIndication="never">
@@ -166,20 +163,26 @@ function ListEvent({
   return (
     <div
       className={cx(styles.eventRow, isPast && styles.eventPast)}
-      data-state={isPast ? 'past' : undefined}>
+      data-state={eventDataState}>
       <Text className={styles.eventTime} color="secondary" type="supporting">
         {isDayEvent(event) ? 'All day' : getEventTimeLabel(event, timezoneID)}
       </Text>
       {triggerProps != null ? (
         <button
           className={cx(styles.eventContent, styles.eventContentButton)}
+          data-state={eventDataState}
           data-testid={`schedule-event-${event.id}`}
           type="button"
           {...triggerProps}>
           {eventContent}
         </button>
       ) : (
-        <div className={styles.eventContent}>{eventContent}</div>
+        <div
+          className={styles.eventContent}
+          data-state={eventDataState}
+          data-testid={`schedule-event-${event.id}`}>
+          {eventContent}
+        </div>
       )}
       {popover}
     </div>
@@ -285,11 +288,10 @@ function renderListRows({
   }
 
   const marker = (
-    <div
-      aria-hidden="true"
-      className={styles.nowRow}
-      data-testid="schedule-list-current-time"
+    <ScheduleCurrentTimeIndicator
       key="current-time"
+      layout="list"
+      testId="schedule-list-current-time"
     />
   );
   const insertIndex = events.findIndex(

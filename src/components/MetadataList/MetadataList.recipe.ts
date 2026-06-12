@@ -42,7 +42,7 @@ export const metadataListRecipe = sva({
         dl: {
           gridTemplateColumns: 'auto 1fr',
           rowGap: '3',
-          columnGap: '6',
+          columnGap: '4',
           alignItems: 'start',
         },
         item: {
@@ -61,9 +61,20 @@ export const metadataListRecipe = sva({
         },
       },
     },
+    // Renders only the icon in the label slot (the label text is kept available
+    // to assistive technology via VisuallyHidden in MetadataListItem).
+    isIconOnly: {
+      true: {
+        label: {
+          paddingBlockStart: '2px',
+        },
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     labelPosition: 'start',
+    isIconOnly: false,
   },
 });
 

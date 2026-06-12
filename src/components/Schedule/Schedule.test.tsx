@@ -25,6 +25,7 @@ import {
 } from 'components/Schedule/dateMath';
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
+import {ScheduleEventPopoverContent} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
 import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import {
   createScheduleZonedInstant,
@@ -1196,6 +1197,10 @@ describe('Schedule', () => {
     expect(
       screen.getByTestId('schedule-list-current-time'),
     ).toBeInTheDocument();
+    expect(screen.getByTestId('schedule-list-current-time')).toHaveClass(
+      'silver-bg_surface.orange.accent',
+      'before:silver-bg_surface.orange.accent',
+    );
   });
 
   it('marks past events from the mocked current time', async () => {
@@ -1235,6 +1240,45 @@ describe('Schedule', () => {
     expect(screen.getByTestId('schedule-event-current')).not.toHaveAttribute(
       'data-state',
     );
+  });
+
+  it('marks past list view event content from the mocked current time', async () => {
+    mockCurrentTime('2026-05-13T09:30:00.000Z');
+
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-13T08:30:00.000Z',
+            id: 'past-list',
+            start: '2026-05-13T08:00:00.000Z',
+            title: 'Past list sync',
+          }),
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-13T10:30:00.000Z',
+            id: 'current-list',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Current list sync',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleListView({days: 1})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('schedule-event-past-list')).toHaveAttribute(
+        'data-state',
+        'past',
+      );
+    });
+    expect(
+      screen.getByTestId('schedule-event-current-list'),
+    ).not.toHaveAttribute('data-state');
   });
 
   it('calls onViewDateChange with the previous view date preserving time of day', () => {
@@ -1519,13 +1563,25 @@ describe('Schedule', () => {
       eventsList?: CalendarEvent[];
       onDelete?: (event: CalendarEvent) => void;
       onEdit?: (event: CalendarEvent) => void;
-      renderContent?: (event: CalendarEvent) => ReactNode;
+      renderContent?: (props: {
+        close: () => void;
+        event: CalendarEvent;
+      }) => ReactNode;
       view: ScheduleView;
     }) {
       const plugin = useScheduleEventPopoverPlugin({
-        onDelete,
-        onEdit,
-        renderContent,
+        renderContent:
+          renderContent ??
+          (onEdit != null || onDelete != null
+            ? ({event, close}) => (
+                <ScheduleEventPopoverContent
+                  event={event}
+                  onClose={close}
+                  onDelete={onDelete}
+                  onEdit={onEdit}
+                />
+              )
+            : undefined),
       });
       return (
         <Schedule
@@ -1691,7 +1747,7 @@ describe('Schedule', () => {
     it('replaces the default content with renderContent', () => {
       render(
         <ScheduleWithPopover
-          renderContent={event => (
+          renderContent={({event}) => (
             <div data-testid="custom-popover">Custom {event.title}</div>
           )}
           view={createScheduleMonthlyView()}
