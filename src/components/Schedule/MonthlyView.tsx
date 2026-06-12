@@ -3,6 +3,7 @@
 import type {CSSProperties} from 'react';
 import {Link} from 'components/Link';
 import {Popover} from 'components/Popover';
+import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
 import {
@@ -35,7 +36,6 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from 'internal/plainDate';
-import {css} from 'styled-system/css';
 
 export interface ScheduleMonthlyViewOptions {
   /**
@@ -55,130 +55,7 @@ export interface ScheduleMonthlyViewOptions {
   weekStartsOn?: DayOfWeek;
 }
 
-const styles = {
-  grid: css({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-  }),
-  weekday: css({
-    p: '2',
-    textAlign: 'center',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  cell: css({
-    minH: '24',
-    p: '0.5',
-    borderInlineEndWidth: 'default',
-    borderInlineEndStyle: 'solid',
-    borderInlineEndColor: 'border',
-    borderBlockEndWidth: 'default',
-    borderBlockEndStyle: 'solid',
-    borderBlockEndColor: 'border',
-  }),
-  lastColumn: css({
-    borderInlineEndWidth: 0,
-  }),
-  lastRow: css({
-    borderBlockEndWidth: 0,
-  }),
-  otherMonth: css({
-    bg: 'bg.subtle',
-    color: 'fg.muted',
-  }),
-  dayNumber: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    w: '6',
-    h: '6',
-    m: '0.5',
-    borderRadius: 'full',
-  }),
-  today: css({
-    bg: 'primary',
-    color: 'fg.onPrimary',
-  }),
-  todayText: css({
-    marginInlineEnd: '1px',
-  }),
-  events: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1',
-    m: 0,
-    p: 0,
-    listStyleType: 'none',
-  }),
-  eventItem: css({
-    display: 'flex',
-  }),
-  monthSurface: css({
-    position: 'relative',
-    gridColumn: '1 / -1',
-  }),
-  monthCellGrid: css({
-    display: 'grid',
-    gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-    gridAutoRows: 'var(--schedule-month-row-height)',
-  }),
-  monthEventOverlay: css({
-    position: 'absolute',
-    inset: 0,
-    display: 'grid',
-    gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-    gridAutoRows: 'var(--schedule-month-row-height)',
-    pointerEvents: 'none',
-  }),
-  monthEventSpan: css({
-    alignSelf: 'start',
-    minW: 0,
-    mx: '0.5',
-    pointerEvents: 'auto',
-    zIndex: 1,
-  }),
-  monthSeeMoreSpan: css({
-    alignSelf: 'start',
-    minW: 0,
-    mx: '0.5',
-    pointerEvents: 'auto',
-    zIndex: 2,
-  }),
-  monthSeeMoreButton: css({
-    display: 'inline-flex',
-    alignItems: 'center',
-    maxW: 'full',
-    h: '5',
-    px: '1',
-    borderRadius: 'sm',
-    color: 'primary',
-    cursor: 'pointer',
-    fontSize: 'xs',
-    fontWeight: 'medium',
-    lineHeight: 'tight',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    _hover: {
-      bg: 'bg.muted',
-    },
-  }),
-  monthPopoverContent: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1',
-    p: '3',
-  }),
-  monthPopoverEvents: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 0,
-    m: 0,
-    p: 0,
-    listStyleType: 'none',
-  }),
-} as const;
+const styles = scheduleMonthlyViewRecipe();
 
 type MonthGridStyle = CSSProperties & {'--schedule-month-row-height': string};
 
@@ -619,11 +496,16 @@ function ScheduleMonthlyView({
                 day.month === month.month && day.year === month.year;
               const isLastColumn = index % 7 === 6;
               const isLastRow = index >= days.length - 7;
+              const isToday = plainDateIsEqual(day, today);
+              const dayClasses = scheduleMonthlyViewRecipe({
+                isLastColumn,
+                isLastRow,
+                isOtherMonth: !isCurrentMonth,
+                isToday,
+              });
               return (
                 <div
-                  aria-current={
-                    plainDateIsEqual(day, today) ? 'date' : undefined
-                  }
+                  aria-current={isToday ? 'date' : undefined}
                   aria-label={getGridCellName({
                     categoryMap,
                     date: day,
@@ -633,26 +515,13 @@ function ScheduleMonthlyView({
                     events: eventPopoverActive ? [] : dayEvents,
                     timezoneID,
                   })}
-                  className={cx(
-                    styles.cell,
-                    isLastColumn ? styles.lastColumn : undefined,
-                    isLastRow ? styles.lastRow : undefined,
-                    !isCurrentMonth ? styles.otherMonth : undefined,
-                  )}
+                  className={dayClasses.cell}
                   key={day.toString()}
                   role="gridcell">
-                  <span
-                    className={cx(
-                      styles.dayNumber,
-                      plainDateIsEqual(day, today) ? styles.today : undefined,
-                    )}>
+                  <span className={dayClasses.dayNumber}>
                     <Text
                       as="span"
-                      className={
-                        plainDateIsEqual(day, today)
-                          ? styles.todayText
-                          : undefined
-                      }
+                      className={dayClasses.todayText}
                       color="inherit"
                       hasTabularNumbers
                       type="supporting"

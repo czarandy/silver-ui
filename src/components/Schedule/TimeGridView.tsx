@@ -91,9 +91,9 @@ const styles = {
   }),
   allDayLabel: css({
     display: 'flex',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     justifyContent: 'flex-end',
-    py: '1',
+    py: '0.5',
     px: '2',
     borderInlineEndWidth: 'default',
     borderInlineEndStyle: 'solid',
@@ -151,6 +151,11 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '1',
+  }),
+  allDayEvents: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5',
   }),
   rowContents: css({
     display: 'contents',
@@ -524,7 +529,7 @@ export function TimeGridView({
                 )}
                 key={`${day.toString()}-all-day`}
                 role="gridcell">
-                <div className={styles.events}>
+                <div className={styles.allDayEvents}>
                   {dayEvents.map(event => (
                     <CalendarEventPill
                       event={event}
