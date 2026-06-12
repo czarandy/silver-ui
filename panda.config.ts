@@ -1,5 +1,5 @@
 import {defineConfig} from '@pandacss/dev';
-import {generateColorScale} from './src/theme/generate-color-scale';
+import {generateColorScale} from './scripts/generate-color-scale';
 
 const gray = {
   ...generateColorScale('#6a7b8c'),

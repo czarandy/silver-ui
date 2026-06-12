@@ -4,6 +4,7 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useMemo, useState} from 'react';
 import {Badge} from '../Badge';
 import {Button} from '../Button';
+import {ToastViewport, useToast} from '../Toast';
 import {createEventFromISO} from './CalendarEvent';
 import {createScheduleDayView} from './DayView';
 import {createScheduleListView} from './ListView';
@@ -282,6 +283,35 @@ function ScheduleStory({
   );
 }
 
+function AsyncEventsWithToastStory(): React.JSX.Element {
+  const toast = useToast();
+  const loader = useMemo<ScheduleEventSource>(
+    () => async () => {
+      try {
+        await new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Unable to load events')), 900);
+        });
+        return [];
+      } catch {
+        toast({
+          body: 'Unable to load schedule events',
+          type: 'error',
+          uniqueID: 'schedule-events-load-error',
+        });
+        return [];
+      }
+    },
+    [toast],
+  );
+
+  return (
+    <ScheduleStory
+      events={loader}
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+    />
+  );
+}
+
 export const Month: Story = {
   render: () => <ScheduleStory view={createScheduleMonthlyView()} />,
 };
@@ -331,6 +361,14 @@ export const AsyncEvents: Story = {
       />
     );
   },
+};
+
+export const AsyncEventsWithToastError: Story = {
+  render: () => (
+    <ToastViewport>
+      <AsyncEventsWithToastStory />
+    </ToastViewport>
+  ),
 };
 
 export const ViewSelector: Story = {

@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import {log} from 'node:console';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {generateColorScale} from '../src/theme/generate-color-scale';
+import {generateColorScale} from './generate-color-scale';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const THEME_PATH = path.join(ROOT, 'THEME.md');
