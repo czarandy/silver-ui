@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Rating} from './Rating';
+import {Rating} from 'components/Rating/Rating';
 
 const meta: Meta<typeof Rating> = {
   title: 'Components/Rating',

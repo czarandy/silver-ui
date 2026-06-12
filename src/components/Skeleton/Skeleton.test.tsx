@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Skeleton} from './Skeleton';
+import {Skeleton} from 'components/Skeleton/Skeleton';
 
 describe('Skeleton', () => {
   it('applies numeric dimensions as pixels', () => {

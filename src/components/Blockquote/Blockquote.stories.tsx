@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Blockquote} from './Blockquote';
+import {Blockquote} from 'components/Blockquote/Blockquote';
 
 const meta: Meta<typeof Blockquote> = {
   title: 'Components/Blockquote',

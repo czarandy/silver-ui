@@ -1,10 +1,13 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, Mail, MessageSquare} from 'lucide-react';
 import {useState} from 'react';
-import {Badge} from '../Badge';
-import {Icon} from '../Icon';
-import {RadioGroup, type RadioGroupProps} from './RadioGroup';
-import {RadioGroupItem} from './RadioGroupItem';
+import {Badge} from 'components/Badge';
+import {Icon} from 'components/Icon';
+import {
+  RadioGroup,
+  type RadioGroupProps,
+} from 'components/RadioGroup/RadioGroup';
+import {RadioGroupItem} from 'components/RadioGroup/RadioGroupItem';
 
 function RadioGroupStory(
   args: React.ComponentProps<typeof RadioGroup>,

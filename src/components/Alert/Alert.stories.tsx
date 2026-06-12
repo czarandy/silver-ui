@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Rocket} from 'lucide-react';
-import {Button} from '../Button';
-import {Icon} from '../Icon';
-import {Text} from '../Text';
-import {Alert} from './Alert';
+import {Alert} from 'components/Alert/Alert';
+import {Button} from 'components/Button';
+import {Icon} from 'components/Icon';
+import {Text} from 'components/Text';
 
 const meta = {
   title: 'Components/Alert',

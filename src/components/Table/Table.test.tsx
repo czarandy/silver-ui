@@ -9,31 +9,40 @@ import {
 import userEvent from '@testing-library/user-event';
 import {useMemo, useState} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import type {SearchFilterInputConfig} from '../SearchFilterInput';
-import {Table} from './Table';
-import {TableFooter} from './TableFooter';
+import type {SearchFilterInputConfig} from 'components/SearchFilterInput';
+import {Table} from 'components/Table/Table';
+import {TableFooter} from 'components/Table/TableFooter';
 import {
   defaultCellRenderer,
   generateColumns,
   pixel,
   proportional,
   resolveColumnWidths,
-} from './columnUtils';
-import {useTableColumnResize} from './plugins/columnResize';
+} from 'components/Table/columnUtils';
+import {useTableColumnResize} from 'components/Table/plugins/columnResize';
 import {
   useTableColumnSettings,
   useTableColumnSettingsState,
-} from './plugins/columnSettings';
+} from 'components/Table/plugins/columnSettings';
 import {
   toSearchFilters,
   useTableFiltering,
   useTableFilterState,
-} from './plugins/filtering';
-import {paginateData, useTablePagination} from './plugins/pagination';
-import {useTableSelection, useTableSelectionState} from './plugins/selection';
-import {useTableSortable, useTableSortableState} from './plugins/sortable';
-import type {TableColumn, TablePlugin} from './types';
-import {useBaseTablePlugins} from './useBaseTablePlugins';
+} from 'components/Table/plugins/filtering';
+import {
+  paginateData,
+  useTablePagination,
+} from 'components/Table/plugins/pagination';
+import {
+  useTableSelection,
+  useTableSelectionState,
+} from 'components/Table/plugins/selection';
+import {
+  useTableSortable,
+  useTableSortableState,
+} from 'components/Table/plugins/sortable';
+import type {TableColumn, TablePlugin} from 'components/Table/types';
+import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
 
 interface PersonRow extends Record<string, unknown> {
   age: number;

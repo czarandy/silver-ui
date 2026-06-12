@@ -1,9 +1,9 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {Button} from '../Button';
-import {AlertDialog} from './AlertDialog';
-import {useAlertDialog} from './useAlertDialog';
+import {AlertDialog} from 'components/AlertDialog/AlertDialog';
+import {useAlertDialog} from 'components/AlertDialog/useAlertDialog';
+import {Button} from 'components/Button';
 
 beforeAll(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {

@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {fn} from 'storybook/test';
-import {HStack} from '../Stack';
-import {Thumbnail} from './Thumbnail';
+import {HStack} from 'components/Stack';
+import {Thumbnail} from 'components/Thumbnail/Thumbnail';
 
 const meta: Meta<typeof Thumbnail> = {
   title: 'Components/Thumbnail',

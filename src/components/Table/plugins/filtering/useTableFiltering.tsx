@@ -8,6 +8,16 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import {Button} from 'components/Button';
+import {DateInput} from 'components/DateInput';
+import {MultiSelect} from 'components/MultiSelect';
+import {NumberInput} from 'components/NumberInput';
+import {Popover} from 'components/Popover';
+import {Select} from 'components/Select';
+import {proportional} from 'components/Table/columnUtils';
+import {TagsInput} from 'components/TagsInput';
+import {TextInput} from 'components/TextInput';
+import {TimeInput} from 'components/TimeInput';
 import {css} from 'styled-system/css';
 import {
   plainDateToUnixSeconds,
@@ -18,11 +28,6 @@ import {
   createStaticSearchSource,
   type SearchableItem,
 } from '../../../AutocompleteInput';
-import {Button} from '../../../Button';
-import {DateInput} from '../../../DateInput';
-import {MultiSelect} from '../../../MultiSelect';
-import {NumberInput} from '../../../NumberInput';
-import {Popover} from '../../../Popover';
 import type {
   FilterValue,
   FloatOperatorValue,
@@ -37,11 +42,6 @@ import type {
   EnumListOperatorValue,
   EnumOperatorValue,
 } from '../../../SearchFilterInput';
-import {Select} from '../../../Select';
-import {TagsInput} from '../../../TagsInput';
-import {TextInput} from '../../../TextInput';
-import {TimeInput} from '../../../TimeInput';
-import {proportional} from '../../columnUtils';
 import type {
   HeaderCellRenderProps,
   TableColumn,

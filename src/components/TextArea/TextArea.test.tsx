@@ -2,7 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {MessageSquare, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
-import {TextArea} from './TextArea';
+import {TextArea} from 'components/TextArea/TextArea';
 
 function MessageIcon(props: LucideProps): React.JSX.Element {
   return <MessageSquare {...props} data-testid="message-icon" />;

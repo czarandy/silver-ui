@@ -11,6 +11,8 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
+import {Button} from 'components/Button';
+import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
 import {cx} from 'internal/cx';
 import type {DateRange, DayOfWeek} from '../../internal/dateTypes';
 import {
@@ -30,8 +32,6 @@ import {
 } from '../../internal/plainDate';
 import {getBrowserTimezoneID} from '../../internal/time';
 import {useGridFocus} from '../../internal/useGridFocus';
-import {Button} from '../Button';
-import {calendarRecipe} from './Calendar.recipe';
 
 export type {DateRange, DayOfWeek} from '../../internal/dateTypes';
 

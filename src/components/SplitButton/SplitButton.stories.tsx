@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Archive, Copy, Edit, Save, Trash2} from 'lucide-react';
-import {DropdownMenuItem} from '../DropdownMenu';
-import {SplitButton} from './SplitButton';
+import {DropdownMenuItem} from 'components/DropdownMenu';
+import {SplitButton} from 'components/SplitButton/SplitButton';
 
 const meta: Meta<typeof SplitButton> = {
   title: 'Components/SplitButton',

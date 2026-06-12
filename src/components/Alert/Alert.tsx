@@ -13,13 +13,13 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {alertRecipe} from 'components/Alert/Alert.recipe';
+import {Button} from 'components/Button';
+import {Icon} from 'components/Icon';
+import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {Button} from '../Button';
-import {Icon} from '../Icon';
-import {Text} from '../Text';
-import {alertRecipe} from './Alert.recipe';
 import type {AlertContainer, AlertStatus} from './Alert.types';
 
 export type {AlertContainer, AlertStatus} from './Alert.types';

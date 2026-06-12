@@ -2,11 +2,11 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Home} from 'lucide-react';
 import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
-import {layoutRegionRecipe} from '../Layout/Layout.recipe';
-import {SideNav, SideNavItem, SideNavSection} from '../SideNav';
-import {TopNav, TopNavHeading, TopNavItem} from '../TopNav';
-import {AppShell} from './AppShell';
-import {appShellRecipe} from './AppShell.recipe';
+import {AppShell} from 'components/AppShell/AppShell';
+import {appShellRecipe} from 'components/AppShell/AppShell.recipe';
+import {layoutRegionRecipe} from 'components/Layout/Layout.recipe';
+import {SideNav, SideNavItem, SideNavSection} from 'components/SideNav';
+import {TopNav, TopNavHeading, TopNavItem} from 'components/TopNav';
 
 function createMatchMedia(matches: boolean) {
   return vi.fn().mockImplementation((query: string) => ({

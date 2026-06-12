@@ -7,10 +7,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {DateInput} from 'components/DateInput';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {plainDateIsEqual, type PlainDate} from '../../internal/plainDate';
-import {DateInput} from '../DateInput';
 import {
   Field,
   getNecessity,

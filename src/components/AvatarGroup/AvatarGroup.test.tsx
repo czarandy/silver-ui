@@ -1,9 +1,9 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {Avatar, AvatarStatusDot} from '../Avatar';
-import {AvatarGroup} from './AvatarGroup';
-import {AvatarGroupOverflow} from './AvatarGroupOverflow';
+import {Avatar, AvatarStatusDot} from 'components/Avatar';
+import {AvatarGroup} from 'components/AvatarGroup/AvatarGroup';
+import {AvatarGroupOverflow} from 'components/AvatarGroup/AvatarGroupOverflow';
 
 describe('AvatarGroup', () => {
   it('renders a labelled group', () => {

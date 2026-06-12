@@ -12,12 +12,12 @@ import {
   Settings,
 } from 'lucide-react';
 import {fn} from 'storybook/test';
-import {Badge} from '../Badge';
-import {Icon} from '../Icon';
-import {HStack, VStack} from '../Stack';
-import {Text} from '../Text';
-import {TreeView} from './TreeView';
-import type {TreeViewItemData} from './types';
+import {Badge} from 'components/Badge';
+import {Icon} from 'components/Icon';
+import {HStack, VStack} from 'components/Stack';
+import {Text} from 'components/Text';
+import {TreeView} from 'components/TreeView/TreeView';
+import type {TreeViewItemData} from 'components/TreeView/types';
 
 const basicItems: TreeViewItemData[] = [
   {id: 'overview', label: 'Overview'},

@@ -1,12 +1,12 @@
 import {User} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo, useState} from 'react';
+import {avatarRecipe} from 'components/Avatar/Avatar.recipe';
+import {AvatarSizeContext} from 'components/Avatar/AvatarSizeContext';
+import {useAvatarGroup} from 'components/AvatarGroup/AvatarGroupContext';
+import {Icon} from 'components/Icon';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
-import {useAvatarGroup} from '../AvatarGroup/AvatarGroupContext';
-import {Icon} from '../Icon';
-import {avatarRecipe} from './Avatar.recipe';
-import {AvatarSizeContext} from './AvatarSizeContext';
 
 const CIRCLE_EDGE_OFFSET_RATIO = (1 - 1 / Math.SQRT2) / 2;
 const INITIALS_FONT_SIZE_RATIO = 0.4;

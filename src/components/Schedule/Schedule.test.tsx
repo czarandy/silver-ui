@@ -8,35 +8,35 @@ import {
 } from '@testing-library/react';
 import {Component, useState, type ErrorInfo, type ReactNode} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
-import {buttonRecipe} from '../Button/Button.recipe';
-import {createEventFromISO} from './CalendarEvent';
-import {createScheduleDayView} from './DayView';
-import {createScheduleListView} from './ListView';
-import {createScheduleMonthlyView} from './MonthlyView';
-import {Schedule} from './Schedule';
-import {scheduleEventRecipe} from './ScheduleEvent.recipe';
-import {createScheduleWeeklyView} from './WeeklyView';
+import {buttonRecipe} from 'components/Button/Button.recipe';
+import {createEventFromISO} from 'components/Schedule/CalendarEvent';
+import {createScheduleDayView} from 'components/Schedule/DayView';
+import {createScheduleListView} from 'components/Schedule/ListView';
+import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
+import {Schedule} from 'components/Schedule/Schedule';
+import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
+import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {
   enumerateDates,
   eventOccursOnDate,
   eventOverlapsRange,
   getScheduleRangeFromDates,
   sortEvents,
-} from './dateMath';
-import {useSchedulePaginationPlugin} from './plugins/PaginationPlugin';
-import {useScheduleViewSelectorPlugin} from './plugins/ViewSelectorPlugin';
+} from 'components/Schedule/dateMath';
+import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
+import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import {
   createScheduleZonedInstant,
   scheduleRangeToScheduleZonedInstantRange,
   scheduleZonedInstantFromInstant,
-} from './scheduleZonedInstant';
+} from 'components/Schedule/scheduleZonedInstant';
 import type {
   CalendarEvent,
   Instant,
   ScheduleCategory,
   SchedulePlugin,
   ScheduleView,
-} from './types';
+} from 'components/Schedule/types';
 
 class ErrorBoundary extends Component<
   {children: ReactNode},

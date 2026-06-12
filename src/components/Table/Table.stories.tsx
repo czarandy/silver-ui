@@ -1,30 +1,39 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {RotateCcw, Settings2} from 'lucide-react';
 import {useMemo, useState} from 'react';
-import {Badge} from '../Badge';
-import {Button} from '../Button';
-import {EmptyState} from '../EmptyState';
-import type {SearchFilterInputConfig} from '../SearchFilterInput';
-import {Table} from './Table';
-import {TableBody} from './TableBody';
-import {TableCell} from './TableCell';
-import {TableFooter} from './TableFooter';
-import {TableHeader} from './TableHeader';
-import {TableHeaderCell} from './TableHeaderCell';
-import {TableRow} from './TableRow';
-import {pixel, proportional} from './columnUtils';
-import {useTableColumnResize} from './plugins/columnResize';
-import {useTableColumnSettings} from './plugins/columnSettings';
+import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
+import {EmptyState} from 'components/EmptyState';
+import type {SearchFilterInputConfig} from 'components/SearchFilterInput';
+import {Table} from 'components/Table/Table';
+import {TableBody} from 'components/Table/TableBody';
+import {TableCell} from 'components/Table/TableCell';
+import {TableFooter} from 'components/Table/TableFooter';
+import {TableHeader} from 'components/Table/TableHeader';
+import {TableHeaderCell} from 'components/Table/TableHeaderCell';
+import {TableRow} from 'components/Table/TableRow';
+import {pixel, proportional} from 'components/Table/columnUtils';
+import {useTableColumnResize} from 'components/Table/plugins/columnResize';
+import {useTableColumnSettings} from 'components/Table/plugins/columnSettings';
 import {
   useTableFiltering,
   useTableFilterState,
   type TableFilterState,
   type TableFilterVariant,
-} from './plugins/filtering';
-import {paginateData, useTablePagination} from './plugins/pagination';
-import {useTableSelection, useTableSelectionState} from './plugins/selection';
-import {useTableSortable, useTableSortableState} from './plugins/sortable';
-import type {TableColumn, TableDividers} from './types';
+} from 'components/Table/plugins/filtering';
+import {
+  paginateData,
+  useTablePagination,
+} from 'components/Table/plugins/pagination';
+import {
+  useTableSelection,
+  useTableSelectionState,
+} from 'components/Table/plugins/selection';
+import {
+  useTableSortable,
+  useTableSortableState,
+} from 'components/Table/plugins/sortable';
+import type {TableColumn, TableDividers} from 'components/Table/types';
 
 interface TaskRow extends Record<string, unknown> {
   budget: number;

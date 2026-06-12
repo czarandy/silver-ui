@@ -1,7 +1,7 @@
 /* eslint-disable silver-ui/require-component-props */
 
-import {SearchFilterInputEditPopover} from './SearchFilterInputEditPopover';
-import {useInternalSearchFilterInputConfig} from './internalConfig';
+import {SearchFilterInputEditPopover} from 'components/SearchFilterInput/SearchFilterInputEditPopover';
+import {useInternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';
 import type {SearchFilterInputEditorProps} from './types';
 
 /**

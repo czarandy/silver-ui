@@ -6,14 +6,14 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {textRecipe} from 'components/Text/Text.recipe';
+import {getMaxLinesVariant} from 'components/Text/Text.utils';
+import {useTruncation} from 'components/Text/useTruncation';
+import {useTooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 import type {TooltipProps} from '../Tooltip';
-import {useTooltip} from '../Tooltip';
-import {textRecipe} from './Text.recipe';
-import {getMaxLinesVariant} from './Text.utils';
-import {useTruncation} from './useTruncation';
 
 export type TextType =
   | 'body'

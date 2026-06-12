@@ -5,10 +5,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {metadataListRecipe} from 'components/MetadataList/MetadataList.recipe';
+import {MetadataListContext} from 'components/MetadataList/MetadataListContext';
 import {cx} from 'internal/cx';
 import {Heading} from '../Text';
-import {metadataListRecipe} from './MetadataList.recipe';
-import {MetadataListContext} from './MetadataListContext';
 
 export type MetadataListLabelPosition = 'start' | 'top';
 

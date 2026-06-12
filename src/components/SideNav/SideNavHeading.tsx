@@ -1,13 +1,13 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useLinkComponent} from 'components/Link';
+import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
+import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import isReactNode from '../../internal/isReactNode';
 import type {LinkComponent} from '../Link';
-import {useLinkComponent} from '../Link';
-import {Text} from '../Text';
-import {useSideNavCollapse} from './SideNavContext';
 
 export interface SideNavHeadingProps {
   as?: LinkComponent;

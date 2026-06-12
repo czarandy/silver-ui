@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {Accordion} from './Accordion';
-import {AccordionItem} from './AccordionItem';
+import {Accordion} from 'components/Accordion/Accordion';
+import {AccordionItem} from 'components/Accordion/AccordionItem';
 
 describe('AccordionItem (standalone)', () => {
   it('renders trigger and children', () => {

@@ -8,10 +8,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Toast} from 'components/Toast/Toast';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {Toast} from './Toast';
 import {ToastContext, type ToastContextValue} from './ToastContext';
 import type {ToastDismissReason, ToastEntry, ToastPosition} from './types';
 

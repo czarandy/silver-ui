@@ -5,9 +5,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {listRecipe} from 'components/List/List.recipe';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
-import {listRecipe} from './List.recipe';
 import {ListContext, type ListStyle} from './ListContext';
 
 export type {ListStyle};

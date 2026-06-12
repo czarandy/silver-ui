@@ -2,8 +2,8 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {ComponentPropsWithRef} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {LinkProvider} from '../Link';
-import {Item} from './Item';
+import {Item} from 'components/Item/Item';
+import {LinkProvider} from 'components/Link';
 
 function RouterLink({
   children,

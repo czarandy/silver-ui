@@ -2,6 +2,7 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
+import {DateInput, type PlainDate} from 'components/DateInput/DateInput';
 import {
   DATE_FORMAT_LONG,
   plainDateCreate,
@@ -9,7 +10,6 @@ import {
   plainDateToday,
 } from '../../internal/plainDate';
 import {getBrowserTimezoneID} from '../../internal/time';
-import {DateInput, type PlainDate} from './DateInput';
 
 beforeAll(() => {
   // jsdom has no native popover support. Toggle display so opened content is

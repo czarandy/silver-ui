@@ -1,9 +1,9 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useDropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
+import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
+import {Item} from 'components/Item';
 import {cx} from 'internal/cx';
 import {Icon, type IconComponent} from '../Icon';
-import {Item} from '../Item';
-import {useDropdownMenuContext} from './DropdownMenuContext';
-import {dropdownMenuItemRecipe} from './DropdownMenuItem.recipe';
 
 export interface DropdownMenuItemProps {
   /**

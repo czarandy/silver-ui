@@ -11,9 +11,9 @@ import {
   type MockInstance,
   vi,
 } from 'vitest';
-import {Button} from '../Button';
-import {Lightbox, type LightboxMedia} from './Lightbox';
-import {useLightbox} from './useLightbox';
+import {Button} from 'components/Button';
+import {Lightbox, type LightboxMedia} from 'components/Lightbox/Lightbox';
+import {useLightbox} from 'components/Lightbox/useLightbox';
 
 const media: ReadonlyArray<LightboxMedia> = [
   {alt: 'First image', src: '/first.jpg'},

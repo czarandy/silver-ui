@@ -1,9 +1,12 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {
+  layoutFooterRecipe,
+  layoutRegionRecipe,
+} from 'components/Layout/Layout.recipe';
+import {useLayoutDivider} from 'components/Layout/LayoutContext';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {layoutFooterRecipe, layoutRegionRecipe} from './Layout.recipe';
-import {useLayoutDivider} from './LayoutContext';
 
 interface LayoutFooterBaseProps {
   /**

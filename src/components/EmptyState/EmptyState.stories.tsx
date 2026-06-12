@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Inbox} from 'lucide-react';
-import {Button} from '../Button';
-import {EmptyState} from './EmptyState';
+import {Button} from 'components/Button';
+import {EmptyState} from 'components/EmptyState/EmptyState';
 
 const meta: Meta<typeof EmptyState> = {
   title: 'Components/EmptyState',

@@ -1,5 +1,5 @@
 import {use} from 'react';
-import {LinkContext} from './LinkContext';
+import {LinkContext} from 'components/Link/LinkContext';
 import type {LinkComponent} from './types';
 
 export function useLinkComponent(as?: LinkComponent): LinkComponent {

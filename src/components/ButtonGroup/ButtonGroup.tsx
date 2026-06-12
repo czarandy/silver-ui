@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
+import {buttonGroupRecipe} from 'components/ButtonGroup/ButtonGroup.recipe';
 import {cx} from 'internal/cx';
 import type {ButtonSize} from '../Button/Button';
-import {buttonGroupRecipe} from './ButtonGroup.recipe';
 import {
   ButtonGroupContext,
   type ButtonGroupOrientation,

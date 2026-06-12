@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Center} from './Center';
+import {Center} from 'components/Center/Center';
 
 describe('Center', () => {
   it('renders children centered on both axes by default', () => {

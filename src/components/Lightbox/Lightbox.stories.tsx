@@ -1,8 +1,12 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {Button} from '../Button';
-import {Lightbox, type LightboxMedia, type LightboxProps} from './Lightbox';
-import {useLightbox} from './useLightbox';
+import {Button} from 'components/Button';
+import {
+  Lightbox,
+  type LightboxMedia,
+  type LightboxProps,
+} from 'components/Lightbox/Lightbox';
+import {useLightbox} from 'components/Lightbox/useLightbox';
 
 type LightboxStoryArgs = Pick<
   LightboxProps,

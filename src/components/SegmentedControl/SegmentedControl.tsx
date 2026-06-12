@@ -7,9 +7,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {segmentedControlRecipe} from 'components/SegmentedControl/SegmentedControl.recipe';
 import {cx} from 'internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {segmentedControlRecipe} from './SegmentedControl.recipe';
 import {
   SegmentedControlContext,
   type SegmentedControlLayout,

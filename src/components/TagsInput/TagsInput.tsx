@@ -12,14 +12,18 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {BaseAutocompleteInput} from 'components/AutocompleteInput';
+import {Button} from 'components/Button';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {Tag} from 'components/Tag';
+import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import {cx} from 'internal/cx';
 import {OverflowList} from '../../internal/OverflowList';
 import isReactNode from '../../internal/isReactNode';
 import useLatest from '../../internal/useLatest';
 import {useLayer} from '../../internal/useLayer';
-import {BaseAutocompleteInput} from '../AutocompleteInput';
 import type {SearchableItem, SearchSource} from '../AutocompleteInput';
-import {Button} from '../Button';
 import {
   Field,
   getNecessity,
@@ -27,11 +31,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe, inputStyles} from '../Field/inputStyles';
-import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
-import {Tag} from '../Tag';
-import {tagsInputRecipe} from './TagsInput.recipe';
 
 export type TagsInputChange<T extends SearchableItem> =
   | {item: T; type: 'add'}

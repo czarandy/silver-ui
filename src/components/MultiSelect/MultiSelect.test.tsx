@@ -2,8 +2,8 @@ import {fireEvent, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {SelectOption} from '../Select';
-import {MultiSelect} from './MultiSelect';
+import {MultiSelect} from 'components/MultiSelect/MultiSelect';
+import {SelectOption} from 'components/Select';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {

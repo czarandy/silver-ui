@@ -1,10 +1,10 @@
 import {act, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
+import {Calendar, type CalendarHandle} from 'components/Calendar/Calendar';
+import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
 import {plainDateCreate} from '../../internal/plainDate';
 import {assertNonNull} from '../../internal/testHelpers';
-import {Calendar, type CalendarHandle} from './Calendar';
-import {calendarRecipe} from './Calendar.recipe';
 
 describe('Calendar', () => {
   it('renders the selected month and selected day', () => {

@@ -3,12 +3,12 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {FileText} from 'lucide-react';
 import {useState} from 'react';
-import {Button} from '../Button';
-import {Icon} from '../Icon';
-import {HStack, VStack} from '../Stack';
-import {Text} from '../Text';
-import {TextInput} from '../TextInput';
-import {Stepper, type StepConfig} from './Stepper';
+import {Button} from 'components/Button';
+import {Icon} from 'components/Icon';
+import {HStack, VStack} from 'components/Stack';
+import {Stepper, type StepConfig} from 'components/Stepper/Stepper';
+import {Text} from 'components/Text';
+import {TextInput} from 'components/TextInput';
 
 const baseSteps: StepConfig[] = [
   {id: 'account', label: 'Account', description: 'Create account'},

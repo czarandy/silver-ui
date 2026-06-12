@@ -2,16 +2,16 @@
 
 import {ExternalLink} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {Icon} from 'components/Icon';
+import {linkRecipe} from 'components/Link/Link.recipe';
+import {useLinkComponent} from 'components/Link/useLinkComponent';
+import {Tooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
-import {Icon} from '../Icon';
 import type {TextColor, TextSize, TextWeight} from '../Text';
-import {Tooltip} from '../Tooltip';
-import {linkRecipe} from './Link.recipe';
 import type {LinkComponent} from './types';
-import {useLinkComponent} from './useLinkComponent';
 
 /**
  * A polymorphic link component with built-in accessibility, external link handling,

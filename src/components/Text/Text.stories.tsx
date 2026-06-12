@@ -1,6 +1,6 @@
 import type {Decorator, Meta, StoryObj} from '@storybook/react-vite';
 import type {JSX} from 'react';
-import {Text} from './Text';
+import {Text} from 'components/Text/Text';
 
 const constrainWidth =
   (maxWidth: number): Decorator =>

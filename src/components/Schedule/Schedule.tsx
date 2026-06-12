@@ -1,12 +1,12 @@
 import {Suspense, useMemo, useState, type CSSProperties, type Ref} from 'react';
+import {ScheduleContext} from 'components/Schedule/context';
+import {eventOverlapsRange, sortEvents} from 'components/Schedule/dateMath';
+import {defaultSchedulePlugins} from 'components/Schedule/plugins';
+import {createScheduleZonedInstant} from 'components/Schedule/scheduleZonedInstant';
+import {createCategoryMap, scheduleClasses} from 'components/Schedule/shared';
 import {cx} from 'internal/cx';
 import {plainDateFromInstant} from '../../internal/plainDate';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from '../../internal/time';
-import {ScheduleContext} from './context';
-import {eventOverlapsRange, sortEvents} from './dateMath';
-import {defaultSchedulePlugins} from './plugins';
-import {createScheduleZonedInstant} from './scheduleZonedInstant';
-import {createCategoryMap, scheduleClasses} from './shared';
 import type {
   CalendarEvent,
   Instant,

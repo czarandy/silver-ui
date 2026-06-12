@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Blockquote} from './Blockquote';
+import {Blockquote} from 'components/Blockquote/Blockquote';
 
 describe('Blockquote', () => {
   it('renders children in a blockquote element', () => {

@@ -1,9 +1,9 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {useCallback, useMemo, type ReactNode} from 'react';
+import {Button} from 'components/Button';
+import {ButtonGroup} from 'components/ButtonGroup';
+import {useScheduleContext} from 'components/Schedule/context';
 import {nowEpochMilliseconds} from '../../../internal/time';
-import {Button} from '../../Button';
-import {ButtonGroup} from '../../ButtonGroup';
-import {useScheduleContext} from '../context';
 import type {
   Instant,
   ScheduleHeaderContent,

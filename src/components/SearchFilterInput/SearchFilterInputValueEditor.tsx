@@ -2,6 +2,12 @@
 
 import {Temporal} from '@js-temporal/polyfill';
 import {useCallback, useMemo} from 'react';
+import {DateInput} from 'components/DateInput';
+import {NumberInput} from 'components/NumberInput';
+import {Select} from 'components/Select';
+import {TagsInput} from 'components/TagsInput';
+import {TextInput} from 'components/TextInput';
+import {TimeInput} from 'components/TimeInput';
 import {
   plainDateFromUnixSeconds,
   plainDateToUnixSeconds,
@@ -14,12 +20,6 @@ import {
   type SearchableItem,
   type SearchSource,
 } from '../AutocompleteInput';
-import {DateInput} from '../DateInput';
-import {NumberInput} from '../NumberInput';
-import {Select} from '../Select';
-import {TagsInput} from '../TagsInput';
-import {TextInput} from '../TextInput';
-import {TimeInput} from '../TimeInput';
 import type {InternalSearchFilterInputConfig} from './internalConfig';
 import type {
   EnumItem,

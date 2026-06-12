@@ -1,13 +1,16 @@
 import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {Button} from 'components/Button';
+import {useDialogContext} from 'components/Dialog/DialogContext';
+import {
+  layoutHeaderRecipe,
+  layoutRegionRecipe,
+} from 'components/Layout/Layout.recipe';
+import {useLayoutDivider} from 'components/Layout/LayoutContext';
+import {Heading, Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {Button} from '../Button';
-import {useDialogContext} from '../Dialog/DialogContext';
-import {Heading, Text} from '../Text';
-import {layoutHeaderRecipe, layoutRegionRecipe} from './Layout.recipe';
-import {useLayoutDivider} from './LayoutContext';
 
 /**
  * Header landmark region within a Layout with a structured title,

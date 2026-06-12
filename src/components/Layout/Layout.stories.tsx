@@ -1,14 +1,14 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {ChevronLeft} from 'lucide-react';
-import {Button} from '../Button';
-import {Card} from '../Card';
-import {VStack} from '../Stack';
-import {Text} from '../Text';
-import {Layout} from './Layout';
-import {LayoutContent} from './LayoutContent';
-import {LayoutFooter} from './LayoutFooter';
-import {LayoutHeader} from './LayoutHeader';
-import {LayoutPanel} from './LayoutPanel';
+import {Button} from 'components/Button';
+import {Card} from 'components/Card';
+import {Layout} from 'components/Layout/Layout';
+import {LayoutContent} from 'components/Layout/LayoutContent';
+import {LayoutFooter} from 'components/Layout/LayoutFooter';
+import {LayoutHeader} from 'components/Layout/LayoutHeader';
+import {LayoutPanel} from 'components/Layout/LayoutPanel';
+import {VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 
 const meta: Meta<typeof Layout> = {
   title: 'Components/Layout',

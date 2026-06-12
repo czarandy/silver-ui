@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Inbox, Plus, RefreshCw, Settings} from 'lucide-react';
+import {Button} from 'components/Button/Button';
+import {Icon} from 'components/Icon';
 import {css} from 'styled-system/css';
-import {Icon} from '../Icon';
-import {Button} from './Button';
 
 const meta = {
   title: 'Components/Button',

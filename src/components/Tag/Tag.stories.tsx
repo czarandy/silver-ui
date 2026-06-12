@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Star, TagIcon} from 'lucide-react';
-import {Badge} from '../Badge';
-import {HStack} from '../Stack';
-import {Tag, type TagColor} from './Tag';
+import {Badge} from 'components/Badge';
+import {HStack} from 'components/Stack';
+import {Tag, type TagColor} from 'components/Tag/Tag';
 
 const colors: TagColor[] = [
   'red',

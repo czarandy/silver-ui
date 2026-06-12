@@ -8,6 +8,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {dialogRecipe} from 'components/Dialog/Dialog.recipe';
+import {DialogContext} from 'components/Dialog/DialogContext';
 import {cx} from 'internal/cx';
 import {
   resolveDismissBehavior,
@@ -16,8 +18,6 @@ import {
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useBackdropDismiss} from '../../internal/useBackdropDismiss';
 import {useScrollLock} from '../../internal/useScrollLock';
-import {dialogRecipe} from './Dialog.recipe';
-import {DialogContext} from './DialogContext';
 
 export type DialogVariant = 'fullscreen' | 'standard';
 export type DialogRole = 'alertdialog' | 'dialog';

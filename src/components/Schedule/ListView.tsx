@@ -1,5 +1,23 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
+import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
+import {useScheduleContext} from 'components/Schedule/context';
+import {
+  enumerateDates,
+  eventOccursOnDate,
+  isDayEvent,
+} from 'components/Schedule/dateMath';
+import {
+  getCategory,
+  getEventTimeLabel,
+  isEventInPast,
+  formatListRangeTitle,
+  scheduleClasses,
+  ScheduleFrame,
+} from 'components/Schedule/shared';
+import {useCurrentTime} from 'components/Schedule/useCurrentTime';
+import {Text} from 'components/Text';
+import {Tooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {
@@ -8,26 +26,12 @@ import {
   plainDateFromInstant,
   plainDateIsEqual,
 } from '../../internal/plainDate';
-import {Text} from '../Text';
-import {Tooltip} from '../Tooltip';
-import {scheduleEventRecipe} from './ScheduleEvent.recipe';
-import {useScheduleContext} from './context';
-import {enumerateDates, eventOccursOnDate, isDayEvent} from './dateMath';
-import {
-  getCategory,
-  getEventTimeLabel,
-  isEventInPast,
-  formatListRangeTitle,
-  scheduleClasses,
-  ScheduleFrame,
-} from './shared';
 import type {
   CalendarEvent,
   Instant,
   ScheduleView,
   ScheduleZonedInstant,
 } from './types';
-import {useCurrentTime} from './useCurrentTime';
 
 export interface ScheduleListViewOptions {
   /**

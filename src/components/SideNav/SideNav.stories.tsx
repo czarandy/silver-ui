@@ -17,14 +17,14 @@ import {
   Users,
 } from 'lucide-react';
 import {useState} from 'react';
-import {Badge} from '../Badge';
-import {Button} from '../Button';
-import {NavIcon} from '../NavIcon';
-import {TextInput} from '../TextInput';
-import {SideNav} from './SideNav';
-import {SideNavHeading} from './SideNavHeading';
-import {SideNavItem} from './SideNavItem';
-import {SideNavSection} from './SideNavSection';
+import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
+import {NavIcon} from 'components/NavIcon';
+import {SideNav} from 'components/SideNav/SideNav';
+import {SideNavHeading} from 'components/SideNav/SideNavHeading';
+import {SideNavItem} from 'components/SideNav/SideNavItem';
+import {SideNavSection} from 'components/SideNav/SideNavSection';
+import {TextInput} from 'components/TextInput';
 
 const logo = <NavIcon icon={<Box style={{width: 16, height: 16}} />} />;
 

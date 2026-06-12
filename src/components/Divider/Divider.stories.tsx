@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {Card} from 'components/Card';
+import {Divider} from 'components/Divider/Divider';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import {Card} from '../Card';
-import {Text} from '../Text';
-import {Divider} from './Divider';
 
 const meta: Meta<typeof Divider> = {
   title: 'Components/Divider',

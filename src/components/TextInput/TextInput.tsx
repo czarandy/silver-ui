@@ -8,9 +8,17 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Button} from 'components/Button';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import {useInputGroup} from 'components/InputGroup';
+import {Spinner} from 'components/Spinner';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
-import {Button} from '../Button';
 import {
   Field,
   getNecessity,
@@ -18,15 +26,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe, inputStyles} from '../Field/inputStyles';
-import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
-import {useInputGroup} from '../InputGroup';
-import {Spinner} from '../Spinner';
 
 export type TextInputType = 'email' | 'password' | 'text';
 

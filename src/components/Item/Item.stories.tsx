@@ -7,9 +7,9 @@ import {
   GripVertical,
   User,
 } from 'lucide-react';
-import {Badge} from '../Badge';
-import {Icon} from '../Icon';
-import {Item} from './Item';
+import {Badge} from 'components/Badge';
+import {Icon} from 'components/Icon';
+import {Item} from 'components/Item/Item';
 
 const meta: Meta<typeof Item> = {
   title: 'Components/Item',

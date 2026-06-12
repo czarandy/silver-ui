@@ -1,7 +1,7 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {FileInput} from './FileInput';
+import {FileInput} from 'components/FileInput/FileInput';
 
 describe('FileInput', () => {
   it('calls onChange when a file is selected', async () => {

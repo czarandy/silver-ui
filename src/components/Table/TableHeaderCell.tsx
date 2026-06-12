@@ -1,7 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useTableContext} from 'components/Table/TableContext';
 import {cx} from 'internal/cx';
 import {tableRecipe} from './Table.recipe';
-import {useTableContext} from './TableContext';
 
 export interface TableHeaderCellProps {
   /**

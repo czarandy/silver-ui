@@ -2,8 +2,12 @@ import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
-import {getNecessity} from '../Field';
-import {Slider, type SliderRangeProps, type SliderSingleProps} from './Slider';
+import {getNecessity} from 'components/Field';
+import {
+  Slider,
+  type SliderRangeProps,
+  type SliderSingleProps,
+} from 'components/Slider/Slider';
 
 const popoverOpenState = new WeakMap<HTMLElement, boolean>();
 

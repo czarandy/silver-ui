@@ -10,11 +10,11 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
+import {SearchFilterInputValueEditor} from 'components/SearchFilterInput/SearchFilterInputValueEditor';
+import {Select} from 'components/Select';
+import {HStack, VStack} from 'components/Stack';
 import {css} from 'styled-system/css';
 import {Button} from '../Button';
-import {Select} from '../Select';
-import {HStack, VStack} from '../Stack';
-import {SearchFilterInputValueEditor} from './SearchFilterInputValueEditor';
 import type {InternalSearchFilterInputConfig} from './internalConfig';
 import type {
   FilterValue,

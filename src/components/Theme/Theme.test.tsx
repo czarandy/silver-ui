@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Theme} from './Theme';
+import {Theme} from 'components/Theme/Theme';
 
 describe('Theme', () => {
   it('renders children and defaults to system mode', () => {

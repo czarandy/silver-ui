@@ -1,8 +1,8 @@
 /* eslint-disable silver-ui/require-component-props */
 
+import {formatFilterValue} from 'components/SearchFilterInput/formatFilterValue';
+import {Tag} from 'components/Tag';
 import {css} from 'styled-system/css';
-import {Tag} from '../Tag';
-import {formatFilterValue} from './formatFilterValue';
 import type {SearchFilterInputTagProps} from './types';
 
 const styles = {

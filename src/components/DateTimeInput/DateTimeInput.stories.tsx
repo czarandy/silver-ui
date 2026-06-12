@@ -5,7 +5,7 @@ import {
   DateTimeInput,
   type DateTimeInputProps,
   type PlainDateTime,
-} from './DateTimeInput';
+} from 'components/DateTimeInput/DateTimeInput';
 
 function DateTimeStory(args: DateTimeInputProps): React.JSX.Element {
   const [value, setValue] = useState<PlainDateTime | null>(args.value);

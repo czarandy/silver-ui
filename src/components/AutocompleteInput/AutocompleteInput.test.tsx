@@ -2,14 +2,14 @@ import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
-import {AutocompleteInput} from './AutocompleteInput';
-import {AutocompleteInputItem} from './AutocompleteInputItem';
-import {BaseAutocompleteInput} from './BaseAutocompleteInput';
+import {AutocompleteInput} from 'components/AutocompleteInput/AutocompleteInput';
+import {AutocompleteInputItem} from 'components/AutocompleteInput/AutocompleteInputItem';
+import {BaseAutocompleteInput} from 'components/AutocompleteInput/BaseAutocompleteInput';
 import {
   createStaticSearchSource,
   type SearchableItem,
   type SearchSource,
-} from './types';
+} from 'components/AutocompleteInput/types';
 
 const items: SearchableItem[] = [
   {id: 'ada', label: 'Ada Lovelace'},

@@ -1,5 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useRef} from 'react';
+import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
 import {cx} from 'internal/cx';
 import {
   resolveDismissBehavior,
@@ -8,7 +9,6 @@ import {
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useBackdropDismiss} from '../../internal/useBackdropDismiss';
 import {useScrollLock} from '../../internal/useScrollLock';
-import {drawerRecipe} from './Drawer.recipe';
 
 export type DrawerPlacement = 'start' | 'end' | 'top' | 'bottom';
 export type DrawerDismissBehavior = DismissBehavior;

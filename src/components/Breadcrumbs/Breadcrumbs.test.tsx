@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event';
 import {Home, type LucideProps} from 'lucide-react';
 import type {ReactNode, Ref} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {LinkProvider} from '../Link';
-import {BreadcrumbItem} from './BreadcrumbItem';
-import {Breadcrumbs} from './Breadcrumbs';
+import {BreadcrumbItem} from 'components/Breadcrumbs/BreadcrumbItem';
+import {Breadcrumbs} from 'components/Breadcrumbs/Breadcrumbs';
+import {LinkProvider} from 'components/Link';
 
 function CustomLink({
   children,

@@ -7,12 +7,12 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {breadcrumbItemRecipe} from 'components/Breadcrumbs/BreadcrumbItem.recipe';
+import {BreadcrumbsContext} from 'components/Breadcrumbs/BreadcrumbsContext';
+import {useLinkComponent} from 'components/Link';
 import {cx} from 'internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
-import {useLinkComponent} from '../Link';
-import {breadcrumbItemRecipe} from './BreadcrumbItem.recipe';
-import {BreadcrumbsContext} from './BreadcrumbsContext';
 
 export interface BreadcrumbItemProps {
   /**

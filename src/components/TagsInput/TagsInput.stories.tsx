@@ -5,8 +5,8 @@ import {
   createStaticSearchSource,
   type SearchableItem,
   type SearchSource,
-} from '../AutocompleteInput';
-import {TagsInput, type TagsInputProps} from './TagsInput';
+} from 'components/AutocompleteInput';
+import {TagsInput, type TagsInputProps} from 'components/TagsInput/TagsInput';
 
 const people: SearchableItem[] = [
   {id: 'ada', label: 'Ada Lovelace'},

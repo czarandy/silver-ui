@@ -1,11 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, Home, Search, Settings} from 'lucide-react';
-import {Avatar} from '../Avatar';
-import {Badge} from '../Badge';
-import {Button} from '../Button';
-import {TopNav} from './TopNav';
-import {TopNavHeading} from './TopNavHeading';
-import {TopNavItem} from './TopNavItem';
+import {Avatar} from 'components/Avatar';
+import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
+import {TopNav} from 'components/TopNav/TopNav';
+import {TopNavHeading} from 'components/TopNav/TopNavHeading';
+import {TopNavItem} from 'components/TopNav/TopNavItem';
 
 const meta: Meta<typeof TopNav> = {
   title: 'Components/TopNav',

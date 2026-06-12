@@ -1,7 +1,6 @@
 import {
   useCallback,
   useMemo,
-  useRef,
   useState,
   type CSSProperties,
   type ReactNode,
@@ -10,6 +9,7 @@ import {
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {AccordionContext, type AccordionContextValue} from './AccordionContext';
+import {useAccordionDevWarning} from './useAccordionDevWarning';
 
 /**
  * A container that coordinates multiple `AccordionItem` children so that
@@ -130,37 +130,7 @@ export function Accordion({
     normalizeToSet(defaultValue),
   );
 
-  // Dev-only: warn when a controlled `value` array is recreated each render
-  // with the same contents, which defeats the `openValues` memo and forces
-  // unnecessary re-renders. These refs are read/written during render purely
-  // for the diagnostic — they never affect render output — and the whole
-  // block is inert in production.
-  /* eslint-disable @eslint-react/refs -- diagnostic-only ref use, does not affect render output */
-  const prevControlledArrayRef = useRef<ReadonlyArray<string> | undefined>(
-    undefined,
-  );
-  const hasWarnedUnstableValueRef = useRef(false);
-  if (process.env.NODE_ENV !== 'production') {
-    if (Array.isArray(controlledValue)) {
-      const prev = prevControlledArrayRef.current;
-      if (
-        !hasWarnedUnstableValueRef.current &&
-        prev !== undefined &&
-        prev !== controlledValue &&
-        prev.length === controlledValue.length &&
-        prev.every((item, i) => item === controlledValue[i])
-      ) {
-        hasWarnedUnstableValueRef.current = true;
-        console.warn(
-          'Accordion: the `value` array changed identity between renders but ' +
-            'contains the same items. Memoize it (e.g. with `useMemo`) to ' +
-            'avoid unnecessary re-renders of the accordion items.',
-        );
-      }
-      prevControlledArrayRef.current = controlledValue;
-    }
-  }
-  /* eslint-enable @eslint-react/refs */
+  useAccordionDevWarning(controlledValue);
 
   const openValues = useMemo(
     () => (isControlled ? normalizeToSet(controlledValue) : internalValue),

@@ -3,7 +3,11 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {TimeInput, type PlainTime, type TimeInputProps} from './TimeInput';
+import {
+  TimeInput,
+  type PlainTime,
+  type TimeInputProps,
+} from 'components/TimeInput/TimeInput';
 
 function time(value: string): PlainTime {
   return Temporal.PlainTime.from(value);

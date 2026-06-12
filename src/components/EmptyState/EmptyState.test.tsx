@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import {Inbox} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
-import {Button} from '../Button';
-import {EmptyState} from './EmptyState';
+import {Button} from 'components/Button';
+import {EmptyState} from 'components/EmptyState/EmptyState';
 
 describe('EmptyState', () => {
   it('renders title, description, illustration, and actions', () => {

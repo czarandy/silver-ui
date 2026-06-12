@@ -1,14 +1,14 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Copy, Download, Pencil, Trash} from 'lucide-react';
+import {Badge} from 'components/Badge';
+import {Card} from 'components/Card';
+import {ContextMenu, ContextMenuItem} from 'components/ContextMenu/ContextMenu';
+import {Divider} from 'components/Divider';
+import {Kbd} from 'components/Kbd';
+import {LayoutContent} from 'components/Layout/LayoutContent';
+import {LayoutHeader} from 'components/Layout/LayoutHeader';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import {Badge} from '../Badge';
-import {Card} from '../Card';
-import {Divider} from '../Divider';
-import {Kbd} from '../Kbd';
-import {LayoutContent} from '../Layout/LayoutContent';
-import {LayoutHeader} from '../Layout/LayoutHeader';
-import {Text} from '../Text';
-import {ContextMenu, ContextMenuItem} from './ContextMenu';
 
 const styles = {
   target: css({

@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {AspectRatio} from './AspectRatio';
+import {AspectRatio} from 'components/AspectRatio/AspectRatio';
 
 const meta: Meta<typeof AspectRatio> = {
   title: 'Components/AspectRatio',

@@ -1,6 +1,6 @@
 import {use, useCallback} from 'react';
+import {ToastContext} from 'components/Toast/ToastContext';
 import {nowEpochMilliseconds} from '../../internal/time';
-import {ToastContext} from './ToastContext';
 import type {
   ShowToastFn,
   ToastDismissFn,

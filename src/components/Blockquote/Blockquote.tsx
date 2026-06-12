@@ -1,7 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {blockquoteRecipe} from 'components/Blockquote/Blockquote.recipe';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
-import {blockquoteRecipe} from './Blockquote.recipe';
 
 /**
  * Styled block quotation with an optional citation footer.

@@ -1,9 +1,9 @@
 /* eslint-disable @eslint-react/no-array-index-key */
 import {useCallback, type KeyboardEvent, type ReactNode} from 'react';
+import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
 import {Divider} from '../Divider';
-import {Text} from '../Text';
-import {DropdownMenuItem} from './DropdownMenuItem';
 import type {DropdownMenuOption} from './types';
 
 const menuStyles = {

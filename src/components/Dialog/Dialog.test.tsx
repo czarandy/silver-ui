@@ -7,10 +7,10 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {Button} from '../Button';
-import {LayoutHeader} from '../Layout';
-import {Dialog} from './Dialog';
-import {useDialog} from './useDialog';
+import {Button} from 'components/Button';
+import {Dialog} from 'components/Dialog/Dialog';
+import {useDialog} from 'components/Dialog/useDialog';
+import {LayoutHeader} from 'components/Layout';
 
 beforeAll(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {

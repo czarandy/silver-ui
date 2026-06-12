@@ -5,9 +5,9 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {listItemRecipe} from 'components/List/List.recipe';
 import {cx} from 'internal/cx';
 import {Item} from '../Item';
-import {listItemRecipe} from './List.recipe';
 import {ListContext, type ListStyle} from './ListContext';
 
 export interface ListItemProps {

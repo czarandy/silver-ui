@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {Button} from '../Button';
-import {Card} from '../Card';
-import {Text} from '../Text';
-import {Collapsible} from './Collapsible';
+import {Collapsible} from 'components/Accordion/Collapsible';
+import {Button} from 'components/Button';
+import {Card} from 'components/Card';
+import {Text} from 'components/Text';
 
 const meta = {
   title: 'Components/Collapsible',

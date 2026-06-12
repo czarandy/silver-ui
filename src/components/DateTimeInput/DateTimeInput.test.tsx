@@ -1,7 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {DateTimeInput} from './DateTimeInput';
+import {DateTimeInput} from 'components/DateTimeInput/DateTimeInput';
 
 describe('DateTimeInput', () => {
   it('updates the time portion', () => {

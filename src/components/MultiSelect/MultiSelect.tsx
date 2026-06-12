@@ -6,14 +6,22 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {
+  multiSelectMenuRecipe,
+  multiSelectTriggerRecipe,
+} from 'components/MultiSelect/MultiSelect.recipe';
+import {Popover} from 'components/Popover';
+import {Spinner} from 'components/Spinner';
+import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
   type SelectListboxOptionData,
 } from '../../internal/useSelectListbox';
-import {Badge} from '../Badge';
-import {Button} from '../Button';
 import {
   Field,
   getNecessity,
@@ -21,15 +29,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe} from '../Field/inputStyles';
 import {Icon, type IconComponent} from '../Icon';
-import {Popover} from '../Popover';
-import {Spinner} from '../Spinner';
-import {Text} from '../Text';
-import {
-  multiSelectMenuRecipe,
-  multiSelectTriggerRecipe,
-} from './MultiSelect.recipe';
 
 export interface MultiSelectOptionData extends SelectListboxOptionData {
   /**

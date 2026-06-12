@@ -1,7 +1,7 @@
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {ButtonGroup} from 'components/ButtonGroup';
 import {Button, type ButtonProps, type ButtonSize} from '../Button';
-import {ButtonGroup} from '../ButtonGroup';
 import {DropdownMenu, type DropdownMenuOption} from '../DropdownMenu';
 import type {IconComponent} from '../Icon';
 

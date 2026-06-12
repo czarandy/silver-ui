@@ -5,10 +5,15 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
+import {Dialog} from 'components/Dialog';
+import {
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+} from 'components/Layout';
+import {Text} from 'components/Text';
 import {Button} from '../Button';
-import {Dialog} from '../Dialog';
-import {Layout, LayoutContent, LayoutFooter, LayoutHeader} from '../Layout';
-import {Text} from '../Text';
 
 export type AlertDialogActionVariant = 'destructive' | 'primary';
 

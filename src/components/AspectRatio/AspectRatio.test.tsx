@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {AspectRatio} from './AspectRatio';
+import {AspectRatio} from 'components/AspectRatio/AspectRatio';
 
 describe('AspectRatio', () => {
   it('renders with the provided aspect ratio', () => {

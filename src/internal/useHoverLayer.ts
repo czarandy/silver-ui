@@ -6,6 +6,7 @@ import {
   type RefCallback,
   type RefObject,
 } from 'react';
+import {mergeRefs} from './mergeRefs';
 import useLatest from './useLatest';
 import {useLayer, type LayerReturn} from './useLayer';
 
@@ -228,12 +229,9 @@ export function useHoverLayer({
     ],
   );
 
-  const ref: RefCallback<HTMLElement> = useCallback(
-    element => {
-      layer.ref(element);
-      interactionRef(element);
-    },
-    [interactionRef, layer],
+  const ref = useMemo(
+    () => mergeRefs(layer.ref, interactionRef),
+    [layer.ref, interactionRef],
   );
 
   useEffect(() => {

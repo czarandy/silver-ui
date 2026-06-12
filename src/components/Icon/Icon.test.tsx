@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import {Home} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
-import {Icon, type IconColor, type IconSize} from './Icon';
+import {Icon, type IconColor, type IconSize} from 'components/Icon/Icon';
 
 describe('Icon', () => {
   it('renders a lucide icon as an SVG', () => {

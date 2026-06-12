@@ -1,8 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, Calendar, Home, List, Settings, Users} from 'lucide-react';
 import {useState} from 'react';
-import {SegmentedControl, type SegmentedControlProps} from './SegmentedControl';
-import {SegmentedControlItem} from './SegmentedControlItem';
+import {
+  SegmentedControl,
+  type SegmentedControlProps,
+} from 'components/SegmentedControl/SegmentedControl';
+import {SegmentedControlItem} from 'components/SegmentedControl/SegmentedControlItem';
 
 function SegmentedControlStory(args: SegmentedControlProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);

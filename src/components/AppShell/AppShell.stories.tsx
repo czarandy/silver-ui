@@ -1,9 +1,14 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Home, Settings} from 'lucide-react';
-import {Button} from '../Button';
-import {SideNav, SideNavHeading, SideNavItem, SideNavSection} from '../SideNav';
-import {TopNav, TopNavHeading, TopNavItem} from '../TopNav';
-import {AppShell} from './AppShell';
+import {AppShell} from 'components/AppShell/AppShell';
+import {Button} from 'components/Button';
+import {
+  SideNav,
+  SideNavHeading,
+  SideNavItem,
+  SideNavSection,
+} from 'components/SideNav';
+import {TopNav, TopNavHeading, TopNavItem} from 'components/TopNav';
 
 const meta: Meta<typeof AppShell> = {
   title: 'Components/AppShell',

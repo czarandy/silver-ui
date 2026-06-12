@@ -4,15 +4,16 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef,
   useSyncExternalStore,
   type ReactNode,
   type RefCallback,
 } from 'react';
+import {CheckboxInput} from 'components/CheckboxInput';
+import {pixel} from 'components/Table/columnUtils';
 import {css} from 'styled-system/css';
 import {mergeRefs} from '../../../../internal/mergeRefs';
-import {CheckboxInput} from '../../../CheckboxInput';
-import {pixel} from '../../columnUtils';
+import useConstant from '../../../../internal/useConstant';
+import useLatest from '../../../../internal/useLatest';
 import type {BodyRowRenderProps, TableColumn, TablePlugin} from '../../types';
 
 export interface UseTableSelectionConfig<T extends Record<string, unknown>> {
@@ -202,14 +203,8 @@ function SelectionCellContentInner<T extends Record<string, unknown>>({
 export function useTableSelection<T extends Record<string, unknown>>(
   config: UseTableSelectionConfig<T>,
 ): TablePlugin<T> {
-  /* eslint-disable @eslint-react/refs -- external store keeps plugin identity stable while exposing the latest selection config */
-  const configRef = useRef(config);
-  configRef.current = config;
-
-  const storeRef = useRef<SelectionStore<T> | null>(null);
-  storeRef.current ??= createSelectionStore(configRef);
-  const store = storeRef.current;
-  /* eslint-enable @eslint-react/refs */
+  const configRef = useLatest(config);
+  const store = useConstant(() => createSelectionStore(configRef));
 
   // Re-notify subscribers only when the selection config changes (new selected
   // keys, data, or predicates). `config` is memoized upstream by

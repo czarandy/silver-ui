@@ -1,20 +1,20 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, ChevronRight, Settings, Star, User} from 'lucide-react';
+import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
+import type {CardVariant} from 'components/Card/Card';
+import {Card} from 'components/Card/Card';
+import {Divider} from 'components/Divider';
+import {Icon} from 'components/Icon';
+import {Layout} from 'components/Layout';
+import {LayoutContent} from 'components/Layout/LayoutContent';
+import {LayoutFooter} from 'components/Layout/LayoutFooter';
+import {LayoutHeader} from 'components/Layout/LayoutHeader';
+import {LayoutPanel} from 'components/Layout/LayoutPanel';
+import {HStack, VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {Badge} from '../Badge';
-import {Button} from '../Button';
-import {Divider} from '../Divider';
-import {Icon} from '../Icon';
-import {Layout} from '../Layout';
-import {LayoutContent} from '../Layout/LayoutContent';
-import {LayoutFooter} from '../Layout/LayoutFooter';
-import {LayoutHeader} from '../Layout/LayoutHeader';
-import {LayoutPanel} from '../Layout/LayoutPanel';
-import {HStack, VStack} from '../Stack';
-import {Text} from '../Text';
-import type {CardVariant} from './Card';
-import {Card} from './Card';
 
 const meta: Meta<typeof Card> = {
   title: 'Components/Card',

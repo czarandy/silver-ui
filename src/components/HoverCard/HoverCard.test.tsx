@@ -1,8 +1,8 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
-import {Button} from '../Button';
-import {HoverCard} from './HoverCard';
+import {Button} from 'components/Button';
+import {HoverCard} from 'components/HoverCard/HoverCard';
 
 const showPopoverMock = vi.fn();
 const hidePopoverMock = vi.fn();

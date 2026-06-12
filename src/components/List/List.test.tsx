@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {List} from './List';
-import {ListItem} from './ListItem';
+import {List} from 'components/List/List';
+import {ListItem} from 'components/List/ListItem';
 
 describe('List', () => {
   it('renders a semantic list with list items', () => {

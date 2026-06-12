@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, ChevronRight, Shield, Star, User} from 'lucide-react';
-import {Badge} from '../Badge';
-import {Icon} from '../Icon';
-import {List} from './List';
-import {ListItem} from './ListItem';
+import {Badge} from 'components/Badge';
+import {Icon} from 'components/Icon';
+import {List} from 'components/List/List';
+import {ListItem} from 'components/List/ListItem';
 
 const meta: Meta<typeof List> = {
   title: 'Components/List',

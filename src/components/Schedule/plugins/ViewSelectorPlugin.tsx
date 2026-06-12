@@ -1,8 +1,8 @@
 import {Check} from 'lucide-react';
 import {useMemo, type ReactNode} from 'react';
+import {Icon} from 'components/Icon';
+import {useScheduleContext} from 'components/Schedule/context';
 import {DropdownMenu, DropdownMenuItem} from '../../DropdownMenu';
-import {Icon} from '../../Icon';
-import {useScheduleContext} from '../context';
 import type {
   ScheduleHeaderContent,
   SchedulePlugin,

@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {ChevronRight, Home} from 'lucide-react';
-import {Icon} from '../Icon';
-import {BreadcrumbItem} from './BreadcrumbItem';
-import {Breadcrumbs} from './Breadcrumbs';
+import {BreadcrumbItem} from 'components/Breadcrumbs/BreadcrumbItem';
+import {Breadcrumbs} from 'components/Breadcrumbs/Breadcrumbs';
+import {Icon} from 'components/Icon';
 
 const meta: Meta<typeof Breadcrumbs> = {
   title: 'Components/Breadcrumbs',

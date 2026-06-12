@@ -1,8 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Columns3, User} from 'lucide-react';
 import {useState} from 'react';
-import {SelectOption} from '../Select';
-import {MultiSelect, type MultiSelectProps} from './MultiSelect';
+import {
+  MultiSelect,
+  type MultiSelectProps,
+} from 'components/MultiSelect/MultiSelect';
+import {SelectOption} from 'components/Select';
 
 const options = [
   {label: 'Name', value: 'name'},

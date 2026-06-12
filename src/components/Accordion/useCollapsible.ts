@@ -1,5 +1,5 @@
 import {use, useCallback, useState} from 'react';
-import {AccordionContext} from './AccordionContext';
+import {AccordionContext} from 'components/Accordion/AccordionContext';
 
 export interface CollapsibleConfig {
   isDefaultOpen?: boolean;

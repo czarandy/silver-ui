@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import {LayoutGrid} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {SegmentedControl} from './SegmentedControl';
-import {SegmentedControlItem} from './SegmentedControlItem';
+import {SegmentedControl} from 'components/SegmentedControl/SegmentedControl';
+import {SegmentedControlItem} from 'components/SegmentedControl/SegmentedControlItem';
 
 describe('SegmentedControl', () => {
   it('renders a labelled radiogroup', () => {

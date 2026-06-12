@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {Kbd} from 'components/Kbd/Kbd';
+import {kbdRecipe} from 'components/Kbd/Kbd.recipe';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import {Text} from '../Text';
-import {Kbd} from './Kbd';
-import {kbdRecipe} from './Kbd.recipe';
 
 const styles = {
   list: css({

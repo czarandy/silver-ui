@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Text} from './Text';
+import {Text} from 'components/Text/Text';
 
 describe('Text', () => {
   it('renders a span by default', () => {

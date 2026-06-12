@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import {Heart, Star} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {ToggleButton} from './ToggleButton';
-import {ToggleButtonGroup} from './ToggleButtonGroup';
+import {ToggleButton} from 'components/ToggleButton/ToggleButton';
+import {ToggleButtonGroup} from 'components/ToggleButton/ToggleButtonGroup';
 
 describe('ToggleButton', () => {
   it('renders label as visible text', () => {

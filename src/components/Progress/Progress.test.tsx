@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Progress} from './Progress';
+import {Progress} from 'components/Progress/Progress';
 
 describe('Progress', () => {
   it('renders determinate progress with progressbar role by default', () => {

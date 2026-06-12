@@ -2,9 +2,9 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
-import {inputRecipe} from '../Field/inputStyles';
-import {InputGroup} from '../InputGroup';
-import {TextInput} from './TextInput';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {InputGroup} from 'components/InputGroup';
+import {TextInput} from 'components/TextInput/TextInput';
 
 function SearchIcon(props: LucideProps): React.JSX.Element {
   return <Search {...props} data-testid="search-icon" />;

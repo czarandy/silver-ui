@@ -1,7 +1,7 @@
 import {Eye, EyeOff} from 'lucide-react';
 import {useCallback, useState, type Ref} from 'react';
+import {getNecessity} from 'components/Field';
 import {Button} from '../Button';
-import {getNecessity} from '../Field';
 import {TextInput, type TextInputProps} from '../TextInput';
 
 export type PasswordInputProps = Omit<

@@ -2,20 +2,9 @@
 
 import {Temporal} from '@js-temporal/polyfill';
 import type {CSSProperties} from 'react';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import {
-  DATE_FORMAT_WITH_WEEKDAY,
-  plainDateFormat,
-  plainDateFromInstant,
-  plainDateIsBefore,
-  plainDateIsEqual,
-  type PlainDate,
-} from '../../internal/plainDate';
-import {Heading, Text} from '../Text';
-import {scheduleEventRecipe} from './ScheduleEvent.recipe';
-import {useScheduleContext} from './context';
-import {eventOccursOnDate, isDayEvent} from './dateMath';
+import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
+import {useScheduleContext} from 'components/Schedule/context';
+import {eventOccursOnDate, isDayEvent} from 'components/Schedule/dateMath';
 import {
   CalendarEventPill,
   formatHour,
@@ -26,9 +15,20 @@ import {
   getMinutesSinceStartOfDay,
   isEventInPast,
   scheduleClasses,
-} from './shared';
+} from 'components/Schedule/shared';
+import {useCurrentTime} from 'components/Schedule/useCurrentTime';
+import {Heading, Text} from 'components/Text';
+import {cx} from 'internal/cx';
+import {css} from 'styled-system/css';
+import {
+  DATE_FORMAT_WITH_WEEKDAY,
+  plainDateFormat,
+  plainDateFromInstant,
+  plainDateIsBefore,
+  plainDateIsEqual,
+  type PlainDate,
+} from '../../internal/plainDate';
 import type {CalendarEvent, CalendarInstantEvent} from './types';
-import {useCurrentTime} from './useCurrentTime';
 
 type GridStyle = CSSProperties & {'--schedule-day-count': string};
 type HourStyle = Pick<CSSProperties, 'height' | 'minHeight'>;

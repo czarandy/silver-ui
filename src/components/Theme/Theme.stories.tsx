@@ -1,20 +1,20 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, Search} from 'lucide-react';
+import {Alert} from 'components/Alert';
+import {Badge, type BadgeColor} from 'components/Badge';
+import {Button} from 'components/Button';
+import {Card} from 'components/Card';
+import {HStack, VStack} from 'components/Stack';
+import {Switch} from 'components/Switch';
+import {Text} from 'components/Text';
+import {TextInput} from 'components/TextInput';
+import {Theme} from 'components/Theme/Theme';
 import {
   materialTheme,
   neutralTheme,
   nordTheme,
   solarizedTheme,
 } from 'themes/presets';
-import {Alert} from '../Alert';
-import {Badge, type BadgeColor} from '../Badge';
-import {Button} from '../Button';
-import {Card} from '../Card';
-import {HStack, VStack} from '../Stack';
-import {Switch} from '../Switch';
-import {Text} from '../Text';
-import {TextInput} from '../TextInput';
-import {Theme} from './Theme';
 
 const meta = {
   title: 'Components/Theme',

@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {HStack} from './HStack';
-import {VStack} from './VStack';
-import {Stack} from './internal/Stack';
+import {HStack} from 'components/Stack/HStack';
+import {VStack} from 'components/Stack/VStack';
+import {Stack} from 'components/Stack/internal/Stack';
 
 describe('Stack', () => {
   it('renders children', () => {

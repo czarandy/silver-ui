@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import {Home} from 'lucide-react';
 import type {ComponentPropsWithRef, ReactNode, Ref} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {LinkProvider} from '../Link';
-import {Button} from './Button';
+import {Button} from 'components/Button/Button';
+import {LinkProvider} from 'components/Link';
 
 function ToBasedRouterLink({
   to,

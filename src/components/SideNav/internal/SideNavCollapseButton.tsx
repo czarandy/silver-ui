@@ -1,7 +1,7 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
+import {Button} from 'components/Button';
+import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {css} from 'styled-system/css';
-import {Button} from '../../Button';
-import {useSideNavCollapse} from '../SideNavContext';
 
 const styles = {
   expanded: css({

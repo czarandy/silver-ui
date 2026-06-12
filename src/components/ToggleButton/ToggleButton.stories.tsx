@@ -10,8 +10,8 @@ import {
   Underline,
 } from 'lucide-react';
 import {useState} from 'react';
-import {ToggleButton} from './ToggleButton';
-import {ToggleButtonGroup} from './ToggleButtonGroup';
+import {ToggleButton} from 'components/ToggleButton/ToggleButton';
+import {ToggleButtonGroup} from 'components/ToggleButton/ToggleButtonGroup';
 
 const meta = {
   title: 'Components/ToggleButton',

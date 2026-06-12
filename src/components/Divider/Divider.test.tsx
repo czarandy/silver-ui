@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Divider} from './Divider';
+import {Divider} from 'components/Divider/Divider';
 
 /**
  * Class tokens present in `withFlag` but not in `base`.

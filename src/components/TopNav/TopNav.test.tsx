@@ -5,11 +5,14 @@ import {describe, expect, it, vi} from 'vitest';
 import {
   AppShellMobileContext,
   type AppShellMobileContextValue,
-} from '../AppShell/AppShellMobileContext';
-import {TopNav} from './TopNav';
-import {TopNavMobileContentContext, TopNavRenderContext} from './TopNavContext';
-import {TopNavHeading} from './TopNavHeading';
-import {TopNavItem} from './TopNavItem';
+} from 'components/AppShell/AppShellMobileContext';
+import {TopNav} from 'components/TopNav/TopNav';
+import {
+  TopNavMobileContentContext,
+  TopNavRenderContext,
+} from 'components/TopNav/TopNavContext';
+import {TopNavHeading} from 'components/TopNav/TopNavHeading';
+import {TopNavItem} from 'components/TopNav/TopNavItem';
 
 describe('TopNav', () => {
   it('renders heading, start content, and end content', () => {

@@ -1,10 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {Card} from 'components/Card';
+import {HStack} from 'components/Stack/HStack';
+import {VStack} from 'components/Stack/VStack';
+import type {StackGap} from 'components/Stack/internal/Stack';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import {Card} from '../Card';
-import {Text} from '../Text';
-import {HStack} from './HStack';
-import {VStack} from './VStack';
-import type {StackGap} from './internal/Stack';
 
 const meta: Meta<typeof HStack> = {
   title: 'Components/Stack',

@@ -6,10 +6,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {ratingRecipe} from 'components/Rating/Rating.recipe';
 import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {Icon, type IconColor, type IconSize} from '../Icon';
-import {ratingRecipe} from './Rating.recipe';
 
 export interface RatingProps {
   /**

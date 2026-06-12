@@ -2,9 +2,9 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Star} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
+import {Tag} from 'components/Tag/Tag';
+import {tagRecipe} from 'components/Tag/Tag.recipe';
 import {assertNonNull} from '../../internal/testHelpers';
-import {Tag} from './Tag';
-import {tagRecipe} from './Tag.recipe';
 
 describe('Tag', () => {
   it('renders a label', () => {

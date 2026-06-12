@@ -1,6 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {FileInput, type FileInputProps} from './FileInput';
+import {FileInput, type FileInputProps} from 'components/FileInput/FileInput';
 
 function SingleFileStory(): React.JSX.Element {
   const [value, setValue] = useState<File | null>(null);

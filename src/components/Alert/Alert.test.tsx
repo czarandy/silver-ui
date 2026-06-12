@@ -2,8 +2,8 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Rocket} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
-import {Icon} from '../Icon';
-import {Alert} from './Alert';
+import {Alert} from 'components/Alert/Alert';
+import {Icon} from 'components/Icon';
 
 describe('Alert', () => {
   it('renders title and description with the correct role', () => {

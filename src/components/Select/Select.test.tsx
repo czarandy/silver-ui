@@ -2,9 +2,9 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {Select} from 'components/Select/Select';
+import {SelectOption} from 'components/Select/SelectOption';
 import {assertNonNull} from '../../internal/testHelpers';
-import {Select} from './Select';
-import {SelectOption} from './SelectOption';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {

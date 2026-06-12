@@ -9,10 +9,10 @@ import {
   Users,
 } from 'lucide-react';
 import {useState, type ComponentPropsWithRef} from 'react';
-import {Badge} from '../Badge';
-import {Tab} from './Tab';
-import {TabMenu} from './TabMenu';
-import {Tabs} from './Tabs';
+import {Badge} from 'components/Badge';
+import {Tab} from 'components/Tabs/Tab';
+import {TabMenu} from 'components/Tabs/TabMenu';
+import {Tabs} from 'components/Tabs/Tabs';
 
 const meta: Meta<typeof Tabs> = {
   title: 'Components/Tabs',

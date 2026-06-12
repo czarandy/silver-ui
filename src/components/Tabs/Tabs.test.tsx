@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import {Settings} from 'lucide-react';
 import type {ComponentPropsWithRef, SVGProps} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {Badge} from '../Badge';
-import {Tab} from './Tab';
-import {TabMenu} from './TabMenu';
-import {Tabs} from './Tabs';
+import {Badge} from 'components/Badge';
+import {Tab} from 'components/Tabs/Tab';
+import {TabMenu} from 'components/Tabs/TabMenu';
+import {Tabs} from 'components/Tabs/Tabs';
 
 function RouterLink({
   children,

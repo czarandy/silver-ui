@@ -1,5 +1,17 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
+import {useScheduleContext} from 'components/Schedule/context';
+import {isDayEvent} from 'components/Schedule/dateMath';
+import {
+  CalendarMonthEventPill,
+  formatMonthTitle,
+  getEventAccessibleLabel,
+  isEventInPast,
+  scheduleClasses,
+  ScheduleFrame,
+} from 'components/Schedule/shared';
+import {useCurrentTime} from 'components/Schedule/useCurrentTime';
+import {Heading, Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import type {DayOfWeek} from '../../internal/dateTypes';
@@ -13,17 +25,6 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from '../../internal/plainDate';
-import {Heading, Text} from '../Text';
-import {useScheduleContext} from './context';
-import {isDayEvent} from './dateMath';
-import {
-  CalendarMonthEventPill,
-  formatMonthTitle,
-  getEventAccessibleLabel,
-  isEventInPast,
-  scheduleClasses,
-  ScheduleFrame,
-} from './shared';
 import type {
   CalendarEvent,
   ScheduleView,
@@ -31,7 +32,6 @@ import type {
   ScheduleZonedInstant,
   ScheduleZonedInstantRange,
 } from './types';
-import {useCurrentTime} from './useCurrentTime';
 
 export interface ScheduleMonthlyViewOptions {
   /**
@@ -185,7 +185,7 @@ interface MonthEventSegment {
   week: number;
 }
 
-const MAX_MONTH_EVENT_LEVELS = 4;
+const MAX_MONTH_EVENT_LEVELS = 5;
 
 function getEventDateSpan(
   event: CalendarEvent,
@@ -358,7 +358,7 @@ function getMonthEventSegmentStyle({
   return {
     gridColumn: `${columnStart + 1} / ${columnEnd + 2}`,
     gridRow: `${week + 1}`,
-    marginBlockStart: `${30 + level * 29}px`,
+    marginBlockStart: `${30 + level * 22}px`,
   };
 }
 

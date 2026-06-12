@@ -2,10 +2,10 @@
 
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {Button} from '../Button';
-import {HStack, VStack} from '../Stack';
-import {Text} from '../Text';
-import {Popover} from './Popover';
+import {Button} from 'components/Button';
+import {Popover} from 'components/Popover/Popover';
+import {HStack, VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 
 const meta: Meta<typeof Popover> = {
   title: 'Components/Popover',

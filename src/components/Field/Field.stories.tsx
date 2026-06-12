@@ -1,6 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Mail} from 'lucide-react';
-import {Field, type FieldProps} from './Field';
+import {Field, type FieldProps} from 'components/Field/Field';
 
 const meta = {
   title: 'Components/Field',

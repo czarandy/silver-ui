@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Card} from '../Card';
-import {HStack, VStack} from '../Stack';
-import {Text} from '../Text';
-import {Skeleton} from './Skeleton';
+import {Card} from 'components/Card';
+import {Skeleton} from 'components/Skeleton/Skeleton';
+import {HStack, VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 
 const meta: Meta<typeof Skeleton> = {
   title: 'Components/Skeleton',

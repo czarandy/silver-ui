@@ -8,14 +8,18 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {DropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
+import {
+  formatMenuWidth,
+  renderMenuItems,
+  useMenuKeyboard,
+} from 'components/DropdownMenu/menuUtils';
+import {Icon} from 'components/Icon';
+import {Popover} from 'components/Popover';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import isReactNode from '../../internal/isReactNode';
 import {Button, type ButtonProps, type ButtonSize} from '../Button';
-import {Icon} from '../Icon';
-import {Popover} from '../Popover';
-import {DropdownMenuContext} from './DropdownMenuContext';
-import {formatMenuWidth, renderMenuItems, useMenuKeyboard} from './menuUtils';
 import type {DropdownMenuOption} from './types';
 
 export type {

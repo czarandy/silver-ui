@@ -1,12 +1,17 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {Button} from '../Button';
-import {Layout, LayoutContent, LayoutFooter, LayoutHeader} from '../Layout';
-import {Text} from '../Text';
-import {TextInput} from '../TextInput';
-import {Drawer, type DrawerPlacement} from './Drawer';
-import {useDrawer} from './useDrawer';
+import {Button} from 'components/Button';
+import {Drawer, type DrawerPlacement} from 'components/Drawer/Drawer';
+import {useDrawer} from 'components/Drawer/useDrawer';
+import {
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+} from 'components/Layout';
+import {Text} from 'components/Text';
+import {TextInput} from 'components/TextInput';
 
 const meta: Meta<typeof Drawer> = {
   title: 'Components/Drawer',

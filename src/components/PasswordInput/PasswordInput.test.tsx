@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {PasswordInput} from './PasswordInput';
+import {PasswordInput} from 'components/PasswordInput/PasswordInput';
 
 describe('PasswordInput', () => {
   const noop = () => {};

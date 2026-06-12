@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import type {ComponentPropsWithRef} from 'react';
 import {fn} from 'storybook/test';
-import {Text} from '../Text';
-import {Link} from './Link';
-import {LinkProvider} from './LinkProvider';
+import {Link} from 'components/Link/Link';
+import {LinkProvider} from 'components/Link/LinkProvider';
+import {Text} from 'components/Text';
 
 function StoryLink({
   children,

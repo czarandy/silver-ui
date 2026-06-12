@@ -1,7 +1,7 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {Thumbnail} from './Thumbnail';
+import {Thumbnail} from 'components/Thumbnail/Thumbnail';
 
 describe('Thumbnail', () => {
   it('renders an image thumbnail', () => {

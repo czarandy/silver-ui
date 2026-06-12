@@ -1,11 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {Button} from '../Button';
-import {HStack} from '../Stack';
-import {Toast} from './Toast';
-import {ToastViewport} from './ToastViewport';
-import type {ToastPosition} from './types';
-import {useToast} from './useToast';
+import {Button} from 'components/Button';
+import {HStack} from 'components/Stack';
+import {Toast} from 'components/Toast/Toast';
+import {ToastViewport} from 'components/Toast/ToastViewport';
+import type {ToastPosition} from 'components/Toast/types';
+import {useToast} from 'components/Toast/useToast';
 
 const meta: Meta<typeof Toast> = {
   title: 'Components/Toast',

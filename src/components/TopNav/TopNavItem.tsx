@@ -1,16 +1,16 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
+import {useLinkComponent} from 'components/Link';
+import {Text} from 'components/Text';
+import {useTopNavRenderMode} from 'components/TopNav/TopNavContext';
+import {topNavItemRecipe} from 'components/TopNav/TopNavItem.recipe';
 import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
-import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
-import {useLinkComponent} from '../Link';
-import {Text} from '../Text';
-import {useTopNavRenderMode} from './TopNavContext';
-import {topNavItemRecipe} from './TopNavItem.recipe';
 
 export interface TopNavItemProps {
   /**

@@ -2,8 +2,8 @@ import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
+import {TimeInput} from 'components/TimeInput/TimeInput';
 import {assertNonNull} from '../../internal/testHelpers';
-import {TimeInput} from './TimeInput';
 
 const T = (s: string) => Temporal.PlainTime.from(s);
 

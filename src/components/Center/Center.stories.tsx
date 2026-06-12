@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {Card} from 'components/Card';
+import {Center} from 'components/Center/Center';
+import {HStack, VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import {Card} from '../Card';
-import {HStack, VStack} from '../Stack';
-import {Text} from '../Text';
-import {Center} from './Center';
 
 const meta: Meta<typeof Center> = {
   title: 'Components/Center',

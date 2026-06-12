@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Heading} from './Heading';
+import {Heading} from 'components/Text/Heading';
 
 describe('Heading', () => {
   it('renders the semantic heading for the requested level', () => {

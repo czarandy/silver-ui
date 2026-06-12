@@ -10,6 +10,15 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Button} from 'components/Button';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import {Popover} from 'components/Popover';
+import {Spinner} from 'components/Spinner';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import isReactNode from '../../internal/isReactNode';
@@ -22,7 +31,6 @@ import {
   plainDateIsBefore,
   type PlainDate,
 } from '../../internal/plainDate';
-import {Button} from '../Button';
 import {Calendar, type CalendarHandle} from '../Calendar';
 import {
   Field,
@@ -31,15 +39,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe, inputStyles} from '../Field/inputStyles';
-import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from '../Field/inputUtils';
 import type {IconComponent} from '../Icon';
-import {Popover} from '../Popover';
-import {Spinner} from '../Spinner';
 
 export type {PlainDate} from '../../internal/plainDate';
 

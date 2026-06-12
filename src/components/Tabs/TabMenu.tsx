@@ -6,13 +6,13 @@ import {
   type KeyboardEvent,
   type Ref,
 } from 'react';
+import {Popover} from 'components/Popover';
+import {tabMenuRecipe} from 'components/Tabs/TabMenu.recipe';
+import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
+import {useTabsContext} from 'components/Tabs/TabsContext';
 import {cx} from 'internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Icon, type IconComponent} from '../Icon';
-import {Popover} from '../Popover';
-import {tabMenuRecipe} from './TabMenu.recipe';
-import {tabsRecipe} from './Tabs.recipe';
-import {useTabsContext} from './TabsContext';
 
 export interface TabMenuOption {
   /**

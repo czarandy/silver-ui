@@ -1,29 +1,30 @@
 import {
   memo,
   useMemo,
-  useRef,
   type CSSProperties,
   type HTMLAttributes,
   type ReactElement,
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import {EmptyState} from '../EmptyState';
-import {Text} from '../Text';
-import {tableRecipe} from './Table.recipe';
-import {TableBody} from './TableBody';
-import {TableCell} from './TableCell';
-import {TableContext} from './TableContext';
-import {TableHeader} from './TableHeader';
-import {TableHeaderCell} from './TableHeaderCell';
-import {TableRow} from './TableRow';
+import {EmptyState} from 'components/EmptyState';
+import {tableRecipe} from 'components/Table/Table.recipe';
+import {TableBody} from 'components/Table/TableBody';
+import {TableCell} from 'components/Table/TableCell';
+import {TableContext} from 'components/Table/TableContext';
+import {TableHeader} from 'components/Table/TableHeader';
+import {TableHeaderCell} from 'components/Table/TableHeaderCell';
+import {TableRow} from 'components/Table/TableRow';
 import {
   defaultCellRenderer,
   generateColumns,
   resolveColumnWidths,
-} from './columnUtils';
+} from 'components/Table/columnUtils';
+import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
+import {Text} from 'components/Text';
+import {cx} from 'internal/cx';
+import isReactNode from '../../internal/isReactNode';
+import useShallowEqualMemo from '../../internal/useShallowEqualMemo';
 import type {
   BodyCellRenderProps,
   BodyRowRenderProps,
@@ -41,7 +42,6 @@ import type {
   TableTextOverflow,
   TableVerticalAlign,
 } from './types';
-import {useBaseTablePlugins} from './useBaseTablePlugins';
 
 export interface TableProps<T extends Record<string, unknown>> {
   /**
@@ -120,21 +120,6 @@ export interface TableProps<T extends Record<string, unknown>> {
    * @default 'middle'
    */
   verticalAlign?: TableVerticalAlign;
-}
-
-function areArraysShallowEqual<T>(previous: T[], next: T[]): boolean {
-  if (previous === next) {
-    return true;
-  }
-  if (previous.length !== next.length) {
-    return false;
-  }
-  for (let index = 0; index < previous.length; index++) {
-    if (previous[index] !== next[index]) {
-      return false;
-    }
-  }
-  return true;
 }
 
 function applyPlugins<TPlugin, TProps, TArgs extends unknown[]>(
@@ -327,18 +312,11 @@ function TableInner<T extends Record<string, unknown>>({
     plugin => plugin.transformColumns,
     baseColumns,
   );
-  /* eslint-disable @eslint-react/refs -- render-time memoization keeps row props stable before children render */
-  const columnsRef = useRef(transformedColumns);
-  const areColumnsStable = areArraysShallowEqual(
-    columnsRef.current,
-    transformedColumns,
-  );
-  if (!areColumnsStable) {
-    columnsRef.current = transformedColumns;
-  }
-  const columns = columnsRef.current;
+  // Keep `columns` referentially stable while its contents are unchanged so the
+  // memoized data rows (which compare `columns` by identity) skip re-rendering
+  // when an upstream value rebuilds the array each render.
+  const columns = useShallowEqualMemo(transformedColumns);
   const widths = resolveColumnWidths(columns);
-  /* eslint-enable @eslint-react/refs */
 
   const tableRenderProps = applyPlugins(
     plugins,

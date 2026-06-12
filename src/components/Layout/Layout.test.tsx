@@ -1,12 +1,12 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {DialogContext} from '../Dialog/DialogContext';
-import {Layout} from './Layout';
-import {LayoutContent} from './LayoutContent';
-import {LayoutFooter} from './LayoutFooter';
-import {LayoutHeader} from './LayoutHeader';
-import {LayoutPanel} from './LayoutPanel';
+import {DialogContext} from 'components/Dialog/DialogContext';
+import {Layout} from 'components/Layout/Layout';
+import {LayoutContent} from 'components/Layout/LayoutContent';
+import {LayoutFooter} from 'components/Layout/LayoutFooter';
+import {LayoutHeader} from 'components/Layout/LayoutHeader';
+import {LayoutPanel} from 'components/Layout/LayoutPanel';
 
 describe('Layout', () => {
   it('renders header, start, content, end, and footer slots', () => {

@@ -1,7 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Hash, Tag} from 'lucide-react';
 import {useState} from 'react';
-import {NumberInput, type NumberInputProps} from './NumberInput';
+import {
+  NumberInput,
+  type NumberInputProps,
+} from 'components/NumberInput/NumberInput';
 
 type NumberInputStoryArgs = Omit<NumberInputProps, 'onChange'> & {
   onChange?: NumberInputProps['onChange'];

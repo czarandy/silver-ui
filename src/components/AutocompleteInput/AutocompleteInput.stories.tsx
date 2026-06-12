@@ -6,14 +6,14 @@ import {useMemo, useState} from 'react';
 import {
   AutocompleteInput,
   type AutocompleteInputProps,
-} from './AutocompleteInput';
-import {AutocompleteInputItem} from './AutocompleteInputItem';
-import {BaseAutocompleteInput} from './BaseAutocompleteInput';
+} from 'components/AutocompleteInput/AutocompleteInput';
+import {AutocompleteInputItem} from 'components/AutocompleteInput/AutocompleteInputItem';
+import {BaseAutocompleteInput} from 'components/AutocompleteInput/BaseAutocompleteInput';
 import {
   createStaticSearchSource,
   type SearchableItem,
   type SearchSource,
-} from './types';
+} from 'components/AutocompleteInput/types';
 
 const people: SearchableItem<{role: string}>[] = [
   {id: 'ada', label: 'Ada Lovelace', auxiliaryData: {role: 'Mathematician'}},

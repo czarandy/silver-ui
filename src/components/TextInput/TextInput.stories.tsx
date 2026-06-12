@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Mail, Search} from 'lucide-react';
 import {useState} from 'react';
-import {Badge} from '../Badge';
-import {getNecessity} from '../Field';
-import {TextInput, type TextInputProps} from './TextInput';
+import {Badge} from 'components/Badge';
+import {getNecessity} from 'components/Field';
+import {TextInput, type TextInputProps} from 'components/TextInput/TextInput';
 
 const meta = {
   title: 'Components/TextInput',

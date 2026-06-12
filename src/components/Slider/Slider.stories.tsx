@@ -1,8 +1,12 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {getNecessity} from '../Field';
-import {VStack} from '../Stack';
-import {Slider, type SliderRangeProps, type SliderSingleProps} from './Slider';
+import {getNecessity} from 'components/Field';
+import {
+  Slider,
+  type SliderRangeProps,
+  type SliderSingleProps,
+} from 'components/Slider/Slider';
+import {VStack} from 'components/Stack';
 
 const DEFAULT_RANGE_VALUE: [number, number] = [20, 80];
 

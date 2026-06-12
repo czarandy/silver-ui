@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {BriefcaseBusiness, User} from 'lucide-react';
 import {useState} from 'react';
-import {Select, type SelectProps} from './Select';
-import {SelectOption} from './SelectOption';
+import {Select, type SelectProps} from 'components/Select/Select';
+import {SelectOption} from 'components/Select/SelectOption';
 
 const peopleOptions = [
   {label: 'Ada Lovelace', value: 'ada'},

@@ -1,9 +1,12 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell} from 'lucide-react';
 import {useState} from 'react';
-import {Badge} from '../Badge';
-import {Icon} from '../Icon';
-import {CheckboxInput, type CheckboxInputProps} from './CheckboxInput';
+import {Badge} from 'components/Badge';
+import {
+  CheckboxInput,
+  type CheckboxInputProps,
+} from 'components/CheckboxInput/CheckboxInput';
+import {Icon} from 'components/Icon';
 
 function CheckboxStory(args: CheckboxInputProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);

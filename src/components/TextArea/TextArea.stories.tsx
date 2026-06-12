@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {MessageSquare} from 'lucide-react';
 import {useState} from 'react';
-import {TextArea, type TextAreaProps} from './TextArea';
+import {TextArea, type TextAreaProps} from 'components/TextArea/TextArea';
 
 function TextAreaStory(args: TextAreaProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);

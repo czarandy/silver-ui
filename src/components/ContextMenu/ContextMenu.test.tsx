@@ -1,8 +1,8 @@
 import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
-import {Divider} from '../Divider';
-import {ContextMenu, ContextMenuItem} from './ContextMenu';
+import {ContextMenu, ContextMenuItem} from 'components/ContextMenu/ContextMenu';
+import {Divider} from 'components/Divider';
 
 const showPopover = vi.fn(function (this: HTMLElement) {
   this.setAttribute('popover-open', '');

@@ -1,6 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- internal presentational connector */
 
-import {treeViewBranchesRecipe} from './TreeViewBranches.recipe';
+import {treeViewBranchesRecipe} from 'components/TreeView/TreeViewBranches.recipe';
 
 const styles = treeViewBranchesRecipe();
 

@@ -12,9 +12,9 @@ import {
   Trash2,
   Underline,
 } from 'lucide-react';
-import {Button} from '../Button';
-import {DropdownMenu} from '../DropdownMenu';
-import {ButtonGroup} from './ButtonGroup';
+import {Button} from 'components/Button';
+import {ButtonGroup} from 'components/ButtonGroup/ButtonGroup';
+import {DropdownMenu} from 'components/DropdownMenu';
 
 const meta: Meta<typeof ButtonGroup> = {
   title: 'Components/ButtonGroup',

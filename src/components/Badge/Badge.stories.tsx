@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {CheckCircle2} from 'lucide-react';
-import {HStack} from '../Stack';
-import {Badge, type BadgeColor} from './Badge';
+import {Badge, type BadgeColor} from 'components/Badge/Badge';
+import {HStack} from 'components/Stack';
 
 const colors: BadgeColor[] = [
   'neutral',

@@ -2,10 +2,13 @@
 
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {NumberInput} from '../NumberInput';
-import {TextInput} from '../TextInput';
-import {InputGroup, type InputGroupProps} from './InputGroup';
-import {InputGroupText} from './InputGroupText';
+import {
+  InputGroup,
+  type InputGroupProps,
+} from 'components/InputGroup/InputGroup';
+import {InputGroupText} from 'components/InputGroup/InputGroupText';
+import {NumberInput} from 'components/NumberInput';
+import {TextInput} from 'components/TextInput';
 
 const meta = {
   title: 'Components/InputGroup',

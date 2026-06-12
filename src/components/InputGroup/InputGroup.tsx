@@ -5,6 +5,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {inputGroupRecipe} from 'components/InputGroup/InputGroup.recipe';
+import {InputGroupContext} from 'components/InputGroup/InputGroupContext';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {
@@ -14,8 +16,6 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputGroupRecipe} from './InputGroup.recipe';
-import {InputGroupContext} from './InputGroupContext';
 
 export type InputGroupProps = {
   /**

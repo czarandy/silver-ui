@@ -2,9 +2,9 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
-import {Button} from '../Button';
-import {Drawer} from './Drawer';
-import {useDrawer} from './useDrawer';
+import {Button} from 'components/Button';
+import {Drawer} from 'components/Drawer/Drawer';
+import {useDrawer} from 'components/Drawer/useDrawer';
 
 beforeAll(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {

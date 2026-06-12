@@ -1,6 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {PasswordInput, type PasswordInputProps} from './PasswordInput';
+import {
+  PasswordInput,
+  type PasswordInputProps,
+} from 'components/PasswordInput/PasswordInput';
 
 const meta: Meta<typeof PasswordInput> = {
   title: 'Components/PasswordInput',

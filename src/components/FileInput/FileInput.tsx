@@ -8,12 +8,20 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Button} from 'components/Button';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import {fileInputRecipe} from 'components/FileInput/FileInput.recipe';
+import {Spinner} from 'components/Spinner';
+import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import {formatFileSize} from '../../internal/formatFileSize';
 import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
-import {Button} from '../Button';
 import {
   Field,
   getNecessity,
@@ -21,15 +29,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
-import {Spinner} from '../Spinner';
-import {Text} from '../Text';
-import {fileInputRecipe} from './FileInput.recipe';
 
 export type FileInputMode = 'dropzone' | 'input';
 

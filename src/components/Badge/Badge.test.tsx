@@ -2,8 +2,8 @@ import {render, screen} from '@testing-library/react';
 import {Check} from 'lucide-react';
 import type {SVGProps} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {Badge} from './Badge';
-import {badgeRecipe} from './Badge.recipe';
+import {Badge} from 'components/Badge/Badge';
+import {badgeRecipe} from 'components/Badge/Badge.recipe';
 
 function BadgeIcon(props: SVGProps<SVGSVGElement>): React.JSX.Element {
   return <Check {...props} data-testid="badge-icon" />;

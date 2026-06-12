@@ -2,24 +2,24 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useMemo, useState} from 'react';
-import {Badge} from '../Badge';
-import {Button} from '../Button';
-import {ToastViewport, useToast} from '../Toast';
-import {createEventFromISO} from './CalendarEvent';
-import {createScheduleDayView} from './DayView';
-import {createScheduleListView} from './ListView';
-import {createScheduleMonthlyView} from './MonthlyView';
-import {Schedule} from './Schedule';
-import {createScheduleWeeklyView} from './WeeklyView';
-import {useSchedulePaginationPlugin} from './plugins/PaginationPlugin';
-import {useScheduleViewSelectorPlugin} from './plugins/ViewSelectorPlugin';
+import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
+import {createEventFromISO} from 'components/Schedule/CalendarEvent';
+import {createScheduleDayView} from 'components/Schedule/DayView';
+import {createScheduleListView} from 'components/Schedule/ListView';
+import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
+import {Schedule} from 'components/Schedule/Schedule';
+import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
+import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
+import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import type {
   Instant,
   ScheduleCategory,
   ScheduleEventSource,
   SchedulePlugin,
   ScheduleView,
-} from './types';
+} from 'components/Schedule/types';
+import {ToastViewport, useToast} from 'components/Toast';
 
 const events = [
   createEventFromISO({
@@ -49,6 +49,13 @@ const events = [
     id: 'prototype-critique',
     start: '2026-05-13T14:30:00.000Z',
     title: 'Prototype critique',
+  }),
+  createEventFromISO({
+    category: 'Planning',
+    end: '2026-05-13T16:00:00.000Z',
+    id: 'launch-checklist',
+    start: '2026-05-13T15:30:00.000Z',
+    title: 'Launch checklist',
   }),
   createEventFromISO({
     category: 'Sync',

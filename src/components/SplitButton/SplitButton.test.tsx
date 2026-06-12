@@ -2,8 +2,8 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Copy} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {DropdownMenuItem} from '../DropdownMenu';
-import {SplitButton} from './SplitButton';
+import {DropdownMenuItem} from 'components/DropdownMenu';
+import {SplitButton} from 'components/SplitButton/SplitButton';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {

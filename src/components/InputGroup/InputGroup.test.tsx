@@ -1,10 +1,10 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {inputRecipe} from '../Field/inputStyles';
-import {NumberInput} from '../NumberInput';
-import {TextInput} from '../TextInput';
-import {InputGroup} from './InputGroup';
-import {InputGroupText} from './InputGroupText';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {InputGroup} from 'components/InputGroup/InputGroup';
+import {InputGroupText} from 'components/InputGroup/InputGroupText';
+import {NumberInput} from 'components/NumberInput';
+import {TextInput} from 'components/TextInput';
 
 describe('InputGroup', () => {
   it('renders a labeled group with addon text and an input', () => {

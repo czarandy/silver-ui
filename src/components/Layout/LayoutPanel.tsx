@@ -1,8 +1,11 @@
 import type {ComponentPropsWithRef} from 'react';
+import {
+  layoutPanelRecipe,
+  layoutRegionRecipe,
+} from 'components/Layout/Layout.recipe';
+import {useLayoutArea, useLayoutDivider} from 'components/Layout/LayoutContext';
 import {cx} from 'internal/cx';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {layoutPanelRecipe, layoutRegionRecipe} from './Layout.recipe';
-import {useLayoutArea, useLayoutDivider} from './LayoutContext';
 
 /**
  * Side panel region within a Layout. Placed in the start or end slot,

@@ -11,19 +11,19 @@ import {
   type Ref,
   type RefObject,
 } from 'react';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {Icon} from '../Icon';
-import {Popover} from '../Popover';
-import {Spinner} from '../Spinner';
-import {Text} from '../Text';
 import {
   autocompleteMenuRecipe,
   optionHighlightedStyle,
   optionSelectedStyle,
-} from './AutocompleteInput.recipe';
-import {AutocompleteInputItem} from './AutocompleteInputItem';
+} from 'components/AutocompleteInput/AutocompleteInput.recipe';
+import {AutocompleteInputItem} from 'components/AutocompleteInput/AutocompleteInputItem';
+import {Icon} from 'components/Icon';
+import {Popover} from 'components/Popover';
+import {Spinner} from 'components/Spinner';
+import {Text} from 'components/Text';
+import {cx} from 'internal/cx';
+import {css} from 'styled-system/css';
+import {mergeRefs} from '../../internal/mergeRefs';
 import type {SearchableItem, SearchSource} from './types';
 
 export interface BaseAutocompleteInputProps<T extends SearchableItem> {

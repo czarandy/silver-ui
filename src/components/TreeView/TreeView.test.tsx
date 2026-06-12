@@ -1,8 +1,8 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {TreeView} from './TreeView';
-import type {TreeViewItemData} from './types';
+import {TreeView} from 'components/TreeView/TreeView';
+import type {TreeViewItemData} from 'components/TreeView/types';
 
 const simpleItems: TreeViewItemData[] = [
   {id: 'a', label: 'Item A'},

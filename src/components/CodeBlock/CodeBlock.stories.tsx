@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {CodeBlock} from './CodeBlock';
+import {CodeBlock} from 'components/CodeBlock/CodeBlock';
 
 const longCode = Array.from(
   {length: 24},

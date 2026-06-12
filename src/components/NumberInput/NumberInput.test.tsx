@@ -1,8 +1,8 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {InputGroup} from '../InputGroup';
-import {NumberInput} from './NumberInput';
+import {InputGroup} from 'components/InputGroup';
+import {NumberInput} from 'components/NumberInput/NumberInput';
 
 describe('NumberInput', () => {
   it('calls onChange with valid numbers', async () => {

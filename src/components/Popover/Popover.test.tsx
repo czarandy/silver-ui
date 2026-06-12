@@ -1,10 +1,10 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {useRef} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
+import {Button} from 'components/Button';
+import {Popover} from 'components/Popover/Popover';
 import {token} from 'styled-system/tokens';
 import {assertNonNull} from '../../internal/testHelpers';
-import {Button} from '../Button';
-import {Popover} from './Popover';
 
 const showPopoverMock = vi.fn();
 const hidePopoverMock = vi.fn();

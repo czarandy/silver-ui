@@ -7,11 +7,11 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
+import {Button} from 'components/Button';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal';
 import {useFocusTrap} from '../../internal/useFocusTrap';
 import {useLayer, type ContextRenderProps} from '../../internal/useLayer';
-import {Button} from '../Button';
 
 export type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
 

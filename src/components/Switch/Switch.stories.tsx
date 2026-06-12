@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, ShieldCheck} from 'lucide-react';
 import {useState} from 'react';
-import {VStack} from '../Stack';
-import {Switch, type SwitchProps} from './Switch';
+import {VStack} from 'components/Stack';
+import {Switch, type SwitchProps} from 'components/Switch/Switch';
 
 const meta = {
   title: 'Components/Switch',

@@ -2,9 +2,12 @@
 
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
+import {
+  DateRangeInput,
+  type DateRangeInputProps,
+} from 'components/DateRangeInput/DateRangeInput';
 import type {DateRange} from '../../internal/dateTypes';
 import {plainDateCreate} from '../../internal/plainDate';
-import {DateRangeInput, type DateRangeInputProps} from './DateRangeInput';
 
 const meta = {
   title: 'Components/DateRangeInput',

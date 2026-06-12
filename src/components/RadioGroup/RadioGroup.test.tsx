@@ -2,8 +2,8 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {RadioGroup} from './RadioGroup';
-import {RadioGroupItem} from './RadioGroupItem';
+import {RadioGroup} from 'components/RadioGroup/RadioGroup';
+import {RadioGroupItem} from 'components/RadioGroup/RadioGroupItem';
 
 describe('RadioGroup', () => {
   it('calls onChange with the selected item value', async () => {

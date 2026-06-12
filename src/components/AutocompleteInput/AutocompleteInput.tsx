@@ -9,10 +9,14 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {BaseAutocompleteInput} from 'components/AutocompleteInput/BaseAutocompleteInput';
+import {Button} from 'components/Button';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {Tag} from 'components/Tag';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import isReactNode from '../../internal/isReactNode';
-import {Button} from '../Button';
 import {
   Field,
   getNecessity,
@@ -20,11 +24,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe, inputStyles} from '../Field/inputStyles';
-import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
-import {Tag} from '../Tag';
-import {BaseAutocompleteInput} from './BaseAutocompleteInput';
 import type {SearchableItem, SearchSource} from './types';
 
 export type AutocompleteInputProps<T extends SearchableItem = SearchableItem> =

@@ -1,8 +1,8 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {useCallback} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
-import {Tooltip} from './Tooltip';
-import {useTooltip} from './useTooltip';
+import {Tooltip} from 'components/Tooltip/Tooltip';
+import {useTooltip} from 'components/Tooltip/useTooltip';
 
 const popoverOpenState = new WeakMap<HTMLElement, boolean>();
 const showPopoverMock = vi.fn(function (this: HTMLElement) {

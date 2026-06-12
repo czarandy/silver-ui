@@ -1,10 +1,14 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
-import {TimeGridView} from './TimeGridView';
-import {useScheduleContext} from './context';
-import {getScheduleRangeFromDates} from './dateMath';
-import {scheduleRangeToScheduleZonedInstantRange} from './scheduleZonedInstant';
-import {ScheduleFrame, formatDate, formatMonthTitle} from './shared';
+import {TimeGridView} from 'components/Schedule/TimeGridView';
+import {useScheduleContext} from 'components/Schedule/context';
+import {getScheduleRangeFromDates} from 'components/Schedule/dateMath';
+import {scheduleRangeToScheduleZonedInstantRange} from 'components/Schedule/scheduleZonedInstant';
+import {
+  ScheduleFrame,
+  formatDate,
+  formatMonthTitle,
+} from 'components/Schedule/shared';
 import type {
   ScheduleView,
   ScheduleViewComponentProps,

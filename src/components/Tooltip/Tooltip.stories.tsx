@@ -1,10 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useCallback} from 'react';
-import {Badge} from '../Badge';
-import {Button} from '../Button';
-import {Text} from '../Text';
-import {Tooltip} from './Tooltip';
-import {useTooltip} from './useTooltip';
+import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
+import {Text} from 'components/Text';
+import {Tooltip} from 'components/Tooltip/Tooltip';
+import {useTooltip} from 'components/Tooltip/useTooltip';
 
 const meta: Meta<typeof Tooltip> = {
   title: 'Components/Tooltip',

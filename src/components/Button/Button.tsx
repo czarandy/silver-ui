@@ -9,17 +9,17 @@ import type {
   ReactNode,
   Ref,
 } from 'react';
+import {buttonRecipe} from 'components/Button/Button.recipe';
+import {useButtonGroup} from 'components/ButtonGroup/ButtonGroupContext';
+import {useLinkComponent} from 'components/Link';
+import {Spinner} from 'components/Spinner';
+import {Tooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal';
 import isReactNode from '../../internal/isReactNode';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
-import {useButtonGroup} from '../ButtonGroup/ButtonGroupContext';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
-import {useLinkComponent} from '../Link';
-import {Spinner} from '../Spinner';
-import {Tooltip} from '../Tooltip';
-import {buttonRecipe} from './Button.recipe';
 import type {ButtonSize, ButtonVariant} from './Button.types';
 
 export type {ButtonSize} from './Button.types';

@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Button} from '../Button';
-import {ButtonGroup} from './ButtonGroup';
+import {Button} from 'components/Button';
+import {ButtonGroup} from 'components/ButtonGroup/ButtonGroup';
 
 describe('ButtonGroup', () => {
   it('renders a labelled group', () => {

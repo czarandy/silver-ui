@@ -1,9 +1,9 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import {Check} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
+import {Avatar} from 'components/Avatar/Avatar';
+import {AvatarStatusDot} from 'components/Avatar/AvatarStatusDot';
 import {assertNonNull} from '../../internal/testHelpers';
-import {Avatar} from './Avatar';
-import {AvatarStatusDot} from './AvatarStatusDot';
 
 describe('Avatar', () => {
   it('renders initials from the provided name', () => {

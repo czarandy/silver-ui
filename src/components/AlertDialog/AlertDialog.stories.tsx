@@ -2,9 +2,9 @@
 
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import {Button} from '../Button';
-import {AlertDialog} from './AlertDialog';
-import {useAlertDialog} from './useAlertDialog';
+import {AlertDialog} from 'components/AlertDialog/AlertDialog';
+import {useAlertDialog} from 'components/AlertDialog/useAlertDialog';
+import {Button} from 'components/Button';
 
 const meta: Meta<typeof AlertDialog> = {
   title: 'Components/AlertDialog',

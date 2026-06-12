@@ -1,12 +1,12 @@
 /* eslint-disable @eslint-react/static-components */
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useLinkComponent} from 'components/Link';
+import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
+import {useTabsContext} from 'components/Tabs/TabsContext';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
-import {useLinkComponent} from '../Link';
-import {tabsRecipe} from './Tabs.recipe';
-import {useTabsContext} from './TabsContext';
 
 export interface TabProps {
   /**

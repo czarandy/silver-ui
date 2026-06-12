@@ -1,7 +1,7 @@
 import type {CSSProperties, Ref} from 'react';
+import {spinnerRecipe} from 'components/Spinner/Spinner.recipe';
 import {cx} from 'internal/cx';
 import {Text} from '../Text';
-import {spinnerRecipe} from './Spinner.recipe';
 import type {SpinnerSize, SpinnerVariant} from './Spinner.types';
 
 export interface SpinnerProps {

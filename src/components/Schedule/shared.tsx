@@ -1,5 +1,11 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {ReactNode} from 'react';
+import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
+import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
+import {useScheduleContext} from 'components/Schedule/context';
+import {isDayEvent} from 'components/Schedule/dateMath';
+import {Spinner} from 'components/Spinner';
+import {Heading} from 'components/Text';
 import {
   DATE_FORMAT_MONTH_YEAR,
   DATE_FORMAT_WITH_WEEKDAY,
@@ -9,12 +15,6 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from '../../internal/plainDate';
-import {Spinner} from '../Spinner';
-import {Heading} from '../Text';
-import {scheduleRecipe} from './Schedule.recipe';
-import {scheduleEventRecipe} from './ScheduleEvent.recipe';
-import {useScheduleContext} from './context';
-import {isDayEvent} from './dateMath';
 import type {
   CalendarEvent,
   ScheduleCategory,

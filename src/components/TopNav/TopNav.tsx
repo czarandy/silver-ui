@@ -1,11 +1,14 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
+import {Divider} from 'components/Divider';
+import {topNavRecipe} from 'components/TopNav/TopNav.recipe';
+import {
+  useTopNavMobileContent,
+  useTopNavRenderMode,
+} from 'components/TopNav/TopNavContext';
 import {cx} from 'internal/cx';
 import {MobileNav, MobileNavToggle} from '../../internal/MobileNav';
 import isReactNode from '../../internal/isReactNode';
-import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
-import {Divider} from '../Divider';
-import {topNavRecipe} from './TopNav.recipe';
-import {useTopNavMobileContent, useTopNavRenderMode} from './TopNavContext';
 
 export interface TopNavProps {
   /**

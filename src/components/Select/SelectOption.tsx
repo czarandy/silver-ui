@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {Item} from 'components/Item';
+import {selectOptionItemRecipe} from 'components/Select/Select.recipe';
 import {cx} from 'internal/cx';
 import {Icon, type IconComponent} from '../Icon';
-import {Item} from '../Item';
-import {selectOptionItemRecipe} from './Select.recipe';
 
 export interface SelectOptionProps {
   /**

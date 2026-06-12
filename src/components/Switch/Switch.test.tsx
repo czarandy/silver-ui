@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import {ShieldCheck, type LucideProps} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {Switch} from './Switch';
+import {Switch} from 'components/Switch/Switch';
 
 function LabelIcon(props: LucideProps): React.JSX.Element {
   return <ShieldCheck {...props} data-testid="label-icon" />;

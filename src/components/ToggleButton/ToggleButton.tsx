@@ -1,12 +1,12 @@
 import type {CSSProperties, MouseEvent, Ref} from 'react';
+import {buttonRecipe} from 'components/Button/Button.recipe';
+import {Spinner} from 'components/Spinner';
+import {toggleButtonRecipe} from 'components/ToggleButton/ToggleButton.recipe';
+import {useToggleButtonGroup} from 'components/ToggleButton/ToggleButtonGroup';
+import {Tooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
 import type {ButtonSize} from '../Button';
-import {buttonRecipe} from '../Button/Button.recipe';
 import {Icon, type IconComponent} from '../Icon';
-import {Spinner} from '../Spinner';
-import {Tooltip} from '../Tooltip';
-import {toggleButtonRecipe} from './ToggleButton.recipe';
-import {useToggleButtonGroup} from './ToggleButtonGroup';
 
 export interface ToggleButtonProps {
   /**

@@ -8,11 +8,11 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Button} from 'components/Button';
+import {toastRecipe} from 'components/Toast/Toast.recipe';
 import {cx} from 'internal/cx';
 import {nowMonotonicMilliseconds} from '../../internal/time';
 import useLatest from '../../internal/useLatest';
-import {Button} from '../Button';
-import {toastRecipe} from './Toast.recipe';
 import type {ToastDismissReason, ToastType} from './types';
 
 export interface ToastProps {

@@ -2,11 +2,11 @@ import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useRef} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {Button} from '../Button';
-import {Toast} from './Toast';
-import {ToastViewport} from './ToastViewport';
-import type {ToastDismissFn} from './types';
-import {useToast} from './useToast';
+import {Button} from 'components/Button';
+import {Toast} from 'components/Toast/Toast';
+import {ToastViewport} from 'components/Toast/ToastViewport';
+import type {ToastDismissFn} from 'components/Toast/types';
+import {useToast} from 'components/Toast/useToast';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {

@@ -7,16 +7,16 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {Spinner} from 'components/Spinner';
+import {switchRecipe} from 'components/Switch/Switch.recipe';
+import {Text} from 'components/Text';
+import {Tooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
 import isReactNode from '../../internal/isReactNode';
 import type {FieldNecessity, InputStatus} from '../Field';
-import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';
 import {Icon, type IconComponent} from '../Icon';
-import {Spinner} from '../Spinner';
-import {Text} from '../Text';
-import {Tooltip} from '../Tooltip';
-import {switchRecipe} from './Switch.recipe';
 
 export type SwitchLabelPosition = 'end' | 'start';
 export type SwitchLabelSpacing = 'default' | 'spread';

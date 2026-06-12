@@ -3,7 +3,6 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
-import type {EnumItem} from './types';
 import {
   SearchFilterInput,
   useSearchFilterInputConfig,
@@ -12,7 +11,8 @@ import {
   type SearchFilterInputFilter,
   type SearchFilterInputProps,
   type SearchFilterInputTagProps,
-} from './index';
+} from 'components/SearchFilterInput/index';
+import type {EnumItem} from 'components/SearchFilterInput/types';
 
 const meta = {
   title: 'Components/SearchFilterInput',

@@ -1,12 +1,15 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useCallback, useMemo, useState} from 'react';
+import {sideNavRecipe} from 'components/SideNav/SideNav.recipe';
+import {
+  SideNavCollapseContext,
+  useSideNavRenderMode,
+} from 'components/SideNav/SideNavContext';
+import {SideNavCollapseButton} from 'components/SideNav/internal/SideNavCollapseButton';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {MobileNav} from '../../internal/MobileNav';
 import isReactNode from '../../internal/isReactNode';
-import {sideNavRecipe} from './SideNav.recipe';
-import {SideNavCollapseContext, useSideNavRenderMode} from './SideNavContext';
-import {SideNavCollapseButton} from './internal/SideNavCollapseButton';
 
 export interface SideNavProps {
   /**

@@ -2,8 +2,8 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Edit, Trash2} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {DropdownMenu} from './DropdownMenu';
-import {DropdownMenuItem} from './DropdownMenuItem';
+import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
+import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {

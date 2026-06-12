@@ -12,10 +12,10 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {treeViewRecipe} from 'components/TreeView/TreeView.recipe';
+import {TreeViewItem} from 'components/TreeView/TreeViewItem';
 import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
-import {treeViewRecipe} from './TreeView.recipe';
-import {TreeViewItem} from './TreeViewItem';
 import type {TreeViewDensity, TreeViewItemData} from './types';
 
 export interface TreeViewProps {

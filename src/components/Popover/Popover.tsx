@@ -6,6 +6,7 @@ import {
   type Ref,
   type RefObject,
 } from 'react';
+import {usePopover} from 'components/Popover/usePopover';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
@@ -13,7 +14,6 @@ import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
 import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
-import {usePopover} from './usePopover';
 
 export interface PopoverProps {
   /**

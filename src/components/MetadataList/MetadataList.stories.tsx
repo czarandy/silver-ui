@@ -1,7 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Calendar, CircleCheck, Eye, User} from 'lucide-react';
-import {MetadataList} from './MetadataList';
-import {MetadataListItem} from './MetadataListItem';
+import {MetadataList} from 'components/MetadataList/MetadataList';
+import {MetadataListItem} from 'components/MetadataList/MetadataListItem';
 
 const meta: Meta<typeof MetadataList> = {
   title: 'Components/MetadataList',

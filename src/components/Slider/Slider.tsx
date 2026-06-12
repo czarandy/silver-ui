@@ -9,6 +9,8 @@ import {
   type PointerEvent,
   type Ref,
 } from 'react';
+import {sliderRecipe} from 'components/Slider/Slider.recipe';
+import {Tooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
 import {
   Field,
@@ -16,8 +18,6 @@ import {
   type FieldNecessity,
   type InputStatus,
 } from '../Field';
-import {Tooltip} from '../Tooltip';
-import {sliderRecipe} from './Slider.recipe';
 
 export type SliderOrientation = 'horizontal' | 'vertical';
 export type SliderValueDisplay = 'tooltip' | 'text' | 'none';

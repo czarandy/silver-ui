@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Button} from '../Button';
-import {HStack, VStack} from '../Stack';
-import {Text} from '../Text';
-import {HoverCard} from './HoverCard';
+import {Button} from 'components/Button';
+import {HoverCard} from 'components/HoverCard/HoverCard';
+import {HStack, VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 
 const meta: Meta<typeof HoverCard> = {
   title: 'Components/HoverCard',

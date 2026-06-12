@@ -5,8 +5,8 @@ import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
 import {
   createStaticSearchSource,
   type SearchableItem,
-} from '../AutocompleteInput';
-import {TagsInput} from './TagsInput';
+} from 'components/AutocompleteInput';
+import {TagsInput} from 'components/TagsInput/TagsInput';
 
 const items: SearchableItem[] = [
   {id: 'ada', label: 'Ada Lovelace'},

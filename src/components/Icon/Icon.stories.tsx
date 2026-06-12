@@ -1,8 +1,8 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Home} from 'lucide-react';
+import {Icon, type IconColor, type IconSize} from 'components/Icon/Icon';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import {Text} from '../Text';
-import {Icon, type IconColor, type IconSize} from './Icon';
 
 const sizes: IconSize[] = ['sm', 'md', 'lg'];
 const colors: IconColor[] = [

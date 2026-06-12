@@ -1,5 +1,5 @@
+import type {StepState} from 'components/Stepper/internal/Step';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
-import type {StepState} from './Step';
 
 export const stepRecipe = sva({
   slots: [

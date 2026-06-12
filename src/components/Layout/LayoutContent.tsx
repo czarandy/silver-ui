@@ -1,7 +1,10 @@
 import type {ComponentPropsWithRef, ElementType} from 'react';
+import {
+  layoutContentRecipe,
+  layoutRegionRecipe,
+} from 'components/Layout/Layout.recipe';
 import {cx} from 'internal/cx';
 import type {SpacingToken} from '../../internal/spacingTokens';
-import {layoutContentRecipe, layoutRegionRecipe} from './Layout.recipe';
 
 /**
  * Scrollable main content area within a Layout. Fills the remaining space

@@ -3,12 +3,12 @@ import userEvent from '@testing-library/user-event';
 import {Home} from 'lucide-react';
 import type {ComponentPropsWithRef, ReactNode, Ref} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {LinkProvider} from '../Link';
-import {SideNav} from './SideNav';
-import {SideNavRenderContext} from './SideNavContext';
-import {SideNavHeading} from './SideNavHeading';
-import {SideNavItem} from './SideNavItem';
-import {SideNavSection} from './SideNavSection';
+import {LinkProvider} from 'components/Link';
+import {SideNav} from 'components/SideNav/SideNav';
+import {SideNavRenderContext} from 'components/SideNav/SideNavContext';
+import {SideNavHeading} from 'components/SideNav/SideNavHeading';
+import {SideNavItem} from 'components/SideNav/SideNavItem';
+import {SideNavSection} from 'components/SideNav/SideNavSection';
 
 function CustomLink({
   children,

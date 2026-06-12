@@ -1,9 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Archive, Edit, Inbox, MoreVertical, Trash2} from 'lucide-react';
-import {Icon} from '../Icon';
-import {Kbd} from '../Kbd';
-import {DropdownMenu} from './DropdownMenu';
-import {DropdownMenuItem} from './DropdownMenuItem';
+import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
+import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
+import {Icon} from 'components/Icon';
+import {Kbd} from 'components/Kbd';
 
 const meta: Meta<typeof DropdownMenu> = {
   title: 'Components/DropdownMenu',

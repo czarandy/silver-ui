@@ -2,9 +2,9 @@
 
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
+import {Calendar, type CalendarProps} from 'components/Calendar/Calendar';
 import type {DateRange} from '../../internal/dateTypes';
 import {plainDateCreate, type PlainDate} from '../../internal/plainDate';
-import {Calendar, type CalendarProps} from './Calendar';
 
 const meta: Meta<typeof Calendar> = {
   title: 'Components/Calendar',

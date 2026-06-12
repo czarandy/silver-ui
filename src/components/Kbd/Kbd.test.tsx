@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {Kbd} from './Kbd';
+import {Kbd} from 'components/Kbd/Kbd';
 
 describe('Kbd', () => {
   const originalPlatform = navigator.platform;

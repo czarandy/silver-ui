@@ -6,13 +6,20 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Button} from 'components/Button';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {Popover} from 'components/Popover';
+import {
+  selectMenuRecipe,
+  selectTriggerRecipe,
+} from 'components/Select/Select.recipe';
+import {Spinner} from 'components/Spinner';
 import {cx} from 'internal/cx';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
   type SelectListboxOptionData,
 } from '../../internal/useSelectListbox';
-import {Button} from '../Button';
 import {
   Field,
   getNecessity,
@@ -20,11 +27,7 @@ import {
   type InputSize,
   type InputStatus,
 } from '../Field';
-import {inputRecipe} from '../Field/inputStyles';
 import {Icon, type IconComponent} from '../Icon';
-import {Popover} from '../Popover';
-import {Spinner} from '../Spinner';
-import {selectMenuRecipe, selectTriggerRecipe} from './Select.recipe';
 
 export interface SelectOptionData extends SelectListboxOptionData {
   /**

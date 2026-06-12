@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {Spinner} from './Spinner';
+import {Spinner} from 'components/Spinner/Spinner';
 
 describe('Spinner', () => {
   it('renders with default props', () => {

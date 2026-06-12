@@ -1,13 +1,16 @@
 import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {SearchFilterInput} from './SearchFilterInput';
-import {formatFilterValue} from './formatFilterValue';
-import type {EnumItem, SearchFilterInputConfig} from './types';
+import {SearchFilterInput} from 'components/SearchFilterInput/SearchFilterInput';
+import {formatFilterValue} from 'components/SearchFilterInput/formatFilterValue';
+import type {
+  EnumItem,
+  SearchFilterInputConfig,
+} from 'components/SearchFilterInput/types';
 import {
   createSearchFilterInputConfig,
   type FieldDefinition,
-} from './useSearchFilterInputConfig';
+} from 'components/SearchFilterInput/useSearchFilterInputConfig';
 
 const STATUSES: ReadonlyArray<EnumItem> = [
   {label: 'Active', value: 'active'},

@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {Stepper, type StepConfig} from './Stepper';
+import {Stepper, type StepConfig} from 'components/Stepper/Stepper';
 
 const threeSteps: StepConfig[] = [
   {id: 'account', label: 'Step 1'},
