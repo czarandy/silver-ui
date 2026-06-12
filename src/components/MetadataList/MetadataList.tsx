@@ -5,7 +5,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {Heading} from '../Text';
 import {metadataListRecipe} from './MetadataList.recipe';
 import {MetadataListContext} from './MetadataListContext';

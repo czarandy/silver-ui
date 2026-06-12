@@ -1,5 +1,5 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {dividerRecipe} from './Divider.recipe';
 

@@ -1,6 +1,6 @@
 /* eslint-disable @eslint-react/static-components */
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';

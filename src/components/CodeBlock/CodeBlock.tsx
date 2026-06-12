@@ -10,8 +10,8 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {token} from 'styled-system/tokens';
-import {cx} from '../../internal/cx';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';
 import {Card} from '../Card';

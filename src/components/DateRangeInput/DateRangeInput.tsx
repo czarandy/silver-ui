@@ -7,8 +7,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import type {DateRange} from '../../internal/dateTypes';
 import isReactNode from '../../internal/isReactNode';
 import {

@@ -7,7 +7,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {segmentedControlRecipe} from './SegmentedControl.recipe';
 import {

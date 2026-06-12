@@ -1,6 +1,6 @@
 import {ImageIcon, X} from 'lucide-react';
 import {useState, type CSSProperties, type MouseEvent, type Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {Button} from '../Button';
 import {Icon} from '../Icon';
 import {Skeleton} from '../Skeleton';

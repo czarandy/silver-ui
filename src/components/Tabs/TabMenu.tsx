@@ -6,7 +6,7 @@ import {
   type KeyboardEvent,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Icon, type IconComponent} from '../Icon';
 import {Popover} from '../Popover';

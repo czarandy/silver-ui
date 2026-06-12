@@ -8,8 +8,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {cx} from '../../internal/cx';
 import {formatFileSize} from '../../internal/formatFileSize';
 import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';

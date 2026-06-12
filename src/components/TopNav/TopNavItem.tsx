@@ -1,8 +1,8 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal';
-import {cx} from '../../internal/cx';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from '../Icon';

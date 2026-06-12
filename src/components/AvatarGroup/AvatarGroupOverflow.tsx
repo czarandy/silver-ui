@@ -1,6 +1,6 @@
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import {useAvatarGroup} from './AvatarGroupContext';
 
 const DEFAULT_SIZE = 36;

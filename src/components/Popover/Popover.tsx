@@ -6,9 +6,9 @@ import {
   type Ref,
   type RefObject,
 } from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';

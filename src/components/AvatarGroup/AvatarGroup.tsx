@@ -1,6 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {resolveAvatarSize, type AvatarSize} from '../Avatar';
 import {avatarGroupRecipe} from './AvatarGroup.recipe';
 import {AvatarGroupContext} from './AvatarGroupContext';

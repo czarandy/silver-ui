@@ -6,8 +6,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {cx} from '../../internal/cx';
 import {Icon, type IconColor, type IconSize} from '../Icon';
 import {ratingRecipe} from './Rating.recipe';
 

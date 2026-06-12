@@ -8,8 +8,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Toast} from './Toast';
 import {ToastContext, type ToastContextValue} from './ToastContext';

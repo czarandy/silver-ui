@@ -1,5 +1,5 @@
 import type {ComponentPropsWithRef, ElementType} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutContentRecipe, layoutRegionRecipe} from './Layout.recipe';
 

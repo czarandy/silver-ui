@@ -11,7 +11,7 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import type {DateRange, DayOfWeek} from '../../internal/dateTypes';
 import {
   DATE_FORMAT_MONTH_YEAR,

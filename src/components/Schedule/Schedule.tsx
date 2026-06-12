@@ -1,5 +1,5 @@
 import {Suspense, useMemo, useState, type CSSProperties, type Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {plainDateFromInstant} from '../../internal/plainDate';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from '../../internal/time';
 import {ScheduleContext} from './context';

@@ -9,8 +9,8 @@ import type {
   ReactNode,
   Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {useButtonGroup} from '../ButtonGroup/ButtonGroupContext';

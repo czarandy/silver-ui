@@ -5,7 +5,7 @@ import type {
   ReactNode,
   Ref,
 } from 'react';
-import {cx} from '../../../internal/cx';
+import {cx} from 'internal/cx';
 import type {SpacingToken} from '../../../internal/spacingTokens';
 import {toPixelSize, type SizeValue} from '../../../internal/toPixelSize';
 import {stackRecipe} from './Stack.recipe';

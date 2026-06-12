@@ -1,6 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- discriminated union: custom-element items render item.element directly; passthrough props only apply to standard items */
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';

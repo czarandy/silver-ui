@@ -1,5 +1,5 @@
 import type {CSSProperties, MouseEvent, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import type {ButtonSize} from '../Button';
 import {buttonRecipe} from '../Button/Button.recipe';
 import {Icon, type IconComponent} from '../Icon';

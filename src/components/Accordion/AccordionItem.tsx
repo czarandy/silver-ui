@@ -1,6 +1,6 @@
 import {ChevronDown} from 'lucide-react';
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {Icon} from '../Icon';
 import {accordionItemRecipe} from './AccordionItem.recipe';
 import {useCollapsible} from './useCollapsible';

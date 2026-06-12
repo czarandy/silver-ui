@@ -5,7 +5,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {tabsRecipe} from './Tabs.recipe';
 import {TabsContext, type TabsLayout, type TabsSize} from './TabsContext';
 

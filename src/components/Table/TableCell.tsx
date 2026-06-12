@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {tableRecipe} from './Table.recipe';
 import {useTableContext} from './TableContext';
 

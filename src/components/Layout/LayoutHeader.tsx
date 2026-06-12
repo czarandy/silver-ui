@@ -1,6 +1,6 @@
 import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {Button} from '../Button';

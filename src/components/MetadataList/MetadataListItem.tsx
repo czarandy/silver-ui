@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {metadataListRecipe} from './MetadataList.recipe';
 import {useMetadataList} from './MetadataListContext';

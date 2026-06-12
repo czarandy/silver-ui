@@ -1,6 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {cx} from 'internal/cx';
 import {MobileNav, MobileNavToggle} from '../../internal/MobileNav';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Divider} from '../Divider';

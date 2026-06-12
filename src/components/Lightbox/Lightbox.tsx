@@ -12,7 +12,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';

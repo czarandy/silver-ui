@@ -9,8 +9,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Button} from '../Button';
 import {

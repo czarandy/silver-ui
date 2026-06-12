@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {SpacingToken} from '../../internal/spacingTokens';
 import {layoutFooterRecipe, layoutRegionRecipe} from './Layout.recipe';

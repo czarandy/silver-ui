@@ -1,6 +1,6 @@
 import type {CSSProperties, Ref} from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {segmentedControlRecipe} from './SegmentedControl.recipe';
 import {useSegmentedControlContext} from './SegmentedControlContext';

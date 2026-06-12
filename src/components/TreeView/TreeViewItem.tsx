@@ -2,7 +2,7 @@
 
 import {ChevronRight} from 'lucide-react';
 import {useCallback, useId, useRef, type ReactNode, type Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Icon} from '../Icon';
 import {TreeViewBranches} from './TreeViewBranches';

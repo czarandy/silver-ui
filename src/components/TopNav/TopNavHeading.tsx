@@ -1,7 +1,7 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';

@@ -1,6 +1,6 @@
 import type {ComponentPropsWithRef} from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import {aspectRatioRecipe} from './AspectRatio.recipe';
 
 /**

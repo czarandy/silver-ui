@@ -1,6 +1,6 @@
 import type {LucideProps} from 'lucide-react';
 import type {ComponentType, CSSProperties, Ref, SVGProps} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {iconRecipe} from './Icon.recipe';
 
 export type IconColor =

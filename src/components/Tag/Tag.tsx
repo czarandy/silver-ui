@@ -6,8 +6,8 @@ import type {
   ReactNode,
   Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {cx} from '../../internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import {Link} from '../Link';
 import {Tooltip} from '../Tooltip';

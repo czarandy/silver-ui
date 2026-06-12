@@ -1,6 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useRef} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {
   resolveDismissBehavior,
   type DismissBehavior,

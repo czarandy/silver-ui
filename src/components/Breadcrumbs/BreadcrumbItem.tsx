@@ -7,7 +7,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {Icon, type IconComponent} from '../Icon';
 import type {LinkComponent} from '../Link';
 import {useLinkComponent} from '../Link';

@@ -8,7 +8,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import {nowMonotonicMilliseconds} from '../../internal/time';
 import useLatest from '../../internal/useLatest';
 import {Button} from '../Button';

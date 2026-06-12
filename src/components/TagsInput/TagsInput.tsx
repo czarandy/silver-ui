@@ -12,8 +12,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {OverflowList} from '../../internal/OverflowList';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {useLayer} from '../../internal/useLayer';
 import {BaseAutocompleteInput} from '../AutocompleteInput';

@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useId} from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Text} from '../Text';
 import {useSideNavCollapse} from './SideNavContext';

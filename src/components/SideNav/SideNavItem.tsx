@@ -3,7 +3,7 @@
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useCallback, useId, useState} from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {useAppShellMobile} from '../AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from '../Icon';

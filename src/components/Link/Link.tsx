@@ -2,9 +2,9 @@
 
 import {ExternalLink} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {VisuallyHidden} from '../../internal';
-import {cx} from '../../internal/cx';
 import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
 import {Icon} from '../Icon';
 import type {TextColor, TextSize, TextWeight} from '../Text';

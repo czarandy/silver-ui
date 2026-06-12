@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {useRel} from '../../internal/linkAccessibility';
 import type {LinkComponent as LinkComponentType} from '../Link';

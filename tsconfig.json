@@ -15,6 +15,7 @@
     "rootDir": ".",
     "ignoreDeprecations": "6.0",
     "paths": {
+      "internal/*": ["./src/internal/*"],
       "themes/*": ["./src/themes/*"],
       "styled-system/*": ["./styled-system/*"]
     }

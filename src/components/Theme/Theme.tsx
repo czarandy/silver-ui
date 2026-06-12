@@ -8,7 +8,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {cx} from '../../internal/cx';
+import {cx} from 'internal/cx';
 
 export type ThemeMode = 'dark' | 'light' | 'system';
 

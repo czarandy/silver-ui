@@ -1,8 +1,8 @@
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
 import {useMemo} from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import type {ButtonSize} from '../Button';
 import {Button} from '../Button';
 import {Text} from '../Text';

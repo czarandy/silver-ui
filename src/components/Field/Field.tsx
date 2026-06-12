@@ -1,7 +1,7 @@
 import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {Icon, type IconComponent} from '../Icon';
 import {Text} from '../Text';

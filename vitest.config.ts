@@ -7,6 +7,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      internal: resolve(__dirname, 'src/internal'),
       'styled-system': resolve(__dirname, 'styled-system'),
       themes: resolve(__dirname, 'src/themes'),
     },

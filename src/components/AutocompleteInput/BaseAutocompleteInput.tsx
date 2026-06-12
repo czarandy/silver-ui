@@ -11,8 +11,8 @@ import {
   type Ref,
   type RefObject,
 } from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from '../../internal/cx';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {Icon} from '../Icon';
 import {Popover} from '../Popover';

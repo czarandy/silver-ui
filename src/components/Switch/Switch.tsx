@@ -7,8 +7,8 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {cx} from 'internal/cx';
 import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import type {FieldNecessity, InputStatus} from '../Field';
 import {getDescribedBy, getStatusMessageID} from '../Field/inputUtils';

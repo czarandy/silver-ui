@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useId, useMemo, useRef, useState} from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
 import {MobileNavToggle} from '../../internal/MobileNav';
-import {cx} from '../../internal/cx';
 import isReactNode from '../../internal/isReactNode';
 import {mergeRefs} from '../../internal/mergeRefs';
 import {
