@@ -100,6 +100,9 @@ const styles = {
     bg: 'primary',
     color: 'fg.onPrimary',
   }),
+  todayText: css({
+    marginInlineEnd: '1px',
+  }),
   events: css({
     display: 'flex',
     flexDirection: 'column',
@@ -645,6 +648,11 @@ function ScheduleMonthlyView({
                     )}>
                     <Text
                       as="span"
+                      className={
+                        plainDateIsEqual(day, today)
+                          ? styles.todayText
+                          : undefined
+                      }
                       color="inherit"
                       hasTabularNumbers
                       type="supporting"

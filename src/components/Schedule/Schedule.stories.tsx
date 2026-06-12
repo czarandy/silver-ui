@@ -23,9 +23,12 @@ import type {
 } from 'components/Schedule/types';
 import {ToastViewport, useToast} from 'components/Toast';
 
-// Anchor every story to the current date so the seeded events always fall in
-// the visible range. Offsets are measured in whole days from "today" (UTC).
-const today = Temporal.Now.plainDateISO('UTC');
+// Anchor every story to the current date in the viewer's local timezone so the
+// seeded events fall in the visible range and their displayed times match the
+// reader's wall clock (so the past/future styling lines up with "now"). Offsets
+// are whole days from "today".
+const localTimezoneID = Temporal.Now.timeZoneId();
+const today = Temporal.Now.plainDateISO(localTimezoneID);
 
 function allDayISO(dayOffset: number): string {
   return today.add({days: dayOffset}).toString();
@@ -36,14 +39,14 @@ function timedISO(dayOffset: number, hour: number, minute = 0): string {
     .add({days: dayOffset})
     .toZonedDateTime({
       plainTime: Temporal.PlainTime.from({hour, minute}),
-      timeZone: 'UTC',
+      timeZone: localTimezoneID,
     })
     .toInstant()
     .toString();
 }
 
-function dayInstant(dayOffset: number, timezoneID = 'UTC'): Instant {
-  return today.add({days: dayOffset}).toZonedDateTime(timezoneID)
+function dayInstant(dayOffset: number): Instant {
+  return today.add({days: dayOffset}).toZonedDateTime(localTimezoneID)
     .epochMilliseconds;
 }
 
@@ -264,7 +267,7 @@ function ScheduleStory({
   events: storyEvents = events,
   highlightDate = defaultHighlightDate,
   plugins,
-  timezoneID = 'UTC',
+  timezoneID = localTimezoneID,
   view,
   viewDate: initialViewDate = defaultViewDate,
 }: {
@@ -623,7 +626,7 @@ function EventPopoverStory(): React.JSX.Element {
       events={eventPopoverEvents}
       highlightDate={defaultHighlightDate}
       plugins={[paginationPlugin, viewSelectorPlugin, eventPopoverPlugin]}
-      timezoneID="UTC"
+      timezoneID={localTimezoneID}
       view={view}
       viewDate={viewDate}
     />
@@ -661,7 +664,7 @@ export const EventPopoverCustomContent: Story = {
         events={eventPopoverEvents}
         highlightDate={defaultHighlightDate}
         plugins={[paginationPlugin, eventPopoverPlugin]}
-        timezoneID="UTC"
+        timezoneID={localTimezoneID}
         view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
         viewDate={viewDate}
       />
@@ -733,12 +736,23 @@ export const MultiDayEvents: Story = {
 
 export const Timezones: Story = {
   render: () => {
+    // Anchored to a fixed UTC time-of-day (not the viewer's local zone) so the
+    // same instant is shown side by side in two zones deterministically.
+    const utcToday = Temporal.Now.plainDateISO('UTC');
+    const utcInstant = (hour: number): string =>
+      utcToday
+        .toZonedDateTime({
+          plainTime: Temporal.PlainTime.from({hour}),
+          timeZone: 'UTC',
+        })
+        .toInstant()
+        .toString();
     const sameInstantEvents = [
       createEventFromISO({
         category: 'Sync',
-        end: timedISO(0, 19),
+        end: utcInstant(19),
         id: 'global-sync',
-        start: timedISO(0, 17),
+        start: utcInstant(17),
         title: 'Global sync',
       }),
     ];
@@ -749,13 +763,15 @@ export const Timezones: Story = {
           events={sameInstantEvents}
           timezoneID="UTC"
           view={createScheduleDayView({maxHour: 20, minHour: 8})}
-          viewDate={dayInstant(0)}
+          viewDate={utcToday.toZonedDateTime('UTC').epochMilliseconds}
         />
         <ScheduleStory
           events={sameInstantEvents}
           timezoneID="America/Los_Angeles"
           view={createScheduleDayView({maxHour: 20, minHour: 8})}
-          viewDate={dayInstant(0, 'America/Los_Angeles')}
+          viewDate={
+            utcToday.toZonedDateTime('America/Los_Angeles').epochMilliseconds
+          }
         />
       </div>
     );

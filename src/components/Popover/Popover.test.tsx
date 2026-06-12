@@ -52,44 +52,84 @@ describe('Popover', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('applies offsetX and offsetY as a translate on the layer', () => {
+  it('applies offsetX/offsetY as logical margins toward the trigger', () => {
     render(
       <Popover
         content={<div>Popover content</div>}
         label="Actions"
         offsetX={8}
-        offsetY={4}>
+        offsetY={4}
+        placement="below">
         <Button label="Open" />
       </Popover>,
     );
 
     const style = getPopoverElement().getAttribute('style') ?? '';
-    expect(style).toContain('translate');
-    expect(style).toContain('8px 4px');
+    // `below` placement: the gap sits on the block-start edge (toward the
+    // trigger above) and the inline-start edge.
+    expect(style).toContain('margin-block-start: 4px');
+    expect(style).toContain('margin-inline-start: 8px');
   });
 
-  it('applies a single-axis offset, defaulting the other axis to zero', () => {
+  it('puts the inline gap on the trigger-facing edge so it flips with placement', () => {
+    // `end` (popover to the right): gap on its inline-start edge. When
+    // `position-try` flips it to the left, that margin flips to inline-end,
+    // keeping the gap between the popover and trigger.
+    const {unmount} = render(
+      <Popover
+        content={<div>Popover content</div>}
+        label="Actions"
+        offsetX={6}
+        placement="end">
+        <Button label="Open" />
+      </Popover>,
+    );
+    expect(getPopoverElement().getAttribute('style') ?? '').toContain(
+      'margin-inline-start: 6px',
+    );
+    unmount();
+
+    // `start` (popover to the left): gap on the opposite (inline-end) edge.
     render(
-      <Popover content={<div>Popover content</div>} label="Actions" offsetY={4}>
+      <Popover
+        content={<div>Popover content</div>}
+        label="Actions"
+        offsetX={6}
+        placement="start">
+        <Button label="Open" />
+      </Popover>,
+    );
+    expect(getPopoverElement().getAttribute('style') ?? '').toContain(
+      'margin-inline-end: 6px',
+    );
+  });
+
+  it('puts the block gap on the trigger-facing edge for above placement', () => {
+    render(
+      <Popover
+        content={<div>Popover content</div>}
+        label="Actions"
+        offsetY={5}
+        placement="above">
         <Button label="Open" />
       </Popover>,
     );
 
     expect(getPopoverElement().getAttribute('style') ?? '').toContain(
-      '0px 4px',
+      'margin-block-end: 5px',
     );
   });
 
-  it('omits the translate when no offset is provided', () => {
+  it('omits the gap margins when no offset is provided', () => {
     render(
       <Popover content={<div>Popover content</div>} label="Actions">
         <Button label="Open" />
       </Popover>,
     );
 
-    expect(getPopoverElement().getAttribute('style') ?? '').not.toContain(
-      'translate',
-    );
+    const style = getPopoverElement().getAttribute('style') ?? '';
+    expect(style).not.toContain('margin-block');
+    expect(style).not.toContain('margin-inline');
   });
 
   it('opens when the trigger is clicked', async () => {

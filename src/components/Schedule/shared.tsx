@@ -288,8 +288,9 @@ export function useScheduleEventPopover(event: CalendarEvent): {
   return {
     popover: popover.render(content, {
       alignment: 'start',
-      offsetY: 4,
-      placement: 'below',
+      offsetX: 8,
+      offsetY: -3,
+      placement: 'end',
     }),
     triggerProps: {
       ...popover.triggerProps,

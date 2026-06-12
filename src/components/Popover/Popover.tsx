@@ -82,13 +82,15 @@ export interface PopoverProps {
    */
   label?: string;
   /**
-   * Horizontal offset in pixels applied after positioning. Positive values move
-   * the popover to the right.
+   * Gap in pixels between the popover and its trigger along the inline axis
+   * (for `start`/`end` placements). Applied as a logical margin so it stays on
+   * the trigger-facing side even when the popover flips.
    */
   offsetX?: number;
   /**
-   * Vertical offset in pixels applied after positioning. Positive values move
-   * the popover down.
+   * Gap in pixels between the popover and its trigger along the block axis (for
+   * `above`/`below` placements). Applied as a logical margin so it stays on the
+   * trigger-facing side even when the popover flips.
    */
   offsetY?: number;
   /**

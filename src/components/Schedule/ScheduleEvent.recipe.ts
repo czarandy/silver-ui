@@ -25,6 +25,16 @@ export const scheduleEventRecipe = sva({
       _hover: {
         bg: 'var(--schedule-event-bg-hover)',
       },
+      // Active state: the pill's popover is open. Interactive pills carry
+      // `aria-expanded`, so this only matches the open trigger. The outline uses
+      // the category accent color and composes cleanly with the color/past
+      // background overrides.
+      '&[aria-expanded="true"]': {
+        outlineWidth: 'focus',
+        outlineStyle: 'solid',
+        outlineColor: 'var(--schedule-event-dot)',
+        outlineOffset: '1px',
+      },
       '&[data-state="past"]': {
         '--schedule-event-bg':
           'color-mix(in srgb, var(--schedule-event-dot) 10%, token(colors.bg))',

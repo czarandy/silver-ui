@@ -25,14 +25,15 @@ export interface ContextRenderProps {
    */
   className?: string;
   /**
-   * Horizontal offset in pixels applied after positioning. Positive values move
-   * the layer to the right.
+   * Gap in pixels along the inline axis, applied as a margin on the edge facing
+   * the trigger (for `start`/`end` placements). Flips with the layer when
+   * `position-try` reflects it, so the gap stays between the layer and trigger.
    */
   offsetX?: number;
   /**
-   * Vertical offset in pixels applied after positioning. Positive values move
-   * the layer down. Use this to add a gap between a `below`-placed layer and its
-   * trigger.
+   * Gap in pixels along the block axis, applied as a margin on the edge facing
+   * the trigger (for `above`/`below` placements). Flips with the layer when
+   * `position-try` reflects it, so the gap stays between the layer and trigger.
    */
   offsetY?: number;
   /**
@@ -153,6 +154,35 @@ function getPositionArea(
   return `${cssPlacement} center`;
 }
 
+/**
+ * Applies the offset as a logical margin on the edge that faces the anchor for
+ * the given placement. Using logical margins (rather than `translate`) means the
+ * `position-try` flip tactics flip the gap along with the layer, so it stays on
+ * the correct side after a flip.
+ */
+function getOffsetStyle(
+  placement: LayerPlacement,
+  offsetX?: number,
+  offsetY?: number,
+): React.CSSProperties {
+  const style: React.CSSProperties = {};
+  if (offsetY != null) {
+    if (placement === 'above') {
+      style.marginBlockEnd = `${offsetY}px`;
+    } else {
+      style.marginBlockStart = `${offsetY}px`;
+    }
+  }
+  if (offsetX != null) {
+    if (placement === 'start') {
+      style.marginInlineEnd = `${offsetX}px`;
+    } else {
+      style.marginInlineStart = `${offsetX}px`;
+    }
+  }
+  return style;
+}
+
 export function useLayer({
   onShow,
   onHide,
@@ -245,10 +275,7 @@ export function useLayer({
         positionArea: getPositionArea(placement, alignment),
         positionTryFallbacks: 'flip-block, flip-inline, flip-block flip-inline',
       };
-      const offsetStyle: React.CSSProperties =
-        offsetX != null || offsetY != null
-          ? {translate: `${offsetX ?? 0}px ${offsetY ?? 0}px`}
-          : {};
+      const offsetStyle = getOffsetStyle(placement, offsetX, offsetY);
 
       const layerProps: LayerElementProps = {
         ref: popoverRefCallback,
