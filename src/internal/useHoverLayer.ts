@@ -6,6 +6,7 @@ import {
   type RefCallback,
   type RefObject,
 } from 'react';
+import useLatest from './useLatest';
 import {useLayer, type LayerReturn} from './useLayer';
 
 export type HoverLayerFocusTrigger = 'auto' | 'always' | 'never';
@@ -160,21 +161,13 @@ export function useHoverLayer({
     [layer.isOpen, onTriggerEscape],
   );
 
-  const handlersRef = useRef({
+  const handlersRef = useLatest({
     focusIn: handleFocusIn,
     focusOut: handleFocusOut,
     keyDown: handleKeyDown,
     mouseEnter: handleMouseEnter,
     mouseLeave: handleMouseLeave,
   });
-  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern for stable DOM listeners
-  handlersRef.current = {
-    focusIn: handleFocusIn,
-    focusOut: handleFocusOut,
-    keyDown: handleKeyDown,
-    mouseEnter: handleMouseEnter,
-    mouseLeave: handleMouseLeave,
-  };
 
   const stableMouseEnter = useCallback(() => {
     handlersRef.current.mouseEnter();

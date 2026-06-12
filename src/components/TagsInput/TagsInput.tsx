@@ -15,6 +15,7 @@ import {
 import {cx} from 'internal/cx';
 import {OverflowList} from '../../internal/OverflowList';
 import isReactNode from '../../internal/isReactNode';
+import useLatest from '../../internal/useLatest';
 import {useLayer} from '../../internal/useLayer';
 import {BaseAutocompleteInput} from '../AutocompleteInput';
 import type {SearchableItem, SearchSource} from '../AutocompleteInput';
@@ -321,13 +322,9 @@ export function TagsInput<T extends SearchableItem>({
   const isLayerMode = tagOverflowBehavior === 'unfocusedLayer';
   const layer = useLayer();
   const layerContentRef = useRef<HTMLDivElement>(null);
-  const selectedIDsRef = useRef(new Set<string>());
-  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern: synchronous, idempotent sync with props
-  selectedIDsRef.current = new Set(value.map(item => item.id));
+  const selectedIDsRef = useLatest(new Set(value.map(item => item.id)));
   const isAtMax = maxEntries != null && value.length >= maxEntries;
-  const isAtMaxRef = useRef(false);
-  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
-  isAtMaxRef.current = isAtMax;
+  const isAtMaxRef = useLatest(isAtMax);
   const isTruncated =
     !isFocusedWithin && tagOverflowBehavior !== 'none' && value.length > 0;
   const classes = tagsInputRecipe({
@@ -415,12 +412,8 @@ export function TagsInput<T extends SearchableItem>({
     [],
   );
 
-  const valueRef = useRef(value);
-  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
-  valueRef.current = value;
-  const onChangeRef = useRef(onChange);
-  // eslint-disable-next-line @eslint-react/refs -- latest-ref pattern
-  onChangeRef.current = onChange;
+  const valueRef = useLatest(value);
+  const onChangeRef = useLatest(onChange);
 
   const announce = useCallback((message: string) => {
     setAnnouncement('');
