@@ -73,6 +73,7 @@ export const scheduleListViewRecipe = sva({
       display: 'flex',
       alignItems: 'center',
       gap: '2',
+      justifySelf: 'start',
       minW: 0,
     },
     eventTime: {

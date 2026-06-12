@@ -11,6 +11,7 @@ import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
+import {useScheduleEventResizePlugin} from 'components/Schedule/plugins/EventResizePlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
 import {ScheduleEventPopoverContent} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
 import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
@@ -262,6 +263,43 @@ const meta: Meta<typeof Schedule> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+function ResizableEventsStory(): React.JSX.Element {
+  const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
+  const [storyEvents, setStoryEvents] = useState(() => events);
+  const paginationPlugin = useSchedulePaginationPlugin({
+    onViewDateChange: setViewDate,
+  });
+  const resizePlugin = useScheduleEventResizePlugin({
+    onResize: ({end, event, start}) => {
+      setStoryEvents(currentEvents =>
+        currentEvents.map(currentEvent => {
+          if (
+            currentEvent.id !== event.id ||
+            typeof currentEvent.start !== 'number'
+          ) {
+            return currentEvent;
+          }
+
+          return {...currentEvent, end, start};
+        }),
+      );
+    },
+    snapMinutes: 5,
+  });
+
+  return (
+    <Schedule
+      categories={categories}
+      events={storyEvents}
+      highlightDate={defaultHighlightDate}
+      plugins={[paginationPlugin, resizePlugin]}
+      timezoneID={localTimezoneID}
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+      viewDate={viewDate}
+    />
+  );
+}
+
 function ScheduleStory({
   categories: storyCategories = categories,
   events: storyEvents = events,
@@ -390,6 +428,10 @@ export const Week: Story = {
       view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
     />
   ),
+};
+
+export const ResizableEvents: Story = {
+  render: () => <ResizableEventsStory />,
 };
 
 export const MondayStartWeek: Story = {

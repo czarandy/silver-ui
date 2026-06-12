@@ -7,7 +7,7 @@ import {
 } from 'react';
 import {Link} from 'components/Link';
 import {Popover} from 'components/Popover';
-import {usePopover} from 'components/Popover/usePopover';
+import {usePopover, type LayerPlacement} from 'components/Popover/usePopover';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -258,7 +258,10 @@ export function hasEventPopoverPlugin(
  * plugin supplies content for the event, in which case the pill stays a static,
  * non-interactive element (unchanged default behavior).
  */
-export function useScheduleEventPopover(event: CalendarEvent): {
+export function useScheduleEventPopover(
+  event: CalendarEvent,
+  {placement = 'end'}: {placement?: LayerPlacement} = {},
+): {
   popover?: ReactNode;
   triggerProps?: ScheduleEventTriggerProps;
 } {
@@ -292,7 +295,7 @@ export function useScheduleEventPopover(event: CalendarEvent): {
       alignment: 'start',
       offsetX: 8,
       offsetY: -3,
-      placement: 'end',
+      placement,
     }),
     triggerProps: {
       ...popover.triggerProps,

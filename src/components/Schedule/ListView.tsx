@@ -56,7 +56,9 @@ function ListEvent({
   isPast: boolean;
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
-  const {popover, triggerProps} = useScheduleEventPopover(event);
+  const {popover, triggerProps} = useScheduleEventPopover(event, {
+    placement: 'end',
+  });
   const category = getCategory(categoryMap, event);
   const eventDataState = isPast ? 'past' : undefined;
   const classes = scheduleListViewRecipe({

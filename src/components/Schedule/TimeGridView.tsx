@@ -1,7 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
 import {Temporal} from '@js-temporal/polyfill';
-import type {CSSProperties} from 'react';
+import {useMemo, type CSSProperties, type ReactNode} from 'react';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -27,6 +27,7 @@ import type {
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
 import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
@@ -185,14 +186,36 @@ function getTimedEventStyle({
  */
 function TimeGridEvent({
   currentTime,
+  hourHeight,
   layout,
+  maxHour,
+  minHour,
 }: {
   currentTime: number;
+  hourHeight: number;
   layout: TimedEventLayout;
+  maxHour: number;
+  minHour: number;
 }): React.JSX.Element {
-  const {categoryMap, timezoneID} = useScheduleContext();
+  const {categoryMap, plugins, timezoneID} = useScheduleContext();
   const {event} = layout;
   const {popover, triggerProps} = useScheduleEventPopover(event);
+  const pluginEndContent = useMemo(
+    () =>
+      plugins
+        .map(
+          (plugin): ReactNode =>
+            plugin.renderTimeGridEventContent?.({
+              event,
+              hourHeight,
+              maxHour,
+              minHour,
+              timezoneID,
+            }),
+        )
+        .filter(isReactNode),
+    [event, hourHeight, maxHour, minHour, plugins, timezoneID],
+  );
   const category = getCategory(categoryMap, event);
   const isPast = isEventInPast(event, currentTime, timezoneID);
   const classes = scheduleEventRecipe({
@@ -208,6 +231,7 @@ function TimeGridEvent({
       <span className={classes.time}>
         {getEventTimeLabel(event, timezoneID)}
       </span>
+      {pluginEndContent}
     </>
   );
   return (
@@ -515,8 +539,11 @@ export function TimeGridView({
                       {visibleTimedEventLayouts.map(layout => (
                         <TimeGridEvent
                           currentTime={currentTime}
+                          hourHeight={normalizedHourHeight}
                           key={layout.event.id}
                           layout={layout}
+                          maxHour={normalizedMaxHour}
+                          minHour={normalizedMinHour}
                         />
                       ))}
                     </div>

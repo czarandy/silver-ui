@@ -24,6 +24,10 @@ import {
   sortEvents,
 } from 'components/Schedule/dateMath';
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
+import {
+  useScheduleEventResizePlugin,
+  type ScheduleEventResizeChange,
+} from 'components/Schedule/plugins/EventResizePlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
 import {ScheduleEventPopoverContent} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
 import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
@@ -1587,6 +1591,100 @@ describe('Schedule', () => {
     ).not.toBeInTheDocument();
   });
 
+  describe('event resize plugin', () => {
+    function ScheduleWithEventResize({
+      onResize,
+      snapMinutes = 5,
+    }: {
+      onResize: (change: ScheduleEventResizeChange) => void;
+      snapMinutes?: number;
+    }) {
+      const plugin = useScheduleEventResizePlugin({
+        onResize,
+        snapMinutes,
+      });
+
+      return (
+        <Schedule
+          categories={categories}
+          events={events}
+          highlightDate={instantUTC(2026, 4, 13)}
+          plugins={[plugin]}
+          timezoneID="UTC"
+          view={createScheduleDayView({
+            hourHeight: 60,
+            maxHour: 18,
+            minHour: 8,
+          })}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    it('resizes timed event end times by dragging the bottom handle with custom minute snapping', () => {
+      const onResize = vi.fn<(change: ScheduleEventResizeChange) => void>();
+      render(<ScheduleWithEventResize onResize={onResize} snapMinutes={5} />);
+
+      const event = screen.getByTestId('schedule-event-visible');
+      const handle = screen.getByTestId(
+        'schedule-event-resize-end-handle-visible',
+      );
+      expect(handle).toHaveAccessibleName('Resize end of Visible sync');
+
+      fireEvent.pointerDown(handle, {clientY: 100, pointerId: 1});
+      fireEvent.pointerMove(window, {clientY: 120, pointerId: 1});
+      expect(event).toHaveStyle({height: '45px'});
+
+      fireEvent.pointerUp(window, {clientY: 120, pointerId: 1});
+
+      expect(onResize).toHaveBeenCalledTimes(1);
+      expect(onResize.mock.calls[0]?.[0].event.id).toBe('visible');
+      expect(onResize.mock.calls[0]?.[0].end).toBe(
+        instantUTC(2026, 4, 13, 16, 50),
+      );
+      expect(onResize.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 16),
+      );
+    });
+
+    it('resizes timed event start times by dragging the top handle with custom minute snapping', () => {
+      const onResize = vi.fn<(change: ScheduleEventResizeChange) => void>();
+      render(<ScheduleWithEventResize onResize={onResize} snapMinutes={5} />);
+
+      const event = screen.getByTestId('schedule-event-visible');
+      const handle = screen.getByTestId(
+        'schedule-event-resize-start-handle-visible',
+      );
+      expect(handle).toHaveAccessibleName('Resize start of Visible sync');
+
+      fireEvent.pointerDown(handle, {clientY: 100, pointerId: 1});
+      fireEvent.pointerMove(window, {clientY: 80, pointerId: 1});
+      expect(event).toHaveStyle({height: '45px', top: '-18px'});
+
+      fireEvent.pointerUp(window, {clientY: 80, pointerId: 1});
+
+      expect(onResize).toHaveBeenCalledTimes(1);
+      expect(onResize.mock.calls[0]?.[0].event.id).toBe('visible');
+      expect(onResize.mock.calls[0]?.[0].end).toBe(
+        instantUTC(2026, 4, 13, 16, 30),
+      );
+      expect(onResize.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 15, 40),
+      );
+    });
+
+    it('does not render resize handles for all-day events', () => {
+      render(<ScheduleWithEventResize onResize={vi.fn()} />);
+
+      expect(
+        screen.queryByTestId('schedule-event-resize-end-handle-all-day'),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('schedule-event-resize-start-handle-all-day'),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('event popover plugin', () => {
     const popoverEvents: CalendarEvent[] = [
       createEventFromISO({
@@ -1707,6 +1805,28 @@ describe('Schedule', () => {
 
       fireEvent.click(pill);
       expect(pill).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('positions list view event popovers to the right by default', () => {
+      render(
+        <ScheduleWithPopover
+          eventsList={events}
+          view={createScheduleListView({days: 7})}
+        />,
+      );
+
+      const trigger = screen.getByTestId('schedule-event-visible');
+      fireEvent.click(trigger);
+
+      // The native popover layer does not expose an accessible role, so inspect
+      // the exact generated layer referenced by the opened trigger.
+      const layerId = trigger.getAttribute('aria-controls');
+      expect(layerId).toBeTruthy();
+      // eslint-disable-next-line testing-library/no-node-access
+      const layer = document.getElementById(layerId ?? '');
+      const style = layer?.getAttribute('style') ?? '';
+      expect(style).toContain('position-area: right span-bottom');
+      expect(style).toContain('margin-inline-start: 8px');
     });
 
     it('shows description, location, and category in the default content', () => {

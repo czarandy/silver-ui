@@ -85,6 +85,14 @@ export interface ScheduleEventPopoverControls {
   close: () => void;
 }
 
+export interface ScheduleTimeGridEventRenderProps {
+  event: CalendarEvent;
+  hourHeight: number;
+  maxHour: number;
+  minHour: number;
+  timezoneID: string;
+}
+
 export interface SchedulePlugin {
   /**
    * Provides the popover content shown when an event pill is clicked. Receives
@@ -102,4 +110,11 @@ export interface SchedulePlugin {
     centerContent: ReactNode,
     endContent: ReactNode,
   ) => ScheduleHeaderContent;
+  /**
+   * Appends content inside timed event blocks in day/week time-grid views.
+   * Return `null`/`undefined` to opt out for a specific event.
+   */
+  renderTimeGridEventContent?: (
+    props: ScheduleTimeGridEventRenderProps,
+  ) => ReactNode;
 }

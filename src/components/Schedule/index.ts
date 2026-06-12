@@ -21,10 +21,15 @@ export {
   defaultSchedulePlugins,
   ScheduleEventPopoverContent,
   useScheduleEventPopoverPlugin,
+  useScheduleEventResizePlugin,
   useSchedulePaginationPlugin,
   useScheduleViewSelectorPlugin,
 } from 'components/Schedule/plugins';
 export type {ScheduleContextValue} from 'components/Schedule/context';
+export type {
+  ScheduleEventResizeChange,
+  ScheduleEventResizePluginOptions,
+} from 'components/Schedule/plugins/EventResizePlugin';
 export type {ScheduleEventPopoverContentProps} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
 export type {
   ScheduleEventPopoverPluginOptions,
@@ -48,6 +53,7 @@ export type {
   ScheduleEventColor,
   ScheduleEventSource,
   ScheduleHeaderContent,
+  ScheduleTimeGridEventRenderProps,
   SchedulePlugin,
   SchedulePluginPosition,
   ScheduleRange,
