@@ -19,10 +19,13 @@ export {
 export {ScheduleContext, useScheduleContext} from 'components/Schedule/context';
 export {
   defaultSchedulePlugins,
+  ScheduleEventPopoverContent,
+  useScheduleEventPopoverPlugin,
   useSchedulePaginationPlugin,
   useScheduleViewSelectorPlugin,
 } from 'components/Schedule/plugins';
 export type {ScheduleContextValue} from 'components/Schedule/context';
+export type {ScheduleEventPopoverPluginOptions} from 'components/Schedule/plugins/EventPopoverPlugin';
 export type {SchedulePaginationPluginOptions} from 'components/Schedule/plugins/PaginationPlugin';
 export type {
   ScheduleViewSelectorOption,

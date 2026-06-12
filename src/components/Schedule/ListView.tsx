@@ -14,6 +14,7 @@ import {
   formatListRangeTitle,
   scheduleClasses,
   ScheduleFrame,
+  useScheduleEventPopover,
 } from 'components/Schedule/shared';
 import type {
   CalendarEvent,
@@ -110,6 +111,23 @@ const styles = {
     gap: '2',
     minW: 0,
   }),
+  eventContentButton: css({
+    appearance: 'none',
+    bg: 'none',
+    borderWidth: 0,
+    p: 0,
+    m: 0,
+    font: 'inherit',
+    textAlign: 'inherit',
+    color: 'inherit',
+    cursor: 'pointer',
+    borderRadius: 'sm',
+    _focusVisible: {
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
+      outlineColor: 'primary',
+    },
+  }),
   eventTime: css({
     whiteSpace: 'nowrap',
   }),
@@ -131,7 +149,20 @@ function ListEvent({
   isPast: boolean;
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
+  const {popover, triggerProps} = useScheduleEventPopover(event);
   const category = getCategory(categoryMap, event);
+  const eventContent = (
+    <>
+      <Tooltip content={category.label} hasHoverIndication={false}>
+        <span
+          aria-label={category.label}
+          className={scheduleEventRecipe({color: category.color}).dot}
+          role="img"
+        />
+      </Tooltip>
+      <Text>{event.title}</Text>
+    </>
+  );
   return (
     <div
       className={cx(styles.eventRow, isPast && styles.eventPast)}
@@ -139,16 +170,18 @@ function ListEvent({
       <Text className={styles.eventTime} color="secondary" type="supporting">
         {isDayEvent(event) ? 'All day' : getEventTimeLabel(event, timezoneID)}
       </Text>
-      <div className={styles.eventContent}>
-        <Tooltip content={category.label} hasHoverIndication={false}>
-          <span
-            aria-label={category.label}
-            className={scheduleEventRecipe({color: category.color}).dot}
-            role="img"
-          />
-        </Tooltip>
-        <Text>{event.title}</Text>
-      </div>
+      {triggerProps != null ? (
+        <button
+          className={cx(styles.eventContent, styles.eventContentButton)}
+          data-testid={`schedule-event-${event.id}`}
+          type="button"
+          {...triggerProps}>
+          {eventContent}
+        </button>
+      ) : (
+        <div className={styles.eventContent}>{eventContent}</div>
+      )}
+      {popover}
     </div>
   );
 }

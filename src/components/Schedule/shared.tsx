@@ -1,5 +1,6 @@
 import {Temporal} from '@js-temporal/polyfill';
-import type {ReactNode} from 'react';
+import {useMemo, type ReactNode, type RefCallback} from 'react';
+import {usePopover} from 'components/Popover/usePopover';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -9,9 +10,11 @@ import type {
   ScheduleCategory,
   ScheduleCategoryMap,
   ScheduleHeaderContent,
+  SchedulePlugin,
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
+import isReactNode from 'internal/isReactNode';
 import {
   DATE_FORMAT_MONTH_YEAR,
   DATE_FORMAT_WITH_WEEKDAY,
@@ -163,6 +166,103 @@ export function isEventInPast(
 }
 
 /**
+ * ARIA/positioning props spread onto an event pill that has been promoted to a
+ * clickable `<button>` trigger by {@link useScheduleEventPopover}.
+ */
+export interface ScheduleEventTriggerProps {
+  'aria-controls': string;
+  'aria-expanded': boolean;
+  'aria-haspopup': 'dialog' | 'menu';
+  onClick: () => void;
+  ref: RefCallback<HTMLElement>;
+}
+
+/**
+ * Whether any registered plugin provides event popover content, meaning event
+ * pills should render as interactive triggers.
+ */
+export function hasEventPopoverPlugin(
+  plugins: ReadonlyArray<SchedulePlugin>,
+): boolean {
+  return plugins.some(plugin => plugin.renderEventPopover != null);
+}
+
+/**
+ * Wires an event pill to its popover when an event popover plugin is active.
+ * Returns `triggerProps` to spread onto the pill's `<button>` root and the
+ * rendered `popover` layer to place as a sibling. Both are `undefined` when no
+ * plugin supplies content for the event, in which case the pill stays a static,
+ * non-interactive element (unchanged default behavior).
+ */
+export function useScheduleEventPopover(event: CalendarEvent): {
+  popover?: ReactNode;
+  triggerProps?: ScheduleEventTriggerProps;
+} {
+  const {categoryMap, plugins, timezoneID} = useScheduleContext();
+  const content = useMemo((): ReactNode => {
+    for (const plugin of plugins) {
+      const node = plugin.renderEventPopover?.(event);
+      if (isReactNode(node)) {
+        return node;
+      }
+    }
+    return null;
+  }, [event, plugins]);
+  const popover = usePopover({
+    label: getEventAccessibleLabel(event, categoryMap, timezoneID),
+    role: 'dialog',
+  });
+  if (!isReactNode(content)) {
+    return {};
+  }
+  return {
+    popover: popover.render(content, {placement: 'below', alignment: 'start'}),
+    triggerProps: {
+      ...popover.triggerProps,
+      onClick: popover.toggle,
+      ref: popover.triggerRef,
+    },
+  };
+}
+
+/**
+ * Renders an event pill root as either a clickable `<button>` trigger (when
+ * `triggerProps` is supplied) or a static `<span>`, keeping identical classes
+ * and data attributes so the two forms look the same.
+ */
+function EventPillRoot({
+  children,
+  className,
+  dataState,
+  dataTestId,
+  triggerProps,
+}: {
+  children: ReactNode;
+  className?: string;
+  dataState?: 'past';
+  dataTestId: string;
+  triggerProps?: ScheduleEventTriggerProps;
+}): React.JSX.Element {
+  if (triggerProps != null) {
+    return (
+      <button
+        className={className}
+        data-state={dataState}
+        data-testid={dataTestId}
+        type="button"
+        {...triggerProps}>
+        {children}
+      </button>
+    );
+  }
+  return (
+    <span className={className} data-state={dataState} data-testid={dataTestId}>
+      {children}
+    </span>
+  );
+}
+
+/**
  * Renders a colored pill displaying an event's accessible label.
  */
 export function CalendarEventPill({
@@ -173,19 +273,28 @@ export function CalendarEventPill({
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
+  const {popover, triggerProps} = useScheduleEventPopover(event);
   const category = getCategory(categoryMap, event);
-  const classes = scheduleEventRecipe({color: category.color, isPast});
+  const classes = scheduleEventRecipe({
+    color: category.color,
+    isPast,
+    isInteractive: triggerProps != null,
+  });
   return (
-    <span
-      className={classes.event}
-      data-state={isPast ? 'past' : undefined}
-      data-testid={`schedule-event-${event.id}`}>
-      <span className={classes.title}>
-        {isDayEvent(event)
-          ? event.title
-          : getEventAccessibleLabel(event, categoryMap, timezoneID)}
-      </span>
-    </span>
+    <>
+      <EventPillRoot
+        className={classes.event}
+        dataState={isPast ? 'past' : undefined}
+        dataTestId={`schedule-event-${event.id}`}
+        triggerProps={triggerProps}>
+        <span className={classes.title}>
+          {isDayEvent(event)
+            ? event.title
+            : getEventAccessibleLabel(event, categoryMap, timezoneID)}
+        </span>
+      </EventPillRoot>
+      {popover}
+    </>
   );
 }
 
@@ -197,23 +306,29 @@ export function CalendarMonthEventPill({
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
+  const {popover, triggerProps} = useScheduleEventPopover(event);
   const category = getCategory(categoryMap, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);
   const classes = scheduleEventRecipe({
     color: category.color,
     isPast,
     isFullWidth: true,
+    isInteractive: triggerProps != null,
   });
   return (
-    <span
-      className={classes.event}
-      data-state={isPast ? 'past' : undefined}
-      data-testid={`schedule-event-${event.id}`}>
-      {startTimeLabel != null ? (
-        <span className={classes.time}>{startTimeLabel}</span>
-      ) : null}
-      <span className={classes.title}>{event.title}</span>
-    </span>
+    <>
+      <EventPillRoot
+        className={classes.event}
+        dataState={isPast ? 'past' : undefined}
+        dataTestId={`schedule-event-${event.id}`}
+        triggerProps={triggerProps}>
+        {startTimeLabel != null ? (
+          <span className={classes.time}>{startTimeLabel}</span>
+        ) : null}
+        <span className={classes.title}>{event.title}</span>
+      </EventPillRoot>
+      {popover}
+    </>
   );
 }
 

@@ -23,6 +23,7 @@ import {
   getScheduleRangeFromDates,
   sortEvents,
 } from 'components/Schedule/dateMath';
+import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
 import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import {
@@ -1495,6 +1496,244 @@ describe('Schedule', () => {
     expect(
       screen.queryByRole('button', {name: 'Previous day'}),
     ).not.toBeInTheDocument();
+  });
+
+  describe('event popover plugin', () => {
+    const popoverEvents: CalendarEvent[] = [
+      createEventFromISO({
+        category: 'Sync',
+        end: '2026-05-13T16:30:00.000Z',
+        id: 'visible',
+        start: '2026-05-13T16:00:00.000Z',
+        title: 'Visible sync',
+      }),
+    ];
+
+    function ScheduleWithPopover({
+      eventsList = popoverEvents,
+      onDelete,
+      onEdit,
+      renderContent,
+      view,
+    }: {
+      eventsList?: CalendarEvent[];
+      onDelete?: (event: CalendarEvent) => void;
+      onEdit?: (event: CalendarEvent) => void;
+      renderContent?: (event: CalendarEvent) => ReactNode;
+      view: ScheduleView;
+    }) {
+      const plugin = useScheduleEventPopoverPlugin({
+        onDelete,
+        onEdit,
+        renderContent,
+      });
+      return (
+        <Schedule
+          categories={categories}
+          events={eventsList}
+          highlightDate={instantUTC(2026, 4, 13)}
+          plugins={[plugin]}
+          timezoneID="UTC"
+          view={view}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    it('renders pills as buttons that toggle a popover in the month view', () => {
+      render(<ScheduleWithPopover view={createScheduleMonthlyView()} />);
+
+      const pill = screen.getByTestId('schedule-event-visible');
+      expect(pill.tagName).toBe('BUTTON');
+      expect(pill).toHaveAttribute('aria-haspopup', 'dialog');
+      expect(pill).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.click(pill);
+      expect(pill).toHaveAttribute('aria-expanded', 'true');
+
+      const popover = screen.getByTestId('schedule-event-popover');
+      expect(within(popover).getByText('Visible sync')).toBeInTheDocument();
+      expect(within(popover).getByText('Sync')).toBeInTheDocument();
+    });
+
+    it('keeps pills non-interactive when no popover plugin is registered', () => {
+      render(
+        <Schedule
+          categories={categories}
+          events={popoverEvents}
+          highlightDate={instantUTC(2026, 4, 13)}
+          timezoneID="UTC"
+          view={createScheduleMonthlyView()}
+          viewDate={instantUTC(2026, 4, 13)}
+        />,
+      );
+
+      const pill = screen.getByTestId('schedule-event-visible');
+      expect(pill.tagName).toBe('SPAN');
+      expect(pill).not.toHaveAttribute('aria-haspopup');
+      expect(
+        screen.queryByTestId('schedule-event-popover'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens popovers for timed and all-day events in the day view', () => {
+      render(
+        <ScheduleWithPopover
+          eventsList={events}
+          view={createScheduleDayView()}
+        />,
+      );
+
+      const timed = screen.getByTestId('schedule-event-visible');
+      const allDay = screen.getByTestId('schedule-event-all-day');
+      expect(timed.tagName).toBe('BUTTON');
+      expect(allDay.tagName).toBe('BUTTON');
+
+      fireEvent.click(timed);
+      expect(timed).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('opens a popover in the list view', () => {
+      render(
+        <ScheduleWithPopover
+          eventsList={events}
+          view={createScheduleListView({days: 7})}
+        />,
+      );
+
+      const pill = screen.getByTestId('schedule-event-visible');
+      expect(pill.tagName).toBe('BUTTON');
+
+      fireEvent.click(pill);
+      expect(pill).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('shows description, location, and category in the default content', () => {
+      const detailed: CalendarEvent = {
+        ...createEventFromISO({
+          category: 'Sync',
+          end: '2026-05-13T16:30:00.000Z',
+          id: 'visible',
+          start: '2026-05-13T16:00:00.000Z',
+          title: 'Visible sync',
+        }),
+        description: 'Weekly team sync',
+        location: 'Room 4',
+      };
+
+      render(
+        <ScheduleWithPopover
+          eventsList={[detailed]}
+          view={createScheduleMonthlyView()}
+        />,
+      );
+      fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+      const popover = screen.getByTestId('schedule-event-popover');
+      expect(within(popover).getByText('Weekly team sync')).toBeInTheDocument();
+      expect(within(popover).getByText('Room 4')).toBeInTheDocument();
+      expect(within(popover).getByText('Sync')).toBeInTheDocument();
+    });
+
+    it('renders edit and delete actions only when callbacks are provided', () => {
+      const onEdit = vi.fn();
+      const onDelete = vi.fn();
+      render(
+        <ScheduleWithPopover
+          onDelete={onDelete}
+          onEdit={onEdit}
+          view={createScheduleMonthlyView()}
+        />,
+      );
+      fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+      const popover = screen.getByTestId('schedule-event-popover');
+      fireEvent.click(
+        within(popover).getByTestId('schedule-event-popover-edit'),
+      );
+      expect(onEdit).toHaveBeenCalledWith(
+        expect.objectContaining({id: 'visible'}),
+      );
+      fireEvent.click(
+        within(popover).getByTestId('schedule-event-popover-delete'),
+      );
+      expect(onDelete).toHaveBeenCalledWith(
+        expect.objectContaining({id: 'visible'}),
+      );
+    });
+
+    it('omits action buttons when no callbacks are provided', () => {
+      render(<ScheduleWithPopover view={createScheduleMonthlyView()} />);
+      fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+      const popover = screen.getByTestId('schedule-event-popover');
+      expect(
+        within(popover).queryByTestId('schedule-event-popover-edit'),
+      ).not.toBeInTheDocument();
+      expect(
+        within(popover).queryByTestId('schedule-event-popover-delete'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('replaces the default content with renderContent', () => {
+      render(
+        <ScheduleWithPopover
+          renderContent={event => (
+            <div data-testid="custom-popover">Custom {event.title}</div>
+          )}
+          view={createScheduleMonthlyView()}
+        />,
+      );
+      fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+      expect(screen.getByTestId('custom-popover')).toHaveTextContent(
+        'Custom Visible sync',
+      );
+      expect(
+        screen.queryByTestId('schedule-event-popover'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('makes every segment of a multi-day month event an independent trigger', () => {
+      const multiDay = createEventFromISO({
+        category: 'Sync',
+        end: '2026-05-20',
+        id: 'multi',
+        start: '2026-05-13',
+        title: 'Conference',
+      });
+
+      render(
+        <ScheduleWithPopover
+          eventsList={[multiDay]}
+          view={createScheduleMonthlyView()}
+        />,
+      );
+
+      const segments = screen.getAllByTestId('schedule-event-multi');
+      expect(segments.length).toBeGreaterThan(1);
+      segments.forEach(segment => expect(segment.tagName).toBe('BUTTON'));
+
+      fireEvent.click(segments[0]);
+      expect(segments[0]).toHaveAttribute('aria-expanded', 'true');
+      expect(segments[1]).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('exposes interactive month pills to assistive technology', () => {
+      render(
+        <ScheduleWithPopover
+          eventsList={events}
+          view={createScheduleMonthlyView()}
+        />,
+      );
+
+      // Role queries ignore aria-hidden subtrees, so finding the pill by role
+      // proves the decorative overlay's aria-hidden was dropped when the event
+      // became an interactive trigger.
+      expect(
+        screen.getByRole('button', {name: /Design review/}),
+      ).toBeInTheDocument();
+    });
   });
 
   it('prepends pagination controls before existing start slot content', () => {

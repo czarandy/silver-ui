@@ -10,6 +10,7 @@ import {createScheduleListView} from 'components/Schedule/ListView';
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
+import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
 import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import type {
@@ -430,6 +431,101 @@ export const CustomPlugin: Story = {
       <ScheduleStory
         plugins={[customPlugin]}
         view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+      />
+    );
+  },
+};
+
+const eventPopoverEvents = [
+  {
+    ...createEventFromISO({
+      category: 'Sync',
+      end: '2026-05-13T16:30:00.000Z',
+      id: 'team-sync',
+      start: '2026-05-13T16:00:00.000Z',
+      title: 'Team sync',
+    }),
+    description: 'Weekly status check-in and blockers review.',
+    location: 'Room 4 · Zoom',
+  },
+  {
+    ...createEventFromISO({
+      category: 'Design',
+      end: '2026-05-14',
+      id: 'design-review',
+      start: '2026-05-14',
+      title: 'Design review',
+    }),
+    description: 'Critique the latest prototype flows.',
+    location: 'Design Studio',
+  },
+  {
+    ...createEventFromISO({
+      category: 'Planning',
+      end: '2026-05-15T15:00:00.000Z',
+      id: 'roadmap',
+      start: '2026-05-15T14:00:00.000Z',
+      title: 'Roadmap planning',
+    }),
+  },
+];
+
+function EventPopoverStory({view}: {view: ScheduleView}): React.JSX.Element {
+  const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
+  const paginationPlugin = useSchedulePaginationPlugin({
+    onViewDateChange: setViewDate,
+  });
+  const eventPopoverPlugin = useScheduleEventPopoverPlugin({
+    onDelete: event => window.alert(`Delete ${event.title}`),
+    onEdit: event => window.alert(`Edit ${event.title}`),
+  });
+  return (
+    <Schedule
+      categories={categories}
+      events={eventPopoverEvents}
+      highlightDate={defaultHighlightDate}
+      plugins={[paginationPlugin, eventPopoverPlugin]}
+      timezoneID="UTC"
+      view={view}
+      viewDate={viewDate}
+    />
+  );
+}
+
+export const EventPopover: Story = {
+  render: () => <EventPopoverStory view={createScheduleMonthlyView()} />,
+};
+
+export const EventPopoverCustomContent: Story = {
+  render: () => {
+    const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
+    const paginationPlugin = useSchedulePaginationPlugin({
+      onViewDateChange: setViewDate,
+    });
+    const eventPopoverPlugin = useScheduleEventPopoverPlugin({
+      renderContent: event => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
+            maxWidth: 260,
+            padding: 16,
+          }}>
+          <strong>{event.title}</strong>
+          <Badge color="info" label={event.category ?? 'Event'} size="sm" />
+        </div>
+      ),
+    });
+    return (
+      <Schedule
+        categories={categories}
+        events={eventPopoverEvents}
+        highlightDate={defaultHighlightDate}
+        plugins={[paginationPlugin, eventPopoverPlugin]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+        viewDate={viewDate}
       />
     );
   },

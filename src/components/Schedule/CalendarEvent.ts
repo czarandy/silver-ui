@@ -12,23 +12,43 @@ export interface ScheduleCategory {
   label: string;
 }
 
-export interface CalendarEventBase {
+export interface CalendarEventBase<TAuxiliaryData = unknown> {
+  /**
+   * Arbitrary consumer-defined data carried alongside the event, mirroring the
+   * `auxiliaryData` field of `SearchableItem`. Surfaced to plugin render
+   * functions (e.g. the event popover's `renderContent`) for custom rendering.
+   */
+  auxiliaryData?: TAuxiliaryData;
   category?: string;
+  /**
+   * Optional longer-form description shown by the default event popover.
+   */
+  description?: string;
   id: string;
+  /**
+   * Optional location shown by the default event popover.
+   */
+  location?: string;
   title: string;
 }
 
-export interface CalendarDayEvent extends CalendarEventBase {
+export interface CalendarDayEvent<
+  TAuxiliaryData = unknown,
+> extends CalendarEventBase<TAuxiliaryData> {
   end: PlainDate;
   start: PlainDate;
 }
 
-export interface CalendarInstantEvent extends CalendarEventBase {
+export interface CalendarInstantEvent<
+  TAuxiliaryData = unknown,
+> extends CalendarEventBase<TAuxiliaryData> {
   end: Instant;
   start: Instant;
 }
 
-export type CalendarEvent = CalendarDayEvent | CalendarInstantEvent;
+export type CalendarEvent<TAuxiliaryData = unknown> =
+  | CalendarDayEvent<TAuxiliaryData>
+  | CalendarInstantEvent<TAuxiliaryData>;
 
 export function createEventFromISO({
   category,

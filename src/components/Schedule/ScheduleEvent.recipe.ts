@@ -79,6 +79,26 @@ export const scheduleEventRecipe = sva({
       true: {event: {w: 'full'}},
       false: {},
     },
+    // Applied when the pill is rendered as a clickable <button> trigger (event
+    // popover plugin). Resets user-agent button styling so the pill looks
+    // identical to its static <span> form.
+    isInteractive: {
+      true: {
+        event: {
+          appearance: 'none',
+          textAlign: 'inherit',
+          font: 'inherit',
+          m: 0,
+          cursor: 'pointer',
+          _focusVisible: {
+            outlineWidth: 'focus',
+            outlineStyle: 'solid',
+            outlineColor: 'primary',
+          },
+        },
+      },
+      false: {},
+    },
     color: {
       blue: {
         event: {
@@ -211,6 +231,7 @@ export const scheduleEventRecipe = sva({
     layout: 'inline',
     color: 'blue',
     isFullWidth: false,
+    isInteractive: false,
     isPast: false,
   },
 });

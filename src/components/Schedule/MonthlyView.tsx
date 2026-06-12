@@ -8,6 +8,7 @@ import {
   CalendarMonthEventPill,
   formatMonthTitle,
   getEventAccessibleLabel,
+  hasEventPopoverPlugin,
   isEventInPast,
   scheduleClasses,
   ScheduleFrame,
@@ -551,8 +552,9 @@ function getGridCellName({
 function ScheduleMonthlyView({
   options,
 }: ScheduleViewComponentProps<ScheduleMonthlyViewOptions>): React.JSX.Element {
-  const {categoryMap, events, highlightDate, timezoneID, viewDate} =
+  const {categoryMap, events, highlightDate, plugins, timezoneID, viewDate} =
     useScheduleContext();
+  const eventPopoverActive = hasEventPopoverPlugin(plugins);
   const currentTime = useCurrentTime();
   const month = viewDate.toPlainDate();
   const title = formatMonthTitle(month);
@@ -621,7 +623,10 @@ function ScheduleMonthlyView({
                   aria-label={getGridCellName({
                     categoryMap,
                     date: day,
-                    events: dayEvents,
+                    // When events are interactive popover triggers they expose
+                    // their own accessible names, so omit them here to avoid
+                    // announcing each event twice.
+                    events: eventPopoverActive ? [] : dayEvents,
                     timezoneID,
                   })}
                   className={cx(
@@ -653,7 +658,10 @@ function ScheduleMonthlyView({
           <div className={styles.monthEventOverlay} style={monthGridStyle}>
             {visibleEventSegments.map(segment => (
               <div
-                aria-hidden="true"
+                // The overlay is decorative when pills are static, but becomes
+                // focusable when they are popover triggers — a focusable button
+                // must not live inside an aria-hidden subtree.
+                aria-hidden={eventPopoverActive ? undefined : 'true'}
                 className={styles.monthEventSpan}
                 data-testid={`schedule-event-span-${segment.event.id}`}
                 key={`${segment.event.id}:${segment.week}:${segment.columnStart}`}

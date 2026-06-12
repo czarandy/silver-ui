@@ -15,6 +15,7 @@ import {
   getMinutesSinceStartOfDay,
   isEventInPast,
   scheduleClasses,
+  useScheduleEventPopover,
 } from 'components/Schedule/shared';
 import type {
   CalendarEvent,
@@ -313,6 +314,63 @@ function getTimedEventStyle({
   };
 }
 
+/**
+ * Renders a single positioned timed-event block. Becomes a clickable `<button>`
+ * trigger when an event popover plugin is active, otherwise a static `<div>`.
+ */
+function TimeGridEvent({
+  currentTime,
+  layout,
+}: {
+  currentTime: number;
+  layout: TimedEventLayout;
+}): React.JSX.Element {
+  const {categoryMap, timezoneID} = useScheduleContext();
+  const {event} = layout;
+  const {popover, triggerProps} = useScheduleEventPopover(event);
+  const category = getCategory(categoryMap, event);
+  const isPast = isEventInPast(event, currentTime, timezoneID);
+  const classes = scheduleEventRecipe({
+    layout: 'block',
+    color: category.color,
+    isPast,
+    isInteractive: triggerProps != null,
+  });
+  const style = getTimedEventStyle(layout);
+  const body = (
+    <>
+      <span className={classes.title}>{event.title}</span>
+      <span className={classes.time}>
+        {getEventTimeLabel(event, timezoneID)}
+      </span>
+    </>
+  );
+  return (
+    <>
+      {triggerProps != null ? (
+        <button
+          className={classes.event}
+          data-state={isPast ? 'past' : undefined}
+          data-testid={`schedule-event-${event.id}`}
+          style={style}
+          type="button"
+          {...triggerProps}>
+          {body}
+        </button>
+      ) : (
+        <div
+          className={classes.event}
+          data-state={isPast ? 'past' : undefined}
+          data-testid={`schedule-event-${event.id}`}
+          style={style}>
+          {body}
+        </div>
+      )}
+      {popover}
+    </>
+  );
+}
+
 function getCellName({
   categoryMap,
   date,
@@ -554,35 +612,13 @@ export function TimeGridView({
                       />
                     ) : null}
                     <div className={styles.events}>
-                      {visibleTimedEventLayouts.map(layout => {
-                        const {event} = layout;
-                        const category = getCategory(categoryMap, event);
-                        const isPast = isEventInPast(
-                          event,
-                          currentTime,
-                          timezoneID,
-                        );
-                        const eventClasses = scheduleEventRecipe({
-                          layout: 'block',
-                          color: category.color,
-                          isPast,
-                        });
-                        return (
-                          <div
-                            className={eventClasses.event}
-                            data-state={isPast ? 'past' : undefined}
-                            data-testid={`schedule-event-${event.id}`}
-                            key={event.id}
-                            style={getTimedEventStyle(layout)}>
-                            <span className={eventClasses.title}>
-                              {event.title}
-                            </span>
-                            <span className={eventClasses.time}>
-                              {getEventTimeLabel(event, timezoneID)}
-                            </span>
-                          </div>
-                        );
-                      })}
+                      {visibleTimedEventLayouts.map(layout => (
+                        <TimeGridEvent
+                          currentTime={currentTime}
+                          key={layout.event.id}
+                          layout={layout}
+                        />
+                      ))}
                     </div>
                   </div>
                 );

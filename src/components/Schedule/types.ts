@@ -79,6 +79,13 @@ export interface ScheduleHeaderContent {
 export type SchedulePluginPosition = 'start' | 'end';
 
 export interface SchedulePlugin {
+  /**
+   * Provides the popover content shown when an event pill is clicked. Return
+   * `null`/`undefined` to decline (e.g. to opt out for a specific event). When
+   * multiple plugins implement this, the first to return non-nullish content
+   * wins.
+   */
+  renderEventPopover?: (event: CalendarEvent) => ReactNode;
   renderHeader?: (
     startContent: ReactNode,
     centerContent: ReactNode,
