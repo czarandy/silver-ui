@@ -9,33 +9,33 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {Calendar} from 'components/Calendar';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
-import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from 'components/Field/inputUtils';
-import {Popover} from 'components/Popover';
-import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import type {DateRange} from '../../internal/dateTypes';
-import isReactNode from '../../internal/isReactNode';
-import {
-  DATE_FORMAT_SHORT_WITH_YEAR,
-  plainDateFormat,
-  type PlainDate,
-} from '../../internal/plainDate';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
-} from '../Field';
-import type {IconComponent} from '../Icon';
+} from 'components/Field';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import type {IconComponent} from 'components/Icon';
+import {Popover} from 'components/Popover';
+import {Spinner} from 'components/Spinner';
+import {cx} from 'internal/cx';
+import type {DateRange} from 'internal/dateTypes';
+import isReactNode from 'internal/isReactNode';
+import {
+  DATE_FORMAT_SHORT_WITH_YEAR,
+  plainDateFormat,
+  type PlainDate,
+} from 'internal/plainDate';
+import {css} from 'styled-system/css';
 
-export type {DateRange} from '../../internal/dateTypes';
+export type {DateRange} from 'internal/dateTypes';
 
 const styles = {
   wrapper: css({ps: '1', gap: '1'}),

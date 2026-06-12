@@ -53,7 +53,7 @@ describe('component barrel and docs coverage', () => {
 
   describe.each(componentDirs)('%s', dir => {
     it('is re-exported from src/index.ts', () => {
-      expect(barrelSource).toContain(`from './components/${dir}'`);
+      expect(barrelSource).toContain(`from 'components/${dir}'`);
     });
 
     it('is listed in the README', () => {

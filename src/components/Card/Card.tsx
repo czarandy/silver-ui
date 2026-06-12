@@ -1,7 +1,7 @@
 import type {ComponentPropsWithRef} from 'react';
 import {cardRecipe} from 'components/Card/Card.recipe';
 import {cx} from 'internal/cx';
-import type {SpacingToken} from '../../internal/spacingTokens';
+import type {SpacingToken} from 'internal/spacingTokens';
 
 export type CardColor =
   | 'blue'

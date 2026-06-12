@@ -1,8 +1,11 @@
-export {TopNav, type TopNavProps} from './TopNav';
-export {TopNavHeading, type TopNavHeadingProps} from './TopNavHeading';
-export {TopNavItem, type TopNavItemProps} from './TopNavItem';
+export {TopNav, type TopNavProps} from 'components/TopNav/TopNav';
+export {
+  TopNavHeading,
+  type TopNavHeadingProps,
+} from 'components/TopNav/TopNavHeading';
+export {TopNavItem, type TopNavItemProps} from 'components/TopNav/TopNavItem';
 export {
   TopNavMobileContentContext,
   TopNavRenderContext,
   type TopNavRenderMode,
-} from './TopNavContext';
+} from 'components/TopNav/TopNavContext';

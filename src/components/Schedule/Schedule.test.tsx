@@ -725,6 +725,97 @@ describe('Schedule', () => {
     });
   });
 
+  it('collapses month events that do not fit into a see-more popover', () => {
+    const overflowEvents = Array.from({length: 5}, (_, index) =>
+      createEventFromISO({
+        category: 'Planning',
+        end: '2026-05-13',
+        id: `overflow-${index + 1}`,
+        start: '2026-05-13',
+        title: `Overflow ${index + 1}`,
+      }),
+    );
+
+    render(
+      <Schedule
+        categories={categories}
+        events={overflowEvents}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByTestId('schedule-event-span-overflow-1'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('schedule-event-span-overflow-2'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('schedule-event-span-overflow-3'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('schedule-event-span-overflow-4'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('schedule-event-span-overflow-5'),
+    ).not.toBeInTheDocument();
+
+    const seeMore = screen.getByRole('button', {
+      name: 'Show 2 more events for Wednesday, May 13, 2026',
+    });
+    expect(seeMore).toHaveTextContent('+2 more');
+
+    fireEvent.click(seeMore);
+    expect(seeMore).toHaveAttribute('aria-expanded', 'true');
+
+    const popover = screen.getByTestId('schedule-month-see-more-2026-05-13');
+    expect(
+      within(popover).getByText('Wednesday, May 13, 2026'),
+    ).toBeInTheDocument();
+    expect(
+      within(popover).getByTestId('schedule-event-overflow-1'),
+    ).toHaveTextContent('Overflow 1');
+    expect(
+      within(popover).getByTestId('schedule-event-overflow-5'),
+    ).toHaveTextContent('Overflow 5');
+  });
+
+  it('shows more month events before collapsing when row height is taller', () => {
+    const overflowEvents = Array.from({length: 5}, (_, index) =>
+      createEventFromISO({
+        category: 'Planning',
+        end: '2026-05-13',
+        id: `tall-month-${index + 1}`,
+        start: '2026-05-13',
+        title: `Tall month ${index + 1}`,
+      }),
+    );
+
+    render(
+      <Schedule
+        categories={categories}
+        events={overflowEvents}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView({monthRowHeight: 172})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByTestId('schedule-event-span-tall-month-1'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId('schedule-event-span-tall-month-5'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {
+        name: 'Show 2 more events for Wednesday, May 13, 2026',
+      }),
+    ).not.toBeInTheDocument();
+  });
+
   it('includes month events in each covered day cell label', () => {
     render(
       <Schedule

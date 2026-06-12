@@ -3,14 +3,14 @@ import {useCallback, useMemo, type ReactNode} from 'react';
 import {Button} from 'components/Button';
 import {ButtonGroup} from 'components/ButtonGroup';
 import {useScheduleContext} from 'components/Schedule/context';
-import {nowEpochMilliseconds} from '../../../internal/time';
 import type {
   Instant,
   ScheduleHeaderContent,
   SchedulePlugin,
   SchedulePluginPosition,
   ScheduleZonedInstantRange,
-} from '../types';
+} from 'components/Schedule/types';
+import {nowEpochMilliseconds} from 'internal/time';
 
 export interface SchedulePaginationPluginOptions {
   onViewDateChange: (date: Instant) => void;

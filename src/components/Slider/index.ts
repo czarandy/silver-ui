@@ -7,4 +7,4 @@ export {
   type SliderRangeProps,
   type SliderSingleProps,
   type SliderValueDisplay,
-} from './Slider';
+} from 'components/Slider/Slider';

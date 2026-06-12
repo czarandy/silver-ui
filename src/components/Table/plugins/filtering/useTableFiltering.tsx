@@ -8,26 +8,15 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import {
+  createStaticSearchSource,
+  type SearchableItem,
+} from 'components/AutocompleteInput';
 import {Button} from 'components/Button';
 import {DateInput} from 'components/DateInput';
 import {MultiSelect} from 'components/MultiSelect';
 import {NumberInput} from 'components/NumberInput';
 import {Popover} from 'components/Popover';
-import {Select} from 'components/Select';
-import {proportional} from 'components/Table/columnUtils';
-import {TagsInput} from 'components/TagsInput';
-import {TextInput} from 'components/TextInput';
-import {TimeInput} from 'components/TimeInput';
-import {css} from 'styled-system/css';
-import {
-  plainDateToUnixSeconds,
-  type PlainDate,
-} from '../../../../internal/plainDate';
-import {getBrowserTimezoneID} from '../../../../internal/time';
-import {
-  createStaticSearchSource,
-  type SearchableItem,
-} from '../../../AutocompleteInput';
 import type {
   FilterValue,
   FloatOperatorValue,
@@ -41,12 +30,20 @@ import type {
   EntityListOperatorValue,
   EnumListOperatorValue,
   EnumOperatorValue,
-} from '../../../SearchFilterInput';
+} from 'components/SearchFilterInput';
+import {Select} from 'components/Select';
+import {proportional} from 'components/Table/columnUtils';
 import type {
   HeaderCellRenderProps,
   TableColumn,
   TablePlugin,
-} from '../../types';
+} from 'components/Table/types';
+import {TagsInput} from 'components/TagsInput';
+import {TextInput} from 'components/TextInput';
+import {TimeInput} from 'components/TimeInput';
+import {plainDateToUnixSeconds, type PlainDate} from 'internal/plainDate';
+import {getBrowserTimezoneID} from 'internal/time';
+import {css} from 'styled-system/css';
 
 export type TableFilterValue = number | string | string[] | PlainDate;
 export type TableFilterState = Record<string, TableFilterValue | undefined>;

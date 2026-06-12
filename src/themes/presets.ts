@@ -1,4 +1,4 @@
-import type {ThemeModeTokens, ThemeTokens} from '../components/Theme';
+import type {ThemeModeTokens, ThemeTokens} from 'components/Theme';
 
 /**
  * A named theme preset containing token overrides for the Silver UI

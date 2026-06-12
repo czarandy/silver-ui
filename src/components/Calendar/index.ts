@@ -4,4 +4,4 @@ export {
   type CalendarProps,
   type DateRange,
   type DayOfWeek,
-} from './Calendar';
+} from 'components/Calendar/Calendar';

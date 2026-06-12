@@ -1,7 +1,7 @@
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import {useAvatarGroup} from 'components/AvatarGroup/AvatarGroupContext';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {useAvatarGroup} from './AvatarGroupContext';
 
 const DEFAULT_SIZE = 36;
 const BORDER_WIDTH = 2;

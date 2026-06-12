@@ -1,5 +1,8 @@
-export {ButtonGroup, type ButtonGroupProps} from './ButtonGroup';
+export {
+  ButtonGroup,
+  type ButtonGroupProps,
+} from 'components/ButtonGroup/ButtonGroup';
 export {
   type ButtonGroupContextValue,
   type ButtonGroupOrientation,
-} from './ButtonGroupContext';
+} from 'components/ButtonGroup/ButtonGroupContext';

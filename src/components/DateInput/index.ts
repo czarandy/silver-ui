@@ -1,1 +1,5 @@
-export {DateInput, type DateInputProps, type PlainDate} from './DateInput';
+export {
+  DateInput,
+  type DateInputProps,
+  type PlainDate,
+} from 'components/DateInput/DateInput';

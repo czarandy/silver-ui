@@ -2,10 +2,10 @@ import {ChevronLeft, ChevronRight} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
 import {useMemo} from 'react';
 import {Button} from 'components/Button';
+import type {ButtonSize} from 'components/Button';
 import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import type {ButtonSize} from '../Button';
 
 export type PaginationVariant = 'pages' | 'count' | 'compact' | 'none';
 

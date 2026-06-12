@@ -12,14 +12,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {
-  formatMenuWidth,
-  renderMenuItems,
-  useMenuKeyboard,
-} from 'components/DropdownMenu/menuUtils';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import type {ButtonSize} from '../Button';
+import type {ButtonSize} from 'components/Button';
 import {
   DropdownMenuContext,
   DropdownMenuItem,
@@ -28,7 +21,14 @@ import {
   type DropdownMenuItemProps,
   type DropdownMenuOption,
   type DropdownMenuSection,
-} from '../DropdownMenu';
+} from 'components/DropdownMenu';
+import {
+  formatMenuWidth,
+  renderMenuItems,
+  useMenuKeyboard,
+} from 'components/DropdownMenu/menuUtils';
+import {cx} from 'internal/cx';
+import {css} from 'styled-system/css';
 
 export type ContextMenuSize = ButtonSize;
 export type ContextMenuItemData = DropdownMenuItemData;

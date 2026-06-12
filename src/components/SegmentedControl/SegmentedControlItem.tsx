@@ -1,9 +1,9 @@
 import type {CSSProperties, Ref} from 'react';
+import {Icon, type IconComponent} from 'components/Icon';
 import {segmentedControlRecipe} from 'components/SegmentedControl/SegmentedControl.recipe';
 import {useSegmentedControlContext} from 'components/SegmentedControl/SegmentedControlContext';
+import {VisuallyHidden} from 'internal/VisuallyHidden';
 import {cx} from 'internal/cx';
-import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {Icon, type IconComponent} from '../Icon';
 
 export interface SegmentedControlItemProps<TValue extends string = string> {
   /**

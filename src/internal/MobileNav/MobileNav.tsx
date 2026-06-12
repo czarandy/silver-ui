@@ -1,13 +1,13 @@
 import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useCallback, useEffect, useRef} from 'react';
+import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
+import {Button} from 'components/Button';
+import {mobileNavRecipe} from 'internal/MobileNav/MobileNav.recipe';
+import {cx} from 'internal/cx';
+import {mergeRefs} from 'internal/mergeRefs';
+import {useScrollLock} from 'internal/useScrollLock';
 import {css} from 'styled-system/css';
-import {useAppShellMobile} from '../../components/AppShell/AppShellMobileContext';
-import {Button} from '../../components/Button';
-import {cx} from '../cx';
-import {mergeRefs} from '../mergeRefs';
-import {useScrollLock} from '../useScrollLock';
-import {mobileNavRecipe} from './MobileNav.recipe';
 
 export type MobileNavSide = 'start' | 'end';
 

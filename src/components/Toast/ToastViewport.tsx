@@ -9,11 +9,18 @@ import {
   type Ref,
 } from 'react';
 import {Toast} from 'components/Toast/Toast';
+import {
+  ToastContext,
+  type ToastContextValue,
+} from 'components/Toast/ToastContext';
+import type {
+  ToastDismissReason,
+  ToastEntry,
+  ToastPosition,
+} from 'components/Toast/types';
 import {cx} from 'internal/cx';
+import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {ToastContext, type ToastContextValue} from './ToastContext';
-import type {ToastDismissReason, ToastEntry, ToastPosition} from './types';
 
 export interface ToastViewportInset {
   bottom?: number;

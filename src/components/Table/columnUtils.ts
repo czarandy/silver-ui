@@ -1,6 +1,10 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {CSSProperties, ReactNode} from 'react';
-import type {PixelWidth, ProportionalWidth, TableColumn} from './types';
+import type {
+  PixelWidth,
+  ProportionalWidth,
+  TableColumn,
+} from 'components/Table/types';
 
 export const DEFAULT_MIN_COLUMN_WIDTH = 120;
 

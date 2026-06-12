@@ -2,8 +2,8 @@ import {ChevronDown} from 'lucide-react';
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {accordionItemRecipe} from 'components/Accordion/AccordionItem.recipe';
 import {useCollapsible} from 'components/Accordion/useCollapsible';
+import {Icon} from 'components/Icon';
 import {cx} from 'internal/cx';
-import {Icon} from '../Icon';
 
 /**
  * A single expandable section within an `Accordion`, or a standalone

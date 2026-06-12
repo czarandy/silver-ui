@@ -8,8 +8,8 @@ import {
   plainDateCreate,
   plainDateFormat,
   plainDateToday,
-} from '../../internal/plainDate';
-import {getBrowserTimezoneID} from '../../internal/time';
+} from 'internal/plainDate';
+import {getBrowserTimezoneID} from 'internal/time';
 
 beforeAll(() => {
   // jsdom has no native popover support. Toggle display so opened content is

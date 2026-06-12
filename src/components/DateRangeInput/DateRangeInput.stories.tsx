@@ -6,8 +6,8 @@ import {
   DateRangeInput,
   type DateRangeInputProps,
 } from 'components/DateRangeInput/DateRangeInput';
-import type {DateRange} from '../../internal/dateTypes';
-import {plainDateCreate} from '../../internal/plainDate';
+import type {DateRange} from 'internal/dateTypes';
+import {plainDateCreate} from 'internal/plainDate';
 
 const meta = {
   title: 'Components/DateRangeInput',

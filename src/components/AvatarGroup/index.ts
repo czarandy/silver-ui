@@ -1,5 +1,8 @@
-export {AvatarGroup, type AvatarGroupProps} from './AvatarGroup';
+export {
+  AvatarGroup,
+  type AvatarGroupProps,
+} from 'components/AvatarGroup/AvatarGroup';
 export {
   AvatarGroupOverflow,
   type AvatarGroupOverflowProps,
-} from './AvatarGroupOverflow';
+} from 'components/AvatarGroup/AvatarGroupOverflow';

@@ -9,8 +9,8 @@ import {
 import {useLayoutDivider} from 'components/Layout/LayoutContext';
 import {Heading, Text} from 'components/Text';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import type {SpacingToken} from '../../internal/spacingTokens';
+import isReactNode from 'internal/isReactNode';
+import type {SpacingToken} from 'internal/spacingTokens';
 
 /**
  * Header landmark region within a Layout with a structured title,

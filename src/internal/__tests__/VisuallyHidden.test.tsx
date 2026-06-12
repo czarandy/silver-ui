@@ -1,6 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {VisuallyHidden} from '../VisuallyHidden';
+import {VisuallyHidden} from 'internal/VisuallyHidden';
 
 describe('VisuallyHidden', () => {
   it('keeps children available to assistive technology while visually hiding them', () => {

@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {Icon, type IconComponent} from 'components/Icon';
 import {metadataListRecipe} from 'components/MetadataList/MetadataList.recipe';
 import {useMetadataList} from 'components/MetadataList/MetadataListContext';
 import {cx} from 'internal/cx';
-import {Icon, type IconComponent} from '../Icon';
 
 /**
  * A single label-value pair rendered inside a MetadataList.

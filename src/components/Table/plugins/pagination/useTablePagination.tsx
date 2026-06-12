@@ -1,7 +1,7 @@
 import {useMemo, type ReactNode} from 'react';
+import {Pagination, type PaginationProps} from 'components/Pagination';
+import type {TablePlugin} from 'components/Table/types';
 import {css} from 'styled-system/css';
-import {Pagination, type PaginationProps} from '../../../Pagination';
-import type {TablePlugin} from '../../types';
 
 export interface UseTablePaginationConfig {
   align?: 'center' | 'end' | 'start';

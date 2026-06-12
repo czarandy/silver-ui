@@ -1,5 +1,5 @@
 import {createContext} from 'react';
-import type {ToastDismissReason, ToastEntry} from './types';
+import type {ToastDismissReason, ToastEntry} from 'components/Toast/types';
 
 export interface ToastContextValue {
   addToast: (entry: ToastEntry) => void;

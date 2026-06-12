@@ -1,9 +1,9 @@
 export {
   useTableSelection,
   type UseTableSelectionConfig,
-} from './useTableSelection';
+} from 'components/Table/plugins/selection/useTableSelection';
 export {
   useTableSelectionState,
   type UseTableSelectionStateConfig,
   type UseTableSelectionStateResult,
-} from './useTableSelectionState';
+} from 'components/Table/plugins/selection/useTableSelectionState';

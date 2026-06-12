@@ -1,9 +1,12 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {HoverLayerTrigger} from '../../internal/HoverLayerTrigger';
-import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
-import {useTooltip, type TooltipFocusTrigger} from './useTooltip';
+import {
+  useTooltip,
+  type TooltipFocusTrigger,
+} from 'components/Tooltip/useTooltip';
+import {HoverLayerTrigger} from 'internal/HoverLayerTrigger';
+import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 
-export type {TooltipFocusTrigger} from './useTooltip';
+export type {TooltipFocusTrigger} from 'components/Tooltip/useTooltip';
 
 export interface TooltipProps {
   /**

@@ -11,37 +11,37 @@ import {
   type Ref,
 } from 'react';
 import {Button} from 'components/Button';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
-import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from 'components/Field/inputUtils';
-import {Popover} from 'components/Popover';
-import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import isReactNode from '../../internal/isReactNode';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {parseDateInput} from '../../internal/parseDateInput';
-import {
-  DATE_FORMAT_LONG,
-  plainDateFormat,
-  plainDateIsAfter,
-  plainDateIsBefore,
-  type PlainDate,
-} from '../../internal/plainDate';
-import {Calendar, type CalendarHandle} from '../Calendar';
+import {Calendar, type CalendarHandle} from 'components/Calendar';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
-} from '../Field';
-import type {IconComponent} from '../Icon';
+} from 'components/Field';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import type {IconComponent} from 'components/Icon';
+import {Popover} from 'components/Popover';
+import {Spinner} from 'components/Spinner';
+import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
+import {parseDateInput} from 'internal/parseDateInput';
+import {
+  DATE_FORMAT_LONG,
+  plainDateFormat,
+  plainDateIsAfter,
+  plainDateIsBefore,
+  type PlainDate,
+} from 'internal/plainDate';
+import {css} from 'styled-system/css';
 
-export type {PlainDate} from '../../internal/plainDate';
+export type {PlainDate} from 'internal/plainDate';
 
 const styles = {
   wrapper: css({ps: '1', gap: '1'}),

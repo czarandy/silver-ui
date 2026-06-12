@@ -1,7 +1,7 @@
 import {CheckCircle2, CircleAlert, CircleX} from 'lucide-react';
 import type {ReactNode} from 'react';
-import {Icon} from '../Icon';
-import type {InputStatus, InputStatusType} from './types';
+import type {InputStatus, InputStatusType} from 'components/Field/types';
+import {Icon} from 'components/Icon';
 
 export function getDescribedBy(
   ...ids: (string | null | undefined | false)[]

@@ -3,7 +3,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {DateInput, type DateInputProps} from 'components/DateInput/DateInput';
-import {plainDateCreate, type PlainDate} from '../../internal/plainDate';
+import {plainDateCreate, type PlainDate} from 'internal/plainDate';
 
 const meta = {
   title: 'Components/DateInput',

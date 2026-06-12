@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {Field, getNecessity} from 'components/Field/Field';
-import {assertNonNull} from '../../internal/testHelpers';
+import {assertNonNull} from 'internal/testHelpers';
 
 describe('Field', () => {
   it('renders label, description, and status', () => {

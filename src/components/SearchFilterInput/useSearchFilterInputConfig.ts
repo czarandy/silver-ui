@@ -1,13 +1,13 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {useMemo} from 'react';
-import {nowEpochMilliseconds} from '../../internal/time';
 import type {
   DateTimeRangePart,
   EnumItem,
   SearchFilterInputConfig,
   SearchFilterInputFilter,
   SearchFilterInputOperator,
-} from './types';
+} from 'components/SearchFilterInput/types';
+import {nowEpochMilliseconds} from 'internal/time';
 
 type FieldType =
   | 'boolean'

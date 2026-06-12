@@ -1,15 +1,15 @@
 export {
   BaseAutocompleteInput,
   type BaseAutocompleteInputProps,
-} from './BaseAutocompleteInput';
+} from 'components/AutocompleteInput/BaseAutocompleteInput';
 export {
   AutocompleteInput,
   type AutocompleteInputProps,
-} from './AutocompleteInput';
+} from 'components/AutocompleteInput/AutocompleteInput';
 export {
   AutocompleteInputItem,
   type AutocompleteInputItemProps,
-} from './AutocompleteInputItem';
+} from 'components/AutocompleteInput/AutocompleteInputItem';
 export {
   createStaticSearchSource,
   type CreateStaticSearchSourceOptions,
@@ -17,4 +17,4 @@ export {
   type SearchableItem,
   type SearchSource,
   type StandardSearchableItem,
-} from './types';
+} from 'components/AutocompleteInput/types';

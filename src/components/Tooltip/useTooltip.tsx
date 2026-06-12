@@ -7,16 +7,16 @@ import {
   type RefCallback,
 } from 'react';
 import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
 import {
   useHoverLayer,
   type HoverLayerFocusTrigger,
-} from '../../internal/useHoverLayer';
+} from 'internal/useHoverLayer';
 import type {
   ContextRenderProps,
   LayerAlignment,
   LayerPlacement,
-} from '../../internal/useLayer';
+} from 'internal/useLayer';
+import {css} from 'styled-system/css';
 
 export type TooltipFocusTrigger = HoverLayerFocusTrigger;
 

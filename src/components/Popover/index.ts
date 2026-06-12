@@ -1,8 +1,8 @@
-export {Popover, type PopoverProps} from './Popover';
+export {Popover, type PopoverProps} from 'components/Popover/Popover';
 export {
   usePopover,
   type LayerAlignment,
   type LayerPlacement,
   type UsePopoverOptions,
   type UsePopoverReturn,
-} from './usePopover';
+} from 'components/Popover/usePopover';

@@ -1,4 +1,8 @@
-import type {EnumItem, FilterValue, OperatorValue} from './types';
+import type {
+  EnumItem,
+  FilterValue,
+  OperatorValue,
+} from 'components/SearchFilterInput/types';
 
 function truncate(value: string, maxLength: number): string {
   return value.length > maxLength

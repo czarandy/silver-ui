@@ -2,8 +2,21 @@
 
 import {Temporal} from '@js-temporal/polyfill';
 import {useCallback, useMemo} from 'react';
+import {
+  AutocompleteInput,
+  createStaticSearchSource,
+  type SearchableItem,
+  type SearchSource,
+} from 'components/AutocompleteInput';
 import {DateInput} from 'components/DateInput';
 import {NumberInput} from 'components/NumberInput';
+import type {InternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';
+import type {
+  EnumItem,
+  FilterValue,
+  OperatorValue,
+  SearchFilterInputEntity,
+} from 'components/SearchFilterInput/types';
 import {Select} from 'components/Select';
 import {TagsInput} from 'components/TagsInput';
 import {TextInput} from 'components/TextInput';
@@ -12,21 +25,8 @@ import {
   plainDateFromUnixSeconds,
   plainDateToUnixSeconds,
   type PlainDate,
-} from '../../internal/plainDate';
-import {getBrowserTimezoneID} from '../../internal/time';
-import {
-  AutocompleteInput,
-  createStaticSearchSource,
-  type SearchableItem,
-  type SearchSource,
-} from '../AutocompleteInput';
-import type {InternalSearchFilterInputConfig} from './internalConfig';
-import type {
-  EnumItem,
-  FilterValue,
-  OperatorValue,
-  SearchFilterInputEntity,
-} from './types';
+} from 'internal/plainDate';
+import {getBrowserTimezoneID} from 'internal/time';
 
 export interface SearchFilterInputValueEditorProps {
   config: InternalSearchFilterInputConfig;

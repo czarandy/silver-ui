@@ -5,6 +5,7 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
+import {Button} from 'components/Button';
 import {Dialog} from 'components/Dialog';
 import {
   Layout,
@@ -13,7 +14,6 @@ import {
   LayoutHeader,
 } from 'components/Layout';
 import {Text} from 'components/Text';
-import {Button} from '../Button';
 
 export type AlertDialogActionVariant = 'destructive' | 'primary';
 

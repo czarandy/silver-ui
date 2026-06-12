@@ -6,14 +6,14 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
-import {css} from 'styled-system/css';
-import {DEFAULT_MIN_COLUMN_WIDTH} from '../../columnUtils';
+import {DEFAULT_MIN_COLUMN_WIDTH} from 'components/Table/columnUtils';
 import type {
   ColumnWidth,
   HeaderCellRenderProps,
   TableColumn,
   TablePlugin,
-} from '../../types';
+} from 'components/Table/types';
+import {css} from 'styled-system/css';
 
 export interface UseTableColumnResizeConfig {
   columns?: TableColumn<Record<string, unknown>>[];

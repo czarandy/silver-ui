@@ -9,10 +9,10 @@ import {
 } from 'react';
 import {breadcrumbItemRecipe} from 'components/Breadcrumbs/BreadcrumbItem.recipe';
 import {BreadcrumbsContext} from 'components/Breadcrumbs/BreadcrumbsContext';
+import {Icon, type IconComponent} from 'components/Icon';
 import {useLinkComponent} from 'components/Link';
+import type {LinkComponent} from 'components/Link';
 import {cx} from 'internal/cx';
-import {Icon, type IconComponent} from '../Icon';
-import type {LinkComponent} from '../Link';
 
 export interface BreadcrumbItemProps {
   /**

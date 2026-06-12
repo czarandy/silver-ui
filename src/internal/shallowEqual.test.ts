@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {shallowEqual} from './shallowEqual';
+import {shallowEqual} from 'internal/shallowEqual';
 
 describe('shallowEqual', () => {
   it('returns true for the same reference', () => {

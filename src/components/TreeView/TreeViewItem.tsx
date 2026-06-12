@@ -5,9 +5,9 @@ import {useCallback, useId, useRef, type ReactNode, type Ref} from 'react';
 import {Icon} from 'components/Icon';
 import {TreeViewBranches} from 'components/TreeView/TreeViewBranches';
 import {treeViewItemRecipe} from 'components/TreeView/TreeViewItem.recipe';
+import type {TreeViewDensity} from 'components/TreeView/types';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import type {TreeViewDensity} from './types';
+import isReactNode from 'internal/isReactNode';
 
 interface TreeViewItemProps {
   /**

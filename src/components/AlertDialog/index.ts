@@ -2,9 +2,9 @@ export {
   AlertDialog,
   type AlertDialogActionVariant,
   type AlertDialogProps,
-} from './AlertDialog';
+} from 'components/AlertDialog/AlertDialog';
 export {
   useAlertDialog,
   type AlertDialogOptions,
   type UseAlertDialogReturn,
-} from './useAlertDialog';
+} from 'components/AlertDialog/useAlertDialog';

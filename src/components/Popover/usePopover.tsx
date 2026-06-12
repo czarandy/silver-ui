@@ -8,12 +8,12 @@ import {
   type RefCallback,
 } from 'react';
 import {Button} from 'components/Button';
+import {VisuallyHidden} from 'internal';
+import {useFocusTrap} from 'internal/useFocusTrap';
+import {useLayer, type ContextRenderProps} from 'internal/useLayer';
 import {css} from 'styled-system/css';
-import {VisuallyHidden} from '../../internal';
-import {useFocusTrap} from '../../internal/useFocusTrap';
-import {useLayer, type ContextRenderProps} from '../../internal/useLayer';
 
-export type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
+export type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 
 export interface UsePopoverOptions {
   /**

@@ -2,4 +2,4 @@ export {
   DateRangeInput,
   type DateRange,
   type DateRangeInputProps,
-} from './DateRangeInput';
+} from 'components/DateRangeInput/DateRangeInput';

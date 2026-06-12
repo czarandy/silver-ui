@@ -7,8 +7,8 @@ import type {
 } from 'react';
 import {stackRecipe} from 'components/Stack/internal/Stack.recipe';
 import {cx} from 'internal/cx';
-import type {SpacingToken} from '../../../internal/spacingTokens';
-import {toPixelSize, type SizeValue} from '../../../internal/toPixelSize';
+import type {SpacingToken} from 'internal/spacingTokens';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 
 export type {SizeValue};
 export type StackDirection = 'horizontal' | 'vertical';

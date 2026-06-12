@@ -5,10 +5,10 @@ import {
   type Ref,
   type RefCallback,
 } from 'react';
+import {cx} from 'internal/cx';
+import {mergeRefs} from 'internal/mergeRefs';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
-import {cx} from './cx';
-import {mergeRefs} from './mergeRefs';
-import {useIsomorphicLayoutEffect} from './useIsomorphicLayoutEffect';
 
 export type HoverLayerTriggerIndication = 'auto' | boolean;
 

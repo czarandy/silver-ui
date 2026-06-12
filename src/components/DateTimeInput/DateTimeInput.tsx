@@ -8,18 +8,18 @@ import {
   type Ref,
 } from 'react';
 import {DateInput} from 'components/DateInput';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import {plainDateIsEqual, type PlainDate} from '../../internal/plainDate';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
-} from '../Field';
-import type {IconComponent} from '../Icon';
-import {TimeInput, type PlainTime} from '../TimeInput';
+} from 'components/Field';
+import type {IconComponent} from 'components/Icon';
+import {TimeInput, type PlainTime} from 'components/TimeInput';
+import {cx} from 'internal/cx';
+import {plainDateIsEqual, type PlainDate} from 'internal/plainDate';
+import {css} from 'styled-system/css';
 
 export type PlainDateTime = Temporal.PlainDateTime;
 

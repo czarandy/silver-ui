@@ -10,18 +10,18 @@ import {
   type Ref,
 } from 'react';
 import {checkboxInputRecipe} from 'components/CheckboxInput/CheckboxInput.recipe';
+import type {FieldNecessity, InputStatus} from 'components/Field';
 import {fieldRecipe} from 'components/Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
+import {VisuallyHidden} from 'internal/VisuallyHidden';
 import {cx} from 'internal/cx';
-import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import isReactNode from '../../internal/isReactNode';
-import {mergeRefs} from '../../internal/mergeRefs';
-import type {FieldNecessity, InputStatus} from '../Field';
-import {Icon, type IconComponent} from '../Icon';
+import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 
 export type CheckboxInputSize = 'sm' | 'md';
 export type CheckboxInputValue = boolean | 'indeterminate';

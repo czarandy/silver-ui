@@ -10,26 +10,26 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from 'components/Field/inputUtils';
-import {fileInputRecipe} from 'components/FileInput/FileInput.recipe';
-import {Spinner} from 'components/Spinner';
-import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
-import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {formatFileSize} from '../../internal/formatFileSize';
-import isReactNode from '../../internal/isReactNode';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
-} from '../Field';
-import {Icon, type IconComponent} from '../Icon';
+} from 'components/Field';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import {fileInputRecipe} from 'components/FileInput/FileInput.recipe';
+import {Icon, type IconComponent} from 'components/Icon';
+import {Spinner} from 'components/Spinner';
+import {Text} from 'components/Text';
+import {VisuallyHidden} from 'internal/VisuallyHidden';
+import {cx} from 'internal/cx';
+import {formatFileSize} from 'internal/formatFileSize';
+import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 
 export type FileInputMode = 'dropzone' | 'input';
 

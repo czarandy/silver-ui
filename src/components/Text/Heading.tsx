@@ -6,15 +6,20 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import type {
+  TextColor,
+  TextDisplay,
+  TextWordBreak,
+  TextWrap,
+} from 'components/Text/Text';
 import {headingRecipe} from 'components/Text/Text.recipe';
 import {getMaxLinesVariant} from 'components/Text/Text.utils';
 import {useTruncation} from 'components/Text/useTruncation';
 import {useTooltip} from 'components/Tooltip';
+import type {TooltipProps} from 'components/Tooltip';
 import {cx} from 'internal/cx';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
-import type {TooltipProps} from '../Tooltip';
-import type {TextColor, TextDisplay, TextWordBreak, TextWrap} from './Text';
+import {mergeRefs} from 'internal/mergeRefs';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type HeadingTruncateTooltipPlacement = NonNullable<

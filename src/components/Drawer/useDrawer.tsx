@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState, type ReactNode} from 'react';
-import {Drawer, type DrawerProps} from './Drawer';
+import {Drawer, type DrawerProps} from 'components/Drawer/Drawer';
 
 export type DrawerOptions = Partial<
   Omit<DrawerProps, 'children' | 'isOpen' | 'onOpenChange'>

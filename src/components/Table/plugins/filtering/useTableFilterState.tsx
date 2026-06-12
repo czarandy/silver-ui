@@ -1,5 +1,8 @@
 import {useCallback, useState} from 'react';
-import type {TableFilterState, TableFilterValue} from './useTableFiltering';
+import type {
+  TableFilterState,
+  TableFilterValue,
+} from 'components/Table/plugins/filtering/useTableFiltering';
 
 export interface UseTableFilterStateResult {
   clearAll: () => void;

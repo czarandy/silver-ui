@@ -2,4 +2,4 @@ export {
   DateTimeInput,
   type DateTimeInputProps,
   type PlainDateTime,
-} from './DateTimeInput';
+} from 'components/DateTimeInput/DateTimeInput';

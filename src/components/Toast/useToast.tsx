@@ -1,12 +1,12 @@
 import {use, useCallback} from 'react';
 import {ToastContext} from 'components/Toast/ToastContext';
-import {nowEpochMilliseconds} from '../../internal/time';
 import type {
   ShowToastFn,
   ToastDismissFn,
   ToastEntry,
   ToastOptions,
-} from './types';
+} from 'components/Toast/types';
+import {nowEpochMilliseconds} from 'internal/time';
 
 let toastIdCounter = 0;
 

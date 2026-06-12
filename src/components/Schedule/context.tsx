@@ -7,7 +7,7 @@ import type {
   ScheduleRange,
   ScheduleViewBase,
   ScheduleZonedInstant,
-} from './types';
+} from 'components/Schedule/types';
 
 export interface ScheduleContextValue {
   categories: ReadonlyArray<ScheduleCategory>;

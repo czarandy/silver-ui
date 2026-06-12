@@ -1,12 +1,15 @@
 import type {ReactNode} from 'react';
-import type {PlainDate} from '../../internal/dateTypes';
-import type {CalendarEvent, ScheduleCategory} from './CalendarEvent';
+import type {
+  CalendarEvent,
+  ScheduleCategory,
+} from 'components/Schedule/CalendarEvent';
 import type {
   ScheduleZonedInstant,
   ScheduleZonedInstantRange,
-} from './scheduleZonedInstant';
+} from 'components/Schedule/scheduleZonedInstant';
+import type {PlainDate} from 'internal/dateTypes';
 
-export type {PlainDate} from '../../internal/dateTypes';
+export type {PlainDate} from 'internal/dateTypes';
 export type {
   CalendarDayEvent,
   CalendarEvent,
@@ -14,11 +17,11 @@ export type {
   CalendarInstantEvent,
   ScheduleCategory,
   ScheduleEventColor,
-} from './CalendarEvent';
+} from 'components/Schedule/CalendarEvent';
 export type {
   ScheduleZonedInstant,
   ScheduleZonedInstantRange,
-} from './scheduleZonedInstant';
+} from 'components/Schedule/scheduleZonedInstant';
 
 export type Instant = number;
 

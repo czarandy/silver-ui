@@ -12,11 +12,11 @@ import {
 } from 'react';
 import {itemRecipe} from 'components/Item/Item.recipe';
 import {useLinkComponent} from 'components/Link';
+import type {LinkComponent as LinkComponentType} from 'components/Link';
 import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import {useRel} from '../../internal/linkAccessibility';
-import type {LinkComponent as LinkComponentType} from '../Link';
+import isReactNode from 'internal/isReactNode';
+import {useRel} from 'internal/linkAccessibility';
 
 const SELECTABLE_ROLES = new Set([
   'option',

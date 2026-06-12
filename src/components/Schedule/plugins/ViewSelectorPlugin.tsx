@@ -1,15 +1,15 @@
 import {Check} from 'lucide-react';
 import {useMemo, type ReactNode} from 'react';
+import {DropdownMenu, DropdownMenuItem} from 'components/DropdownMenu';
 import {Icon} from 'components/Icon';
 import {useScheduleContext} from 'components/Schedule/context';
-import {DropdownMenu, DropdownMenuItem} from '../../DropdownMenu';
 import type {
   ScheduleHeaderContent,
   SchedulePlugin,
   SchedulePluginPosition,
   ScheduleView,
   ScheduleViewBase,
-} from '../types';
+} from 'components/Schedule/types';
 
 export interface ScheduleViewSelectorOption<
   View extends ScheduleViewBase = ScheduleView,

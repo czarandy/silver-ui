@@ -5,11 +5,15 @@ export {
   type DialogProps,
   type DialogRole,
   type DialogVariant,
-} from './Dialog';
+} from 'components/Dialog/Dialog';
 
 export {
   DialogContext,
   useDialogContext,
   type DialogContextValue,
-} from './DialogContext';
-export {useDialog, type DialogOptions, type UseDialogReturn} from './useDialog';
+} from 'components/Dialog/DialogContext';
+export {
+  useDialog,
+  type DialogOptions,
+  type UseDialogReturn,
+} from 'components/Dialog/useDialog';

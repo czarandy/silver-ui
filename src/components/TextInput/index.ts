@@ -1,1 +1,5 @@
-export {TextInput, type TextInputProps, type TextInputType} from './TextInput';
+export {
+  TextInput,
+  type TextInputProps,
+  type TextInputType,
+} from 'components/TextInput/TextInput';

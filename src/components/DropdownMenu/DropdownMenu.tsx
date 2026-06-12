@@ -8,26 +8,26 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {Button, type ButtonProps, type ButtonSize} from 'components/Button';
 import {DropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
 import {
   formatMenuWidth,
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
+import type {DropdownMenuOption} from 'components/DropdownMenu/types';
 import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
-import isReactNode from '../../internal/isReactNode';
-import {Button, type ButtonProps, type ButtonSize} from '../Button';
-import type {DropdownMenuOption} from './types';
 
 export type {
   DropdownMenuDivider,
   DropdownMenuItemData,
   DropdownMenuOption,
   DropdownMenuSection,
-} from './types';
+} from 'components/DropdownMenu/types';
 
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
   ? Omit<T, K>

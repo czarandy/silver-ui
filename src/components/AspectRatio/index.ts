@@ -1,1 +1,4 @@
-export {AspectRatio, type AspectRatioProps} from './AspectRatio';
+export {
+  AspectRatio,
+  type AspectRatioProps,
+} from 'components/AspectRatio/AspectRatio';

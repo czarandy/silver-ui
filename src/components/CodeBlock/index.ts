@@ -3,4 +3,4 @@ export {
   type CodeBlockContainer,
   type CodeBlockProps,
   type CodeBlockSize,
-} from './CodeBlock';
+} from 'components/CodeBlock/CodeBlock';

@@ -1,5 +1,5 @@
 import {createContext, use} from 'react';
-import type {ButtonSize} from '../Button';
+import type {ButtonSize} from 'components/Button';
 
 export interface DropdownMenuContextValue {
   closeMenu: () => void;

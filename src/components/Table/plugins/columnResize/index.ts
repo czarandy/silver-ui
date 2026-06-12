@@ -1,4 +1,4 @@
 export {
   useTableColumnResize,
   type UseTableColumnResizeConfig,
-} from './useTableColumnResize';
+} from 'components/Table/plugins/columnResize/useTableColumnResize';

@@ -8,20 +8,23 @@ export {
   resolveColumnWidths,
   type ResolvedColumnWidth,
   type ResolvedColumnWidths,
-} from './columnUtils';
-export {Table, type TableProps} from './Table';
-export {TableBody, type TableBodyProps} from './TableBody';
-export {TableCell, type TableCellProps} from './TableCell';
-export {TableFooter, type TableFooterProps} from './TableFooter';
-export {TableHeader, type TableHeaderProps} from './TableHeader';
-export {TableHeaderCell, type TableHeaderCellProps} from './TableHeaderCell';
-export {TableRow, type TableRowProps} from './TableRow';
-export * from './plugins/columnResize';
-export * from './plugins/columnSettings';
-export * from './plugins/filtering';
-export * from './plugins/pagination';
-export * from './plugins/selection';
-export * from './plugins/sortable';
+} from 'components/Table/columnUtils';
+export {Table, type TableProps} from 'components/Table/Table';
+export {TableBody, type TableBodyProps} from 'components/Table/TableBody';
+export {TableCell, type TableCellProps} from 'components/Table/TableCell';
+export {TableFooter, type TableFooterProps} from 'components/Table/TableFooter';
+export {TableHeader, type TableHeaderProps} from 'components/Table/TableHeader';
+export {
+  TableHeaderCell,
+  type TableHeaderCellProps,
+} from 'components/Table/TableHeaderCell';
+export {TableRow, type TableRowProps} from 'components/Table/TableRow';
+export * from 'components/Table/plugins/columnResize';
+export * from 'components/Table/plugins/columnSettings';
+export * from 'components/Table/plugins/filtering';
+export * from 'components/Table/plugins/pagination';
+export * from 'components/Table/plugins/selection';
+export * from 'components/Table/plugins/sortable';
 export type {
   BodyCellRenderProps,
   BodyRowRenderProps,
@@ -44,4 +47,4 @@ export type {
   TableStyle,
   TableTextOverflow,
   TableVerticalAlign,
-} from './types';
+} from 'components/Table/types';

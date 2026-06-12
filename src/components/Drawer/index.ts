@@ -3,5 +3,9 @@ export {
   type DrawerDismissBehavior,
   type DrawerPlacement,
   type DrawerProps,
-} from './Drawer';
-export {useDrawer, type DrawerOptions, type UseDrawerReturn} from './useDrawer';
+} from 'components/Drawer/Drawer';
+export {
+  useDrawer,
+  type DrawerOptions,
+  type UseDrawerReturn,
+} from 'components/Drawer/useDrawer';

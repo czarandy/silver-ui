@@ -1,6 +1,6 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {useSyncExternalStore} from 'react';
-import type {Instant} from './types';
+import type {Instant} from 'components/Schedule/types';
 
 const UPDATE_INTERVAL_MS = 60 * 1000;
 const listeners = new Set<() => void>();

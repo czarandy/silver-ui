@@ -1,5 +1,5 @@
 import {useCallback, useMemo, useState, type ReactNode} from 'react';
-import {Dialog, type DialogProps} from './Dialog';
+import {Dialog, type DialogProps} from 'components/Dialog/Dialog';
 
 export type DialogOptions = Partial<
   Omit<DialogProps, 'children' | 'isOpen' | 'onOpenChange'>

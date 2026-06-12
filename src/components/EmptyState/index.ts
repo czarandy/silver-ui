@@ -1,1 +1,4 @@
-export {EmptyState, type EmptyStateProps} from './EmptyState';
+export {
+  EmptyState,
+  type EmptyStateProps,
+} from 'components/EmptyState/EmptyState';

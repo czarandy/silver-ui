@@ -1,2 +1,5 @@
-export {TreeView, type TreeViewProps} from './TreeView';
-export type {TreeViewDensity, TreeViewItemData} from './types';
+export {TreeView, type TreeViewProps} from 'components/TreeView/TreeView';
+export type {
+  TreeViewDensity,
+  TreeViewItemData,
+} from 'components/TreeView/types';

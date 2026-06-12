@@ -3,4 +3,4 @@ export {
   type CheckboxInputProps,
   type CheckboxInputSize,
   type CheckboxInputValue,
-} from './CheckboxInput';
+} from 'components/CheckboxInput/CheckboxInput';

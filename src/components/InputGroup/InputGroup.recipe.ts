@@ -1,5 +1,5 @@
+import type {InputSize, InputStatusType} from 'components/Field';
 import {cva, type RecipeVariantProps} from 'styled-system/css';
-import type {InputSize, InputStatusType} from '../Field';
 
 const addonSelector = '& > [data-silver-input-group-text]';
 const controlSelector = '& > :not([data-silver-input-group-text])';

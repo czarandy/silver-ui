@@ -13,8 +13,8 @@ import {LayoutHeader} from 'components/Layout/LayoutHeader';
 import {LayoutPanel} from 'components/Layout/LayoutPanel';
 import {HStack, VStack} from 'components/Stack';
 import {Text} from 'components/Text';
+import type {SpacingToken} from 'internal/spacingTokens';
 import {css} from 'styled-system/css';
-import type {SpacingToken} from '../../internal/spacingTokens';
 
 const meta: Meta<typeof Card> = {
   title: 'Components/Card',

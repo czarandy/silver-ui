@@ -2,7 +2,7 @@
 
 import {SearchFilterInputEditPopover} from 'components/SearchFilterInput/SearchFilterInputEditPopover';
 import {useInternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';
-import type {SearchFilterInputEditorProps} from './types';
+import type {SearchFilterInputEditorProps} from 'components/SearchFilterInput/types';
 
 /**
  * Default public filter editor used by SearchFilterInput.

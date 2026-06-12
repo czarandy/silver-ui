@@ -2,10 +2,10 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useId} from 'react';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {Text} from 'components/Text';
+import {VisuallyHidden} from 'internal';
 import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
-import {VisuallyHidden} from '../../internal';
-import isReactNode from '../../internal/isReactNode';
 
 export interface SideNavSectionProps {
   children: ReactNode;

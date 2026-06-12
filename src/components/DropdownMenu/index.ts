@@ -6,10 +6,13 @@ export {
   type DropdownMenuOption,
   type DropdownMenuProps,
   type DropdownMenuSection,
-} from './DropdownMenu';
+} from 'components/DropdownMenu/DropdownMenu';
 export {
   DropdownMenuContext,
   useDropdownMenuContext,
   type DropdownMenuContextValue,
-} from './DropdownMenuContext';
-export {DropdownMenuItem, type DropdownMenuItemProps} from './DropdownMenuItem';
+} from 'components/DropdownMenu/DropdownMenuContext';
+export {
+  DropdownMenuItem,
+  type DropdownMenuItemProps,
+} from 'components/DropdownMenu/DropdownMenuItem';

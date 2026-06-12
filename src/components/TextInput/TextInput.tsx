@@ -9,24 +9,24 @@ import {
   type Ref,
 } from 'react';
 import {Button} from 'components/Button';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
-import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from 'components/Field/inputUtils';
-import {useInputGroup} from 'components/InputGroup';
-import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
-} from '../Field';
-import {Icon, type IconComponent} from '../Icon';
+} from 'components/Field';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import {Icon, type IconComponent} from 'components/Icon';
+import {useInputGroup} from 'components/InputGroup';
+import {Spinner} from 'components/Spinner';
+import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
 
 export type TextInputType = 'email' | 'password' | 'text';
 

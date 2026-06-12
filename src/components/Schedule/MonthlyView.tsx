@@ -1,5 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
+import type {CSSProperties} from 'react';
+import {Popover} from 'components/Popover';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
 import {
@@ -10,11 +12,17 @@ import {
   scheduleClasses,
   ScheduleFrame,
 } from 'components/Schedule/shared';
+import type {
+  CalendarEvent,
+  ScheduleView,
+  ScheduleViewComponentProps,
+  ScheduleZonedInstant,
+  ScheduleZonedInstantRange,
+} from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
 import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import type {DayOfWeek} from '../../internal/dateTypes';
+import type {DayOfWeek} from 'internal/dateTypes';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateDayOfWeek,
@@ -24,16 +32,15 @@ import {
   plainDateIsBefore,
   plainDateIsEqual,
   type PlainDate,
-} from '../../internal/plainDate';
-import type {
-  CalendarEvent,
-  ScheduleView,
-  ScheduleViewComponentProps,
-  ScheduleZonedInstant,
-  ScheduleZonedInstantRange,
-} from './types';
+} from 'internal/plainDate';
+import {css} from 'styled-system/css';
 
 export interface ScheduleMonthlyViewOptions {
+  /**
+   * Pixel height used for each week row in the monthly grid.
+   * @default 128
+   */
+  monthRowHeight?: number;
   /**
    * Number of weeks to display in the monthly grid.
    * @default 6
@@ -109,14 +116,14 @@ const styles = {
   monthCellGrid: css({
     display: 'grid',
     gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-    gridAutoRows: '128px',
+    gridAutoRows: 'var(--schedule-month-row-height)',
   }),
   monthEventOverlay: css({
     position: 'absolute',
     inset: 0,
     display: 'grid',
     gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
-    gridAutoRows: '128px',
+    gridAutoRows: 'var(--schedule-month-row-height)',
     pointerEvents: 'none',
   }),
   monthEventSpan: css({
@@ -126,7 +133,49 @@ const styles = {
     pointerEvents: 'auto',
     zIndex: 1,
   }),
+  monthSeeMoreSpan: css({
+    alignSelf: 'start',
+    minW: 0,
+    mx: '0.5',
+    pointerEvents: 'auto',
+    zIndex: 2,
+  }),
+  monthSeeMoreButton: css({
+    display: 'inline-flex',
+    alignItems: 'center',
+    maxW: 'full',
+    h: '5',
+    px: '1',
+    borderRadius: 'sm',
+    color: 'primary',
+    cursor: 'pointer',
+    fontSize: 'xs',
+    fontWeight: 'medium',
+    lineHeight: 'tight',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    _hover: {
+      bg: 'bg.muted',
+    },
+  }),
+  monthPopoverContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2',
+    p: '3',
+  }),
+  monthPopoverEvents: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 0,
+    m: 0,
+    p: 0,
+    listStyleType: 'none',
+  }),
 } as const;
+
+type MonthGridStyle = CSSProperties & {'--schedule-month-row-height': string};
 
 const weekdays = [
   {label: 'Sunday', shortLabel: 'Sun'},
@@ -180,12 +229,18 @@ function getVisibleMonthRange(
 interface MonthEventSegment {
   columnEnd: number;
   columnStart: number;
+  endIndex: number;
   event: CalendarEvent;
   level: number;
+  startIndex: number;
   week: number;
 }
 
-const MAX_MONTH_EVENT_LEVELS = 5;
+const DEFAULT_MONTH_ROW_HEIGHT = 128;
+const MONTH_EVENT_TOP_OFFSET = 30;
+const MONTH_EVENT_LEVEL_HEIGHT = 22;
+const MONTH_EVENT_HEIGHT = 20;
+const MONTH_EVENT_BOTTOM_PADDING = 4;
 
 function getEventDateSpan(
   event: CalendarEvent,
@@ -339,10 +394,16 @@ function getMonthEventSegments(
       const columnEnd = week === Math.floor(endIndex / 7) ? endIndex % 7 : 6;
       const weekLevels = (levelsByWeek[week] ??= []);
       const level = getAvailableLevel(weekLevels, columnStart);
-      if (level < MAX_MONTH_EVENT_LEVELS) {
-        weekLevels[level] = columnEnd;
-        segments.push({columnEnd, columnStart, event, level, week});
-      }
+      weekLevels[level] = columnEnd;
+      segments.push({
+        columnEnd,
+        columnStart,
+        endIndex,
+        event,
+        level,
+        startIndex,
+        week,
+      });
     }
   });
 
@@ -354,12 +415,114 @@ function getMonthEventSegmentStyle({
   columnStart,
   level,
   week,
-}: MonthEventSegment): React.CSSProperties {
+}: MonthEventSegment): CSSProperties {
   return {
     gridColumn: `${columnStart + 1} / ${columnEnd + 2}`,
     gridRow: `${week + 1}`,
-    marginBlockStart: `${30 + level * 22}px`,
+    marginBlockStart: `${MONTH_EVENT_TOP_OFFSET + level * MONTH_EVENT_LEVEL_HEIGHT}px`,
   };
+}
+
+function getMonthEventLevelCount(monthRowHeight: number): number {
+  const availableHeight =
+    monthRowHeight -
+    MONTH_EVENT_TOP_OFFSET -
+    MONTH_EVENT_HEIGHT -
+    MONTH_EVENT_BOTTOM_PADDING;
+  return Math.max(
+    1,
+    Math.floor(availableHeight / MONTH_EVENT_LEVEL_HEIGHT) + 1,
+  );
+}
+
+function getMonthSeeMoreStyle({
+  dayIndex,
+  level,
+}: {
+  dayIndex: number;
+  level: number;
+}): CSSProperties {
+  return {
+    gridColumn: `${(dayIndex % 7) + 1} / ${(dayIndex % 7) + 2}`,
+    gridRow: `${Math.floor(dayIndex / 7) + 1}`,
+    marginBlockStart: `${MONTH_EVENT_TOP_OFFSET + level * MONTH_EVENT_LEVEL_HEIGHT}px`,
+  };
+}
+
+function segmentCoversDay(
+  segment: MonthEventSegment,
+  dayIndex: number,
+): boolean {
+  return segment.startIndex <= dayIndex && segment.endIndex >= dayIndex;
+}
+
+function shouldReserveSeeMoreLevel({
+  dayEvents,
+  levelCount,
+}: {
+  dayEvents: ReadonlyArray<CalendarEvent>;
+  levelCount: number;
+}): boolean {
+  return dayEvents.length > levelCount;
+}
+
+function isSegmentVisible({
+  dayEventsByIndex,
+  levelCount,
+  segment,
+}: {
+  dayEventsByIndex: ReadonlyArray<ReadonlyArray<CalendarEvent>>;
+  levelCount: number;
+  segment: MonthEventSegment;
+}): boolean {
+  for (let index = segment.startIndex; index <= segment.endIndex; index += 1) {
+    const visibleLevelCount = shouldReserveSeeMoreLevel({
+      dayEvents: dayEventsByIndex[index] ?? [],
+      levelCount,
+    })
+      ? levelCount - 1
+      : levelCount;
+    if (segment.level >= visibleLevelCount) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getHiddenEventsByDate({
+  dayEventsByIndex,
+  days,
+  segments,
+  visibleSegments,
+}: {
+  dayEventsByIndex: ReadonlyArray<ReadonlyArray<CalendarEvent>>;
+  days: ReadonlyArray<PlainDate>;
+  segments: ReadonlyArray<MonthEventSegment>;
+  visibleSegments: ReadonlyArray<MonthEventSegment>;
+}): Map<string, CalendarEvent[]> {
+  const hiddenEventsByDate = new Map<string, CalendarEvent[]>();
+  days.forEach((day, dayIndex) => {
+    const allSegmentEventIds = new Set(
+      segments
+        .filter(segment => segmentCoversDay(segment, dayIndex))
+        .map(segment => segment.event.id),
+    );
+    const visibleSegmentEventIds = new Set(
+      visibleSegments
+        .filter(segment => segmentCoversDay(segment, dayIndex))
+        .map(segment => segment.event.id),
+    );
+    const hiddenEvents = (dayEventsByIndex[dayIndex] ?? []).filter(
+      event =>
+        allSegmentEventIds.has(event.id) &&
+        !visibleSegmentEventIds.has(event.id),
+    );
+    if (hiddenEvents.length > 0) {
+      hiddenEventsByDate.set(day.toString(), hiddenEvents);
+    }
+  });
+
+  return hiddenEventsByDate;
 }
 
 function getGridCellName({
@@ -393,12 +556,36 @@ function ScheduleMonthlyView({
   const currentTime = useCurrentTime();
   const month = viewDate.toPlainDate();
   const title = formatMonthTitle(month);
+  const monthRowHeight = Math.max(
+    64,
+    Math.floor(options.monthRowHeight ?? DEFAULT_MONTH_ROW_HEIGHT),
+  );
   const weekStartsOn = options.weekStartsOn ?? 0;
   const days = getMonthDays(month, options.weekCount ?? 6, weekStartsOn);
   const eventSegments = getMonthEventSegments(events, days, timezoneID);
   const eventsByDate = getEventsByDate(events, days, timezoneID);
+  const dayEventsByIndex = days.map(
+    day => eventsByDate.get(day.toString()) ?? [],
+  );
+  const monthEventLevelCount = getMonthEventLevelCount(monthRowHeight);
+  const visibleEventSegments = eventSegments.filter(segment =>
+    isSegmentVisible({
+      dayEventsByIndex,
+      levelCount: monthEventLevelCount,
+      segment,
+    }),
+  );
+  const hiddenEventsByDate = getHiddenEventsByDate({
+    dayEventsByIndex,
+    days,
+    segments: eventSegments,
+    visibleSegments: visibleEventSegments,
+  });
   const today = highlightDate.toPlainDate();
   const visibleWeekdays = getWeekdays(weekStartsOn);
+  const monthGridStyle: MonthGridStyle = {
+    '--schedule-month-row-height': `${monthRowHeight}px`,
+  };
 
   return (
     <ScheduleFrame title={title} titleLabel={title}>
@@ -419,7 +606,7 @@ function ScheduleMonthlyView({
           </div>
         ))}
         <div className={styles.monthSurface}>
-          <div className={styles.monthCellGrid}>
+          <div className={styles.monthCellGrid} style={monthGridStyle}>
             {days.map((day, index) => {
               const dayEvents = eventsByDate.get(day.toString()) ?? [];
               const isCurrentMonth =
@@ -463,9 +650,10 @@ function ScheduleMonthlyView({
               );
             })}
           </div>
-          <div aria-hidden="true" className={styles.monthEventOverlay}>
-            {eventSegments.map(segment => (
+          <div className={styles.monthEventOverlay} style={monthGridStyle}>
+            {visibleEventSegments.map(segment => (
               <div
+                aria-hidden="true"
                 className={styles.monthEventSpan}
                 data-testid={`schedule-event-span-${segment.event.id}`}
                 key={`${segment.event.id}:${segment.week}:${segment.columnStart}`}
@@ -476,6 +664,56 @@ function ScheduleMonthlyView({
                 />
               </div>
             ))}
+            {days.map((day, dayIndex) => {
+              const hiddenEvents = hiddenEventsByDate.get(day.toString()) ?? [];
+              if (hiddenEvents.length === 0) {
+                return null;
+              }
+              const dateLabel = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
+              const label = `Show ${hiddenEvents.length} more events for ${dateLabel}`;
+              return (
+                <div
+                  className={styles.monthSeeMoreSpan}
+                  key={`${day.toString()}-see-more`}
+                  style={getMonthSeeMoreStyle({
+                    dayIndex,
+                    level: Math.max(0, monthEventLevelCount - 1),
+                  })}>
+                  <Popover
+                    content={
+                      <div className={styles.monthPopoverContent}>
+                        <Heading level={4}>{dateLabel}</Heading>
+                        <ul className={styles.monthPopoverEvents}>
+                          {(eventsByDate.get(day.toString()) ?? []).map(
+                            event => (
+                              <li key={event.id}>
+                                <CalendarMonthEventPill
+                                  event={event}
+                                  isPast={isEventInPast(
+                                    event,
+                                    currentTime,
+                                    timezoneID,
+                                  )}
+                                />
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      </div>
+                    }
+                    data-testid={`schedule-month-see-more-${day.toString()}`}
+                    label={label}
+                    width={320}>
+                    <button
+                      aria-label={label}
+                      className={styles.monthSeeMoreButton}
+                      type="button">
+                      +{hiddenEvents.length} more
+                    </button>
+                  </Popover>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -487,6 +725,7 @@ function ScheduleMonthlyView({
  * Creates a monthly schedule view configuration.
  */
 export function createScheduleMonthlyView({
+  monthRowHeight = DEFAULT_MONTH_ROW_HEIGHT,
   weekCount = 6,
   weekStartsOn = 0,
 }: ScheduleMonthlyViewOptions = {}): ScheduleView<ScheduleMonthlyViewOptions> {
@@ -518,6 +757,6 @@ export function createScheduleMonthlyView({
         ),
       };
     },
-    options: {weekCount, weekStartsOn},
+    options: {monthRowHeight, weekCount, weekStartsOn},
   };
 }

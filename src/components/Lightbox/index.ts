@@ -3,9 +3,9 @@ export {
   type LightboxMedia,
   type LightboxMediaType,
   type LightboxProps,
-} from './Lightbox';
+} from 'components/Lightbox/Lightbox';
 export {
   useLightbox,
   type UseLightboxOptions,
   type UseLightboxReturn,
-} from './useLightbox';
+} from 'components/Lightbox/useLightbox';

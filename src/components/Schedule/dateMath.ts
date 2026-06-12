@@ -1,12 +1,15 @@
+import type {
+  CalendarDayEvent,
+  CalendarEvent,
+} from 'components/Schedule/CalendarEvent';
+import type {Instant, ScheduleRange} from 'components/Schedule/types';
 import {
   plainDateFromInstant,
   plainDateIsAfter,
   plainDateIsBefore,
   plainDateToInstant,
   type PlainDate,
-} from '../../internal/plainDate';
-import type {CalendarDayEvent, CalendarEvent} from './CalendarEvent';
-import type {Instant, ScheduleRange} from './types';
+} from 'internal/plainDate';
 
 export function isDayEvent(event: CalendarEvent): event is CalendarDayEvent {
   return typeof event.start !== 'number';

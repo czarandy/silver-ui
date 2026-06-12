@@ -6,12 +6,12 @@ import type {
   ReactNode,
   Ref,
 } from 'react';
+import {Icon, type IconComponent} from 'components/Icon';
 import {Link} from 'components/Link';
 import {tagRecipe} from 'components/Tag/Tag.recipe';
 import {Tooltip} from 'components/Tooltip';
+import {VisuallyHidden} from 'internal/VisuallyHidden';
 import {cx} from 'internal/cx';
-import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import {Icon, type IconComponent} from '../Icon';
 
 export type TagColor =
   | 'red'

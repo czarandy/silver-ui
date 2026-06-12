@@ -10,23 +10,13 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {AutocompleteInputItem} from 'components/AutocompleteInput';
+import type {InputStatus} from 'components/Field';
+import type {IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {SearchFilterInputEditPopover} from 'components/SearchFilterInput/SearchFilterInputEditPopover';
 import {formatFilterValue} from 'components/SearchFilterInput/formatFilterValue';
 import {useInternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';
-import {useSearchFilterInputSource} from 'components/SearchFilterInput/useSearchFilterInputSource';
-import {Tag} from 'components/Tag';
-import {Text} from 'components/Text';
-import {css} from 'styled-system/css';
-import {AutocompleteInputItem} from '../AutocompleteInput';
-import type {InputStatus} from '../Field';
-import type {IconComponent} from '../Icon';
-import {
-  TagsInput,
-  type TagsInputChange,
-  type TagsInputHandle,
-  type TagsInputOverflowBehavior,
-} from '../TagsInput';
 import type {
   PartialFilter,
   SearchFilterInputChangeType,
@@ -35,7 +25,17 @@ import type {
   SearchFilterInputFilter,
   SearchFilterInputHandle,
   SearchFilterInputItem,
-} from './types';
+} from 'components/SearchFilterInput/types';
+import {useSearchFilterInputSource} from 'components/SearchFilterInput/useSearchFilterInputSource';
+import {Tag} from 'components/Tag';
+import {
+  TagsInput,
+  type TagsInputChange,
+  type TagsInputHandle,
+  type TagsInputOverflowBehavior,
+} from 'components/TagsInput';
+import {Text} from 'components/Text';
+import {css} from 'styled-system/css';
 
 export type SearchFilterInputSize = 'sm' | 'md' | 'lg';
 

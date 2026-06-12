@@ -7,8 +7,8 @@ import {
 } from 'react';
 import {metadataListRecipe} from 'components/MetadataList/MetadataList.recipe';
 import {MetadataListContext} from 'components/MetadataList/MetadataListContext';
+import {Heading} from 'components/Text';
 import {cx} from 'internal/cx';
-import {Heading} from '../Text';
 
 export type MetadataListLabelPosition = 'start' | 'top';
 

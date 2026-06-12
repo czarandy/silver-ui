@@ -5,22 +5,22 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
-import {radioGroupRecipe} from 'components/RadioGroup/RadioGroup.recipe';
-import isReactNode from '../../internal/isReactNode';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputStatus,
-} from '../Field';
+} from 'components/Field';
+import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {radioGroupRecipe} from 'components/RadioGroup/RadioGroup.recipe';
 import {
   RadioGroupContext,
   type RadioGroupOrientation,
   type RadioGroupSize,
-} from './RadioGroupContext';
+} from 'components/RadioGroup/RadioGroupContext';
+import isReactNode from 'internal/isReactNode';
 
-export type {RadioGroupOrientation} from './RadioGroupContext';
+export type {RadioGroupOrientation} from 'components/RadioGroup/RadioGroupContext';
 
 export type RadioGroupProps = {
   /**

@@ -1,5 +1,9 @@
 import {useCallback, useMemo, useState, type ReactNode} from 'react';
-import {Lightbox, type LightboxMedia, type LightboxProps} from './Lightbox';
+import {
+  Lightbox,
+  type LightboxMedia,
+  type LightboxProps,
+} from 'components/Lightbox/Lightbox';
 
 type LightboxOptions = Omit<
   LightboxProps,

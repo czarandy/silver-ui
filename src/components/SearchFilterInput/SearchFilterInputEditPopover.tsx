@@ -10,18 +10,18 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
+import {Button} from 'components/Button';
 import {SearchFilterInputValueEditor} from 'components/SearchFilterInput/SearchFilterInputValueEditor';
-import {Select} from 'components/Select';
-import {HStack, VStack} from 'components/Stack';
-import {css} from 'styled-system/css';
-import {Button} from '../Button';
-import type {InternalSearchFilterInputConfig} from './internalConfig';
+import type {InternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';
 import type {
   FilterValue,
   OperatorValue,
   PartialFilter,
   SearchFilterInputFilter,
-} from './types';
+} from 'components/SearchFilterInput/types';
+import {Select} from 'components/Select';
+import {HStack, VStack} from 'components/Stack';
+import {css} from 'styled-system/css';
 
 export interface SearchFilterInputEditPopoverProps {
   /**

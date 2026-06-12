@@ -1,1 +1,5 @@
-export {Center, type CenterAxis, type CenterProps} from './Center';
+export {
+  Center,
+  type CenterAxis,
+  type CenterProps,
+} from 'components/Center/Center';

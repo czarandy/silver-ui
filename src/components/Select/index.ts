@@ -5,5 +5,8 @@ export {
   type SelectOptionDefinition,
   type SelectProps,
   type SelectSection,
-} from './Select';
-export {SelectOption, type SelectOptionProps} from './SelectOption';
+} from 'components/Select/Select';
+export {
+  SelectOption,
+  type SelectOptionProps,
+} from 'components/Select/SelectOption';

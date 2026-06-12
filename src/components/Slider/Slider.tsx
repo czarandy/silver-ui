@@ -9,15 +9,15 @@ import {
   type PointerEvent,
   type Ref,
 } from 'react';
-import {sliderRecipe} from 'components/Slider/Slider.recipe';
-import {Tooltip} from 'components/Tooltip';
-import {cx} from 'internal/cx';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputStatus,
-} from '../Field';
+} from 'components/Field';
+import {sliderRecipe} from 'components/Slider/Slider.recipe';
+import {Tooltip} from 'components/Tooltip';
+import {cx} from 'internal/cx';
 
 export type SliderOrientation = 'horizontal' | 'vertical';
 export type SliderValueDisplay = 'tooltip' | 'text' | 'none';

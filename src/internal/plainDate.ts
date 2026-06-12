@@ -1,7 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
-import type {PlainDate} from './dateTypes';
+import type {PlainDate} from 'internal/dateTypes';
 
-export type {PlainDate} from './dateTypes';
+export type {PlainDate} from 'internal/dateTypes';
 
 export const DATE_FORMAT_WITH_WEEKDAY: Intl.DateTimeFormatOptions = {
   day: 'numeric',

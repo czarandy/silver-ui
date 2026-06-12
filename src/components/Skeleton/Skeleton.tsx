@@ -1,6 +1,6 @@
 import type {CSSProperties, Ref} from 'react';
+import {skeletonRecipe} from 'components/Skeleton/Skeleton.recipe';
 import {cx} from 'internal/cx';
-import {skeletonRecipe} from './Skeleton.recipe';
 
 export type SkeletonRadius = 0 | 1 | 2 | 3 | 4 | 'none' | 'rounded';
 

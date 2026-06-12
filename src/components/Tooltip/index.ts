@@ -1,6 +1,10 @@
-export {Tooltip, type TooltipProps, type TooltipFocusTrigger} from './Tooltip';
+export {
+  Tooltip,
+  type TooltipProps,
+  type TooltipFocusTrigger,
+} from 'components/Tooltip/Tooltip';
 export {
   useTooltip,
   type UseTooltipOptions,
   type UseTooltipReturn,
-} from './useTooltip';
+} from 'components/Tooltip/useTooltip';

@@ -7,7 +7,15 @@ import {
   type Ref,
 } from 'react';
 import {Button} from 'components/Button';
+import {
+  Field,
+  getNecessity,
+  type FieldNecessity,
+  type InputSize,
+  type InputStatus,
+} from 'components/Field';
 import {inputRecipe} from 'components/Field/inputStyles';
+import {Icon, type IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {
   selectMenuRecipe,
@@ -19,15 +27,7 @@ import {
   renderSelectListboxOptions,
   useSelectListbox,
   type SelectListboxOptionData,
-} from '../../internal/useSelectListbox';
-import {
-  Field,
-  getNecessity,
-  type FieldNecessity,
-  type InputSize,
-  type InputStatus,
-} from '../Field';
-import {Icon, type IconComponent} from '../Icon';
+} from 'internal/useSelectListbox';
 
 export interface SelectOptionData extends SelectListboxOptionData {
   /**

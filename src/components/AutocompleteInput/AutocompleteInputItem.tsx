@@ -1,11 +1,11 @@
 /* eslint-disable silver-ui/require-component-props -- discriminated union: custom-element items render item.element directly; passthrough props only apply to standard items */
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {autocompleteItemRecipe} from 'components/AutocompleteInput/AutocompleteInput.recipe';
+import type {SearchableItem} from 'components/AutocompleteInput/types';
+import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import {Icon, type IconComponent} from '../Icon';
-import type {SearchableItem} from './types';
+import isReactNode from 'internal/isReactNode';
 
 /**
  * Props for an item with a custom `element`. The element is rendered

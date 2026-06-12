@@ -4,7 +4,7 @@ import {
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
 import {cx} from 'internal/cx';
-import type {SpacingToken} from '../../internal/spacingTokens';
+import type {SpacingToken} from 'internal/spacingTokens';
 
 /**
  * Scrollable main content area within a Layout. Fills the remaining space

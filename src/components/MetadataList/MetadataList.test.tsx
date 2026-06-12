@@ -3,7 +3,7 @@ import {CircleCheck} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {MetadataList} from 'components/MetadataList/MetadataList';
 import {MetadataListItem} from 'components/MetadataList/MetadataListItem';
-import {assertNonNull} from '../../internal/testHelpers';
+import {assertNonNull} from 'internal/testHelpers';
 
 describe('MetadataList', () => {
   it('renders semantic metadata items', () => {

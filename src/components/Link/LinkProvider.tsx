@@ -1,6 +1,6 @@
 import {useMemo, type ReactNode} from 'react';
-import {LinkContext} from './LinkContext';
-import type {LinkComponent} from './types';
+import {LinkContext} from 'components/Link/LinkContext';
+import type {LinkComponent} from 'components/Link/types';
 
 export interface LinkProviderProps {
   children: ReactNode;

@@ -10,10 +10,10 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {toastRecipe} from 'components/Toast/Toast.recipe';
+import type {ToastDismissReason, ToastType} from 'components/Toast/types';
 import {cx} from 'internal/cx';
-import {nowMonotonicMilliseconds} from '../../internal/time';
-import useLatest from '../../internal/useLatest';
-import type {ToastDismissReason, ToastType} from './types';
+import {nowMonotonicMilliseconds} from 'internal/time';
+import useLatest from 'internal/useLatest';
 
 export interface ToastProps {
   /**

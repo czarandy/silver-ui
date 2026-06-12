@@ -1,12 +1,12 @@
 import {ImageIcon, X} from 'lucide-react';
 import {useState, type CSSProperties, type MouseEvent, type Ref} from 'react';
+import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
 import {Skeleton} from 'components/Skeleton';
 import {Spinner} from 'components/Spinner';
 import {thumbnailRecipe} from 'components/Thumbnail/Thumbnail.recipe';
 import {Tooltip} from 'components/Tooltip';
 import {cx} from 'internal/cx';
-import {Button} from '../Button';
 
 export interface ThumbnailProps {
   /**

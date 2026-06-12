@@ -3,4 +3,4 @@ export {
   type AlertContainer,
   type AlertProps,
   type AlertStatus,
-} from './Alert';
+} from 'components/Alert/Alert';

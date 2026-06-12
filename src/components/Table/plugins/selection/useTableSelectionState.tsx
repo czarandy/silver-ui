@@ -1,5 +1,5 @@
 import {useCallback, useMemo} from 'react';
-import type {UseTableSelectionConfig} from './useTableSelection';
+import type {UseTableSelectionConfig} from 'components/Table/plugins/selection/useTableSelection';
 
 export interface UseTableSelectionStateConfig<
   T extends Record<string, unknown>,

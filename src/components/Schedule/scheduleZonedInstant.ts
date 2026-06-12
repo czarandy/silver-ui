@@ -1,9 +1,13 @@
+import type {
+  Instant,
+  ScheduleDate,
+  ScheduleRange,
+} from 'components/Schedule/types';
 import {
   plainDateFromInstant,
   plainDateToInstant,
   type PlainDate,
-} from '../../internal/plainDate';
-import type {Instant, ScheduleDate, ScheduleRange} from './types';
+} from 'internal/plainDate';
 
 export interface ScheduleZonedInstant {
   addDays: (days: number) => ScheduleZonedInstant;

@@ -5,6 +5,10 @@ export {
   type FieldProps,
   type FieldStatus,
   type FieldStatusVariant,
-} from './Field';
+} from 'components/Field/Field';
 
-export type {InputSize, InputStatus, InputStatusType} from './types';
+export type {
+  InputSize,
+  InputStatus,
+  InputStatusType,
+} from 'components/Field/types';

@@ -8,12 +8,12 @@ import {
 } from 'components/Schedule/dateMath';
 import {scheduleRangeToScheduleZonedInstantRange} from 'components/Schedule/scheduleZonedInstant';
 import {ScheduleFrame, formatWeekTitle} from 'components/Schedule/shared';
-import {plainDateDayOfWeek, type PlainDate} from '../../internal/plainDate';
 import type {
   ScheduleView,
   ScheduleViewComponentProps,
   ScheduleZonedInstant,
-} from './types';
+} from 'components/Schedule/types';
+import {plainDateDayOfWeek, type PlainDate} from 'internal/plainDate';
 
 export interface ScheduleWeeklyViewOptions {
   /**

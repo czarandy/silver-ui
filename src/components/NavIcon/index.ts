@@ -1,1 +1,1 @@
-export {NavIcon, type NavIconProps} from './NavIcon';
+export {NavIcon, type NavIconProps} from 'components/NavIcon/NavIcon';

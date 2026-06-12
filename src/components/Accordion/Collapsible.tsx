@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {AccordionItem} from './AccordionItem';
+import {AccordionItem} from 'components/Accordion/AccordionItem';
 
 /**
  * A standalone disclosure widget that toggles the visibility of a content

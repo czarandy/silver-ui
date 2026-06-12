@@ -4,7 +4,7 @@ import {Star} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {Tag} from 'components/Tag/Tag';
 import {tagRecipe} from 'components/Tag/Tag.recipe';
-import {assertNonNull} from '../../internal/testHelpers';
+import {assertNonNull} from 'internal/testHelpers';
 
 describe('Tag', () => {
   it('renders a label', () => {

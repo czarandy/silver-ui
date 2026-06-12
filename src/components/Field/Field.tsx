@@ -1,13 +1,13 @@
 import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {fieldRecipe} from 'components/Field/Field.recipe';
+import type {InputStatusType} from 'components/Field/types';
+import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
+import {VisuallyHidden} from 'internal/VisuallyHidden';
 import {cx} from 'internal/cx';
-import {VisuallyHidden} from '../../internal/VisuallyHidden';
-import isReactNode from '../../internal/isReactNode';
-import {Icon, type IconComponent} from '../Icon';
-import type {InputStatusType} from './types';
+import isReactNode from 'internal/isReactNode';
 
 export type FieldStatusVariant = 'attached' | 'detached';
 

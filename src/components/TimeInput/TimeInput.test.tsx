@@ -3,7 +3,7 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {TimeInput} from 'components/TimeInput/TimeInput';
-import {assertNonNull} from '../../internal/testHelpers';
+import {assertNonNull} from 'internal/testHelpers';
 
 const T = (s: string) => Temporal.PlainTime.from(s);
 

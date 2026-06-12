@@ -2,4 +2,4 @@ export {
   Pagination,
   type PaginationProps,
   type PaginationVariant,
-} from './Pagination';
+} from 'components/Pagination/Pagination';

@@ -1,5 +1,5 @@
 import type {ReactNode} from 'react';
-import type {IconComponent} from '../Icon';
+import type {IconComponent} from 'components/Icon';
 
 export interface DropdownMenuItemData {
   /**

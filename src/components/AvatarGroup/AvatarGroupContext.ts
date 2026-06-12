@@ -1,5 +1,5 @@
 import {createContext, use} from 'react';
-import type {AvatarSize} from '../Avatar';
+import type {AvatarSize} from 'components/Avatar';
 
 export interface AvatarGroupContextValue {
   numericSize: number;

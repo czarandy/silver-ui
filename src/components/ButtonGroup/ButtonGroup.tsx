@@ -1,12 +1,12 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
+import type {ButtonSize} from 'components/Button/Button';
 import {buttonGroupRecipe} from 'components/ButtonGroup/ButtonGroup.recipe';
-import {cx} from 'internal/cx';
-import type {ButtonSize} from '../Button/Button';
 import {
   ButtonGroupContext,
   type ButtonGroupOrientation,
-} from './ButtonGroupContext';
+} from 'components/ButtonGroup/ButtonGroupContext';
+import {cx} from 'internal/cx';
 
 /**
  * Groups related Buttons and propagates shared size, disabled state, and

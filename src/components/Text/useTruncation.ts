@@ -4,7 +4,7 @@ import {
   useSyncExternalStore,
   type RefCallback,
 } from 'react';
-import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 
 export interface UseTruncationOptions {
   maxLines: number;

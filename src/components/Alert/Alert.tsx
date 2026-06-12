@@ -14,15 +14,15 @@ import {
   type Ref,
 } from 'react';
 import {alertRecipe} from 'components/Alert/Alert.recipe';
+import type {AlertContainer, AlertStatus} from 'components/Alert/Alert.types';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
 import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import type {SpacingToken} from '../../internal/spacingTokens';
-import type {AlertContainer, AlertStatus} from './Alert.types';
+import isReactNode from 'internal/isReactNode';
+import type {SpacingToken} from 'internal/spacingTokens';
 
-export type {AlertContainer, AlertStatus} from './Alert.types';
+export type {AlertContainer, AlertStatus} from 'components/Alert/Alert.types';
 
 export interface AlertProps {
   /**

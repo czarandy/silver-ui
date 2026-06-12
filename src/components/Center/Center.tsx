@@ -1,7 +1,7 @@
 import type {HTMLAttributes, ReactNode, Ref} from 'react';
 import {centerRecipe} from 'components/Center/Center.recipe';
 import {cx} from 'internal/cx';
-import {toPixelSize, type SizeValue} from '../../internal/toPixelSize';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 
 export type CenterAxis = 'both' | 'horizontal' | 'vertical';
 

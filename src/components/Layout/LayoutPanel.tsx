@@ -5,7 +5,7 @@ import {
 } from 'components/Layout/Layout.recipe';
 import {useLayoutArea, useLayoutDivider} from 'components/Layout/LayoutContext';
 import {cx} from 'internal/cx';
-import type {SpacingToken} from '../../internal/spacingTokens';
+import type {SpacingToken} from 'internal/spacingTokens';
 
 /**
  * Side panel region within a Layout. Placed in the start or end slot,

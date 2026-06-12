@@ -13,7 +13,7 @@ import type {
   ScheduleView,
   ScheduleViewComponentProps,
   ScheduleZonedInstant,
-} from './types';
+} from 'components/Schedule/types';
 
 export interface ScheduleDayViewOptions {
   /**

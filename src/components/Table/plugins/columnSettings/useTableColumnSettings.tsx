@@ -1,6 +1,6 @@
 import {useMemo} from 'react';
-import type {TableColumn, TablePlugin} from '../../types';
-import type {UseTableColumnSettingsStateConfig} from './useTableColumnSettingsState';
+import type {UseTableColumnSettingsStateConfig} from 'components/Table/plugins/columnSettings/useTableColumnSettingsState';
+import type {TableColumn, TablePlugin} from 'components/Table/types';
 
 export interface TableColumnSettingsOption<TColumnKey extends string = string> {
   group?: string;

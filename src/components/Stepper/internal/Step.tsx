@@ -1,10 +1,10 @@
 import {Check, TriangleAlert} from 'lucide-react';
 import type {ReactNode} from 'react';
 import {Icon} from 'components/Icon';
+import type {StepperOrientation} from 'components/Stepper/Stepper';
 import {stepRecipe} from 'components/Stepper/internal/Step.recipe';
 import {Text} from 'components/Text';
 import isReactNode from 'internal/isReactNode';
-import type {StepperOrientation} from '../Stepper';
 
 export type StepState =
   | 'active'

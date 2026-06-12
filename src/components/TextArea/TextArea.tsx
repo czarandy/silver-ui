@@ -7,25 +7,25 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
-import {
-  getDescribedBy,
-  getStatusIcon,
-  getStatusMessageID,
-} from 'components/Field/inputUtils';
-import {Spinner} from 'components/Spinner';
-import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import isReactNode from '../../internal/isReactNode';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
-} from '../Field';
-import {Icon, type IconComponent} from '../Icon';
+} from 'components/Field';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  getDescribedBy,
+  getStatusIcon,
+  getStatusMessageID,
+} from 'components/Field/inputUtils';
+import {Icon, type IconComponent} from 'components/Icon';
+import {Spinner} from 'components/Spinner';
+import {Text} from 'components/Text';
+import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
+import {css} from 'styled-system/css';
 
 export type TextAreaProps = {
   /**

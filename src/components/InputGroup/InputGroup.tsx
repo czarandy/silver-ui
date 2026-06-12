@@ -5,17 +5,17 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import {inputGroupRecipe} from 'components/InputGroup/InputGroup.recipe';
-import {InputGroupContext} from 'components/InputGroup/InputGroupContext';
-import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
 import {
   Field,
   getNecessity,
   type FieldNecessity,
   type InputSize,
   type InputStatus,
-} from '../Field';
+} from 'components/Field';
+import {inputGroupRecipe} from 'components/InputGroup/InputGroup.recipe';
+import {InputGroupContext} from 'components/InputGroup/InputGroupContext';
+import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
 
 export type InputGroupProps = {
   /**

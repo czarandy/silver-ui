@@ -4,9 +4,9 @@ export {
   type AppShellHeight,
   type AppShellProps,
   type AppShellVariant,
-} from './AppShell';
+} from 'components/AppShell/AppShell';
 export {
   AppShellMobileContext,
   useAppShellMobile,
   type AppShellMobileContextValue,
-} from './AppShellMobileContext';
+} from 'components/AppShell/AppShellMobileContext';

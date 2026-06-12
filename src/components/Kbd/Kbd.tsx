@@ -4,8 +4,8 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
+import {kbdRecipe} from 'components/Kbd/Kbd.recipe';
 import {cx} from 'internal/cx';
-import {kbdRecipe} from './Kbd.recipe';
 
 export type KbdSize = 'sm' | 'md' | 'lg';
 

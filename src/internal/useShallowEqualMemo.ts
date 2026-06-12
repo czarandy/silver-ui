@@ -1,5 +1,5 @@
 import {useRef} from 'react';
-import {shallowEqual} from './shallowEqual';
+import {shallowEqual} from 'internal/shallowEqual';
 
 /**
  * Returns a referentially stable version of `value`: the same reference is

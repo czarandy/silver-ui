@@ -3,5 +3,5 @@ export {
   type StepConfig,
   type StepperOrientation,
   type StepperProps,
-} from './Stepper';
-export {type StepState} from './internal/Step';
+} from 'components/Stepper/Stepper';
+export {type StepState} from 'components/Stepper/internal/Step';

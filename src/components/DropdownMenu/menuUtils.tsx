@@ -1,10 +1,10 @@
 /* eslint-disable @eslint-react/no-array-index-key */
 import {useCallback, type KeyboardEvent, type ReactNode} from 'react';
+import {Divider} from 'components/Divider';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
+import type {DropdownMenuOption} from 'components/DropdownMenu/types';
 import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import {Divider} from '../Divider';
-import type {DropdownMenuOption} from './types';
 
 const menuStyles = {
   section: css({

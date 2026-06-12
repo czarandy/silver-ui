@@ -5,9 +5,13 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
+import {
+  TabsContext,
+  type TabsLayout,
+  type TabsSize,
+} from 'components/Tabs/TabsContext';
 import {cx} from 'internal/cx';
-import {tabsRecipe} from './Tabs.recipe';
-import {TabsContext, type TabsLayout, type TabsSize} from './TabsContext';
 
 export interface TabsProps {
   /**

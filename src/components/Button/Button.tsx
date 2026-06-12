@@ -10,19 +10,19 @@ import type {
   Ref,
 } from 'react';
 import {buttonRecipe} from 'components/Button/Button.recipe';
+import type {ButtonSize, ButtonVariant} from 'components/Button/Button.types';
 import {useButtonGroup} from 'components/ButtonGroup/ButtonGroupContext';
+import {Icon, type IconComponent} from 'components/Icon';
 import {useLinkComponent} from 'components/Link';
+import type {LinkComponent} from 'components/Link';
 import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
+import {VisuallyHidden} from 'internal';
 import {cx} from 'internal/cx';
-import {VisuallyHidden} from '../../internal';
-import isReactNode from '../../internal/isReactNode';
-import {getAriaLabel, useRel} from '../../internal/linkAccessibility';
-import {Icon, type IconComponent} from '../Icon';
-import type {LinkComponent} from '../Link';
-import type {ButtonSize, ButtonVariant} from './Button.types';
+import isReactNode from 'internal/isReactNode';
+import {getAriaLabel, useRel} from 'internal/linkAccessibility';
 
-export type {ButtonSize} from './Button.types';
+export type {ButtonSize} from 'components/Button/Button.types';
 
 /**
  * A versatile action element that renders as a `<button>` or a link depending

@@ -2,12 +2,12 @@
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useLinkComponent} from 'components/Link';
+import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
-import isReactNode from '../../internal/isReactNode';
-import type {LinkComponent} from '../Link';
 
 export interface SideNavHeadingProps {
   as?: LinkComponent;

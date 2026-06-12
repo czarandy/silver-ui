@@ -1,15 +1,15 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
 import {layoutRecipe} from 'components/Layout/Layout.recipe';
-import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import type {SpacingToken} from '../../internal/spacingTokens';
 import {
   LayoutAreaContext,
   LayoutDividerContext,
   type LayoutArea,
-} from './LayoutContext';
-import type {LayoutHeight} from './types';
+} from 'components/Layout/LayoutContext';
+import type {LayoutHeight} from 'components/Layout/types';
+import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
+import type {SpacingToken} from 'internal/spacingTokens';
 
 /**
  * Shell with header, side panels, content, and footer slots.

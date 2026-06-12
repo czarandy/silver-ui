@@ -1,27 +1,33 @@
-export {createEventFromISO} from './CalendarEvent';
-export {createScheduleDayView, type ScheduleDayViewOptions} from './DayView';
-export {createScheduleListView, type ScheduleListViewOptions} from './ListView';
+export {createEventFromISO} from 'components/Schedule/CalendarEvent';
+export {
+  createScheduleDayView,
+  type ScheduleDayViewOptions,
+} from 'components/Schedule/DayView';
+export {
+  createScheduleListView,
+  type ScheduleListViewOptions,
+} from 'components/Schedule/ListView';
 export {
   createScheduleMonthlyView,
   type ScheduleMonthlyViewOptions,
-} from './MonthlyView';
-export {Schedule, type ScheduleProps} from './Schedule';
+} from 'components/Schedule/MonthlyView';
+export {Schedule, type ScheduleProps} from 'components/Schedule/Schedule';
 export {
   createScheduleWeeklyView,
   type ScheduleWeeklyViewOptions,
-} from './WeeklyView';
-export {ScheduleContext, useScheduleContext} from './context';
+} from 'components/Schedule/WeeklyView';
+export {ScheduleContext, useScheduleContext} from 'components/Schedule/context';
 export {
   defaultSchedulePlugins,
   useSchedulePaginationPlugin,
   useScheduleViewSelectorPlugin,
-} from './plugins';
-export type {ScheduleContextValue} from './context';
-export type {SchedulePaginationPluginOptions} from './plugins/PaginationPlugin';
+} from 'components/Schedule/plugins';
+export type {ScheduleContextValue} from 'components/Schedule/context';
+export type {SchedulePaginationPluginOptions} from 'components/Schedule/plugins/PaginationPlugin';
 export type {
   ScheduleViewSelectorOption,
   ScheduleViewSelectorPluginOptions,
-} from './plugins/ViewSelectorPlugin';
+} from 'components/Schedule/plugins/ViewSelectorPlugin';
 export type {
   CalendarDayEvent,
   CalendarEvent,
@@ -43,4 +49,4 @@ export type {
   ScheduleViewOptions,
   ScheduleZonedInstant,
   ScheduleZonedInstantRange,
-} from './types';
+} from 'components/Schedule/types';

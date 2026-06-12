@@ -1,6 +1,6 @@
 import type {ComponentPropsWithoutRef, JSX, ReactNode, Ref} from 'react';
+import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {cx} from './cx';
 
 export interface VisuallyHiddenProps extends Omit<
   ComponentPropsWithoutRef<'span'>,

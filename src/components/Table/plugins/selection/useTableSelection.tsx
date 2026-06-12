@@ -10,11 +10,15 @@ import {
 } from 'react';
 import {CheckboxInput} from 'components/CheckboxInput';
 import {pixel} from 'components/Table/columnUtils';
+import type {
+  BodyRowRenderProps,
+  TableColumn,
+  TablePlugin,
+} from 'components/Table/types';
+import {mergeRefs} from 'internal/mergeRefs';
+import useConstant from 'internal/useConstant';
+import useLatest from 'internal/useLatest';
 import {css} from 'styled-system/css';
-import {mergeRefs} from '../../../../internal/mergeRefs';
-import useConstant from '../../../../internal/useConstant';
-import useLatest from '../../../../internal/useLatest';
-import type {BodyRowRenderProps, TableColumn, TablePlugin} from '../../types';
 
 export interface UseTableSelectionConfig<T extends Record<string, unknown>> {
   getIsAllSelected: () => boolean;

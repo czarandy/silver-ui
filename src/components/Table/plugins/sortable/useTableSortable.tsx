@@ -1,12 +1,12 @@
 import {ArrowDown, ArrowUp, ChevronsUpDown} from 'lucide-react';
 import {useMemo, type ReactNode} from 'react';
-import {css} from 'styled-system/css';
-import {Icon} from '../../../Icon';
+import {Icon} from 'components/Icon';
 import type {
   HeaderCellRenderProps,
   TableColumn,
   TablePlugin,
-} from '../../types';
+} from 'components/Table/types';
+import {css} from 'styled-system/css';
 
 export type TableSortDirection = 'ascending' | 'descending';
 

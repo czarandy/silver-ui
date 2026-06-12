@@ -2,9 +2,9 @@ export {
   useTableColumnSettings,
   type TableColumnSettingsOption,
   type UseTableColumnSettingsConfig,
-} from './useTableColumnSettings';
+} from 'components/Table/plugins/columnSettings/useTableColumnSettings';
 export {
   useTableColumnSettingsState,
   type UseTableColumnSettingsStateConfig,
   type UseTableColumnSettingsStateReturn,
-} from './useTableColumnSettingsState';
+} from 'components/Table/plugins/columnSettings/useTableColumnSettingsState';

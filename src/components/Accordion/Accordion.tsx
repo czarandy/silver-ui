@@ -6,10 +6,13 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {
+  AccordionContext,
+  type AccordionContextValue,
+} from 'components/Accordion/AccordionContext';
+import {useAccordionDevWarning} from 'components/Accordion/useAccordionDevWarning';
 import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
-import {AccordionContext, type AccordionContextValue} from './AccordionContext';
-import {useAccordionDevWarning} from './useAccordionDevWarning';
 
 /**
  * A container that coordinates multiple `AccordionItem` children so that

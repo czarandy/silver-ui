@@ -15,4 +15,4 @@ export {
   type ThemeSizeTokens,
   type ThemeSpacingTokens,
   type ThemeTokens,
-} from './Theme';
+} from 'components/Theme/Theme';

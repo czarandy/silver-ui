@@ -1,5 +1,5 @@
 import {useCallback, useMemo} from 'react';
-import type {TableColumnSettingsOption} from './useTableColumnSettings';
+import type {TableColumnSettingsOption} from 'components/Table/plugins/columnSettings/useTableColumnSettings';
 
 export interface UseTableColumnSettingsStateConfig<
   TColumnKey extends string = string,

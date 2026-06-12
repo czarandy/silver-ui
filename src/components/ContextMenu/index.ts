@@ -8,4 +8,4 @@ export {
   type ContextMenuProps,
   type ContextMenuSection,
   type ContextMenuSize,
-} from './ContextMenu';
+} from 'components/ContextMenu/ContextMenu';

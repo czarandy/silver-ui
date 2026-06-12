@@ -6,8 +6,8 @@ export {
   type TableFilterValue,
   type TableFilterVariant,
   type UseTableFilteringConfig,
-} from './useTableFiltering';
+} from 'components/Table/plugins/filtering/useTableFiltering';
 export {
   useTableFilterState,
   type UseTableFilterStateResult,
-} from './useTableFilterState';
+} from 'components/Table/plugins/filtering/useTableFilterState';

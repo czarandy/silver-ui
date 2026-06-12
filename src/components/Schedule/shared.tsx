@@ -4,6 +4,12 @@ import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
+import type {
+  CalendarEvent,
+  ScheduleCategory,
+  ScheduleCategoryMap,
+  ScheduleHeaderContent,
+} from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
 import {
@@ -14,13 +20,7 @@ import {
   plainDateIsBefore,
   plainDateIsEqual,
   type PlainDate,
-} from '../../internal/plainDate';
-import type {
-  CalendarEvent,
-  ScheduleCategory,
-  ScheduleCategoryMap,
-  ScheduleHeaderContent,
-} from './types';
+} from 'internal/plainDate';
 
 /**
  * Static slot classes for the schedule shell (root, frame/header, surface).

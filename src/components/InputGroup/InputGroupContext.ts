@@ -1,5 +1,5 @@
 import {createContext, use} from 'react';
-import type {InputSize, InputStatusType} from '../Field';
+import type {InputSize, InputStatusType} from 'components/Field';
 
 export interface InputGroupContextValue {
   isDisabled: boolean;

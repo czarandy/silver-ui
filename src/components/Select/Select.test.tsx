@@ -4,7 +4,7 @@ import {Search, User} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {Select} from 'components/Select/Select';
 import {SelectOption} from 'components/Select/SelectOption';
-import {assertNonNull} from '../../internal/testHelpers';
+import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {

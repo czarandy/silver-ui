@@ -14,7 +14,7 @@ import {
 import {Button} from 'components/Button';
 import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
 import {cx} from 'internal/cx';
-import type {DateRange, DayOfWeek} from '../../internal/dateTypes';
+import type {DateRange, DayOfWeek} from 'internal/dateTypes';
 import {
   DATE_FORMAT_MONTH_YEAR,
   DATE_FORMAT_WITH_WEEKDAY,
@@ -29,11 +29,11 @@ import {
   plainDateIsInRange,
   plainDateToday,
   type PlainDate,
-} from '../../internal/plainDate';
-import {getBrowserTimezoneID} from '../../internal/time';
-import {useGridFocus} from '../../internal/useGridFocus';
+} from 'internal/plainDate';
+import {getBrowserTimezoneID} from 'internal/time';
+import {useGridFocus} from 'internal/useGridFocus';
 
-export type {DateRange, DayOfWeek} from '../../internal/dateTypes';
+export type {DateRange, DayOfWeek} from 'internal/dateTypes';
 
 export interface CalendarHandle {
   navigateTo: (date: PlainDate) => void;

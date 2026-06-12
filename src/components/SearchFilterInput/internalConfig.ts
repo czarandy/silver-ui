@@ -3,7 +3,7 @@ import type {
   SearchFilterInputConfig,
   SearchFilterInputField,
   SearchFilterInputOperator,
-} from './types';
+} from 'components/SearchFilterInput/types';
 
 export interface InternalSearchFilterInputConfig {
   readonly config: SearchFilterInputConfig;

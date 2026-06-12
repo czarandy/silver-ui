@@ -5,9 +5,9 @@ export {
   type AvatarNumericSize,
   type AvatarProps,
   type AvatarSize,
-} from './Avatar';
+} from 'components/Avatar/Avatar';
 export {
   AvatarStatusDot,
   type AvatarStatusDotProps,
   type AvatarStatusDotVariant,
-} from './AvatarStatusDot';
+} from 'components/Avatar/AvatarStatusDot';

@@ -1,5 +1,5 @@
 import {createContext} from 'react';
-import type {LinkComponent} from './types';
+import type {LinkComponent} from 'components/Link/types';
 
 export interface LinkContextValue {
   component: LinkComponent;

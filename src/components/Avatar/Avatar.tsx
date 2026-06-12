@@ -6,7 +6,7 @@ import {AvatarSizeContext} from 'components/Avatar/AvatarSizeContext';
 import {useAvatarGroup} from 'components/AvatarGroup/AvatarGroupContext';
 import {Icon} from 'components/Icon';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
+import isReactNode from 'internal/isReactNode';
 
 const CIRCLE_EDGE_OFFSET_RATIO = (1 - 1 / Math.SQRT2) / 2;
 const INITIALS_FONT_SIZE_RATIO = 0.4;

@@ -1,1 +1,6 @@
-export {Tag, type TagColor, type TagProps, type TagSize} from './Tag';
+export {
+  Tag,
+  type TagColor,
+  type TagProps,
+  type TagSize,
+} from 'components/Tag/Tag';

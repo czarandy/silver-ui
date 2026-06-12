@@ -2,9 +2,12 @@ export {
   RadioGroup,
   type RadioGroupOrientation,
   type RadioGroupProps,
-} from './RadioGroup';
+} from 'components/RadioGroup/RadioGroup';
 export {
   type RadioGroupContextValue,
   type RadioGroupSize,
-} from './RadioGroupContext';
-export {RadioGroupItem, type RadioGroupItemProps} from './RadioGroupItem';
+} from 'components/RadioGroup/RadioGroupContext';
+export {
+  RadioGroupItem,
+  type RadioGroupItemProps,
+} from 'components/RadioGroup/RadioGroupItem';

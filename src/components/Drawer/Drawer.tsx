@@ -5,10 +5,10 @@ import {cx} from 'internal/cx';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
-} from '../../internal/dismissBehavior';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {useBackdropDismiss} from '../../internal/useBackdropDismiss';
-import {useScrollLock} from '../../internal/useScrollLock';
+} from 'internal/dismissBehavior';
+import {mergeRefs} from 'internal/mergeRefs';
+import {useBackdropDismiss} from 'internal/useBackdropDismiss';
+import {useScrollLock} from 'internal/useScrollLock';
 
 export type DrawerPlacement = 'start' | 'end' | 'top' | 'bottom';
 export type DrawerDismissBehavior = DismissBehavior;

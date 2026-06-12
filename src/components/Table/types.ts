@@ -5,7 +5,7 @@ import type {
   TdHTMLAttributes,
   ThHTMLAttributes,
 } from 'react';
-import type {TableFilterFieldRef} from './plugins/filtering/useTableFiltering';
+import type {TableFilterFieldRef} from 'components/Table/plugins/filtering/useTableFiltering';
 
 export interface ProportionalWidth {
   minWidth?: number;

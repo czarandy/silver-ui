@@ -1,1 +1,1 @@
-export {Kbd, type KbdProps, type KbdSize} from './Kbd';
+export {Kbd, type KbdProps, type KbdSize} from 'components/Kbd/Kbd';

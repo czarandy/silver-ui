@@ -3,8 +3,8 @@ import {useRef} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {Popover} from 'components/Popover/Popover';
+import {assertNonNull} from 'internal/testHelpers';
 import {token} from 'styled-system/tokens';
-import {assertNonNull} from '../../internal/testHelpers';
 
 const showPopoverMock = vi.fn();
 const hidePopoverMock = vi.fn();

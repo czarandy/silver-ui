@@ -1,9 +1,9 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
+import {resolveAvatarSize, type AvatarSize} from 'components/Avatar';
 import {avatarGroupRecipe} from 'components/AvatarGroup/AvatarGroup.recipe';
 import {AvatarGroupContext} from 'components/AvatarGroup/AvatarGroupContext';
 import {cx} from 'internal/cx';
-import {resolveAvatarSize, type AvatarSize} from '../Avatar';
 
 const OVERLAP_RATIO = 0.25;
 

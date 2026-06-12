@@ -6,9 +6,9 @@ import {
   type RefCallback,
   type RefObject,
 } from 'react';
-import {mergeRefs} from './mergeRefs';
-import useLatest from './useLatest';
-import {useLayer, type LayerReturn} from './useLayer';
+import {mergeRefs} from 'internal/mergeRefs';
+import useLatest from 'internal/useLatest';
+import {useLayer, type LayerReturn} from 'internal/useLayer';
 
 export type HoverLayerFocusTrigger = 'auto' | 'always' | 'never';
 

@@ -11,13 +11,10 @@ import {
   type RefObject,
   type SetStateAction,
 } from 'react';
-import type {InputStatus} from '../components/Field';
-import {
-  getDescribedBy,
-  getStatusMessageID,
-} from '../components/Field/inputUtils';
-import isReactNode from './isReactNode';
-import {useListboxNavigation} from './useListboxNavigation';
+import type {InputStatus} from 'components/Field';
+import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import isReactNode from 'internal/isReactNode';
+import {useListboxNavigation} from 'internal/useListboxNavigation';
 
 export interface SelectListboxOptionData {
   isDisabled?: boolean;

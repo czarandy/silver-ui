@@ -4,9 +4,6 @@ import {eventOverlapsRange, sortEvents} from 'components/Schedule/dateMath';
 import {defaultSchedulePlugins} from 'components/Schedule/plugins';
 import {createScheduleZonedInstant} from 'components/Schedule/scheduleZonedInstant';
 import {createCategoryMap, scheduleClasses} from 'components/Schedule/shared';
-import {cx} from 'internal/cx';
-import {plainDateFromInstant} from '../../internal/plainDate';
-import {getBrowserTimezoneID, nowEpochMilliseconds} from '../../internal/time';
 import type {
   CalendarEvent,
   Instant,
@@ -17,7 +14,10 @@ import type {
   ScheduleView,
   ScheduleViewOptions,
   ScheduleZonedInstant,
-} from './types';
+} from 'components/Schedule/types';
+import {cx} from 'internal/cx';
+import {plainDateFromInstant} from 'internal/plainDate';
+import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
 
 const EMPTY_CATEGORIES: ReadonlyArray<ScheduleCategory> = [];
 

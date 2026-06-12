@@ -1,4 +1,4 @@
-import {plainDateCreate, type PlainDate} from './plainDate';
+import {plainDateCreate, type PlainDate} from 'internal/plainDate';
 
 const MONTH_NAMES: Partial<Record<string, number>> = {
   jan: 1,

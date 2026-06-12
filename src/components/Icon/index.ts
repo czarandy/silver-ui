@@ -4,4 +4,4 @@ export {
   type IconComponent,
   type IconProps,
   type IconSize,
-} from './Icon';
+} from 'components/Icon/Icon';

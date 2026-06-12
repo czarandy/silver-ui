@@ -3,4 +3,4 @@ export {
   type SwitchLabelPosition,
   type SwitchLabelSpacing,
   type SwitchProps,
-} from './Switch';
+} from 'components/Switch/Switch';

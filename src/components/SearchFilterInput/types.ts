@@ -1,6 +1,6 @@
 import type {ComponentType, ReactNode} from 'react';
-import type {SearchableItem, SearchSource} from '../AutocompleteInput';
-import type {IconComponent} from '../Icon';
+import type {SearchableItem, SearchSource} from 'components/AutocompleteInput';
+import type {IconComponent} from 'components/Icon';
 
 export interface EmptyOperatorValue {
   readonly type: 'empty';

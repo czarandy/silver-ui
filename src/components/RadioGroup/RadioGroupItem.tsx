@@ -2,7 +2,7 @@ import {use, useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {Item} from 'components/Item';
 import {radioGroupItemRecipe} from 'components/RadioGroup/RadioGroup.recipe';
 import {RadioGroupContext} from 'components/RadioGroup/RadioGroupContext';
-import isReactNode from '../../internal/isReactNode';
+import isReactNode from 'internal/isReactNode';
 
 export interface RadioGroupItemProps {
   /**

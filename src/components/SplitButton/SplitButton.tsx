@@ -1,9 +1,9 @@
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {Button, type ButtonProps, type ButtonSize} from 'components/Button';
 import {ButtonGroup} from 'components/ButtonGroup';
-import {Button, type ButtonProps, type ButtonSize} from '../Button';
-import {DropdownMenu, type DropdownMenuOption} from '../DropdownMenu';
-import type {IconComponent} from '../Icon';
+import {DropdownMenu, type DropdownMenuOption} from 'components/DropdownMenu';
+import type {IconComponent} from 'components/Icon';
 
 /**
  * A directly-clickable primary action paired with an attached chevron toggle

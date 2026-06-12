@@ -1,1 +1,4 @@
-export {SplitButton, type SplitButtonProps} from './SplitButton';
+export {
+  SplitButton,
+  type SplitButtonProps,
+} from 'components/SplitButton/SplitButton';

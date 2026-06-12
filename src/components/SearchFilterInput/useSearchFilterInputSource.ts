@@ -1,11 +1,11 @@
 import {useMemo} from 'react';
-import type {SearchSource} from '../AutocompleteInput';
-import type {InternalSearchFilterInputConfig} from './internalConfig';
+import type {SearchSource} from 'components/AutocompleteInput';
+import type {InternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';
 import type {
   FilterValue,
   SearchFilterInputItem,
   SearchFilterInputOperator,
-} from './types';
+} from 'components/SearchFilterInput/types';
 
 export function useSearchFilterInputSource(
   config: InternalSearchFilterInputConfig,

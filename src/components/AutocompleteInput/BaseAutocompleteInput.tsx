@@ -17,14 +17,17 @@ import {
   optionSelectedStyle,
 } from 'components/AutocompleteInput/AutocompleteInput.recipe';
 import {AutocompleteInputItem} from 'components/AutocompleteInput/AutocompleteInputItem';
+import type {
+  SearchableItem,
+  SearchSource,
+} from 'components/AutocompleteInput/types';
 import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
+import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
-import {mergeRefs} from '../../internal/mergeRefs';
-import type {SearchableItem, SearchSource} from './types';
 
 export interface BaseAutocompleteInputProps<T extends SearchableItem> {
   /**

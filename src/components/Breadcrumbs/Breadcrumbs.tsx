@@ -1,10 +1,10 @@
 import {useMemo, type CSSProperties, type ReactNode, type Ref} from 'react';
-import {cx} from 'internal/cx';
-import {breadcrumbsRecipe} from './Breadcrumbs.recipe';
+import {breadcrumbsRecipe} from 'components/Breadcrumbs/Breadcrumbs.recipe';
 import {
   BreadcrumbsContext,
   type BreadcrumbsVariant,
-} from './BreadcrumbsContext';
+} from 'components/Breadcrumbs/BreadcrumbsContext';
+import {cx} from 'internal/cx';
 
 export interface BreadcrumbsProps {
   /**

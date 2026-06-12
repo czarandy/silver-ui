@@ -1,1 +1,4 @@
-export {Blockquote, type BlockquoteProps} from './Blockquote';
+export {
+  Blockquote,
+  type BlockquoteProps,
+} from 'components/Blockquote/Blockquote';

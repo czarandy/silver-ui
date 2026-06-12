@@ -3,4 +3,4 @@ export {
   type DividerOrientation,
   type DividerProps,
   type DividerVariant,
-} from './Divider';
+} from 'components/Divider/Divider';

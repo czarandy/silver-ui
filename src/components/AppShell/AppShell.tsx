@@ -1,6 +1,10 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useId, useMemo, useRef, useState} from 'react';
 import {appShellRecipe} from 'components/AppShell/AppShell.recipe';
+import {
+  AppShellMobileContext,
+  type AppShellMobileContextValue,
+} from 'components/AppShell/AppShellMobileContext';
 import {useSlotPresence} from 'components/AppShell/useSlotPresence';
 import {Layout, LayoutContent, LayoutPanel} from 'components/Layout';
 import {SideNavRenderContext} from 'components/SideNav';
@@ -8,21 +12,14 @@ import {
   TopNavMobileContentContext,
   TopNavRenderContext,
 } from 'components/TopNav';
+import {MobileNavToggle} from 'internal/MobileNav';
 import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
+import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
+import type {SpacingToken} from 'internal/spacingTokens';
+import {useMediaQuery} from 'internal/useMediaQuery';
 import {css} from 'styled-system/css';
-import {MobileNavToggle} from '../../internal/MobileNav';
-import isReactNode from '../../internal/isReactNode';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {
-  observeResize,
-  unobserveResize,
-} from '../../internal/sharedResizeObserver';
-import type {SpacingToken} from '../../internal/spacingTokens';
-import {useMediaQuery} from '../../internal/useMediaQuery';
-import {
-  AppShellMobileContext,
-  type AppShellMobileContextValue,
-} from './AppShellMobileContext';
 
 export type AppShellBreakpoint = 'sm' | 'md' | 'lg' | 'none';
 export type AppShellVariant = 'default' | 'section';

@@ -3,7 +3,7 @@ export {
   type HeadingLevel,
   type HeadingProps,
   type HeadingTruncateTooltipPlacement,
-} from './Heading';
+} from 'components/Text/Heading';
 export {
   Text,
   type TextColor,
@@ -16,4 +16,4 @@ export {
   type TextWordBreak,
   type TextWrap,
   type TruncateTooltipPlacement,
-} from './Text';
+} from 'components/Text/Text';

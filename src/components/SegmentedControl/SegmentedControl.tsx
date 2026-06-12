@@ -8,13 +8,13 @@ import {
   type Ref,
 } from 'react';
 import {segmentedControlRecipe} from 'components/SegmentedControl/SegmentedControl.recipe';
-import {cx} from 'internal/cx';
-import {mergeRefs} from '../../internal/mergeRefs';
 import {
   SegmentedControlContext,
   type SegmentedControlLayout,
   type SegmentedControlSize,
-} from './SegmentedControlContext';
+} from 'components/SegmentedControl/SegmentedControlContext';
+import {cx} from 'internal/cx';
+import {mergeRefs} from 'internal/mergeRefs';
 
 export interface SegmentedControlProps<TValue extends string = string> {
   /**

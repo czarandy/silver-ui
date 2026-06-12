@@ -15,23 +15,23 @@ import {
   scheduleClasses,
   ScheduleFrame,
 } from 'components/Schedule/shared';
-import {useCurrentTime} from 'components/Schedule/useCurrentTime';
-import {Text} from 'components/Text';
-import {Tooltip} from 'components/Tooltip';
-import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
-import {
-  DATE_FORMAT_WITH_WEEKDAY,
-  plainDateFormat,
-  plainDateFromInstant,
-  plainDateIsEqual,
-} from '../../internal/plainDate';
 import type {
   CalendarEvent,
   Instant,
   ScheduleView,
   ScheduleZonedInstant,
-} from './types';
+} from 'components/Schedule/types';
+import {useCurrentTime} from 'components/Schedule/useCurrentTime';
+import {Text} from 'components/Text';
+import {Tooltip} from 'components/Tooltip';
+import {cx} from 'internal/cx';
+import {
+  DATE_FORMAT_WITH_WEEKDAY,
+  plainDateFormat,
+  plainDateFromInstant,
+  plainDateIsEqual,
+} from 'internal/plainDate';
+import {css} from 'styled-system/css';
 
 export interface ScheduleListViewOptions {
   /**

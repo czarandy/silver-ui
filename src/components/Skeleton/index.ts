@@ -1,1 +1,5 @@
-export {Skeleton, type SkeletonProps, type SkeletonRadius} from './Skeleton';
+export {
+  Skeleton,
+  type SkeletonProps,
+  type SkeletonRadius,
+} from 'components/Skeleton/Skeleton';

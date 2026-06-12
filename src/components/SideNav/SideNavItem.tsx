@@ -4,14 +4,14 @@ import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useCallback, useId, useState} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
+import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
 import {useLinkComponent} from 'components/Link';
+import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {sideNavItemRecipe} from 'components/SideNav/SideNavItem.recipe';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
-import {Icon, type IconComponent} from '../Icon';
-import type {LinkComponent} from '../Link';
+import isReactNode from 'internal/isReactNode';
 
 export interface SideNavItemProps {
   /**

@@ -1,7 +1,7 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {dividerRecipe} from 'components/Divider/Divider.recipe';
 import {cx} from 'internal/cx';
-import isReactNode from '../../internal/isReactNode';
+import isReactNode from 'internal/isReactNode';
 
 export type DividerOrientation = 'horizontal' | 'vertical';
 export type DividerVariant = 'subtle' | 'strong';

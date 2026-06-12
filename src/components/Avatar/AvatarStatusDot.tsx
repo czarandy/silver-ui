@@ -1,8 +1,8 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useAvatarSize} from 'components/Avatar/AvatarSizeContext';
 import {cx} from 'internal/cx';
+import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
-import isReactNode from '../../internal/isReactNode';
 
 export type AvatarStatusDotVariant = 'success' | 'neutral' | 'error';
 

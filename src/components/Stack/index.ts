@@ -1,10 +1,10 @@
-export {HStack, type HStackProps} from './HStack';
+export {HStack, type HStackProps} from 'components/Stack/HStack';
 export {
   type SizeValue,
   type StackCrossAlignment,
   type StackGap,
   type StackMainAlignment,
   type StackWrap,
-} from './internal/Stack';
+} from 'components/Stack/internal/Stack';
 
-export {VStack, type VStackProps} from './VStack';
+export {VStack, type VStackProps} from 'components/Stack/VStack';

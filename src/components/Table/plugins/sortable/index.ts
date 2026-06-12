@@ -4,10 +4,10 @@ export {
   type TableSortEntry,
   type TableSortState,
   type UseTableSortableConfig,
-} from './useTableSortable';
+} from 'components/Table/plugins/sortable/useTableSortable';
 export {
   useTableSortableState,
   type TableSortComparator,
   type UseTableSortableStateConfig,
   type UseTableSortableStateResult,
-} from './useTableSortableState';
+} from 'components/Table/plugins/sortable/useTableSortableState';

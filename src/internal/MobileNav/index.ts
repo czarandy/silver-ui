@@ -1,2 +1,9 @@
-export {MobileNav, type MobileNavProps, type MobileNavSide} from './MobileNav';
-export {MobileNavToggle, type MobileNavToggleProps} from './MobileNavToggle';
+export {
+  MobileNav,
+  type MobileNavProps,
+  type MobileNavSide,
+} from 'internal/MobileNav/MobileNav';
+export {
+  MobileNavToggle,
+  type MobileNavToggleProps,
+} from 'internal/MobileNav/MobileNavToggle';

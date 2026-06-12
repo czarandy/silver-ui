@@ -1,9 +1,12 @@
-export {SegmentedControl, type SegmentedControlProps} from './SegmentedControl';
+export {
+  SegmentedControl,
+  type SegmentedControlProps,
+} from 'components/SegmentedControl/SegmentedControl';
 export {
   SegmentedControlItem,
   type SegmentedControlItemProps,
-} from './SegmentedControlItem';
+} from 'components/SegmentedControl/SegmentedControlItem';
 export {
   type SegmentedControlLayout,
   type SegmentedControlSize,
-} from './SegmentedControlContext';
+} from 'components/SegmentedControl/SegmentedControlContext';

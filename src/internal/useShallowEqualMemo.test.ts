@@ -1,6 +1,6 @@
 import {renderHook} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
-import useShallowEqualMemo from './useShallowEqualMemo';
+import useShallowEqualMemo from 'internal/useShallowEqualMemo';
 
 describe('useShallowEqualMemo', () => {
   it('returns the value on first render', () => {

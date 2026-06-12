@@ -1,9 +1,12 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {HoverLayerTrigger} from '../../internal/HoverLayerTrigger';
-import type {LayerAlignment, LayerPlacement} from '../../internal/useLayer';
-import {useHoverCard, type HoverCardFocusTrigger} from './useHoverCard';
+import {
+  useHoverCard,
+  type HoverCardFocusTrigger,
+} from 'components/HoverCard/useHoverCard';
+import {HoverLayerTrigger} from 'internal/HoverLayerTrigger';
+import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 
-export type {HoverCardFocusTrigger} from './useHoverCard';
+export type {HoverCardFocusTrigger} from 'components/HoverCard/useHoverCard';
 
 export interface HoverCardProps {
   /**

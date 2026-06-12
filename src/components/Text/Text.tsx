@@ -10,10 +10,10 @@ import {textRecipe} from 'components/Text/Text.recipe';
 import {getMaxLinesVariant} from 'components/Text/Text.utils';
 import {useTruncation} from 'components/Text/useTruncation';
 import {useTooltip} from 'components/Tooltip';
+import type {TooltipProps} from 'components/Tooltip';
 import {cx} from 'internal/cx';
-import {mergeRefs} from '../../internal/mergeRefs';
-import {useIsomorphicLayoutEffect} from '../../internal/useIsomorphicLayoutEffect';
-import type {TooltipProps} from '../Tooltip';
+import {mergeRefs} from 'internal/mergeRefs';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 
 export type TextType =
   | 'body'

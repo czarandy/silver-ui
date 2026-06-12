@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {Calendar, type CalendarHandle} from 'components/Calendar/Calendar';
 import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
-import {plainDateCreate} from '../../internal/plainDate';
-import {assertNonNull} from '../../internal/testHelpers';
+import {plainDateCreate} from 'internal/plainDate';
+import {assertNonNull} from 'internal/testHelpers';
 
 describe('Calendar', () => {
   it('renders the selected month and selected day', () => {

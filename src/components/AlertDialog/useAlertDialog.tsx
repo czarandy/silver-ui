@@ -1,5 +1,8 @@
 import {useCallback, useState, type ReactNode} from 'react';
-import {AlertDialog, type AlertDialogProps} from './AlertDialog';
+import {
+  AlertDialog,
+  type AlertDialogProps,
+} from 'components/AlertDialog/AlertDialog';
 
 export type AlertDialogOptions = Omit<
   AlertDialogProps,

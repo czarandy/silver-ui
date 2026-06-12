@@ -16,10 +16,13 @@ import {
   isEventInPast,
   scheduleClasses,
 } from 'components/Schedule/shared';
+import type {
+  CalendarEvent,
+  CalendarInstantEvent,
+} from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
 import {cx} from 'internal/cx';
-import {css} from 'styled-system/css';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
@@ -27,8 +30,8 @@ import {
   plainDateIsBefore,
   plainDateIsEqual,
   type PlainDate,
-} from '../../internal/plainDate';
-import type {CalendarEvent, CalendarInstantEvent} from './types';
+} from 'internal/plainDate';
+import {css} from 'styled-system/css';
 
 type GridStyle = CSSProperties & {'--schedule-day-count': string};
 type HourStyle = Pick<CSSProperties, 'height' | 'minHeight'>;
