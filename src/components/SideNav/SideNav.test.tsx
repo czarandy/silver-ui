@@ -211,7 +211,7 @@ describe('SideNavItem', () => {
       </SideNav>,
     );
 
-    expect(screen.getByRole('button', {name: 'Action'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Action'}).tagName).toBe('BUTTON');
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 

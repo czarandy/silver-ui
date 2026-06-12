@@ -1,10 +1,9 @@
-/* eslint-disable @eslint-react/static-components */
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Icon, type IconComponent} from 'components/Icon';
-import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {useTabsContext} from 'components/Tabs/TabsContext';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 
@@ -92,7 +91,6 @@ export function Tab({
   value,
 }: TabProps): React.JSX.Element {
   const context = useTabsContext();
-  const LinkComponent = useLinkComponent(as);
   const isSelected = context.value === value;
   const displayIcon = isSelected && selectedIcon != null ? selectedIcon : icon;
   const classes = tabsRecipe({
@@ -121,61 +119,35 @@ export function Tab({
     </>
   );
 
-  if (href != null) {
-    return (
-      <LinkComponent
-        aria-controls={controls}
-        aria-disabled={isDisabled || undefined}
-        aria-selected={isSelected}
-        className={rootClassName}
-        data-tab-disabled={isDisabled ? 'true' : undefined}
-        data-tab-value={isDisabled ? undefined : value}
-        data-testid={dataTestId}
-        href={href}
-        id={id}
-        onClick={event => {
-          if (isDisabled) {
-            event.preventDefault();
-            return;
-          }
-
-          context.onChange(value);
-        }}
-        ref={ref as Ref<HTMLAnchorElement>}
-        role="tab"
-        style={style}
-        tabIndex={isSelected && !isDisabled ? 0 : -1}
-        to={LinkComponent === 'a' ? undefined : href}>
-        {content}
-      </LinkComponent>
-    );
-  }
-
   return (
-    <button
+    <ActionElement
       aria-controls={controls}
-      aria-disabled={isDisabled || undefined}
+      aria-disabled={href != null && isDisabled ? true : undefined}
       aria-selected={isSelected}
+      as={as}
       className={rootClassName}
       data-tab-disabled={isDisabled ? 'true' : undefined}
       data-tab-value={isDisabled ? undefined : value}
       data-testid={dataTestId}
-      disabled={isDisabled}
+      disabled={href == null ? isDisabled : undefined}
+      href={href}
       id={id}
-      onClick={() => {
+      onClick={event => {
         if (isDisabled) {
+          event.preventDefault();
           return;
         }
 
         context.onChange(value);
       }}
-      ref={ref as Ref<HTMLButtonElement>}
+      ref={ref}
+      renderAsLink={href != null}
       role="tab"
       style={style}
       tabIndex={isSelected && !isDisabled ? 0 : -1}
       type="button">
       {content}
-    </button>
+    </ActionElement>
   );
 }
 

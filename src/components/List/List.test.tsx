@@ -69,7 +69,10 @@ describe('List', () => {
       </List>,
     );
 
-    await user.click(screen.getByRole('button', {name: 'Clickable'}));
+    const button = screen.getByRole('button', {name: 'Clickable'});
+    expect(button.tagName).toBe('BUTTON');
+
+    await user.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
@@ -80,10 +83,9 @@ describe('List', () => {
       </List>,
     );
 
-    expect(screen.getByRole('link', {name: 'Docs'})).toHaveAttribute(
-      'href',
-      '/docs',
-    );
+    const link = screen.getByRole('link', {name: 'Docs'});
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', '/docs');
   });
 
   it('renders with default none list style', () => {

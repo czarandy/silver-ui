@@ -205,6 +205,17 @@ describe('Tabs', () => {
     expect(tab).toHaveAttribute('href', '/docs');
   });
 
+  it('renders tabs without href as buttons', () => {
+    render(
+      <Tabs onChange={() => {}} value="overview">
+        <Tab label="Overview" value="overview" />
+      </Tabs>,
+    );
+
+    const tab = screen.getByRole('tab', {name: 'Overview'});
+    expect(tab.tagName).toBe('BUTTON');
+  });
+
   it('uses a custom link component for href tabs', () => {
     render(
       <Tabs onChange={() => {}} value="docs">

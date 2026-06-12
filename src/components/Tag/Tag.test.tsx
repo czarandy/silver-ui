@@ -20,6 +20,8 @@ describe('Tag', () => {
     render(<Tag label="Filter" onClick={onClick} />);
 
     const button = screen.getByRole('button', {name: 'Filter'});
+    expect(button.tagName).toBe('BUTTON');
+
     await user.click(button);
     expect(onClick).toHaveBeenCalledOnce();
   });
@@ -63,10 +65,9 @@ describe('Tag', () => {
   it('renders as a link when href is provided', () => {
     render(<Tag href="/filters/open" label="Open" />);
 
-    expect(screen.getByRole('link', {name: 'Open'})).toHaveAttribute(
-      'href',
-      '/filters/open',
-    );
+    const link = screen.getByRole('link', {name: 'Open'});
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', '/filters/open');
   });
 
   it('disables button interactions when isDisabled is true', () => {

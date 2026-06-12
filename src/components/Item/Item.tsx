@@ -1,5 +1,3 @@
-/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as/link component props */
-
 import {
   useCallback,
   useRef,
@@ -11,9 +9,9 @@ import {
   type Ref,
 } from 'react';
 import {itemRecipe} from 'components/Item/Item.recipe';
-import {useLinkComponent} from 'components/Link';
 import type {LinkComponent as LinkComponentType} from 'components/Link';
 import {Text} from 'components/Text';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {useRel} from 'internal/linkAccessibility';
@@ -217,7 +215,6 @@ export function Item({
   trailingContent,
   width = 'full',
 }: ItemProps): React.JSX.Element {
-  const LinkComponent = useLinkComponent(linkComponent);
   const linkRel = useRel({target, rel});
   const isInteractive = href != null || onClick != null;
   const hasParentRole = role != null;
@@ -304,11 +301,13 @@ export function Item({
 
   const content = !ownsInteraction ? (
     <span className={classes.content}>{innerSlots}</span>
-  ) : href != null ? (
-    <LinkComponent
+  ) : (
+    <ActionElement
       aria-current={ariaCurrent ?? undefined}
-      aria-disabled={isDisabled || undefined}
+      aria-disabled={href != null && isDisabled ? true : undefined}
+      as={linkComponent}
       className={classes.interactiveContent}
+      disabled={href == null ? isDisabled : undefined}
       href={href}
       onClick={(e: MouseEvent<HTMLElement>) => {
         if (isDisabled) {
@@ -318,22 +317,12 @@ export function Item({
         onClick?.(e);
       }}
       ref={setInteractiveRef}
-      rel={linkRel}
-      tabIndex={isDisabled ? -1 : undefined}
-      target={target}
-      to={LinkComponent === 'a' ? undefined : href}>
+      rel={href != null ? linkRel : undefined}
+      renderAsLink={href != null}
+      tabIndex={href != null && isDisabled ? -1 : undefined}
+      target={href != null ? target : undefined}>
       {innerSlots}
-    </LinkComponent>
-  ) : (
-    <button
-      aria-current={ariaCurrent ?? undefined}
-      className={classes.interactiveContent}
-      disabled={isDisabled}
-      onClick={onClick}
-      ref={setInteractiveRef}
-      type="button">
-      {innerSlots}
-    </button>
+    </ActionElement>
   );
 
   return (

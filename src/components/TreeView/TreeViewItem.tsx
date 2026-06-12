@@ -6,6 +6,7 @@ import {Icon} from 'components/Icon';
 import {TreeViewBranches} from 'components/TreeView/TreeViewBranches';
 import {treeViewItemRecipe} from 'components/TreeView/TreeViewItem.recipe';
 import type {TreeViewDensity} from 'components/TreeView/types';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 
@@ -139,7 +140,7 @@ export function TreeViewItem({
 }: TreeViewItemProps): React.JSX.Element {
   const labelId = useId();
   const descriptionId = useId();
-  const actionRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
+  const actionRef = useRef<HTMLElement>(null);
   const isInteractive = onClick != null || href != null;
   const togglesOnRow = hasChildren && onClick == null && onToggle != null;
   const styles = treeViewItemRecipe({
@@ -206,15 +207,17 @@ export function TreeViewItem({
     onFocusItem(id, false);
   }, [id, onFocusItem]);
 
-  const handleDisabledLinkClick = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      if (!isDisabled) {
+  const handleActionClick = useCallback(
+    (event: React.MouseEvent<HTMLElement>) => {
+      if (isDisabled) {
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
-      event.preventDefault();
-      event.stopPropagation();
+
+      onClick?.(event);
     },
-    [isDisabled],
+    [isDisabled, onClick],
   );
 
   const labelAndDescription = (
@@ -257,31 +260,21 @@ export function TreeViewItem({
       {!isReactNode(startContent) ? null : (
         <span className={styles.startContent}>{startContent}</span>
       )}
-      {href != null ? (
-        <a
+      {href != null || onClick != null ? (
+        <ActionElement
           aria-describedby={description == null ? undefined : descriptionId}
-          aria-disabled={isDisabled || undefined}
+          aria-disabled={href != null && isDisabled ? true : undefined}
           aria-labelledby={labelId}
           className={styles.invisibleAction}
+          disabled={href == null ? isDisabled : undefined}
           href={href}
-          onClick={handleDisabledLinkClick}
-          ref={actionRef as Ref<HTMLAnchorElement>}
+          onClick={handleActionClick}
+          ref={actionRef}
+          renderAsLink={href != null}
           tabIndex={-1}
-          target={target}>
+          target={href != null ? target : undefined}>
           {labelAndDescription}
-        </a>
-      ) : onClick != null ? (
-        <button
-          aria-describedby={description == null ? undefined : descriptionId}
-          aria-labelledby={labelId}
-          className={styles.invisibleAction}
-          disabled={isDisabled}
-          onClick={onClick}
-          ref={actionRef as Ref<HTMLButtonElement>}
-          tabIndex={-1}
-          type="button">
-          {labelAndDescription}
-        </button>
+        </ActionElement>
       ) : (
         <span className={styles.content}>{labelAndDescription}</span>
       )}

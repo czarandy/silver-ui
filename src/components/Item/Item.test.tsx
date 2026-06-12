@@ -82,7 +82,10 @@ describe('Item', () => {
 
     render(<Item label="Clickable" onClick={onClick} />);
 
-    await user.click(screen.getByRole('button', {name: 'Clickable'}));
+    const button = screen.getByRole('button', {name: 'Clickable'});
+    expect(button.tagName).toBe('BUTTON');
+
+    await user.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
@@ -98,6 +101,14 @@ describe('Item', () => {
     const link = screen.getByRole('link', {name: 'Disabled link'});
     expect(link).toHaveAttribute('aria-disabled', 'true');
     expect(link).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('renders href items as anchors', () => {
+    render(<Item href="/docs" label="Docs" />);
+
+    const link = screen.getByRole('link', {name: 'Docs'});
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', '/docs');
   });
 
   it('does not double-dim end content when disabled', () => {

@@ -1,14 +1,12 @@
-/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
-
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from 'components/Icon';
-import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {Text} from 'components/Text';
 import {useTopNavRenderMode} from 'components/TopNav/TopNavContext';
 import {topNavItemRecipe} from 'components/TopNav/TopNavItem.recipe';
 import {VisuallyHidden} from 'internal';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
 
@@ -104,7 +102,6 @@ export function TopNavItem({
   style,
   target,
 }: TopNavItemProps): React.JSX.Element {
-  const LinkComponent = useLinkComponent(as);
   const renderMode = useTopNavRenderMode();
   const {closeMobileNav} = useAppShellMobile();
   const isDrawer = renderMode === 'drawer';
@@ -143,38 +140,23 @@ export function TopNavItem({
     </>
   );
 
-  if (href == null) {
-    return (
-      <button
-        aria-current={isSelected ? 'page' : undefined}
-        aria-label={isIconOnly ? label : undefined}
-        className={className_}
-        data-testid={dataTestId}
-        disabled={isDisabled}
-        onClick={handleClick}
-        ref={ref as Ref<HTMLButtonElement>}
-        style={style}
-        type="button">
-        {content}
-      </button>
-    );
-  }
-
   return (
-    <LinkComponent
+    <ActionElement
       aria-current={isSelected ? 'page' : undefined}
-      aria-disabled={isDisabled || undefined}
+      aria-disabled={href != null && isDisabled ? true : undefined}
       aria-label={isIconOnly ? getAriaLabel(label, opensInNewTab) : undefined}
+      as={as}
       className={className_}
       data-testid={dataTestId}
+      disabled={href == null ? isDisabled : undefined}
       href={href}
       onClick={handleClick}
-      ref={ref as Ref<HTMLAnchorElement>}
-      rel={linkRel}
+      ref={ref}
+      rel={href != null ? linkRel : undefined}
+      renderAsLink={href != null}
       style={style}
-      tabIndex={isDisabled ? -1 : undefined}
-      target={target}
-      to={LinkComponent === 'a' ? undefined : href}>
+      tabIndex={href != null && isDisabled ? -1 : undefined}
+      target={href != null ? target : undefined}>
       {content}
       {opensInNewTab && !isIconOnly ? (
         <>
@@ -182,7 +164,7 @@ export function TopNavItem({
           <VisuallyHidden>(opens in new tab)</VisuallyHidden>
         </>
       ) : null}
-    </LinkComponent>
+    </ActionElement>
   );
 }
 

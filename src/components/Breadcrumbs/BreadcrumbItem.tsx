@@ -1,5 +1,3 @@
-/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
-
 import {
   use,
   type CSSProperties,
@@ -10,8 +8,8 @@ import {
 import {breadcrumbItemRecipe} from 'components/Breadcrumbs/BreadcrumbItem.recipe';
 import {BreadcrumbsContext} from 'components/Breadcrumbs/BreadcrumbsContext';
 import {Icon, type IconComponent} from 'components/Icon';
-import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 
 export interface BreadcrumbItemProps {
@@ -74,7 +72,6 @@ export function BreadcrumbItem({
   style,
 }: BreadcrumbItemProps): React.JSX.Element {
   const context = use(BreadcrumbsContext);
-  const LinkComponent = useLinkComponent(as);
   const isCurrent = isCurrentProp === true;
   const classes = breadcrumbItemRecipe({
     variant: context.variant,
@@ -118,18 +115,15 @@ export function BreadcrumbItem({
       <span aria-hidden="true" className={classes.separator}>
         {context.separator}
       </span>
-      {href != null ? (
-        <LinkComponent
+      {href != null || onClick != null ? (
+        <ActionElement
+          as={as}
           className={classes.link}
           href={href}
           onClick={onClick}
-          to={LinkComponent === 'a' ? undefined : href}>
+          renderAsLink={href != null}>
           {content}
-        </LinkComponent>
-      ) : onClick != null ? (
-        <button className={classes.link} onClick={onClick} type="button">
-          {content}
-        </button>
+        </ActionElement>
       ) : (
         <span className={classes.content}>{content}</span>
       )}

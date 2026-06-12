@@ -243,7 +243,10 @@ describe('TreeView', () => {
     const onClick = vi.fn();
     render(<TreeView items={[{id: 'a', label: 'Clickable', onClick}]} />);
 
-    await user.click(screen.getByRole('button', {name: 'Clickable'}));
+    const button = screen.getByRole('button', {name: 'Clickable'});
+    expect(button.tagName).toBe('BUTTON');
+
+    await user.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
@@ -255,6 +258,7 @@ describe('TreeView', () => {
     );
 
     const link = screen.getByRole('link', {name: 'Docs'});
+    expect(link.tagName).toBe('A');
     expect(link).toHaveAttribute('href', '/docs');
     expect(link).toHaveAttribute('target', '_blank');
   });

@@ -35,6 +35,7 @@ export interface ActionElementProps {
   disabled?: boolean;
   form?: string;
   href?: string;
+  id?: string;
   name?: string;
   onClick?: MouseEventHandler<HTMLElement>;
   onKeyDown?: KeyboardEventHandler<HTMLElement>;

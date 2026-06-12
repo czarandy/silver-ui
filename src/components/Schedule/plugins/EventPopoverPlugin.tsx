@@ -9,6 +9,12 @@ import {
 import {useMemo, type ReactNode} from 'react';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
+import {
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+} from 'components/Layout';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
@@ -18,7 +24,7 @@ import {
   getEventTimeLabel,
 } from 'components/Schedule/shared';
 import type {CalendarEvent, SchedulePlugin} from 'components/Schedule/types';
-import {Heading, Text} from 'components/Text';
+import {Text} from 'components/Text';
 import {cx} from 'internal/cx';
 import {plainDateFromInstant} from 'internal/plainDate';
 import {css} from 'styled-system/css';
@@ -43,24 +49,9 @@ export interface ScheduleEventPopoverPluginOptions<TAuxiliaryData = unknown> {
 }
 
 const styles = {
-  root: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '3',
-    p: '4',
+  layout: css({
     minW: '64',
     maxW: '80',
-  }),
-  actions: css({
-    display: 'flex',
-    justifyContent: 'flex-end',
-    gap: '1',
-    mb: '-2',
-  }),
-  header: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '2',
   }),
   dot: css({
     w: '3',
@@ -105,69 +96,85 @@ export function ScheduleEventPopoverContent<TAuxiliaryData = unknown>({
   const {categoryMap, timezoneID} = useScheduleContext();
   const category = getCategory(categoryMap, event);
   const dotClass = scheduleEventRecipe({color: category.color}).dot;
+  const hasActions = onEdit != null || onDelete != null;
 
   return (
-    <div className={styles.root} data-testid="schedule-event-popover">
-      {onEdit != null || onDelete != null ? (
-        <div className={styles.actions}>
-          {onEdit != null ? (
-            <Button
-              data-testid="schedule-event-popover-edit"
-              icon={Pencil}
-              isIconOnly
-              label="Edit event"
-              onClick={() => onEdit(event)}
-              size="sm"
-              variant="ghost"
-            />
-          ) : null}
-          {onDelete != null ? (
-            <Button
-              data-testid="schedule-event-popover-delete"
-              icon={Trash2}
-              isIconOnly
-              label="Delete event"
-              onClick={() => onDelete(event)}
-              size="sm"
-              variant="ghost"
-            />
-          ) : null}
-        </div>
-      ) : null}
-
-      <div className={styles.header}>
-        <span className={cx(dotClass, styles.dot)} />
-        <Heading level={3}>{event.title}</Heading>
-      </div>
-
-      <div className={styles.details}>
-        <div className={styles.row}>
-          <Icon icon={CalendarDays} size="sm" />
-          <div>
-            <Text>{getEventDateLabel(event, timezoneID)}</Text>
-            <Text color="secondary" type="supporting">
-              {getEventTimeLabel(event, timezoneID)}
-            </Text>
+    <Layout
+      className={styles.layout}
+      content={
+        <LayoutContent isScrollable={false} padding={3}>
+          <div className={styles.details}>
+            <div className={styles.row}>
+              <Icon icon={CalendarDays} size="sm" />
+              <div>
+                <Text>{getEventDateLabel(event, timezoneID)}</Text>
+                <Text color="secondary" type="supporting">
+                  {getEventTimeLabel(event, timezoneID)}
+                </Text>
+              </div>
+            </div>
+            {event.location != null && event.location !== '' ? (
+              <div className={styles.row}>
+                <Icon icon={MapPin} size="sm" />
+                <Text>{event.location}</Text>
+              </div>
+            ) : null}
+            {event.description != null && event.description !== '' ? (
+              <div className={styles.row}>
+                <Icon icon={AlignLeft} size="sm" />
+                <Text>{event.description}</Text>
+              </div>
+            ) : null}
+            <div className={styles.row}>
+              <Icon icon={Tag} size="sm" />
+              <Text>{category.label}</Text>
+            </div>
           </div>
-        </div>
-        {event.location != null && event.location !== '' ? (
-          <div className={styles.row}>
-            <Icon icon={MapPin} size="sm" />
-            <Text>{event.location}</Text>
-          </div>
-        ) : null}
-        {event.description != null && event.description !== '' ? (
-          <div className={styles.row}>
-            <Icon icon={AlignLeft} size="sm" />
-            <Text>{event.description}</Text>
-          </div>
-        ) : null}
-        <div className={styles.row}>
-          <Icon icon={Tag} size="sm" />
-          <Text>{category.label}</Text>
-        </div>
-      </div>
-    </div>
+        </LayoutContent>
+      }
+      data-testid="schedule-event-popover"
+      footer={
+        hasActions ? (
+          <LayoutFooter
+            padding={3}
+            primaryButton={
+              onDelete != null ? (
+                <Button
+                  data-testid="schedule-event-popover-delete"
+                  icon={Trash2}
+                  isIconOnly
+                  label="Delete event"
+                  onClick={() => onDelete(event)}
+                  size="sm"
+                  variant="ghost"
+                />
+              ) : undefined
+            }
+            secondaryButton={
+              onEdit != null ? (
+                <Button
+                  data-testid="schedule-event-popover-edit"
+                  icon={Pencil}
+                  isIconOnly
+                  label="Edit event"
+                  onClick={() => onEdit(event)}
+                  size="sm"
+                  variant="ghost"
+                />
+              ) : undefined
+            }
+          />
+        ) : undefined
+      }
+      header={
+        <LayoutHeader
+          padding={3}
+          startContent={<span className={cx(dotClass, styles.dot)} />}
+          title={event.title}
+        />
+      }
+      height="auto"
+    />
   );
 }
 

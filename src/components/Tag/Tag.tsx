@@ -10,6 +10,7 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Link} from 'components/Link';
 import {tagRecipe} from 'components/Tag/Tag.recipe';
 import {Tooltip} from 'components/Tooltip';
+import {ActionElement} from 'internal/ActionElement';
 import {VisuallyHidden} from 'internal/VisuallyHidden';
 import {cx} from 'internal/cx';
 
@@ -236,20 +237,19 @@ export function Tag({
         href={href}
         isDisabled={isDisabled}
         onClick={onClick}
-        ref={ref as Ref<HTMLAnchorElement>}>
+        ref={ref}>
         <TagBody {...bodyProps} />
       </Link>
     );
   } else if (onClick != null && onRemove != null) {
     element = (
       <span {...sharedProps} aria-label={label} ref={ref} role="group">
-        <button
+        <ActionElement
           className={classes.body}
           disabled={isDisabled}
-          onClick={onClick}
-          type="button">
+          onClick={onClick}>
           <TagBody {...bodyProps} />
-        </button>
+        </ActionElement>
         <RemoveButton
           className={classes.removeButton}
           isDisabled={isDisabled}
@@ -260,14 +260,13 @@ export function Tag({
     );
   } else if (onClick != null) {
     element = (
-      <button
+      <ActionElement
         {...sharedProps}
         disabled={isDisabled}
         onClick={onClick}
-        ref={ref as Ref<HTMLButtonElement>}
-        type="button">
+        ref={ref}>
         <TagBody {...bodyProps} />
-      </button>
+      </ActionElement>
     );
   } else {
     element = (

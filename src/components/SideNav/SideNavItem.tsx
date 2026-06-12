@@ -1,15 +1,13 @@
-/* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
-
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useCallback, useId, useState} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
-import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {sideNavItemRecipe} from 'components/SideNav/SideNavItem.recipe';
+import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 
@@ -102,7 +100,6 @@ export function SideNavItem({
   ref,
   style,
 }: SideNavItemProps): React.JSX.Element {
-  const LinkComponent = useLinkComponent(as);
   const {closeMobileNav, isMobileNavOpen} = useAppShellMobile();
   const {isCollapsed} = useSideNavCollapse();
   const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
@@ -148,36 +145,22 @@ export function SideNavItem({
   if (isCollapsed) {
     const collapsedClassNames = cx(classes.collapsed, className);
 
-    if (href != null && !isDisabled) {
-      return (
-        <LinkComponent
-          aria-current={isSelected ? 'page' : undefined}
-          aria-label={label}
-          className={collapsedClassNames}
-          data-testid={dataTestId}
-          href={href}
-          onClick={handleClick}
-          ref={ref as Ref<HTMLAnchorElement>}
-          style={style}
-          to={LinkComponent === 'a' ? undefined : href}>
-          {iconSlot}
-        </LinkComponent>
-      );
-    }
-
     return (
-      <button
+      <ActionElement
         aria-current={isSelected ? 'page' : undefined}
         aria-label={label}
+        as={as}
         className={collapsedClassNames}
         data-testid={dataTestId}
-        disabled={isDisabled}
+        disabled={href == null || isDisabled ? isDisabled : undefined}
+        href={isDisabled ? undefined : href}
         onClick={handleClick}
-        ref={ref as Ref<HTMLButtonElement>}
+        ref={ref}
+        renderAsLink={href != null && !isDisabled}
         style={style}
         type="button">
         {iconSlot}
-      </button>
+      </ActionElement>
     );
   }
 
