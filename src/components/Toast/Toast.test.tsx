@@ -188,7 +188,9 @@ describe('Toast', () => {
     fireEvent.click(screen.getByRole('button', {name: 'Show'}));
     expect(screen.getByText('Auto hide')).toBeInTheDocument();
 
-    await vi.advanceTimersByTimeAsync(5200);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5200);
+    });
     expect(screen.queryByText('Auto hide')).not.toBeInTheDocument();
     vi.useRealTimers();
   });

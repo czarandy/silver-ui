@@ -382,6 +382,9 @@ describe('Schedule', () => {
   });
 
   it('throws loader rejection errors through the nearest error boundary', async () => {
+    // The loader rejection is intentional and caught by the ErrorBoundary;
+    // silence React's expected error logging for the thrown component tree.
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     const loader = vi.fn(async () => Promise.reject('load failed'));
 
     render(

@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {useCallback} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Tooltip} from 'components/Tooltip/Tooltip';
@@ -195,7 +195,9 @@ describe('Tooltip', () => {
     fireEvent.mouseEnter(trigger);
 
     // delay=0 still uses setTimeout(fn, 0); advance to trigger show.
-    vi.advanceTimersByTime(0);
+    act(() => {
+      vi.advanceTimersByTime(0);
+    });
     expect(showPopoverMock).toHaveBeenCalled();
 
     fireEvent.mouseLeave(trigger);
@@ -205,7 +207,9 @@ describe('Tooltip', () => {
     expect(hidePopoverMock).not.toHaveBeenCalled();
 
     // After the full hideDelay, it should hide.
-    vi.advanceTimersByTime(200);
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
     expect(hidePopoverMock).toHaveBeenCalled();
 
     vi.useRealTimers();

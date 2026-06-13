@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {TreeView} from 'components/TreeView/TreeView';
@@ -103,7 +103,9 @@ describe('TreeView', () => {
     render(<TreeView items={nestedItems} />);
 
     const parentRow = screen.getByRole('treeitem', {name: /Parent/});
-    parentRow.focus();
+    act(() => {
+      parentRow.focus();
+    });
 
     await user.keyboard('{Enter}');
     expect(screen.getByText('Child 1')).toBeInTheDocument();
@@ -123,7 +125,9 @@ describe('TreeView', () => {
     expect(parent).toHaveAttribute('tabindex', '0');
     expect(childOne).toHaveAttribute('tabindex', '-1');
 
-    parent.focus();
+    act(() => {
+      parent.focus();
+    });
     await user.keyboard('{ArrowDown}');
     expect(childOne).toHaveFocus();
     await waitFor(() => {
@@ -164,7 +168,9 @@ describe('TreeView', () => {
     render(<TreeView items={nestedItems} />);
 
     const parent = screen.getByRole('treeitem', {name: /Parent/});
-    parent.focus();
+    act(() => {
+      parent.focus();
+    });
 
     await user.keyboard('{ArrowRight}');
     expect(screen.getByText('Child 1')).toBeInTheDocument();
@@ -185,7 +191,9 @@ describe('TreeView', () => {
     const user = userEvent.setup();
     render(<TreeView items={simpleItems} />);
 
-    screen.getByRole('treeitem', {name: /Item A/}).focus();
+    act(() => {
+      screen.getByRole('treeitem', {name: /Item A/}).focus();
+    });
     await user.keyboard('i');
     expect(screen.getByRole('treeitem', {name: /Item B/})).toHaveFocus();
   });
@@ -203,12 +211,16 @@ describe('TreeView', () => {
     const row = screen.getByText('Item A').closest('.silver-tree-view-item');
     /* eslint-enable testing-library/no-node-access */
 
-    item.focus();
+    act(() => {
+      item.focus();
+    });
     await waitFor(() => {
       expect(row?.className).toContain('silver-ring-w_focus');
     });
 
-    screen.getByRole('button', {name: 'Outside'}).focus();
+    act(() => {
+      screen.getByRole('button', {name: 'Outside'}).focus();
+    });
     await waitFor(() => {
       expect(row?.className).not.toContain('silver-ring-w_focus');
     });
@@ -478,7 +490,9 @@ describe('TreeView', () => {
     );
 
     const parent = screen.getByRole('treeitem', {name: 'Parent'});
-    parent.focus();
+    act(() => {
+      parent.focus();
+    });
 
     await user.keyboard('{ArrowRight}');
     expect(screen.getByText('Child')).toBeInTheDocument();

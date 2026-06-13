@@ -2,6 +2,7 @@
 
 import {Temporal} from '@js-temporal/polyfill';
 import {
+  Fragment,
   useMemo,
   type CSSProperties,
   type HTMLAttributes,
@@ -212,18 +213,21 @@ function TimeGridEvent({
   });
   const pluginEndContent = useMemo(
     () =>
-      plugins
-        .map(
-          (plugin): ReactNode =>
-            plugin.renderTimeGridEventContent?.({
-              event,
-              hourHeight,
-              maxHour,
-              minHour,
-              timezoneID,
-            }),
-        )
-        .filter(isReactNode),
+      plugins.map((plugin, index): ReactNode => {
+        const content = plugin.renderTimeGridEventContent?.({
+          event,
+          hourHeight,
+          maxHour,
+          minHour,
+          timezoneID,
+        });
+        // The plugins array is stable, ordered config that is never reordered,
+        // so the index is a safe key for the appended content nodes.
+        return isReactNode(content) ? (
+          // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
+          <Fragment key={index}>{content}</Fragment>
+        ) : null;
+      }),
     [event, hourHeight, maxHour, minHour, plugins, timezoneID],
   );
   const category = getCategory(categoryMap, event);
