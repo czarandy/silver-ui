@@ -10,6 +10,7 @@ import {createScheduleListView} from 'components/Schedule/ListView';
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
+import {useScheduleEventMovePlugin} from 'components/Schedule/plugins/EventMovePlugin';
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import {useScheduleEventResizePlugin} from 'components/Schedule/plugins/EventResizePlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
@@ -300,6 +301,70 @@ function ResizableEventsStory(): React.JSX.Element {
   );
 }
 
+function MovableEventsStory(): React.JSX.Element {
+  const views = useMemo(
+    (): {label: string; view: ScheduleView}[] => [
+      {label: 'Month', view: createScheduleMonthlyView()},
+      {
+        label: 'Week',
+        view: createScheduleWeeklyView({maxHour: 18, minHour: 8}),
+      },
+    ],
+    [],
+  );
+  const [view, setView] = useState<ScheduleView>(views[1].view);
+  const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
+  const [storyEvents, setStoryEvents] = useState(() => events);
+  const paginationPlugin = useSchedulePaginationPlugin({
+    onViewDateChange: setViewDate,
+  });
+  const viewSelectorPlugin = useScheduleViewSelectorPlugin(views, {
+    onChangeView: setView,
+  });
+  const movePlugin = useScheduleEventMovePlugin({
+    onMove: ({end, event, start}) => {
+      setStoryEvents(currentEvents =>
+        currentEvents.map(currentEvent => {
+          if (currentEvent.id !== event.id) {
+            return currentEvent;
+          }
+
+          if (
+            typeof currentEvent.start === 'number' &&
+            typeof start === 'number' &&
+            typeof end === 'number'
+          ) {
+            return {...currentEvent, end, start};
+          }
+
+          if (
+            typeof currentEvent.start !== 'number' &&
+            typeof start !== 'number' &&
+            typeof end !== 'number'
+          ) {
+            return {...currentEvent, end, start};
+          }
+
+          return currentEvent;
+        }),
+      );
+    },
+    snapMinutes: 5,
+  });
+
+  return (
+    <Schedule
+      categories={categories}
+      events={storyEvents}
+      highlightDate={defaultHighlightDate}
+      plugins={[paginationPlugin, viewSelectorPlugin, movePlugin]}
+      timezoneID={localTimezoneID}
+      view={view}
+      viewDate={viewDate}
+    />
+  );
+}
+
 function ScheduleStory({
   categories: storyCategories = categories,
   events: storyEvents = events,
@@ -432,6 +497,10 @@ export const Week: Story = {
 
 export const ResizableEvents: Story = {
   render: () => <ResizableEventsStory />,
+};
+
+export const MovableEvents: Story = {
+  render: () => <MovableEventsStory />,
 };
 
 export const MondayStartWeek: Story = {

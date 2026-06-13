@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import type {HTMLAttributes, ReactNode} from 'react';
 import type {
   CalendarEvent,
   ScheduleCategory,
@@ -93,7 +93,36 @@ export interface ScheduleTimeGridEventRenderProps {
   timezoneID: string;
 }
 
+export interface ScheduleEventPropsRenderProps {
+  event: CalendarEvent;
+  layout: 'inline' | 'month' | 'timeGrid';
+  timezoneID: string;
+}
+
+export interface ScheduleMonthCellPropsRenderProps {
+  date: PlainDate;
+  timezoneID: string;
+}
+
+export interface ScheduleTimeGridCellPropsRenderProps {
+  date: PlainDate;
+  hour: number;
+  hourHeight: number;
+  maxHour: number;
+  minHour: number;
+  timezoneID: string;
+}
+
 export interface SchedulePlugin {
+  getEventProps?: (
+    props: ScheduleEventPropsRenderProps,
+  ) => HTMLAttributes<HTMLElement>;
+  getMonthCellProps?: (
+    props: ScheduleMonthCellPropsRenderProps,
+  ) => HTMLAttributes<HTMLElement>;
+  getTimeGridCellProps?: (
+    props: ScheduleTimeGridCellPropsRenderProps,
+  ) => HTMLAttributes<HTMLElement>;
   /**
    * Provides the popover content shown when an event pill is clicked. Receives
    * `controls` (e.g. `close`) so content can dismiss the popover. Return

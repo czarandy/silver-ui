@@ -20,12 +20,17 @@ export {ScheduleContext, useScheduleContext} from 'components/Schedule/context';
 export {
   defaultSchedulePlugins,
   ScheduleEventPopoverContent,
+  useScheduleEventMovePlugin,
   useScheduleEventPopoverPlugin,
   useScheduleEventResizePlugin,
   useSchedulePaginationPlugin,
   useScheduleViewSelectorPlugin,
 } from 'components/Schedule/plugins';
 export type {ScheduleContextValue} from 'components/Schedule/context';
+export type {
+  ScheduleEventMoveChange,
+  ScheduleEventMovePluginOptions,
+} from 'components/Schedule/plugins/EventMovePlugin';
 export type {
   ScheduleEventResizeChange,
   ScheduleEventResizePluginOptions,
@@ -51,9 +56,12 @@ export type {
   ScheduleCategoryMap,
   ScheduleDate,
   ScheduleEventColor,
+  ScheduleEventPropsRenderProps,
   ScheduleEventSource,
   ScheduleHeaderContent,
+  ScheduleMonthCellPropsRenderProps,
   ScheduleTimeGridEventRenderProps,
+  ScheduleTimeGridCellPropsRenderProps,
   SchedulePlugin,
   SchedulePluginPosition,
   ScheduleRange,

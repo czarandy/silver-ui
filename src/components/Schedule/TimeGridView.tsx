@@ -1,7 +1,12 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
 import {Temporal} from '@js-temporal/polyfill';
-import {useMemo, type CSSProperties, type ReactNode} from 'react';
+import {
+  useMemo,
+  type CSSProperties,
+  type HTMLAttributes,
+  type ReactNode,
+} from 'react';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -18,6 +23,7 @@ import {
   scheduleClasses,
   ScheduleCurrentTimeIndicator,
   ScheduleEventOverflowPopover,
+  useScheduleEventPluginProps,
   useScheduleEventPopover,
 } from 'components/Schedule/shared';
 import type {
@@ -200,6 +206,10 @@ function TimeGridEvent({
   const {categoryMap, plugins, timezoneID} = useScheduleContext();
   const {event} = layout;
   const {popover, triggerProps} = useScheduleEventPopover(event);
+  const eventPluginProps = useScheduleEventPluginProps({
+    event,
+    layout: 'timeGrid',
+  });
   const pluginEndContent = useMemo(
     () =>
       plugins
@@ -243,6 +253,7 @@ function TimeGridEvent({
           data-testid={`schedule-event-${event.id}`}
           style={style}
           type="button"
+          {...eventPluginProps}
           {...triggerProps}>
           {body}
         </button>
@@ -251,6 +262,7 @@ function TimeGridEvent({
           className={classes.event}
           data-state={isPast ? 'past' : undefined}
           data-testid={`schedule-event-${event.id}`}
+          {...eventPluginProps}
           style={style}>
           {body}
         </div>
@@ -318,7 +330,8 @@ export function TimeGridView({
    */
   minHour?: number;
 }): React.JSX.Element {
-  const {categoryMap, events, highlightDate, timezoneID} = useScheduleContext();
+  const {categoryMap, events, highlightDate, plugins, timezoneID} =
+    useScheduleContext();
   const normalizedMinHour = Math.max(0, Math.min(23, Math.floor(minHour)));
   const normalizedMaxHour = Math.max(
     normalizedMinHour + 1,
@@ -514,6 +527,22 @@ export function TimeGridView({
                   isLastColumn: index === days.length - 1,
                   isLastRow: isLastHour,
                 });
+                const hourCellPluginProps = plugins.reduce<
+                  HTMLAttributes<HTMLElement>
+                >(
+                  (props, plugin) => ({
+                    ...props,
+                    ...plugin.getTimeGridCellProps?.({
+                      date: day,
+                      hour,
+                      hourHeight: normalizedHourHeight,
+                      maxHour: normalizedMaxHour,
+                      minHour: normalizedMinHour,
+                      timezoneID,
+                    }),
+                  }),
+                  {},
+                );
                 return (
                   <div
                     aria-colindex={index + 2}
@@ -525,9 +554,11 @@ export function TimeGridView({
                       timezoneID,
                     })}
                     className={hourCellClasses.hourCell}
+                    data-testid={`schedule-time-grid-cell-${day.toString()}-${hour}`}
                     key={`${day.toString()}-${hour}`}
                     role="gridcell"
-                    style={hourStyle}>
+                    style={hourStyle}
+                    {...hourCellPluginProps}>
                     {currentTimeTop != null ? (
                       <ScheduleCurrentTimeIndicator
                         layout="timeGrid"

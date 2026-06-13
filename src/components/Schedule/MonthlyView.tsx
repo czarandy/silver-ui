@@ -1,6 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 
-import type {CSSProperties} from 'react';
+import type {CSSProperties, HTMLAttributes} from 'react';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
@@ -502,6 +502,18 @@ function ScheduleMonthlyView({
                 isOtherMonth: !isCurrentMonth,
                 isToday,
               });
+              const dayCellPluginProps = plugins.reduce<
+                HTMLAttributes<HTMLElement>
+              >(
+                (props, plugin) => ({
+                  ...props,
+                  ...plugin.getMonthCellProps?.({
+                    date: day,
+                    timezoneID,
+                  }),
+                }),
+                {},
+              );
               return (
                 <div
                   aria-current={isToday ? 'date' : undefined}
@@ -515,8 +527,10 @@ function ScheduleMonthlyView({
                     timezoneID,
                   })}
                   className={dayClasses.cell}
+                  data-testid={`schedule-month-cell-${day.toString()}`}
                   key={day.toString()}
-                  role="gridcell">
+                  role="gridcell"
+                  {...dayCellPluginProps}>
                   <span className={dayClasses.dayNumber}>
                     <Text
                       as="span"

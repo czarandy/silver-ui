@@ -2,6 +2,7 @@ import {Temporal} from '@js-temporal/polyfill';
 import {
   useMemo,
   type CSSProperties,
+  type HTMLAttributes,
   type ReactNode,
   type RefCallback,
 } from 'react';
@@ -16,6 +17,7 @@ import type {
   CalendarEvent,
   ScheduleCategory,
   ScheduleCategoryMap,
+  ScheduleEventPropsRenderProps,
   ScheduleEventPopoverControls,
   ScheduleHeaderContent,
   SchedulePlugin,
@@ -305,6 +307,25 @@ export function useScheduleEventPopover(
   };
 }
 
+export function useScheduleEventPluginProps({
+  event,
+  layout,
+}: Pick<ScheduleEventPropsRenderProps, 'event' | 'layout'>):
+  | HTMLAttributes<HTMLElement>
+  | undefined {
+  const {plugins, timezoneID} = useScheduleContext();
+  return useMemo(() => {
+    let props: HTMLAttributes<HTMLElement> | undefined;
+    plugins.forEach(plugin => {
+      const pluginProps = plugin.getEventProps?.({event, layout, timezoneID});
+      if (pluginProps != null) {
+        props = {...props, ...pluginProps};
+      }
+    });
+    return props;
+  }, [event, layout, plugins, timezoneID]);
+}
+
 /**
  * Renders an event pill root as either a clickable `<button>` trigger (when
  * `triggerProps` is supplied) or a static `<span>`, keeping identical classes
@@ -315,12 +336,14 @@ function EventPillRoot({
   className,
   dataState,
   dataTestId,
+  pluginProps,
   triggerProps,
 }: {
   children: ReactNode;
   className?: string;
   dataState?: 'past';
   dataTestId: string;
+  pluginProps?: HTMLAttributes<HTMLElement>;
   triggerProps?: ScheduleEventTriggerProps;
 }): React.JSX.Element {
   if (triggerProps != null) {
@@ -329,6 +352,7 @@ function EventPillRoot({
         className={className}
         data-state={dataState}
         data-testid={dataTestId}
+        {...pluginProps}
         type="button"
         {...triggerProps}>
         {children}
@@ -336,7 +360,11 @@ function EventPillRoot({
     );
   }
   return (
-    <span className={className} data-state={dataState} data-testid={dataTestId}>
+    <span
+      className={className}
+      data-state={dataState}
+      data-testid={dataTestId}
+      {...pluginProps}>
       {children}
     </span>
   );
@@ -356,6 +384,7 @@ export function CalendarEventPill({
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
   const {popover, triggerProps} = useScheduleEventPopover(event);
+  const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});
   const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({
     color: category.color,
@@ -369,6 +398,7 @@ export function CalendarEventPill({
         className={classes.event}
         dataState={isPast ? 'past' : undefined}
         dataTestId={`schedule-event-${event.id}`}
+        pluginProps={pluginProps}
         triggerProps={triggerProps}>
         <span className={classes.title}>
           {isDayEvent(event)
@@ -390,6 +420,7 @@ export function CalendarMonthEventPill({
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
   const {popover, triggerProps} = useScheduleEventPopover(event);
+  const pluginProps = useScheduleEventPluginProps({event, layout: 'month'});
   const category = getCategory(categoryMap, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);
   const classes = scheduleEventRecipe({
@@ -404,6 +435,7 @@ export function CalendarMonthEventPill({
         className={classes.event}
         dataState={isPast ? 'past' : undefined}
         dataTestId={`schedule-event-${event.id}`}
+        pluginProps={pluginProps}
         triggerProps={triggerProps}>
         {startTimeLabel != null ? (
           <span className={classes.time}>{startTimeLabel}</span>
