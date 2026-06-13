@@ -189,13 +189,6 @@ describe('Alert', () => {
     expect(screen.getByText('Extra content')).toBeVisible();
   });
 
-  // The collapsible body is the only id-bearing div (it carries the
-  // aria-controls target id); its single child is the styled content slot,
-  // which has no accessible role to query by.
-  const getBodyContent = (testId: string): Element | null =>
-    // eslint-disable-next-line testing-library/no-node-access -- styling wrapper has no semantic query
-    screen.getByTestId(testId).querySelector('div[id] > div');
-
   it('rounds the body bottom corners for the card container', () => {
     render(
       <Alert
@@ -208,7 +201,7 @@ describe('Alert', () => {
       </Alert>,
     );
 
-    expect(getBodyContent('alert')).toHaveClass('silver-bdr-b_lg');
+    expect(screen.getByText('Body')).toHaveClass('silver-bdr-b_lg');
   });
 
   it('omits the body bottom corner radius for the section container', () => {
@@ -223,7 +216,7 @@ describe('Alert', () => {
       </Alert>,
     );
 
-    expect(getBodyContent('alert')).not.toHaveClass('silver-bdr-b_lg');
+    expect(screen.getByText('Body')).not.toHaveClass('silver-bdr-b_lg');
   });
 
   it('applies the padding prop to the collapsible body', () => {
@@ -238,7 +231,7 @@ describe('Alert', () => {
       </Alert>,
     );
 
-    const body = getBodyContent('alert');
+    const body = screen.getByText('Body');
     expect(body).toHaveClass('silver-px_6');
     expect(body).toHaveClass('silver-py_6');
   });
