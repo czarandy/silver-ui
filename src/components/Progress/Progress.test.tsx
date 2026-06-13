@@ -104,8 +104,16 @@ describe('Progress', () => {
   });
 
   it('degrades gracefully when max is 0', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
     render(<Progress hasValueLabel label="Progress" max={0} value={0} />);
     expect(screen.getByText('0%')).toBeInTheDocument();
+
+    // An invalid `max` warns once and falls back to a 0% rendering.
+    expect(warn).toHaveBeenCalledWith(
+      'Progress: `max` must be greater than 0.',
+    );
+    warn.mockRestore();
   });
 
   it('applies variant classes to the fill', () => {

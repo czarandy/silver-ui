@@ -49,6 +49,10 @@ describe('TopNav', () => {
   });
 
   it('uses startContent over children when both are provided', () => {
+    // The precedence warning is asserted in the dedicated test below; silence
+    // it here so it does not pollute the test output.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
     render(
       <TopNav
         label="Nav"
@@ -59,6 +63,8 @@ describe('TopNav', () => {
 
     expect(screen.getByRole('link', {name: 'Start'})).toBeInTheDocument();
     expect(screen.queryByRole('link', {name: 'Child'})).not.toBeInTheDocument();
+
+    warn.mockRestore();
   });
 
   it('warns when both startContent and children are provided', () => {

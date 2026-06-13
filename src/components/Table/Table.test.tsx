@@ -1415,6 +1415,7 @@ describe('Table utilities', () => {
   });
 
   it('renders supported primitive and temporal cell values by default', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const item = {
       bigint: BigInt(42),
       bool: true,
@@ -1434,6 +1435,10 @@ describe('Table utilities', () => {
     expect(defaultCellRenderer(item, 'missing')).toBe('');
     expect(defaultCellRenderer(item, 'nativeDate')).toBe('');
     expect(defaultCellRenderer(item, 'object')).toBe('');
+
+    // The unsupported-type values (nativeDate, object) warn and render empty.
+    expect(warn).toHaveBeenCalledTimes(2);
+    warn.mockRestore();
   });
 
   it('paginates data with guarded page and page size values', () => {

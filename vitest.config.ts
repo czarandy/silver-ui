@@ -20,5 +20,13 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}', 'eslint/**/*.test.{js,ts}'],
     css: true,
     testTimeout: 20000,
+    // jsdom does not implement real navigation, so clicking real anchors/submit
+    // buttons logs a benign "Not implemented: navigation" error. Drop it so it
+    // does not pollute test output.
+    onConsoleLog(log) {
+      if (log.includes('Not implemented: navigation')) {
+        return false;
+      }
+    },
   },
 });
