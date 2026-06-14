@@ -25,7 +25,7 @@ export function useToast(): ShowToastFn {
 
   if (context == null) {
     throw new Error(
-      'useToast must be used within a ToastViewport. Add <ToastViewport> near your app root to enable toast notifications.',
+      'useToast must be used within a ToastViewport. Add <ToastViewport> around your app root to enable toast notifications.',
     );
   }
 
