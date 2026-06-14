@@ -21,7 +21,7 @@ describe('Badge', () => {
     render(<Badge data-testid="badge" label="Default" />);
 
     expect(screen.getByTestId('badge')).toHaveClass(
-      badgeRecipe({color: 'neutral'}),
+      badgeRecipe({color: 'neutral'}).root!,
     );
   });
 
@@ -29,7 +29,7 @@ describe('Badge', () => {
     render(<Badge color="error" data-testid="badge" label="Error" />);
 
     expect(screen.getByTestId('badge')).toHaveClass(
-      badgeRecipe({color: 'error'}),
+      badgeRecipe({color: 'error'}).root!,
     );
   });
 
@@ -59,7 +59,9 @@ describe('Badge', () => {
   it('applies the specified size', () => {
     render(<Badge data-testid="badge" label="Large" size="lg" />);
 
-    expect(screen.getByTestId('badge')).toHaveClass(badgeRecipe({size: 'lg'}));
+    expect(screen.getByTestId('badge')).toHaveClass(
+      badgeRecipe({size: 'lg'}).root!,
+    );
   });
 
   it('does not render an icon when icon is not provided', () => {

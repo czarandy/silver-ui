@@ -90,10 +90,11 @@ export function Badge({
   style,
   color = 'neutral',
 }: BadgeProps): React.JSX.Element {
+  const classes = badgeRecipe({size, color});
   return (
     <span
       aria-label={ariaLabel}
-      className={cx(badgeRecipe({size, color}), className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       role={role}
@@ -101,7 +102,7 @@ export function Badge({
       {icon != null ? (
         <Icon aria-hidden="true" color="inherit" icon={icon} size={size} />
       ) : null}
-      {label}
+      <span className={classes.label}>{label}</span>
     </span>
   );
 }
