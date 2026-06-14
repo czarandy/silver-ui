@@ -574,6 +574,9 @@ export default defineConfig({
           },
         },
         sizes: {
+          // Fills the gap in Panda's default scale, which has the half-steps
+          // `4.5`/`5.5` but jumps straight from `6` to `7`.
+          '6.5': {value: '1.625rem'},
           component: {
             sm: {value: '{sizes.8}'},
             md: {value: '{sizes.10}'},
@@ -586,6 +589,7 @@ export default defineConfig({
           },
         },
         spacing: {
+          '6.5': {value: '1.625rem'},
           component: {
             sm: {value: '{spacing.3}'},
             md: {value: '{spacing.4}'},
