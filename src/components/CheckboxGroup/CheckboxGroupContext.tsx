@@ -9,8 +9,8 @@ export interface CheckboxGroupContextValue {
   isDisabled: boolean;
   onChange: (value: string, isChecked: boolean) => void;
   orientation: CheckboxGroupOrientation;
+  selectedValues: Set<string>;
   size: CheckboxGroupSize;
-  value: string[];
 }
 
 export const CheckboxGroupContext =

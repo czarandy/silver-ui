@@ -136,16 +136,17 @@ export function CheckboxGroup({
     },
     [onChange, value],
   );
+  const selectedValues = useMemo(() => new Set(value), [value]);
   const contextValue = useMemo(
     () => ({
       htmlName,
       isDisabled,
       onChange: handleItemChange,
       orientation,
+      selectedValues,
       size,
-      value,
     }),
-    [handleItemChange, htmlName, isDisabled, orientation, size, value],
+    [handleItemChange, htmlName, isDisabled, orientation, selectedValues, size],
   );
 
   const necessity = getNecessity(isOptional, isRequired);

@@ -73,7 +73,7 @@ export function CheckboxGroupItem({
   }
 
   const isDisabled = context.isDisabled || isItemDisabled;
-  const isChecked = context.value.includes(value);
+  const isChecked = context.selectedValues.has(value);
 
   return (
     <CheckboxInput
