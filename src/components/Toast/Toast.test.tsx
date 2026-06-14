@@ -307,6 +307,25 @@ describe('Toast', () => {
     vi.useRealTimers();
   });
 
+  it('clears pending exit timers when the viewport unmounts', () => {
+    vi.useFakeTimers();
+
+    const {unmount} = render(
+      <ToastViewport isTopLayer={false}>
+        <ShowToastFixture body="Unmounting" isAutoHide={false} />
+      </ToastViewport>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Dismiss notification'}));
+    expect(vi.getTimerCount()).toBe(1);
+
+    unmount();
+
+    expect(vi.getTimerCount()).toBe(0);
+    vi.useRealTimers();
+  });
+
   it('limits visible toasts to maxVisible', async () => {
     const user = userEvent.setup();
 

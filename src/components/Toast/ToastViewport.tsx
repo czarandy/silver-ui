@@ -162,6 +162,9 @@ export function ToastViewport({
   const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set());
   const toastsRef = useRef(toasts);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const exitTimeoutsRef = useRef(
+    new Map<string, ReturnType<typeof globalThis.setTimeout>>(),
+  );
 
   useEffect(() => {
     toastsRef.current = toasts;
@@ -191,7 +194,12 @@ export function ToastViewport({
     const entry = toastsRef.current.find(toast => toast.id === id);
     entry?.options.onHide?.(reason);
     setExitingIds(previous => new Set(previous).add(id));
-    globalThis.setTimeout(() => {
+    const existingTimeout = exitTimeoutsRef.current.get(id);
+    if (existingTimeout != null) {
+      globalThis.clearTimeout(existingTimeout);
+    }
+    const timeout = globalThis.setTimeout(() => {
+      exitTimeoutsRef.current.delete(id);
       setExitingIds(previous => {
         const next = new Set(previous);
         next.delete(id);
@@ -199,6 +207,7 @@ export function ToastViewport({
       });
       setToasts(previous => previous.filter(toast => toast.id !== id));
     }, 180);
+    exitTimeoutsRef.current.set(id, timeout);
   }, []);
 
   const findByUniqueID = useCallback((uniqueID: string) => {
@@ -220,6 +229,16 @@ export function ToastViewport({
       // Already showing.
     }
   }, [isTopLayer]);
+
+  useEffect(() => {
+    const exitTimeouts = exitTimeoutsRef.current;
+    return () => {
+      for (const timeout of exitTimeouts.values()) {
+        globalThis.clearTimeout(timeout);
+      }
+      exitTimeouts.clear();
+    };
+  }, []);
 
   const insetStyle: CSSProperties = {
     ...(inset?.top != null ? {top: inset.top} : null),
