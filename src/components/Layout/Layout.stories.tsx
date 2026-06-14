@@ -319,6 +319,24 @@ export const HeaderSubtitle: Story = {
   ),
 };
 
+export const HeaderLevel: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">
+              Header title renders as a level 2 heading in this layout.
+            </Text>
+          </LayoutContent>
+        }
+        header={<LayoutHeader level={2} title="Account settings" />}
+      />
+    </Card>
+  ),
+};
+
 export const HeaderActions: Story = {
   render: args => (
     <Card style={{height: 420}}>

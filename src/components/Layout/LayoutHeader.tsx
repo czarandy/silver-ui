@@ -7,7 +7,7 @@ import {
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
 import {useLayoutDivider} from 'components/Layout/LayoutContext';
-import {Heading, Text} from 'components/Text';
+import {Heading, Text, type HeadingLevel} from 'components/Text';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
@@ -46,6 +46,11 @@ export interface LayoutHeaderProps {
    * Accessible label for the header landmark.
    */
   label?: string;
+  /**
+   * Semantic heading level used for the title.
+   * @default 4
+   */
+  level?: HeadingLevel;
   /**
    * Inner padding.
    */
@@ -87,6 +92,7 @@ export function LayoutHeader({
   endContent,
   height,
   label,
+  level = 4,
   padding = 4,
   ref,
   startContent,
@@ -128,7 +134,7 @@ export function LayoutHeader({
           <Heading
             data-dialog-autofocus={dialogContext != null ? 'true' : undefined}
             id={dialogContext?.titleId}
-            level={4}
+            level={level}
             tabIndex={dialogContext != null ? -1 : undefined}>
             {title}
           </Heading>

@@ -178,6 +178,17 @@ describe('LayoutHeader', () => {
 
     expect(screen.getByTestId('header').tagName).toBe('HEADER');
     expect(screen.getByText('My Title')).toBeInTheDocument();
+    expect(screen.getByRole('heading', {level: 4, name: 'My Title'})).toBe(
+      screen.getByText('My Title'),
+    );
+  });
+
+  it('applies the configured heading level to the title', () => {
+    render(<LayoutHeader level={2} title="My Title" />);
+
+    expect(
+      screen.getByRole('heading', {level: 2, name: 'My Title'}),
+    ).toBeInTheDocument();
   });
 
   it('renders subtitle when provided', () => {
