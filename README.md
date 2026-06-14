@@ -153,6 +153,7 @@ mode details, scoped theming examples, and per-instance overrides.
 ### Forms
 
 - **CheckboxInput** — checkbox with label and description
+- **CheckboxGroup** — controlled checkbox group for multi-value selection
 - **AutocompleteInput** — searchable autocomplete input (combobox)
 - **DateInput** — date picker field
 - **DateRangeInput** — date range picker field
