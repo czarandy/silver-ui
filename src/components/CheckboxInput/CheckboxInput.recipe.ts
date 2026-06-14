@@ -53,6 +53,7 @@ export const checkboxInputRecipe = sva({
     icon: {
       w: '70%',
       h: '70%',
+      mt: '1px',
     },
     label: {
       cursor: 'pointer',
@@ -70,6 +71,7 @@ export const checkboxInputRecipe = sva({
     size: {
       sm: {box: {w: '4.5', h: '4.5'}},
       md: {box: {w: '5.5', h: '5.5'}},
+      lg: {box: {w: '6.5', h: '6.5'}},
     },
     isChecked: {
       true: {box: {bg: 'primary', borderColor: 'primary'}},

@@ -23,7 +23,7 @@ import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 
-export type CheckboxInputSize = 'sm' | 'md';
+export type CheckboxInputSize = 'sm' | 'md' | 'lg';
 export type CheckboxInputValue = boolean | 'indeterminate';
 
 export type CheckboxInputProps = {
@@ -53,6 +53,10 @@ export type CheckboxInputProps = {
    * HTML name attribute for native form submission.
    */
   htmlName?: string;
+  /**
+   * HTML value attribute for native form submission.
+   */
+  htmlValue?: string;
   /**
    * Whether the checkbox is disabled.
    * @default false
@@ -122,6 +126,11 @@ export type CheckboxInputProps = {
    * Current checked state: true, false, or 'indeterminate'.
    */
   value: CheckboxInputValue;
+  /**
+   * Width of the checkbox item.
+   * @default 'full'
+   */
+  width?: 'auto' | 'full';
 } & FieldNecessity;
 
 /**
@@ -135,6 +144,7 @@ export function CheckboxInput({
   endContent,
   endContentPosition = 'inline',
   htmlName,
+  htmlValue,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -152,6 +162,7 @@ export function CheckboxInput({
   'data-testid': dataTestId,
   style,
   ref,
+  width = 'full',
 }: CheckboxInputProps): React.JSX.Element {
   const inputId = useId();
   const descriptionId = useId();
@@ -218,6 +229,7 @@ export function CheckboxInput({
         ref={mergeRefs(ref, inputRef)}
         required={isRequired}
         type="checkbox"
+        value={htmlValue}
       />
       <span aria-hidden="true" className={classes.box}>
         {isLoading ? (
@@ -295,6 +307,7 @@ export function CheckboxInput({
       label={labelNode}
       leadingContent={control}
       startContent={startContent}
+      width={width}
     />
   );
 

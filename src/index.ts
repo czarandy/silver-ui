@@ -655,6 +655,15 @@ export {
   type CheckboxInputSize,
   type CheckboxInputValue,
 } from 'components/CheckboxInput';
+export {
+  CheckboxGroup,
+  CheckboxGroupItem,
+  type CheckboxGroupContextValue,
+  type CheckboxGroupItemProps,
+  type CheckboxGroupOrientation,
+  type CheckboxGroupProps,
+  type CheckboxGroupSize,
+} from 'components/CheckboxGroup';
 export {DateInput, type DateInputProps} from 'components/DateInput';
 export {
   TimeInput,

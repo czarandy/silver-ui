@@ -7,8 +7,6 @@ import {
   type CheckboxInputProps,
 } from 'components/CheckboxInput/CheckboxInput';
 import {Icon} from 'components/Icon';
-import {HStack} from 'components/Stack/HStack';
-import {VStack} from 'components/Stack/VStack';
 
 function CheckboxStory(args: CheckboxInputProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);
@@ -19,101 +17,6 @@ function CheckboxStory(args: CheckboxInputProps): React.JSX.Element {
       onChange={checked => setValue(checked)}
       value={value}
     />
-  );
-}
-
-function CheckboxRowStory(): React.JSX.Element {
-  const [selected, setSelected] = useState({
-    email: true,
-    sms: false,
-    push: true,
-  });
-
-  return (
-    <HStack
-      aria-label="Notification channels"
-      as="fieldset"
-      gap={4}
-      style={{border: 0, padding: 0}}>
-      <CheckboxInput
-        label="Email"
-        onChange={checked =>
-          setSelected(current => ({...current, email: checked}))
-        }
-        value={selected.email}
-      />
-      <CheckboxInput
-        label="SMS"
-        onChange={checked =>
-          setSelected(current => ({...current, sms: checked}))
-        }
-        value={selected.sms}
-      />
-      <CheckboxInput
-        label="Push"
-        onChange={checked =>
-          setSelected(current => ({...current, push: checked}))
-        }
-        value={selected.push}
-      />
-    </HStack>
-  );
-}
-
-function CheckboxWrappingRowStory(): React.JSX.Element {
-  const [selected, setSelected] = useState({
-    design: true,
-    engineering: true,
-    marketing: false,
-    operations: false,
-    support: true,
-  });
-
-  return (
-    <VStack gap={3} width={420}>
-      <HStack
-        aria-label="Teams"
-        as="fieldset"
-        gap={4}
-        style={{border: 0, padding: 0}}
-        wrap="wrap">
-        <CheckboxInput
-          label="Design"
-          onChange={checked =>
-            setSelected(current => ({...current, design: checked}))
-          }
-          value={selected.design}
-        />
-        <CheckboxInput
-          label="Engineering"
-          onChange={checked =>
-            setSelected(current => ({...current, engineering: checked}))
-          }
-          value={selected.engineering}
-        />
-        <CheckboxInput
-          label="Marketing"
-          onChange={checked =>
-            setSelected(current => ({...current, marketing: checked}))
-          }
-          value={selected.marketing}
-        />
-        <CheckboxInput
-          label="Operations"
-          onChange={checked =>
-            setSelected(current => ({...current, operations: checked}))
-          }
-          value={selected.operations}
-        />
-        <CheckboxInput
-          label="Support"
-          onChange={checked =>
-            setSelected(current => ({...current, support: checked}))
-          }
-          value={selected.support}
-        />
-      </HStack>
-    </VStack>
   );
 }
 
@@ -142,15 +45,9 @@ export const WithDescription: Story = {
   },
 };
 
-export const HorizontalRow: Story = {
-  render: (): React.JSX.Element => <CheckboxRowStory />,
-};
-
-export const WrappingRow: Story = {
-  render: (): React.JSX.Element => <CheckboxWrappingRowStory />,
-};
-
 export const Small: Story = {args: {size: 'sm'}};
+
+export const Large: Story = {args: {size: 'lg'}};
 
 export const Disabled: Story = {args: {isDisabled: true, value: true}};
 
