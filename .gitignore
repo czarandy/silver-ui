@@ -5,3 +5,4 @@ styled-system/
 *.tsbuildinfo
 .eslintcache
 *.log
+.pnpm-store/
