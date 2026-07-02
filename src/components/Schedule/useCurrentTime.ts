@@ -1,3 +1,5 @@
+'use client';
+
 import {Temporal} from '@js-temporal/polyfill';
 import {useSyncExternalStore} from 'react';
 import type {Instant} from 'components/Schedule/types';

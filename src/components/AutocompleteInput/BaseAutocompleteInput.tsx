@@ -1,3 +1,5 @@
+'use client';
+
 import {Check, LoaderCircle} from 'lucide-react';
 import {
   useCallback,

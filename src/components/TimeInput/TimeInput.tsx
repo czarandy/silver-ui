@@ -1,3 +1,5 @@
+'use client';
+
 import {Temporal} from '@js-temporal/polyfill';
 import {Clock, X} from 'lucide-react';
 import {

@@ -1,3 +1,5 @@
+'use client';
+
 import {createContext, use, type ReactNode} from 'react';
 
 export type TopNavRenderMode = 'default' | 'mobile-bar' | 'drawer';

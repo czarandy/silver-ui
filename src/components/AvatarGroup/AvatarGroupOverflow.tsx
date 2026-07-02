@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useAvatarGroup} from 'components/AvatarGroup/AvatarGroupContext';
 import {cx} from 'internal/cx';

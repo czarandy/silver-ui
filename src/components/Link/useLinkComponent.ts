@@ -1,3 +1,5 @@
+'use client';
+
 import {use} from 'react';
 import {LinkContext} from 'components/Link/LinkContext';
 import type {LinkComponent} from 'components/Link/types';

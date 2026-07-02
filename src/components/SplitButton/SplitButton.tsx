@@ -1,3 +1,5 @@
+'use client';
+
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Button, type ButtonProps, type ButtonSize} from 'components/Button';

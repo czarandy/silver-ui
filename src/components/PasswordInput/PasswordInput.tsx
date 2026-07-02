@@ -1,3 +1,5 @@
+'use client';
+
 import {Eye, EyeOff} from 'lucide-react';
 import {useCallback, useState, type Ref} from 'react';
 import {Button} from 'components/Button';

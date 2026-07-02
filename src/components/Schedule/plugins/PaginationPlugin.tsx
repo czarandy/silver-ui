@@ -1,3 +1,5 @@
+'use client';
+
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {useCallback, useMemo, type ReactNode} from 'react';
 import {Button} from 'components/Button';

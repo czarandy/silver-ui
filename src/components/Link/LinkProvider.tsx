@@ -1,3 +1,5 @@
+'use client';
+
 import {useMemo, type ReactNode} from 'react';
 import {LinkContext} from 'components/Link/LinkContext';
 import type {LinkComponent} from 'components/Link/types';

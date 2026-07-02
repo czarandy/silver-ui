@@ -13,6 +13,7 @@
 import {readFile, writeFile, rm} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {join, dirname} from 'node:path';
+import process from 'node:process';
 import {fileURLToPath} from 'node:url';
 
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -32,14 +33,42 @@ async function sourceHasUseClient(source) {
   // (e.g. styled-system/*) and anything that no longer exists on disk.
   if (source.startsWith('src/') && existsSync(absolutePath)) {
     const contents = await readFile(absolutePath, 'utf8');
-    const firstStatement = contents.trimStart();
-    hasDirective =
-      firstStatement.startsWith(`'use client'`) ||
-      firstStatement.startsWith(`"use client"`);
+    hasDirective = startsWithUseClientDirective(contents);
   }
 
   sourceDirectiveCache.set(source, hasDirective);
   return hasDirective;
+}
+
+// True if the first *statement* is a `use client` directive. Skips a shebang and
+// any leading comments/whitespace first, so a directive placed below a license
+// header or `/* eslint-disable */` comment is still detected.
+function startsWithUseClientDirective(contents) {
+  let i = 0;
+  const n = contents.length;
+
+  if (contents.startsWith('#!')) {
+    const newline = contents.indexOf('\n');
+    i = newline === -1 ? n : newline + 1;
+  }
+
+  while (i < n) {
+    const char = contents[i];
+    if (char === ' ' || char === '\t' || char === '\r' || char === '\n') {
+      i += 1;
+    } else if (contents.startsWith('//', i)) {
+      const newline = contents.indexOf('\n', i);
+      i = newline === -1 ? n : newline + 1;
+    } else if (contents.startsWith('/*', i)) {
+      const end = contents.indexOf('*/', i + 2);
+      i = end === -1 ? n : end + 2;
+    } else {
+      break;
+    }
+  }
+
+  const rest = contents.slice(i);
+  return rest.startsWith(`'use client'`) || rest.startsWith(`"use client"`);
 }
 
 let stampedCount = 0;
@@ -88,6 +117,6 @@ for (const metafile of metafiles) {
   await rm(metafilePath);
 }
 
-console.log(
-  `preserve-use-client: added 'use client' to ${stampedCount} chunk(s).`,
+process.stdout.write(
+  `preserve-use-client: added 'use client' to ${stampedCount} chunk(s).\n`,
 );

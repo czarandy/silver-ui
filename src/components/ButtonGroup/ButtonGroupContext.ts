@@ -1,3 +1,5 @@
+'use client';
+
 import {createContext, use} from 'react';
 import type {ButtonSize} from 'components/Button/Button';
 

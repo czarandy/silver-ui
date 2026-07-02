@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useId} from 'react';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';

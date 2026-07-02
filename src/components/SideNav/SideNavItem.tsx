@@ -1,3 +1,5 @@
+'use client';
+
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useCallback, useId, useState} from 'react';

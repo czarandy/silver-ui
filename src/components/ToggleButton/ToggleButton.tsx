@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, MouseEvent, Ref} from 'react';
 import type {ButtonSize} from 'components/Button';
 import {buttonRecipe} from 'components/Button/Button.recipe';

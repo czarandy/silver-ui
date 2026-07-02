@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useCallback, useMemo, useState} from 'react';
 import {sideNavRecipe} from 'components/SideNav/SideNav.recipe';

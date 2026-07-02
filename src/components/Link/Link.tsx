@@ -1,3 +1,5 @@
+'use client';
+
 import {ExternalLink} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {Icon} from 'components/Icon';

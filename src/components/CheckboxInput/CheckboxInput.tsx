@@ -1,3 +1,5 @@
+'use client';
+
 import {Check, Info, Minus} from 'lucide-react';
 import {
   useEffect,

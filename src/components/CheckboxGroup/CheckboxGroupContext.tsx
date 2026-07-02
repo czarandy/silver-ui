@@ -1,3 +1,5 @@
+'use client';
+
 import {createContext} from 'react';
 import type {CheckboxInputSize} from 'components/CheckboxInput';
 

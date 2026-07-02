@@ -1,3 +1,5 @@
+'use client';
+
 import {createContext} from 'react';
 import type {ToastDismissReason, ToastEntry} from 'components/Toast/types';
 

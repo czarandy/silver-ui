@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
+'use client';
 
 import {scheduleListViewRecipe} from 'components/Schedule/ListView.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';

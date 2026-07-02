@@ -1,3 +1,5 @@
+'use client';
+
 import {ArrowDown, ArrowUp, ChevronsUpDown} from 'lucide-react';
 import {useMemo, type ReactNode} from 'react';
 import {Icon} from 'components/Icon';

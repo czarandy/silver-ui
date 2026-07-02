@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Step} from 'components/Stepper/internal/Step';
 import {cx} from 'internal/cx';

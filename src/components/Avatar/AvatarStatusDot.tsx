@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useAvatarSize} from 'components/Avatar/AvatarSizeContext';
 import {cx} from 'internal/cx';

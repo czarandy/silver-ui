@@ -1,3 +1,5 @@
+'use client';
+
 import {useCallback, useMemo, useState, type ReactNode} from 'react';
 import {Drawer, type DrawerProps} from 'components/Drawer/Drawer';
 

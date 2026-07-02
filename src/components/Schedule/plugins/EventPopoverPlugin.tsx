@@ -1,3 +1,5 @@
+'use client';
+
 import {useMemo, type ReactNode} from 'react';
 import {ScheduleEventPopoverContent} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
 import type {

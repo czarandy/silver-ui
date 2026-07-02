@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useRef} from 'react';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';

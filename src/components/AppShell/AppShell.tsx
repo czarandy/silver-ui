@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useId, useMemo, useRef, useState} from 'react';
 import {appShellRecipe} from 'components/AppShell/AppShell.recipe';

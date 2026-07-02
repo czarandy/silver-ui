@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
 import {Divider} from 'components/Divider';

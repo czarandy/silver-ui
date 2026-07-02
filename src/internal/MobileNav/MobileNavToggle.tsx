@@ -1,3 +1,5 @@
+'use client';
+
 import {Menu} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';

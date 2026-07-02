@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useDropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
 import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';

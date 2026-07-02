@@ -5,6 +5,12 @@ allowBuilds:
   esbuild: true
   unrs-resolver: true
 
+# First-party package (github.com/czarandy/eslint-plugin-use-client); exempt it
+# from the minimum-release-age supply-chain gate so freshly published versions
+# can be adopted immediately.
+minimumReleaseAgeExclude:
+  - eslint-plugin-use-client
+
 overrides:
   esbuild: 0.28.1
 

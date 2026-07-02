@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo} from 'react';
 import type {ButtonSize} from 'components/Button/Button';

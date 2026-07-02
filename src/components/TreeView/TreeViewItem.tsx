@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y-x/no-noninteractive-element-to-interactive-role, jsx-a11y-x/no-static-element-interactions, silver-ui/require-component-props -- internal recursive tree item */
+'use client';
 
 import {ChevronRight} from 'lucide-react';
 import {useCallback, useId, useRef, type ReactNode, type Ref} from 'react';

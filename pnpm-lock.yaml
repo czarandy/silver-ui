@@ -90,6 +90,9 @@ importers:
       eslint-plugin-testing-library:
         specifier: ^7.16.2
         version: 7.16.2(eslint@10.4.0)(typescript@6.0.3)
+      eslint-plugin-use-client:
+        specifier: ^1.0.0
+        version: 1.0.0(eslint@10.4.0)
       globals:
         specifier: ^17.6.0
         version: 17.6.0
@@ -2236,6 +2239,12 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
+
+  eslint-plugin-use-client@1.0.0:
+    resolution: {integrity: sha512-wwrqPHc4td/bBVJEfvYAiM0wN+ORgGHLDdDINvwce2jxEUCOmTyBp2qAfW+9qjU34ilXCRmOTTWIh4v/SwGhfg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      eslint: '>=9'
 
   eslint-scope@9.1.2:
     resolution: {integrity: sha512-xS90H51cKw0jltxmvmHy2Iai1LIqrfbw57b79w/J7MfvDfkIkFZ+kj6zC3BjtUwh150HsSSdxXZcsuv72miDFQ==}
@@ -5923,6 +5932,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
       - typescript
+
+  eslint-plugin-use-client@1.0.0(eslint@10.4.0):
+    dependencies:
+      eslint: 10.4.0
 
   eslint-scope@9.1.2:
     dependencies:

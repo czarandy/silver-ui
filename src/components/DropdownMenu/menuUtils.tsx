@@ -1,4 +1,5 @@
 /* eslint-disable @eslint-react/no-array-index-key */
+'use client';
 import {useCallback, type KeyboardEvent, type ReactNode} from 'react';
 import {Divider} from 'components/Divider';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';

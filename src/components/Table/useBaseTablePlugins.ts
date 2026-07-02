@@ -1,3 +1,5 @@
+'use client';
+
 import {useMemo} from 'react';
 import type {TablePlugin} from 'components/Table/types';
 

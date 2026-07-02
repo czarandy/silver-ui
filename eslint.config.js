@@ -9,6 +9,7 @@ import perfectionist from 'eslint-plugin-perfectionist';
 import reactCompiler from 'eslint-plugin-react-compiler';
 import storybook from 'eslint-plugin-storybook';
 import testingLibrary from 'eslint-plugin-testing-library';
+import useClient from 'eslint-plugin-use-client';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import silverUiPlugin from './eslint/silver-ui-plugin.js';
@@ -417,6 +418,24 @@ export default tseslint.config(
     },
     rules: {
       'silver-ui/no-recipe-exports': 'error',
+    },
+  },
+  // 'use client' — source files using client-only React features (hooks,
+  // createContext, browser APIs, event handlers) must declare the directive so
+  // it survives the build (see scripts/preserve-use-client.mjs) and consumers in
+  // React Server Components environments can import them.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: [
+      '**/*.test.{ts,tsx}',
+      '**/*.stories.{ts,tsx}',
+      '**/*.recipe.ts',
+    ],
+    plugins: {
+      'use-client': useClient,
+    },
+    rules: {
+      'use-client/require-use-client': 'error',
     },
   },
   // Testing Library — enforce best practices in test files

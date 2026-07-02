@@ -1,3 +1,5 @@
+'use client';
+
 import {useMemo, type ReactNode} from 'react';
 import {Pagination, type PaginationProps} from 'components/Pagination';
 import type {TablePlugin} from 'components/Table/types';

@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
 import {Icon, type IconComponent} from 'components/Icon';

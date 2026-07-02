@@ -1,3 +1,5 @@
+'use client';
+
 import {createContext, use} from 'react';
 import type {TableContextValue} from 'components/Table/types';
 

@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props */
+'use client';
 
 import {Temporal} from '@js-temporal/polyfill';
 import {useCallback, useMemo} from 'react';

@@ -1,4 +1,5 @@
 /* eslint-disable @eslint-react/static-components -- intentional polymorphism via as prop */
+'use client';
 
 import type {
   AriaAttributes,

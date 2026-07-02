@@ -1,3 +1,5 @@
+'use client';
+
 import {User} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useMemo, useState} from 'react';

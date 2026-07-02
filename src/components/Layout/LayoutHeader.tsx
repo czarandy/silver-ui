@@ -1,3 +1,5 @@
+'use client';
+
 import {X} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Button} from 'components/Button';

@@ -1,3 +1,5 @@
+'use client';
+
 import {Check, ChevronDown, X} from 'lucide-react';
 import {
   useCallback,

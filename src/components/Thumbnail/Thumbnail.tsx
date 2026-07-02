@@ -1,3 +1,5 @@
+'use client';
+
 import {ImageIcon, X} from 'lucide-react';
 import {useState, type CSSProperties, type MouseEvent, type Ref} from 'react';
 import {Button} from 'components/Button';

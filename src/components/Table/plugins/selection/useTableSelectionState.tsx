@@ -1,3 +1,5 @@
+'use client';
+
 import {useCallback, useMemo} from 'react';
 import type {UseTableSelectionConfig} from 'components/Table/plugins/selection/useTableSelection';
 

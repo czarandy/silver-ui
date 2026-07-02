@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props */
+'use client';
 
 import {formatFilterValue} from 'components/SearchFilterInput/formatFilterValue';
 import type {SearchFilterInputTagProps} from 'components/SearchFilterInput/types';

@@ -1,3 +1,5 @@
+'use client';
+
 import {createContext, use} from 'react';
 
 export type LayoutArea = 'header' | 'content' | 'start' | 'end' | 'footer';

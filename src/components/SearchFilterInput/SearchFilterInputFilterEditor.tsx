@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props */
+'use client';
 
 import {SearchFilterInputEditPopover} from 'components/SearchFilterInput/SearchFilterInputEditPopover';
 import {useInternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';

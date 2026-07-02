@@ -1,3 +1,5 @@
+'use client';
+
 import {useRef} from 'react';
 import {shallowEqual} from 'internal/shallowEqual';
 

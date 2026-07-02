@@ -1,3 +1,5 @@
+'use client';
+
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {emptyStateRecipe} from 'components/EmptyState/EmptyState.recipe';
 import {Heading, type HeadingLevel, Text} from 'components/Text';

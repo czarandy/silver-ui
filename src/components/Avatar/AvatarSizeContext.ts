@@ -1,3 +1,5 @@
+'use client';
+
 import {createContext, use} from 'react';
 
 const DEFAULT_AVATAR_SIZE = 36;

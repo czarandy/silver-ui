@@ -1,3 +1,5 @@
+'use client';
+
 import {use, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {CheckboxGroupContext} from 'components/CheckboxGroup/CheckboxGroupContext';
 import {CheckboxInput, type CheckboxInputProps} from 'components/CheckboxInput';

@@ -1,3 +1,5 @@
+'use client';
+
 import {useMemo} from 'react';
 import type {SearchSource} from 'components/AutocompleteInput';
 import type {InternalSearchFilterInputConfig} from 'components/SearchFilterInput/internalConfig';

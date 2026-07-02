@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y-x/no-noninteractive-element-to-interactive-role -- tree semantics are applied to list markup */
+'use client';
 
 import {
   useCallback,

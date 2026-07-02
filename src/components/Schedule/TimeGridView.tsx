@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
+'use client';
 
 import {Temporal} from '@js-temporal/polyfill';
 import {

@@ -1,3 +1,5 @@
+'use client';
+
 import {use, useCallback} from 'react';
 import {ToastContext} from 'components/Toast/ToastContext';
 import type {

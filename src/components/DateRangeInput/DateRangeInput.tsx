@@ -1,3 +1,5 @@
+'use client';
+
 import {CalendarIcon, X} from 'lucide-react';
 import {
   useId,

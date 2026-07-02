@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, Ref} from 'react';
 import {Icon, type IconComponent} from 'components/Icon';
 import {segmentedControlRecipe} from 'components/SegmentedControl/SegmentedControl.recipe';

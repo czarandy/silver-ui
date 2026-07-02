@@ -1,3 +1,5 @@
+'use client';
+
 import {Temporal} from '@js-temporal/polyfill';
 import {useMemo} from 'react';
 import type {

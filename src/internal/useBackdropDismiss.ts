@@ -1,3 +1,5 @@
+'use client';
+
 import {useRef, type MouseEvent, type PointerEvent} from 'react';
 
 /**

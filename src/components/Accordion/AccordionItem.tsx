@@ -1,3 +1,5 @@
+'use client';
+
 import {ChevronDown} from 'lucide-react';
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {accordionItemRecipe} from 'components/Accordion/AccordionItem.recipe';

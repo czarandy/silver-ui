@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y-x/no-static-element-interactions */
+'use client';
 import {X} from 'lucide-react';
 import {
   useCallback,

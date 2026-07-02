@@ -1,3 +1,5 @@
+'use client';
+
 import {Suspense, useMemo, useState, type CSSProperties, type Ref} from 'react';
 import {ScheduleContext} from 'components/Schedule/context';
 import {eventOverlapsRange, sortEvents} from 'components/Schedule/dateMath';

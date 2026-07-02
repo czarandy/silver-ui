@@ -1,3 +1,5 @@
+'use client';
+
 import {Check} from 'lucide-react';
 import {useMemo, type ReactNode} from 'react';
 import {DropdownMenu, DropdownMenuItem} from 'components/DropdownMenu';

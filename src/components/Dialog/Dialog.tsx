@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions */
+'use client';
 import {
   useEffect,
   useId,

@@ -1,3 +1,5 @@
+'use client';
+
 import {useCallback, useMemo} from 'react';
 import type {TableColumnSettingsOption} from 'components/Table/plugins/columnSettings/useTableColumnSettings';
 

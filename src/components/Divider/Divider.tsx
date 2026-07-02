@@ -1,3 +1,5 @@
+'use client';
+
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {dividerRecipe} from 'components/Divider/Divider.recipe';
 import {cx} from 'internal/cx';

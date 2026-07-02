@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
+'use client';
 
 import {TimeGridView} from 'components/Schedule/TimeGridView';
 import {useScheduleContext} from 'components/Schedule/context';

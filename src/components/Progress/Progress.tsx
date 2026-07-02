@@ -1,3 +1,5 @@
+'use client';
+
 import {useId, type CSSProperties, type Ref} from 'react';
 import {progressRecipe} from 'components/Progress/Progress.recipe';
 import {VisuallyHidden} from 'internal/VisuallyHidden';

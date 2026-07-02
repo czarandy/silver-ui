@@ -1,3 +1,5 @@
+'use client';
+
 import {ChevronLeft, ChevronRight} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
 import {useMemo} from 'react';

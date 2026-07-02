@@ -1,3 +1,5 @@
+'use client';
+
 import {use, useCallback, useState} from 'react';
 import {AccordionContext} from 'components/Accordion/AccordionContext';
 

@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props, jsx-a11y-x/no-static-element-interactions, @eslint-react/no-array-index-key */
+'use client';
 
 import {X} from 'lucide-react';
 import {

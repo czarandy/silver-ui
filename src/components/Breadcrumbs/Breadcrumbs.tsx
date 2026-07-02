@@ -1,3 +1,5 @@
+'use client';
+
 import {useMemo, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {breadcrumbsRecipe} from 'components/Breadcrumbs/Breadcrumbs.recipe';
 import {

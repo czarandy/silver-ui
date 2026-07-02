@@ -1,4 +1,5 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
+'use client';
 
 import type {CSSProperties, HTMLAttributes} from 'react';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';

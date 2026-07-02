@@ -1,4 +1,5 @@
 /* eslint-disable jsx-a11y-x/no-noninteractive-element-interactions */
+'use client';
 
 import {ChevronLeft, ChevronRight, X} from 'lucide-react';
 import {

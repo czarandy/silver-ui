@@ -1,3 +1,5 @@
+'use client';
+
 import {useMemo} from 'react';
 import type {UseTableColumnSettingsStateConfig} from 'components/Table/plugins/columnSettings/useTableColumnSettingsState';
 import type {TableColumn, TablePlugin} from 'components/Table/types';

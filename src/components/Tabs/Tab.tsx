@@ -1,3 +1,5 @@
+'use client';
+
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Icon, type IconComponent} from 'components/Icon';
 import type {LinkComponent} from 'components/Link';

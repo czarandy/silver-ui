@@ -1,3 +1,5 @@
+'use client';
+
 import {useEffect} from 'react';
 
 // Module-level reference count so overlapping locks cooperate: e.g. a Lightbox
