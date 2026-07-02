@@ -51,6 +51,8 @@ try {
   await mkdir(packageDir, {recursive: true});
   await extractPackageTarball(tarballPath, packageDir);
 
+  await verifyUseClientPreserved(packageDir);
+
   for (const packageName of [
     '@js-temporal/polyfill',
     '@types/react',
@@ -126,6 +128,35 @@ export type PublicToken = SpacingToken;
   );
 } finally {
   await rm(tempDir, {force: true, recursive: true});
+}
+
+// The source already ships at least one `use client` directive (CodeBlock).
+// esbuild's code splitting drops top-level directives unless the
+// preserve-directives plugin re-hoists them onto the emitted chunks, so this
+// asserts the build preserves the directive somewhere in the shipped output.
+async function verifyUseClientPreserved(packageDir) {
+  const distDir = join(packageDir, 'dist');
+  const files = await readdir(distDir, {recursive: true, withFileTypes: true});
+
+  for (const file of files) {
+    if (!file.isFile() || !/\.(js|cjs)$/.test(file.name)) {
+      continue;
+    }
+    const source = await readFile(join(file.parentPath, file.name), 'utf8');
+    const firstStatement = source.trimStart();
+    if (
+      firstStatement.startsWith(`'use client'`) ||
+      firstStatement.startsWith(`"use client"`)
+    ) {
+      return;
+    }
+  }
+
+  throw new Error(
+    `No 'use client' directive found anywhere in the shipped dist output. ` +
+      `The tsup preserve-directives plugin is not preserving directives ` +
+      `through code splitting.`,
+  );
 }
 
 async function linkPackage(packageName, nodeModulesDir) {
