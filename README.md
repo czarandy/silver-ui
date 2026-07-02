@@ -30,7 +30,7 @@ import {Button} from 'silver-ui';
 
 function App() {
   return (
-    <Button variant="solid" size="md">
+    <Button variant="primary" size="md">
       Click me
     </Button>
   );
