@@ -6,7 +6,9 @@ const gray = {
   50: {value: '#f1f4f7'},
 };
 const green = generateColorScale('#26a332');
-const teal = generateColorScale('#1ca49e');
+// Darkened from '#1ca49e' so teal.500 (the default `primary` accent) clears WCAG
+// AA (4.5:1) against white text — the original measured 3.06:1. See issue #1.
+const teal = generateColorScale('#0f7a76');
 const red = {
   50: {value: '#fceef0'},
   100: {value: '#f9d1d8'},
@@ -116,9 +118,12 @@ export default defineConfig({
                 },
               },
               solid: {
+                // _dark pinned to green.600 (not the lighter green.500): with
+                // white text green.500 measured only 3.30:1 in dark mode. See
+                // issue #1.
                 value: {
                   base: '{colors.green.600}',
-                  _dark: '{colors.green.500}',
+                  _dark: '{colors.green.600}',
                 },
               },
               solidFg: {value: '{colors.white}'},
@@ -156,7 +161,11 @@ export default defineConfig({
                   _dark: '{colors.yellow.400}',
                 },
               },
-              solidFg: {value: '{colors.white}'},
+              // Dark text on the light amber solid: white measured only 2.01:1
+              // (fails WCAG AA). gray.900 is fixed dark in both modes — the solid
+              // is a light amber in light AND dark mode, so a mode-flipping fg
+              // would fail in dark mode. See issue #1.
+              solidFg: {value: '{colors.gray.900}'},
             },
             info: {
               fg: {value: '{colors.blue.700}'},
@@ -165,9 +174,11 @@ export default defineConfig({
             },
             neutral: {
               solid: {
+                // Darkened from gray.500/gray.400 so white text clears WCAG AA
+                // (was 4.35:1 light / 4.05:1 dark). See issue #1.
                 value: {
-                  base: '{colors.gray.500}',
-                  _dark: '{colors.gray.400}',
+                  base: '{colors.gray.600}',
+                  _dark: '{colors.gray.600}',
                 },
               },
               solidFg: {value: '{colors.white}'},
