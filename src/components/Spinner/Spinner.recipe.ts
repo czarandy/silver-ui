@@ -17,7 +17,6 @@ export const spinnerRecipe = sva({
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '0.5',
       textAlign: 'center',
     },
     visual: {

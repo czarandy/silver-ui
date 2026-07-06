@@ -62,13 +62,26 @@ describe('Spinner', () => {
     expect(screen.getByText('Fetching data')).toHaveClass('silver-fw_bold');
   });
 
-  it('renders a 16px label for the xl size', () => {
+  it('scales the label with the spinner size', () => {
     const {rerender} = render(<Spinner label="Loading" size="xl" />);
     // silver-fs_md maps to fontSizes.md (1rem / 16px)
     expect(screen.getByText('Loading')).toHaveClass('silver-fs_md');
 
     rerender(<Spinner label="Loading" size="lg" />);
+    // silver-fs_sm maps to fontSizes.sm (0.875rem / 14px)
     expect(screen.getByText('Loading')).toHaveClass('silver-fs_sm');
+  });
+
+  it('scales the description with the spinner size', () => {
+    const {rerender} = render(
+      <Spinner description="Details" label="Loading" size="xl" />,
+    );
+    // xl description is 14px (silver-fs_sm)
+    expect(screen.getByText('Details')).toHaveClass('silver-fs_sm');
+
+    rerender(<Spinner description="Details" label="Loading" size="lg" />);
+    // non-xl description is 12px (silver-fs_xs)
+    expect(screen.getByText('Details')).toHaveClass('silver-fs_xs');
   });
 
   it('renders a secondary description below the label', () => {

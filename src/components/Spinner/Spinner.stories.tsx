@@ -36,6 +36,14 @@ export const WithDescription: Story = {
   },
 };
 
+export const ExtraLargeWithDescription: Story = {
+  args: {
+    size: 'xl',
+    label: 'Uploading files',
+    description: 'This may take a few moments',
+  },
+};
+
 export const Sizes: Story = {
   render: () => (
     <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
