@@ -62,6 +62,15 @@ describe('Spinner', () => {
     expect(screen.getByText('Fetching data')).toHaveClass('silver-fw_bold');
   });
 
+  it('renders a 16px label for the xl size', () => {
+    const {rerender} = render(<Spinner label="Loading" size="xl" />);
+    // silver-fs_md maps to fontSizes.md (1rem / 16px)
+    expect(screen.getByText('Loading')).toHaveClass('silver-fs_md');
+
+    rerender(<Spinner label="Loading" size="lg" />);
+    expect(screen.getByText('Loading')).toHaveClass('silver-fs_sm');
+  });
+
   it('renders a secondary description below the label', () => {
     render(<Spinner description="This may take a moment" label="Uploading" />);
     const description = screen.getByText('This may take a moment');

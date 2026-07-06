@@ -77,6 +77,8 @@ export function Spinner({
   const onMedia = variant === 'onMedia';
   const labelColor = onMedia ? 'inherit' : undefined;
   const descriptionColor = onMedia ? 'inherit' : 'secondary';
+  // Bump the label to 16px for the largest spinner so it stays proportional.
+  const labelSize = size === 'xl' ? 'md' : undefined;
   const classes = spinnerRecipe({size, variant, hasText});
 
   return (
@@ -91,7 +93,12 @@ export function Spinner({
       {hasText ? (
         <span className={classes.text}>
           {hasLabel ? (
-            <Text as="span" color={labelColor} type="label" weight="bold">
+            <Text
+              as="span"
+              color={labelColor}
+              size={labelSize}
+              type="label"
+              weight="bold">
               {label}
             </Text>
           ) : null}
