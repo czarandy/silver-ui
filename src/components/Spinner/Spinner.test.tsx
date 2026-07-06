@@ -34,9 +34,19 @@ describe('Spinner', () => {
       'silver---spinner-size_var(--silver-sizes-icon-lg)',
     );
 
-    rerender(<Spinner data-testid="spinner" size="xl" />);
+    rerender(<Spinner data-testid="spinner" size={28} />);
     expect(screen.getByTestId('spinner')).toHaveClass(
-      'silver---spinner-size_2.25rem',
+      'silver---spinner-size_28px',
+    );
+
+    rerender(<Spinner data-testid="spinner" size={32} />);
+    expect(screen.getByTestId('spinner')).toHaveClass(
+      'silver---spinner-size_32px',
+    );
+
+    rerender(<Spinner data-testid="spinner" size={36} />);
+    expect(screen.getByTestId('spinner')).toHaveClass(
+      'silver---spinner-size_36px',
     );
   });
 
@@ -55,6 +65,61 @@ describe('Spinner', () => {
     expect(screen.getByText('Fetching data')).toHaveClass(
       'silver-c_var(--silver-text-color,_var(--silver-colors-fg))',
     );
+  });
+
+  it('renders the visible label in bold', () => {
+    render(<Spinner label="Fetching data" />);
+    expect(screen.getByText('Fetching data')).toHaveClass('silver-fw_bold');
+  });
+
+  it('scales the label with the spinner size', () => {
+    // Numeric sizes use the larger 16px label (silver-fs_md).
+    const {rerender} = render(<Spinner label="Loading" size={36} />);
+    expect(screen.getByText('Loading')).toHaveClass('silver-fs_md');
+
+    // Token sizes keep the 14px label (silver-fs_sm).
+    rerender(<Spinner label="Loading" size="lg" />);
+    expect(screen.getByText('Loading')).toHaveClass('silver-fs_sm');
+  });
+
+  it('scales the description with the spinner size', () => {
+    // Numeric sizes use the 14px description (silver-fs_sm).
+    const {rerender} = render(
+      <Spinner description="Details" label="Loading" size={36} />,
+    );
+    expect(screen.getByText('Details')).toHaveClass('silver-fs_sm');
+
+    // Token sizes use the 12px description (silver-fs_xs).
+    rerender(<Spinner description="Details" label="Loading" size="lg" />);
+    expect(screen.getByText('Details')).toHaveClass('silver-fs_xs');
+  });
+
+  it('renders a secondary description below the label', () => {
+    render(<Spinner description="This may take a moment" label="Uploading" />);
+    const description = screen.getByText('This may take a moment');
+    expect(description).toBeInTheDocument();
+    expect(description).toHaveClass(
+      'silver-c_var(--silver-text-color-muted,_var(--silver-colors-fg-muted))',
+    );
+  });
+
+  it('renders a description without a label', () => {
+    render(<Spinner description="Almost done" />);
+    expect(screen.getByText('Almost done')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Loading');
+  });
+
+  it('uses inherited color for the on media description', () => {
+    render(
+      <Spinner description="Buffering" label="Loading" variant="onMedia" />,
+    );
+    expect(screen.getByText('Buffering')).toHaveClass('silver-c_inherit');
+  });
+
+  it('treats an empty description like no description', () => {
+    render(<Spinner data-testid="spinner" description="" />);
+    const spinner = screen.getByTestId('spinner');
+    expect(spinner).toHaveTextContent(/^$/);
   });
 
   it('uses inherited color for the on media visible label', () => {
