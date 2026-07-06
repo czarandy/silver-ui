@@ -40,9 +40,14 @@ import {
 export interface ScheduleMonthlyViewOptions {
   /**
    * Pixel height used for each week row in the monthly grid.
+   *
+   * Pass a number to fix the row height; days with more events than fit
+   * collapse the overflow into a "+N more" popover. Pass `'auto'` to show every
+   * event with no hiding — each week row grows to fit its busiest day, using the
+   * default height as a minimum.
    * @default 128
    */
-  monthRowHeight?: number;
+  monthRowHeight?: number | 'auto';
   /**
    * Number of weeks to display in the monthly grid.
    * @default 6
@@ -317,6 +322,48 @@ function getMonthEventLevelCount(monthRowHeight: number): number {
   );
 }
 
+/**
+ * Pixel height a week row needs to show every stacked event level up to and
+ * including `maxLevel` without clipping. Inverse of {@link getMonthEventLevelCount}.
+ */
+function getMonthRowHeightForMaxLevel(maxLevel: number): number {
+  return (
+    MONTH_EVENT_TOP_OFFSET +
+    maxLevel * MONTH_EVENT_LEVEL_HEIGHT +
+    MONTH_EVENT_HEIGHT +
+    MONTH_EVENT_BOTTOM_PADDING
+  );
+}
+
+/**
+ * Per-week-row heights for the auto-height mode: each week grows to fit its
+ * busiest day, floored at `minRowHeight`. Weeks with no events use the minimum.
+ */
+function getAutoMonthRowHeights({
+  minRowHeight,
+  segments,
+  weekRowCount,
+}: {
+  minRowHeight: number;
+  segments: ReadonlyArray<MonthEventSegment>;
+  weekRowCount: number;
+}): number[] {
+  const maxLevelByWeek = new Array<number>(weekRowCount).fill(-1);
+  segments.forEach(segment => {
+    if (segment.week >= 0 && segment.week < weekRowCount) {
+      maxLevelByWeek[segment.week] = Math.max(
+        maxLevelByWeek[segment.week],
+        segment.level,
+      );
+    }
+  });
+  return maxLevelByWeek.map(maxLevel =>
+    maxLevel < 0
+      ? minRowHeight
+      : Math.max(minRowHeight, getMonthRowHeightForMaxLevel(maxLevel)),
+  );
+}
+
 function getMonthSeeMoreStyle({
   dayIndex,
   level,
@@ -439,9 +486,15 @@ function ScheduleMonthlyView({
   const currentTime = useCurrentTime();
   const month = viewDate.toPlainDate();
   const title = formatMonthTitle(month);
-  const monthRowHeight = Math.max(
+  const isAutoRowHeight = options.monthRowHeight === 'auto';
+  // In auto mode the default height is the minimum each row may shrink to.
+  const minMonthRowHeight = Math.max(
     64,
-    Math.floor(options.monthRowHeight ?? DEFAULT_MONTH_ROW_HEIGHT),
+    Math.floor(
+      typeof options.monthRowHeight === 'number'
+        ? options.monthRowHeight
+        : DEFAULT_MONTH_ROW_HEIGHT,
+    ),
   );
   const weekStartsOn = options.weekStartsOn ?? 0;
   const days = getMonthDays(month, options.weekCount ?? 6, weekStartsOn);
@@ -450,24 +503,42 @@ function ScheduleMonthlyView({
   const dayEventsByIndex = days.map(
     day => eventsByDate.get(day.toString()) ?? [],
   );
-  const monthEventLevelCount = getMonthEventLevelCount(monthRowHeight);
-  const visibleEventSegments = eventSegments.filter(segment =>
-    isSegmentVisible({
-      dayEventsByIndex,
-      levelCount: monthEventLevelCount,
-      segment,
-    }),
-  );
-  const hiddenEventsByDate = getHiddenEventsByDate({
-    dayEventsByIndex,
-    days,
-    segments: eventSegments,
-    visibleSegments: visibleEventSegments,
-  });
+  const monthEventLevelCount = getMonthEventLevelCount(minMonthRowHeight);
+  // Auto mode shows every event, so no segment is hidden and no "+N more"
+  // popover is rendered; instead each week row grows to fit its busiest day.
+  const visibleEventSegments = isAutoRowHeight
+    ? eventSegments
+    : eventSegments.filter(segment =>
+        isSegmentVisible({
+          dayEventsByIndex,
+          levelCount: monthEventLevelCount,
+          segment,
+        }),
+      );
+  const hiddenEventsByDate = isAutoRowHeight
+    ? new Map<string, CalendarEvent[]>()
+    : getHiddenEventsByDate({
+        dayEventsByIndex,
+        days,
+        segments: eventSegments,
+        visibleSegments: visibleEventSegments,
+      });
   const today = highlightDate.toPlainDate();
   const visibleWeekdays = getWeekdays(weekStartsOn);
+  const autoRowHeights = isAutoRowHeight
+    ? getAutoMonthRowHeights({
+        minRowHeight: minMonthRowHeight,
+        segments: eventSegments,
+        weekRowCount: Math.ceil(days.length / 7),
+      })
+    : null;
   const monthGridStyle: MonthGridStyle = {
-    '--schedule-month-row-height': `${monthRowHeight}px`,
+    '--schedule-month-row-height': `${minMonthRowHeight}px`,
+    // Auto mode pins explicit per-week tracks on both the cell grid and the
+    // event overlay so their absolute positions stay aligned.
+    ...(autoRowHeights != null && {
+      gridTemplateRows: autoRowHeights.map(height => `${height}px`).join(' '),
+    }),
   };
 
   return (
@@ -489,7 +560,10 @@ function ScheduleMonthlyView({
           </div>
         ))}
         <div className={styles.monthSurface}>
-          <div className={styles.monthCellGrid} style={monthGridStyle}>
+          <div
+            className={styles.monthCellGrid}
+            data-testid="schedule-month-grid"
+            style={monthGridStyle}>
             {days.map((day, index) => {
               const dayEvents = eventsByDate.get(day.toString()) ?? [];
               const isCurrentMonth =

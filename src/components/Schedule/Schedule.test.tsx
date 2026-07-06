@@ -840,6 +840,44 @@ describe('Schedule', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows every month event and grows the week row when monthRowHeight is auto', () => {
+    const overflowEvents = Array.from({length: 6}, (_, index) =>
+      createEventFromISO({
+        category: 'Planning',
+        end: '2026-05-13',
+        id: `auto-month-${index + 1}`,
+        start: '2026-05-13',
+        title: `Auto month ${index + 1}`,
+      }),
+    );
+
+    render(
+      <Schedule
+        categories={categories}
+        events={overflowEvents}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView({monthRowHeight: 'auto'})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    // Every event is rendered, including ones that would overflow a fixed row.
+    for (let index = 1; index <= 6; index += 1) {
+      expect(
+        screen.getByTestId(`schedule-event-span-auto-month-${index}`),
+      ).toBeInTheDocument();
+    }
+    // No "+N more" collapse happens in auto mode.
+    expect(
+      screen.queryByRole('button', {name: /more events for/}),
+    ).not.toBeInTheDocument();
+
+    // The week row grows to fit the busy day via explicit per-week tracks. Six
+    // stacked events (levels 0-5) need 30 + 5*22 + 20 + 4 = 164px.
+    const cellGrid = screen.getByTestId('schedule-month-grid');
+    expect(cellGrid.style.gridTemplateRows).toContain('164px');
+  });
+
   it('includes month events in each covered day cell label', () => {
     render(
       <Schedule
