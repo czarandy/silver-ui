@@ -1,6 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 'use client';
 
+import {useMemo} from 'react';
 import type {CSSProperties, HTMLAttributes} from 'react';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -484,7 +485,10 @@ function ScheduleMonthlyView({
     useScheduleContext();
   const eventPopoverActive = hasEventPopoverPlugin(plugins);
   const currentTime = useCurrentTime();
-  const month = viewDate.toPlainDate();
+  // viewDate is a memoized context value, so deriving the month from it once and
+  // memoizing keeps `month` referentially stable across unrelated re-renders
+  // (e.g. the per-minute current-time tick).
+  const month = useMemo(() => viewDate.toPlainDate(), [viewDate]);
   const title = formatMonthTitle(month);
   const isAutoRowHeight = options.monthRowHeight === 'auto';
   // In auto mode the default height is the minimum each row may shrink to.
@@ -497,49 +501,83 @@ function ScheduleMonthlyView({
     ),
   );
   const weekStartsOn = options.weekStartsOn ?? 0;
-  const days = getMonthDays(month, options.weekCount ?? 6, weekStartsOn);
-  const eventSegments = getMonthEventSegments(events, days, timezoneID);
-  const eventsByDate = getEventsByDate(events, days, timezoneID);
-  const dayEventsByIndex = days.map(
-    day => eventsByDate.get(day.toString()) ?? [],
+  const weekCount = options.weekCount ?? 6;
+  const days = useMemo(
+    () => getMonthDays(month, weekCount, weekStartsOn),
+    [month, weekCount, weekStartsOn],
+  );
+  // The event bucketing/stacking below is O(events) and reruns only when the
+  // events, visible days, or timezone change — not on every render.
+  const eventSegments = useMemo(
+    () => getMonthEventSegments(events, days, timezoneID),
+    [events, days, timezoneID],
+  );
+  const eventsByDate = useMemo(
+    () => getEventsByDate(events, days, timezoneID),
+    [events, days, timezoneID],
+  );
+  const dayEventsByIndex = useMemo(
+    () => days.map(day => eventsByDate.get(day.toString()) ?? []),
+    [days, eventsByDate],
   );
   const monthEventLevelCount = getMonthEventLevelCount(minMonthRowHeight);
   // Auto mode shows every event, so no segment is hidden and no "+N more"
   // popover is rendered; instead each week row grows to fit its busiest day.
-  const visibleEventSegments = isAutoRowHeight
-    ? eventSegments
-    : eventSegments.filter(segment =>
-        isSegmentVisible({
-          dayEventsByIndex,
-          levelCount: monthEventLevelCount,
-          segment,
-        }),
-      );
-  const hiddenEventsByDate = isAutoRowHeight
-    ? new Map<string, CalendarEvent[]>()
-    : getHiddenEventsByDate({
-        dayEventsByIndex,
-        days,
-        segments: eventSegments,
-        visibleSegments: visibleEventSegments,
-      });
+  const visibleEventSegments = useMemo(
+    () =>
+      isAutoRowHeight
+        ? eventSegments
+        : eventSegments.filter(segment =>
+            isSegmentVisible({
+              dayEventsByIndex,
+              levelCount: monthEventLevelCount,
+              segment,
+            }),
+          ),
+    [dayEventsByIndex, eventSegments, isAutoRowHeight, monthEventLevelCount],
+  );
+  const hiddenEventsByDate = useMemo(
+    () =>
+      isAutoRowHeight
+        ? new Map<string, CalendarEvent[]>()
+        : getHiddenEventsByDate({
+            dayEventsByIndex,
+            days,
+            segments: eventSegments,
+            visibleSegments: visibleEventSegments,
+          }),
+    [
+      dayEventsByIndex,
+      days,
+      eventSegments,
+      isAutoRowHeight,
+      visibleEventSegments,
+    ],
+  );
   const today = highlightDate.toPlainDate();
   const visibleWeekdays = getWeekdays(weekStartsOn);
-  const autoRowHeights = isAutoRowHeight
-    ? getAutoMonthRowHeights({
-        minRowHeight: minMonthRowHeight,
-        segments: eventSegments,
-        weekRowCount: Math.ceil(days.length / 7),
-      })
-    : null;
-  const monthGridStyle: MonthGridStyle = {
-    '--schedule-month-row-height': `${minMonthRowHeight}px`,
-    // Auto mode pins explicit per-week tracks on both the cell grid and the
-    // event overlay so their absolute positions stay aligned.
-    ...(autoRowHeights != null && {
-      gridTemplateRows: autoRowHeights.map(height => `${height}px`).join(' '),
+  const autoRowHeights = useMemo(
+    () =>
+      isAutoRowHeight
+        ? getAutoMonthRowHeights({
+            minRowHeight: minMonthRowHeight,
+            segments: eventSegments,
+            weekRowCount: Math.ceil(days.length / 7),
+          })
+        : null,
+    [days, eventSegments, isAutoRowHeight, minMonthRowHeight],
+  );
+  const monthGridStyle = useMemo<MonthGridStyle>(
+    () => ({
+      '--schedule-month-row-height': `${minMonthRowHeight}px`,
+      // Auto mode pins explicit per-week tracks on both the cell grid and the
+      // event overlay so their absolute positions stay aligned.
+      ...(autoRowHeights != null && {
+        gridTemplateRows: autoRowHeights.map(height => `${height}px`).join(' '),
+      }),
     }),
-  };
+    [autoRowHeights, minMonthRowHeight],
+  );
 
   return (
     <ScheduleFrame title={title} titleLabel={title}>
