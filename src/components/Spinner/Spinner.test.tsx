@@ -34,9 +34,19 @@ describe('Spinner', () => {
       'silver---spinner-size_var(--silver-sizes-icon-lg)',
     );
 
-    rerender(<Spinner data-testid="spinner" size="xl" />);
+    rerender(<Spinner data-testid="spinner" size={28} />);
     expect(screen.getByTestId('spinner')).toHaveClass(
-      'silver---spinner-size_2.25rem',
+      'silver---spinner-size_28px',
+    );
+
+    rerender(<Spinner data-testid="spinner" size={32} />);
+    expect(screen.getByTestId('spinner')).toHaveClass(
+      'silver---spinner-size_32px',
+    );
+
+    rerender(<Spinner data-testid="spinner" size={36} />);
+    expect(screen.getByTestId('spinner')).toHaveClass(
+      'silver---spinner-size_36px',
     );
   });
 
@@ -63,24 +73,24 @@ describe('Spinner', () => {
   });
 
   it('scales the label with the spinner size', () => {
-    const {rerender} = render(<Spinner label="Loading" size="xl" />);
-    // silver-fs_md maps to fontSizes.md (1rem / 16px)
+    // Numeric sizes use the larger 16px label (silver-fs_md).
+    const {rerender} = render(<Spinner label="Loading" size={36} />);
     expect(screen.getByText('Loading')).toHaveClass('silver-fs_md');
 
+    // Token sizes keep the 14px label (silver-fs_sm).
     rerender(<Spinner label="Loading" size="lg" />);
-    // silver-fs_sm maps to fontSizes.sm (0.875rem / 14px)
     expect(screen.getByText('Loading')).toHaveClass('silver-fs_sm');
   });
 
   it('scales the description with the spinner size', () => {
+    // Numeric sizes use the 14px description (silver-fs_sm).
     const {rerender} = render(
-      <Spinner description="Details" label="Loading" size="xl" />,
+      <Spinner description="Details" label="Loading" size={36} />,
     );
-    // xl description is 14px (silver-fs_sm)
     expect(screen.getByText('Details')).toHaveClass('silver-fs_sm');
 
+    // Token sizes use the 12px description (silver-fs_xs).
     rerender(<Spinner description="Details" label="Loading" size="lg" />);
-    // non-xl description is 12px (silver-fs_xs)
     expect(screen.getByText('Details')).toHaveClass('silver-fs_xs');
   });
 

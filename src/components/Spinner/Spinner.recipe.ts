@@ -47,8 +47,16 @@ export const spinnerRecipe = sva({
       lg: {
         root: {'--spinner-size': 'var(--silver-sizes-icon-lg)'},
       },
-      xl: {
-        root: {'--spinner-size': '2.25rem'},
+      // Numeric sizes are bespoke pixel values, intentionally not design-system
+      // tokens, for larger standalone loading states.
+      28: {
+        root: {'--spinner-size': '28px'},
+      },
+      32: {
+        root: {'--spinner-size': '32px'},
+      },
+      36: {
+        root: {'--spinner-size': '36px'},
       },
     },
     variant: {

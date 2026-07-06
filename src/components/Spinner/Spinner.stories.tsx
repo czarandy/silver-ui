@@ -7,7 +7,7 @@ const meta: Meta<typeof Spinner> = {
   argTypes: {
     size: {
       control: {type: 'select'},
-      options: ['sm', 'md', 'lg', 'xl'],
+      options: ['sm', 'md', 'lg', 28, 32, 36],
     },
     variant: {
       control: {type: 'select'},
@@ -36,9 +36,9 @@ export const WithDescription: Story = {
   },
 };
 
-export const ExtraLargeWithDescription: Story = {
+export const LargeWithDescription: Story = {
   args: {
-    size: 'xl',
+    size: 36,
     label: 'Uploading files',
     description: 'This may take a few moments',
   },
@@ -50,18 +50,22 @@ export const Sizes: Story = {
       <Spinner size="sm" />
       <Spinner size="md" />
       <Spinner size="lg" />
-      <Spinner size="xl" />
+      <Spinner size={28} />
+      <Spinner size={32} />
+      <Spinner size={36} />
     </div>
   ),
 };
 
 export const SizesWithLabels: Story = {
   render: () => (
-    <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
+    <div style={{display: 'flex', alignItems: 'flex-start', gap: '1rem'}}>
       <Spinner label="Small" size="sm" />
       <Spinner label="Medium" size="md" />
       <Spinner label="Large" size="lg" />
-      <Spinner label="Extra Large" size="xl" />
+      <Spinner label="28px" size={28} />
+      <Spinner label="32px" size={32} />
+      <Spinner label="36px" size={36} />
     </div>
   ),
 };

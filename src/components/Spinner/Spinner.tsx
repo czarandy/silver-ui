@@ -35,7 +35,9 @@ export interface SpinnerProps {
    */
   ref?: Ref<HTMLSpanElement>;
   /**
-   * Visual size of the spinner. Matches Button size names. Default is `md`.
+   * Visual size of the spinner. `sm`/`md`/`lg` use design-system icon size
+   * tokens; the numeric sizes (`28`/`32`/`36`) are bespoke pixel values for
+   * larger standalone loading states. Default is `md`.
    */
   size?: SpinnerSize;
   /**
@@ -77,9 +79,11 @@ export function Spinner({
   const onMedia = variant === 'onMedia';
   const labelColor = onMedia ? 'inherit' : undefined;
   const descriptionColor = onMedia ? 'inherit' : 'secondary';
-  // Scale the text with the spinner: xl uses 16px/14px, all others 14px/12px.
-  const labelSize = size === 'xl' ? 'md' : undefined;
-  const descriptionSize = size === 'xl' ? 'sm' : 'xs';
+  // Scale the text with the spinner: the larger numeric sizes use 16px/14px,
+  // the token sizes use 14px/12px.
+  const isLargeSize = typeof size === 'number';
+  const labelSize = isLargeSize ? 'md' : undefined;
+  const descriptionSize = isLargeSize ? 'sm' : 'xs';
   const classes = spinnerRecipe({size, variant, hasText});
 
   return (
