@@ -1,5 +1,7 @@
 import {describe, expect, it} from 'vitest';
 
+import {themePresets} from 'themes/presets';
+
 // panda.config.ts lives at the repo root (outside src) and has no path alias;
 // this test intentionally reads the real token source of truth.
 // eslint-disable-next-line no-restricted-imports
@@ -153,6 +155,149 @@ describe('token color contrast (WCAG AA, normal text)', () => {
         ratio,
         `${fg} (${fgHex}) on ${bg} (${bgHex}) is ${ratio.toFixed(2)}:1`,
       ).toBeGreaterThanOrEqual(AA_NORMAL);
+    },
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Bundled theme presets (`<Theme preset=…>`). We ship and encourage these, so
+// they get the same audit. A preset only overrides a subset of tokens; any
+// pairing it does not override falls back to the (already-audited) default
+// token, so each pairing is resolved override-first, default-second.
+// ---------------------------------------------------------------------------
+
+type Preset = (typeof themePresets)[keyof typeof themePresets];
+type Appearance = 'light' | 'dark';
+
+// Panda token path -> flat camelCase `<Theme>` override key.
+function presetKey(ref: string): string {
+  const parts = ref
+    .replace(/^\{colors\./, '')
+    .replace(/\}$/, '')
+    .split('.')
+    .filter(part => part !== 'DEFAULT');
+  return parts
+    .map((part, i) => (i === 0 ? part : part[0].toUpperCase() + part.slice(1)))
+    .join('');
+}
+
+function presetOverride(
+  preset: Preset,
+  appearance: Appearance,
+  key: string,
+): string | undefined {
+  const modeColors = preset.themes?.[appearance]?.colors as unknown as
+    | Record<string, string | undefined>
+    | undefined;
+  const agnostic = preset.tokens?.colors as unknown as
+    | Record<string, string | undefined>
+    | undefined;
+  return modeColors?.[key] ?? agnostic?.[key];
+}
+
+// Effective hex for a token in a preset: its override, else the default.
+function effective(
+  preset: Preset,
+  appearance: Appearance,
+  ref: string,
+  mode: Mode,
+): string {
+  return (
+    presetOverride(preset, appearance, presetKey(ref)) ?? resolve(ref, mode)
+  );
+}
+
+// Opaque `#rrggbb` only; translucent colors need compositing to judge.
+function isOpaqueHex(color: string): boolean {
+  return /^#[0-9a-f]{6}$/i.test(color);
+}
+
+/**
+ * Pairings kept intentionally faithful to their source palette even though the
+ * on-accent text falls short of AA. Verified against the official palettes
+ * (nordtheme.com, ethanschoonover.com/solarized) — every accent below is the
+ * exact canonical value. Keyed `${preset}:${mode}:${pairing}`; the pinned hex
+ * makes this exemption break loudly if the color ever drifts (at which point
+ * it should either pass AA or be reconsidered, not silently re-exempted).
+ */
+const CANONICAL_EXCEPTIONS: Record<
+  string,
+  {bg: string; source: string} | undefined
+> = {
+  'nord:base:primary button': {bg: '#5e81ac', source: 'Nord nord10'},
+  'nord:base:status.info solid': {bg: '#5e81ac', source: 'Nord nord10'},
+  'nord:base:destructive button': {bg: '#bf616a', source: 'Nord nord11'},
+  'nord:_dark:destructive button': {bg: '#bf616a', source: 'Nord nord11'},
+  'solarized:base:primary button': {bg: '#268bd2', source: 'Solarized blue'},
+  'solarized:_dark:primary button': {bg: '#268bd2', source: 'Solarized blue'},
+  'solarized:base:status.info solid': {bg: '#268bd2', source: 'Solarized blue'},
+  'solarized:_dark:status.info solid': {
+    bg: '#268bd2',
+    source: 'Solarized blue',
+  },
+  'solarized:base:destructive button': {bg: '#dc322f', source: 'Solarized red'},
+  'solarized:_dark:destructive button': {
+    bg: '#dc322f',
+    source: 'Solarized red',
+  },
+};
+
+interface PresetCase {
+  appearance: Appearance;
+  bgHex: string;
+  fgHex: string;
+  mode: Mode;
+  name: string;
+  preset: string;
+}
+
+const PRESET_CASES: PresetCase[] = Object.entries(themePresets)
+  .flatMap(([presetId, preset]) =>
+    MODES.flatMap(mode => {
+      const appearance: Appearance = mode === '_dark' ? 'dark' : 'light';
+      return PAIRINGS.map(p => ({
+        appearance,
+        bgHex: effective(preset, appearance, p.bg, mode),
+        fgHex: effective(preset, appearance, p.fg, mode),
+        mode,
+        name: p.name,
+        preset: presetId,
+      }));
+    }),
+  )
+  .filter(c => isOpaqueHex(c.bgHex) && isOpaqueHex(c.fgHex));
+
+const exceptionFor = (c: PresetCase) =>
+  CANONICAL_EXCEPTIONS[`${c.preset}:${c.mode}:${c.name}`];
+
+const ENFORCED_CASES = PRESET_CASES.filter(c => exceptionFor(c) === undefined);
+const EXEMPT_CASES = PRESET_CASES.map(c => ({
+  ...c,
+  expected: exceptionFor(c)?.bg,
+  source: exceptionFor(c)?.source,
+})).filter(c => c.expected !== undefined);
+
+describe('theme preset color contrast (WCAG AA, normal text)', () => {
+  it.each(ENFORCED_CASES)(
+    '$preset · $name in $appearance mode',
+    ({bgHex, fgHex, name, preset}) => {
+      const ratio = contrastRatio(bgHex, fgHex);
+      expect(
+        ratio,
+        `${preset} ${name}: ${fgHex} on ${bgHex} is ${ratio.toFixed(2)}:1`,
+      ).toBeGreaterThanOrEqual(AA_NORMAL);
+    },
+  );
+});
+
+describe('theme preset canonical exceptions (faithful to source palette)', () => {
+  it.each(EXEMPT_CASES)(
+    '$preset · $name stays canonical in $appearance mode',
+    ({bgHex, expected, name, preset, source}) => {
+      expect(
+        bgHex.toLowerCase(),
+        `${preset} ${name} should stay ${source} (${expected})`,
+      ).toBe(expected);
     },
   );
 });
