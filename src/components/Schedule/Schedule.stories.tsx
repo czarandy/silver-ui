@@ -1097,3 +1097,43 @@ export const FiveWeekMonth: Story = {
     <ScheduleStory view={createScheduleMonthlyView({weekCount: 5})} />
   ),
 };
+
+// A single very busy day plus a multi-day span, to show how `monthRowHeight:
+// 'auto'` grows the week row to fit every event instead of collapsing overflow
+// into a "+N more" popover.
+const busyDayEvents = [
+  ...Array.from({length: 7}, (_, index) =>
+    createEventFromISO({
+      category: (
+        [
+          'Planning',
+          'Operations',
+          'Design',
+          'Customer',
+          'Research',
+          'Sync',
+        ] as const
+      )[index % 6],
+      end: allDayISO(0),
+      id: `busy-day-${index + 1}`,
+      start: allDayISO(0),
+      title: `Busy day event ${index + 1}`,
+    }),
+  ),
+  createEventFromISO({
+    category: 'Operations',
+    end: allDayISO(4),
+    id: 'busy-launch-window',
+    start: allDayISO(2),
+    title: 'Launch window',
+  }),
+];
+
+export const ShowAllMonthEvents: Story = {
+  render: () => (
+    <ScheduleStory
+      events={busyDayEvents}
+      view={createScheduleMonthlyView({monthRowHeight: 'auto'})}
+    />
+  ),
+};
