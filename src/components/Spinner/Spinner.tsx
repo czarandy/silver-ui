@@ -22,6 +22,11 @@ export interface SpinnerProps {
    */
   'data-testid'?: string;
   /**
+   * Optional secondary text shown below the label to give more context about
+   * the pending work.
+   */
+  description?: string;
+  /**
    * Optional visible label shown below the spinner.
    */
   label?: string;
@@ -53,6 +58,7 @@ export function Spinner({
   size,
   variant,
   label,
+  description,
   className,
   'data-testid': dataTestId,
   style,
@@ -60,14 +66,18 @@ export function Spinner({
   'aria-label': ariaLabelFromProps,
 }: SpinnerProps): React.JSX.Element {
   const hasLabel = typeof label === 'string' && label !== '';
+  const hasDescription = typeof description === 'string' && description !== '';
+  const hasText = hasLabel || hasDescription;
   const ariaLabel =
     ariaLabelFromProps != null && ariaLabelFromProps !== ''
       ? ariaLabelFromProps
       : hasLabel
         ? label
         : 'Loading';
-  const labelColor = variant === 'onMedia' ? 'inherit' : undefined;
-  const classes = spinnerRecipe({size, variant, hasLabel});
+  const onMedia = variant === 'onMedia';
+  const labelColor = onMedia ? 'inherit' : undefined;
+  const descriptionColor = onMedia ? 'inherit' : 'secondary';
+  const classes = spinnerRecipe({size, variant, hasText});
 
   return (
     <span
@@ -78,10 +88,19 @@ export function Spinner({
       role="status"
       style={style}>
       <span aria-hidden="true" className={classes.visual} />
-      {hasLabel ? (
-        <Text as="span" color={labelColor} type="label">
-          {label}
-        </Text>
+      {hasText ? (
+        <span className={classes.text}>
+          {hasLabel ? (
+            <Text as="span" color={labelColor} type="label" weight="bold">
+              {label}
+            </Text>
+          ) : null}
+          {hasDescription ? (
+            <Text as="span" color={descriptionColor} type="supporting">
+              {description}
+            </Text>
+          ) : null}
+        </span>
       ) : null}
     </span>
   );

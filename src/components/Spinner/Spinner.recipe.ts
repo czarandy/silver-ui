@@ -1,7 +1,7 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const spinnerRecipe = sva({
-  slots: ['root', 'visual'],
+  slots: ['root', 'visual', 'text'],
   base: {
     root: {
       '--spinner-size': 'var(--silver-sizes-icon-md)',
@@ -12,6 +12,13 @@ export const spinnerRecipe = sva({
       color: 'primary',
       w: 'var(--spinner-size)',
       h: 'var(--spinner-size)',
+    },
+    text: {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '0.5',
+      textAlign: 'center',
     },
     visual: {
       display: 'block',
@@ -49,7 +56,7 @@ export const spinnerRecipe = sva({
       default: {root: {color: 'primary'}},
       onMedia: {root: {color: 'fg.onPrimary'}},
     },
-    hasLabel: {
+    hasText: {
       true: {
         root: {
           flexDirection: 'column',
@@ -63,7 +70,7 @@ export const spinnerRecipe = sva({
   defaultVariants: {
     size: 'md',
     variant: 'default',
-    hasLabel: false,
+    hasText: false,
   },
 });
 

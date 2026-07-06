@@ -57,6 +57,39 @@ describe('Spinner', () => {
     );
   });
 
+  it('renders the visible label in bold', () => {
+    render(<Spinner label="Fetching data" />);
+    expect(screen.getByText('Fetching data')).toHaveClass('silver-fw_bold');
+  });
+
+  it('renders a secondary description below the label', () => {
+    render(<Spinner description="This may take a moment" label="Uploading" />);
+    const description = screen.getByText('This may take a moment');
+    expect(description).toBeInTheDocument();
+    expect(description).toHaveClass(
+      'silver-c_var(--silver-text-color-muted,_var(--silver-colors-fg-muted))',
+    );
+  });
+
+  it('renders a description without a label', () => {
+    render(<Spinner description="Almost done" />);
+    expect(screen.getByText('Almost done')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveAttribute('aria-label', 'Loading');
+  });
+
+  it('uses inherited color for the on media description', () => {
+    render(
+      <Spinner description="Buffering" label="Loading" variant="onMedia" />,
+    );
+    expect(screen.getByText('Buffering')).toHaveClass('silver-c_inherit');
+  });
+
+  it('treats an empty description like no description', () => {
+    render(<Spinner data-testid="spinner" description="" />);
+    const spinner = screen.getByTestId('spinner');
+    expect(spinner).toHaveTextContent(/^$/);
+  });
+
   it('uses inherited color for the on media visible label', () => {
     render(<Spinner label="Loading media" variant="onMedia" />);
     expect(screen.getByText('Loading media')).toHaveClass('silver-c_inherit');

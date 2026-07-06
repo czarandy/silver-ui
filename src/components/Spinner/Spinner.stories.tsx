@@ -14,6 +14,7 @@ const meta: Meta<typeof Spinner> = {
       options: ['default', 'onMedia'],
     },
     label: {control: 'text'},
+    description: {control: 'text'},
   },
 };
 
@@ -25,6 +26,13 @@ export const Default: Story = {};
 export const WithLabel: Story = {
   args: {
     label: 'Loading...',
+  },
+};
+
+export const WithDescription: Story = {
+  args: {
+    label: 'Uploading files',
+    description: 'This may take a few moments',
   },
 };
 
@@ -62,6 +70,18 @@ export const OnMediaWithLabel: Story = {
   render: () => (
     <div style={{display: 'inline-flex', padding: '1rem', background: '#111'}}>
       <Spinner label="Loading media" variant="onMedia" />
+    </div>
+  ),
+};
+
+export const OnMediaWithDescription: Story = {
+  render: () => (
+    <div style={{display: 'inline-flex', padding: '1rem', background: '#111'}}>
+      <Spinner
+        description="Streaming from the server"
+        label="Loading media"
+        variant="onMedia"
+      />
     </div>
   ),
 };
