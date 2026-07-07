@@ -33,6 +33,7 @@ export default tseslint.config(
       'styled-system/',
       '*.cjs',
       'eslint/',
+      '.claude/',
     ],
   },
   // TypeScript rules — all source files
