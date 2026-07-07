@@ -16,6 +16,7 @@
     "ignoreDeprecations": "6.0",
     "paths": {
       "components/*": ["./src/components/*"],
+      "hooks/*": ["./src/hooks/*"],
       "internal": ["./src/internal/index"],
       "internal/*": ["./src/internal/*"],
       "themes/*": ["./src/themes/*"],
