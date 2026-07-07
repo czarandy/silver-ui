@@ -17,8 +17,8 @@ import type {
   TableColumn,
   TablePlugin,
 } from 'components/Table/types';
+import useConstant from 'hooks/useConstant';
 import {mergeRefs} from 'internal/mergeRefs';
-import useConstant from 'internal/useConstant';
 import useLatest from 'internal/useLatest';
 import {css} from 'styled-system/css';
 

@@ -31,6 +31,16 @@
       }
     },
     "./styles.css": "./dist/styles.css",
+    "./hooks": {
+      "import": {
+        "types": "./dist/hooks/index.d.ts",
+        "default": "./dist/hooks/index.js"
+      },
+      "require": {
+        "types": "./dist/hooks/index.d.ts",
+        "default": "./dist/hooks/index.cjs"
+      }
+    },
     "./*": {
       "import": {
         "types": "./dist/components/*/index.d.ts",

@@ -6,6 +6,7 @@ const componentEntries = getComponentEntries();
 export default defineConfig({
   entry: {
     index: 'src/index.ts',
+    'hooks/index': 'src/hooks/index.ts',
     ...componentEntries,
   },
   format: ['esm', 'cjs'],
