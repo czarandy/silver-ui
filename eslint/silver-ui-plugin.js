@@ -244,10 +244,7 @@ function collectStableHookCallees(root, stableHookNames) {
 }
 
 function getStableHookCallee(callee, stableHookNames) {
-  if (
-    callee.type === 'Identifier' &&
-    stableHookNames.has(callee.name)
-  ) {
+  if (callee.type === 'Identifier' && stableHookNames.has(callee.name)) {
     return {
       originalName: callee.name,
       set name(value) {
@@ -310,7 +307,7 @@ function isNullishType(typeNode) {
   return (
     typeNode.type === 'TSUndefinedKeyword' ||
     typeNode.type === 'TSNullKeyword' ||
-    (typeNode.type === 'TSVoidKeyword')
+    typeNode.type === 'TSVoidKeyword'
   );
 }
 
@@ -341,8 +338,7 @@ function isPureBooleanType(typeAnnotation) {
     return (
       semanticTypes.length > 0 &&
       semanticTypes.every(
-        type =>
-          type.type === 'TSBooleanKeyword' || isBooleanLiteralType(type),
+        type => type.type === 'TSBooleanKeyword' || isBooleanLiteralType(type),
       )
     );
   }
@@ -361,8 +357,7 @@ function isBooleanFunctionType(typeAnnotation) {
       : typeAnnotation;
 
   return (
-    typeNode.type === 'TSFunctionType' &&
-    isPureBooleanType(typeNode.returnType)
+    typeNode.type === 'TSFunctionType' && isPureBooleanType(typeNode.returnType)
   );
 }
 
@@ -577,10 +572,7 @@ function isNullLiteral(node) {
 
 function hasReactNodeType(context, node) {
   const services = context.sourceCode.parserServices;
-  if (
-    services?.program == null ||
-    services.esTreeNodeToTSNodeMap == null
-  ) {
+  if (services?.program == null || services.esTreeNodeToTSNodeMap == null) {
     return false;
   }
 
@@ -661,8 +653,12 @@ function getImportFix(fixer, context, program, shouldAddImport) {
   }
 
   const sourceCode = context.sourceCode || context.getSourceCode();
-  const imports = program.body.filter(node => node.type === 'ImportDeclaration');
-  const importSource = getImportSource(context.filename || context.getFilename());
+  const imports = program.body.filter(
+    node => node.type === 'ImportDeclaration',
+  );
+  const importSource = getImportSource(
+    context.filename || context.getFilename(),
+  );
   const importText = `import isReactNode from '${importSource}';\n`;
 
   if (imports.length === 0) {
@@ -670,7 +666,9 @@ function getImportFix(fixer, context, program, shouldAddImport) {
   }
 
   const lastImport = imports.at(-1);
-  const tokenAfter = sourceCode.getTokenAfter(lastImport, {includeComments: true});
+  const tokenAfter = sourceCode.getTokenAfter(lastImport, {
+    includeComments: true,
+  });
   if (tokenAfter == null) {
     return [fixer.insertTextAfter(lastImport, `\n${importText}`)];
   }
@@ -699,7 +697,9 @@ const preferIsReactNode = {
   },
   create(context) {
     const filename = context.filename || context.getFilename();
-    if (/src\/internal\/isReactNode\.ts$/.test(filename.replaceAll('\\', '/'))) {
+    if (
+      /src\/internal\/isReactNode\.ts$/.test(filename.replaceAll('\\', '/'))
+    ) {
       return {};
     }
 
@@ -731,7 +731,8 @@ const preferIsReactNode = {
 
         const sourceCode = context.sourceCode || context.getSourceCode();
         const comparedText = sourceCode.getText(comparedNode);
-        const isPositiveCheck = node.operator === '!=' || node.operator === '!==';
+        const isPositiveCheck =
+          node.operator === '!=' || node.operator === '!==';
         const replacement = isPositiveCheck
           ? `isReactNode(${comparedText})`
           : `!isReactNode(${comparedText})`;
@@ -743,7 +744,9 @@ const preferIsReactNode = {
           data: {name: comparedText},
           fix(fixer) {
             const fixes = [fixer.replaceText(node, replacement)];
-            fixes.push(...getImportFix(fixer, context, programNode, shouldAddImport));
+            fixes.push(
+              ...getImportFix(fixer, context, programNode, shouldAddImport),
+            );
             needsImport = false;
             return fixes;
           },
@@ -771,7 +774,7 @@ const noRedundantBoxSizing = {
     fixable: 'code',
     messages: {
       redundant:
-        'Redundant boxSizing: \'border-box\' — already set by the Panda CSS preflight reset.',
+        "Redundant boxSizing: 'border-box' — already set by the Panda CSS preflight reset.",
     },
     schema: [],
   },
@@ -807,7 +810,10 @@ const noRedundantBoxSizing = {
 
             // Extend backward to consume leading whitespace up to (and
             // including) the preceding newline so the entire line vanishes.
-            while (start > 0 && (text[start - 1] === ' ' || text[start - 1] === '\t')) {
+            while (
+              start > 0 &&
+              (text[start - 1] === ' ' || text[start - 1] === '\t')
+            ) {
               start--;
             }
             if (start > 0 && text[start - 1] === '\n') {

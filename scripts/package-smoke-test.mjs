@@ -21,13 +21,7 @@ const tempDir = await mkdtemp(join(tmpdir(), 'silver-ui-package-smoke-'));
 try {
   execFileSync(
     'npm',
-    [
-      'pack',
-      rootDir,
-      '--ignore-scripts',
-      '--pack-destination',
-      tempDir,
-    ],
+    ['pack', rootDir, '--ignore-scripts', '--pack-destination', tempDir],
     {
       env: {
         ...process.env,
@@ -37,7 +31,9 @@ try {
       stdio: ['ignore', 'ignore', 'ignore'],
     },
   );
-  const tarballs = (await readdir(tempDir)).filter(file => file.endsWith('.tgz'));
+  const tarballs = (await readdir(tempDir)).filter(file =>
+    file.endsWith('.tgz'),
+  );
   if (tarballs.length !== 1) {
     throw new Error(
       `Expected npm pack to create one tarball, found ${tarballs.length}.`,
@@ -162,7 +158,9 @@ async function verifyUseClientPreserved(packageDir) {
 async function linkPackage(packageName, nodeModulesDir) {
   const source = join(rootDir, 'node_modules', packageName);
   if (!existsSync(source)) {
-    throw new Error(`Package smoke test dependency is not installed: ${packageName}`);
+    throw new Error(
+      `Package smoke test dependency is not installed: ${packageName}`,
+    );
   }
 
   const destination = join(nodeModulesDir, packageName);

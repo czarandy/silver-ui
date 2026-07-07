@@ -386,11 +386,7 @@ export default tseslint.config(
   // Public component types must not depend on Panda recipe declarations
   {
     files: ['src/components/**/*.{ts,tsx}'],
-    ignores: [
-      '**/*.recipe.ts',
-      '**/*.test.{ts,tsx}',
-      '**/*.stories.{ts,tsx}',
-    ],
+    ignores: ['**/*.recipe.ts', '**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}'],
     plugins: {
       'silver-ui': silverUiPlugin,
     },
@@ -426,11 +422,7 @@ export default tseslint.config(
   // React Server Components environments can import them.
   {
     files: ['src/**/*.{ts,tsx}'],
-    ignores: [
-      '**/*.test.{ts,tsx}',
-      '**/*.stories.{ts,tsx}',
-      '**/*.recipe.ts',
-    ],
+    ignores: ['**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}', '**/*.recipe.ts'],
     plugins: {
       'use-client': useClient,
     },
