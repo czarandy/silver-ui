@@ -46,7 +46,11 @@ const leakedAliases = [];
 
 for (const file of declarationFiles) {
   const source = await readFile(file, 'utf8');
-  if (/\b(?:from\s*['"]|import\s*\(\s*['"])(?:components|hooks|internal|themes)\//.test(source)) {
+  if (
+    /\b(?:from\s*['"]|import\s*\(\s*['"])(?:components|hooks|internal|themes)\//.test(
+      source,
+    )
+  ) {
     leakedAliases.push(toPosixPath(relative(rootDir, file)));
   }
 }
@@ -60,7 +64,9 @@ if (leakedAliases.length > 0) {
 }
 
 if (rewriteCount > 0) {
-  process.stdout.write(`Rewrote ${rewriteCount} declaration alias import(s).\n`);
+  process.stdout.write(
+    `Rewrote ${rewriteCount} declaration alias import(s).\n`,
+  );
 }
 
 async function findDeclarationFiles(directory) {
@@ -84,7 +90,9 @@ async function findDeclarationFiles(directory) {
 
 function resolveAliasSpecifier(specifier) {
   for (const [alias, directory] of aliases) {
-    if (alias.endsWith('/') ? !specifier.startsWith(alias) : specifier !== alias) {
+    if (
+      alias.endsWith('/') ? !specifier.startsWith(alias) : specifier !== alias
+    ) {
       continue;
     }
 
@@ -113,7 +121,10 @@ function resolveDeclarationTarget(pathWithoutExtension) {
 }
 
 function toDeclarationRelativeSpecifier(fromFile, targetFile) {
-  let specifier = relative(dirname(fromFile), stripDeclarationExtension(targetFile));
+  let specifier = relative(
+    dirname(fromFile),
+    stripDeclarationExtension(targetFile),
+  );
   specifier = toPosixPath(specifier);
 
   if (!specifier.startsWith('.')) {

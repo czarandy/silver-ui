@@ -12,8 +12,7 @@ const noRecipeTypeImportsRule = plugin.rules['no-recipe-type-imports'];
 const preferIsReactNodeRule = plugin.rules['prefer-is-react-node'];
 const noUselessFragmentWithCommentRule =
   plugin.rules['no-useless-fragment-with-comment'];
-const noUselessUndefinedPropRule =
-  plugin.rules['no-useless-undefined-prop'];
+const noUselessUndefinedPropRule = plugin.rules['no-useless-undefined-prop'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -832,13 +831,17 @@ tester.run('no-recipe-exports', noRecipeExportsRule, {
       name: 'recipe name re-exported via a component barrel',
       code: "export {Blockquote, blockquoteRecipe, type BlockquoteProps} from './components/Blockquote';",
       filename: 'src/index.ts',
-      errors: [{messageId: 'recipeNamedExport', data: {name: 'blockquoteRecipe'}}],
+      errors: [
+        {messageId: 'recipeNamedExport', data: {name: 'blockquoteRecipe'}},
+      ],
     },
     {
       name: 'recipe *Variants type re-exported via a component barrel',
       code: "export {Skeleton, type SkeletonVariants} from './components/Skeleton';",
       filename: 'src/index.ts',
-      errors: [{messageId: 'recipeNamedExport', data: {name: 'SkeletonVariants'}}],
+      errors: [
+        {messageId: 'recipeNamedExport', data: {name: 'SkeletonVariants'}},
+      ],
     },
   ],
 });
