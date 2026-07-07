@@ -1,0 +1,39 @@
+name: CI
+
+# Runs the quality gates on every PR and on pushes to main, so breakage is
+# caught before merge rather than only at release time (see publish.yml, which
+# only runs on release: published).
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel an in-progress run when new commits are pushed to the same PR/branch.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      # Use the pnpm version pinned in package.json's "packageManager" field.
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Runs the "prepare" script (husky + panda codegen), generating
+      # styled-system/ which typecheck and tests depend on.
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
