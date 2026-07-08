@@ -9,9 +9,9 @@ import type {TextColor, TextSize, TextWeight} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 /**
  * A polymorphic link component with built-in accessibility, external link handling,

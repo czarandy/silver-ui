@@ -20,6 +20,7 @@
       "internal": ["./src/internal/index"],
       "internal/*": ["./src/internal/*"],
       "themes/*": ["./src/themes/*"],
+      "utils/*": ["./src/utils/*"],
       "styled-system/*": ["./styled-system/*"]
     }
   },

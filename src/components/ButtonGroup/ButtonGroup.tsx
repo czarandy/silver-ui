@@ -8,7 +8,7 @@ import {
   ButtonGroupContext,
   type ButtonGroupOrientation,
 } from 'components/ButtonGroup/ButtonGroupContext';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 /**
  * Groups related Buttons and propagates shared size, disabled state, and

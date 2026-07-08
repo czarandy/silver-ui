@@ -10,9 +10,9 @@ import {
 } from 'components/Layout/Layout.recipe';
 import {useLayoutDivider} from 'components/Layout/LayoutContext';
 import {Heading, Text, type HeadingLevel} from 'components/Text';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {cx} from 'utils/cx';
 
 /**
  * Header landmark region within a Layout with a structured title,

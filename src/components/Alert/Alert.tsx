@@ -20,9 +20,9 @@ import type {AlertContainer, AlertStatus} from 'components/Alert/Alert.types';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {cx} from 'utils/cx';
 
 export type {AlertContainer, AlertStatus} from 'components/Alert/Alert.types';
 

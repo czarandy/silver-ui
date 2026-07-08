@@ -41,9 +41,9 @@ import type {
 } from 'components/Table/types';
 import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import useShallowEqualMemo from 'internal/useShallowEqualMemo';
+import {cx} from 'utils/cx';
 
 export interface TableProps<T extends Record<string, unknown>> {
   /**

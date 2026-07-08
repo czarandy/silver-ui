@@ -14,7 +14,7 @@ import {tagRecipe} from 'components/Tag/Tag.recipe';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export type TagColor =
   | 'red'

@@ -19,7 +19,7 @@ import {
 } from 'components/Field';
 import {sliderRecipe} from 'components/Slider/Slider.recipe';
 import {Tooltip} from 'components/Tooltip';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export type SliderOrientation = 'horizontal' | 'vertical';
 export type SliderValueDisplay = 'tooltip' | 'text' | 'none';

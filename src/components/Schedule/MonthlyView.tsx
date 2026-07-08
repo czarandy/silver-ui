@@ -25,7 +25,6 @@ import type {
 } from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import type {DayOfWeek} from 'internal/dateTypes';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
@@ -37,6 +36,7 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from 'internal/plainDate';
+import {cx} from 'utils/cx';
 
 export interface ScheduleMonthlyViewOptions {
   /**

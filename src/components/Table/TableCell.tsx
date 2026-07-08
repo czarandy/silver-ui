@@ -3,7 +3,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {tableRecipe} from 'components/Table/Table.recipe';
 import {useTableContext} from 'components/Table/TableContext';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface TableCellProps {
   /**

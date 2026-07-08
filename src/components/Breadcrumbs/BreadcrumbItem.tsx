@@ -12,7 +12,7 @@ import {BreadcrumbsContext} from 'components/Breadcrumbs/BreadcrumbsContext';
 import {Icon, type IconComponent} from 'components/Icon';
 import type {LinkComponent} from 'components/Link';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface BreadcrumbItemProps {
   /**

@@ -24,12 +24,12 @@ import {
   selectTriggerRecipe,
 } from 'components/Select/Select.recipe';
 import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
   type SelectListboxOptionData,
 } from 'internal/useSelectListbox';
+import {cx} from 'utils/cx';
 
 export interface SelectOptionData extends SelectListboxOptionData {
   /**

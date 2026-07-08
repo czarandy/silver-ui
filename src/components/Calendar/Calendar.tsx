@@ -15,7 +15,6 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
-import {cx} from 'internal/cx';
 import type {DateRange, DayOfWeek} from 'internal/dateTypes';
 import {
   DATE_FORMAT_MONTH_YEAR,
@@ -34,6 +33,7 @@ import {
 } from 'internal/plainDate';
 import {getBrowserTimezoneID} from 'internal/time';
 import {useGridFocus} from 'internal/useGridFocus';
+import {cx} from 'utils/cx';
 
 export type {DateRange, DayOfWeek} from 'internal/dateTypes';
 

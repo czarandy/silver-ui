@@ -28,13 +28,13 @@ import type {
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
-import {cx} from 'internal/cx';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
   plainDateFromInstant,
   plainDateIsEqual,
 } from 'internal/plainDate';
+import {cx} from 'utils/cx';
 
 export interface ScheduleListViewOptions {
   /**

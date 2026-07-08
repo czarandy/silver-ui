@@ -13,7 +13,7 @@ import {
   type TabsLayout,
   type TabsSize,
 } from 'components/Tabs/TabsContext';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface TabsProps {
   /**

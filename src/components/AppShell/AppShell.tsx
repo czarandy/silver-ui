@@ -15,13 +15,13 @@ import {
   TopNavRenderContext,
 } from 'components/TopNav';
 import {MobileNavToggle} from 'internal/MobileNav';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useMediaQuery} from 'internal/useMediaQuery';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type AppShellBreakpoint = 'sm' | 'md' | 'lg' | 'none';
 export type AppShellVariant = 'default' | 'section';

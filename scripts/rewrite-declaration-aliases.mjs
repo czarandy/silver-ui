@@ -13,6 +13,7 @@ const aliases = [
   ['hooks/', join(distDir, 'hooks')],
   ['internal/', join(distDir, 'internal')],
   ['themes/', join(distDir, 'themes')],
+  ['utils/', join(distDir, 'utils')],
 ];
 
 const declarationFiles = await findDeclarationFiles(distDir);
@@ -21,7 +22,7 @@ let rewriteCount = 0;
 for (const file of declarationFiles) {
   const source = await readFile(file, 'utf8');
   const rewritten = source.replace(
-    /\b(from\s*['"]|import\s*\(\s*['"])(components\/[^'"]+|hooks\/[^'"]+|internal\/[^'"]+|internal|themes\/[^'"]+)(['"]\s*\)?)/g,
+    /\b(from\s*['"]|import\s*\(\s*['"])(components\/[^'"]+|hooks\/[^'"]+|internal\/[^'"]+|internal|themes\/[^'"]+|utils\/[^'"]+)(['"]\s*\)?)/g,
     (match, prefix, specifier, suffix) => {
       const target = resolveAliasSpecifier(specifier);
       if (target == null) {
@@ -47,7 +48,7 @@ const leakedAliases = [];
 for (const file of declarationFiles) {
   const source = await readFile(file, 'utf8');
   if (
-    /\b(?:from\s*['"]|import\s*\(\s*['"])(?:components|hooks|internal|themes)\//.test(
+    /\b(?:from\s*['"]|import\s*\(\s*['"])(?:components|hooks|internal|themes|utils)\//.test(
       source,
     )
   ) {

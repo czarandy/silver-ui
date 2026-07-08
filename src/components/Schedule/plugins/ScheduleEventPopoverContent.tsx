@@ -29,9 +29,9 @@ import {
 import type {CalendarEvent} from 'components/Schedule/types';
 import {Text} from 'components/Text';
 import {ToggleButton, ToggleButtonGroup} from 'components/ToggleButton';
-import {cx} from 'internal/cx';
 import {plainDateFromInstant} from 'internal/plainDate';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export interface ScheduleEventPopoverContentProps<TAuxiliaryData = unknown> {
   /**

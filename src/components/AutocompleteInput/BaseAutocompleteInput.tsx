@@ -27,9 +27,9 @@ import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export interface BaseAutocompleteInputProps<T extends SearchableItem> {
   /**

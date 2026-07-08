@@ -6,7 +6,7 @@ import {
   BreadcrumbsContext,
   type BreadcrumbsVariant,
 } from 'components/Breadcrumbs/BreadcrumbsContext';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface BreadcrumbsProps {
   /**

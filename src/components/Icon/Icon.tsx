@@ -1,7 +1,7 @@
 import type {LucideProps} from 'lucide-react';
 import type {ComponentType, CSSProperties, Ref, SVGProps} from 'react';
 import {iconRecipe} from 'components/Icon/Icon.recipe';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export type IconColor =
   | 'accent'

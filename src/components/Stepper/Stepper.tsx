@@ -2,8 +2,8 @@
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Step} from 'components/Stepper/internal/Step';
-import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type StepperOrientation = 'horizontal' | 'vertical';
 

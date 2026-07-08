@@ -19,8 +19,8 @@ import type {
   TreeViewDensity,
   TreeViewItemData,
 } from 'components/TreeView/types';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export interface TreeViewProps {
   /**

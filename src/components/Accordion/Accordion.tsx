@@ -13,8 +13,8 @@ import {
   type AccordionContextValue,
 } from 'components/Accordion/AccordionContext';
 import {useAccordionDevWarning} from 'components/Accordion/useAccordionDevWarning';
-import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 /**
  * A container that coordinates multiple `AccordionItem` children so that

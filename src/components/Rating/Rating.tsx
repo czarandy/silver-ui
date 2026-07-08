@@ -11,7 +11,7 @@ import {
 import {Icon, type IconColor, type IconSize} from 'components/Icon';
 import {ratingRecipe} from 'components/Rating/Rating.recipe';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface RatingProps {
   /**

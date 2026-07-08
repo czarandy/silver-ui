@@ -29,9 +29,9 @@ import {
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 type NumberInputBaseProps = {
   /**

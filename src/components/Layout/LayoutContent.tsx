@@ -3,8 +3,8 @@ import {
   layoutContentRecipe,
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
-import {cx} from 'internal/cx';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {cx} from 'utils/cx';
 
 /**
  * Scrollable main content area within a Layout. Fills the remaining space

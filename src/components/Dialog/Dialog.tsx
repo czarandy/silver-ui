@@ -11,7 +11,6 @@ import {
 } from 'react';
 import {dialogRecipe} from 'components/Dialog/Dialog.recipe';
 import {DialogContext} from 'components/Dialog/DialogContext';
-import {cx} from 'internal/cx';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
@@ -19,6 +18,7 @@ import {
 import {mergeRefs} from 'internal/mergeRefs';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
 import {useScrollLock} from 'internal/useScrollLock';
+import {cx} from 'utils/cx';
 
 export type DialogVariant = 'fullscreen' | 'standard';
 export type DialogRole = 'alertdialog' | 'dialog';

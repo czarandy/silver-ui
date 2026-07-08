@@ -8,7 +8,7 @@ import {Skeleton} from 'components/Skeleton';
 import {Spinner} from 'components/Spinner';
 import {thumbnailRecipe} from 'components/Thumbnail/Thumbnail.recipe';
 import {Tooltip} from 'components/Tooltip';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface ThumbnailProps {
   /**

@@ -1,7 +1,7 @@
 import type {CSSProperties, Ref} from 'react';
 import {badgeRecipe} from 'components/Badge/Badge.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export type BadgeSize = 'sm' | 'md' | 'lg';
 

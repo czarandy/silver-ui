@@ -20,10 +20,10 @@ import {
 import type {DropdownMenuOption} from 'components/DropdownMenu/types';
 import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type {
   DropdownMenuDivider,

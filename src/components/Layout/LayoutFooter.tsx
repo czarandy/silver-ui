@@ -6,9 +6,9 @@ import {
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
 import {useLayoutDivider} from 'components/Layout/LayoutContext';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {cx} from 'utils/cx';
 
 interface LayoutFooterBaseProps {
   /**

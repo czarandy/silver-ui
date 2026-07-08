@@ -9,8 +9,8 @@ import {
   useTopNavRenderMode,
 } from 'components/TopNav/TopNavContext';
 import {MobileNav, MobileNavToggle} from 'internal/MobileNav';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export interface TopNavProps {
   /**

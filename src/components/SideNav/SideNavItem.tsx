@@ -10,8 +10,8 @@ import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {sideNavItemRecipe} from 'components/SideNav/SideNavItem.recipe';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export interface SideNavItemProps {
   /**

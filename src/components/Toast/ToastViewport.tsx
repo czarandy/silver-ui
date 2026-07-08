@@ -20,9 +20,9 @@ import type {
   ToastEntry,
   ToastPosition,
 } from 'components/Toast/types';
-import {cx} from 'internal/cx';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export interface ToastViewportInset {
   bottom?: number;

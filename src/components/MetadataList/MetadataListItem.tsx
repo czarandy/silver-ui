@@ -5,7 +5,7 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {metadataListRecipe} from 'components/MetadataList/MetadataList.recipe';
 import {useMetadataList} from 'components/MetadataList/MetadataListContext';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 /**
  * A single label-value pair rendered inside a MetadataList.

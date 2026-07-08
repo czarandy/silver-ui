@@ -14,9 +14,9 @@ import {Button} from 'components/Button';
 import {Card} from 'components/Card';
 import {codeBlockRecipe} from 'components/CodeBlock/CodeBlock.recipe';
 import {Divider} from 'components/Divider';
-import {cx} from 'internal/cx';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {token} from 'styled-system/tokens';
+import {cx} from 'utils/cx';
 
 export type CodeBlockContainer = 'card' | 'section' | 'inline';
 export type CodeBlockSize = 'sm' | 'md';

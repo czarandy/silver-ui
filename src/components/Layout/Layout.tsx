@@ -9,9 +9,9 @@ import {
   type LayoutArea,
 } from 'components/Layout/LayoutContext';
 import type {LayoutHeight} from 'components/Layout/types';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {cx} from 'utils/cx';
 
 /**
  * Shell with header, side panels, content, and footer slots.

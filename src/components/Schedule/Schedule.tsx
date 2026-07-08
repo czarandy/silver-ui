@@ -17,9 +17,9 @@ import type {
   ScheduleViewOptions,
   ScheduleZonedInstant,
 } from 'components/Schedule/types';
-import {cx} from 'internal/cx';
 import {plainDateFromInstant} from 'internal/plainDate';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
+import {cx} from 'utils/cx';
 
 const EMPTY_CATEGORIES: ReadonlyArray<ScheduleCategory> = [];
 

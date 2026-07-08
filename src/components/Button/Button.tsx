@@ -18,9 +18,9 @@ import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
+import {cx} from 'utils/cx';
 
 export type {ButtonSize} from 'components/Button/Button.types';
 

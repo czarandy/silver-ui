@@ -16,8 +16,8 @@ import {
 } from 'components/Field';
 import {inputGroupRecipe} from 'components/InputGroup/InputGroup.recipe';
 import {InputGroupContext} from 'components/InputGroup/InputGroupContext';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export type InputGroupProps = {
   /**

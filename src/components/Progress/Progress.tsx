@@ -3,7 +3,7 @@
 import {useId, type CSSProperties, type Ref} from 'react';
 import {progressRecipe} from 'components/Progress/Progress.recipe';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export type ProgressVariant =
   'error' | 'info' | 'neutral' | 'success' | 'warning';

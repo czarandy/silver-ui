@@ -4,8 +4,8 @@ import {autocompleteItemRecipe} from 'components/AutocompleteInput/AutocompleteI
 import type {SearchableItem} from 'components/AutocompleteInput/types';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 /**
  * Props for an item with a custom `element`. The element is rendered

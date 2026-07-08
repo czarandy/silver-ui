@@ -6,8 +6,8 @@ import {
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
 import {useLayoutArea, useLayoutDivider} from 'components/Layout/LayoutContext';
-import {cx} from 'internal/cx';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {cx} from 'utils/cx';
 
 /**
  * Side panel region within a Layout. Placed in the start or end slot,

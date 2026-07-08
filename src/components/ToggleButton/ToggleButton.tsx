@@ -8,7 +8,7 @@ import {Spinner} from 'components/Spinner';
 import {toggleButtonRecipe} from 'components/ToggleButton/ToggleButton.recipe';
 import {useToggleButtonGroup} from 'components/ToggleButton/ToggleButtonGroup';
 import {Tooltip} from 'components/Tooltip';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface ToggleButtonProps {
   /**

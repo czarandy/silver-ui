@@ -31,10 +31,10 @@ import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {OverflowList} from 'internal/OverflowList';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import useLatest from 'internal/useLatest';
 import {useLayer} from 'internal/useLayer';
+import {cx} from 'utils/cx';
 
 export type TagsInputChange<T extends SearchableItem> =
   | {item: T; type: 'add'}

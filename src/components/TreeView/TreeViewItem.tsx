@@ -8,8 +8,8 @@ import {TreeViewBranches} from 'components/TreeView/TreeViewBranches';
 import {treeViewItemRecipe} from 'components/TreeView/TreeViewItem.recipe';
 import type {TreeViewDensity} from 'components/TreeView/types';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 interface TreeViewItemProps {
   /**

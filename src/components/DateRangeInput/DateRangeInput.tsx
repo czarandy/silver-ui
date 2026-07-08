@@ -29,7 +29,6 @@ import {
 import type {IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
 import type {DateRange} from 'internal/dateTypes';
 import isReactNode from 'internal/isReactNode';
 import {
@@ -38,6 +37,7 @@ import {
   type PlainDate,
 } from 'internal/plainDate';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type {DateRange} from 'internal/dateTypes';
 
