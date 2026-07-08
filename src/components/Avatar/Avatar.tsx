@@ -20,6 +20,62 @@ export type AvatarNumericSize =
 
 export type AvatarSize = AvatarNamedSize | AvatarNumericSize;
 
+export type AvatarColor =
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'teal'
+  | 'cyan'
+  | 'blue'
+  | 'purple'
+  | 'pink'
+  | 'gray';
+
+/**
+ * Non-gray hues used when deriving a color from the avatar's name.
+ */
+const AVATAR_AUTO_COLORS: AvatarColor[] = [
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'teal',
+  'cyan',
+  'blue',
+  'purple',
+  'pink',
+];
+
+function hashName(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) | 0;
+  }
+  return Math.abs(hash);
+}
+
+/**
+ * Resolve the avatar surface color: an explicit `color` wins, otherwise a hue
+ * is derived deterministically from `name`. Falls back to `gray` when there are
+ * no initials to color (e.g. the default icon).
+ */
+function resolveAvatarColor(
+  color: AvatarColor | undefined,
+  name: string | undefined,
+  hasInitials: boolean,
+): AvatarColor {
+  if (color != null) {
+    return color;
+  }
+
+  if (hasInitials && name != null) {
+    return AVATAR_AUTO_COLORS[hashName(name) % AVATAR_AUTO_COLORS.length];
+  }
+
+  return 'gray';
+}
+
 /**
  * Resolve an Avatar size token to its pixel size.
  */
@@ -54,6 +110,12 @@ export interface AvatarProps {
    * Additional CSS class names applied to the root element.
    */
   className?: string;
+  /**
+   * Surface color for the initials/icon fallback, which also drives the text
+   * color. When omitted, a hue is derived deterministically from `name`
+   * (fallbacks without initials use `gray`).
+   */
+  color?: AvatarColor;
   /**
    * Test ID applied to the root element.
    */
@@ -108,6 +170,7 @@ function getInitials(name: string): string {
 export function Avatar({
   alt,
   className,
+  color,
   'data-testid': dataTestId,
   fallbackSrc,
   name,
@@ -123,9 +186,12 @@ export function Avatar({
     () => resolveAvatarSize(resolvedSize),
     [resolvedSize],
   );
-  const classes = avatarRecipe({isGrouped: avatarGroup != null});
   const initials = name != null ? getInitials(name) : '';
   const showInitials = initials !== '';
+  const classes = avatarRecipe({
+    color: resolveAvatarColor(color, name, showInitials),
+    isGrouped: avatarGroup != null,
+  });
   const accessibleName = alt ?? (showInitials ? name : undefined) ?? 'Avatar';
   const contentStyle = {
     width: numericSize,
