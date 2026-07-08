@@ -20,6 +20,7 @@
 #   scripts/release.sh prerelease      # cuts a 0.1.1-beta.0 pre-release (CI publishes to the "next" dist-tag)
 #   scripts/release.sh --dry-run       # run every check + build but do NOT bump/tag/push/release
 #   scripts/release.sh patch --preid=rc # use a different pre-release identifier
+#   scripts/release.sh patch --no-watch # cut the release but don't wait on the CI publish run
 #
 # Release notes (default: changelog auto-generated from commit titles since the
 # previous release tag; shown to you with the option to edit before submitting):
@@ -45,6 +46,7 @@ die()  { printf '\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 RELEASE_TYPE=""
 ASSUME_YES=0
 DRY_RUN=0
+WATCH_RUN=1      # --no-watch           : skip streaming the CI publish workflow
 PREID="beta"
 NOTES_TEXT=""    # --notes "..."        : use this exact text as the release body
 NOTES_FILE=""    # --notes-file PATH    : use a file as the release body
@@ -58,6 +60,7 @@ for arg in "$@"; do
     patch|minor|major|prerelease|premajor|preminor|prepatch) RELEASE_TYPE="$arg" ;;
     --yes|-y)         ASSUME_YES=1 ;;
     --dry-run)        DRY_RUN=1 ;;
+    --no-watch)       WATCH_RUN=0 ;;
     --preid=*)        PREID="${arg#*=}" ;;
     --notes=*)        NOTES_TEXT="${arg#*=}" ;;
     --notes-file=*)   NOTES_FILE="${arg#*=}" ;;
@@ -287,9 +290,89 @@ ok "GitHub Release created"
 
 echo
 bold "🎉 Release $NEW_TAG cut. CI is now publishing ${PKG_NAME} to npm."
-info "Watch it:   gh run watch  (or: gh run list --workflow=publish.yml)"
-if [ "$IS_PRERELEASE" -eq 1 ]; then
-  info "Pre-release → publishes under the 'next' dist-tag. Install with: npm install ${PKG_NAME}@next"
+
+PUBLISHED_VERSION="${NEW_TAG#v}"   # e.g. v1.1.1 -> 1.1.1
+DIST_TAG="latest"
+[ "$IS_PRERELEASE" -eq 1 ] && DIST_TAG="next"
+
+# --- watch the publish workflow to completion -------------------------------
+# The GitHub Release published above triggers .github/workflows/publish.yml on
+# this same version-bump commit. We locate that run and stream its step-by-step
+# progress so the release isn't "done" until npm actually has the package.
+if [ "$WATCH_RUN" -eq 0 ]; then
+  info "Skipping CI watch (--no-watch)."
+  info "Watch it:   gh run list --workflow=publish.yml"
+  info "Install (once green):   npm install ${PKG_NAME}$([ "$IS_PRERELEASE" -eq 1 ] && echo "@next")"
+  exit 0
+fi
+
+RELEASE_SHA="$(git rev-parse HEAD)"
+
+# The run takes a few seconds to register after the release event fires. Poll
+# for the run whose head commit matches the release commit (filtering by commit
+# avoids grabbing an unrelated publish run).
+info "Waiting for the publish workflow to start…"
+RUN_ID=""
+for _ in $(seq 1 30); do
+  RUN_ID="$(gh run list --workflow=publish.yml --event=release --limit 15 \
+    --json databaseId,headSha,createdAt \
+    --jq "[.[] | select(.headSha == \"$RELEASE_SHA\")] | sort_by(.createdAt) | last | .databaseId" \
+    2>/dev/null || true)"
+  [ -n "$RUN_ID" ] && [ "$RUN_ID" != "null" ] && break
+  RUN_ID=""
+  sleep 2
+done
+
+if [ -z "$RUN_ID" ]; then
+  warn "Couldn't find the publish run automatically (it may still be starting)."
+  warn "Watch it manually:  gh run list --workflow=publish.yml"
+  warn "                    gh run watch <run-id>"
+  exit 0
+fi
+
+RUN_URL="$(gh run view "$RUN_ID" --json url --jq .url 2>/dev/null || true)"
+ok "Publish workflow started (run $RUN_ID)"
+[ -n "$RUN_URL" ] && info "$RUN_URL"
+echo
+
+# `gh run watch` live-updates the per-step status; --exit-status makes it return
+# non-zero if the run concludes in failure. Guarded so `set -e` doesn't abort
+# before we can print guidance.
+bold "Streaming CI publish progress"
+WATCH_OK=1
+gh run watch "$RUN_ID" --exit-status --interval 5 || WATCH_OK=0
+
+echo
+if [ "$WATCH_OK" -eq 0 ]; then
+  warn "The publish workflow did not succeed."
+  [ -n "$RUN_URL" ] && warn "Inspect the failure:  $RUN_URL"
+  warn "Or view logs:  gh run view $RUN_ID --log-failed"
+  die "Publish failed — ${PKG_NAME}@${PUBLISHED_VERSION} was not published."
+fi
+ok "Publish workflow completed successfully."
+
+# The npm registry can lag a few seconds behind a successful publish; poll
+# briefly to confirm the version is actually resolvable before declaring done.
+info "Confirming ${PKG_NAME}@${PUBLISHED_VERSION} on the npm registry…"
+PUBLISHED_OK=0
+for _ in $(seq 1 15); do
+  if npm view "${PKG_NAME}@${PUBLISHED_VERSION}" version >/dev/null 2>&1; then
+    PUBLISHED_OK=1
+    break
+  fi
+  sleep 2
+done
+
+echo
+if [ "$PUBLISHED_OK" -eq 1 ]; then
+  bold "✅ ${PKG_NAME}@${PUBLISHED_VERSION} is live on npm (dist-tag: ${DIST_TAG})."
 else
-  info "Once green: npm install ${PKG_NAME}"
+  warn "CI reported success but npm hasn't surfaced ${PKG_NAME}@${PUBLISHED_VERSION} yet."
+  warn "It's likely just registry lag — check:  npm view ${PKG_NAME}@${PUBLISHED_VERSION}"
+fi
+
+if [ "$IS_PRERELEASE" -eq 1 ]; then
+  info "Install:  npm install ${PKG_NAME}@next"
+else
+  info "Install:  npm install ${PKG_NAME}"
 fi
