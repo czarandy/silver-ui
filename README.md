@@ -158,6 +158,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Tag** — removable label for categories or filters
 - **Text / Heading** — typography primitives with size, color, and truncation
 - **Thumbnail** — image preview with fallback and remove action
+- **Timestamp** — displays a point in time as relative or absolute text
 - **TreeView** — hierarchical expandable tree
 
 ### Forms
