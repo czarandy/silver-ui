@@ -52,6 +52,16 @@ describe('prerendered marketing page', () => {
     expect(html).toContain('github.com/czarandy/silver-ui');
   });
 
+  it('gives the wordmark image intrinsic dimensions to avoid layout shift', () => {
+    const html = buildStaticHtml();
+    const img = html.match(/<img[^>]*\/wordmark\.svg[^>]*>/)?.[0];
+    if (img == null) {
+      throw new Error('wordmark <img> not found in rendered HTML');
+    }
+    expect(img).toMatch(/width="1700"/);
+    expect(img).toMatch(/height="417"/);
+  });
+
   it('hydrates the prerendered markup without a mismatch', () => {
     const container = document.createElement('div');
     container.innerHTML = renderToString(

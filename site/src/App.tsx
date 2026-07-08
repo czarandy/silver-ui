@@ -290,7 +290,9 @@ export function App(): JSX.Element {
                   <img
                     alt="silver-ui"
                     className="brand__wordmark"
+                    height={417}
                     src="/wordmark.svg"
+                    width={1700}
                   />
                 }
               />
