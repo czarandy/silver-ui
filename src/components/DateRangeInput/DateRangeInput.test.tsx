@@ -316,6 +316,24 @@ describe('DateRangeInput', () => {
       });
     });
 
+    it('opens the calendar when ArrowDown is pressed in the field', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <DateRangeInput label="Window" onChange={() => {}} value={null} />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Window'});
+      expect(input).toHaveAttribute('aria-expanded', 'false');
+
+      await user.click(input);
+      await user.keyboard('{ArrowDown}');
+
+      await waitFor(() => {
+        expect(input).toHaveAttribute('aria-expanded', 'true');
+      });
+    });
+
     it('closes the calendar without changing the value when toggled shut', async () => {
       const user = userEvent.setup();
       const onChange = vi.fn();
