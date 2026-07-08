@@ -15,8 +15,8 @@ import {
   type SegmentedControlLayout,
   type SegmentedControlSize,
 } from 'components/SegmentedControl/SegmentedControlContext';
-import {cx} from 'internal/cx';
 import {mergeRefs} from 'internal/mergeRefs';
+import {cx} from 'utils/cx';
 
 export interface SegmentedControlProps<TValue extends string = string> {
   /**

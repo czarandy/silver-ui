@@ -706,7 +706,7 @@ export {
   type RadioGroupProps,
   type RadioGroupSize,
 } from 'components/RadioGroup';
-export {cx} from 'internal/cx';
+export {cx} from 'utils/cx';
 export {
   VisuallyHidden,
   type VisuallyHiddenElement,

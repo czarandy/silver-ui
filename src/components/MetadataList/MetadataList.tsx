@@ -10,7 +10,7 @@ import {
 import {metadataListRecipe} from 'components/MetadataList/MetadataList.recipe';
 import {MetadataListContext} from 'components/MetadataList/MetadataListContext';
 import {Heading} from 'components/Text';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export type MetadataListLabelPosition = 'start' | 'top';
 

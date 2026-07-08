@@ -6,10 +6,10 @@ import {useCallback, useEffect, useRef} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
 import {Button} from 'components/Button';
 import {mobileNavRecipe} from 'internal/MobileNav/MobileNav.recipe';
-import {cx} from 'internal/cx';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useScrollLock} from 'internal/useScrollLock';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type MobileNavSide = 'start' | 'end';
 

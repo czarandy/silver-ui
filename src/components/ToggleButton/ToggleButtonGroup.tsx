@@ -10,8 +10,8 @@ import {
   type Ref,
 } from 'react';
 import type {ButtonSize} from 'components/Button';
-import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type ToggleButtonGroupOrientation = 'horizontal' | 'vertical';
 

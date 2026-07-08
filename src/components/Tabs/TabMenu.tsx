@@ -13,8 +13,8 @@ import {Popover} from 'components/Popover';
 import {tabMenuRecipe} from 'components/Tabs/TabMenu.recipe';
 import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {useTabsContext} from 'components/Tabs/TabsContext';
-import {cx} from 'internal/cx';
 import {mergeRefs} from 'internal/mergeRefs';
+import {cx} from 'utils/cx';
 
 export interface TabMenuOption {
   /**

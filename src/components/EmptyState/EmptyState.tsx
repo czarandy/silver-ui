@@ -3,8 +3,8 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {emptyStateRecipe} from 'components/EmptyState/EmptyState.recipe';
 import {Heading, type HeadingLevel, Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export interface EmptyStateProps {
   /**

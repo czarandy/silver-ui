@@ -8,7 +8,6 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
-import {cx} from 'internal/cx';
 import {
   useHoverLayer,
   type HoverLayerFocusTrigger,
@@ -19,6 +18,7 @@ import type {
   LayerPlacement,
 } from 'internal/useLayer';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type TooltipFocusTrigger = HoverLayerFocusTrigger;
 

@@ -9,8 +9,8 @@ import {useTopNavRenderMode} from 'components/TopNav/TopNavContext';
 import {topNavItemRecipe} from 'components/TopNav/TopNavItem.recipe';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
+import {cx} from 'utils/cx';
 
 export interface TopNavItemProps {
   /**

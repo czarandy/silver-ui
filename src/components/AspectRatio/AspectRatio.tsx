@@ -1,7 +1,7 @@
 import type {ComponentPropsWithRef} from 'react';
 import {aspectRatioRecipe} from 'components/AspectRatio/AspectRatio.recipe';
-import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 /**
  * Maintains a fixed width-to-height ratio for media or embedded content.

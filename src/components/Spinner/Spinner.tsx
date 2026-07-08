@@ -5,7 +5,7 @@ import type {
   SpinnerVariant,
 } from 'components/Spinner/Spinner.types';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface SpinnerProps {
   /**

@@ -19,9 +19,9 @@ import {
 } from 'components/Field';
 import type {IconComponent} from 'components/Icon';
 import {TimeInput, type PlainTime} from 'components/TimeInput';
-import {cx} from 'internal/cx';
 import {plainDateIsEqual, type PlainDate} from 'internal/plainDate';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type PlainDateTime = Temporal.PlainDateTime;
 

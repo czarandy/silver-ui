@@ -14,9 +14,9 @@ import {itemRecipe} from 'components/Item/Item.recipe';
 import type {LinkComponent as LinkComponentType} from 'components/Link';
 import {Text} from 'components/Text';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {useRel} from 'internal/linkAccessibility';
+import {cx} from 'utils/cx';
 
 const SELECTABLE_ROLES = new Set([
   'option',

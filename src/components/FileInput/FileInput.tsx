@@ -28,10 +28,10 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import {cx} from 'internal/cx';
 import {formatFileSize} from 'internal/formatFileSize';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {cx} from 'utils/cx';
 
 export type FileInputMode = 'dropzone' | 'input';
 

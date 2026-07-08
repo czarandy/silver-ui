@@ -10,7 +10,7 @@ import {
 import {Item} from 'components/Item';
 import {listItemRecipe} from 'components/List/List.recipe';
 import {ListContext, type ListStyle} from 'components/List/ListContext';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface ListItemProps {
   /**

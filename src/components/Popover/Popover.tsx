@@ -9,13 +9,13 @@ import {
   type RefObject,
 } from 'react';
 import {usePopover} from 'components/Popover/usePopover';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 import {css} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
+import {cx} from 'utils/cx';
 
 export interface PopoverProps {
   /**

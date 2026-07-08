@@ -29,8 +29,8 @@ import {
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
-import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type ContextMenuSize = ButtonSize;
 export type ContextMenuItemData = DropdownMenuItemData;

@@ -9,8 +9,8 @@ import {
 } from 'components/SideNav/SideNavContext';
 import {SideNavCollapseButton} from 'components/SideNav/internal/SideNavCollapseButton';
 import {MobileNav} from 'internal/MobileNav';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export interface SideNavProps {
   /**

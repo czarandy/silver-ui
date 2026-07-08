@@ -30,7 +30,6 @@ import {
 import type {IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {parseDateInput} from 'internal/parseDateInput';
@@ -42,6 +41,7 @@ import {
   type PlainDate,
 } from 'internal/plainDate';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type {PlainDate} from 'internal/plainDate';
 

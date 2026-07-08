@@ -26,12 +26,12 @@ import {
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
   type SelectListboxOptionData,
 } from 'internal/useSelectListbox';
+import {cx} from 'utils/cx';
 
 export interface MultiSelectOptionData extends SelectListboxOptionData {
   /**

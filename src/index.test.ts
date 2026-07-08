@@ -63,6 +63,12 @@ describe('VisuallyHidden public export', () => {
   });
 });
 
+describe('public exports', () => {
+  it('does not re-export symbols from internal modules', () => {
+    expect(barrelSource).not.toMatch(/\bfrom\s*['"]internal(?:\/[^'"]*)?['"]/);
+  });
+});
+
 describe('component barrel and docs coverage', () => {
   it('finds component directories to check', () => {
     expect(componentDirs.length).toBeGreaterThan(0);

@@ -12,6 +12,7 @@ export default defineConfig({
       internal: resolve(__dirname, 'src/internal'),
       'styled-system': resolve(__dirname, 'styled-system'),
       themes: resolve(__dirname, 'src/themes'),
+      utils: resolve(__dirname, 'src/utils'),
     },
   },
   test: {

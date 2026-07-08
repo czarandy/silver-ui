@@ -25,9 +25,9 @@ import {
 } from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 const styles = {
   input: css({

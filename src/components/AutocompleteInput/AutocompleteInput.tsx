@@ -28,9 +28,9 @@ import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Tag} from 'components/Tag';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type AutocompleteInputProps<T extends SearchableItem = SearchableItem> =
   {

@@ -5,7 +5,7 @@ import {useDropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContex
 import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface DropdownMenuItemProps {
   /**

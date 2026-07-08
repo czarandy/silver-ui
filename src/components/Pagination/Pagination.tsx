@@ -6,8 +6,8 @@ import {useMemo} from 'react';
 import {Button} from 'components/Button';
 import type {ButtonSize} from 'components/Button';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export type PaginationVariant = 'pages' | 'count' | 'compact' | 'none';
 

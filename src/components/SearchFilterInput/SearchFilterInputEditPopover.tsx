@@ -23,7 +23,7 @@ import type {
 } from 'components/SearchFilterInput/types';
 import {Select} from 'components/Select';
 import {HStack, VStack} from 'components/Stack';
-import {cx} from 'internal/cx';
+import {cx} from 'utils/cx';
 
 export interface SearchFilterInputEditPopoverProps {
   /**

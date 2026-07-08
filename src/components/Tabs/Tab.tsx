@@ -6,8 +6,8 @@ import type {LinkComponent} from 'components/Link';
 import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {useTabsContext} from 'components/Tabs/TabsContext';
 import {ActionElement} from 'internal/ActionElement';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export interface TabProps {
   /**

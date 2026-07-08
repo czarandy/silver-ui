@@ -21,9 +21,9 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {cx} from 'utils/cx';
 
 export type CheckboxInputSize = 'sm' | 'md' | 'lg';
 export type CheckboxInputValue = boolean | 'indeterminate';

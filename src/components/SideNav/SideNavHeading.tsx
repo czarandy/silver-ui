@@ -6,9 +6,9 @@ import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {Text} from 'components/Text';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export interface SideNavHeadingProps {
   as?: LinkComponent;

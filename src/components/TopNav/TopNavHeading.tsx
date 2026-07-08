@@ -6,8 +6,8 @@ import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {Text} from 'components/Text';
 import {topNavHeadingRecipe} from 'components/TopNav/TopNavHeading.recipe';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {cx} from 'utils/cx';
 
 export interface TopNavHeadingProps {
   /**

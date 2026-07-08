@@ -15,11 +15,11 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {lightboxRecipe} from 'components/Lightbox/Lightbox.recipe';
-import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {useScrollLock} from 'internal/useScrollLock';
+import {cx} from 'utils/cx';
 
 export type LightboxMediaType = 'image' | 'video';
 
