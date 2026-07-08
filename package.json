@@ -4,7 +4,7 @@
   "packageManager": "pnpm@11.3.0",
   "description": "A comprehensive themeable React component library",
   "license": "MIT",
-  "homepage": "https://silver-ui.com",
+  "homepage": "https://www.silver-ui.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/czarandy/silver-ui.git"
