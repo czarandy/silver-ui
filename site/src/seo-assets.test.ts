@@ -60,6 +60,16 @@ describe('SEO static assets', () => {
     expect(data['@type']).toBe('SoftwareApplication');
     expect(data.name).toBe('silver-ui');
     expect(data.url).toBe(canonicalUrl);
+    expect(data.sameAs).toEqual([
+      'https://github.com/czarandy/silver-ui',
+      'https://www.npmjs.com/package/silver-ui',
+      'https://storybook.silver-ui.com/',
+    ]);
+    expect(data.applicationSubCategory).toBe('React component library');
+    expect(data.programmingLanguage).toBe('TypeScript');
+    expect(data.runtimePlatform).toBe('React');
+    expect(data.downloadUrl).toBe('https://www.npmjs.com/package/silver-ui');
+    expect(data.isAccessibleForFree).toBe(true);
   });
 
   it('loads only the fonts that are actually used', () => {
