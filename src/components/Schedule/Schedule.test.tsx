@@ -49,6 +49,7 @@ import type {
   SchedulePlugin,
   ScheduleView,
 } from 'components/Schedule/types';
+import type {DayOfWeek} from 'internal/dateTypes';
 
 class ErrorBoundary extends Component<
   {children: ReactNode},
@@ -649,6 +650,242 @@ describe('Schedule', () => {
     expect(
       screen.queryByRole('columnheader', {name: 'Sunday, May 10, 2026'}),
     ).not.toBeInTheDocument();
+  });
+
+  it('hides weekend columns when hiddenDays is set', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          hiddenDays: [0, 6],
+          maxHour: 8,
+          minHour: 8,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByRole('columnheader', {name: 'Monday, May 11, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+    expect(
+      screen.getByRole('columnheader', {name: 'Friday, May 15, 2026'}),
+    ).toHaveAttribute('aria-colindex', '6');
+    expect(
+      screen.queryByRole('columnheader', {name: 'Sunday, May 10, 2026'}),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('columnheader', {name: 'Saturday, May 16, 2026'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('drops an interior hidden day but keeps the surrounding columns', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          hiddenDays: [3],
+          maxHour: 8,
+          minHour: 8,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByRole('columnheader', {name: 'Sunday, May 10, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+    expect(
+      screen.getByRole('columnheader', {name: 'Saturday, May 16, 2026'}),
+    ).toHaveAttribute('aria-colindex', '7');
+    expect(
+      screen.queryByRole('columnheader', {name: 'Wednesday, May 13, 2026'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the full week when hiddenDays is empty', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          hiddenDays: [],
+          maxHour: 8,
+          minHour: 8,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByRole('columnheader', {name: 'Sunday, May 10, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+    expect(
+      screen.getByRole('columnheader', {name: 'Saturday, May 16, 2026'}),
+    ).toHaveAttribute('aria-colindex', '8');
+  });
+
+  it('ignores duplicate and out-of-range hiddenDays values', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          hiddenDays: [0, 0, 6, 9 as DayOfWeek, -1 as DayOfWeek],
+          maxHour: 8,
+          minHour: 8,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByRole('columnheader', {name: 'Monday, May 11, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+    expect(
+      screen.getByRole('columnheader', {name: 'Friday, May 15, 2026'}),
+    ).toHaveAttribute('aria-colindex', '6');
+    expect(
+      screen.queryByRole('columnheader', {name: 'Sunday, May 10, 2026'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the full week when every day is hidden', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          hiddenDays: [0, 1, 2, 3, 4, 5, 6],
+          maxHour: 8,
+          minHour: 8,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByRole('columnheader', {name: 'Sunday, May 10, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+    expect(
+      screen.getByRole('columnheader', {name: 'Saturday, May 16, 2026'}),
+    ).toHaveAttribute('aria-colindex', '8');
+  });
+
+  it('loads async events with the trimmed hidden-day range', async () => {
+    const loader = vi.fn(async (_start: Instant, _end: Instant) => {
+      await Promise.resolve();
+      return [] as CalendarEvent[];
+    });
+
+    render(
+      <Schedule
+        events={loader}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          hiddenDays: [0, 6],
+          maxHour: 8,
+          minHour: 8,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    await waitFor(() => expect(loader).toHaveBeenCalledTimes(1));
+    const [start, end] = loader.mock.calls[0];
+    expect(start).toBe(instantUTC(2026, 4, 11));
+    expect(end).toBe(instantUTC(2026, 4, 16));
+  });
+
+  it('renders an all-day event spanning a hidden day as separate pills', () => {
+    const spanningEvent = createEventFromISO({
+      category: 'Design',
+      end: '2026-05-18',
+      id: 'spanning',
+      start: '2026-05-15',
+      title: 'Weekend retreat',
+    });
+    const weeklyView = createScheduleWeeklyView({
+      hiddenDays: [0, 6],
+      maxHour: 8,
+      minHour: 8,
+    });
+
+    const {rerender} = render(
+      <Schedule
+        categories={categories}
+        events={[spanningEvent]}
+        timezoneID="UTC"
+        view={weeklyView}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    // Friday May 15 is the only visible day this event covers in this week.
+    expect(screen.getAllByTestId('schedule-event-spanning')).toHaveLength(1);
+    expect(
+      screen.queryByRole('columnheader', {name: 'Saturday, May 16, 2026'}),
+    ).not.toBeInTheDocument();
+
+    rerender(
+      <Schedule
+        categories={categories}
+        events={[spanningEvent]}
+        timezoneID="UTC"
+        view={weeklyView}
+        viewDate={instantUTC(2026, 4, 20)}
+      />,
+    );
+
+    // The following week shows a second, unconnected pill on Monday May 18.
+    expect(screen.getAllByTestId('schedule-event-spanning')).toHaveLength(1);
+    expect(
+      screen.getByRole('columnheader', {name: 'Monday, May 18, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+  });
+
+  it('advances exactly one week at a time when days are hidden', () => {
+    function Fixture(): React.JSX.Element {
+      const [viewDate, setViewDate] = useState(() => instantUTC(2026, 4, 13));
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange: setViewDate,
+      });
+      return (
+        <Schedule
+          events={[]}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={createScheduleWeeklyView({
+            hiddenDays: [0, 6],
+            maxHour: 8,
+            minHour: 8,
+          })}
+          viewDate={viewDate}
+        />
+      );
+    }
+
+    render(<Fixture />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Next week'}));
+    expect(
+      screen.getByRole('columnheader', {name: 'Monday, May 18, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+    expect(
+      screen.getByRole('columnheader', {name: 'Friday, May 22, 2026'}),
+    ).toHaveAttribute('aria-colindex', '6');
+
+    fireEvent.click(screen.getByRole('button', {name: 'Next week'}));
+    expect(
+      screen.getByRole('columnheader', {name: 'Monday, May 25, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
+
+    fireEvent.click(screen.getByRole('button', {name: 'Previous week'}));
+    expect(
+      screen.getByRole('columnheader', {name: 'Monday, May 18, 2026'}),
+    ).toHaveAttribute('aria-colindex', '2');
   });
 
   it('exposes monthly view as an ARIA grid', () => {

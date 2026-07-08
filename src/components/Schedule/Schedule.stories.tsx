@@ -515,6 +515,19 @@ export const MondayStartWeek: Story = {
   ),
 };
 
+export const HiddenWeekendDays: Story = {
+  render: () => (
+    <ScheduleStory
+      events={weekEvents}
+      view={createScheduleWeeklyView({
+        hiddenDays: [0, 6],
+        maxHour: 18,
+        minHour: 8,
+      })}
+    />
+  ),
+};
+
 export const Day: Story = {
   render: () => (
     <ScheduleStory view={createScheduleDayView({maxHour: 18, minHour: 8})} />
