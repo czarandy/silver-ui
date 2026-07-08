@@ -385,7 +385,8 @@ export function TimeGridView({
       aria-readonly="true"
       className={cx(scheduleClasses.surface, styles.grid)}
       role="grid"
-      style={gridStyle}>
+      style={gridStyle}
+      tabIndex={0}>
       <div className={styles.rowContents} role="row">
         <div
           aria-colindex={1}
