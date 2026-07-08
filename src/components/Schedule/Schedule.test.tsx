@@ -14,6 +14,7 @@ import {createEventFromISO} from 'components/Schedule/CalendarEvent';
 import {createScheduleDayView} from 'components/Schedule/DayView';
 import {createScheduleListView} from 'components/Schedule/ListView';
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
+import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {Schedule} from 'components/Schedule/Schedule';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
@@ -669,6 +670,49 @@ describe('Schedule', () => {
     expect(
       screen.getByRole('gridcell', {name: /Wednesday, May 13, 2026/}),
     ).toHaveAttribute('aria-current', 'date');
+  });
+
+  it('nudges only two-digit today numbers to stay centered in the circle', () => {
+    // The 1px end margin visually centers a tabular two-digit number inside the
+    // today circle; single-digit numbers already center cleanly without it.
+    const todayTextClasses = (isTwoDigit: boolean) =>
+      (
+        scheduleMonthlyViewRecipe({isToday: true, isTwoDigit}).todayText ?? ''
+      ).split(' ');
+    const singleDigitClasses = todayTextClasses(false);
+    const marginClass = todayTextClasses(true).find(
+      className => !singleDigitClasses.includes(className),
+    );
+    expect(marginClass).toBeDefined();
+
+    const {container, unmount} = render(
+      <Schedule
+        events={[]}
+        highlightDate={instantUTC(2026, 4, 13)}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+    const twoDigitCell = within(container).getByRole('gridcell', {
+      name: /Wednesday, May 13, 2026/,
+    });
+    expect(within(twoDigitCell).getByText('13')).toHaveClass(marginClass!);
+    unmount();
+
+    render(
+      <Schedule
+        events={[]}
+        highlightDate={instantUTC(2026, 4, 5)}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 5)}
+      />,
+    );
+    const oneDigitCell = screen.getByRole('gridcell', {
+      name: /Tuesday, May 5, 2026/,
+    });
+    expect(within(oneDigitCell).getByText('5')).not.toHaveClass(marginClass!);
   });
 
   it('renders monthly view with a Monday-start week when configured', () => {
