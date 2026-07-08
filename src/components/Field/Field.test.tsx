@@ -1,7 +1,9 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {Field, getNecessity} from 'components/Field/Field';
+import {inputRecipe} from 'components/Field/inputStyles';
 import {assertNonNull} from 'internal/testHelpers';
+import {token} from 'styled-system/tokens';
 
 describe('Field', () => {
   it('renders label, description, and status', () => {
@@ -98,5 +100,35 @@ describe('Field', () => {
     it('returns empty object when both are false', () => {
       expect(getNecessity(false, false)).toEqual({});
     });
+  });
+
+  describe('focus shadow tokens', () => {
+    it('renders every focus ring as an inset shadow', () => {
+      expect(token('shadows.focus')).toMatch(/^inset /);
+      expect(token('shadows.focus.error')).toMatch(/^inset /);
+      expect(token('shadows.focus.warning')).toMatch(/^inset /);
+      expect(token('shadows.focus.success')).toMatch(/^inset /);
+    });
+  });
+
+  describe('focus border color', () => {
+    // Regression: `_hover` and `_focusWithin` set border-color at equal
+    // specificity, so hovering a focused input used to swap the focus border
+    // for the hover color. The recipe must re-assert the focus border under
+    // `:focus-within:hover` so it wins while hovered.
+    it('keeps the primary border when a focused input is hovered', () => {
+      expect(inputRecipe()).toContain('focusWithin:hover:silver-bd-c_primary');
+    });
+
+    it.each([
+      ['error', 'focusWithin:hover:silver-bd-c_status.error.border'],
+      ['warning', 'focusWithin:hover:silver-bd-c_status.warning.border'],
+      ['success', 'focusWithin:hover:silver-bd-c_status.success.border'],
+    ] as const)(
+      'keeps the %s status border when a focused input is hovered',
+      (status, expectedClass) => {
+        expect(inputRecipe({status})).toContain(expectedClass);
+      },
+    );
   });
 });
