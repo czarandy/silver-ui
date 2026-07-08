@@ -41,9 +41,28 @@
     <meta name="twitter:image" content="https://silver-ui.com/og-image.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Load fonts without blocking render: preload the stylesheet, then apply it
+      on load by flipping the media from "print" to "all". Prerendered content
+      paints immediately in the system-ui fallback and the web fonts swap in
+      (display=swap). Inter/Figtree/Roboto are used by the body and theme
+      presets; JetBrains Mono was loaded but never applied (code uses the
+      system "mono" token), so it is dropped.
+    -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Roboto:wght@400;500;700&display=swap"
-      rel="stylesheet" />
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
+      media="print"
+      onload="this.media = 'all'" />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" />
+    </noscript>
 
     <!-- Structured data -->
     <script type="application/ld+json">

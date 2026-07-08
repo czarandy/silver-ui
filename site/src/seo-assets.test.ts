@@ -40,4 +40,23 @@ describe('SEO static assets', () => {
     expect(data.name).toBe('silver-ui');
     expect(data.url).toBe('https://silver-ui.com/');
   });
+
+  it('loads only the fonts that are actually used', () => {
+    const html = readSiteFile('index.html');
+    // Used by the body and the theme presets.
+    expect(html).toContain('family=Inter');
+    expect(html).toContain('family=Figtree');
+    expect(html).toContain('family=Roboto');
+    // Loaded but never applied (code uses the system "mono" token).
+    expect(html).not.toContain('family=JetBrains');
+  });
+
+  it('loads the font stylesheet without blocking render', () => {
+    const html = readSiteFile('index.html');
+    // The applied stylesheet is deferred via the print-media swap, with a
+    // no-JS fallback, so it does not block first paint.
+    expect(html).toMatch(/media="print"\s+onload="this\.media\s*=\s*'all'"/);
+    expect(html).toContain('<noscript>');
+    expect(html).toContain('rel="preload"');
+  });
 });
