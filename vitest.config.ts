@@ -10,6 +10,9 @@ export default defineConfig({
       components: resolve(__dirname, 'src/components'),
       hooks: resolve(__dirname, 'src/hooks'),
       internal: resolve(__dirname, 'src/internal'),
+      // Resolve the published package specifier to library source so the site
+      // tests run without a prior library build (CI does not build dist).
+      'silver-ui': resolve(__dirname, 'src/index.ts'),
       'styled-system': resolve(__dirname, 'styled-system'),
       themes: resolve(__dirname, 'src/themes'),
       utils: resolve(__dirname, 'src/utils'),
@@ -19,7 +22,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}', 'eslint/**/*.test.{js,ts}'],
+    include: [
+      'src/**/*.test.{ts,tsx}',
+      'site/src/**/*.test.{ts,tsx}',
+      'eslint/**/*.test.{js,ts}',
+    ],
     css: true,
     testTimeout: 20000,
   },
