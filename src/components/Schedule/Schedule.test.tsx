@@ -982,9 +982,11 @@ describe('Schedule', () => {
       />,
     );
 
+    // The scrollable grid is a tab stop so keyboard-only users can scroll it
+    // (axe `scrollable-region-focusable`).
     expect(
       screen.getByRole('grid', {name: 'Schedule time grid'}),
-    ).toBeInTheDocument();
+    ).toHaveAttribute('tabindex', '0');
     expect(screen.getByRole('columnheader', {name: 'Time'})).toHaveAttribute(
       'aria-colindex',
       '1',
