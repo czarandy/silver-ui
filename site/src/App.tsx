@@ -44,6 +44,8 @@ import {
   Sun,
   Trash2,
 } from 'lucide-react';
+import {Analytics} from '@vercel/analytics/react';
+import {SpeedInsights} from '@vercel/speed-insights/react';
 
 const LINKS = {
   github: 'https://github.com/czarandy/silver-ui',
@@ -398,6 +400,9 @@ export function App(): JSX.Element {
           <Link href="https://github.com/czarandy">Andrey Goder</Link>
         </Text>
       </footer>
+
+      <Analytics />
+      <SpeedInsights />
     </Theme>
   );
 }
