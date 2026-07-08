@@ -141,18 +141,33 @@ export const scheduleMonthlyViewRecipe = sva({
           bg: 'primary',
           color: 'fg.onPrimary',
         },
+      },
+      false: {},
+    },
+    // Two-digit day numbers need a 1px end nudge to look optically centered
+    // inside the today circle; single-digit numbers already center cleanly.
+    isTwoDigit: {
+      true: {},
+      false: {},
+    },
+  },
+  compoundVariants: [
+    {
+      isToday: true,
+      isTwoDigit: true,
+      css: {
         todayText: {
           marginInlineEnd: '1px',
         },
       },
-      false: {},
     },
-  },
+  ],
   defaultVariants: {
     isLastColumn: false,
     isLastRow: false,
     isOtherMonth: false,
     isToday: false,
+    isTwoDigit: false,
   },
 });
 

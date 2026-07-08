@@ -614,6 +614,7 @@ function ScheduleMonthlyView({
                 isLastRow,
                 isOtherMonth: !isCurrentMonth,
                 isToday,
+                isTwoDigit: day.day >= 10,
               });
               const dayCellPluginProps = plugins.reduce<
                 HTMLAttributes<HTMLElement>
