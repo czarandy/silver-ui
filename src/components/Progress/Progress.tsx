@@ -6,11 +6,7 @@ import {VisuallyHidden} from 'components/VisuallyHidden';
 import {cx} from 'internal/cx';
 
 export type ProgressVariant =
-  | 'error'
-  | 'info'
-  | 'neutral'
-  | 'success'
-  | 'warning';
+  'error' | 'info' | 'neutral' | 'success' | 'warning';
 
 export interface ProgressProps {
   /**

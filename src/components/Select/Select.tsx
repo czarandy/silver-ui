@@ -73,10 +73,7 @@ export interface SelectSection {
 }
 
 export type SelectOptionDefinition =
-  | SelectDivider
-  | SelectOptionData
-  | SelectSection
-  | string;
+  SelectDivider | SelectOptionData | SelectSection | string;
 
 export type SelectProps = {
   /**

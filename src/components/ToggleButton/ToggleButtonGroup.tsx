@@ -105,8 +105,7 @@ export interface ToggleButtonGroupMultipleProps extends ToggleButtonGroupBasePro
 }
 
 export type ToggleButtonGroupProps =
-  | ToggleButtonGroupSingleProps
-  | ToggleButtonGroupMultipleProps;
+  ToggleButtonGroupSingleProps | ToggleButtonGroupMultipleProps;
 
 const styles = {
   group: css({

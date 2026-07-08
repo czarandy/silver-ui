@@ -9,11 +9,7 @@ import {Text} from 'components/Text';
 import isReactNode from 'internal/isReactNode';
 
 export type StepState =
-  | 'active'
-  | 'completed'
-  | 'disabled'
-  | 'error'
-  | 'upcoming';
+  'active' | 'completed' | 'disabled' | 'error' | 'upcoming';
 
 /**
  * Resolved props for a single rendered step. Computed by `Stepper`; not part of

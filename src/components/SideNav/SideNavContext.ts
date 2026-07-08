@@ -3,10 +3,7 @@
 import {createContext, use} from 'react';
 
 export type SideNavRenderMode =
-  | 'default'
-  | 'topbar'
-  | 'drawer'
-  | 'drawer-content';
+  'default' | 'topbar' | 'drawer' | 'drawer-content';
 
 export interface SideNavCollapseState {
   isCollapsed: boolean;

@@ -43,9 +43,7 @@ export type TagsInputChange<T extends SearchableItem> =
   | {items: T[]; type: 'remove-all'};
 
 export type TagsInputOverflowBehavior =
-  | 'none'
-  | 'unfocusedInline'
-  | 'unfocusedLayer';
+  'none' | 'unfocusedInline' | 'unfocusedLayer';
 
 export interface TagsInputHandle {
   /**
@@ -88,27 +86,26 @@ export type TagsInputCreateProps<T extends SearchableItem> = {
        */
       createItem?: (rawValue: string) => T;
     }
-  :
-      | {
-          /**
-           * Whether users can create a tag from free text.
-           * @default false
-           */
-          hasCreate?: false;
-          createItem?: never;
-        }
-      | {
-          /**
-           * Whether users can create a tag from free text.
-           */
-          hasCreate: true;
-          /**
-           * Builds the committed item from the typed text. Required for this
-           * item type because it has fields the default `{id, label}` builder
-           * cannot supply.
-           */
-          createItem: (rawValue: string) => T;
-        };
+  : | {
+        /**
+         * Whether users can create a tag from free text.
+         * @default false
+         */
+        hasCreate?: false;
+        createItem?: never;
+      }
+    | {
+        /**
+         * Whether users can create a tag from free text.
+         */
+        hasCreate: true;
+        /**
+         * Builds the committed item from the typed text. Required for this
+         * item type because it has fields the default `{id, label}` builder
+         * cannot supply.
+         */
+        createItem: (rawValue: string) => T;
+      };
 
 export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
   /**

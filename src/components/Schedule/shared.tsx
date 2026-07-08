@@ -313,8 +313,7 @@ export function useScheduleEventPluginProps({
   event,
   layout,
 }: Pick<ScheduleEventPropsRenderProps, 'event' | 'layout'>):
-  | HTMLAttributes<HTMLElement>
-  | undefined {
+  HTMLAttributes<HTMLElement> | undefined {
   const {plugins, timezoneID} = useScheduleContext();
   return useMemo(() => {
     let props: HTMLAttributes<HTMLElement> | undefined;

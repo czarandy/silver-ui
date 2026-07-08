@@ -187,11 +187,9 @@ function presetOverride(
   key: string,
 ): string | undefined {
   const modeColors = preset.themes?.[appearance]?.colors as unknown as
-    | Record<string, string | undefined>
-    | undefined;
+    Record<string, string | undefined> | undefined;
   const agnostic = preset.tokens?.colors as unknown as
-    | Record<string, string | undefined>
-    | undefined;
+    Record<string, string | undefined> | undefined;
   return modeColors?.[key] ?? agnostic?.[key];
 }
 

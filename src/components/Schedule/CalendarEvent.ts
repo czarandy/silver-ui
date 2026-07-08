@@ -47,8 +47,7 @@ export interface CalendarInstantEvent<
 }
 
 export type CalendarEvent<TAuxiliaryData = unknown> =
-  | CalendarDayEvent<TAuxiliaryData>
-  | CalendarInstantEvent<TAuxiliaryData>;
+  CalendarDayEvent<TAuxiliaryData> | CalendarInstantEvent<TAuxiliaryData>;
 
 export function createEventFromISO({
   category,

@@ -40,12 +40,7 @@ export type TextSize =
   | '6xl'
   | 'inherit';
 export type TextColor =
-  | 'primary'
-  | 'secondary'
-  | 'disabled'
-  | 'placeholder'
-  | 'active'
-  | 'inherit';
+  'primary' | 'secondary' | 'disabled' | 'placeholder' | 'active' | 'inherit';
 export type TextWeight = 'normal' | 'medium' | 'semibold' | 'bold' | 'inherit';
 export type TextDisplay = 'inline' | 'block';
 export type TextElement = 'span' | 'p' | 'div' | 'label' | 'time';

@@ -35,10 +35,7 @@ export interface SelectListboxSection<TOption extends SelectListboxOptionData> {
 }
 
 export type SelectListboxOption<TOption extends SelectListboxOptionData> =
-  | SelectListboxDivider
-  | SelectListboxSection<TOption>
-  | TOption
-  | string;
+  SelectListboxDivider | SelectListboxSection<TOption> | TOption | string;
 
 function normalizeSelectListboxOption<TOption extends SelectListboxOptionData>(
   option: string | TOption,
