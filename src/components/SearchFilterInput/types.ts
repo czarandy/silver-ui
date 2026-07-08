@@ -161,18 +161,10 @@ export interface DateTimeRangePartRelative {
   readonly backValue: number;
   readonly type: 'RELATIVE';
   readonly unit:
-    | 'day'
-    | 'hour'
-    | 'minute'
-    | 'month'
-    | 'second'
-    | 'week'
-    | 'year';
+    'day' | 'hour' | 'minute' | 'month' | 'second' | 'week' | 'year';
 }
 export type DateTimeRangePart =
-  | DateTimeRangePartAbsolute
-  | DateTimeRangePartNow
-  | DateTimeRangePartRelative;
+  DateTimeRangePartAbsolute | DateTimeRangePartNow | DateTimeRangePartRelative;
 export interface DateTimeRange {
   readonly end: DateTimeRangePart;
   readonly start: DateTimeRangePart;

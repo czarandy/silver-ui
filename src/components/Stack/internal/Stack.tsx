@@ -13,12 +13,7 @@ import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 export type {SizeValue};
 export type StackDirection = 'horizontal' | 'vertical';
 export type StackMainAlignment =
-  | 'start'
-  | 'center'
-  | 'end'
-  | 'between'
-  | 'around'
-  | 'evenly';
+  'start' | 'center' | 'end' | 'between' | 'around' | 'evenly';
 export type StackCrossAlignment = 'start' | 'center' | 'end' | 'stretch';
 export type StackAlignment = StackMainAlignment | StackCrossAlignment;
 export type StackWrap = 'nowrap' | 'wrap' | 'wrap-reverse';

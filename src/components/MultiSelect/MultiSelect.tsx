@@ -75,10 +75,7 @@ export interface MultiSelectSection {
 }
 
 export type MultiSelectOption =
-  | MultiSelectDivider
-  | MultiSelectOptionData
-  | MultiSelectSection
-  | string;
+  MultiSelectDivider | MultiSelectOptionData | MultiSelectSection | string;
 
 export type MultiSelectTriggerDisplay = 'count' | 'labels' | 'badges';
 

@@ -16,20 +16,7 @@ const INITIALS_FONT_SIZE_RATIO = 0.4;
 export type AvatarNamedSize = 'tiny' | 'xsmall' | 'small' | 'medium' | 'large';
 
 export type AvatarNumericSize =
-  | 16
-  | 20
-  | 24
-  | 32
-  | 36
-  | 40
-  | 48
-  | 60
-  | 64
-  | 72
-  | 96
-  | 128
-  | 144
-  | 180;
+  16 | 20 | 24 | 32 | 36 | 40 | 48 | 60 | 64 | 72 | 96 | 128 | 144 | 180;
 
 export type AvatarSize = AvatarNamedSize | AvatarNumericSize;
 

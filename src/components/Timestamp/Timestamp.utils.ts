@@ -2,10 +2,7 @@ import {Temporal} from '@js-temporal/polyfill';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
 
 export type TimestampValue =
-  | Temporal.Instant
-  | Temporal.ZonedDateTime
-  | number
-  | string;
+  Temporal.Instant | Temporal.ZonedDateTime | number | string;
 
 export type TimestampFormat =
   | 'auto'

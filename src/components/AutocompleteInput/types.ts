@@ -56,8 +56,7 @@ export interface StandardSearchableItem<TAuxiliaryData = unknown> {
  * custom content.
  */
 export type SearchableItem<TAuxiliaryData = unknown> =
-  | CustomSearchableItem<TAuxiliaryData>
-  | StandardSearchableItem<TAuxiliaryData>;
+  CustomSearchableItem<TAuxiliaryData> | StandardSearchableItem<TAuxiliaryData>;
 
 export interface SearchSource<T extends SearchableItem = SearchableItem> {
   /**

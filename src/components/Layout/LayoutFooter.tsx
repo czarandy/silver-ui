@@ -72,8 +72,7 @@ interface LayoutFooterActionsProps extends LayoutFooterBaseProps {
  * footer layout, or children for a custom footer inside the same shell.
  */
 export type LayoutFooterProps =
-  | LayoutFooterActionsProps
-  | LayoutFooterCustomProps;
+  LayoutFooterActionsProps | LayoutFooterCustomProps;
 
 /**
  * Footer landmark region within a Layout.

@@ -58,8 +58,7 @@ interface AutocompleteInputStandardItemProps {
 }
 
 export type AutocompleteInputItemProps =
-  | AutocompleteInputCustomItemProps
-  | AutocompleteInputStandardItemProps;
+  AutocompleteInputCustomItemProps | AutocompleteInputStandardItemProps;
 
 /**
  * Default layout for AutocompleteInput and TagsInput result rows.

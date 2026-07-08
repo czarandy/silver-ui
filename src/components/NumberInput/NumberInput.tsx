@@ -181,8 +181,7 @@ type NumberInputClearableProps = NumberInputBaseProps & {
 };
 
 export type NumberInputProps =
-  | NumberInputClearableProps
-  | NumberInputNonClearableProps;
+  NumberInputClearableProps | NumberInputNonClearableProps;
 
 const styles = {
   units: css({
