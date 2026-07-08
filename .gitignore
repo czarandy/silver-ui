@@ -6,3 +6,5 @@ styled-system/
 .eslintcache
 *.log
 .pnpm-store/
+.codex-worktrees/
+.claude/worktrees/
