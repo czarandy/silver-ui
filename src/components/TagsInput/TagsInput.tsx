@@ -29,6 +29,7 @@ import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {OverflowList} from 'internal/OverflowList';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
@@ -623,9 +624,9 @@ export function TagsInput<T extends SearchableItem>({
           variant="ghost"
         />
       ) : null}
-      <span aria-live="polite" className={classes.liveRegion} role="status">
+      <VisuallyHidden aria-live="polite" as="div" role="status">
         {announcement}
-      </span>
+      </VisuallyHidden>
     </div>
   );
 

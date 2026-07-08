@@ -709,6 +709,7 @@ export {
 export {cx} from 'internal/cx';
 export {
   VisuallyHidden,
+  type VisuallyHiddenElement,
   type VisuallyHiddenProps,
 } from 'components/VisuallyHidden';
 export {

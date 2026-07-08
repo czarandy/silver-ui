@@ -13,7 +13,6 @@ export const tagsInputRecipe = sva({
     'input',
     'endContent',
     'overflowText',
-    'liveRegion',
     'layerPopover',
   ],
   base: {
@@ -39,14 +38,6 @@ export const tagsInputRecipe = sva({
       fontSize: 'sm',
       color: 'fg.muted',
       px: '1',
-    },
-    liveRegion: {
-      position: 'absolute',
-      w: '1px',
-      h: '1px',
-      overflow: 'hidden',
-      clip: 'rect(0 0 0 0)',
-      whiteSpace: 'nowrap',
     },
     layerPopover: {
       w: 'anchor-size(width)',
