@@ -1,4 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {useState} from 'react';
+import {Button} from 'components/Button';
 import {Text} from 'components/Text';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {css} from 'styled-system/css';
@@ -61,18 +63,28 @@ export const InlineWithVisibleText: Story = {
 };
 
 /**
- * Because it renders a plain `span`, extra props (such as a `className`) are
- * forwarded to the underlying element.
+ * Use the polymorphic `as` prop to render a block-level element — required for
+ * an `aria-live` region, which an inline `span` cannot host reliably. Activate
+ * the button with a screen reader running: the count change is announced
+ * without any visible status text. Accessibility props (`aria-live`, `role`)
+ * pass through even though styling is locked down.
  */
-export const WithForwardedProps: Story = {
-  render: () => (
-    <div className={css({borderWidth: '1px', borderColor: 'border', p: '4'})}>
-      <Text as="p" type="body">
-        There is a visually hidden note attached to this box.
-      </Text>
-      <VisuallyHidden className={css({fontWeight: 'bold'})}>
-        Hidden note for screen readers only.
-      </VisuallyHidden>
-    </div>
-  ),
+export const LiveRegionAnnouncer: Story = {
+  render: function LiveRegionAnnouncer() {
+    const [count, setCount] = useState(0);
+
+    return (
+      <div
+        className={css({display: 'flex', flexDirection: 'column', gap: '3'})}>
+        <Button label="Add item" onClick={() => setCount(value => value + 1)} />
+        <Text as="p" type="body">
+          {count} item{count === 1 ? '' : 's'} added (this text is visible; the
+          announcement below is not).
+        </Text>
+        <VisuallyHidden aria-live="polite" as="div" role="status">
+          {count === 0 ? '' : `${count} items in the list`}
+        </VisuallyHidden>
+      </div>
+    );
+  },
 };
