@@ -2,7 +2,6 @@
 
 import {
   useCallback,
-  useEffect,
   useMemo,
   useState,
   type Dispatch,
@@ -65,10 +64,16 @@ export function useListboxNavigation({
       : undefined;
 
   // Keep the highlighted option visible as the user arrows through an
-  // overflowing list.
-  useEffect(() => {
-    scrollOptionIntoView(activeDescendantId);
-  }, [activeDescendantId]);
+  // overflowing list. The option elements already carry stable ids, so this
+  // runs right after the highlight moves without needing element refs.
+  const scrollHighlightIntoView = useCallback(
+    (optionValue: string | null): void => {
+      if (optionValue != null) {
+        scrollOptionIntoView(getOptionId(optionValue));
+      }
+    },
+    [getOptionId],
+  );
 
   const getInitialHighlight = useCallback(
     (direction: 'first' | 'last' = 'first'): string | null => {
@@ -90,26 +95,23 @@ export function useListboxNavigation({
     [enabledOptions, selectedValues],
   );
 
-  const moveHighlight = useCallback(
-    (direction: 1 | -1): void => {
+  const getNextHighlight = useCallback(
+    (currentValue: string | null, direction: 1 | -1): string | null => {
       if (enabledOptions.length === 0) {
-        setHighlightedValue(null);
-        return;
+        return null;
       }
 
-      setHighlightedValue(currentValue => {
-        const currentIndex = enabledOptions.findIndex(
-          option => option.value === currentValue,
-        );
-        const nextIndex =
-          currentIndex === -1
-            ? direction === 1
-              ? 0
-              : enabledOptions.length - 1
-            : (currentIndex + direction + enabledOptions.length) %
-              enabledOptions.length;
-        return enabledOptions[nextIndex].value;
-      });
+      const currentIndex = enabledOptions.findIndex(
+        option => option.value === currentValue,
+      );
+      const nextIndex =
+        currentIndex === -1
+          ? direction === 1
+            ? 0
+            : enabledOptions.length - 1
+          : (currentIndex + direction + enabledOptions.length) %
+            enabledOptions.length;
+      return enabledOptions[nextIndex].value;
     },
     [enabledOptions],
   );
@@ -130,19 +132,28 @@ export function useListboxNavigation({
           return;
         }
 
-        moveHighlight(event.key === 'ArrowDown' ? 1 : -1);
+        const nextValue = getNextHighlight(
+          highlightedValue,
+          event.key === 'ArrowDown' ? 1 : -1,
+        );
+        setHighlightedValue(nextValue);
+        scrollHighlightIntoView(nextValue);
         return;
       }
 
       if (event.key === 'Home' && isOpen) {
         event.preventDefault();
-        setHighlightedValue(getInitialHighlight('first'));
+        const nextValue = getInitialHighlight('first');
+        setHighlightedValue(nextValue);
+        scrollHighlightIntoView(nextValue);
         return;
       }
 
       if (event.key === 'End' && isOpen) {
         event.preventDefault();
-        setHighlightedValue(getInitialHighlight('last'));
+        const nextValue = getInitialHighlight('last');
+        setHighlightedValue(nextValue);
+        scrollHighlightIntoView(nextValue);
         return;
       }
 
@@ -163,12 +174,13 @@ export function useListboxNavigation({
     },
     [
       getInitialHighlight,
+      getNextHighlight,
       highlightedValue,
       isDisabled,
       isOpen,
-      moveHighlight,
       onCommit,
       onOpenChange,
+      scrollHighlightIntoView,
       shouldClearOnCommit,
     ],
   );
