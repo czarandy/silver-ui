@@ -5,7 +5,7 @@ import type {InputStatusType} from 'components/Field/types';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
-import {VisuallyHidden} from 'internal/VisuallyHidden';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 

@@ -210,6 +210,10 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Calendar** — date picker calendar grid with single and range selection
 - **Schedule** — event calendar with day, week, month, and list views
 
+### Accessibility
+
+- **VisuallyHidden** — hides content visually while keeping it available to screen readers
+
 ---
 
 ## Contributing

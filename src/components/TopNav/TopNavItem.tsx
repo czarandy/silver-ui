@@ -7,7 +7,7 @@ import type {LinkComponent} from 'components/Link';
 import {Text} from 'components/Text';
 import {useTopNavRenderMode} from 'components/TopNav/TopNavContext';
 import {topNavItemRecipe} from 'components/TopNav/TopNavItem.recipe';
-import {VisuallyHidden} from 'internal';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';

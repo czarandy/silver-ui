@@ -7,7 +7,7 @@ import {linkRecipe} from 'components/Link/Link.recipe';
 import type {LinkComponent} from 'components/Link/types';
 import type {TextColor, TextSize, TextWeight} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
-import {VisuallyHidden} from 'internal';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';

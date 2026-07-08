@@ -4,7 +4,7 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Icon, type IconComponent} from 'components/Icon';
 import {metadataListRecipe} from 'components/MetadataList/MetadataList.recipe';
 import {useMetadataList} from 'components/MetadataList/MetadataListContext';
-import {VisuallyHidden} from 'internal';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {cx} from 'internal/cx';
 
 /**

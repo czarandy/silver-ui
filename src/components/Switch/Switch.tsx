@@ -16,7 +16,7 @@ import {Spinner} from 'components/Spinner';
 import {switchRecipe} from 'components/Switch/Switch.recipe';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
-import {VisuallyHidden} from 'internal/VisuallyHidden';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
 

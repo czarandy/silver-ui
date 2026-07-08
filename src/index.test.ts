@@ -46,6 +46,23 @@ function valueExports(source: string): string[] {
   return names;
 }
 
+describe('VisuallyHidden public export', () => {
+  it('re-exports the VisuallyHidden value and VisuallyHiddenProps type', () => {
+    // The re-export must come from the public component barrel, not `internal`.
+    expect(barrelSource).toMatch(
+      /export\s*\{[^}]*\bVisuallyHidden\b[^}]*\btype VisuallyHiddenProps\b[^}]*\}\s*from\s*'components\/VisuallyHidden'/s,
+    );
+  });
+
+  it('does not surface VisuallyHidden through the internal barrel', () => {
+    const internalBarrel = readFileSync(
+      resolve(here, 'internal', 'index.ts'),
+      'utf8',
+    );
+    expect(internalBarrel).not.toContain('VisuallyHidden');
+  });
+});
+
 describe('component barrel and docs coverage', () => {
   it('finds component directories to check', () => {
     expect(componentDirs.length).toBeGreaterThan(0);

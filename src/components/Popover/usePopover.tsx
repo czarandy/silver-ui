@@ -10,7 +10,7 @@ import {
   type RefCallback,
 } from 'react';
 import {Button} from 'components/Button';
-import {VisuallyHidden} from 'internal';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {useFocusTrap} from 'internal/useFocusTrap';
 import {useLayer, type ContextRenderProps} from 'internal/useLayer';
 import {css} from 'styled-system/css';
