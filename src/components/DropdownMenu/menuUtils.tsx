@@ -1,6 +1,11 @@
 /* eslint-disable @eslint-react/no-array-index-key */
 'use client';
-import {useCallback, type KeyboardEvent, type ReactNode} from 'react';
+import {
+  useCallback,
+  type KeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import {Divider} from 'components/Divider';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
 import type {DropdownMenuOption} from 'components/DropdownMenu/types';
@@ -86,8 +91,9 @@ export function renderMenuItems(
 }
 
 export function useMenuKeyboard(
-  menuRef: React.RefObject<HTMLElement | null>,
+  menuRef: RefObject<HTMLElement | null>,
   onClose: () => void,
+  focusTargetRef?: RefObject<HTMLElement | null>,
 ): (event: KeyboardEvent<HTMLElement>) => void {
   const getMenuItems = useCallback(() => {
     if (menuRef.current == null) {
@@ -102,6 +108,13 @@ export function useMenuKeyboard(
 
   return useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
+      if (event.key === 'Tab') {
+        event.preventDefault();
+        onClose();
+        focusTargetRef?.current?.focus();
+        return;
+      }
+
       const menuItems = getMenuItems();
       if (menuItems.length === 0) {
         return;
@@ -159,6 +172,6 @@ export function useMenuKeyboard(
       event.preventDefault();
       menuItems[nextIndex]?.focus();
     },
-    [getMenuItems, onClose],
+    [focusTargetRef, getMenuItems, onClose],
   );
 }

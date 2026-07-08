@@ -188,6 +188,25 @@ describe('ContextMenu', () => {
     expect(hidePopover).toHaveBeenCalledTimes(1);
   });
 
+  it('closes the menu and focuses the trigger on Tab', () => {
+    render(
+      <ContextMenu data-testid="context-trigger" items={[{label: 'Copy'}]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    const trigger = screen.getByTestId('context-trigger');
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+
+    const menuItem = screen.getByRole('menuitem', {hidden: true, name: 'Copy'});
+    menuItem.focus();
+    fireEvent.keyDown(menuItem, {key: 'Tab'});
+
+    expect(hidePopover).toHaveBeenCalledTimes(1);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(trigger).toHaveFocus();
+  });
+
   it('calls onOpenChange when opening and closing', async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();

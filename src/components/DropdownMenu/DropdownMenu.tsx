@@ -22,6 +22,7 @@ import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
 
 export type {
@@ -130,6 +131,7 @@ export function DropdownMenu({
   const isOpen = isControlled ? isMenuOpen : internalOpen;
   const menuSize: ButtonSize = button.size ?? 'md';
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   if (process.env.NODE_ENV !== 'production') {
     if (items != null && isReactNode(children)) {
@@ -150,7 +152,7 @@ export function DropdownMenu({
     }
   }, [isControlled, onOpenChange]);
 
-  const handleMenuKeyDown = useMenuKeyboard(menuRef, hide);
+  const handleMenuKeyDown = useMenuKeyboard(menuRef, hide, triggerRef);
 
   const contextValue = useMemo(
     () => ({
@@ -201,7 +203,7 @@ export function DropdownMenu({
           </>
         }
         onClick={onClick}
-        ref={ref}
+        ref={mergeRefs(ref, triggerRef)}
       />
     </Popover>
   );

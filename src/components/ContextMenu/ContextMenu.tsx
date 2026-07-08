@@ -271,7 +271,7 @@ export function ContextMenu({
     [isDisabled, show],
   );
 
-  const handleMenuKeyDown = useMenuKeyboard(menuRef, hide);
+  const handleMenuKeyDown = useMenuKeyboard(menuRef, hide, triggerRef);
 
   const menuNode = useMemo(
     (): ReactNode => (items == null ? menuContent : renderMenuItems(items)),

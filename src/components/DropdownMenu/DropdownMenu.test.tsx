@@ -217,6 +217,17 @@ describe('DropdownMenu', () => {
 
       expect(item('Cherry')).toHaveFocus();
     });
+
+    it('closes the menu and focuses the trigger on Tab', async () => {
+      const item = await openMenu();
+      const trigger = screen.getByRole('button', {name: 'Actions'});
+
+      item('Apple').focus();
+      fireEvent.keyDown(item('Apple'), {key: 'Tab'});
+
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+      expect(trigger).toHaveFocus();
+    });
   });
 
   it('closes menu after clicking an item', async () => {
