@@ -175,6 +175,10 @@ echo
 confirm "Proceed with checks and build?" || die "Aborted."
 
 # --- quality gates (fast-fail; CI re-runs these) ----------------------------
+bold "Regenerating Panda output"
+info "panda codegen"; pnpm panda codegen
+ok "styled-system up to date"
+
 bold "Running checks"
 info "typecheck"; pnpm typecheck
 info "test";      pnpm test
