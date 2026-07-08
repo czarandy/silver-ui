@@ -273,12 +273,12 @@ export function DateInput({
       if (event.key === 'Enter') {
         event.preventDefault();
         commitPendingInput();
-      } else if (event.key === 'ArrowDown' && !isOpen) {
+      } else if (event.key === 'ArrowDown') {
         event.preventDefault();
         setIsOpen(true);
       }
     },
-    [commitPendingInput, isOpen],
+    [commitPendingInput],
   );
 
   const handleClear = useCallback(() => {

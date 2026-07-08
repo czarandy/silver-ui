@@ -187,12 +187,12 @@ export function DateRangeInput({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'ArrowDown' && !isOpen) {
+      if (event.key === 'ArrowDown') {
         event.preventDefault();
         setIsOpen(true);
       }
     },
-    [isOpen],
+    [],
   );
 
   return (
