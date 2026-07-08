@@ -221,6 +221,11 @@ export function AppShell({
   const isAuto = height === 'auto';
   const isFill = height === 'fill';
   const navHasDividers = variant === 'section';
+  const classes = appShellRecipe({
+    height,
+    variant,
+    headerDivider: navHasDividers && hasTopNav,
+  });
   const headerRef = useRef<HTMLDivElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
 
@@ -287,7 +292,9 @@ export function AppShell({
     );
   const headerContent =
     hasTopNav || isReactNode(banner) ? (
-      <div className={cx(isAuto && styles.headerSticky)} ref={headerRef}>
+      <div
+        className={cx(isAuto && styles.headerSticky, classes.header)}
+        ref={headerRef}>
         <header style={{flexShrink: 0}}>
           {isReactNode(banner) ? (
             <div className={styles.banner}>{banner}</div>
@@ -363,7 +370,7 @@ export function AppShell({
   return (
     <AppShellMobileContext value={mobileContextValue}>
       <div
-        className={cx(appShellRecipe({height, variant}), className)}
+        className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={mergeRefs(ref, shellRef)}
         style={rootStyle}>

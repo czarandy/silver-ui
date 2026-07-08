@@ -124,7 +124,7 @@ describe('AppShell', () => {
     );
 
     expect(screen.getByTestId('shell')).toHaveClass(
-      appShellRecipe({height: 'auto'}),
+      appShellRecipe({height: 'auto'}).root ?? '',
     );
   });
 
@@ -136,7 +136,7 @@ describe('AppShell', () => {
     );
 
     expect(screen.getByTestId('shell')).toHaveClass(
-      appShellRecipe({variant: 'section'}),
+      appShellRecipe({variant: 'section'}).root ?? '',
     );
   });
 
@@ -152,7 +152,21 @@ describe('AppShell', () => {
     );
 
     expect(screen.getByTestId('shell')).toHaveClass(
-      appShellRecipe({variant: 'section'}),
+      appShellRecipe({variant: 'section'}).root ?? '',
+    );
+  });
+
+  it('applies a top nav bottom border for variant="section"', () => {
+    render(
+      <AppShell topNav={topNav} variant="section">
+        <div>Content</div>
+      </AppShell>,
+    );
+
+    const nav = screen.getByRole('navigation', {name: 'Main navigation'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the shell-owned wrapper around the header slot gets the divider class
+    expect(nav.closest('header')?.parentElement).toHaveClass(
+      appShellRecipe({headerDivider: true}).header ?? '',
     );
   });
 

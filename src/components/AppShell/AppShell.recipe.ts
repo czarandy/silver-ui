@@ -1,32 +1,54 @@
-import {cva, type RecipeVariantProps} from 'styled-system/css';
+import {sva, type RecipeVariantProps} from 'styled-system/css';
 
-export const appShellRecipe = cva({
+export const appShellRecipe = sva({
+  slots: ['root', 'header'],
   base: {
-    display: 'flex',
-    flexDirection: 'column',
-    position: 'relative',
+    root: {
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+    },
   },
   variants: {
     height: {
       fill: {
-        h: '100dvh',
+        root: {
+          h: '100dvh',
+        },
       },
       auto: {
-        minH: '100dvh',
+        root: {
+          minH: '100dvh',
+        },
       },
     },
     variant: {
       default: {
-        bg: 'bg.subtle',
+        root: {
+          bg: 'bg.subtle',
+        },
       },
       section: {
-        bg: 'bg',
+        root: {
+          bg: 'bg',
+        },
       },
+    },
+    headerDivider: {
+      true: {
+        header: {
+          borderBlockEndWidth: 'default',
+          borderBlockEndStyle: 'solid',
+          borderBlockEndColor: 'border',
+        },
+      },
+      false: {},
     },
   },
   defaultVariants: {
     height: 'fill',
     variant: 'default',
+    headerDivider: false,
   },
 });
 
