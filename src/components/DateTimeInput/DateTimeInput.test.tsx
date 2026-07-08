@@ -1,9 +1,42 @@
 import {Temporal} from '@js-temporal/polyfill';
-import {fireEvent, render, screen} from '@testing-library/react';
-import {describe, expect, it, vi} from 'vitest';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {DateTimeInput} from 'components/DateTimeInput/DateTimeInput';
 
+beforeAll(() => {
+  // jsdom has no native popover support. Toggle display so opened content is
+  // rendered (and therefore focusable) the way a real popover would be.
+  HTMLElement.prototype.showPopover = vi.fn(function (this: HTMLElement) {
+    this.style.display = 'block';
+  });
+  HTMLElement.prototype.hidePopover = vi.fn(function (this: HTMLElement) {
+    this.style.display = 'none';
+  });
+});
+
+afterAll(() => {
+  Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+  Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+});
+
 describe('DateTimeInput', () => {
+  it('opens the calendar when ArrowDown is pressed in the date field', async () => {
+    const user = userEvent.setup();
+
+    render(<DateTimeInput label="Meeting" onChange={() => {}} value={null} />);
+
+    const dateInput = screen.getByLabelText('Meeting date');
+    expect(dateInput).toHaveAttribute('aria-expanded', 'false');
+
+    await user.click(dateInput);
+    await user.keyboard('{ArrowDown}');
+
+    await waitFor(() => {
+      expect(dateInput).toHaveAttribute('aria-expanded', 'true');
+    });
+  });
+
   it('updates the time portion', () => {
     const onChange = vi.fn();
 

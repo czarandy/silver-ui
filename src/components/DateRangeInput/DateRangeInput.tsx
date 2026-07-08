@@ -2,10 +2,12 @@
 
 import {CalendarIcon, X} from 'lucide-react';
 import {
+  useCallback,
   useId,
   useMemo,
   useState,
   type CSSProperties,
+  type KeyboardEvent,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -183,6 +185,16 @@ export function DateRangeInput({
 
   const necessity = getNecessity(isOptional, isRequired);
 
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        setIsOpen(true);
+      }
+    },
+    [],
+  );
+
   return (
     <Field
       className={className}
@@ -252,6 +264,7 @@ export function DateRangeInput({
           data-testid={dataTestId}
           disabled={isDisabled}
           id={inputId}
+          onKeyDown={handleKeyDown}
           placeholder={placeholder}
           readOnly
           ref={ref}

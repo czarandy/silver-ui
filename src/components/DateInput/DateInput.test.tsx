@@ -501,6 +501,22 @@ describe('DateInput', () => {
       expect(onChange).not.toHaveBeenCalled();
     });
 
+    it('opens the calendar when ArrowDown is pressed in the field', async () => {
+      const user = userEvent.setup();
+
+      render(<DateInput label="Due date" onChange={() => {}} value={null} />);
+
+      const input = screen.getByRole('combobox', {name: 'Due date'});
+      expect(input).toHaveAttribute('aria-expanded', 'false');
+
+      await user.click(input);
+      await user.keyboard('{ArrowDown}');
+
+      await waitFor(() => {
+        expect(input).toHaveAttribute('aria-expanded', 'true');
+      });
+    });
+
     it('focuses the selected date when opened', async () => {
       const user = userEvent.setup();
 
