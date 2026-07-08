@@ -1,4 +1,5 @@
 import {fireEvent, render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {Check} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {Avatar} from 'components/Avatar/Avatar';
@@ -106,6 +107,38 @@ describe('Avatar', () => {
     expect(avatar).toHaveClass('custom-avatar');
     expect(avatar).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+
+  it('forwards unrecognized props to the root element', async () => {
+    const user = userEvent.setup();
+    const onMouseEnter = vi.fn();
+
+    render(
+      <Avatar
+        data-analytics="avatar"
+        data-testid="avatar"
+        id="user-ada"
+        name="Ada Lovelace"
+        onMouseEnter={onMouseEnter}
+        tabIndex={0}
+        title="Ada Lovelace"
+      />,
+    );
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar).toHaveAttribute('data-analytics', 'avatar');
+    expect(avatar).toHaveAttribute('id', 'user-ada');
+    expect(avatar).toHaveAttribute('tabindex', '0');
+    expect(avatar).toHaveAttribute('title', 'Ada Lovelace');
+
+    await user.hover(avatar);
+    expect(onMouseEnter).toHaveBeenCalledOnce();
+  });
+
+  it('does not let forwarded props clobber the semantic role', () => {
+    render(<Avatar data-testid="avatar" name="Ada Lovelace" role="button" />);
+
+    expect(screen.getByTestId('avatar')).toHaveAttribute('role', 'img');
   });
 
   it('resets image error state when src changes', () => {

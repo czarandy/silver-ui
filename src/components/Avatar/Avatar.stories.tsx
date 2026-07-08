@@ -145,6 +145,29 @@ export const AutoColorFromName: Story = {
   ),
 };
 
+export const ForwardedProps: Story = {
+  render: () => (
+    <div style={{display: 'flex', alignItems: 'center', gap: 16}}>
+      <Avatar
+        aria-describedby="ada-tooltip"
+        data-analytics="avatar-ada"
+        id="avatar-ada"
+        name="Ada Lovelace"
+        onMouseEnter={() => undefined}
+        size="medium"
+        tabIndex={0}
+        title="Ada Lovelace"
+      />
+      <span id="ada-tooltip">
+        Unrecognized props (<code>id</code>, <code>tabIndex</code>,{' '}
+        <code>title</code>, <code>data-*</code>, <code>aria-*</code>, event
+        handlers) are forwarded to the root element — hover, focus, or inspect
+        the avatar.
+      </span>
+    </div>
+  ),
+};
+
 export const OnNav: Story = {
   render: () => (
     <div

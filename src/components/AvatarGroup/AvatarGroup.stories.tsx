@@ -90,3 +90,23 @@ export const CustomOverflowContent: Story = {
     </AvatarGroup>
   ),
 };
+
+export const ForwardedProps: Story = {
+  render: args => (
+    <AvatarGroup
+      {...args}
+      data-analytics="member-group"
+      id="member-group"
+      onMouseEnter={() => undefined}
+      title="Project members">
+      <Avatar name="Ada Lovelace" />
+      <Avatar name="Grace Hopper" />
+      <AvatarGroupOverflow
+        count={4}
+        data-analytics="member-overflow"
+        onClick={() => undefined}
+        title="View all members"
+      />
+    </AvatarGroup>
+  ),
+};
