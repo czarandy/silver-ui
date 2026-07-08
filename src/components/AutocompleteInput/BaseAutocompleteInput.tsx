@@ -28,6 +28,7 @@ import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {mergeRefs} from 'internal/mergeRefs';
+import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -352,6 +353,14 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       searchSource.cancel?.();
     };
   }, [searchSource]);
+
+  // Keep the highlighted result visible as the user arrows through an
+  // overflowing list.
+  useEffect(() => {
+    if (isOpen && highlightedIndex >= 0) {
+      scrollOptionIntoView(`${listboxId}-option-${highlightedIndex}`);
+    }
+  }, [highlightedIndex, isOpen, listboxId]);
 
   const menuClasses = autocompleteMenuRecipe({size});
 

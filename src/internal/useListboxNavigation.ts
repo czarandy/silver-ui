@@ -2,12 +2,14 @@
 
 import {
   useCallback,
+  useEffect,
   useMemo,
   useState,
   type Dispatch,
   type KeyboardEvent,
   type SetStateAction,
 } from 'react';
+import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 
 export type ListboxNavigationOption = {
   isDisabled?: boolean;
@@ -61,6 +63,12 @@ export function useListboxNavigation({
     isOpen && highlightedValue != null
       ? getOptionId(highlightedValue)
       : undefined;
+
+  // Keep the highlighted option visible as the user arrows through an
+  // overflowing list.
+  useEffect(() => {
+    scrollOptionIntoView(activeDescendantId);
+  }, [activeDescendantId]);
 
   const getInitialHighlight = useCallback(
     (direction: 'first' | 'last' = 'first'): string | null => {
