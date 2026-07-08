@@ -23,6 +23,11 @@ export const inputRecipe = cva({
     _focusWithin: {
       borderColor: 'primary',
       boxShadow: 'focus',
+      // Keep the focus border color while hovering a focused input; otherwise
+      // the equal-specificity `_hover` rule would override it.
+      _hover: {
+        borderColor: 'primary',
+      },
     },
   },
   variants: {
@@ -38,6 +43,7 @@ export const inputRecipe = cva({
         _focusWithin: {
           borderColor: 'status.warning.border',
           boxShadow: 'focus.warning',
+          _hover: {borderColor: 'status.warning.border'},
         },
       },
       error: {
@@ -46,6 +52,7 @@ export const inputRecipe = cva({
         _focusWithin: {
           borderColor: 'status.error.border',
           boxShadow: 'focus.error',
+          _hover: {borderColor: 'status.error.border'},
         },
       },
       success: {
@@ -54,6 +61,7 @@ export const inputRecipe = cva({
         _focusWithin: {
           borderColor: 'status.success.border',
           boxShadow: 'focus.success',
+          _hover: {borderColor: 'status.success.border'},
         },
       },
     },

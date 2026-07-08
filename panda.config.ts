@@ -87,7 +87,10 @@ export default defineConfig({
               value: {base: '{colors.teal.700}', _dark: '{colors.teal.300}'},
             },
             subtle: {
-              value: {base: '{colors.teal.100}', _dark: '{colors.teal.900}'},
+              value: {
+                base: '{colors.teal.100}',
+                _dark: 'color-mix(in srgb, {colors.primary} 45%, transparent)',
+              },
             },
           },
           destructive: {
@@ -631,16 +634,16 @@ export default defineConfig({
         },
         shadows: {
           focus: {
-            value: '0 0 0 {borderWidths.focus} {colors.primary.subtle}',
+            value: 'inset 0 0 0 {borderWidths.focus} {colors.primary.subtle}',
           },
           'focus.error': {
-            value: '0 0 0 {borderWidths.focus} {colors.red.100}',
+            value: 'inset 0 0 0 {borderWidths.focus} {colors.red.100}',
           },
           'focus.warning': {
-            value: '0 0 0 {borderWidths.focus} {colors.yellow.100}',
+            value: 'inset 0 0 0 {borderWidths.focus} {colors.yellow.100}',
           },
           'focus.success': {
-            value: '0 0 0 {borderWidths.focus} {colors.green.100}',
+            value: 'inset 0 0 0 {borderWidths.focus} {colors.green.100}',
           },
         },
       },
