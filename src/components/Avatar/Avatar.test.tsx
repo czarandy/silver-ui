@@ -134,6 +134,42 @@ describe('Avatar', () => {
     });
   });
 
+  it('applies the surface color from an explicit color prop', () => {
+    render(<Avatar color="blue" name="Ada Lovelace" />);
+
+    expect(screen.getByText('AL')).toHaveClass('silver-bg_surface.blue');
+  });
+
+  it('derives a deterministic surface color from the name', () => {
+    const {rerender} = render(<Avatar name="Ada Lovelace" />);
+    expect(screen.getByText('AL')).toHaveClass('silver-bg_surface.pink');
+
+    // Same name resolves to the same color on re-render.
+    rerender(<Avatar name="Ada Lovelace" />);
+    expect(screen.getByText('AL')).toHaveClass('silver-bg_surface.pink');
+
+    // A different name resolves to a different, stable color.
+    rerender(<Avatar name="Katherine Johnson" />);
+    expect(screen.getByText('KJ')).toHaveClass('silver-bg_surface.blue');
+  });
+
+  it('uses gray when there are no initials to color', () => {
+    render(<Avatar data-testid="avatar" />);
+
+    // eslint-disable-next-line testing-library/no-node-access -- inner content div has no role or testid
+    expect(screen.getByTestId('avatar').firstElementChild).toHaveClass(
+      'silver-bg_surface.gray',
+    );
+  });
+
+  it('lets an explicit color override the name-derived color', () => {
+    render(<Avatar color="green" name="Ada Lovelace" />);
+
+    const fallback = screen.getByText('AL');
+    expect(fallback).toHaveClass('silver-bg_surface.green');
+    expect(fallback).not.toHaveClass('silver-bg_surface.pink');
+  });
+
   it('warns in development when AvatarStatusDot icon is not visible at small sizes', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 

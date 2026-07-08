@@ -1,6 +1,7 @@
 export {
   Avatar,
   resolveAvatarSize,
+  type AvatarColor,
   type AvatarNamedSize,
   type AvatarNumericSize,
   type AvatarProps,

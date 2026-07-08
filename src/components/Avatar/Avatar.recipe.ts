@@ -17,8 +17,6 @@ export const avatarRecipe = sva({
       borderRadius: 'full',
       overflow: 'hidden',
       userSelect: 'none',
-      bg: 'bg.subtle',
-      color: 'fg.muted',
     },
     image: {
       w: '100%',
@@ -31,8 +29,6 @@ export const avatarRecipe = sva({
       justifyContent: 'center',
       w: '100%',
       h: '100%',
-      bg: 'bg.subtle',
-      color: 'fg.muted',
       fontFamily: 'body',
       fontWeight: 'medium',
       textTransform: 'uppercase',
@@ -42,6 +38,48 @@ export const avatarRecipe = sva({
     },
   },
   variants: {
+    color: {
+      red: {
+        content: {bg: 'surface.red', color: 'surface.red.fg'},
+        fallback: {bg: 'surface.red', color: 'surface.red.fg'},
+      },
+      orange: {
+        content: {bg: 'surface.orange', color: 'surface.orange.fg'},
+        fallback: {bg: 'surface.orange', color: 'surface.orange.fg'},
+      },
+      yellow: {
+        content: {bg: 'surface.yellow', color: 'surface.yellow.fg'},
+        fallback: {bg: 'surface.yellow', color: 'surface.yellow.fg'},
+      },
+      green: {
+        content: {bg: 'surface.green', color: 'surface.green.fg'},
+        fallback: {bg: 'surface.green', color: 'surface.green.fg'},
+      },
+      teal: {
+        content: {bg: 'surface.teal', color: 'surface.teal.fg'},
+        fallback: {bg: 'surface.teal', color: 'surface.teal.fg'},
+      },
+      cyan: {
+        content: {bg: 'surface.cyan', color: 'surface.cyan.fg'},
+        fallback: {bg: 'surface.cyan', color: 'surface.cyan.fg'},
+      },
+      blue: {
+        content: {bg: 'surface.blue', color: 'surface.blue.fg'},
+        fallback: {bg: 'surface.blue', color: 'surface.blue.fg'},
+      },
+      purple: {
+        content: {bg: 'surface.purple', color: 'surface.purple.fg'},
+        fallback: {bg: 'surface.purple', color: 'surface.purple.fg'},
+      },
+      pink: {
+        content: {bg: 'surface.pink', color: 'surface.pink.fg'},
+        fallback: {bg: 'surface.pink', color: 'surface.pink.fg'},
+      },
+      gray: {
+        content: {bg: 'surface.gray', color: 'surface.gray.fg'},
+        fallback: {bg: 'surface.gray', color: 'surface.gray.fg'},
+      },
+    },
     isGrouped: {
       true: {
         root: {
@@ -60,6 +98,7 @@ export const avatarRecipe = sva({
     },
   },
   defaultVariants: {
+    color: 'gray',
     isGrouped: false,
   },
 });

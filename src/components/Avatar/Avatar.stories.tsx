@@ -1,6 +1,22 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Check} from 'lucide-react';
+import {Check, Home, Settings} from 'lucide-react';
+import {SideNav, SideNavItem} from 'components/SideNav';
+import {css} from 'styled-system/css';
+import type {AvatarColor} from '.';
 import {Avatar, AvatarStatusDot} from '.';
+
+const colors: AvatarColor[] = [
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'teal',
+  'cyan',
+  'blue',
+  'purple',
+  'pink',
+  'gray',
+];
 
 const meta: Meta<typeof Avatar> = {
   title: 'Components/Avatar',
@@ -9,6 +25,10 @@ const meta: Meta<typeof Avatar> = {
     name: 'Ada Lovelace',
   },
   argTypes: {
+    color: {
+      control: {type: 'select'},
+      options: colors,
+    },
     size: {
       control: {type: 'select'},
       options: ['tiny', 'xsmall', 'small', 'medium', 'large'],
@@ -86,6 +106,60 @@ export const NumericSizes: Story = {
       <Avatar name="Ada Lovelace" size={48} />
       <Avatar name="Ada Lovelace" size={96} />
       <Avatar name="Ada Lovelace" size={144} />
+    </div>
+  ),
+};
+
+export const Colors: Story = {
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        flexWrap: 'wrap',
+      }}>
+      {colors.map(color => (
+        <Avatar color={color} key={color} name={color} size="medium" />
+      ))}
+    </div>
+  ),
+};
+
+export const AutoColorFromName: Story = {
+  render: () => (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        flexWrap: 'wrap',
+      }}>
+      <Avatar name="Ada Lovelace" size="medium" />
+      <Avatar name="Grace Hopper" size="medium" />
+      <Avatar name="Katherine Johnson" size="medium" />
+      <Avatar name="Alan Turing" size="medium" />
+      <Avatar name="Barbara Liskov" size="medium" />
+      <Avatar name="Dennis Ritchie" size="medium" />
+    </div>
+  ),
+};
+
+export const OnNav: Story = {
+  render: () => (
+    <div
+      className={css({bg: 'bg.subtle'})}
+      style={{width: 260, height: 320, padding: 12}}>
+      <SideNav
+        footer={
+          <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+            <Avatar name="Ada Lovelace" size="small" />
+            <span>Ada Lovelace</span>
+          </div>
+        }>
+        <SideNavItem href="/home" icon={Home} label="Home" />
+        <SideNavItem href="/settings" icon={Settings} label="Settings" />
+      </SideNav>
     </div>
   ),
 };
