@@ -105,26 +105,30 @@ export function Timestamp({
   );
 
   const isTooltipEnabled = hasTooltip && isRelative;
-  const tooltip = useTooltip({isEnabled: isTooltipEnabled});
+  const {
+    describedBy,
+    ref: tooltipRef,
+    renderTooltip,
+  } = useTooltip({isEnabled: isTooltipEnabled});
 
   return (
     <>
       <Text
-        aria-describedby={isTooltipEnabled ? tooltip.describedBy : undefined}
+        aria-describedby={isTooltipEnabled ? describedBy : undefined}
         aria-label={isRelative ? absoluteLabel : undefined}
         as="time"
         className={className}
         color={color}
         data-testid={dataTestId}
         dateTime={dateTime}
-        ref={mergeRefs<HTMLTimeElement>(ref, tooltip.ref)}
+        ref={mergeRefs<HTMLTimeElement>(ref, tooltipRef)}
         size={size}
         style={style}
         type={type}
         weight={weight}>
         {text}
       </Text>
-      {isTooltipEnabled ? tooltip.renderTooltip(absoluteLabel) : null}
+      {isTooltipEnabled ? renderTooltip(absoluteLabel) : null}
     </>
   );
 }
