@@ -1,6 +1,12 @@
 'use client';
 
-import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
+import type {
+  CSSProperties,
+  HTMLAttributes,
+  MouseEventHandler,
+  ReactNode,
+  Ref,
+} from 'react';
 import {useAvatarGroup} from 'components/AvatarGroup/AvatarGroupContext';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -11,8 +17,16 @@ const OVERFLOW_FONT_RATIO = 0.35;
 
 /**
  * Overflow indicator for AvatarGroup.
+ *
+ * Unrecognized props (`id`, `tabIndex`, `title`, `data-*`, `aria-*`, event
+ * handlers, …) are forwarded to the rendered `<button>` / `<span>`. The
+ * passthrough is typed against the common `HTMLElement` attributes since the
+ * root switches between a button and a span depending on `onClick`.
  */
-export interface AvatarGroupOverflowProps {
+export interface AvatarGroupOverflowProps extends Omit<
+  HTMLAttributes<HTMLElement>,
+  'onClick'
+> {
   /**
    * Custom content rendered instead of the default "+N" text.
    */
@@ -86,6 +100,7 @@ export function AvatarGroupOverflow({
   onClick,
   ref,
   style,
+  ...rest
 }: AvatarGroupOverflowProps): React.JSX.Element | null {
   const group = useAvatarGroup();
 
@@ -106,6 +121,7 @@ export function AvatarGroupOverflow({
   if (onClick != null) {
     return (
       <button
+        {...rest}
         aria-label={label}
         className={cx(styles.root, styles.button, className)}
         data-testid={dataTestId}
@@ -120,6 +136,7 @@ export function AvatarGroupOverflow({
 
   return (
     <span
+      {...rest}
       aria-label={label}
       className={cx(styles.root, className)}
       data-testid={dataTestId}

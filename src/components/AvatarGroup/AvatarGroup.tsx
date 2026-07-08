@@ -1,6 +1,11 @@
 'use client';
 
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactNode,
+  Ref,
+} from 'react';
 import {useMemo} from 'react';
 import {resolveAvatarSize, type AvatarSize} from 'components/Avatar';
 import {avatarGroupRecipe} from 'components/AvatarGroup/AvatarGroup.recipe';
@@ -11,8 +16,14 @@ const OVERLAP_RATIO = 0.25;
 
 /**
  * Displays a stacked group of Avatars with shared size and overlap.
+ *
+ * Unrecognized props (`id`, `tabIndex`, `title`, `data-*`, `aria-*`, event
+ * handlers, …) are forwarded to the root `<div>`.
  */
-export interface AvatarGroupProps {
+export interface AvatarGroupProps extends Omit<
+  ComponentPropsWithoutRef<'div'>,
+  'children'
+> {
   /**
    * Accessible label for the group. Default is "Avatars".
    */
@@ -59,6 +70,7 @@ export function AvatarGroup({
   ref,
   size = 'small',
   style,
+  ...rest
 }: AvatarGroupProps): React.JSX.Element {
   const numericSize = resolveAvatarSize(size);
   const overlap = Math.round(numericSize * OVERLAP_RATIO);
@@ -74,6 +86,7 @@ export function AvatarGroup({
   return (
     <AvatarGroupContext value={contextValue}>
       <div
+        {...rest}
         aria-label={ariaLabel}
         className={cx(avatarGroupRecipe(), className)}
         data-testid={dataTestId}

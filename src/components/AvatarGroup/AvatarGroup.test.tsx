@@ -102,6 +102,84 @@ describe('AvatarGroup', () => {
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 
+  it('forwards unrecognized props to the group root', async () => {
+    const user = userEvent.setup();
+    const onMouseEnter = vi.fn();
+
+    render(
+      <AvatarGroup
+        data-analytics="team"
+        data-testid="group"
+        id="team-group"
+        onMouseEnter={onMouseEnter}
+        tabIndex={0}
+        title="Team">
+        <Avatar name="Ada Lovelace" />
+      </AvatarGroup>,
+    );
+
+    const group = screen.getByTestId('group');
+    expect(group).toHaveAttribute('data-analytics', 'team');
+    expect(group).toHaveAttribute('id', 'team-group');
+    expect(group).toHaveAttribute('tabindex', '0');
+    expect(group).toHaveAttribute('title', 'Team');
+
+    await user.hover(group);
+    expect(onMouseEnter).toHaveBeenCalledOnce();
+  });
+
+  it('forwards unrecognized props to the overflow button', async () => {
+    const user = userEvent.setup();
+    const onFocus = vi.fn();
+
+    render(
+      <AvatarGroupOverflow
+        count={3}
+        data-analytics="overflow"
+        data-testid="overflow"
+        id="overflow-more"
+        onClick={vi.fn()}
+        onFocus={onFocus}
+        title="More people"
+      />,
+    );
+
+    const overflow = screen.getByTestId('overflow');
+    expect(overflow).toHaveAttribute('data-analytics', 'overflow');
+    expect(overflow).toHaveAttribute('id', 'overflow-more');
+    expect(overflow).toHaveAttribute('title', 'More people');
+
+    await user.click(overflow);
+    expect(onFocus).toHaveBeenCalledOnce();
+  });
+
+  it('forwards unrecognized props to the static overflow span', () => {
+    render(
+      <AvatarGroupOverflow
+        count={3}
+        data-analytics="overflow"
+        data-testid="overflow"
+        id="overflow-more"
+        tabIndex={0}
+        title="More people"
+      />,
+    );
+
+    const overflow = screen.getByTestId('overflow');
+    expect(overflow).toHaveAttribute('data-analytics', 'overflow');
+    expect(overflow).toHaveAttribute('id', 'overflow-more');
+    expect(overflow).toHaveAttribute('tabindex', '0');
+    expect(overflow).toHaveAttribute('title', 'More people');
+  });
+
+  it('does not let forwarded props clobber the overflow role', () => {
+    render(
+      <AvatarGroupOverflow count={3} data-testid="overflow" role="button" />,
+    );
+
+    expect(screen.getByTestId('overflow')).toHaveAttribute('role', 'status');
+  });
+
   it('applies group size to overflow indicator dimensions', () => {
     render(
       <AvatarGroup size="medium">

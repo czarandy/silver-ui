@@ -1,7 +1,12 @@
 'use client';
 
 import {User} from 'lucide-react';
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactNode,
+  Ref,
+} from 'react';
 import {useMemo, useState} from 'react';
 import {avatarRecipe} from 'components/Avatar/Avatar.recipe';
 import {AvatarSizeContext} from 'components/Avatar/AvatarSizeContext';
@@ -100,8 +105,14 @@ export function resolveAvatarSize(size: AvatarSize): number {
 
 /**
  * Displays a user profile image, initials, or a fallback icon.
+ *
+ * Unrecognized props (`id`, `tabIndex`, `title`, `data-*`, `aria-*`, event
+ * handlers, …) are forwarded to the root `<div>`.
  */
-export interface AvatarProps {
+export interface AvatarProps extends Omit<
+  ComponentPropsWithoutRef<'div'>,
+  'color'
+> {
   /**
    * Accessible text for the avatar image. Defaults to `name`, then "Avatar".
    */
@@ -179,6 +190,7 @@ export function Avatar({
   src,
   style,
   status,
+  ...rest
 }: AvatarProps): React.JSX.Element {
   const avatarGroup = useAvatarGroup();
   const resolvedSize = avatarGroup?.size ?? size;
@@ -209,6 +221,7 @@ export function Avatar({
   return (
     <AvatarSizeContext value={numericSize}>
       <div
+        {...rest}
         aria-label={accessibleName}
         className={cx(classes.root, className)}
         data-testid={dataTestId}
