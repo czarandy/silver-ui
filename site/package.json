@@ -7,7 +7,10 @@
     "predev": "pnpm -w exec panda cssgen --outfile dist/styles.css --minify",
     "dev": "vite",
     "prebuild": "pnpm -w exec panda cssgen --outfile dist/styles.css --minify",
-    "build": "vite build",
+    "build:client": "vite build",
+    "build:server": "vite build --ssr src/entry-server.tsx --outDir dist/server",
+    "prerender": "node prerender.js",
+    "build": "pnpm build:client && pnpm build:server && pnpm prerender",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },

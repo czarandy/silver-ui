@@ -19,7 +19,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}', 'eslint/**/*.test.{js,ts}'],
+    include: [
+      'src/**/*.test.{ts,tsx}',
+      'site/src/**/*.test.{ts,tsx}',
+      'eslint/**/*.test.{js,ts}',
+    ],
     css: true,
     testTimeout: 20000,
   },
