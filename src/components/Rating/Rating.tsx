@@ -10,7 +10,7 @@ import {
 } from 'react';
 import {Icon, type IconColor, type IconSize} from 'components/Icon';
 import {ratingRecipe} from 'components/Rating/Rating.recipe';
-import {VisuallyHidden} from 'internal/VisuallyHidden';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {cx} from 'internal/cx';
 
 export interface RatingProps {

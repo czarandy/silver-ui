@@ -27,7 +27,7 @@ import {fileInputRecipe} from 'components/FileInput/FileInput.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
-import {VisuallyHidden} from 'internal/VisuallyHidden';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {cx} from 'internal/cx';
 import {formatFileSize} from 'internal/formatFileSize';
 import isReactNode from 'internal/isReactNode';

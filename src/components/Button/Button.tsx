@@ -16,7 +16,7 @@ import {Icon, type IconComponent} from 'components/Icon';
 import type {LinkComponent} from 'components/Link';
 import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
-import {VisuallyHidden} from 'internal';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
 import {cx} from 'internal/cx';
 import isReactNode from 'internal/isReactNode';

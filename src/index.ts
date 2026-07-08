@@ -702,6 +702,10 @@ export {
 } from 'components/RadioGroup';
 export {cx} from 'internal/cx';
 export {
+  VisuallyHidden,
+  type VisuallyHiddenProps,
+} from 'components/VisuallyHidden';
+export {
   materialTheme,
   neutralTheme,
   nordTheme,

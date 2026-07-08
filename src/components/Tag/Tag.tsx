@@ -12,8 +12,8 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Link} from 'components/Link';
 import {tagRecipe} from 'components/Tag/Tag.recipe';
 import {Tooltip} from 'components/Tooltip';
+import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
-import {VisuallyHidden} from 'internal/VisuallyHidden';
 import {cx} from 'internal/cx';
 
 export type TagColor =
