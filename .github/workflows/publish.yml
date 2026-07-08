@@ -21,15 +21,16 @@ jobs:
       # Use the pnpm version pinned in package.json's "packageManager" field.
       - uses: pnpm/action-setup@v6
 
+      # OIDC trusted publishing requires npm >= 11.5.1. Node 24 bundles a
+      # new-enough npm, so we don't upgrade npm in place: `npm install -g
+      # npm@latest` on top of the tool-cache npm can leave a corrupted
+      # dependency tree (missing nested `sigstore`), which breaks provenance
+      # generation during `npm publish` (MODULE_NOT_FOUND: sigstore).
       - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
           registry-url: https://registry.npmjs.org
-
-      # OIDC trusted publishing requires npm >= 11.5.1, newer than the npm
-      # bundled with Node 22. Upgrade the global npm used for the publish step.
-      - run: npm install -g npm@latest
 
       - run: pnpm install --frozen-lockfile
 
