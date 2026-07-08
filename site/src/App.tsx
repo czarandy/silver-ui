@@ -113,7 +113,7 @@ const DROPDOWN_ITEMS = [
 function ComponentShowcase(): JSX.Element {
   const [switchValue, setSwitchValue] = useState(true);
   const [sliderValue, setSliderValue] = useState(40);
-  const [dateValue, setDateValue] = useState<PlainDate | undefined>();
+  const [dateValue, setDateValue] = useState<PlainDate | null>(null);
   const [filters, setFilters] = useState<
     ReadonlyArray<SearchFilterInputFilter>
   >([
