@@ -4,6 +4,8 @@ import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
 
 const siteRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const canonicalOrigin = 'https://www.silver-ui.com';
+const canonicalUrl = `${canonicalOrigin}/`;
 
 function readSiteFile(relativePath: string): string {
   return readFileSync(resolve(siteRoot, relativePath), 'utf-8');
@@ -14,7 +16,7 @@ describe('SEO static assets', () => {
     const robots = readSiteFile('public/robots.txt');
     expect(robots).toMatch(/User-agent:\s*\*/);
     expect(robots).toMatch(/Allow:\s*\//);
-    expect(robots).toContain('Sitemap: https://silver-ui.com/sitemap.xml');
+    expect(robots).toContain(`Sitemap: ${canonicalOrigin}/sitemap.xml`);
   });
 
   it('sitemap.xml is well-formed and lists the canonical URL', () => {
@@ -22,7 +24,22 @@ describe('SEO static assets', () => {
     expect(sitemap).toContain(
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
     );
-    expect(sitemap).toContain('<loc>https://silver-ui.com/</loc>');
+    expect(sitemap).toContain(`<loc>${canonicalUrl}</loc>`);
+  });
+
+  it('index.html uses the www host for canonical and social URLs', () => {
+    const html = readSiteFile('index.html');
+
+    expect(html).toContain(`<link rel="canonical" href="${canonicalUrl}" />`);
+    expect(html).toContain(
+      `<meta property="og:url" content="${canonicalUrl}" />`,
+    );
+    expect(html).toMatch(
+      new RegExp(
+        `<meta\\s+property="og:image"\\s+content="${canonicalOrigin}/og-image\\.png"\\s*/>`,
+      ),
+    );
+    expect(html).toContain(`content="${canonicalOrigin}/og-image.png"`);
   });
 
   it('index.html embeds valid SoftwareApplication JSON-LD', () => {
@@ -38,6 +55,6 @@ describe('SEO static assets', () => {
     expect(data['@context']).toBe('https://schema.org');
     expect(data['@type']).toBe('SoftwareApplication');
     expect(data.name).toBe('silver-ui');
-    expect(data.url).toBe('https://silver-ui.com/');
+    expect(data.url).toBe(canonicalUrl);
   });
 });
