@@ -45,6 +45,7 @@ export type {
   ScheduleViewSelectorOption,
   ScheduleViewSelectorPluginOptions,
 } from 'components/Schedule/plugins/ViewSelectorPlugin';
+export type {DayOfWeek} from 'internal/dateTypes';
 export type {
   CalendarDayEvent,
   CalendarEvent,
