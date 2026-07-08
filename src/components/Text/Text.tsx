@@ -48,7 +48,7 @@ export type TextColor =
   | 'inherit';
 export type TextWeight = 'normal' | 'medium' | 'semibold' | 'bold' | 'inherit';
 export type TextDisplay = 'inline' | 'block';
-export type TextElement = 'span' | 'p' | 'div' | 'label';
+export type TextElement = 'span' | 'p' | 'div' | 'label' | 'time';
 export type TextWordBreak = 'break-word' | 'break-all';
 export type TextWrap = 'wrap' | 'nowrap' | 'balance' | 'pretty';
 export type TruncateTooltipPlacement = NonNullable<TooltipProps['placement']>;
