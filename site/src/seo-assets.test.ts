@@ -1,4 +1,4 @@
-import {readFileSync} from 'node:fs';
+import {readFileSync, statSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
@@ -7,6 +7,10 @@ const siteRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 function readSiteFile(relativePath: string): string {
   return readFileSync(resolve(siteRoot, relativePath), 'utf-8');
+}
+
+function siteFileSize(relativePath: string): number {
+  return statSync(resolve(siteRoot, relativePath)).size;
 }
 
 describe('SEO static assets', () => {
@@ -58,5 +62,42 @@ describe('SEO static assets', () => {
     expect(html).toMatch(/media="print"\s+onload="this\.media\s*=\s*'all'"/);
     expect(html).toContain('<noscript>');
     expect(html).toContain('rel="preload"');
+  });
+
+  it('links favicon, apple-touch-icon, and the web manifest', () => {
+    const html = readSiteFile('index.html');
+    expect(html).toContain('<link rel="icon" href="/favicon.ico"');
+    expect(html).toContain(
+      'rel="apple-touch-icon" href="/apple-touch-icon.png"',
+    );
+    expect(html).toContain('rel="manifest" href="/site.webmanifest"');
+  });
+
+  it('ships the icon assets referenced by the head and manifest', () => {
+    for (const asset of [
+      'public/favicon.ico',
+      'public/apple-touch-icon.png',
+      'public/icon-192.png',
+      'public/icon-512.png',
+      'public/icon-maskable-512.png',
+    ]) {
+      expect(siteFileSize(asset)).toBeGreaterThan(0);
+    }
+  });
+
+  it('web manifest is valid and references existing icons', () => {
+    const manifest = JSON.parse(readSiteFile('public/site.webmanifest')) as {
+      name: string;
+      theme_color: string;
+      icons: Array<{src: string; sizes: string; purpose: string}>;
+    };
+    expect(manifest.name).toBe('silver-ui');
+    expect(manifest.theme_color).toBe('#1ca49e');
+    expect(manifest.icons.length).toBeGreaterThan(0);
+    expect(manifest.icons.some(icon => icon.purpose === 'maskable')).toBe(true);
+
+    for (const icon of manifest.icons) {
+      expect(siteFileSize(`public${icon.src}`)).toBeGreaterThan(0);
+    }
   });
 });
