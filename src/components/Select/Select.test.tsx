@@ -145,6 +145,46 @@ describe('Select', () => {
     expect(onChange).toHaveBeenCalledWith('Banana');
   });
 
+  it('scrolls the highlighted option into view during keyboard navigation', async () => {
+    const user = userEvent.setup();
+    const scrolled: HTMLElement[] = [];
+    const scrollSpy = vi
+      .spyOn(HTMLElement.prototype, 'scrollIntoView')
+      .mockImplementation(function scrollIntoView(this: HTMLElement) {
+        scrolled.push(this);
+      });
+
+    try {
+      render(
+        <Select
+          label="Fruit"
+          onChange={() => {}}
+          options={Array.from({length: 30}, (_, index) => `Fruit ${index + 1}`)}
+          value={null}
+        />,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+      trigger.focus();
+
+      // Open, then arrow well past the visible fold.
+      await user.keyboard('{ArrowDown}');
+      for (let index = 0; index < 20; index++) {
+        await user.keyboard('{ArrowDown}');
+      }
+
+      const activeId = assertNonNull(
+        trigger.getAttribute('aria-activedescendant'),
+      );
+      // eslint-disable-next-line testing-library/no-node-access -- verifying the active option element was scrolled into view
+      const activeOption = document.getElementById(activeId);
+      expect(scrolled).toContain(activeOption);
+      expect(scrollSpy).toHaveBeenCalledWith({block: 'nearest'});
+    } finally {
+      scrollSpy.mockRestore();
+    }
+  });
+
   it('closes with Escape from the keyboard', async () => {
     const user = userEvent.setup();
 

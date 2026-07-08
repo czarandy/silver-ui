@@ -17,6 +17,14 @@ const disabledOptions: SelectProps['options'] = [
   {isDisabled: true, label: 'Hedy Lamarr (unavailable)', value: 'hedy'},
 ];
 
+const manyOptions: SelectProps['options'] = Array.from(
+  {length: 40},
+  (_, index) => ({
+    label: `Option ${index + 1}`,
+    value: `option-${index + 1}`,
+  }),
+);
+
 const sectionedOptions: SelectProps['options'] = [
   {
     title: 'Engineering',
@@ -125,6 +133,19 @@ export const Disabled: Story = {
 export const Loading: Story = {
   args: {isLoading: true},
   render: (args: SelectProps) => <SelectStory {...args} />,
+};
+
+export const ManyOptions: Story = {
+  args: {options: manyOptions},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With a long, overflowing option list, arrowing with the keyboard keeps the highlighted option scrolled into view.',
+      },
+    },
+  },
+  render: (args: SelectProps) => <EmptySelectStory {...args} />,
 };
 
 export const SectionsAndDividers: Story = {

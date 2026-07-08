@@ -36,3 +36,14 @@ if (!Reflect.has(HTMLElement.prototype, 'hidePopover')) {
     writable: true,
   });
 }
+
+// jsdom does not implement scrollIntoView, but keyboard-navigable listboxes
+// call it to keep the highlighted option visible. Provide a no-op stub so those
+// components can be exercised (and the call spied on) in tests.
+if (!Reflect.has(HTMLElement.prototype, 'scrollIntoView')) {
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+    configurable: true,
+    value: vi.fn(),
+    writable: true,
+  });
+}

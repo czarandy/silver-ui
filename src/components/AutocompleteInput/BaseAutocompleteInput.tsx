@@ -28,6 +28,7 @@ import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {mergeRefs} from 'internal/mergeRefs';
+import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -482,16 +483,25 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
               }
               return;
             }
-            setHighlightedIndex(index =>
-              results.length === 0 ? -1 : (index + 1) % results.length,
-            );
+            if (results.length === 0) {
+              setHighlightedIndex(-1);
+              return;
+            }
+            const nextIndex = (highlightedIndex + 1) % results.length;
+            setHighlightedIndex(nextIndex);
+            // Keep the highlighted result visible as the user arrows through
+            // an overflowing list.
+            scrollOptionIntoView(`${listboxId}-option-${nextIndex}`);
           } else if (event.key === 'ArrowUp') {
             event.preventDefault();
-            setHighlightedIndex(index =>
-              results.length === 0
-                ? -1
-                : (index - 1 + results.length) % results.length,
-            );
+            if (results.length === 0) {
+              setHighlightedIndex(-1);
+              return;
+            }
+            const nextIndex =
+              (highlightedIndex - 1 + results.length) % results.length;
+            setHighlightedIndex(nextIndex);
+            scrollOptionIntoView(`${listboxId}-option-${nextIndex}`);
           } else if (
             event.key === 'Enter' &&
             isOpen &&

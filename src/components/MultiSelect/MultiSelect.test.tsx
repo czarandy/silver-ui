@@ -4,6 +4,7 @@ import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {MultiSelect} from 'components/MultiSelect/MultiSelect';
 import {SelectOption} from 'components/Select';
+import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -109,6 +110,49 @@ describe('MultiSelect', () => {
     await user.keyboard('{ArrowDown}');
     await user.keyboard('{Enter}');
     expect(onChange).toHaveBeenCalledWith(['Name', 'Email']);
+  });
+
+  it('scrolls the highlighted option into view during keyboard navigation', async () => {
+    const user = userEvent.setup();
+    const scrolled: HTMLElement[] = [];
+    const scrollSpy = vi
+      .spyOn(HTMLElement.prototype, 'scrollIntoView')
+      .mockImplementation(function scrollIntoView(this: HTMLElement) {
+        scrolled.push(this);
+      });
+
+    try {
+      render(
+        <MultiSelect
+          label="Columns"
+          onChange={() => {}}
+          options={Array.from(
+            {length: 30},
+            (_, index) => `Column ${index + 1}`,
+          )}
+          value={[]}
+        />,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Columns'});
+      trigger.focus();
+
+      // Open, then arrow well past the visible fold.
+      await user.keyboard('{ArrowDown}');
+      for (let index = 0; index < 20; index++) {
+        await user.keyboard('{ArrowDown}');
+      }
+
+      const activeId = assertNonNull(
+        trigger.getAttribute('aria-activedescendant'),
+      );
+      // eslint-disable-next-line testing-library/no-node-access -- verifying the active option element was scrolled into view
+      const activeOption = document.getElementById(activeId);
+      expect(scrolled).toContain(activeOption);
+      expect(scrollSpy).toHaveBeenCalledWith({block: 'nearest'});
+    } finally {
+      scrollSpy.mockRestore();
+    }
   });
 
   it('keeps the current option highlighted after keyboard selection', async () => {

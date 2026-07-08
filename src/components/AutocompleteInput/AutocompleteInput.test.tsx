@@ -10,6 +10,7 @@ import {
   type SearchableItem,
   type SearchSource,
 } from 'components/AutocompleteInput/types';
+import {assertNonNull} from 'internal/testHelpers';
 
 const items: SearchableItem[] = [
   {id: 'ada', label: 'Ada Lovelace'},
@@ -231,6 +232,51 @@ describe('AutocompleteInput', () => {
     await user.keyboard('{Escape}');
     expect(input).toHaveAttribute('aria-expanded', 'false');
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('scrolls the highlighted result into view during keyboard navigation', async () => {
+    const user = userEvent.setup();
+    const manyItems: SearchableItem[] = Array.from(
+      {length: 30},
+      (_, index) => ({id: `person-${index}`, label: `Person ${index}`}),
+    );
+    const scrolled: HTMLElement[] = [];
+    const scrollSpy = vi
+      .spyOn(HTMLElement.prototype, 'scrollIntoView')
+      .mockImplementation(function scrollIntoView(this: HTMLElement) {
+        scrolled.push(this);
+      });
+
+    try {
+      render(
+        <AutocompleteInput
+          debounceMs={0}
+          label="Assignee"
+          maxMenuItems={30}
+          onChange={() => {}}
+          searchSource={createStaticSearchSource(manyItems)}
+          value={null}
+        />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Assignee'});
+      await user.type(input, 'Person');
+
+      // Arrow well past the visible fold.
+      for (let index = 0; index < 15; index++) {
+        await user.keyboard('{ArrowDown}');
+      }
+
+      const activeId = assertNonNull(
+        input.getAttribute('aria-activedescendant'),
+      );
+      // eslint-disable-next-line testing-library/no-node-access -- verifying the active option element was scrolled into view
+      const activeOption = document.getElementById(activeId);
+      expect(scrolled).toContain(activeOption);
+      expect(scrollSpy).toHaveBeenCalledWith({block: 'nearest'});
+    } finally {
+      scrollSpy.mockRestore();
+    }
   });
 
   it('keeps focus on the input during arrow navigation and moves focus out on Tab', async () => {
