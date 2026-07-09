@@ -1,5 +1,6 @@
 import type {SchedulePlugin} from 'components/Schedule/types';
 
+export {useScheduleEventCreatePlugin} from 'components/Schedule/plugins/EventCreatePlugin';
 export {useScheduleEventMovePlugin} from 'components/Schedule/plugins/EventMovePlugin';
 export {useScheduleEventResizePlugin} from 'components/Schedule/plugins/EventResizePlugin';
 export {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';

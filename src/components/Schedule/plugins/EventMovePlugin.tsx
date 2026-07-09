@@ -8,10 +8,12 @@ import {
   type DragEvent,
   type RefObject,
 } from 'react';
-import {isDayEvent} from 'components/Schedule/dateMath';
+import {
+  instantFromDateAndMinutes,
+  isDayEvent,
+} from 'components/Schedule/dateMath';
 import type {
   CalendarEvent,
-  Instant,
   PlainDate,
   ScheduleEventPropsRenderProps,
   ScheduleMonthCellPropsRenderProps,
@@ -22,7 +24,6 @@ import useLatest from 'internal/useLatest';
 
 const DEFAULT_SNAP_MINUTES = 15;
 const MILLISECONDS_PER_MINUTE = 60_000;
-const MINUTES_PER_DAY = 24 * 60;
 
 export interface ScheduleEventMoveChange<TAuxiliaryData = unknown> {
   end: CalendarEvent<TAuxiliaryData>['end'];
@@ -70,21 +71,6 @@ function getTimeGridStartMinutes<TAuxiliaryData>({
     hour * 60 + pointerOffsetMinutes - drag.offsetMinutes,
     snapMinutes,
   );
-}
-
-function instantFromDateAndMinutes(
-  date: PlainDate,
-  minutes: number,
-  timezoneID: string,
-): Instant {
-  const clampedMinutes = Math.round(
-    Math.max(0, Math.min(MINUTES_PER_DAY - 1, minutes)),
-  );
-  const hour = Math.floor(clampedMinutes / 60);
-  const minute = clampedMinutes % 60;
-  return date
-    .toPlainDateTime(Temporal.PlainTime.from({hour, minute}))
-    .toZonedDateTime(timezoneID).epochMilliseconds;
 }
 
 function moveEventToDate<TAuxiliaryData>(

@@ -26,6 +26,10 @@ import {
   sortEvents,
 } from 'components/Schedule/dateMath';
 import {
+  useScheduleEventCreatePlugin,
+  type ScheduleEventDraft,
+} from 'components/Schedule/plugins/EventCreatePlugin';
+import {
   useScheduleEventMovePlugin,
   type ScheduleEventMoveChange,
 } from 'components/Schedule/plugins/EventMovePlugin';
@@ -2149,6 +2153,273 @@ describe('Schedule', () => {
       expect(onMove.mock.calls[0]?.[0].end).toBe(
         instantUTC(2026, 4, 14, 10, 45),
       );
+    });
+  });
+
+  describe('event create plugin', () => {
+    // Cells report a zero `top` in jsdom, so with `hourHeight: 60` the drafted
+    // minute is simply `hour * 60 + clientY`.
+    function ScheduleWithEventCreate({
+      defaultDurationMinutes,
+      onCreate,
+      snapMinutes,
+      withMovePlugin = false,
+    }: {
+      defaultDurationMinutes?: number;
+      onCreate: (draft: ScheduleEventDraft) => void;
+      snapMinutes?: number;
+      withMovePlugin?: boolean;
+    }) {
+      const createPlugin = useScheduleEventCreatePlugin({
+        defaultDurationMinutes,
+        renderContent: ({close, draft}) => (
+          <button
+            data-testid="save-draft"
+            onClick={() => {
+              onCreate(draft);
+              close();
+            }}
+            type="button">
+            Save draft
+          </button>
+        ),
+        snapMinutes,
+      });
+      const movePlugin = useScheduleEventMovePlugin({onMove: () => {}});
+
+      return (
+        <Schedule
+          categories={categories}
+          events={events}
+          highlightDate={instantUTC(2026, 4, 13)}
+          plugins={withMovePlugin ? [createPlugin, movePlugin] : [createPlugin]}
+          timezoneID="UTC"
+          view={createScheduleDayView({
+            hourHeight: 60,
+            maxHour: 18,
+            minHour: 8,
+          })}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    function getCell(hour: number): HTMLElement {
+      return screen.getByTestId(`schedule-time-grid-cell-2026-05-13-${hour}`);
+    }
+
+    function saveDraft(): void {
+      fireEvent.click(screen.getByTestId('save-draft'));
+    }
+
+    it('drafts a default-duration event when a cell is clicked without dragging', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+
+      const ghost = screen.getByTestId('schedule-event-create-ghost');
+      expect(ghost).toHaveAccessibleName('New event, 10:00 AM - 11:00 AM');
+      expect(ghost).toHaveAttribute('aria-expanded', 'true');
+
+      saveDraft();
+      expect(onCreate).toHaveBeenCalledTimes(1);
+      expect(onCreate.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 10),
+      );
+      expect(onCreate.mock.calls[0]?.[0].end).toBe(instantUTC(2026, 4, 13, 11));
+    });
+
+    it('honors a custom click-to-create duration', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(
+        <ScheduleWithEventCreate
+          defaultDurationMinutes={30}
+          onCreate={onCreate}
+        />,
+      );
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      saveDraft();
+
+      expect(onCreate.mock.calls[0]?.[0].end).toBe(
+        instantUTC(2026, 4, 13, 10, 30),
+      );
+    });
+
+    it('drafts a time range when dragging downward and previews it while dragging', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      const ghost = screen.getByTestId('schedule-event-create-ghost');
+      expect(ghost).toHaveAttribute('aria-expanded', 'false');
+
+      fireEvent.pointerMove(window, {clientY: 90, pointerId: 1});
+      expect(ghost).toHaveStyle({height: '85px', top: '2px'});
+      expect(ghost).toHaveAccessibleName('New event, 10:00 AM - 11:30 AM');
+      expect(ghost).toHaveTextContent('10:00 AM - 11:30 AM');
+
+      fireEvent.pointerUp(window, {clientY: 90, pointerId: 1});
+      saveDraft();
+
+      expect(onCreate.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 10),
+      );
+      expect(onCreate.mock.calls[0]?.[0].end).toBe(
+        instantUTC(2026, 4, 13, 11, 30),
+      );
+    });
+
+    it('normalizes an upward drag so the draft starts before it ends', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} />);
+
+      fireEvent.pointerDown(getCell(12), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerMove(window, {clientY: -90, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: -90, pointerId: 1});
+      saveDraft();
+
+      expect(onCreate.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 10, 30),
+      );
+      expect(onCreate.mock.calls[0]?.[0].end).toBe(instantUTC(2026, 4, 13, 12));
+    });
+
+    it('clamps a draft dragged past the last rendered hour', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} />);
+
+      fireEvent.pointerDown(getCell(17), {
+        button: 0,
+        clientY: 30,
+        pointerId: 1,
+      });
+      fireEvent.pointerUp(window, {clientY: 300, pointerId: 1});
+      saveDraft();
+
+      expect(onCreate.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 17, 30),
+      );
+      expect(onCreate.mock.calls[0]?.[0].end).toBe(instantUTC(2026, 4, 13, 18));
+    });
+
+    it('enforces a minimum duration for a drag shorter than the minimum', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} snapMinutes={5} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 5, pointerId: 1});
+      saveDraft();
+
+      expect(onCreate.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 10),
+      );
+      expect(onCreate.mock.calls[0]?.[0].end).toBe(
+        instantUTC(2026, 4, 13, 10, 15),
+      );
+    });
+
+    it('ignores pointer downs that land on an existing event', () => {
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      fireEvent.pointerDown(screen.getByTestId('schedule-event-visible'), {
+        button: 0,
+        clientY: 0,
+        pointerId: 1,
+      });
+
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('ignores non-primary pointer buttons', () => {
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 2, clientY: 0, pointerId: 1});
+
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('discards the draft when the drag is cancelled', () => {
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
+
+      fireEvent.pointerCancel(window, {clientY: 0, pointerId: 1});
+
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('save-draft')).not.toBeInTheDocument();
+    });
+
+    it('discards the draft when Escape is pressed mid-drag', () => {
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.keyDown(window, {key: 'Escape'});
+
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('removes the ghost when the popover content closes', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      saveDraft();
+
+      expect(onCreate).toHaveBeenCalledTimes(1);
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('replaces an open draft when a new cell is pressed', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      fireEvent.pointerDown(getCell(14), {button: 0, clientY: 0, pointerId: 2});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+
+      expect(screen.getAllByTestId('schedule-event-create-ghost')).toHaveLength(
+        1,
+      );
+      saveDraft();
+      expect(onCreate.mock.calls[0]?.[0].start).toBe(
+        instantUTC(2026, 4, 13, 14),
+      );
+    });
+
+    it('coexists with the event move plugin', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} withMovePlugin />);
+
+      expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+        'draggable',
+        'true',
+      );
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
     });
   });
 

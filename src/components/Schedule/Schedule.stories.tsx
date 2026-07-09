@@ -10,6 +10,10 @@ import {createScheduleListView} from 'components/Schedule/ListView';
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
+import {
+  useScheduleEventCreatePlugin,
+  type ScheduleEventDraft,
+} from 'components/Schedule/plugins/EventCreatePlugin';
 import {useScheduleEventMovePlugin} from 'components/Schedule/plugins/EventMovePlugin';
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import {useScheduleEventResizePlugin} from 'components/Schedule/plugins/EventResizePlugin';
@@ -17,12 +21,15 @@ import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/Paginatio
 import {ScheduleEventPopoverContent} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
 import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import type {
+  CalendarEvent,
   Instant,
   ScheduleCategory,
   ScheduleEventSource,
   SchedulePlugin,
   ScheduleView,
 } from 'components/Schedule/types';
+import {Text} from 'components/Text';
+import {TextInput} from 'components/TextInput';
 import {ToastViewport, useToast} from 'components/Toast';
 
 // Anchor every story to the current date in the viewer's local timezone so the
@@ -301,6 +308,95 @@ function ResizableEventsStory(): React.JSX.Element {
   );
 }
 
+function CreateEventForm({
+  draft,
+  onCancel,
+  onCreate,
+}: {
+  draft: ScheduleEventDraft;
+  onCancel: () => void;
+  onCreate: (title: string) => void;
+}): React.JSX.Element {
+  const [title, setTitle] = useState('');
+  const timeLabel = `${Temporal.Instant.fromEpochMilliseconds(draft.start)
+    .toZonedDateTimeISO(localTimezoneID)
+    .toLocaleString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+      weekday: 'short',
+    })} – ${Temporal.Instant.fromEpochMilliseconds(draft.end)
+    .toZonedDateTimeISO(localTimezoneID)
+    .toLocaleString(undefined, {hour: 'numeric', minute: '2-digit'})}`;
+
+  return (
+    <form
+      onSubmit={submitEvent => {
+        submitEvent.preventDefault();
+        onCreate(title.trim() === '' ? 'Untitled event' : title.trim());
+      }}
+      style={{display: 'grid', gap: '0.75rem', padding: '0.75rem', width: 280}}>
+      <TextInput
+        hasAutoFocus
+        label="Title"
+        onChange={setTitle}
+        placeholder="Add a title"
+        value={title}
+      />
+      <Text color="secondary" type="supporting">
+        {timeLabel}
+      </Text>
+      <div style={{display: 'flex', gap: '0.5rem', justifyContent: 'flex-end'}}>
+        <Button label="Cancel" onClick={onCancel} size="sm" variant="ghost" />
+        <Button label="Create" size="sm" type="submit" variant="primary" />
+      </div>
+    </form>
+  );
+}
+
+function CreatableEventsStory(): React.JSX.Element {
+  const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
+  const [storyEvents, setStoryEvents] = useState<CalendarEvent[]>(() => events);
+  const paginationPlugin = useSchedulePaginationPlugin({
+    onViewDateChange: setViewDate,
+  });
+  const popoverPlugin = useScheduleEventPopoverPlugin();
+  const createPlugin = useScheduleEventCreatePlugin({
+    defaultDurationMinutes: 60,
+    renderContent: ({close, draft}) => (
+      <CreateEventForm
+        draft={draft}
+        onCancel={close}
+        onCreate={title => {
+          setStoryEvents(currentEvents => [
+            ...currentEvents,
+            {
+              category: 'Sync',
+              end: draft.end,
+              id: `created-${draft.start}`,
+              start: draft.start,
+              title,
+            },
+          ]);
+          close();
+        }}
+      />
+    ),
+    snapMinutes: 15,
+  });
+
+  return (
+    <Schedule
+      categories={categories}
+      events={storyEvents}
+      highlightDate={defaultHighlightDate}
+      plugins={[paginationPlugin, createPlugin, popoverPlugin]}
+      timezoneID={localTimezoneID}
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+      viewDate={viewDate}
+    />
+  );
+}
+
 function MovableEventsStory(): React.JSX.Element {
   const views = useMemo(
     (): {label: string; view: ScheduleView}[] => [
@@ -501,6 +597,10 @@ export const ResizableEvents: Story = {
 
 export const MovableEvents: Story = {
   render: () => <MovableEventsStory />,
+};
+
+export const CreatableEvents: Story = {
+  render: () => <CreatableEventsStory />,
 };
 
 export const MondayStartWeek: Story = {

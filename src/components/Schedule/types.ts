@@ -140,6 +140,15 @@ export interface SchedulePlugin {
     endContent: ReactNode,
   ) => ScheduleHeaderContent;
   /**
+   * Appends content inside each hour cell in day/week time-grid views, as a
+   * sibling of the cell's event blocks. Use it to render overlays anchored to
+   * the cell (e.g. a draft event). Return `null`/`undefined` to opt out for a
+   * specific cell.
+   */
+  renderTimeGridCellContent?: (
+    props: ScheduleTimeGridCellPropsRenderProps,
+  ) => ReactNode;
+  /**
    * Appends content inside timed event blocks in day/week time-grid views.
    * Return `null`/`undefined` to opt out for a specific event.
    */

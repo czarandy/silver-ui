@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import type {
   CalendarDayEvent,
   CalendarEvent,
@@ -11,8 +12,36 @@ import {
   type PlainDate,
 } from 'internal/plainDate';
 
+const MINUTES_PER_DAY = 24 * 60;
+
 export function isDayEvent(event: CalendarEvent): event is CalendarDayEvent {
   return typeof event.start !== 'number';
+}
+
+/**
+ * Converts a date plus a minutes-since-midnight offset into an epoch instant.
+ * Minutes are clamped to a single day; exactly `1440` resolves to midnight at
+ * the start of the following day so a range can end on the day boundary.
+ */
+export function instantFromDateAndMinutes(
+  date: PlainDate,
+  minutes: number,
+  timezoneID: string,
+): Instant {
+  const clampedMinutes = Math.round(
+    Math.max(0, Math.min(MINUTES_PER_DAY, minutes)),
+  );
+  const dayOffset = Math.floor(clampedMinutes / MINUTES_PER_DAY);
+  const minutesIntoDay = clampedMinutes % MINUTES_PER_DAY;
+  return date
+    .add({days: dayOffset})
+    .toPlainDateTime(
+      Temporal.PlainTime.from({
+        hour: Math.floor(minutesIntoDay / 60),
+        minute: minutesIntoDay % 60,
+      }),
+    )
+    .toZonedDateTime(timezoneID).epochMilliseconds;
 }
 
 export function getScheduleRangeFromDates({
