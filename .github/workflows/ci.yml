@@ -37,3 +37,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
+
+      # Builds the docs/marketing site (including the doc generators) so
+      # breakage in the site or its generated content fails the PR. The build
+      # runs its own post-build smoke test (site/scripts/smoke-dist.mjs).
+      - run: pnpm build:site

@@ -1,23 +1,23 @@
 {
+  "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "noEmit": true,
     "jsx": "react-jsx",
-
-    "strict": true,
+    "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": {
+      "silver-ui": ["../src/index.ts"],
+      "components/*": ["../src/components/*"],
+      "hooks/*": ["../src/hooks/*"],
+      "internal": ["../src/internal/index"],
+      "internal/*": ["../src/internal/*"],
+      "themes/*": ["../src/themes/*"],
+      "utils/*": ["../src/utils/*"],
+      "styled-system/*": ["../styled-system/*"]
+    },
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "vite.config.ts"]
+  "include": [".astro/types.d.ts", "src", "scripts", "astro.config.ts"],
+  "exclude": ["dist"]
 }

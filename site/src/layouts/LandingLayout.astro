@@ -1,0 +1,103 @@
+---
+/**
+ * Document shell for the marketing landing page, carrying over the SEO head
+ * from the previous static index.html: canonical/OG/Twitter metadata,
+ * SoftwareApplication JSON-LD, icon links, and non-blocking font loading.
+ * Starlight pages render their own document; this layout is landing-only.
+ */
+const title = 'silver-ui | themeable React component library';
+const description =
+  'silver-ui is a comprehensive, themeable React component library built with Panda CSS. CSS-variable theming, dark mode, and React 19 support.';
+const socialDescription =
+  'A comprehensive, themeable React component library built with Panda CSS. CSS-variable theming, dark mode, and React 19 support.';
+const canonicalUrl = 'https://www.silver-ui.com/';
+const ogImage = 'https://www.silver-ui.com/og-image.png';
+const fontsHref =
+  'https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'silver-ui',
+  description: socialDescription,
+  url: canonicalUrl,
+  sameAs: [
+    'https://github.com/czarandy/silver-ui',
+    'https://www.npmjs.com/package/silver-ui',
+    'https://storybook.silver-ui.com/',
+  ],
+  applicationCategory: 'DeveloperApplication',
+  applicationSubCategory: 'React component library',
+  operatingSystem: 'Web',
+  programmingLanguage: 'TypeScript',
+  runtimePlatform: 'React',
+  softwareRequirements: 'React 19',
+  downloadUrl: 'https://www.npmjs.com/package/silver-ui',
+  isAccessibleForFree: true,
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+  license: 'https://opensource.org/licenses/MIT',
+  codeRepository: 'https://github.com/czarandy/silver-ui',
+  author: {
+    '@type': 'Person',
+    name: 'Andrey Goder',
+    url: 'https://github.com/czarandy',
+  },
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1ca49e" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="silver-ui" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={socialDescription} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="silver-ui — a themeable React component library" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={socialDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Load fonts without blocking render: preload the stylesheet, then apply it
+      on load by flipping the media from "print" to "all".
+    -->
+    <link rel="preload" as="style" href={fontsHref} />
+    <link rel="stylesheet" href={fontsHref} media="print" onload="this.media = 'all'" />
+    <noscript>
+      <link rel="stylesheet" href={fontsHref} />
+    </noscript>
+
+    <!-- Structured data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

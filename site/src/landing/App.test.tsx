@@ -5,7 +5,6 @@ import {renderToString} from 'react-dom/server';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 
 import {App} from './App';
-import {render as buildStaticHtml} from './entry-server';
 
 function createMatchMedia(matches: boolean) {
   return vi.fn().mockImplementation((query: string) => ({
@@ -26,6 +25,16 @@ class ResizeObserverStub {
   disconnect(): void {}
 }
 
+function buildStaticHtml(): string {
+  // Mirrors how Astro statically renders the <App client:load /> island at
+  // build time before the client hydrates it.
+  return renderToString(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}
+
 describe('prerendered marketing page', () => {
   beforeEach(() => {
     vi.stubGlobal('matchMedia', createMatchMedia(false));
@@ -39,10 +48,11 @@ describe('prerendered marketing page', () => {
   });
 
   it('emits the SEO-critical content into the static HTML', () => {
+    // eslint-disable-next-line testing-library/render-result-naming-convention -- renderToString returns an HTML string, not a render result
     const html = buildStaticHtml();
 
     // Headings and hero copy must be present in the served HTML so crawlers
-    // and link unfurlers see real content, not an empty #root.
+    // and link unfurlers see real content, not an empty island.
     expect(html).toContain('component library');
     expect(html).toContain('70+ fast and accessible');
     expect(html).toContain('Themeable');
@@ -53,6 +63,7 @@ describe('prerendered marketing page', () => {
   });
 
   it('gives the wordmark image intrinsic dimensions to avoid layout shift', () => {
+    // eslint-disable-next-line testing-library/render-result-naming-convention -- renderToString returns an HTML string, not a render result
     const html = buildStaticHtml();
     const img = html.match(/<img[^>]*\/wordmark\.svg[^>]*>/)?.[0];
     if (img == null) {
@@ -64,11 +75,7 @@ describe('prerendered marketing page', () => {
 
   it('hydrates the prerendered markup without a mismatch', () => {
     const container = document.createElement('div');
-    container.innerHTML = renderToString(
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    );
+    container.innerHTML = buildStaticHtml();
     document.body.appendChild(container);
 
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

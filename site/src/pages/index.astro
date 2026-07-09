@@ -1,0 +1,10 @@
+---
+import 'silver-ui/styles.css';
+import '../landing/styles.css';
+import {App} from '../landing/App';
+import LandingLayout from '../layouts/LandingLayout.astro';
+---
+
+<LandingLayout>
+  <App client:load />
+</LandingLayout>

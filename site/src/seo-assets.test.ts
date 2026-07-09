@@ -16,46 +16,54 @@ function siteFileSize(relativePath: string): number {
 }
 
 describe('SEO static assets', () => {
-  it('robots.txt allows crawling and points at the sitemap', () => {
+  it('robots.txt allows crawling and points at the generated sitemap index', () => {
     const robots = readSiteFile('public/robots.txt');
     expect(robots).toMatch(/User-agent:\s*\*/);
     expect(robots).toMatch(/Allow:\s*\//);
-    expect(robots).toContain(`Sitemap: ${canonicalOrigin}/sitemap.xml`);
+    // Starlight registers @astrojs/sitemap, which emits sitemap-index.xml at
+    // build time (the static public/sitemap.xml was removed).
+    expect(robots).toContain(`Sitemap: ${canonicalOrigin}/sitemap-index.xml`);
   });
 
-  it('sitemap.xml is well-formed and lists the canonical URL', () => {
-    const sitemap = readSiteFile('public/sitemap.xml');
-    expect(sitemap).toContain(
-      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+  it('landing layout uses the www host for canonical and social URLs', () => {
+    const layout = readSiteFile('src/layouts/LandingLayout.astro');
+
+    expect(layout).toContain(
+      `const canonicalUrl = 'https://www.silver-ui.com/';`,
     );
-    expect(sitemap).toContain(`<loc>${canonicalUrl}</loc>`);
+    expect(layout).toContain(
+      `const ogImage = '${canonicalOrigin}/og-image.png';`,
+    );
+    expect(layout).toContain('<link rel="canonical" href={canonicalUrl} />');
+    expect(layout).toContain(
+      '<meta property="og:url" content={canonicalUrl} />',
+    );
+    expect(layout).toContain('<meta property="og:image" content={ogImage} />');
   });
 
-  it('index.html uses the www host for canonical and social URLs', () => {
-    const html = readSiteFile('index.html');
-
-    expect(html).toContain(`<link rel="canonical" href="${canonicalUrl}" />`);
-    expect(html).toContain(
-      `<meta property="og:url" content="${canonicalUrl}" />`,
-    );
-    expect(html).toMatch(
-      new RegExp(
-        `<meta\\s+property="og:image"\\s+content="${canonicalOrigin}/og-image\\.png"\\s*/>`,
-      ),
-    );
-    expect(html).toContain(`content="${canonicalOrigin}/og-image.png"`);
-  });
-
-  it('index.html embeds valid SoftwareApplication JSON-LD', () => {
-    const html = readSiteFile('index.html');
-    const match = html.match(
-      /<script type="application\/ld\+json">([\s\S]*?)<\/script>/,
-    );
+  it('landing layout embeds valid SoftwareApplication JSON-LD', () => {
+    const layout = readSiteFile('src/layouts/LandingLayout.astro');
+    const match = layout.match(/const jsonLd = (\{[\s\S]*?\n\});/);
     if (match == null) {
-      throw new Error('No JSON-LD script found in index.html');
+      throw new Error('No jsonLd object found in LandingLayout.astro');
     }
 
-    const data = JSON.parse(match[1]) as Record<string, unknown>;
+    // The frontmatter object is plain JS referencing two frontmatter consts;
+    // evaluate it with those bound to validate the structured data it
+    // serializes.
+    const descriptionMatch = layout.match(
+      /const socialDescription =\s*'([^']+)';/,
+    );
+    if (descriptionMatch == null) {
+      throw new Error(
+        'No socialDescription const found in LandingLayout.astro',
+      );
+    }
+    const data = new Function(
+      'socialDescription',
+      'canonicalUrl',
+      `return (${match[1]});`,
+    )(descriptionMatch[1], canonicalUrl) as Record<string, unknown>;
     expect(data['@context']).toBe('https://schema.org');
     expect(data['@type']).toBe('SoftwareApplication');
     expect(data.name).toBe('silver-ui');
@@ -70,34 +78,37 @@ describe('SEO static assets', () => {
     expect(data.runtimePlatform).toBe('React');
     expect(data.downloadUrl).toBe('https://www.npmjs.com/package/silver-ui');
     expect(data.isAccessibleForFree).toBe(true);
+    expect(layout).toContain(
+      '<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />',
+    );
   });
 
   it('loads only the fonts that are actually used', () => {
-    const html = readSiteFile('index.html');
+    const layout = readSiteFile('src/layouts/LandingLayout.astro');
     // Used by the body and the theme presets.
-    expect(html).toContain('family=Inter');
-    expect(html).toContain('family=Figtree');
-    expect(html).toContain('family=Roboto');
+    expect(layout).toContain('family=Inter');
+    expect(layout).toContain('family=Figtree');
+    expect(layout).toContain('family=Roboto');
     // Loaded but never applied (code uses the system "mono" token).
-    expect(html).not.toContain('family=JetBrains');
+    expect(layout).not.toContain('family=JetBrains');
   });
 
   it('loads the font stylesheet without blocking render', () => {
-    const html = readSiteFile('index.html');
+    const layout = readSiteFile('src/layouts/LandingLayout.astro');
     // The applied stylesheet is deferred via the print-media swap, with a
     // no-JS fallback, so it does not block first paint.
-    expect(html).toMatch(/media="print"\s+onload="this\.media\s*=\s*'all'"/);
-    expect(html).toContain('<noscript>');
-    expect(html).toContain('rel="preload"');
+    expect(layout).toMatch(/media="print"\s+onload="this\.media\s*=\s*'all'"/);
+    expect(layout).toContain('<noscript>');
+    expect(layout).toContain('rel="preload"');
   });
 
   it('links favicon, apple-touch-icon, and the web manifest', () => {
-    const html = readSiteFile('index.html');
-    expect(html).toContain('<link rel="icon" href="/favicon.ico"');
-    expect(html).toContain(
+    const layout = readSiteFile('src/layouts/LandingLayout.astro');
+    expect(layout).toContain('<link rel="icon" href="/favicon.ico"');
+    expect(layout).toContain(
       'rel="apple-touch-icon" href="/apple-touch-icon.png"',
     );
-    expect(html).toContain('rel="manifest" href="/site.webmanifest"');
+    expect(layout).toContain('rel="manifest" href="/site.webmanifest"');
   });
 
   it('ships the icon assets referenced by the head and manifest', () => {

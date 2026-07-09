@@ -34,6 +34,7 @@ export default tseslint.config(
       '*.cjs',
       'eslint/',
       '.claude/',
+      '**/.astro/',
     ],
   },
   // TypeScript rules — all source files
