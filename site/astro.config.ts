@@ -27,6 +27,9 @@ export default defineConfig({
         alt: 'silver-ui',
       },
       favicon: '/favicon.ico',
+      // Swap Starlight's dark/light/auto <select> for the same icon-only
+      // button the landing page nav uses.
+      components: {ThemeSelect: './src/components/ThemeSelect.astro'},
       social: [
         {
           icon: 'github',
