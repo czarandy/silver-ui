@@ -2,6 +2,7 @@ import {fileURLToPath} from 'node:url';
 import react from '@astrojs/react';
 import starlight from '@astrojs/starlight';
 import {defineConfig} from 'astro/config';
+import {componentSidebarGroups} from './src/component-categories';
 
 /**
  * Resolve a path relative to the repository root. The docs pages and the
@@ -28,7 +29,11 @@ export default defineConfig({
           href: 'https://github.com/czarandy/silver-ui',
         },
       ],
-      sidebar: [{label: 'Getting started', slug: 'getting-started'}],
+      sidebar: [
+        {label: 'Getting started', slug: 'getting-started'},
+        ...componentSidebarGroups(),
+      ],
+      customCss: ['./src/styles/docs.css'],
       head: [
         {
           tag: 'link',

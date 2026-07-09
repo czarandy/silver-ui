@@ -17,6 +17,10 @@ export interface HStackProps extends Omit<
   vAlign?: StackCrossAlignment;
 }
 
+/**
+ * A horizontal flex container that lays out children in a row with a
+ * consistent gap.
+ */
 export function HStack({
   align,
   className,

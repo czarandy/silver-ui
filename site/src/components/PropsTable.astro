@@ -1,0 +1,79 @@
+---
+import {componentDocData} from './component-data';
+
+interface Props {
+  component: string;
+  exportName: string;
+}
+
+const {component, exportName} = Astro.props;
+const data = componentDocData(component);
+const exported = data.exports.find(entry => entry.name === exportName);
+if (exported == null) {
+  throw new Error(
+    `No generated docs for export "${exportName}" of "${component}" — run the docgen`,
+  );
+}
+
+/**
+ * Splits a JSDoc description on backtick spans so `code` renders as code.
+ * Odd segments are code, even segments are plain text.
+ */
+function inlineSegments(text: string): string[] {
+  return text.replace(/\s+/g, ' ').split('`');
+}
+---
+
+{exported.description && <p>{exported.description}</p>}
+{
+  exported.groups.map(group => (
+    <>
+      {group.label && (
+        <p class="props-variant">
+          When <code>{group.label}</code>
+        </p>
+      )}
+      <div class="props-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Prop</th>
+              <th>Type</th>
+              <th>Default</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {group.props.map(prop => (
+              <tr>
+                <td>
+                  <code>{prop.name}</code>
+                  {prop.required && (
+                    <span class="props-required" title="Required">
+                      *
+                    </span>
+                  )}
+                </td>
+                <td>
+                  <code class="props-type">{prop.type}</code>
+                </td>
+                <td>
+                  {prop.defaultValue != null ? (
+                    <code>{prop.defaultValue}</code>
+                  ) : (
+                    <span class="props-none">—</span>
+                  )}
+                </td>
+                <td>
+                  {inlineSegments(prop.description).map((segment, index) =>
+                    index % 2 === 1 ? <code>{segment}</code> : segment,
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  ))
+}
