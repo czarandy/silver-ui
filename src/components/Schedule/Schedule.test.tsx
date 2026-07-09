@@ -2249,13 +2249,35 @@ describe('Schedule', () => {
       );
     });
 
+    it('shows no ghost until the gesture becomes a click or a drag', () => {
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+
+      // Still within the first snap step, so this is not yet a drag.
+      fireEvent.pointerMove(window, {clientY: 5, pointerId: 1});
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+
+      fireEvent.pointerMove(window, {clientY: 30, pointerId: 1});
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
+    });
+
     it('drafts a time range when dragging downward and previews it while dragging', () => {
       const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
       render(<ScheduleWithEventCreate onCreate={onCreate} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerMove(window, {clientY: 30, pointerId: 1});
       const ghost = screen.getByTestId('schedule-event-create-ghost');
       expect(ghost).toHaveAttribute('aria-expanded', 'false');
+      expect(ghost).toHaveAccessibleName('New event, 10:00 AM - 10:30 AM');
 
       fireEvent.pointerMove(window, {clientY: 90, pointerId: 1});
       expect(ghost).toHaveStyle({height: '85px', top: '2px'});
@@ -2279,6 +2301,11 @@ describe('Schedule', () => {
 
       fireEvent.pointerDown(getCell(12), {button: 0, clientY: 0, pointerId: 1});
       fireEvent.pointerMove(window, {clientY: -90, pointerId: 1});
+      // The ghost mounts in the drag's start hour (10), not the anchor hour.
+      expect(screen.getByTestId('schedule-event-create-ghost')).toHaveStyle({
+        height: '85px',
+        top: '32px',
+      });
       fireEvent.pointerUp(window, {clientY: -90, pointerId: 1});
       saveDraft();
 
@@ -2350,11 +2377,12 @@ describe('Schedule', () => {
       render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerMove(window, {clientY: 30, pointerId: 1});
       expect(
         screen.getByTestId('schedule-event-create-ghost'),
       ).toBeInTheDocument();
 
-      fireEvent.pointerCancel(window, {clientY: 0, pointerId: 1});
+      fireEvent.pointerCancel(window, {clientY: 30, pointerId: 1});
 
       expect(
         screen.queryByTestId('schedule-event-create-ghost'),
@@ -2366,6 +2394,7 @@ describe('Schedule', () => {
       render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerMove(window, {clientY: 30, pointerId: 1});
       fireEvent.keyDown(window, {key: 'Escape'});
 
       expect(

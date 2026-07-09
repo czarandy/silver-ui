@@ -164,11 +164,18 @@ interface DragState extends CellGeometry {
   date: PlainDate;
   defaultDurationMinutes: number;
   /**
-   * Hour of the cell the ghost is mounted in. The ghost stays in that cell for
-   * the whole gesture, so previews are positioned relative to it even when the
-   * pointer moves into other hours.
+   * Hour of the cell the ghost is mounted in, set when the ghost first appears.
+   * The ghost stays in that cell for the rest of the gesture, so previews are
+   * positioned relative to it even when the pointer moves into other hours.
    */
   ghostHour: number;
+  /**
+   * Whether the pointer has moved far enough to snap to a different minute.
+   * Until it has, the gesture is still a click and no ghost is shown — showing
+   * one on pointer down would paint a default-duration block that the first
+   * drag step immediately collapses to the minimum duration.
+   */
+  hasDragged: boolean;
   id: number;
   previewedRange: DraftRange | null;
   timezoneID: string;
@@ -201,8 +208,8 @@ function getMinDurationMinutes(drag: DragState): number {
 }
 
 /**
- * Range used when the pointer never leaves its starting minute. Near the bottom
- * of the grid the range slides up rather than shrinking.
+ * Range for a click that never became a drag. Near the bottom of the grid the
+ * range slides up rather than shrinking.
  */
 function getDefaultRange(drag: DragState): DraftRange {
   const durationMinutes = Math.min(
@@ -220,10 +227,6 @@ function getDefaultRange(drag: DragState): DraftRange {
 }
 
 function getDragRange(drag: DragState, pointerMinutes: number): DraftRange {
-  if (pointerMinutes === drag.anchorMinutes) {
-    return getDefaultRange(drag);
-  }
-
   const startMinutes = Math.min(drag.anchorMinutes, pointerMinutes);
   const draggedEndMinutes = Math.max(drag.anchorMinutes, pointerMinutes);
   const minDurationMinutes = getMinDurationMinutes(drag);
@@ -524,16 +527,28 @@ export function useScheduleEventCreatePlugin(
 
   const handlePointerMove = useCallback((event: globalThis.PointerEvent) => {
     const drag = dragRef.current;
-    const ghostElement = ghostElementRef.current;
-    if (drag == null || ghostElement == null) {
+    if (drag == null) {
       return;
     }
 
-    applyGhostPreview(
-      ghostElement,
-      drag,
-      getDragRange(drag, getPointerMinutes(drag, event.clientY)),
-    );
+    const pointerMinutes = getPointerMinutes(drag, event.clientY);
+    if (!drag.hasDragged && pointerMinutes === drag.anchorMinutes) {
+      return;
+    }
+
+    const range = getDragRange(drag, pointerMinutes);
+    const ghostElement = ghostElementRef.current;
+    if (drag.hasDragged && ghostElement != null) {
+      applyGhostPreview(ghostElement, drag, range);
+      return;
+    }
+
+    // First drag step: mount the ghost from state. Later steps mutate it in
+    // place so sizing the draft never re-renders the schedule.
+    drag.hasDragged = true;
+    drag.ghostHour = Math.floor(range.startMinutes / MINUTES_PER_HOUR);
+    drag.previewedRange = range;
+    setDraft({...range, date: drag.date, id: drag.id, isCommitted: false});
   }, []);
 
   const handlePointerUp = useCallback(
@@ -543,12 +558,12 @@ export function useScheduleEventCreatePlugin(
         return;
       }
 
-      const range = getDragRange(drag, getPointerMinutes(drag, event.clientY));
-      setDraft(current =>
-        current?.id === drag.id
-          ? {...current, ...range, isCommitted: true}
-          : current,
-      );
+      const pointerMinutes = getPointerMinutes(drag, event.clientY);
+      const isDrag = drag.hasDragged || pointerMinutes !== drag.anchorMinutes;
+      const range = isDrag
+        ? getDragRange(drag, pointerMinutes)
+        : getDefaultRange(drag);
+      setDraft({...range, date: drag.date, id: drag.id, isCommitted: true});
     },
     [endDrag],
   );
@@ -597,21 +612,20 @@ export function useScheduleEventCreatePlugin(
         snapMinutes,
       };
       draftIDRef.current += 1;
-      const drag: DragState = {
+      dragRef.current = {
         ...geometry,
         anchorMinutes: getPointerMinutes(geometry, pointerEvent.clientY),
         date: cell.date,
         defaultDurationMinutes,
         ghostHour: 0,
+        hasDragged: false,
         id: draftIDRef.current,
         previewedRange: null,
         timezoneID: cell.timezoneID,
       };
-      const range = getDefaultRange(drag);
-      drag.ghostHour = Math.floor(range.startMinutes / MINUTES_PER_HOUR);
-      drag.previewedRange = range;
-      dragRef.current = drag;
-      setDraft({...range, date: cell.date, id: drag.id, isCommitted: false});
+      // Any draft already on screen belongs to a previous gesture; drop it now
+      // rather than leaving it up until this one resolves.
+      setDraft(null);
 
       listenersRef.current = {
         cancel: handlePointerCancel,
