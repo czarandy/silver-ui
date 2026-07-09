@@ -553,6 +553,42 @@ export const Hover: Story = {
   render: () => <Table columns={columns} data={data} hasHover idKey="id" />,
 };
 
+/**
+ * Hover and striping apply to body rows only — the header and footer stay
+ * unhighlighted because they are not interactive.
+ */
+export const HoverWithSections: Story = {
+  render: () => (
+    <Table hasHover isStriped>
+      <TableHeader>
+        <TableRow>
+          <TableHeaderCell>Plan</TableHeaderCell>
+          <TableHeaderCell>Status</TableHeaderCell>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>Starter</TableCell>
+          <TableCell>Ready</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Growth</TableCell>
+          <TableCell>Ready</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell>Enterprise</TableCell>
+          <TableCell>Draft</TableCell>
+        </TableRow>
+      </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell colSpan={2}>3 plans</TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
+  ),
+};
+
 export const TextOverflow: Story = {
   render: () => <TextOverflowStory />,
 };
