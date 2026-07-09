@@ -5,6 +5,8 @@
 
 A complete, themeable React component library, built with [Panda CSS](https://panda-css.com/).
 
+[Documentation](https://www.silver-ui.com/components/) — components with live examples and API reference.
+
 [Storybook](https://storybook.silver-ui.com/) — browse and interact with all components.
 
 ## Installation

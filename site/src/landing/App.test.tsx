@@ -58,7 +58,8 @@ describe('prerendered marketing page', () => {
     expect(html).toContain('Themeable');
     expect(html).toContain('Tree-shakeable');
     // Real anchors to the primary destinations are crawlable.
-    expect(html).toContain('storybook.silver-ui.com');
+    expect(html).toContain('href="/components/"');
+    expect(html).toContain('href="/getting-started/"');
     expect(html).toContain('github.com/czarandy/silver-ui');
   });
 

@@ -48,9 +48,10 @@ import {Analytics} from '@vercel/analytics/react';
 import {SpeedInsights} from '@vercel/speed-insights/react';
 
 const LINKS = {
+  components: '/components/',
+  docs: '/getting-started/',
   github: 'https://github.com/czarandy/silver-ui',
   npm: 'https://www.npmjs.com/package/silver-ui',
-  storybook: 'https://storybook.silver-ui.com/',
 };
 
 const INSTALL_CMD = 'npm install silver-ui';
@@ -302,7 +303,8 @@ export function App(): JSX.Element {
             label="Main navigation"
             startContent={
               <>
-                <TopNavItem href={LINKS.storybook} label="Components" />
+                <TopNavItem href={LINKS.docs} label="Docs" />
+                <TopNavItem href={LINKS.components} label="Components" />
                 <TopNavItem href={LINKS.github} label="GitHub" />
                 <TopNavItem href={LINKS.npm} label="npm" />
               </>
@@ -336,7 +338,7 @@ export function App(): JSX.Element {
             justify="center"
             wrap="wrap">
             <Button
-              href={LINKS.storybook}
+              href={LINKS.components}
               label="Browse components"
               size="lg"
               variant="primary"

@@ -31,6 +31,8 @@ export default defineConfig({
       ],
       sidebar: [
         {label: 'Getting started', slug: 'getting-started'},
+        {label: 'Theming', slug: 'theming'},
+        {label: 'Components', slug: 'components'},
         ...componentSidebarGroups(),
       ],
       // panda.css is generated with preflight scoped to the demo boxes, so
