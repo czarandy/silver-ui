@@ -61,7 +61,7 @@ export interface CodeBlockProps {
    */
   isWrapped?: boolean;
   /**
-   * Accessible label for the code block region.
+   * Accessible label for the code block.
    */
   label?: string;
   /**
@@ -116,7 +116,7 @@ function getLineEntries(code: string): {lineNumber: number; text: string}[] {
   }));
 }
 
-function getRegionLabel({
+function getGroupLabel({
   label,
   title,
 }: {
@@ -169,7 +169,7 @@ export function CodeBlock({
   );
   const isInline = container === 'inline';
   const showHeader = !isInline && title != null;
-  const regionLabel = getRegionLabel({label, title});
+  const groupLabel = getGroupLabel({label, title});
 
   const classes = codeBlockRecipe({
     container,
@@ -224,9 +224,11 @@ export function CodeBlock({
           maxHeight:
             typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
         };
+  // `role="group"` rather than `"region"`: a named region is a landmark, and a
+  // page of code blocks would publish one per block (axe: landmark-unique).
   const scrollRegionProps = {
-    'aria-label': `${regionLabel} scroll area`,
-    role: 'region',
+    'aria-label': `${groupLabel} scroll area`,
+    role: 'group',
     tabIndex: 0,
   } as const;
 
@@ -248,7 +250,7 @@ export function CodeBlock({
   if (isInline) {
     return (
       <Card
-        aria-label={regionLabel}
+        aria-label={groupLabel}
         className={cx(classes.root, className)}
         data-container={container}
         data-size={size}
@@ -279,13 +281,15 @@ export function CodeBlock({
 
   return (
     <Card
-      aria-label={regionLabel}
+      aria-label={groupLabel}
       className={cx(classes.root, className)}
       data-container={container}
       data-size={size}
       data-testid={dataTestId}
       ref={ref}
-      role="region"
+      // `role="group"`, matching the inline container: a named `region` would
+      // make every code block on the page a landmark (axe: landmark-unique).
+      role="group"
       style={rootStyle}
       variant={container === 'section' ? 'section' : 'default'}>
       {showHeader ? (

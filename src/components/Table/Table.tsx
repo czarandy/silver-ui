@@ -97,6 +97,11 @@ export interface TableProps<T extends Record<string, unknown>> {
    */
   isStriped?: boolean;
   /**
+   * Name of the table, used to label its horizontal scroll region.
+   * @default 'Table'
+   */
+  label?: string;
+  /**
    * Plugin map or array that extends table behavior.
    */
   plugins?: Record<string, TablePlugin<T>> | TablePlugin<T>[];
@@ -280,6 +285,7 @@ function TableInner<T extends Record<string, unknown>>({
   hasHover = false,
   idKey,
   isStriped = false,
+  label = 'Table',
   plugins: userPlugins,
   ref,
   style,
@@ -430,8 +436,16 @@ function TableInner<T extends Record<string, unknown>>({
   const hasData = data != null && data.length > 0;
   const hasColumns = columns.length > 0;
 
+  // `role="group"` rather than `"region"`: a named region is a landmark, and a
+  // page of tables would publish a landmark per table (axe: landmark-unique).
+  const scrollRegionProps = {
+    'aria-label': `${label} scroll area`,
+    role: 'group',
+    tabIndex: 0,
+  } as const;
+
   let tableElement: ReactNode = (
-    <div className={classes.wrapper} data-part="wrapper">
+    <div {...scrollRegionProps} className={classes.wrapper} data-part="wrapper">
       <table
         {...tableRenderProps.htmlProps}
         className={cx(

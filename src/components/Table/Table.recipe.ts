@@ -14,6 +14,14 @@ export const tableRecipe = sva({
     wrapper: {
       overflowX: 'auto',
       WebkitOverflowScrolling: 'touch',
+      // Only reachable while the region overflows and Table makes it focusable.
+      _focusVisible: {
+        outlineWidth: 'focus',
+        outlineStyle: 'solid',
+        outlineColor: 'primary',
+        outlineOffset: 'focusOffset',
+        borderRadius: 'sm',
+      },
     },
     table: {
       color: 'fg',

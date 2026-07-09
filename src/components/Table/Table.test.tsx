@@ -1761,3 +1761,44 @@ describe('Table state hooks', () => {
     );
   });
 });
+
+describe('Table horizontal scroll region', () => {
+  it('exposes the scroll wrapper as a labeled, focusable group', () => {
+    render(<Table columns={columns} data={data} idKey="id" />);
+
+    const group = screen.getByRole('group', {name: 'Table scroll area'});
+    expect(group).toHaveAttribute('data-part', 'wrapper');
+    expect(group).toHaveAttribute('tabindex', '0');
+  });
+
+  it('names the scroll region after the table label', () => {
+    render(<Table columns={columns} data={data} idKey="id" label="Team" />);
+
+    expect(
+      screen.getByRole('group', {name: 'Team scroll area'}),
+    ).toBeInTheDocument();
+  });
+
+  it('lets a keyboard user focus the scroll region', async () => {
+    const user = userEvent.setup();
+    render(<Table columns={columns} data={data} idKey="id" />);
+
+    await user.tab();
+
+    expect(
+      screen.getByRole('group', {name: 'Table scroll area'}),
+    ).toHaveFocus();
+  });
+
+  it('does not publish a landmark per table', () => {
+    render(
+      <>
+        <Table columns={columns} data={data} idKey="id" label="First" />
+        <Table columns={columns} data={data} idKey="id" label="Second" />
+      </>,
+    );
+
+    expect(screen.queryByRole('region')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('group')).toHaveLength(2);
+  });
+});
