@@ -87,7 +87,7 @@ export function EmptyState({
           {title}
         </Heading>
         {description != null ? (
-          <Text as="p" color="secondary">
+          <Text as="div" color="secondary" role="paragraph">
             {description}
           </Text>
         ) : null}

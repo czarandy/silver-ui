@@ -23,6 +23,21 @@ describe('EmptyState', () => {
     expect(screen.getByRole('button', {name: 'Create'})).toBeInTheDocument();
   });
 
+  it('renders the description in a div wrapper with paragraph role', () => {
+    render(
+      <EmptyState
+        description="Create an item to get started."
+        title="No items"
+      />,
+    );
+
+    const description = screen.getByText('Create an item to get started.');
+    expect(description.tagName).toBe('DIV');
+    expect(description).toHaveAttribute('role', 'paragraph');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(description.closest('p')).toBeNull();
+  });
+
   it('labels the region with the heading via aria-labelledby', () => {
     render(<EmptyState title="No items" />);
 

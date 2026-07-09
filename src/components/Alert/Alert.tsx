@@ -167,11 +167,11 @@ export function Alert({
           {icon ?? defaultIcons[status]}
         </span>
         <div className={classes.content}>
-          <Text as="p" type="label" weight="semibold">
+          <Text as="div" type="label" weight="semibold">
             {title}
           </Text>
           {isReactNode(description) ? (
-            <Text as="p" color="secondary" type="supporting">
+            <Text as="div" color="secondary" role="paragraph" type="supporting">
               {description}
             </Text>
           ) : null}
