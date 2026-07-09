@@ -40,7 +40,6 @@ import type {
   TableVerticalAlign,
 } from 'components/Table/types';
 import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
-import {useHorizontalOverflow} from 'components/Table/useHorizontalOverflow';
 import {Text} from 'components/Text';
 import isReactNode from 'internal/isReactNode';
 import useShallowEqualMemo from 'internal/useShallowEqualMemo';
@@ -296,7 +295,6 @@ function TableInner<T extends Record<string, unknown>>({
   verticalAlign = 'middle',
 }: TableProps<T> & {ref?: Ref<HTMLTableElement>}): ReactElement {
   const plugins = useBaseTablePlugins(userPlugins);
-  const {isOverflowing, ref: wrapperRef} = useHorizontalOverflow();
   const contextValue = useMemo(
     (): TableContextValue => ({
       density,
@@ -439,22 +437,19 @@ function TableInner<T extends Record<string, unknown>>({
   const hasData = data != null && data.length > 0;
   const hasColumns = columns.length > 0;
 
-  // A scroll region is only worth a tab stop once it actually scrolls, so the
-  // keyboard affordances appear and disappear with the overflow.
-  const scrollRegionProps = isOverflowing
-    ? ({
-        'aria-label': `${label} scroll area`,
-        role: 'region',
-        tabIndex: 0,
-      } as const)
-    : null;
+  // `role="group"` rather than `"region"`: a named region is a landmark, and a
+  // page of tables would publish a landmark per table (axe: landmark-unique).
+  const scrollRegionProps = {
+    'aria-label': `${label} scroll area`,
+    role: 'group',
+    tabIndex: 0,
+  } as const;
 
   let tableElement: ReactNode = (
     <div
       {...scrollRegionProps}
       className={classes.wrapper}
-      data-part="wrapper"
-      ref={wrapperRef}>
+      data-part="wrapper">
       <table
         {...tableRenderProps.htmlProps}
         className={cx(

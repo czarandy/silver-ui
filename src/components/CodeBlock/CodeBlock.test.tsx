@@ -20,15 +20,15 @@ describe('CodeBlock', () => {
 
     expect(screen.getByText('Example')).toBeInTheDocument();
     expect(
-      screen.getByRole('region', {name: 'Example code block'}),
+      screen.getByRole('group', {name: 'Example code block'}),
     ).toBeInTheDocument();
   });
 
-  it('supports an accessible region label override', () => {
+  it('supports an accessible label override', () => {
     render(<CodeBlock code="const value = 1;" label="Install command" />);
 
     expect(
-      screen.getByRole('region', {name: 'Install command'}),
+      screen.getByRole('group', {name: 'Install command'}),
     ).toBeInTheDocument();
   });
 
@@ -63,8 +63,17 @@ describe('CodeBlock', () => {
     render(<CodeBlock code="const value = 1;" label="Example" />);
 
     expect(
-      screen.getByRole('region', {name: 'Example scroll area'}),
+      screen.getByRole('group', {name: 'Example scroll area'}),
     ).toHaveAttribute('tabIndex', '0');
+  });
+
+  it('nests the scroll container in the root without publishing a landmark', () => {
+    render(<CodeBlock code="const value = 1;" label="Example" />);
+
+    const root = screen.getByRole('group', {name: 'Example'});
+    const scroll = screen.getByRole('group', {name: 'Example scroll area'});
+    expect(root).toContainElement(scroll);
+    expect(screen.queryByRole('region')).not.toBeInTheDocument();
   });
 
   it('marks wrapped code content', () => {
@@ -95,7 +104,7 @@ describe('CodeBlock', () => {
   it('applies width to the root element', () => {
     render(<CodeBlock code="const value = 1;" label="Example" width="100%" />);
 
-    expect(screen.getByRole('region', {name: 'Example'})).toHaveStyle({
+    expect(screen.getByRole('group', {name: 'Example'})).toHaveStyle({
       width: '100%',
     });
   });
@@ -115,7 +124,7 @@ describe('CodeBlock', () => {
       />,
     );
 
-    const root = screen.getByRole('region', {name: 'Example'});
+    const root = screen.getByRole('group', {name: 'Example'});
     expect(root).toHaveClass('custom-code-block');
     expect(root).toHaveStyle({marginTop: '12px'});
     expect(refNode).toBe(root);
@@ -231,7 +240,7 @@ describe('CodeBlock', () => {
     expect(writeText).toHaveBeenCalledWith('npm install silver-ui');
   });
 
-  it('omits the header and region landmark for the inline container', () => {
+  it('omits the header and the scroll container for the inline container', () => {
     render(
       <CodeBlock
         code="npm install silver-ui"
@@ -242,6 +251,20 @@ describe('CodeBlock', () => {
     );
 
     expect(screen.queryByText('ignored.ts')).not.toBeInTheDocument();
+    expect(screen.getByRole('group', {name: 'Install'})).toBeInTheDocument();
+    expect(
+      screen.queryByRole('group', {name: 'Install scroll area'}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not publish a landmark per code block', () => {
+    render(
+      <>
+        <CodeBlock code="const a = 1;" label="First" />
+        <CodeBlock code="const b = 2;" label="Second" />
+      </>,
+    );
+
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
   });
 });

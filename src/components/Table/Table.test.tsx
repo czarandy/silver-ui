@@ -1,6 +1,5 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {
-  act,
   fireEvent,
   render,
   renderHook,
@@ -9,15 +8,7 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useMemo, useState} from 'react';
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 import type {SearchFilterInputConfig} from 'components/SearchFilterInput';
 import {Table} from 'components/Table/Table';
 import {TableBody} from 'components/Table/TableBody';
@@ -57,7 +48,6 @@ import {
 } from 'components/Table/plugins/sortable';
 import type {TableColumn, TablePlugin} from 'components/Table/types';
 import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
-import {assertNonNull} from 'internal/testHelpers';
 
 interface PersonRow extends Record<string, unknown> {
   age: number;
@@ -1773,170 +1763,40 @@ describe('Table state hooks', () => {
 });
 
 describe('Table horizontal scroll region', () => {
-  interface StubObservation {
-    instance: ResizeObserver;
-    targets: Set<Element>;
-  }
-
-  const observations = new Map<ResizeObserverCallback, StubObservation>();
-  let originalResizeObserver: typeof globalThis.ResizeObserver;
-  let originalScrollWidth: PropertyDescriptor | undefined;
-  let originalClientWidth: PropertyDescriptor | undefined;
-  let scrollWidth = 0;
-  let clientWidth = 0;
-
-  /**
-   * jsdom lays nothing out, so both widths read 0 and the wrapper never looks
-   * scrollable. Fake the two measurements the hook reads.
-   */
-  function setWidths(next: {clientWidth: number; scrollWidth: number}): void {
-    scrollWidth = next.scrollWidth;
-    clientWidth = next.clientWidth;
-  }
-
-  /**
-   * `sharedResizeObserver` only reads `entry.target`, so a bare target stands in
-   * for the entry the browser would deliver.
-   */
-  function toEntry(target: Element): ResizeObserverEntry {
-    const entry: Pick<ResizeObserverEntry, 'target'> = {target};
-    return entry as ResizeObserverEntry;
-  }
-
-  function resize(): void {
-    act(() => {
-      for (const [callback, {instance, targets}] of observations) {
-        callback([...targets].map(toEntry), instance);
-      }
-    });
-  }
-
-  function getWrapper(): HTMLElement {
-    return assertNonNull(
-      // eslint-disable-next-line testing-library/no-node-access -- the scroll wrapper has no role until it overflows
-      document.querySelector<HTMLElement>('[data-part="wrapper"]'),
-    );
-  }
-
-  beforeAll(() => {
-    originalResizeObserver = globalThis.ResizeObserver;
-    globalThis.ResizeObserver = class {
-      #callback: ResizeObserverCallback;
-
-      constructor(callback: ResizeObserverCallback) {
-        this.#callback = callback;
-        observations.set(callback, {instance: this, targets: new Set()});
-      }
-      observe(target: Element): void {
-        observations.get(this.#callback)?.targets.add(target);
-      }
-      unobserve(target: Element): void {
-        observations.get(this.#callback)?.targets.delete(target);
-      }
-      disconnect(): void {
-        observations.delete(this.#callback);
-      }
-    };
-
-    originalScrollWidth = Object.getOwnPropertyDescriptor(
-      HTMLElement.prototype,
-      'scrollWidth',
-    );
-    originalClientWidth = Object.getOwnPropertyDescriptor(
-      HTMLElement.prototype,
-      'clientWidth',
-    );
-    Object.defineProperty(HTMLElement.prototype, 'scrollWidth', {
-      configurable: true,
-      get: () => scrollWidth,
-    });
-    Object.defineProperty(HTMLElement.prototype, 'clientWidth', {
-      configurable: true,
-      get: () => clientWidth,
-    });
-  });
-
-  afterAll(() => {
-    globalThis.ResizeObserver = originalResizeObserver;
-    observations.clear();
-    for (const [property, descriptor] of [
-      ['scrollWidth', originalScrollWidth],
-      ['clientWidth', originalClientWidth],
-    ] as const) {
-      if (descriptor == null) {
-        Reflect.deleteProperty(HTMLElement.prototype, property);
-      } else {
-        Object.defineProperty(HTMLElement.prototype, property, descriptor);
-      }
-    }
-  });
-
-  beforeEach(() => {
-    setWidths({clientWidth: 500, scrollWidth: 500});
-  });
-
-  it('leaves a table that fits out of the tab order', () => {
+  it('exposes the scroll wrapper as a labeled, focusable group', () => {
     render(<Table columns={columns} data={data} idKey="id" />);
 
-    expect(screen.queryByRole('region')).not.toBeInTheDocument();
-    expect(getWrapper()).not.toHaveAttribute('tabindex');
-  });
-
-  it('ignores sub-pixel overflow', () => {
-    setWidths({clientWidth: 500, scrollWidth: 501});
-    render(<Table columns={columns} data={data} idKey="id" />);
-
-    expect(screen.queryByRole('region')).not.toBeInTheDocument();
-  });
-
-  it('exposes an overflowing table as a labeled scroll region', () => {
-    setWidths({clientWidth: 500, scrollWidth: 800});
-    render(<Table columns={columns} data={data} idKey="id" />);
-
-    const region = screen.getByRole('region', {name: 'Table scroll area'});
-    expect(region).toBe(getWrapper());
-    expect(region).toHaveAttribute('tabindex', '0');
+    const group = screen.getByRole('group', {name: 'Table scroll area'});
+    expect(group).toHaveAttribute('data-part', 'wrapper');
+    expect(group).toHaveAttribute('tabindex', '0');
   });
 
   it('names the scroll region after the table label', () => {
-    setWidths({clientWidth: 500, scrollWidth: 800});
     render(<Table columns={columns} data={data} idKey="id" label="Team" />);
 
     expect(
-      screen.getByRole('region', {name: 'Team scroll area'}),
+      screen.getByRole('group', {name: 'Team scroll area'}),
     ).toBeInTheDocument();
   });
 
   it('lets a keyboard user focus the scroll region', async () => {
-    setWidths({clientWidth: 500, scrollWidth: 800});
     const user = userEvent.setup();
     render(<Table columns={columns} data={data} idKey="id" />);
 
     await user.tab();
 
-    expect(screen.getByRole('region')).toHaveFocus();
+    expect(screen.getByRole('group', {name: 'Table scroll area'})).toHaveFocus();
   });
 
-  it('adds and removes the region as the table starts and stops overflowing', () => {
-    render(<Table columns={columns} data={data} idKey="id" />);
+  it('does not publish a landmark per table', () => {
+    render(
+      <>
+        <Table columns={columns} data={data} idKey="id" label="First" />
+        <Table columns={columns} data={data} idKey="id" label="Second" />
+      </>,
+    );
+
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
-
-    setWidths({clientWidth: 500, scrollWidth: 800});
-    resize();
-    expect(screen.getByRole('region')).toBeInTheDocument();
-
-    setWidths({clientWidth: 800, scrollWidth: 800});
-    resize();
-    expect(screen.queryByRole('region')).not.toBeInTheDocument();
-  });
-
-  it('observes the table so a widening table becomes scrollable', () => {
-    render(<Table columns={columns} data={data} idKey="id" />);
-
-    const observed = [...observations.values()].flatMap(({targets}) => [
-      ...targets,
-    ]);
-    expect(observed).toContain(getWrapper());
-    expect(observed).toContain(screen.getByRole('table'));
+    expect(screen.getAllByRole('group')).toHaveLength(2);
   });
 });
