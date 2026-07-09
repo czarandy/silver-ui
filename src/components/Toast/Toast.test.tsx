@@ -1,7 +1,7 @@
 import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useRef} from 'react';
-import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {Toast} from 'components/Toast/Toast';
 import {ToastViewport} from 'components/Toast/ToastViewport';
@@ -13,6 +13,10 @@ beforeAll(() => {
     configurable: true,
     value: vi.fn(),
   });
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 function ShowToastFixture({
@@ -142,6 +146,37 @@ describe('Toast', () => {
 
     await user.click(screen.getByRole('button', {name: 'Show'}));
     expect(screen.getByText('Saved successfully')).toBeInTheDocument();
+  });
+
+  it('moves focus to active notifications with F6 and pauses auto-dismiss', async () => {
+    vi.useFakeTimers();
+
+    render(
+      <ToastViewport isTopLayer={false}>
+        <ShowToastFixture
+          body="Item deleted"
+          endContent={<Button label="Undo" size="sm" variant="onSolid" />}
+        />
+      </ToastViewport>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show'}));
+
+    const viewport = screen.getByRole('region', {name: 'Notifications'});
+    expect(viewport).toHaveAttribute('aria-keyshortcuts', 'F6');
+    expect(screen.getByRole('button', {name: 'Undo'})).toBeInTheDocument();
+
+    fireEvent.keyDown(document, {key: 'F6'});
+    expect(viewport).toHaveFocus();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10000);
+    });
+
+    expect(screen.getByText('Item deleted')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Undo'})).toBeInTheDocument();
+
+    vi.useRealTimers();
   });
 
   it('deduplicates by uniqueID using overwrite behavior', async () => {

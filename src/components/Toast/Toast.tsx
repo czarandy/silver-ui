@@ -6,6 +6,7 @@ import {
   useEffect,
   useRef,
   type CSSProperties,
+  type FocusEvent,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -47,6 +48,11 @@ export interface ToastProps {
    */
   isExiting?: boolean;
   /**
+   * Whether the toast auto-dismiss timer is paused by its container.
+   * @default false
+   */
+  isPaused?: boolean;
+  /**
    * Called when the toast should be dismissed.
    */
   onDismiss: (reason: ToastDismissReason) => void;
@@ -80,6 +86,7 @@ export function Toast({
   endContent,
   isAutoHide,
   isExiting = false,
+  isPaused = false,
   onDismiss: onDismissFromProps,
   ref,
   style,
@@ -88,7 +95,10 @@ export function Toast({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startedAtRef = useRef<number | null>(null);
   const remainingRef = useRef(autoHideDuration);
-  const isPausedRef = useRef(false);
+  const pauseReasonsRef = useRef<Set<'external' | 'focus' | 'hover'>>(
+    new Set(),
+  );
+  const isTimerPausedRef = useRef(false);
   const onDismissRef = useLatest(onDismissFromProps);
 
   const startTimer = useCallback(() => {
@@ -105,41 +115,78 @@ export function Toast({
     );
   }, [isAutoHide]);
 
-  const pauseTimer = useCallback(() => {
-    if (!isAutoHide || isPausedRef.current) {
+  const updatePausedState = useCallback(() => {
+    const shouldPauseTimer = pauseReasonsRef.current.size > 0;
+    if (!isAutoHide || shouldPauseTimer === isTimerPausedRef.current) {
       return;
     }
-    isPausedRef.current = true;
-    if (timerRef.current != null) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    isTimerPausedRef.current = shouldPauseTimer;
+    if (shouldPauseTimer) {
+      if (timerRef.current != null) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      if (startedAtRef.current != null) {
+        remainingRef.current = Math.max(
+          remainingRef.current -
+            (nowMonotonicMilliseconds() - startedAtRef.current),
+          1000,
+        );
+      }
+    } else {
+      startTimer();
     }
-    if (startedAtRef.current != null) {
-      remainingRef.current = Math.max(
-        remainingRef.current -
-          (nowMonotonicMilliseconds() - startedAtRef.current),
-        1000,
-      );
-    }
-  }, [isAutoHide]);
-
-  const resumeTimer = useCallback(() => {
-    if (!isAutoHide || !isPausedRef.current) {
-      return;
-    }
-    isPausedRef.current = false;
-    startTimer();
   }, [isAutoHide, startTimer]);
+
+  const addPauseReason = useCallback(
+    (reason: 'external' | 'focus' | 'hover') => {
+      pauseReasonsRef.current.add(reason);
+      updatePausedState();
+    },
+    [updatePausedState],
+  );
+
+  const removePauseReason = useCallback(
+    (reason: 'external' | 'focus' | 'hover') => {
+      pauseReasonsRef.current.delete(reason);
+      updatePausedState();
+    },
+    [updatePausedState],
+  );
+
+  const handleBlurCapture = useCallback(
+    (event: FocusEvent<HTMLDivElement>) => {
+      const nextFocusedElement = event.relatedTarget;
+      if (
+        nextFocusedElement instanceof Node &&
+        event.currentTarget.contains(nextFocusedElement)
+      ) {
+        return;
+      }
+      removePauseReason('focus');
+    },
+    [removePauseReason],
+  );
 
   useEffect(() => {
     remainingRef.current = autoHideDuration;
+    isTimerPausedRef.current = false;
     startTimer();
+    updatePausedState();
     return () => {
       if (timerRef.current != null) {
         clearTimeout(timerRef.current);
       }
     };
-  }, [autoHideDuration, startTimer]);
+  }, [autoHideDuration, startTimer, updatePausedState]);
+
+  useEffect(() => {
+    if (isPaused) {
+      addPauseReason('external');
+    } else {
+      removePauseReason('external');
+    }
+  }, [addPauseReason, isPaused, removePauseReason]);
 
   const classes = toastRecipe({type, isExiting});
 
@@ -149,10 +196,10 @@ export function Toast({
       aria-live={assertiveTypes[type] ? 'assertive' : 'polite'}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
-      onBlurCapture={resumeTimer}
-      onFocusCapture={pauseTimer}
-      onMouseEnter={pauseTimer}
-      onMouseLeave={resumeTimer}
+      onBlurCapture={handleBlurCapture}
+      onFocusCapture={() => addPauseReason('focus')}
+      onMouseEnter={() => addPauseReason('hover')}
+      onMouseLeave={() => removePauseReason('hover')}
       ref={ref}
       role={assertiveTypes[type] ? 'alert' : 'status'}
       style={style}>
