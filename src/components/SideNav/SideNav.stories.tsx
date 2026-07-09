@@ -17,6 +17,7 @@ import {
   Users,
 } from 'lucide-react';
 import {useState} from 'react';
+import {Avatar} from 'components/Avatar';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import {NavIcon} from 'components/NavIcon';
@@ -127,6 +128,21 @@ export const WithFooter: Story = {
           </>
         }
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
+        <SideNavSection title="Main">
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
+        </SideNavSection>
+      </SideNav>
+    </div>
+  ),
+};
+
+export const FooterOnly: Story = {
+  render: () => (
+    <div style={{height: 420}}>
+      <SideNav
+        footer={<Avatar name="Ada Lovelace" size="small" />}
+        header={<SideNavHeading heading="Silver" logo={logo} />}>
         <SideNavSection title="Main">
           <SideNavItem href="/" icon={Home} isSelected label="Home" />
           <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
