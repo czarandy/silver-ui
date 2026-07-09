@@ -23,6 +23,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
     include: [
+      '.storybook/**/*.test.{ts,tsx}',
       'src/**/*.test.{ts,tsx}',
       'site/src/**/*.test.{ts,tsx}',
       'site/scripts/**/*.test.ts',

@@ -46,18 +46,11 @@ const preview: Preview = {
       },
     },
   },
+  // The toolbar control is rendered by the custom `ThemeToggle` tool
+  // registered in `manager.tsx`, so no `toolbar` config is declared here.
   globalTypes: {
     theme: {
       description: 'Color scheme for components',
-      toolbar: {
-        title: 'Theme',
-        icon: 'moon',
-        items: [
-          {value: 'light', title: 'Light', icon: 'sun'},
-          {value: 'dark', title: 'Dark', icon: 'moon'},
-        ],
-        dynamicTitle: true,
-      },
     },
   },
   initialGlobals: {
