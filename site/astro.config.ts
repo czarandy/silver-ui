@@ -33,7 +33,11 @@ export default defineConfig({
         {label: 'Getting started', slug: 'getting-started'},
         ...componentSidebarGroups(),
       ],
-      customCss: ['./src/styles/docs.css'],
+      // panda.css is generated with preflight scoped to the demo boxes, so
+      // it layers cleanly on top of Starlight's styles — do NOT add a global
+      // @layer order statement promoting Panda's layers above `starlight`;
+      // that outranks Starlight's own page styles and unstyles the docs.
+      customCss: ['./src/styles/panda.css', './src/styles/docs.css'],
       head: [
         {
           tag: 'link',
