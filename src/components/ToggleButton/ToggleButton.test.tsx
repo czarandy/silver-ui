@@ -20,7 +20,7 @@ describe('ToggleButton', () => {
     expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('calls onChange with the next state', async () => {
+  it('calls onChange with the next state and originating event', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
     render(
@@ -28,7 +28,42 @@ describe('ToggleButton', () => {
     );
 
     await user.click(screen.getByRole('button', {name: 'Bold'}));
-    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(
+      true,
+      expect.objectContaining({type: 'click'}),
+    );
+  });
+
+  it('lets onChange veto the toggle via the event', async () => {
+    const user = userEvent.setup();
+
+    function Vetoable() {
+      const [isSelected, setIsSelected] = useState(false);
+      return (
+        <ToggleButton
+          isSelected={isSelected}
+          label="Bold"
+          onChange={(next, event) => {
+            // Modifier-key gating: only toggle when the shift key is held.
+            if (!event.shiftKey) {
+              return;
+            }
+            setIsSelected(next);
+          }}
+        />
+      );
+    }
+
+    render(<Vetoable />);
+    const button = screen.getByRole('button', {name: 'Bold'});
+
+    await user.click(button);
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+
+    await user.keyboard('{Shift>}');
+    await user.click(button);
+    await user.keyboard('{/Shift}');
+    expect(button).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('renders selectedIcon when selected', () => {
@@ -206,6 +241,24 @@ describe('ToggleButtonGroup', () => {
     expect(screen.getByRole('button', {name: 'Grid'})).toHaveAttribute(
       'aria-pressed',
       'false',
+    );
+  });
+
+  it('forwards the originating event to the group onChange', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <ToggleButtonGroup label="View mode" onChange={onChange} value="list">
+        <ToggleButton isIconOnly label="List" value="list" />
+        <ToggleButton isIconOnly label="Grid" value="grid" />
+      </ToggleButtonGroup>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Grid'}));
+    expect(onChange).toHaveBeenCalledWith(
+      'grid',
+      expect.objectContaining({type: 'click'}),
     );
   });
 

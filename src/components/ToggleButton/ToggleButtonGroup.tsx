@@ -6,6 +6,7 @@ import {
   useCallback,
   useMemo,
   type CSSProperties,
+  type MouseEvent,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -17,7 +18,7 @@ export type ToggleButtonGroupOrientation = 'horizontal' | 'vertical';
 
 interface ToggleButtonGroupContextValue {
   isDisabled?: boolean;
-  onToggle: (value: string) => void;
+  onToggle: (value: string, event: MouseEvent<HTMLButtonElement>) => void;
   selectedValues: Set<string>;
   size?: ButtonSize;
 }
@@ -75,9 +76,13 @@ interface ToggleButtonGroupBaseProps {
 export interface ToggleButtonGroupSingleProps extends ToggleButtonGroupBaseProps {
   /**
    * Called with the selected value when selection changes, or `null`
-   * when the active button is deselected.
+   * when the active button is deselected. Also receives the originating
+   * click event.
    */
-  onChange: (value: string | null) => void;
+  onChange: (
+    value: string | null,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void;
   /**
    * Single-selection mode. Clicking the active button clears selection.
    * @default 'single'
@@ -91,9 +96,10 @@ export interface ToggleButtonGroupSingleProps extends ToggleButtonGroupBaseProps
 
 export interface ToggleButtonGroupMultipleProps extends ToggleButtonGroupBaseProps {
   /**
-   * Called with the array of selected values when selection changes.
+   * Called with the array of selected values when selection changes. Also
+   * receives the originating click event.
    */
-  onChange: (value: string[]) => void;
+  onChange: (value: string[], event: MouseEvent<HTMLButtonElement>) => void;
   /**
    * Multiple-selection mode.
    */
@@ -146,21 +152,22 @@ export function ToggleButtonGroup({
   }, [isMultiple, value]);
 
   const onToggle = useCallback(
-    (itemValue: string) => {
+    (itemValue: string, event: MouseEvent<HTMLButtonElement>) => {
       if (isMultiple) {
         const current = value as string[];
-        (onChange as (v: string[]) => void)(
+        (onChange as (v: string[], e: MouseEvent<HTMLButtonElement>) => void)(
           current.includes(itemValue)
             ? current.filter(v => v !== itemValue)
             : [...current, itemValue],
+          event,
         );
         return;
       }
 
       const current = value as string | null;
-      (onChange as (v: string | null) => void)(
-        current === itemValue ? null : itemValue,
-      );
+      (
+        onChange as (v: string | null, e: MouseEvent<HTMLButtonElement>) => void
+      )(current === itemValue ? null : itemValue, event);
     },
     [isMultiple, value, onChange],
   );

@@ -48,9 +48,13 @@ export interface ToggleButtonProps {
    */
   label: string;
   /**
-   * Called when the selected state should change.
+   * Called when the selected state should change. Receives the next selected
+   * state and the originating click event.
    */
-  onChange?: (isSelected: boolean) => void;
+  onChange?: (
+    isSelected: boolean,
+    event: MouseEvent<HTMLButtonElement>,
+  ) => void;
   /**
    * Ref forwarded to the button root.
    */
@@ -123,11 +127,11 @@ export function ToggleButton({
     }
 
     if (group != null && value != null) {
-      group.onToggle(value);
+      group.onToggle(value, event);
       return;
     }
 
-    onChange?.(!isSelected);
+    onChange?.(!isSelected, event);
   };
 
   const button = (
