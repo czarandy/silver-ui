@@ -1,4 +1,5 @@
 import {componentCategories} from '../../src/component-categories';
+import {firstSentence} from './first-sentence';
 import type {ComponentDocData} from './types';
 
 /**
@@ -23,8 +24,10 @@ export function componentsIndexMd(all: ComponentDocData[]): string {
       if (data == null) {
         continue;
       }
-      const description = data.description.replace(/\.$/, '');
-      lines.push(`- [${name}](/components/${data.slug}/) — ${description}`);
+      const description = firstSentence(data.description).replace(/\.$/, '');
+      lines.push(
+        `- [${data.label}](/components/${data.slug}/) — ${description}`,
+      );
     }
   }
   lines.push('');

@@ -7,7 +7,7 @@ import {LayoutContent} from 'components/Layout/LayoutContent';
 import {LayoutFooter} from 'components/Layout/LayoutFooter';
 import {LayoutHeader} from 'components/Layout/LayoutHeader';
 import {LayoutPanel} from 'components/Layout/LayoutPanel';
-import {VStack} from 'components/Stack';
+import {HStack, VStack} from 'components/Stack';
 import {Text} from 'components/Text';
 
 const meta: Meta<typeof Layout> = {
@@ -261,6 +261,46 @@ export const NoDividers: Story = {
         }
       />
     </Card>
+  ),
+};
+
+/**
+ * A divider gives each region its own edge to pad against, so the header's
+ * block-end padding and the content's block-start padding sit either side of
+ * the rule. Without a divider those paddings would stack into a gap twice the
+ * size of the surface's outer padding, so the content drops its own padding on
+ * the edges that meet a header or footer and the regions read as one surface.
+ */
+export const RegionPadding: Story = {
+  render: args => (
+    <HStack gap={4}>
+      <Card style={{height: 320, width: 280}}>
+        <Layout
+          {...args}
+          content={
+            <LayoutContent>
+              <Text type="body">16px either side of each rule.</Text>
+            </LayoutContent>
+          }
+          footer={<LayoutFooter primaryButton={<Button label="Save" />} />}
+          hasDividers
+          header={<LayoutHeader title="With dividers" />}
+        />
+      </Card>
+      <Card style={{height: 320, width: 280}}>
+        <Layout
+          {...args}
+          content={
+            <LayoutContent>
+              <Text type="body">16px under the title, not 32px.</Text>
+            </LayoutContent>
+          }
+          footer={<LayoutFooter primaryButton={<Button label="Save" />} />}
+          hasDividers={false}
+          header={<LayoutHeader title="Without dividers" />}
+        />
+      </Card>
+    </HStack>
   ),
 };
 

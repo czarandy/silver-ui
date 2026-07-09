@@ -45,10 +45,38 @@ export const segmentedControlRecipe = sva({
     },
   },
   variants: {
+    // The *root* carries the shared control height so the whole control lines
+    // up with a Button; items fill what the root's padding leaves behind. Items
+    // keep their own tighter `px` and `borderRadius`, which are inset values
+    // rather than points on the `component.*` scale.
     size: {
-      sm: {item: {h: '7', px: '2', borderRadius: 'sm', fontSize: 'sm'}},
-      md: {item: {h: '9', px: '3', borderRadius: 'sm', fontSize: 'sm'}},
-      lg: {item: {h: '11', px: '3', borderRadius: 'md', fontSize: 'md'}},
+      sm: {
+        root: {h: 'component.sm'},
+        item: {
+          h: 'full',
+          px: '2',
+          borderRadius: 'sm',
+          fontSize: 'component.sm',
+        },
+      },
+      md: {
+        root: {h: 'component.md'},
+        item: {
+          h: 'full',
+          px: '3',
+          borderRadius: 'sm',
+          fontSize: 'component.md',
+        },
+      },
+      lg: {
+        root: {h: 'component.lg'},
+        item: {
+          h: 'full',
+          px: '3',
+          borderRadius: 'md',
+          fontSize: 'component.lg',
+        },
+      },
     },
     layout: {
       hug: {},

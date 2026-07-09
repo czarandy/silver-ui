@@ -2,7 +2,11 @@ import {mkdirSync, readdirSync, rmSync, writeFileSync} from 'node:fs';
 import {dirname, join, resolve} from 'node:path';
 import process from 'node:process';
 import {fileURLToPath} from 'node:url';
-import {categoryOf, componentSlug} from '../../src/component-categories';
+import {
+  categoryOf,
+  componentPageLabel,
+  componentSlug,
+} from '../../src/component-categories';
 import {
   createLibraryProgram,
   extractComponentExports,
@@ -60,14 +64,24 @@ export function runDocgen(): void {
     }
     const primary = exports.find(exported => exported.name === name);
     // README bullets are sentence fragments ("versatile action element…");
-    // normalize them into a sentence when used as the page description.
-    const fallback = fallbackDescriptions.get(name);
+    // normalize them into a sentence when used as the page description. A
+    // combined bullet (e.g. "HStack / VStack") is looked up via the page
+    // label's first component name.
+    const fallback =
+      fallbackDescriptions.get(name) ??
+      fallbackDescriptions.get(componentPageLabel(name).split(' & ')[0]);
     const fallbackSentence =
       fallback == null
         ? undefined
         : `${fallback[0].toUpperCase()}${fallback.slice(1)}${fallback.endsWith('.') ? '' : '.'}`;
+    // Pages without a directory-named export (Stack) describe the pair of
+    // components, which the README bullet does better than either JSDoc.
     const description =
-      primary?.description || exports[0].description || fallbackSentence || '';
+      primary?.description ||
+      (primary == null ? fallbackSentence : undefined) ||
+      exports[0].description ||
+      fallbackSentence ||
+      '';
     if (description === '') {
       problems.push(
         `${name}: no description — add a JSDoc summary to the ${name} component (or its ${name}Props type)`,
@@ -77,6 +91,7 @@ export function runDocgen(): void {
     generated.push({
       data: {
         name,
+        label: componentPageLabel(name),
         slug: componentSlug(name),
         category: categoryOf(name) ?? '',
         description,

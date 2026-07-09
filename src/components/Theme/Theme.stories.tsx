@@ -82,10 +82,10 @@ function ComponentPreview({
         </HStack>
 
         <HStack gap={2} wrap="wrap">
-          <Badge color="neutral" label="Neutral" size="lg" />
-          <Badge color="success" label="Ready" size="lg" />
-          <Badge color="warning" label="Review" size="lg" />
-          <Badge color="error" label="Blocked" size="lg" />
+          <Badge color="neutral" label="Neutral" />
+          <Badge color="success" label="Ready" />
+          <Badge color="warning" label="Review" />
+          <Badge color="error" label="Blocked" />
         </HStack>
 
         <Switch

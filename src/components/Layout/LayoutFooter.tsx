@@ -5,7 +5,7 @@ import {
   layoutFooterRecipe,
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
-import {useLayoutDivider} from 'components/Layout/LayoutContext';
+import {useLayoutRegions} from 'components/Layout/LayoutContext';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
@@ -90,8 +90,8 @@ export function LayoutFooter({
   startContent,
   style,
 }: LayoutFooterProps): React.JSX.Element {
-  const dividerContext = useLayoutDivider();
-  const hasDivider = dividerContext?.hasDividers ?? false;
+  const regions = useLayoutRegions();
+  const hasDivider = regions?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
   const isCustom = isReactNode(children);
   const hasActions = isReactNode(primaryButton) || isReactNode(secondaryButton);

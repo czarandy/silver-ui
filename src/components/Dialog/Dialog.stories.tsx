@@ -89,6 +89,60 @@ export const Default: Story = {
   },
 };
 
+/**
+ * A dialog without dividers reads as one padded surface. The content region
+ * drops its block padding against the header and footer rather than stacking a
+ * second padding against theirs, so the gaps around the body match the dialog's
+ * outer padding instead of doubling it.
+ */
+export const WithoutDividers: Story = {
+  render: args => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <>
+        <Button
+          label="Open dialog without dividers"
+          onClick={() => setIsOpen(true)}
+        />
+        <Dialog {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
+          <Layout
+            content={
+              <LayoutContent>
+                <Text as="p" color="secondary">
+                  Are you sure you want to apply these changes to this
+                  workspace?
+                </Text>
+              </LayoutContent>
+            }
+            footer={
+              <LayoutFooter
+                primaryButton={
+                  <Button
+                    label="Apply"
+                    onClick={() => setIsOpen(false)}
+                    variant="primary"
+                  />
+                }
+                secondaryButton={
+                  <Button label="Cancel" onClick={() => setIsOpen(false)} />
+                }
+              />
+            }
+            hasDividers={false}
+            header={
+              <LayoutHeader
+                subtitle="Review the updates before applying them."
+                title="Confirm changes"
+              />
+            }
+          />
+        </Dialog>
+      </>
+    );
+  },
+};
+
 export const Required: Story = {
   args: {
     dismissBehavior: false,

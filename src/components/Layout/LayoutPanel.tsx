@@ -5,7 +5,7 @@ import {
   layoutPanelRecipe,
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
-import {useLayoutArea, useLayoutDivider} from 'components/Layout/LayoutContext';
+import {useLayoutArea, useLayoutRegions} from 'components/Layout/LayoutContext';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
@@ -54,8 +54,8 @@ export function LayoutPanel({
   ...rest
 }: LayoutPanelProps): React.JSX.Element {
   const area = useLayoutArea();
-  const dividerContext = useLayoutDivider();
-  const hasDivider = dividerContext?.hasDividers ?? false;
+  const regions = useLayoutRegions();
+  const hasDivider = regions?.hasDividers ?? false;
   const divider =
     hasDivider && (area === 'start' || area === 'end') ? area : 'none';
 

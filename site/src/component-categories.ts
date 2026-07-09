@@ -3,6 +3,9 @@
  * when adding a component: put its directory name (src/components/<Name>) in
  * exactly one category. The docs generator fails the build if a component is
  * missing from this map or if a name here has no matching directory.
+ *
+ * Categories describe what a component is for, not how it is built, and
+ * mirror the README's `## Components` section — update both together.
  */
 export const componentCategories: Record<string, readonly string[]> = {
   'Layout & Structure': [
@@ -15,12 +18,14 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Layout',
     'Stack',
   ],
+  Typography: ['Blockquote', 'CodeBlock', 'Kbd', 'Text'],
   Navigation: [
     'Breadcrumbs',
     'Link',
     'NavIcon',
     'Pagination',
     'SideNav',
+    'Stepper',
     'Tabs',
     'TopNav',
   ],
@@ -33,32 +38,10 @@ export const componentCategories: Record<string, readonly string[]> = {
     'SplitButton',
     'ToggleButton',
   ],
-  'Data Display': [
-    'Avatar',
-    'AvatarGroup',
-    'Badge',
-    'Blockquote',
-    'CodeBlock',
-    'Icon',
-    'Item',
-    'Kbd',
-    'Lightbox',
-    'List',
-    'MetadataList',
-    'Table',
-    'Tag',
-    'Text',
-    'Thumbnail',
-    'Timestamp',
-    'TreeView',
-  ],
   Forms: [
     'AutocompleteInput',
     'CheckboxGroup',
     'CheckboxInput',
-    'DateInput',
-    'DateRangeInput',
-    'DateTimeInput',
     'Field',
     'FileInput',
     'InputGroup',
@@ -74,7 +57,28 @@ export const componentCategories: Record<string, readonly string[]> = {
     'TagsInput',
     'TextArea',
     'TextInput',
+  ],
+  'Dates & Time': [
+    'Calendar',
+    'DateInput',
+    'DateRangeInput',
+    'DateTimeInput',
+    'Schedule',
     'TimeInput',
+    'Timestamp',
+  ],
+  'Data Display': [
+    'Avatar',
+    'AvatarGroup',
+    'Badge',
+    'Icon',
+    'Item',
+    'List',
+    'MetadataList',
+    'Table',
+    'Tag',
+    'Thumbnail',
+    'TreeView',
   ],
   'Feedback & Status': [
     'Alert',
@@ -82,7 +86,6 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Progress',
     'Skeleton',
     'Spinner',
-    'Stepper',
     'Toast',
   ],
   Overlays: [
@@ -90,13 +93,29 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Dialog',
     'Drawer',
     'HoverCard',
+    'Lightbox',
     'Popover',
     'Tooltip',
   ],
-  Composite: ['Calendar', 'Schedule'],
-  Theming: ['Theme'],
-  Accessibility: ['VisuallyHidden'],
+  Utilities: ['Theme', 'VisuallyHidden'],
 };
+
+/**
+ * Display labels for pages that document more than one headline component,
+ * keyed by directory name. Used as the page title, which Starlight also uses
+ * as the sidebar label.
+ */
+export const componentPageLabels: Record<string, string> = {
+  Stack: 'HStack & VStack',
+  Text: 'Text & Heading',
+};
+
+/**
+ * The title shown for a component page in the sidebar and page heading.
+ */
+export function componentPageLabel(name: string): string {
+  return componentPageLabels[name] ?? name;
+}
 
 /**
  * Converts a PascalCase component name to its docs URL slug.

@@ -8,7 +8,7 @@ import {
   layoutHeaderRecipe,
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
-import {useLayoutDivider} from 'components/Layout/LayoutContext';
+import {useLayoutRegions} from 'components/Layout/LayoutContext';
 import {Heading, Text, type HeadingLevel} from 'components/Text';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
@@ -102,9 +102,9 @@ export function LayoutHeader({
   subtitle,
   title,
 }: LayoutHeaderProps): React.JSX.Element {
-  const dividerContext = useLayoutDivider();
+  const regions = useLayoutRegions();
   const dialogContext = useDialogContext();
-  const hasDivider = dividerContext?.hasDividers ?? false;
+  const hasDivider = regions?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
   const classes = layoutHeaderRecipe({align, hasDivider});
 

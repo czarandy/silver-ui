@@ -20,10 +20,13 @@ export const badgeRecipe = sva({
     },
   },
   variants: {
+    // A badge is a chip, not a control, so it keeps its own heights rather than
+    // the taller `component.*` ones. Its text, however, sits beside control text
+    // and shares the `component.*` ramp so the two never drift apart.
     size: {
-      sm: {root: {gap: '1', h: '5', px: '2', fontSize: 'sm'}},
-      md: {root: {gap: '1.5', h: '6', px: '2.5', fontSize: 'sm'}},
-      lg: {root: {gap: '2', h: '7', px: '3', fontSize: 'md'}},
+      sm: {root: {gap: '1', h: '5', px: '2', fontSize: 'component.sm'}},
+      md: {root: {gap: '1.5', h: '6', px: '2.5', fontSize: 'component.md'}},
+      lg: {root: {gap: '2', h: '7', px: '3', fontSize: 'component.lg'}},
     },
     color: {
       neutral: {root: {bg: 'surface.gray', color: 'fg'}},
