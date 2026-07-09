@@ -10,6 +10,8 @@ import {Divider} from 'components/Divider';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
 import type {DropdownMenuOption} from 'components/DropdownMenu/types';
 import {Text} from 'components/Text';
+import useListFocus from 'hooks/useListFocus';
+import useTypeahead from 'hooks/useTypeahead';
 import {css} from 'styled-system/css';
 
 const menuStyles = {
@@ -106,41 +108,22 @@ export function useMenuKeyboard(
     );
   }, [menuRef]);
 
+  const listFocus = useListFocus({getItems: getMenuItems});
+  const handleTypeahead = useTypeahead<HTMLElement>({
+    getActiveIndex: listFocus.getActiveIndex,
+    getItems: listFocus.getItems,
+    getLabel: item => item.textContent.trim(),
+    onMatch: item => item.focus(),
+  });
+
   return useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key === 'Tab') {
-        event.preventDefault();
-        onClose();
-        focusTargetRef?.current?.focus();
-        return;
-      }
-
-      const menuItems = getMenuItems();
-      if (menuItems.length === 0) {
-        return;
-      }
-      const currentIndex = menuItems.findIndex(
-        item => item === document.activeElement,
-      );
-      let nextIndex: number;
-
       switch (event.key) {
-        case 'ArrowDown':
-          nextIndex =
-            currentIndex === -1 ? 0 : (currentIndex + 1) % menuItems.length;
-          break;
-        case 'ArrowUp':
-          nextIndex =
-            currentIndex === -1
-              ? menuItems.length - 1
-              : (currentIndex - 1 + menuItems.length) % menuItems.length;
-          break;
-        case 'Home':
-          nextIndex = 0;
-          break;
-        case 'End':
-          nextIndex = menuItems.length - 1;
-          break;
+        case 'Tab':
+          event.preventDefault();
+          onClose();
+          focusTargetRef?.current?.focus();
+          return;
         case 'Escape':
           event.preventDefault();
           onClose();
@@ -153,25 +136,11 @@ export function useMenuKeyboard(
           }
           return;
         default:
-          if (event.key.length === 1) {
-            const char = event.key.toLowerCase();
-            const startIndex = currentIndex === -1 ? 0 : currentIndex + 1;
-            for (let i = 0; i < menuItems.length; i++) {
-              const index = (startIndex + i) % menuItems.length;
-              const label = menuItems[index].textContent.trim().toLowerCase();
-              if (label.startsWith(char)) {
-                event.preventDefault();
-                menuItems[index].focus();
-                return;
-              }
-            }
+          if (!listFocus.handleKeyDown(event)) {
+            handleTypeahead(event);
           }
-          return;
       }
-
-      event.preventDefault();
-      menuItems[nextIndex]?.focus();
     },
-    [focusTargetRef, getMenuItems, onClose],
+    [focusTargetRef, handleTypeahead, listFocus, onClose],
   );
 }

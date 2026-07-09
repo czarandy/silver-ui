@@ -1,4 +1,4 @@
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
@@ -116,6 +116,82 @@ describe('TagsInput', () => {
     expect(onChange).toHaveBeenCalledWith([], {
       item: items[0],
       type: 'remove',
+    });
+  });
+
+  // Several controls inside TagsInput carry `role="status"` (Button hosts one
+  // for its loading state), so these assert on the announced text itself and
+  // check that it landed in a polite live region.
+  describe('screen reader announcements', () => {
+    it('announces a removed tag', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <TagsInput
+          label="Team"
+          onChange={vi.fn()}
+          searchSource={createStaticSearchSource(items)}
+          value={[items[0]]}
+        />,
+      );
+
+      await user.click(
+        screen.getByRole('button', {name: 'Remove Ada Lovelace'}),
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('Removed Ada Lovelace')).toHaveAttribute(
+          'aria-live',
+          'polite',
+        );
+      });
+    });
+
+    it('announces an added tag', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <TagsInput
+          debounceMs={0}
+          label="Team"
+          onChange={vi.fn()}
+          searchSource={createStaticSearchSource(items)}
+          value={[]}
+        />,
+      );
+
+      await user.type(screen.getByRole('combobox', {name: 'Team'}), 'ada');
+      await user.click(screen.getByText('Ada Lovelace'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Added Ada Lovelace')).toHaveAttribute(
+          'aria-live',
+          'polite',
+        );
+      });
+    });
+
+    it('announces clearing every tag', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <TagsInput
+          hasClear
+          label="Team"
+          onChange={vi.fn()}
+          searchSource={createStaticSearchSource(items)}
+          value={[items[0], items[1]]}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', {name: 'Clear Team'}));
+
+      await waitFor(() => {
+        expect(screen.getByText('Cleared all tags')).toHaveAttribute(
+          'aria-live',
+          'polite',
+        );
+      });
     });
   });
 

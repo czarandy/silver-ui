@@ -19,6 +19,7 @@ import type {
   TreeViewDensity,
   TreeViewItemData,
 } from 'components/TreeView/types';
+import useTypeahead from 'hooks/useTypeahead';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
@@ -233,6 +234,17 @@ export function TreeView({
     inputModalityRef.current = 'pointer';
   }, []);
 
+  // Set on every item keydown so typeahead resumes from the item the user is
+  // actually on, rather than from whatever React state has caught up to.
+  const typeaheadItemIdRef = useRef<string | null>(null);
+  const handleTypeahead = useTypeahead<VisibleTreeItem>({
+    getActiveIndex: () =>
+      focusableItems.findIndex(item => item.id === typeaheadItemIdRef.current),
+    getItems: () => focusableItems,
+    getLabel: item => item.label,
+    onMatch: item => focusItem(item.id),
+  });
+
   const handleItemKeyDown = useCallback(
     (event: KeyboardEvent<HTMLLIElement>, id: string) => {
       const currentIndex = focusableItems.findIndex(item => item.id === id);
@@ -306,27 +318,10 @@ export function TreeView({
         return;
       }
 
-      if (
-        event.key.length === 1 &&
-        !event.altKey &&
-        !event.ctrlKey &&
-        !event.metaKey
-      ) {
-        const query = event.key.toLocaleLowerCase();
-        const orderedItems = [
-          ...focusableItems.slice(currentIndex + 1),
-          ...focusableItems.slice(0, currentIndex + 1),
-        ];
-        const matchingItem = orderedItems.find(item =>
-          item.label.toLocaleLowerCase().startsWith(query),
-        );
-        if (matchingItem != null) {
-          event.preventDefault();
-          focusItem(matchingItem.id);
-        }
-      }
+      typeaheadItemIdRef.current = id;
+      handleTypeahead(event);
     },
-    [focusItem, focusableItems, handleToggle],
+    [focusItem, focusableItems, handleToggle, handleTypeahead],
   );
 
   const renderItems = useCallback(

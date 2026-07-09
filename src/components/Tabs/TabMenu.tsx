@@ -2,6 +2,7 @@
 
 import {Check, ChevronDown} from 'lucide-react';
 import {
+  useCallback,
   useRef,
   useState,
   type CSSProperties,
@@ -13,6 +14,7 @@ import {Popover} from 'components/Popover';
 import {tabMenuRecipe} from 'components/Tabs/TabMenu.recipe';
 import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {useTabsContext} from 'components/Tabs/TabsContext';
+import useListFocus from 'hooks/useListFocus';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -83,6 +85,7 @@ export function TabMenu({
   const context = useTabsContext();
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const selectedOption = options.find(option => option.value === context.value);
   const triggerLabel = selectedOption?.label ?? label;
   const hasSelectedOption = selectedOption != null;
@@ -94,26 +97,19 @@ export function TabMenu({
   });
   const classes = tabMenuRecipe({isOpen});
 
-  const focusMenuItem = (
-    event: KeyboardEvent<HTMLElement>,
-    nextIndex: number,
-  ) => {
-    const menu = event.currentTarget.closest<HTMLElement>('[role="menu"]');
-    const items = Array.from(
-      menu?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [],
-    );
-    items[nextIndex]?.focus();
-  };
+  const getMenuItems = useCallback(
+    () =>
+      Array.from(
+        menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ??
+          [],
+      ),
+    [],
+  );
+  const {handleKeyDown: handleListKeyDown} = useListFocus({
+    getItems: getMenuItems,
+  });
 
   const handleMenuKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    const menu = event.currentTarget.closest<HTMLElement>('[role="menu"]');
-    const items = Array.from(
-      menu?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? [],
-    );
-    const activeIndex = items.indexOf(
-      document.activeElement as HTMLButtonElement,
-    );
-
     if (event.key === 'Escape') {
       event.preventDefault();
       setIsOpen(false);
@@ -121,40 +117,13 @@ export function TabMenu({
       return;
     }
 
-    if (items.length === 0) {
-      return;
-    }
-
-    if (event.key === 'Home') {
-      event.preventDefault();
-      focusMenuItem(event, 0);
-      return;
-    }
-
-    if (event.key === 'End') {
-      event.preventDefault();
-      focusMenuItem(event, items.length - 1);
-      return;
-    }
-
-    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') {
-      return;
-    }
-
-    event.preventDefault();
-
-    const currentIndex = activeIndex === -1 ? 0 : activeIndex;
-    const nextIndex =
-      event.key === 'ArrowDown'
-        ? (currentIndex + 1) % items.length
-        : (currentIndex - 1 + items.length) % items.length;
-    focusMenuItem(event, nextIndex);
+    handleListKeyDown(event);
   };
 
   return (
     <Popover
       content={
-        <div className={classes.menu}>
+        <div className={classes.menu} ref={menuRef}>
           {options.map(option => {
             const isSelected = option.value === context.value;
             return (
