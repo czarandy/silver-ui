@@ -37,6 +37,43 @@ body {
 }
 
 /* ---- nav (TopNav owns layout; we only size the logo) ---- */
+
+/*
+ * Header surface: match the docs header, which Starlight paints with the nav
+ * background and a hairline beneath. Both now resolve to silver-ui's
+ * `bg.subtle` / `border` tokens (see styles/docs.css), so the bar is the same
+ * surface on both sides. AppShell already draws the hairline here, via the
+ * `headerDivider` its `variant="section"` turns on.
+ *
+ * The geometry mirrors Starlight's nav too — 3.5rem tall, 4rem from 50rem up,
+ * with 1rem/1.5rem of inline padding — so the wordmark and the dark mode
+ * toggle keep their positions across a navigation instead of shifting. This
+ * replaces TopNav's own 0.5rem padding; `.page` qualifies the selector so it
+ * outranks the recipe's utility class regardless of stylesheet order.
+ */
+.page .site-nav {
+  background: var(--silver-colors-bg-subtle);
+  min-height: 3.5rem;
+  padding: 0.75rem 1rem;
+}
+
+@media (min-width: 50rem) {
+  .page .site-nav {
+    min-height: 4rem;
+    padding-inline: 1.5rem;
+  }
+}
+
+/*
+ * TopNavHeading carries `px: '2'` so its focus ring has room, which pushes the
+ * wordmark 0.5rem inside the header padding. The docs site-title sits flush
+ * against that padding (Starlight cancels its own with a negative margin), so
+ * cancel ours the same way — keeping the padding, and the ring, intact.
+ */
+.page .site-nav__heading {
+  margin-inline-start: calc(-1 * var(--silver-spacing-2));
+}
+
 .brand__wordmark {
   display: block;
   height: 30px;

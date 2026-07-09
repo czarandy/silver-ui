@@ -47,12 +47,7 @@ import {
 import {Analytics} from '@vercel/analytics/react';
 import {SpeedInsights} from '@vercel/speed-insights/react';
 
-const LINKS = {
-  components: '/components/',
-  docs: '/getting-started/',
-  github: 'https://github.com/czarandy/silver-ui',
-  npm: 'https://www.npmjs.com/package/silver-ui',
-};
+import {LINKS, NAV_LINKS} from '../nav-links';
 
 const INSTALL_CMD = 'npm install silver-ui';
 
@@ -288,6 +283,7 @@ export function App(): JSX.Element {
             heading={
               <TopNavHeading
                 aria-label="silver-ui home"
+                className="site-nav__heading"
                 href="/"
                 logo={
                   <img
@@ -303,10 +299,9 @@ export function App(): JSX.Element {
             label="Main navigation"
             startContent={
               <>
-                <TopNavItem href={LINKS.docs} label="Docs" />
-                <TopNavItem href={LINKS.components} label="Components" />
-                <TopNavItem href={LINKS.github} label="GitHub" />
-                <TopNavItem href={LINKS.npm} label="npm" />
+                {NAV_LINKS.map(({href, label}) => (
+                  <TopNavItem href={href} key={href} label={label} />
+                ))}
               </>
             }
           />

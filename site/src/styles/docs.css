@@ -20,6 +20,26 @@
 }
 
 /*
+ * Nav surface: paint the header from silver-ui's own `bg.subtle` token, and
+ * the hairline under it from `border`, which is what AppShell draws on the
+ * landing side (its `headerDivider` variant). The bar then reads as one
+ * continuous surface when a reader crosses between the two.
+ *
+ * One declaration covers both schemes: Panda defines these tokens under
+ * `:where(:root)` and `:where([data-theme=dark])`, so they already track the
+ * same `data-theme` attribute Starlight toggles. And Starlight scopes all of
+ * its own rules to `@layer starlight.*` while this file is unlayered, so these
+ * win the cascade outright — no specificity games needed.
+ */
+:root {
+  --sl-color-bg-nav: var(--silver-colors-bg-subtle);
+}
+
+.header {
+  border-bottom-color: var(--silver-colors-border);
+}
+
+/*
  * Sidebar current page: silver-ui's selected-item treatment (the SideNav
  * `bg.selected` subtle teal with regular foreground text) instead of
  * Starlight's solid accent pill with inverted text.
@@ -48,37 +68,86 @@
 }
 
 /*
- * Header social icons (GitHub): Starlight renders them accent-blue with a
- * foreground-colored hover; use the foreground color for both states
- * (black in light mode, white in dark).
+ * Header nav links (see components/SocialIcons.astro, which supplies them).
+ * Starlight wraps that slot in a flex row spaced for icons, with an `::after`
+ * rule drawing a divider beside them — neither of which suits a link list, and
+ * the landing nav puts only a `1` gap between its items and the toggle.
  */
-.header a[rel='me'],
-.header a[rel='me']:hover {
-  color: var(--sl-color-white);
+.header .social-icons {
+  gap: var(--silver-spacing-1);
+}
+
+.header .social-icons::after {
+  content: none;
+}
+
+.header .right-group {
+  gap: var(--silver-spacing-1);
 }
 
 /*
- * Dark mode toggle (see components/ThemeSelect.astro). Geometry mirrors the
- * landing page's icon-only TopNavItem: a 2rem square with an `md` radius and
- * a 20px icon, muted until hovered.
+ * The links themselves restate topNavItemRecipe's text form — `px: '3'`,
+ * `py: '1.5'`, `minH: '8'`, medium weight over `fg.muted`, background-only
+ * hover — so they read as the landing page's nav links. Classed rather than
+ * matched on `a`, so the mobile menu footer (which renders this same slot)
+ * picks them up too.
+ */
+.header-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--silver-sizes-8);
+  padding-block: 0.375rem;
+  padding-inline: var(--silver-spacing-3);
+  border-radius: var(--silver-radii-md);
+  color: var(--silver-colors-fg-muted);
+  font-family: var(--silver-fonts-body);
+  font-size: var(--silver-font-sizes-md);
+  font-weight: var(--silver-font-weights-medium);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* Starlight tints link hovers; hold the landing nav's muted foreground. */
+.header-nav-link:hover {
+  background-color: var(--silver-colors-bg-hover);
+  color: var(--silver-colors-fg-muted);
+}
+
+.header-nav-link:focus-visible {
+  outline: var(--silver-border-widths-focus) solid var(--silver-colors-primary);
+  outline-offset: var(--silver-spacing-focus-offset);
+}
+
+/*
+ * Dark mode toggle (see components/ThemeSelect.astro), sized to the landing
+ * page's icon-only TopNavItem rather than to round numbers: that recipe pairs
+ * `px: '2'` and `py: '1.5'` with a 20px icon under `aspectRatio: square`, so
+ * the box lands at 36px, not the 32px an `md` control suggests. Mirror the
+ * declarations and let the browser do the arithmetic — and mirror the colors
+ * too, `fg.muted` throughout with only the background moving on hover.
  */
 .theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
+  min-height: var(--silver-sizes-8);
+  padding-block: 0.375rem;
+  padding-inline: var(--silver-spacing-2);
+  aspect-ratio: 1 / 1;
   border: 0;
-  border-radius: 0.375rem;
+  border-radius: var(--silver-radii-md);
   background-color: transparent;
-  color: var(--sl-color-gray-2);
+  color: var(--silver-colors-fg-muted);
   cursor: pointer;
 }
 
+.theme-toggle:focus-visible {
+  outline: var(--silver-border-widths-focus) solid var(--silver-colors-primary);
+  outline-offset: var(--silver-spacing-focus-offset);
+}
+
 .theme-toggle:hover {
-  background-color: var(--sl-color-gray-6);
-  color: var(--sl-color-white);
+  background-color: var(--silver-colors-bg-hover);
 }
 
 /*
