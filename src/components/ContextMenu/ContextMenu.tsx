@@ -11,6 +11,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
+  type PointerEvent,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -40,9 +41,21 @@ export type ContextMenuSection = DropdownMenuSection;
 export type ContextMenuOption = DropdownMenuOption;
 export const ContextMenuItem = DropdownMenuItem;
 
+/**
+ * How long a touch must be held before the context menu opens.
+ */
+const LONG_PRESS_DURATION_MS = 500;
+
+/**
+ * How far a touch may drift (in px) before it is treated as a scroll/drag
+ * rather than a long press.
+ */
+const LONG_PRESS_MOVE_THRESHOLD_PX = 10;
+
 interface ContextMenuBaseProps {
   /**
-   * The region that triggers the context menu on right-click.
+   * The region that triggers the context menu on right-click or touch
+   * long-press.
    */
   children: ReactNode;
   /**
@@ -139,7 +152,8 @@ function isPopoverOpen(element: HTMLElement | null): boolean {
 }
 
 /**
- * Right-click context menu for contextual actions on a region.
+ * Right-click (or touch long-press) context menu for contextual actions on a
+ * region.
  */
 export function ContextMenu({
   children,
@@ -157,6 +171,8 @@ export function ContextMenu({
   const menuId = useId();
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressOriginRef = useRef<{x: number; y: number} | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({x: 0, y: 0});
   const items = 'items' in props ? props.items : undefined;
@@ -209,6 +225,16 @@ export function ContextMenu({
     [focusFirstItem, hasAutoFocus, onOpenChange],
   );
 
+  const cancelLongPress = useCallback(() => {
+    if (longPressTimerRef.current != null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    longPressOriginRef.current = null;
+  }, []);
+
+  useEffect(() => cancelLongPress, [cancelLongPress]);
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -247,10 +273,45 @@ export function ContextMenu({
       if (isDisabled) {
         return;
       }
+      // A native touch long-press may fire `contextmenu`; if so, drop any
+      // pending long-press timer so the menu isn't opened twice.
+      cancelLongPress();
       event.preventDefault();
       show(event.clientX, event.clientY);
     },
-    [isDisabled, show],
+    [cancelLongPress, isDisabled, show],
+  );
+
+  const handlePointerDown = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (isDisabled || event.pointerType !== 'touch') {
+        return;
+      }
+      cancelLongPress();
+      const {clientX, clientY} = event;
+      longPressOriginRef.current = {x: clientX, y: clientY};
+      longPressTimerRef.current = setTimeout(() => {
+        longPressTimerRef.current = null;
+        longPressOriginRef.current = null;
+        show(clientX, clientY);
+      }, LONG_PRESS_DURATION_MS);
+    },
+    [cancelLongPress, isDisabled, show],
+  );
+
+  const handlePointerMove = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const origin = longPressOriginRef.current;
+      if (origin == null) {
+        return;
+      }
+      const dx = event.clientX - origin.x;
+      const dy = event.clientY - origin.y;
+      if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_THRESHOLD_PX) {
+        cancelLongPress();
+      }
+    },
+    [cancelLongPress],
   );
 
   const handleTriggerKeyDown = useCallback(
@@ -288,6 +349,10 @@ export function ContextMenu({
         data-testid={dataTestId}
         onContextMenu={handleContextMenu}
         onKeyDown={handleTriggerKeyDown}
+        onPointerCancel={cancelLongPress}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={cancelLongPress}
         ref={triggerRef}
         role="button"
         tabIndex={0}>

@@ -52,6 +52,24 @@ export const Default: Story = {
   ),
 };
 
+export const TouchLongPress: Story = {
+  render: (): React.JSX.Element => (
+    <ContextMenu
+      items={[
+        {icon: Pencil, label: 'Rename'},
+        {icon: Copy, label: 'Duplicate'},
+        {type: 'divider'},
+        {icon: Trash, label: 'Delete'},
+      ]}>
+      <div className={styles.target}>
+        <Text as="span" type="body">
+          Long-press this area on a touch device (or right-click)
+        </Text>
+      </div>
+    </ContextMenu>
+  ),
+};
+
 export const WithDescriptions: Story = {
   render: (): React.JSX.Element => (
     <ContextMenu
