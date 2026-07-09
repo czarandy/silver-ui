@@ -4,20 +4,22 @@ import {createContext, use} from 'react';
 
 export type LayoutArea = 'header' | 'content' | 'start' | 'end' | 'footer';
 
-export interface LayoutDividerContextValue {
+export interface LayoutRegionsContextValue {
   hasDividers: boolean;
+  hasFooter: boolean;
+  hasHeader: boolean;
 }
 
 export const LayoutAreaContext = createContext<LayoutArea>('content');
 LayoutAreaContext.displayName = 'LayoutAreaContext';
-export const LayoutDividerContext =
-  createContext<LayoutDividerContextValue | null>(null);
-LayoutDividerContext.displayName = 'LayoutDividerContext';
+export const LayoutRegionsContext =
+  createContext<LayoutRegionsContextValue | null>(null);
+LayoutRegionsContext.displayName = 'LayoutRegionsContext';
 
 export function useLayoutArea(): LayoutArea {
   return use(LayoutAreaContext);
 }
 
-export function useLayoutDivider(): LayoutDividerContextValue | null {
-  return use(LayoutDividerContext);
+export function useLayoutRegions(): LayoutRegionsContextValue | null {
+  return use(LayoutRegionsContext);
 }

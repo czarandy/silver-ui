@@ -340,4 +340,19 @@ describe('AppShell', () => {
       layoutRegionRecipe({padding: 6}),
     );
   });
+
+  it('keeps the main padding under a top nav without dividers', () => {
+    render(
+      <AppShell contentPadding={6} topNav={topNav}>
+        <div>Content</div>
+      </AppShell>,
+    );
+
+    // The default variant has no dividers, which collapses a LayoutContent's
+    // padding against an adjacent header. Main is its own surface, so its
+    // padding is an inset from its own edge and must survive.
+    const main = screen.getByRole('main');
+    expect(main).not.toHaveClass('silver-pbs_0');
+    expect(main).not.toHaveClass('silver-pbe_0');
+  });
 });

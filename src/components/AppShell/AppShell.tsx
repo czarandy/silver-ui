@@ -2,13 +2,17 @@
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useId, useMemo, useRef, useState} from 'react';
-import {appShellRecipe} from 'components/AppShell/AppShell.recipe';
+import {
+  appShellMainRecipe,
+  appShellRecipe,
+} from 'components/AppShell/AppShell.recipe';
 import {
   AppShellMobileContext,
   type AppShellMobileContextValue,
 } from 'components/AppShell/AppShellMobileContext';
 import {useSlotPresence} from 'components/AppShell/useSlotPresence';
-import {Layout, LayoutContent, LayoutPanel} from 'components/Layout';
+import {Layout, LayoutPanel} from 'components/Layout';
+import {layoutRegionRecipe} from 'components/Layout/Layout.recipe';
 import {SideNavRenderContext} from 'components/SideNav';
 import {
   TopNavMobileContentContext,
@@ -346,14 +350,15 @@ export function AppShell({
         ? styles.contentSurface
         : undefined;
   const mainInner = (
-    <LayoutContent
-      as="main"
-      className={contentClassName}
-      id={mainContentId}
-      isScrollable={isFill}
-      padding={contentPadding ?? 0}>
+    <main
+      className={cx(
+        appShellMainRecipe({isScrollable: isFill}),
+        layoutRegionRecipe({padding: contentPadding ?? 0}),
+        contentClassName,
+      )}
+      id={mainContentId}>
       {children}
-    </LayoutContent>
+    </main>
   );
   const shouldElevateWithCorner =
     variant === 'default' && hasTopNavContent && showSideNavInline;
