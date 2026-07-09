@@ -34,6 +34,15 @@ const topNavHeadingRecipe = readFileSync(
   resolve(repoRoot, 'src/components/TopNav/TopNavHeading.recipe.ts'),
   'utf-8',
 );
+const landingApp = readFileSync(
+  resolve(siteRoot, 'src/landing/App.tsx'),
+  'utf-8',
+);
+const docsSocialIcons = readFileSync(
+  resolve(siteRoot, 'src/components/SocialIcons.astro'),
+  'utf-8',
+);
+const astroConfig = readFileSync(resolve(siteRoot, 'astro.config.ts'), 'utf-8');
 
 /**
  * Drop comments so prose about `@layer` is not mistaken for an at-rule.
@@ -146,8 +155,48 @@ describe('header content', () => {
     );
   });
 
-  it('leaves the toggle alone on the right of the docs header', () => {
-    // The landing nav's right side is the toggle and nothing else.
-    expect(docsCss).toMatch(/\.header \.social-icons\s*\{[^}]*display:\s*none/);
+  it('renders the docs header links from the shared list, not a copy', () => {
+    // Both navs map NAV_LINKS, so a link added to one appears in the other.
+    expect(landingApp).toMatch(
+      /import \{LINKS, NAV_LINKS\} from '\.\.\/nav-links'/,
+    );
+    expect(landingApp).toMatch(/NAV_LINKS\.map\(/);
+    expect(docsSocialIcons).toMatch(
+      /import \{NAV_LINKS\} from '\.\.\/nav-links'/,
+    );
+    expect(docsSocialIcons).toMatch(/NAV_LINKS\.map\(/);
+
+    // Neither may hardcode a destination alongside the shared list.
+    expect(docsSocialIcons).not.toMatch(/href="(https?:)?\//);
+  });
+
+  it('routes the docs links through the slot Starlight actually renders', () => {
+    // `SocialIcons` is the only header slot that appears both in the desktop
+    // right group and in the mobile menu footer, which is where the landing
+    // nav puts its links (bar, then drawer).
+    expect(astroConfig).toMatch(
+      /SocialIcons:\s*'\.\/src\/components\/SocialIcons\.astro'/,
+    );
+    // With the slot overridden, nothing reads `social` — leaving it would
+    // imply an icon row that never renders.
+    expect(astroConfig).not.toMatch(/^\s*social:/m);
+  });
+
+  it('styles the docs links like the landing TopNavItem text form', () => {
+    expect(topNavItemRecipe).toMatch(/px:\s*'3'/);
+    expect(topNavItemRecipe).toMatch(/fontWeight:\s*'medium'/);
+
+    const linkRule = /\.header-nav-link\s*\{([^}]*)\}/.exec(docsCss)?.[1] ?? '';
+    expect(linkRule).toMatch(/padding-inline:\s*var\(--silver-spacing-3\)/);
+    expect(linkRule).toMatch(/min-height:\s*var\(--silver-sizes-8\)/);
+    expect(linkRule).toMatch(/color:\s*var\(--silver-colors-fg-muted\)/);
+    expect(linkRule).toMatch(
+      /font-weight:\s*var\(--silver-font-weights-medium\)/,
+    );
+
+    // Starlight draws a divider beside the icons this slot used to hold.
+    expect(docsCss).toMatch(
+      /\.header \.social-icons::after\s*\{[^}]*content:\s*none/,
+    );
   });
 });

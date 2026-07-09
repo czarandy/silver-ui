@@ -27,16 +27,14 @@ export default defineConfig({
         alt: 'silver-ui',
       },
       favicon: '/favicon.ico',
-      // Swap Starlight's dark/light/auto <select> for the same icon-only
-      // button the landing page nav uses.
-      components: {ThemeSelect: './src/components/ThemeSelect.astro'},
-      social: [
-        {
-          icon: 'github',
-          label: 'GitHub',
-          href: 'https://github.com/czarandy/silver-ui',
-        },
-      ],
+      // Rebuild the header's right side out of the landing nav's parts: its
+      // icon-only dark mode button in place of the dark/light/auto <select>,
+      // and its link list in place of the `social` icon row — which is why no
+      // `social` config remains for Starlight to render.
+      components: {
+        SocialIcons: './src/components/SocialIcons.astro',
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
       sidebar: [
         {label: 'Getting started', slug: 'getting-started'},
         {label: 'Theming', slug: 'theming'},

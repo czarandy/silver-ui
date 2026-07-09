@@ -1,0 +1,24 @@
+---
+/**
+ * Override of Starlight's `SocialIcons`, which renders the `social` config as
+ * a row of icon links beside the theme toggle.
+ *
+ * Starlight has no slot for header nav links, but this component renders in
+ * exactly the two places the landing nav shows its own — the header's right
+ * group on desktop, and the mobile menu footer below it — so the link list
+ * goes here instead of the GitHub icon it used to hold. `astro.config.ts`
+ * drops the now-unread `social` config alongside this.
+ *
+ * Styling lives with the rest of the docs chrome in `styles/docs.css`, which
+ * restates `topNavItemRecipe` so these read as the landing page's nav links.
+ */
+import {NAV_LINKS} from '../nav-links';
+---
+
+{
+  NAV_LINKS.map(({href, label}) => (
+    <a class="header-nav-link" href={href}>
+      {label}
+    </a>
+  ))
+}
