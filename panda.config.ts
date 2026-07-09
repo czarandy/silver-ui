@@ -39,10 +39,14 @@ export default defineConfig({
   cssVarRoot: ':where(:root, :host)',
   conditions: {
     extend: {
-      dark: [
-        '@media (prefers-color-scheme: dark)',
-        '&:where([data-theme=dark])',
-      ],
+      // `_dark` is the *explicit* opt-in: it applies only when a `data-theme`
+      // attribute is present. Following the OS `prefers-color-scheme` for
+      // `<Theme mode="system">` is layered on afterwards by
+      // scripts/inject-system-theme.mjs, which mirrors the dark token block
+      // into a media query. (Panda treats an array condition as AND-nested,
+      // so a `['@media …', '[data-theme=dark]']` array does NOT mean "OS dark
+      // OR attribute dark" — it silently drops the media query. See issue #57.)
+      dark: '&:where([data-theme=dark])',
     },
   },
   theme: {

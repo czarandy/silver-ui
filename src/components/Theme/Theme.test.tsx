@@ -8,7 +8,9 @@ describe('Theme', () => {
 
     const theme = screen.getByTestId('theme');
     expect(theme).toHaveTextContent('Content');
-    expect(theme).not.toHaveAttribute('data-theme');
+    // System mode emits data-theme="system" so styles.css can target it under
+    // `@media (prefers-color-scheme: dark)` to follow the OS.
+    expect(theme).toHaveAttribute('data-theme', 'system');
   });
 
   it('sets data-theme for explicit modes', () => {
@@ -19,6 +21,16 @@ describe('Theme', () => {
     );
 
     expect(screen.getByTestId('theme')).toHaveAttribute('data-theme', 'dark');
+  });
+
+  it('sets data-theme="light" for an explicit light mode', () => {
+    render(
+      <Theme data-testid="theme" mode="light">
+        Content
+      </Theme>,
+    );
+
+    expect(screen.getByTestId('theme')).toHaveAttribute('data-theme', 'light');
   });
 
   it('maps friendly color tokens to CSS custom properties', () => {

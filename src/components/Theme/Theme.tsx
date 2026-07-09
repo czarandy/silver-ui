@@ -230,8 +230,9 @@ export interface ThemeProps extends HTMLAttributes<HTMLElement> {
    */
   'data-testid'?: string;
   /**
-   * Theme mode. System mode omits data-theme and follows existing CSS/media
-   * query behavior.
+   * Theme mode. `'system'` follows the OS `prefers-color-scheme` (rendering
+   * `data-theme="system"`), while `'light'` / `'dark'` pin the theme
+   * explicitly and always win over the OS preference.
    * @default 'system'
    */
   mode?: ThemeMode;
@@ -566,7 +567,10 @@ export function Theme({
       ...htmlProps,
       className: cx(themeClassName, className),
       'data-testid': dataTestId,
-      'data-theme': mode === 'system' ? undefined : mode,
+      // Always emit `data-theme` — including `data-theme="system"`, which the
+      // shipped styles.css targets under `@media (prefers-color-scheme: dark)`
+      // to follow the OS. Explicit `light` / `dark` pin the theme and win.
+      'data-theme': mode,
       ref,
       style: themeStyle,
     },
