@@ -121,6 +121,38 @@ describe('AutocompleteInput', () => {
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
+  // jsdom has no layout engine, so the right-alignment is asserted structurally:
+  // the tag sits in a slot that absorbs the free space, pushing the clear button
+  // to the trailing edge. It must not rely on an auto margin, which a consumer
+  // reset (`* {margin: 0}`) in a layer after Panda's `utilities` would zero out.
+  it('right-aligns the clear button without relying on an auto margin', () => {
+    render(
+      <AutocompleteInput
+        data-testid="assignee"
+        label="Assignee"
+        onChange={vi.fn()}
+        searchSource={createStaticSearchSource(items)}
+        value={items[0]}
+      />,
+    );
+
+    const wrapper = screen.getByTestId('assignee');
+    const clearButton = screen.getByRole('button', {name: 'Clear Assignee'});
+
+    expect(clearButton).not.toHaveClass('silver-ms_auto');
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the tag slot grows to push the clear button to the trailing edge
+    const tagSlot = assertNonNull(wrapper.firstElementChild);
+    expect(tagSlot).toHaveClass('silver-flex_1');
+    expect(tagSlot).toHaveTextContent('Ada Lovelace');
+
+    expect(wrapper).toContainElement(clearButton);
+    expect(
+      tagSlot.compareDocumentPosition(clearButton) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('clicking the tag enters edit mode with the label text in the input', async () => {
     const user = userEvent.setup();
 

@@ -161,6 +161,17 @@ const styles = {
     cursor: 'text',
     flexWrap: 'wrap',
   }),
+  // While the tag is shown the query input is taken out of flow, so nothing
+  // absorbs the free space before the clear button. This slot grows in its
+  // place, keeping the clear button flush right like TextInput's. Growth is
+  // used rather than an auto margin because a consumer reset (`* {margin: 0}`)
+  // in a CSS layer ordered after Panda's `utilities` would zero the margin.
+  tagSlot: css({
+    display: 'flex',
+    alignItems: 'center',
+    flex: 1,
+    minW: 0,
+  }),
   tag: css({
     my: '-1',
     ms: '-1',
@@ -171,9 +182,6 @@ const styles = {
     w: 0,
     minW: 0,
     flexBasis: 0,
-  }),
-  clearButton: css({
-    ms: 'auto',
   }),
 } as const;
 
@@ -286,13 +294,15 @@ export function AutocompleteInput<T extends SearchableItem>({
           </span>
         ) : null}
         {showTag ? (
-          <Tag
-            className={styles.tag}
-            isDisabled={isDisabled}
-            label={value.label}
-            onClick={() => startEditing(value.label)}
-            size={size}
-          />
+          <span className={styles.tagSlot}>
+            <Tag
+              className={styles.tag}
+              isDisabled={isDisabled}
+              label={value.label}
+              onClick={() => startEditing(value.label)}
+              size={size}
+            />
+          </span>
         ) : null}
         <BaseAutocompleteInput
           anchorRef={wrapperRef}
@@ -327,7 +337,6 @@ export function AutocompleteInput<T extends SearchableItem>({
         />
         {hasClear && value != null && !isDisabled ? (
           <Button
-            className={styles.clearButton}
             icon={X}
             isIconOnly
             label={`Clear ${label}`}
