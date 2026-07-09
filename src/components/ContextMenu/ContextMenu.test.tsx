@@ -171,6 +171,151 @@ describe('ContextMenu', () => {
     expect(showPopover).toHaveBeenCalledTimes(1);
   });
 
+  it('opens on a touch long-press near the press point', () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <ContextMenu items={[{label: 'Copy'}]}>
+          <div>Right-click me</div>
+        </ContextMenu>,
+      );
+
+      const trigger = screen.getByText('Right-click me');
+      fireEvent.pointerDown(trigger, {
+        clientX: 30,
+        clientY: 60,
+        pointerType: 'touch',
+      });
+
+      expect(showPopover).not.toHaveBeenCalled();
+
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(showPopover).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('menu', {hidden: true})).toHaveStyle({
+        left: '30px',
+        top: '60px',
+      });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not open on a short tap', () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <ContextMenu items={[{label: 'Copy'}]}>
+          <div>Right-click me</div>
+        </ContextMenu>,
+      );
+
+      const trigger = screen.getByText('Right-click me');
+      fireEvent.pointerDown(trigger, {
+        clientX: 30,
+        clientY: 60,
+        pointerType: 'touch',
+      });
+      act(() => {
+        vi.advanceTimersByTime(200);
+      });
+      fireEvent.pointerUp(trigger, {pointerType: 'touch'});
+
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(showPopover).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not open when the touch moves beyond the threshold (scroll)', () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <ContextMenu items={[{label: 'Copy'}]}>
+          <div>Right-click me</div>
+        </ContextMenu>,
+      );
+
+      const trigger = screen.getByText('Right-click me');
+      fireEvent.pointerDown(trigger, {
+        clientX: 30,
+        clientY: 60,
+        pointerType: 'touch',
+      });
+      fireEvent.pointerMove(trigger, {
+        clientX: 30,
+        clientY: 100,
+        pointerType: 'touch',
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(showPopover).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('ignores non-touch pointers (mouse press does not long-press)', () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <ContextMenu items={[{label: 'Copy'}]}>
+          <div>Right-click me</div>
+        </ContextMenu>,
+      );
+
+      const trigger = screen.getByText('Right-click me');
+      fireEvent.pointerDown(trigger, {
+        clientX: 30,
+        clientY: 60,
+        pointerType: 'mouse',
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(showPopover).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not long-press open when disabled', () => {
+    vi.useFakeTimers();
+    try {
+      render(
+        <ContextMenu isDisabled items={[{label: 'Copy'}]}>
+          <div>Right-click me</div>
+        </ContextMenu>,
+      );
+
+      const trigger = screen.getByText('Right-click me');
+      fireEvent.pointerDown(trigger, {
+        clientX: 30,
+        clientY: 60,
+        pointerType: 'touch',
+      });
+
+      act(() => {
+        vi.advanceTimersByTime(500);
+      });
+
+      expect(showPopover).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('closes the menu on Escape', () => {
     render(
       <ContextMenu items={[{label: 'Copy'}]}>
