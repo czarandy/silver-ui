@@ -1785,7 +1785,9 @@ describe('Table horizontal scroll region', () => {
 
     await user.tab();
 
-    expect(screen.getByRole('group', {name: 'Table scroll area'})).toHaveFocus();
+    expect(
+      screen.getByRole('group', {name: 'Table scroll area'}),
+    ).toHaveFocus();
   });
 
   it('does not publish a landmark per table', () => {

@@ -97,8 +97,7 @@ export interface TableProps<T extends Record<string, unknown>> {
    */
   isStriped?: boolean;
   /**
-   * Name of the table, used to label its horizontal scroll region when the
-   * table is wide enough to overflow.
+   * Name of the table, used to label its horizontal scroll region.
    * @default 'Table'
    */
   label?: string;
@@ -446,10 +445,7 @@ function TableInner<T extends Record<string, unknown>>({
   } as const;
 
   let tableElement: ReactNode = (
-    <div
-      {...scrollRegionProps}
-      className={classes.wrapper}
-      data-part="wrapper">
+    <div {...scrollRegionProps} className={classes.wrapper} data-part="wrapper">
       <table
         {...tableRenderProps.htmlProps}
         className={cx(
