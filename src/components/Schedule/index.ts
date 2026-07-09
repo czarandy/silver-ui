@@ -20,6 +20,7 @@ export {ScheduleContext, useScheduleContext} from 'components/Schedule/context';
 export {
   defaultSchedulePlugins,
   ScheduleEventPopoverContent,
+  useScheduleEventCreatePlugin,
   useScheduleEventMovePlugin,
   useScheduleEventPopoverPlugin,
   useScheduleEventResizePlugin,
@@ -27,6 +28,11 @@ export {
   useScheduleViewSelectorPlugin,
 } from 'components/Schedule/plugins';
 export type {ScheduleContextValue} from 'components/Schedule/context';
+export type {
+  ScheduleEventCreatePluginOptions,
+  ScheduleEventCreateRenderProps,
+  ScheduleEventDraft,
+} from 'components/Schedule/plugins/EventCreatePlugin';
 export type {
   ScheduleEventMoveChange,
   ScheduleEventMovePluginOptions,

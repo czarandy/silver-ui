@@ -181,6 +181,14 @@ export function formatHour(hour: number): string {
   });
 }
 
+export function formatTimeRange(
+  start: number,
+  end: number,
+  timezoneID: string,
+): string {
+  return `${formatTime(start, timezoneID)} - ${formatTime(end, timezoneID)}`;
+}
+
 export function getEventTimeLabel(
   event: CalendarEvent,
   timezoneID: string,
@@ -189,7 +197,31 @@ export function getEventTimeLabel(
     return 'all day';
   }
 
-  return `${formatTime(event.start, timezoneID)} - ${formatTime(event.end, timezoneID)}`;
+  return formatTimeRange(event.start, event.end, timezoneID);
+}
+
+/**
+ * Positions an absolutely-placed block inside its start-hour time-grid cell.
+ * Shared by real timed events and the create plugin's ghost so both sit on the
+ * same geometry. `top`/`height` are raw pixel offsets within the cell; `level`
+ * is the overlap column index.
+ */
+export function getTimedEventBlockStyle({
+  height,
+  level,
+  top,
+}: {
+  height: number;
+  level: number;
+  top: number;
+}): CSSProperties {
+  return {
+    height: `${Math.max(36, height - 5)}px`,
+    insetInlineEnd: '2px',
+    insetInlineStart: level === 0 ? '2px' : `calc(2px + ${level * 8}%)`,
+    top: `${top + 2}px`,
+    zIndex: level + 1,
+  };
 }
 
 function getEventStartTimeLabel(

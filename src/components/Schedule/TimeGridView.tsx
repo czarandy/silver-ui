@@ -21,6 +21,7 @@ import {
   getEventAccessibleLabel,
   getEventTimeLabel,
   getMinutesSinceStartOfDay,
+  getTimedEventBlockStyle,
   isEventInPast,
   scheduleClasses,
   ScheduleCurrentTimeIndicator,
@@ -174,20 +175,6 @@ function getTimedEventLayouts({
     });
 }
 
-function getTimedEventStyle({
-  height,
-  level,
-  top,
-}: TimedEventLayout): React.CSSProperties {
-  return {
-    height: `${Math.max(36, height - 5)}px`,
-    insetInlineEnd: '2px',
-    insetInlineStart: level === 0 ? '2px' : `calc(2px + ${level * 8}%)`,
-    top: `${top + 2}px`,
-    zIndex: level + 1,
-  };
-}
-
 /**
  * Renders a single positioned timed-event block. Becomes a clickable `<button>`
  * trigger when an event popover plugin is active, otherwise a static `<div>`.
@@ -239,7 +226,7 @@ function TimeGridEvent({
     isPast,
     isInteractive: triggerProps != null,
   });
-  const style = getTimedEventStyle(layout);
+  const style = getTimedEventBlockStyle(layout);
   const body = (
     <>
       <span className={classes.title}>{event.title}</span>
@@ -549,6 +536,24 @@ export function TimeGridView({
                   }),
                   {},
                 );
+                // The plugins array is stable, ordered config that is never
+                // reordered, so the index is a safe key for the cell content.
+                const hourCellContent = plugins.map(
+                  (plugin, pluginIndex): ReactNode => {
+                    const content = plugin.renderTimeGridCellContent?.({
+                      date: day,
+                      hour,
+                      hourHeight: normalizedHourHeight,
+                      maxHour: normalizedMaxHour,
+                      minHour: normalizedMinHour,
+                      timezoneID,
+                    });
+                    return isReactNode(content) ? (
+                      // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
+                      <Fragment key={pluginIndex}>{content}</Fragment>
+                    ) : null;
+                  },
+                );
                 return (
                   <div
                     aria-colindex={index + 2}
@@ -584,6 +589,7 @@ export function TimeGridView({
                         />
                       ))}
                     </div>
+                    {hourCellContent}
                   </div>
                 );
               })}
