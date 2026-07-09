@@ -39,6 +39,20 @@ export const WithDescription: Story = {
   },
 };
 
+export const BlockDescription: Story = {
+  args: {
+    title: 'Before you continue',
+    status: 'warning',
+    description: (
+      <ul style={{margin: 0, paddingInlineStart: '1.25rem'}}>
+        <li>Back up your data before proceeding.</li>
+        <li>Ensure all team members are notified.</li>
+        <li>This action cannot be undone.</li>
+      </ul>
+    ),
+  },
+};
+
 export const Dismissable: Story = {
   args: {
     title: 'Tip of the day',

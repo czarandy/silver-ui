@@ -45,6 +45,46 @@ describe('Alert', () => {
     expect(screen.getByText('Some helpful context')).toBeInTheDocument();
   });
 
+  it('renders title and description in div wrappers, not <p>', () => {
+    render(<Alert description="Details" status="info" title="Heads up" />);
+
+    expect(screen.getByText('Heads up').tagName).toBe('DIV');
+
+    const description = screen.getByText('Details');
+    expect(description.tagName).toBe('DIV');
+    expect(description).toHaveAttribute('role', 'paragraph');
+  });
+
+  it('renders block-level description content without invalid <p> nesting', () => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    render(
+      <Alert
+        description={
+          <ul>
+            <li>one</li>
+            <li>two</li>
+          </ul>
+        }
+        status="info"
+        title="With list"
+      />,
+    );
+
+    // Block content nests legally inside a <div>, so React emits no
+    // validateDOMNesting warning (which previously fired for <p><ul>…).
+    expect(consoleError).not.toHaveBeenCalled();
+
+    const list = screen.getByRole('list');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(list.closest('p')).toBeNull();
+    expect(screen.getByText('one')).toBeInTheDocument();
+
+    consoleError.mockRestore();
+  });
+
   it('does not render description when omitted', () => {
     render(<Alert status="info" title="Title only" />);
 
