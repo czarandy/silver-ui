@@ -163,7 +163,7 @@ export function useHoverCard({
             styles.margin[renderPlacement],
             props?.className,
           ),
-          role: props?.role,
+          role: props?.role ?? 'dialog',
           style: props?.style,
         },
       );
