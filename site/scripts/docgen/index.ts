@@ -15,6 +15,8 @@ import {
 } from './extract-stories';
 import {demosModule} from './generate-demos';
 import {componentMdx} from './generate-mdx';
+import {componentsIndexMd} from './generate-index';
+import {gettingStartedPage, syncSwatches, themingPage} from './import-guides';
 import {readmeDescriptions} from './readme-descriptions';
 import type {ComponentDocData} from './types';
 import {validateCategories} from './validate-categories';
@@ -114,6 +116,18 @@ export function runDocgen(): void {
       componentMdx(data, storyFiles),
     );
   }
+  writeFileSync(
+    join(mdxOutDir, 'index.md'),
+    componentsIndexMd(generated.map(({data}) => data)),
+  );
+
+  // Guides are single-sourced from the repo's README.md and THEME.md.
+  writeFileSync(
+    join(siteSrc, 'content/docs/getting-started.md'),
+    gettingStartedPage(),
+  );
+  writeFileSync(join(siteSrc, 'content/docs/theming.md'), themingPage());
+  syncSwatches();
 
   const elapsed = ((performance.now() - started) / 1000).toFixed(1);
   process.stdout.write(

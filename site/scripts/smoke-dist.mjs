@@ -48,6 +48,18 @@ check('getting-started docs page is generated', () => {
   assertContains(html, 'npm install silver-ui', 'install command');
 });
 
+check('theming guide is generated from THEME.md', () => {
+  const html = read('theming/index.html');
+  assertContains(html, 'Quick start', 'THEME.md section heading');
+  assertContains(html, '--silver-colors-primary', 'CSS variable reference');
+});
+
+check('components overview page is generated', () => {
+  const html = read('components/index.html');
+  assertContains(html, 'Layout &amp; Structure', 'category heading');
+  assertContains(html, '/components/button/', 'component link');
+});
+
 check('component pages are generated with props tables', () => {
   const html = read('components/button/index.html');
   assertContains(html, '<h2', 'API heading');

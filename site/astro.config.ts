@@ -21,6 +21,11 @@ export default defineConfig({
       title: 'silver-ui',
       description:
         'A comprehensive, themeable React component library built with Panda CSS.',
+      logo: {
+        src: './src/assets/wordmark.svg',
+        replacesTitle: true,
+        alt: 'silver-ui',
+      },
       favicon: '/favicon.ico',
       social: [
         {
@@ -31,6 +36,8 @@ export default defineConfig({
       ],
       sidebar: [
         {label: 'Getting started', slug: 'getting-started'},
+        {label: 'Theming', slug: 'theming'},
+        {label: 'Components', slug: 'components'},
         ...componentSidebarGroups(),
       ],
       // panda.css is generated with preflight scoped to the demo boxes, so

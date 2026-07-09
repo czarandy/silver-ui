@@ -1,5 +1,21 @@
 /* Docs-page chrome for the generated component pages. */
 
+/*
+ * The wordmark SVG is grayscale with near-black text, which disappears on
+ * the dark background. Invert it in dark mode: the text flips to near-white
+ * and, since the art has no hue, the rest stays color-accurate (same trick
+ * as the landing page nav).
+ */
+[data-theme='dark'] .site-title img {
+  filter: invert(1);
+}
+
+/* Match the 30px wordmark height used by the landing page nav. */
+.site-title img {
+  height: 1.875rem;
+  width: auto;
+}
+
 .component-lead {
   font-size: var(--sl-text-lg);
   color: var(--sl-color-gray-2);
