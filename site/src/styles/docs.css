@@ -1,6 +1,37 @@
 /* Docs-page chrome for the generated component pages. */
 
 /*
+ * Brand accent: point Starlight's accent colors (links, current-page pill,
+ * banners) at silver-ui's own teal tokens so the docs match silver-ui.com.
+ * Steps follow Starlight's lightness contract for each theme; light-mode
+ * links use the primary token itself, which is tuned to clear WCAG AA on
+ * white.
+ */
+:root {
+  --sl-color-accent-low: var(--silver-colors-teal-900);
+  --sl-color-accent: var(--silver-colors-teal-400);
+  --sl-color-accent-high: var(--silver-colors-teal-300);
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-low: var(--silver-colors-teal-100);
+  --sl-color-accent: var(--silver-colors-primary);
+  --sl-color-accent-high: var(--silver-colors-teal-700);
+}
+
+/*
+ * Sidebar current page: silver-ui's selected-item treatment (the SideNav
+ * `bg.selected` subtle teal with regular foreground text) instead of
+ * Starlight's solid accent pill with inverted text.
+ */
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover,
+.sidebar-content a[aria-current='page']:focus {
+  background-color: var(--silver-colors-bg-selected);
+  color: var(--sl-color-text);
+}
+
+/*
  * The wordmark SVG is grayscale with near-black text, which disappears on
  * the dark background. Invert it in dark mode: the text flips to near-white
  * and, since the art has no hue, the rest stays color-accurate (same trick
