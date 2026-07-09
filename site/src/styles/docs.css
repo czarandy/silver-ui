@@ -20,6 +20,26 @@
 }
 
 /*
+ * Nav surface: paint the header from silver-ui's own `bg.subtle` token, and
+ * the hairline under it from `border`, which is what AppShell draws on the
+ * landing side (its `headerDivider` variant). The bar then reads as one
+ * continuous surface when a reader crosses between the two.
+ *
+ * One declaration covers both schemes: Panda defines these tokens under
+ * `:where(:root)` and `:where([data-theme=dark])`, so they already track the
+ * same `data-theme` attribute Starlight toggles. And Starlight scopes all of
+ * its own rules to `@layer starlight.*` while this file is unlayered, so these
+ * win the cascade outright — no specificity games needed.
+ */
+:root {
+  --sl-color-bg-nav: var(--silver-colors-bg-subtle);
+}
+
+.header {
+  border-bottom-color: var(--silver-colors-border);
+}
+
+/*
  * Sidebar current page: silver-ui's selected-item treatment (the SideNav
  * `bg.selected` subtle teal with regular foreground text) instead of
  * Starlight's solid accent pill with inverted text.
