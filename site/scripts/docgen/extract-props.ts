@@ -40,7 +40,9 @@ export function hasComponentIndex(name: string): boolean {
 }
 
 function docText(symbol: ts.Symbol, checker: ts.TypeChecker): string {
-  return ts.displayPartsToString(symbol.getDocumentationComment(checker));
+  return ts
+    .displayPartsToString(symbol.getDocumentationComment(checker))
+    .replace(/\{@link\s+([^}]+?)\s*\}/g, '$1');
 }
 
 function resolveAlias(symbol: ts.Symbol, checker: ts.TypeChecker): ts.Symbol {

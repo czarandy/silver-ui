@@ -1,4 +1,5 @@
 import {describe, expect, it} from 'vitest';
+import {firstSentence} from './first-sentence';
 import {componentMdx} from './generate-mdx';
 import {readmeDescriptions} from './readme-descriptions';
 
@@ -6,6 +7,7 @@ describe('componentMdx', () => {
   it('renders frontmatter, lead, and one API section per export', () => {
     const mdx = componentMdx({
       name: 'Stack',
+      label: 'Stack',
       slug: 'stack',
       category: 'Layout & Structure',
       description: 'Flex containers with gap.',
@@ -27,6 +29,7 @@ describe('componentMdx', () => {
   it('escapes quotes in descriptions via JSON stringification', () => {
     const mdx = componentMdx({
       name: 'Kbd',
+      label: 'Kbd',
       slug: 'kbd',
       category: 'Data Display',
       description: 'Shows "keyboard" keys.',
@@ -43,5 +46,25 @@ describe('readmeDescriptions', () => {
     // Combined entries map each name.
     expect(descriptions.get('HStack')).toContain('flex containers');
     expect(descriptions.get('VStack')).toContain('flex containers');
+  });
+});
+
+describe('firstSentence', () => {
+  it('returns the first sentence of multi-paragraph JSDoc on one line', () => {
+    expect(
+      firstSentence('Controlled tab wrapper.\n\nUses tablist semantics.'),
+    ).toBe('Controlled tab wrapper.');
+  });
+
+  it('does not split on periods inside identifiers', () => {
+    expect(firstSentence('Uses Temporal.PlainDate values. More.')).toBe(
+      'Uses Temporal.PlainDate values.',
+    );
+  });
+
+  it('passes through sentence fragments without a period', () => {
+    expect(firstSentence('A fragment without punctuation')).toBe(
+      'A fragment without punctuation',
+    );
   });
 });
