@@ -9,5 +9,6 @@ styled-system/
 .astro/
 site/src/generated/
 site/src/content/docs/components/
+site/src/styles/panda.css
 .codex-worktrees/
 .claude/worktrees/

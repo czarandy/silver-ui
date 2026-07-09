@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "docgen": "tsx scripts/docgen/index.ts",
-    "predev": "pnpm docgen && pnpm -w exec panda cssgen --outfile dist/styles.css --minify",
+    "cssgen": "pnpm -w exec panda cssgen --outfile dist/styles.css --minify && pnpm -w exec panda cssgen --config panda.docs.config.ts --outfile site/src/styles/panda.css --minify",
+    "predev": "pnpm docgen && pnpm cssgen",
     "dev": "astro dev",
-    "prebuild": "pnpm docgen && pnpm -w exec panda cssgen --outfile dist/styles.css --minify",
+    "prebuild": "pnpm docgen && pnpm cssgen",
     "build": "astro build",
     "postbuild": "node scripts/smoke-dist.mjs",
     "preview": "astro preview",
@@ -25,9 +26,12 @@
     "@astrojs/check": "^0.9.6",
     "@astrojs/react": "^6.0.1",
     "@astrojs/starlight": "^0.41.3",
+    "@storybook/react": "^10.4.6",
+    "@storybook/react-vite": "^10.4.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.1.6",
     "astro": "^7.0.0",
+    "storybook": "^10.4.6",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   }

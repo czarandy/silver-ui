@@ -9,6 +9,21 @@
   margin-top: 1.5rem;
 }
 
+/* Live demo boxes. The silver-ui bg/fg tokens track Starlight's data-theme. */
+.component-preview {
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  background: var(--silver-colors-bg);
+  color: var(--silver-colors-fg);
+  overflow-x: auto;
+}
+
+/* The demo box owns spacing; the code block hugs it. */
+.component-preview + .expressive-code {
+  margin-top: 0.5rem;
+}
+
 /* Wide props tables scroll inside their own container. */
 .props-table {
   overflow-x: auto;

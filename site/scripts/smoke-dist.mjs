@@ -58,6 +58,18 @@ check('component pages are generated with props tables', () => {
   assertContains(html, '/components/date-input', 'sidebar cross-link');
 });
 
+check('live demos are prerendered into the page', () => {
+  const html = read('components/button/index.html');
+  assertContains(html, 'data-component-preview', 'demo preview box');
+  // The story island must contain server-rendered component markup (a real
+  // <button> with Panda classes), not an empty hydration shell.
+  if (!/<astro-island[^>]*>\s*<button[^>]*class="silver-/.test(html)) {
+    throw new Error("no SSR'd <button> markup inside a story island");
+  }
+  // And the code snippet next to it.
+  assertContains(html, 'variant=', 'story snippet');
+});
+
 check('sitemap index is generated', () => {
   const sitemap = read('sitemap-index.xml');
   assertContains(sitemap, '<sitemapindex', 'sitemapindex root element');
