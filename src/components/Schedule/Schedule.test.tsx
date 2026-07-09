@@ -383,6 +383,62 @@ describe('Schedule', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps the header mounted across the initial async load', async () => {
+    let resolveEvents: (events: CalendarEvent[]) => void = () => {};
+    const eventsPromise = new Promise<CalendarEvent[]>(resolve => {
+      resolveEvents = resolve;
+    });
+    const loader = vi.fn(async () => eventsPromise);
+    const plugin: SchedulePlugin = {
+      renderHeader: (startContent, centerContent, endContent) => ({
+        centerContent,
+        endContent: (
+          <>
+            {endContent}
+            <button data-testid="header-plugin-button" type="button">
+              Settings
+            </button>
+          </>
+        ),
+        startContent,
+      }),
+    };
+
+    render(
+      <Schedule
+        events={loader}
+        plugins={[plugin]}
+        timezoneID="UTC"
+        view={createScheduleDayView()}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const button = screen.getByTestId('header-plugin-button');
+    expect(
+      screen.getByRole('status', {name: 'Loading events'}),
+    ).toBeInTheDocument();
+
+    resolveEvents([
+      createEventFromISO({
+        end: '2026-05-13T18:00:00.000Z',
+        id: 'loaded',
+        start: '2026-05-13T17:00:00.000Z',
+        title: 'Loaded event',
+      }),
+    ]);
+
+    expect(
+      await screen.findByTestId('schedule-event-loaded'),
+    ).toBeInTheDocument();
+    // The same node, not a remounted copy: state held by header controls (an
+    // open popover, focus) survives the load completing.
+    expect(screen.getByTestId('header-plugin-button')).toBe(button);
+    expect(
+      screen.queryByRole('status', {name: 'Loading events'}),
+    ).not.toBeInTheDocument();
+  });
+
   it('throws loader rejection errors through the nearest error boundary', async () => {
     // The loader rejection is intentional and caught by the ErrorBoundary;
     // silence React's expected error logging for the thrown component tree.
