@@ -1,7 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Inbox, Plus, RefreshCw, Settings} from 'lucide-react';
+import {useState} from 'react';
 import {Button} from 'components/Button/Button';
 import {Icon} from 'components/Icon';
+import {SegmentedControl} from 'components/SegmentedControl/SegmentedControl';
+import {SegmentedControlItem} from 'components/SegmentedControl/SegmentedControlItem';
+import {TextInput} from 'components/TextInput';
 import {css} from 'styled-system/css';
 
 const meta = {
@@ -53,6 +57,46 @@ export const Sizes: Story = {
       <Button label="Large" size="lg" />
     </div>
   ),
+};
+
+/**
+ * Button, the input family and SegmentedControl all size themselves from the
+ * shared `component.*` scale, so they stay the same height at any given size.
+ * Scoping that token to a single component would break this alignment.
+ */
+export const SizeAlignment: Story = {
+  render: function SizeAlignmentStory() {
+    const [value, setValue] = useState('day');
+    const [name, setName] = useState('');
+
+    return (
+      <div style={{display: 'grid', gap: '1.5rem'}}>
+        {(['sm', 'md', 'lg'] as const).map(size => (
+          <div
+            key={size}
+            style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+            <Button label={size} size={size} variant="primary" />
+            <TextInput
+              isLabelHidden
+              label={`Name (${size})`}
+              onChange={setName}
+              placeholder="Name"
+              size={size}
+              value={name}
+            />
+            <SegmentedControl
+              label={`View (${size})`}
+              onChange={setValue}
+              size={size}
+              value={value}>
+              <SegmentedControlItem label="Day" value="day" />
+              <SegmentedControlItem label="Week" value="week" />
+            </SegmentedControl>
+          </div>
+        ))}
+      </div>
+    );
+  },
 };
 
 export const WithContent: Story = {

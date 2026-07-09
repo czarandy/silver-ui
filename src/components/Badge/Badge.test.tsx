@@ -64,6 +64,26 @@ describe('Badge', () => {
     );
   });
 
+  // Badge text shares the `component.*` ramp with Button and the input family,
+  // so a badge never renders larger text than a control of the same size.
+  it('takes its font size from the shared control ramp', () => {
+    const sizes = ['sm', 'md', 'lg'] as const;
+
+    render(
+      <>
+        {sizes.map(size => (
+          <Badge data-testid={size} key={size} label={size} size={size} />
+        ))}
+      </>,
+    );
+
+    for (const size of sizes) {
+      expect(screen.getByTestId(size)).toHaveClass(
+        `silver-fs_component.${size}`,
+      );
+    }
+  });
+
   it('does not render an icon when icon is not provided', () => {
     render(<Badge data-testid="badge" label="No icon" />);
 

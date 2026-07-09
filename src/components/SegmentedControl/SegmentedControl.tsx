@@ -101,7 +101,7 @@ export function SegmentedControl<TValue extends string = string>({
     () => ({isDisabled, layout, onChange: handleChange, size, value}),
     [handleChange, isDisabled, layout, size, value],
   );
-  const classes = segmentedControlRecipe({isDisabled, layout});
+  const classes = segmentedControlRecipe({isDisabled, layout, size});
 
   const getItems = useCallback(
     () =>

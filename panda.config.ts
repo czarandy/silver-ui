@@ -596,9 +596,9 @@ export default defineConfig({
           // `4.5`/`5.5` but jumps straight from `6` to `7`.
           '6.5': {value: '1.625rem'},
           component: {
-            sm: {value: '{sizes.8}'},
-            md: {value: '{sizes.10}'},
-            lg: {value: '{sizes.12}'},
+            sm: {value: '{sizes.7}'},
+            md: {value: '{sizes.9}'},
+            lg: {value: '{sizes.11}'},
           },
           icon: {
             sm: {value: '{sizes.4}'},
@@ -618,9 +618,11 @@ export default defineConfig({
           focusOffsetLoose: {value: '3px'},
         },
         fontSizes: {
+          // The component scale is deliberately offset from the type scale:
+          // `sm` and `md` share 14px, and only `lg` steps up to 16px.
           component: {
             sm: {value: '{fontSizes.sm}'},
-            md: {value: '{fontSizes.md}'},
+            md: {value: '{fontSizes.sm}'},
             lg: {value: '{fontSizes.md}'},
           },
           icon: {
