@@ -40,6 +40,7 @@ import type {
   TableVerticalAlign,
 } from 'components/Table/types';
 import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
+import {useHorizontalOverflow} from 'components/Table/useHorizontalOverflow';
 import {Text} from 'components/Text';
 import isReactNode from 'internal/isReactNode';
 import useShallowEqualMemo from 'internal/useShallowEqualMemo';
@@ -96,6 +97,12 @@ export interface TableProps<T extends Record<string, unknown>> {
    * @default false
    */
   isStriped?: boolean;
+  /**
+   * Name of the table, used to label its horizontal scroll region when the
+   * table is wide enough to overflow.
+   * @default 'Table'
+   */
+  label?: string;
   /**
    * Plugin map or array that extends table behavior.
    */
@@ -280,6 +287,7 @@ function TableInner<T extends Record<string, unknown>>({
   hasHover = false,
   idKey,
   isStriped = false,
+  label = 'Table',
   plugins: userPlugins,
   ref,
   style,
@@ -288,6 +296,7 @@ function TableInner<T extends Record<string, unknown>>({
   verticalAlign = 'middle',
 }: TableProps<T> & {ref?: Ref<HTMLTableElement>}): ReactElement {
   const plugins = useBaseTablePlugins(userPlugins);
+  const {isOverflowing, ref: wrapperRef} = useHorizontalOverflow();
   const contextValue = useMemo(
     (): TableContextValue => ({
       density,
@@ -430,8 +439,22 @@ function TableInner<T extends Record<string, unknown>>({
   const hasData = data != null && data.length > 0;
   const hasColumns = columns.length > 0;
 
+  // A scroll region is only worth a tab stop once it actually scrolls, so the
+  // keyboard affordances appear and disappear with the overflow.
+  const scrollRegionProps = isOverflowing
+    ? ({
+        'aria-label': `${label} scroll area`,
+        role: 'region',
+        tabIndex: 0,
+      } as const)
+    : null;
+
   let tableElement: ReactNode = (
-    <div className={classes.wrapper} data-part="wrapper">
+    <div
+      {...scrollRegionProps}
+      className={classes.wrapper}
+      data-part="wrapper"
+      ref={wrapperRef}>
       <table
         {...tableRenderProps.htmlProps}
         className={cx(
