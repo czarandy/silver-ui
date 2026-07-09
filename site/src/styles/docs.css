@@ -16,6 +16,16 @@
   width: auto;
 }
 
+/*
+ * Header social icons (GitHub): Starlight renders them accent-blue with a
+ * foreground-colored hover; use the foreground color for both states
+ * (black in light mode, white in dark).
+ */
+.header a[rel='me'],
+.header a[rel='me']:hover {
+  color: var(--sl-color-white);
+}
+
 .component-lead {
   font-size: var(--sl-text-lg);
   color: var(--sl-color-gray-2);
