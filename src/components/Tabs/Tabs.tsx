@@ -15,6 +15,7 @@ import {
   type TabsLayout,
   type TabsSize,
 } from 'components/Tabs/TabsContext';
+import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
@@ -119,7 +120,13 @@ export function Tabs({
     orientation: 'horizontal',
   });
 
+  const hint = useKeyboardHint({orientation: 'horizontal'});
+
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    // Dismiss before the guards below: an arrow press means the user found the
+    // affordance, even when the key came from somewhere we do not navigate.
+    hint.onKeyDown(event);
+
     const activeTab = (event.target as HTMLElement).closest<HTMLElement>(
       '[role="tab"]',
     );
@@ -142,12 +149,15 @@ export function Tabs({
         aria-label={label}
         className={cx(classes.root, className)}
         data-testid={dataTestId}
+        onBlur={hint.onBlur}
+        onFocus={hint.onFocus}
         onKeyDown={handleKeyDown}
         ref={mergeRefs(ref as Ref<HTMLDivElement>, tabListRef)}
         role="tablist"
         style={style}
         tabIndex={-1}>
         {children}
+        {hint.hintElement}
       </div>
     </TabsContext>
   );

@@ -2,9 +2,30 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {LayoutGrid} from 'lucide-react';
 import {useState} from 'react';
-import {describe, expect, it, vi} from 'vitest';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import {SegmentedControl} from 'components/SegmentedControl/SegmentedControl';
 import {SegmentedControlItem} from 'components/SegmentedControl/SegmentedControlItem';
+import {assertNonNull, createPopoverFocusShim} from 'internal/testHelpers';
+
+const shim = createPopoverFocusShim();
+
+beforeAll(shim.install);
+afterAll(shim.uninstall);
+beforeEach(() => {
+  shim.reset();
+  // This suite predates the keyboard hint and focuses items directly, which in
+  // a real browser is not focus-visible. Default to pointer modality and opt in
+  // where the hint is under test.
+  shim.setFocusVisible(false);
+});
 
 describe('SegmentedControl', () => {
   it('renders a labelled radiogroup', () => {
@@ -379,5 +400,83 @@ describe('SegmentedControl', () => {
     expect(() =>
       render(<SegmentedControlItem label="Orphan" value="orphan" />),
     ).toThrow('SegmentedControlItem must be used within a SegmentedControl.');
+  });
+
+  describe('keyboard navigation hint', () => {
+    function renderControl(isDisabled = false) {
+      const view = render(
+        <SegmentedControl
+          isDisabled={isDisabled}
+          label="View mode"
+          onChange={vi.fn()}
+          value="grid">
+          <SegmentedControlItem label="Grid" value="grid" />
+          <SegmentedControlItem label="List" value="list" />
+        </SegmentedControl>,
+      );
+      const getHint = () =>
+        assertNonNull(
+          // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the hint is aria-hidden, so it cannot be reached by role or text
+          view.container.querySelector<HTMLElement>('[popover="manual"]'),
+          'hint layer should be rendered',
+        );
+      return {...view, getHint};
+    }
+
+    it('shows an arrow-key hint on keyboard focus', () => {
+      shim.setFocusVisible(true);
+      renderControl();
+
+      fireEvent.focus(screen.getByRole('radio', {name: 'Grid'}));
+
+      expect(shim.showPopover).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not show the hint when a segment is focused by pointer', () => {
+      renderControl();
+
+      fireEvent.focus(screen.getByRole('radio', {name: 'Grid'}));
+
+      expect(shim.showPopover).not.toHaveBeenCalled();
+    });
+
+    it('does not show the hint when the control is disabled', () => {
+      shim.setFocusVisible(true);
+      renderControl(true);
+
+      fireEvent.focus(screen.getByRole('radio', {name: 'Grid'}));
+
+      expect(shim.showPopover).not.toHaveBeenCalled();
+    });
+
+    it('dismisses the hint on the first arrow press, still moving selection', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      shim.setFocusVisible(true);
+      render(
+        <SegmentedControl label="View mode" onChange={onChange} value="grid">
+          <SegmentedControlItem label="Grid" value="grid" />
+          <SegmentedControlItem label="List" value="list" />
+        </SegmentedControl>,
+      );
+      const grid = screen.getByRole('radio', {name: 'Grid'});
+      fireEvent.focus(grid);
+      grid.focus();
+
+      await user.keyboard('{ArrowRight}');
+
+      expect(shim.hidePopover).toHaveBeenCalledTimes(1);
+      // The hint must not swallow the key it dismisses on.
+      expect(onChange).toHaveBeenCalledWith('list');
+    });
+
+    it('keeps the hint out of the accessibility tree', () => {
+      shim.setFocusVisible(true);
+      const {getHint} = renderControl();
+
+      expect(getHint()).toHaveAttribute('aria-hidden', 'true');
+      // The radiogroup may only own radios; an exposed layer would violate that.
+      expect(screen.getAllByRole('radio')).toHaveLength(2);
+    });
   });
 });
