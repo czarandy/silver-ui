@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {DialogContext} from 'components/Dialog/DialogContext';
 import {Layout} from 'components/Layout/Layout';
+import {layoutHeaderRecipe} from 'components/Layout/Layout.recipe';
 import {LayoutContent} from 'components/Layout/LayoutContent';
 import {LayoutFooter} from 'components/Layout/LayoutFooter';
 import {LayoutHeader} from 'components/Layout/LayoutHeader';
@@ -225,6 +226,36 @@ describe('LayoutHeader', () => {
     render(<LayoutHeader data-testid="header" height={64} title="Header" />);
 
     expect(screen.getByTestId('header')).toHaveStyle({height: '64px'});
+  });
+
+  it('trims the title and subtitle leading against the header padding', () => {
+    const {titleArea} = layoutHeaderRecipe({align: 'start', hasDivider: false});
+
+    expect(titleArea).toContain(
+      '[&_>_*]:silver-text-box_trim-both_cap_alphabetic',
+    );
+    // The trimmed leading no longer separates the title from the subtitle, so
+    // the gap replacing it is scoped to the same feature query.
+    expect(titleArea).toContain(
+      '[@supports_(text-box-trim:_trim-both)]:silver-gap_4',
+    );
+  });
+
+  it('offsets the Dialog close button to match the trimmed title', () => {
+    render(
+      <DialogContext value={{onOpenChange: vi.fn(), titleId: 'title'}}>
+        <LayoutHeader title="Header" />
+      </DialogContext>,
+    );
+
+    const closeButton = screen.getByRole('button', {name: 'Close'});
+
+    expect(closeButton).toHaveClass('silver-mbs_-2');
+    // Both block margins, so a subtitle-less header's height stays driven by
+    // the title rather than by the taller close button.
+    expect(closeButton).toHaveClass(
+      '[@supports_(text-box-trim:_trim-both)]:silver-my_-3',
+    );
   });
 
   it('does not render a close button outside a Dialog', () => {
