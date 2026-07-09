@@ -64,6 +64,16 @@ body {
   }
 }
 
+/*
+ * TopNavHeading carries `px: '2'` so its focus ring has room, which pushes the
+ * wordmark 0.5rem inside the header padding. The docs site-title sits flush
+ * against that padding (Starlight cancels its own with a negative margin), so
+ * cancel ours the same way — keeping the padding, and the ring, intact.
+ */
+.page .site-nav__heading {
+  margin-inline-start: calc(-1 * var(--silver-spacing-2));
+}
+
 .brand__wordmark {
   display: block;
   height: 30px;

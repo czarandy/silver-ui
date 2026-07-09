@@ -288,6 +288,7 @@ export function App(): JSX.Element {
             heading={
               <TopNavHeading
                 aria-label="silver-ui home"
+                className="site-nav__heading"
                 href="/"
                 logo={
                   <img

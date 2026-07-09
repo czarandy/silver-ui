@@ -68,37 +68,46 @@
 }
 
 /*
- * Header social icons (GitHub): Starlight renders them accent-blue with a
- * foreground-colored hover; use the foreground color for both states
- * (black in light mode, white in dark).
+ * Header social icons: the landing nav's right side holds nothing but the dark
+ * mode toggle, so hide Starlight's GitHub icon (and the `::after` rule that
+ * draws a divider beside it) to leave the two right sides identical. The
+ * `social` config stays, so the link still reaches readers from the mobile
+ * menu footer, which the header's `md:sl-flex` right group never shows.
  */
-.header a[rel='me'],
-.header a[rel='me']:hover {
-  color: var(--sl-color-white);
+.header .social-icons {
+  display: none;
 }
 
 /*
- * Dark mode toggle (see components/ThemeSelect.astro). Geometry mirrors the
- * landing page's icon-only TopNavItem: a 2rem square with an `md` radius and
- * a 20px icon, muted until hovered.
+ * Dark mode toggle (see components/ThemeSelect.astro), sized to the landing
+ * page's icon-only TopNavItem rather than to round numbers: that recipe pairs
+ * `px: '2'` and `py: '1.5'` with a 20px icon under `aspectRatio: square`, so
+ * the box lands at 36px, not the 32px an `md` control suggests. Mirror the
+ * declarations and let the browser do the arithmetic — and mirror the colors
+ * too, `fg.muted` throughout with only the background moving on hover.
  */
 .theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
+  min-height: var(--silver-sizes-8);
+  padding-block: 0.375rem;
+  padding-inline: var(--silver-spacing-2);
+  aspect-ratio: 1 / 1;
   border: 0;
-  border-radius: 0.375rem;
+  border-radius: var(--silver-radii-md);
   background-color: transparent;
-  color: var(--sl-color-gray-2);
+  color: var(--silver-colors-fg-muted);
   cursor: pointer;
 }
 
+.theme-toggle:focus-visible {
+  outline: var(--silver-border-widths-focus) solid var(--silver-colors-primary);
+  outline-offset: var(--silver-spacing-focus-offset);
+}
+
 .theme-toggle:hover {
-  background-color: var(--sl-color-gray-6);
-  color: var(--sl-color-white);
+  background-color: var(--silver-colors-bg-hover);
 }
 
 /*

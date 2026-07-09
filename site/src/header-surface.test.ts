@@ -26,6 +26,14 @@ const appShellRecipe = readFileSync(
   resolve(repoRoot, 'src/components/AppShell/AppShell.recipe.ts'),
   'utf-8',
 );
+const topNavItemRecipe = readFileSync(
+  resolve(repoRoot, 'src/components/TopNav/TopNavItem.recipe.ts'),
+  'utf-8',
+);
+const topNavHeadingRecipe = readFileSync(
+  resolve(repoRoot, 'src/components/TopNav/TopNavHeading.recipe.ts'),
+  'utf-8',
+);
 
 /**
  * Drop comments so prose about `@layer` is not mistaken for an at-rule.
@@ -90,5 +98,56 @@ describe('header surface', () => {
     expect(landingCss).toMatch(
       /@media \(min-width: 50rem\)\s*\{\s*\.page \.site-nav\s*\{[^}]*min-height:\s*4rem;[^}]*padding-inline:\s*1\.5rem;/,
     );
+  });
+});
+
+describe('header content', () => {
+  const toggleRule = /\.theme-toggle\s*\{([^}]*)\}/.exec(docsCss)?.[1] ?? '';
+
+  it('sizes the docs toggle off the same values as the landing TopNavItem', () => {
+    // The recipe's icon-only box is `min-height: sizes.8`, `px: '2'`,
+    // `py: '1.5'` and `aspect-ratio: square` around a 20px icon. docs.css
+    // restates those declarations rather than the 36px they happen to produce,
+    // so the two buttons stay the same size if the recipe is retuned.
+    expect(topNavItemRecipe).toMatch(/minH:\s*'8'/);
+    expect(topNavItemRecipe).toMatch(/py:\s*'1\.5'/);
+    expect(topNavItemRecipe).toMatch(
+      /isIconOnly:\s*\{\s*true:\s*\{\s*px:\s*'2'/,
+    );
+    expect(topNavItemRecipe).toMatch(/aspectRatio:\s*'square'/);
+
+    expect(toggleRule).toMatch(/min-height:\s*var\(--silver-sizes-8\)/);
+    expect(toggleRule).toMatch(/padding-block:\s*0\.375rem/);
+    expect(toggleRule).toMatch(/padding-inline:\s*var\(--silver-spacing-2\)/);
+    expect(toggleRule).toMatch(/aspect-ratio:\s*1 \/ 1/);
+    // A fixed width/height would silently pin the box to the wrong size.
+    expect(toggleRule).not.toMatch(/^\s*(width|height):/m);
+  });
+
+  it('colors the docs toggle like the landing one: only the background moves', () => {
+    expect(topNavItemRecipe).toMatch(/color:\s*'fg\.muted'/);
+    expect(topNavItemRecipe).toMatch(/_hover:\s*\{bg:\s*'bg\.hover'\}/);
+
+    expect(toggleRule).toMatch(/color:\s*var\(--silver-colors-fg-muted\)/);
+
+    const hover = /\.theme-toggle:hover\s*\{([^}]*)\}/.exec(docsCss)?.[1] ?? '';
+    expect(hover).toMatch(
+      /background-color:\s*var\(--silver-colors-bg-hover\)/,
+    );
+    // Starlight's own controls brighten their text on hover; ours must not, or
+    // it drifts from the landing toggle on every pointer-over.
+    expect(hover).not.toMatch(/(^|[^-])color:/);
+  });
+
+  it('pulls the landing wordmark flush by exactly TopNavHeading’s padding', () => {
+    expect(topNavHeadingRecipe).toMatch(/px:\s*'2'/);
+    expect(landingCss).toMatch(
+      /\.page \.site-nav__heading\s*\{[^}]*margin-inline-start:\s*calc\(-1 \* var\(--silver-spacing-2\)\)/,
+    );
+  });
+
+  it('leaves the toggle alone on the right of the docs header', () => {
+    // The landing nav's right side is the toggle and nothing else.
+    expect(docsCss).toMatch(/\.header \.social-icons\s*\{[^}]*display:\s*none/);
   });
 });
