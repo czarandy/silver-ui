@@ -71,7 +71,7 @@ export const SizeAlignment: Story = {
 
     return (
       <div style={{display: 'grid', gap: '1.5rem'}}>
-        {(['sm', 'md', 'lg'] as const).map((size) => (
+        {(['sm', 'md', 'lg'] as const).map(size => (
           <div
             key={size}
             style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>

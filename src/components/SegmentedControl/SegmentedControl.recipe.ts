@@ -52,15 +52,30 @@ export const segmentedControlRecipe = sva({
     size: {
       sm: {
         root: {h: 'component.sm'},
-        item: {h: 'full', px: '2', borderRadius: 'sm', fontSize: 'component.sm'},
+        item: {
+          h: 'full',
+          px: '2',
+          borderRadius: 'sm',
+          fontSize: 'component.sm',
+        },
       },
       md: {
         root: {h: 'component.md'},
-        item: {h: 'full', px: '3', borderRadius: 'sm', fontSize: 'component.md'},
+        item: {
+          h: 'full',
+          px: '3',
+          borderRadius: 'sm',
+          fontSize: 'component.md',
+        },
       },
       lg: {
         root: {h: 'component.lg'},
-        item: {h: 'full', px: '3', borderRadius: 'md', fontSize: 'component.lg'},
+        item: {
+          h: 'full',
+          px: '3',
+          borderRadius: 'md',
+          fontSize: 'component.lg',
+        },
       },
     },
     layout: {
