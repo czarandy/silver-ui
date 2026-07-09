@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type FocusEvent,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -162,6 +163,7 @@ export function ToastViewport({
 }: ToastViewportProps): React.JSX.Element {
   const [toasts, setToasts] = useState<ToastEntry[]>([]);
   const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set());
+  const [isFocusWithinViewport, setIsFocusWithinViewport] = useState(false);
   const toastsRef = useRef(toasts);
   const viewportRef = useRef<HTMLDivElement>(null);
   const exitTimeoutsRef = useRef(
@@ -171,6 +173,25 @@ export function ToastViewport({
   useEffect(() => {
     toastsRef.current = toasts;
   }, [toasts]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key !== 'F6' ||
+        event.altKey ||
+        event.ctrlKey ||
+        event.metaKey ||
+        toastsRef.current.length === 0
+      ) {
+        return;
+      }
+      event.preventDefault();
+      viewportRef.current?.focus();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const addToast = useCallback((entry: ToastEntry) => {
     setToasts(previous => {
@@ -242,6 +263,17 @@ export function ToastViewport({
     };
   }, []);
 
+  const handleBlurCapture = useCallback((event: FocusEvent<HTMLDivElement>) => {
+    const nextFocusedElement = event.relatedTarget;
+    if (
+      nextFocusedElement instanceof Node &&
+      event.currentTarget.contains(nextFocusedElement)
+    ) {
+      return;
+    }
+    setIsFocusWithinViewport(false);
+  }, []);
+
   const insetStyle: CSSProperties = {
     ...(inset?.top != null ? {top: inset.top} : null),
     ...(inset?.bottom != null ? {bottom: inset.bottom} : null),
@@ -255,13 +287,17 @@ export function ToastViewport({
     <ToastContext value={contextValue}>
       {children}
       <div
+        aria-keyshortcuts="F6"
         aria-label="Notifications"
         className={cx(styles.viewport, styles.position[position], className)}
         data-testid={dataTestId}
+        onBlurCapture={handleBlurCapture}
+        onFocusCapture={() => setIsFocusWithinViewport(true)}
         popover={isTopLayer ? 'manual' : undefined}
         ref={mergeRefs(viewportRef, ref)}
         role="region"
-        style={insetStyle}>
+        style={insetStyle}
+        tabIndex={visibleToasts.length > 0 ? 0 : -1}>
         {visibleToasts.map(entry => {
           const type = entry.options.type ?? 'info';
           const isAutoHide =
@@ -280,6 +316,7 @@ export function ToastViewport({
                   endContent={entry.options.endContent}
                   isAutoHide={isAutoHide}
                   isExiting={exitingIds.has(entry.id)}
+                  isPaused={isFocusWithinViewport}
                   onDismiss={reason => removeToast(entry.id, reason)}
                   type={type}
                 />
