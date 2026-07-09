@@ -115,6 +115,10 @@ export const layoutContentRecipe = cva({
   },
 });
 
+// Browsers without `text-box-trim` keep the untrimmed leading, so the spacing
+// that compensates for the trim is scoped to a feature query.
+const supportsTextBoxTrim = '@supports (text-box-trim: trim-both)';
+
 export const layoutHeaderRecipe = sva({
   slots: ['root', 'inner', 'titleArea', 'actions', 'closeButton'],
   base: {
@@ -127,8 +131,22 @@ export const layoutHeaderRecipe = sva({
       gap: '3',
     },
     titleArea: {
+      display: 'flex',
+      flexDirection: 'column',
       flex: 1,
       minW: 0,
+      // Half-leading above the title's cap and below the subtitle's baseline
+      // makes the header's padding read as larger than the identical padding of
+      // a sibling region whose content is a box (a footer's buttons). Trimming
+      // it lands the cap and the baseline flush against the padding edges.
+      // The leading also supplies the space between the title and the subtitle,
+      // so replace it with an explicit gap under the same feature query.
+      '& > *': {
+        textBox: 'trim-both cap alphabetic',
+      },
+      [supportsTextBoxTrim]: {
+        gap: '4',
+      },
       '& > :focus': {
         outline: 'none',
       },
@@ -141,7 +159,15 @@ export const layoutHeaderRecipe = sva({
     },
     closeButton: {
       marginInlineEnd: '-2',
+      // Center the button on the title's line box, or on its cap box once the
+      // leading is trimmed away. Trimming leaves the cap box shorter than the
+      // button, so the block margins are pulled in on both sides: a one-sided
+      // offset would let the button set the header's height and push the
+      // padding below the title open by the difference.
       marginBlockStart: '-2',
+      [supportsTextBoxTrim]: {
+        marginBlock: '-3',
+      },
     },
   },
   variants: {
