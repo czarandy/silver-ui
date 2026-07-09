@@ -9,6 +9,7 @@ import {SideNavRenderContext} from 'components/SideNav/SideNavContext';
 import {SideNavHeading} from 'components/SideNav/SideNavHeading';
 import {SideNavItem} from 'components/SideNav/SideNavItem';
 import {SideNavSection} from 'components/SideNav/SideNavSection';
+import {assertNonNull} from 'internal/testHelpers';
 
 function CustomLink({
   children,
@@ -38,6 +39,12 @@ function ToBasedRouterLink({
       {children}
     </a>
   );
+}
+
+// The sticky bottom wrapper carries no role or testid, so reach it through the
+// footer element it wraps.
+function countStickyBottomChildren(footer: HTMLElement): number {
+  return assertNonNull(footer.parentElement).childElementCount;
 }
 
 describe('SideNav', () => {
@@ -82,6 +89,52 @@ describe('SideNav', () => {
     );
 
     expect(screen.getByTestId('footer-content')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+  });
+
+  it('omits the footer row when there is nothing to put in it', () => {
+    render(
+      <SideNav footer={<span data-testid="footer-content">Footer</span>}>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    // An empty footer row would still be a flex item of the sticky bottom, so
+    // its gap would reserve dead space below the footer and push it off-center.
+    expect(
+      countStickyBottomChildren(screen.getByTestId('footer-content')),
+    ).toBe(1);
+  });
+
+  it('renders the footer row alongside the footer when collapsible', () => {
+    render(
+      <SideNav
+        footer={<span data-testid="footer-content">Footer</span>}
+        isCollapsible>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(
+      countStickyBottomChildren(screen.getByTestId('footer-content')),
+    ).toBe(2);
+    expect(
+      screen.getByRole('button', {name: 'Collapse sidebar'}),
+    ).toBeInTheDocument();
+  });
+
+  it('renders the footer row alongside the footer when footerIcons are given', () => {
+    render(
+      <SideNav
+        footer={<span data-testid="footer-content">Footer</span>}
+        footerIcons={<span data-testid="footer-icons">Icons</span>}>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(
+      countStickyBottomChildren(screen.getByTestId('footer-content')),
+    ).toBe(2);
     expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
   });
 

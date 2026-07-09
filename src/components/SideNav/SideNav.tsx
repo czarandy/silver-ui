@@ -142,12 +142,14 @@ export function SideNav({
         {isReactNode(footer) || isReactNode(footerIcons) || isCollapsible ? (
           <div className={classes.stickyBottom}>
             {footer}
-            <div className={classes.footerRow}>
-              {isCollapsible ? <SideNavCollapseButton /> : null}
-              {isReactNode(footerIcons) ? (
-                <div className={classes.footerIcons}>{footerIcons}</div>
-              ) : null}
-            </div>
+            {isCollapsible || isReactNode(footerIcons) ? (
+              <div className={classes.footerRow}>
+                {isCollapsible ? <SideNavCollapseButton /> : null}
+                {isReactNode(footerIcons) ? (
+                  <div className={classes.footerIcons}>{footerIcons}</div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         ) : null}
       </nav>
