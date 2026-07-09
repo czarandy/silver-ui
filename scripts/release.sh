@@ -3,8 +3,8 @@
 # release.sh — interactive release driver for silver-ui.
 #
 # This is the LOCAL half of a two-stage release:
-#   1. (here) preflight -> checks -> build -> bump version -> tag -> push ->
-#      create a GitHub Release.
+#   1. (here) preflight -> pull latest -> checks -> build -> bump version ->
+#      tag -> push -> create a GitHub Release.
 #   2. (CI) .github/workflows/publish.yml runs on the published release and does
 #      the actual `npm publish` from a clean runner, authenticating via OIDC
 #      "trusted publishing" — no npm token anywhere. The package gets an
@@ -112,14 +112,9 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 ok "Working tree clean (branch: $BRANCH)"
 
-# Make sure local main isn't behind/ahead of origin in a way that surprises CI.
-git fetch --quiet origin "$BRANCH" 2>/dev/null || true
-if git rev-parse "@{u}" >/dev/null 2>&1; then
-  LOCAL="$(git rev-parse @)"; REMOTE="$(git rev-parse '@{u}')"
-  if [ "$LOCAL" != "$REMOTE" ] && [ -n "$(git rev-list '@{u}..@' 2>/dev/null)" ] && [ -n "$(git rev-list '@..@{u}' 2>/dev/null)" ]; then
-    die "Local '$BRANCH' has diverged from origin. Reconcile before releasing."
-  fi
-fi
+# Pull the latest remote code so the checks, build, and tag all run against what
+# CI will publish — not a stale local checkout. Diverged branches hard-fail.
+bash "$SCRIPT_DIR/release-sync.sh" "$BRANCH" || exit 1
 
 PKG_NAME="$(node -p "require('./package.json').name")"
 CUR_VERSION="$(node -p "require('./package.json').version")"
