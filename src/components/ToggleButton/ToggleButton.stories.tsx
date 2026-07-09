@@ -77,27 +77,6 @@ export const IconOnly: Story = {
   },
 };
 
-export const ModifierKeyGated: Story = {
-  render: function ModifierKeyGated() {
-    const [isSelected, setIsSelected] = useState(false);
-    // `onChange` receives the originating click event, so consumers can
-    // inspect it — here the toggle only fires when the Shift key is held.
-    return (
-      <ToggleButton
-        icon={Star}
-        isSelected={isSelected}
-        label="Shift-click to favorite"
-        onChange={(next, event) => {
-          if (event.shiftKey) {
-            setIsSelected(next);
-          }
-        }}
-        selectedIcon={Heart}
-      />
-    );
-  },
-};
-
 export const Sizes: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
