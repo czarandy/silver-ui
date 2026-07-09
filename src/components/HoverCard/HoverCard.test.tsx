@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {HoverCard} from 'components/HoverCard/HoverCard';
+import {useHoverCard} from 'components/HoverCard/useHoverCard';
+import {HoverLayerTrigger} from 'internal/HoverLayerTrigger';
 
 const showPopoverMock = vi.fn();
 const hidePopoverMock = vi.fn();
@@ -155,6 +157,14 @@ describe('HoverCard', () => {
     expect(trigger).toHaveStyle({color: 'rgb(255, 0, 0)'});
   });
 
+  it('defaults the hover card layer to role="dialog"', () => {
+    render(<HoverCard content="Details">Hover target</HoverCard>);
+
+    expect(screen.getByRole('dialog', {hidden: true})).toHaveTextContent(
+      'Details',
+    );
+  });
+
   it('applies placement to the hover card layer', () => {
     render(
       <HoverCard content="Details" placement="below">
@@ -162,8 +172,7 @@ describe('HoverCard', () => {
       </HoverCard>,
     );
 
-    // eslint-disable-next-line testing-library/no-node-access -- the hover card layer has no role or testid
-    expect(screen.getByText('Details').parentElement).toHaveStyle({
+    expect(screen.getByRole('dialog', {hidden: true})).toHaveStyle({
       positionArea: 'bottom',
     });
   });
@@ -175,9 +184,32 @@ describe('HoverCard', () => {
       </HoverCard>,
     );
 
-    // eslint-disable-next-line testing-library/no-node-access -- the hover card layer has no role or testid
-    expect(screen.getByText('Details').parentElement).toHaveStyle({
+    expect(screen.getByRole('dialog', {hidden: true})).toHaveStyle({
       positionArea: 'top span-right',
     });
+  });
+
+  it('allows an explicit role to override the dialog default', () => {
+    function CustomRoleHoverCard(): React.JSX.Element {
+      const hoverCard = useHoverCard();
+      return (
+        <HoverLayerTrigger
+          describedBy={hoverCard.describedBy}
+          isNonTextWrapperPropsForwarded={false}
+          layer={hoverCard.renderHoverCard('Details', {role: 'tooltip'})}
+          triggerRef={hoverCard.ref}>
+          Hover target
+        </HoverLayerTrigger>
+      );
+    }
+
+    render(<CustomRoleHoverCard />);
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Details',
+    );
+    expect(
+      screen.queryByRole('dialog', {hidden: true}),
+    ).not.toBeInTheDocument();
   });
 });
