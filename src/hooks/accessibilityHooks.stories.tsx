@@ -3,6 +3,7 @@ import {useCallback, useRef, useState, type KeyboardEvent} from 'react';
 import {Button} from 'components/Button';
 import {Text} from 'components/Text';
 import useAnnounce from 'hooks/useAnnounce';
+import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import useTypeahead from 'hooks/useTypeahead';
 import {css} from 'styled-system/css';
@@ -193,6 +194,77 @@ function ToolbarDemo(): React.JSX.Element {
  */
 export const ListFocus: Story = {
   render: () => <ToolbarDemo />,
+};
+
+function KeyboardHintDemo(): React.JSX.Element {
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState('Bold');
+  const commands = ['Bold', 'Italic', 'Underline', 'Strikethrough'];
+
+  const getItems = useCallback(
+    () =>
+      Array.from(
+        toolbarRef.current?.querySelectorAll<HTMLElement>('button') ?? [],
+      ),
+    [],
+  );
+  const {handleKeyDown} = useListFocus({
+    getItems,
+    onFocusItem: item => setSelected(item.textContent.trim()),
+    orientation: 'horizontal',
+  });
+  const hint = useKeyboardHint({orientation: 'horizontal'});
+
+  return (
+    <div className={styles.column}>
+      <Text type="supporting">
+        Tab into the toolbar to see the hint. It appears only for keyboard
+        focus, so clicking a command never surfaces it, and it dismisses on the
+        first arrow press, after three seconds, or when focus leaves.
+      </Text>
+      <Text type="supporting">
+        Reload the story to see it again — a hint teaches once per instance.
+      </Text>
+      <div
+        aria-label="Formatting"
+        className={styles.toolbar}
+        onBlur={hint.onBlur}
+        onFocus={hint.onFocus}
+        onKeyDown={event => {
+          hint.onKeyDown(event);
+          handleKeyDown(event);
+        }}
+        ref={toolbarRef}
+        role="toolbar">
+        {commands.map(command => (
+          <button
+            aria-pressed={command === selected}
+            className={styles.command}
+            key={command}
+            onClick={() => setSelected(command)}
+            tabIndex={command === selected ? 0 : -1}
+            type="button">
+            {command}
+          </button>
+        ))}
+        {hint.hintElement}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * `useKeyboardHint` shows an ephemeral "← → to navigate" badge the first time a
+ * roving-tabindex widget receives keyboard focus. A single Tab stop is good for
+ * keyboard users but hides the fact that the arrow keys do anything, and this
+ * closes that gap without adding permanent chrome.
+ *
+ * It renders in the top layer, so an overflow container never clips it, and it
+ * is `aria-hidden`: screen reader users are already told the role and position
+ * of the item they land on. Pass the same `orientation` you gave `useListFocus`.
+ */
+export const KeyboardHint: Story = {
+  render: () => <KeyboardHintDemo />,
 };
 
 function TypeaheadDemo(): React.JSX.Element {

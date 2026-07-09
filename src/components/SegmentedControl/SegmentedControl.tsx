@@ -15,6 +15,7 @@ import {
   type SegmentedControlLayout,
   type SegmentedControlSize,
 } from 'components/SegmentedControl/SegmentedControlContext';
+import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
@@ -125,14 +126,24 @@ export function SegmentedControl<TValue extends string = string>({
     orientation: 'both',
   });
 
+  // Only ← → are advertised even though either axis navigates: the control
+  // reads as a horizontal row, and drawing all four arrows is noise for an
+  // affordance the user only has to be shown once.
+  const hint = useKeyboardHint({
+    isEnabled: !isDisabled,
+    orientation: 'horizontal',
+  });
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
+      // Dismissing is safe even while disabled — the hint cannot be showing.
+      hint.onKeyDown(event);
       if (isDisabled) {
         return;
       }
       handleListKeyDown(event);
     },
-    [handleListKeyDown, isDisabled],
+    [handleListKeyDown, hint, isDisabled],
   );
 
   return (
@@ -143,12 +154,15 @@ export function SegmentedControl<TValue extends string = string>({
         aria-orientation="horizontal"
         className={cx(classes.root, className)}
         data-testid={dataTestId}
+        onBlur={hint.onBlur}
+        onFocus={hint.onFocus}
         onKeyDown={handleKeyDown}
         ref={mergeRefs(ref, containerRef)}
         role="radiogroup"
         style={style}
         tabIndex={-1}>
         {children}
+        {hint.hintElement}
       </div>
     </SegmentedControlContext>
   );

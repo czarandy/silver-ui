@@ -24,7 +24,10 @@ const meta: Meta<typeof Tabs> = {
           'Use **Tabs** when selecting an option shows or hides associated content ' +
           'panels (`tablist` / `tabpanel` semantics). To pick a value without swapping ' +
           'panels — a styled radio group for filters, settings, or view modes — use ' +
-          '**SegmentedControl** instead.',
+          '**SegmentedControl** instead.\n\n' +
+          'Tabbing into a tablist reveals an ephemeral "← → to navigate" hint, since ' +
+          'the arrow keys are otherwise undiscoverable behind a single tab stop. It is ' +
+          'shown only to keyboard users and dismisses on the first arrow press.',
       },
     },
   },

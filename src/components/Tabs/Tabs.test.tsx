@@ -2,11 +2,20 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Settings} from 'lucide-react';
 import type {ComponentPropsWithRef, SVGProps} from 'react';
-import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import {Badge} from 'components/Badge';
 import {Tab} from 'components/Tabs/Tab';
 import {TabMenu} from 'components/Tabs/TabMenu';
 import {Tabs} from 'components/Tabs/Tabs';
+import {assertNonNull, createPopoverFocusShim} from 'internal/testHelpers';
 
 function RouterLink({
   children,
@@ -29,19 +38,16 @@ function SelectedIcon(props: SVGProps<SVGSVGElement>): React.JSX.Element {
   return <svg {...props} data-testid="selected-icon" />;
 }
 
-beforeAll(() => {
-  Object.defineProperty(HTMLElement.prototype, 'showPopover', {
-    configurable: true,
-    value(this: HTMLElement) {
-      this.setAttribute('popover-open', '');
-    },
-  });
-  Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
-    configurable: true,
-    value(this: HTMLElement) {
-      this.removeAttribute('popover-open');
-    },
-  });
+const shim = createPopoverFocusShim();
+
+beforeAll(shim.install);
+afterAll(shim.uninstall);
+beforeEach(() => {
+  shim.reset();
+  // Most of this suite predates the keyboard hint and drives focus directly,
+  // which in a real browser would not be focus-visible. Default to pointer
+  // modality so the hint stays out of the way, and opt in where it is tested.
+  shim.setFocusVisible(false);
 });
 
 describe('Tabs', () => {
@@ -497,5 +503,71 @@ describe('Tabs', () => {
     expect(onChange).toHaveBeenCalledTimes(2);
     expect(onChange).toHaveBeenNthCalledWith(1, 'overview');
     expect(onChange).toHaveBeenNthCalledWith(2, 'overview');
+  });
+
+  describe('keyboard navigation hint', () => {
+    function renderTabs() {
+      const view = render(
+        <Tabs onChange={vi.fn()} value="overview">
+          <Tab label="Overview" value="overview" />
+          <Tab label="Settings" value="settings" />
+        </Tabs>,
+      );
+      const getHint = () =>
+        assertNonNull(
+          // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the hint is aria-hidden, so it cannot be reached by role or text
+          view.container.querySelector<HTMLElement>('[popover="manual"]'),
+          'hint layer should be rendered',
+        );
+      return {...view, getHint};
+    }
+
+    it('shows an arrow-key hint on keyboard focus', () => {
+      shim.setFocusVisible(true);
+      renderTabs();
+
+      fireEvent.focus(screen.getByRole('tab', {name: 'Overview'}));
+
+      expect(shim.showPopover).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not show the hint when a tab is focused by pointer', () => {
+      renderTabs();
+
+      fireEvent.focus(screen.getByRole('tab', {name: 'Overview'}));
+
+      expect(shim.showPopover).not.toHaveBeenCalled();
+    });
+
+    it('dismisses the hint on the first arrow press, still moving selection', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      shim.setFocusVisible(true);
+      render(
+        <Tabs onChange={onChange} value="overview">
+          <Tab label="Overview" value="overview" />
+          <Tab label="Settings" value="settings" />
+        </Tabs>,
+      );
+      const overview = screen.getByRole('tab', {name: 'Overview'});
+      fireEvent.focus(overview);
+      overview.focus();
+
+      await user.keyboard('{ArrowRight}');
+
+      expect(shim.hidePopover).toHaveBeenCalledTimes(1);
+      // The hint must not swallow the key it dismisses on.
+      expect(onChange).toHaveBeenCalledWith('settings');
+    });
+
+    it('keeps the hint out of the accessibility tree', () => {
+      shim.setFocusVisible(true);
+      const {getHint} = renderTabs();
+
+      expect(getHint()).toHaveAttribute('aria-hidden', 'true');
+      // The tablist may only own tabs; an exposed layer would violate that.
+      expect(screen.getByRole('tablist')).toBeInTheDocument();
+      expect(screen.getAllByRole('tab')).toHaveLength(2);
+    });
   });
 });

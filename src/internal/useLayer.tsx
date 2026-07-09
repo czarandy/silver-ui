@@ -23,6 +23,13 @@ export interface ContextRenderProps {
    */
   alignment?: LayerAlignment;
   /**
+   * Hides the layer from assistive technology. Use for purely decorative layers
+   * whose content duplicates something the user is already told, so that the
+   * layer is not exposed as a child of a role that restricts its children (a
+   * `tablist` may only own tabs, for instance).
+   */
+  'aria-hidden'?: boolean;
+  /**
    * Additional class name merged onto the layer element.
    */
   className?: string;
@@ -282,6 +289,7 @@ export function useLayer({
       const layerProps: LayerElementProps = {
         ref: popoverRefCallback,
         id,
+        'aria-hidden': props?.['aria-hidden'],
         role: props?.role,
         popover: isDismissable ? 'auto' : 'manual',
         className: cx(styles.layer, props?.className),

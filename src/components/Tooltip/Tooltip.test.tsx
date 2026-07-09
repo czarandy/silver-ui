@@ -3,53 +3,13 @@ import {useCallback} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Tooltip} from 'components/Tooltip/Tooltip';
 import {useTooltip} from 'components/Tooltip/useTooltip';
+import {createPopoverFocusShim} from 'internal/testHelpers';
 
-const popoverOpenState = new WeakMap<HTMLElement, boolean>();
-const showPopoverMock = vi.fn(function (this: HTMLElement) {
-  popoverOpenState.set(this, true);
-});
-const hidePopoverMock = vi.fn(function (this: HTMLElement) {
-  popoverOpenState.set(this, false);
-});
-const originalMatchesDescriptor = Object.getOwnPropertyDescriptor(
-  HTMLElement.prototype,
-  'matches',
-);
+const shim = createPopoverFocusShim();
+const {hidePopover: hidePopoverMock, showPopover: showPopoverMock} = shim;
 
-beforeAll(() => {
-  HTMLElement.prototype.showPopover = showPopoverMock;
-  HTMLElement.prototype.hidePopover = hidePopoverMock;
-
-  HTMLElement.prototype.matches = function (
-    this: HTMLElement,
-    selector: string,
-  ): boolean {
-    if (selector === ':popover-open') {
-      return popoverOpenState.get(this) ?? false;
-    }
-
-    if (selector === ':focus-visible') {
-      return true;
-    }
-
-    return Element.prototype.matches.call(this, selector);
-  } as typeof HTMLElement.prototype.matches;
-});
-
-afterAll(() => {
-  if (originalMatchesDescriptor != null) {
-    Object.defineProperty(
-      HTMLElement.prototype,
-      'matches',
-      originalMatchesDescriptor,
-    );
-  } else {
-    Reflect.deleteProperty(HTMLElement.prototype, 'matches');
-  }
-
-  Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
-  Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
-});
+beforeAll(shim.install);
+afterAll(shim.uninstall);
 
 describe('Tooltip', () => {
   it('renders trigger element', () => {

@@ -137,7 +137,10 @@ const meta = {
           'Use **SegmentedControl** to pick one value from a small set — it is a ' +
           'styled radio group (`role="radiogroup"`), suited to filters, settings, and ' +
           'view modes whose content you render yourself. If selecting an option should ' +
-          'show or hide associated content panels, use **Tabs** instead.',
+          'show or hide associated content panels, use **Tabs** instead.\n\n' +
+          'Tabbing into the control reveals an ephemeral "← → to navigate" hint, since ' +
+          'the arrow keys are otherwise undiscoverable behind a single tab stop. It is ' +
+          'shown only to keyboard users and dismisses on the first arrow press.',
       },
     },
   },
