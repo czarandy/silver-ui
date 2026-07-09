@@ -1,0 +1,67 @@
+---
+/**
+ * Override of Starlight's stock `ThemeSelect`, which renders a dark/light/auto
+ * `<select>`. The landing page nav instead offers a single icon-only button
+ * that swaps between the lucide Moon and Sun glyphs, so the docs pages —
+ * served from the same site — get the same control here.
+ *
+ * Both glyphs are rendered and one is hidden in CSS keyed off the `data-theme`
+ * attribute that Starlight's inlined `ThemeProvider` sets before first paint.
+ * That keeps the correct icon on screen for the first frame; picking one in JS
+ * would flash the wrong glyph until hydration. The styles live alongside the
+ * other `data-theme` rules in `src/styles/docs.css`.
+ *
+ * The button shows the mode it switches *to*, matching the landing page: a
+ * Moon while light, a Sun while dark.
+ */
+const label = 'Toggle dark mode';
+---
+
+<silver-theme-toggle>
+  <button aria-label={label} class="theme-toggle" title={label} type="button">
+    <svg
+      aria-hidden="true"
+      class="theme-toggle__icon theme-toggle__icon--moon"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"
+      ></path>
+    </svg>
+    <svg
+      aria-hidden="true"
+      class="theme-toggle__icon theme-toggle__icon--sun"
+      fill="none"
+      height="20"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      viewBox="0 0 24 24"
+      width="20"
+      xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2"></path>
+      <path d="M12 20v2"></path>
+      <path d="m4.93 4.93 1.41 1.41"></path>
+      <path d="m17.66 17.66 1.41 1.41"></path>
+      <path d="M2 12h2"></path>
+      <path d="M20 12h2"></path>
+      <path d="m6.34 17.66-1.41 1.41"></path>
+      <path d="m19.07 4.93-1.41 1.41"></path>
+    </svg>
+  </button>
+</silver-theme-toggle>
+
+<script>
+  import {defineThemeToggle} from './theme-toggle';
+
+  defineThemeToggle();
+</script>
