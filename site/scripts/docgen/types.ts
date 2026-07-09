@@ -48,6 +48,11 @@ export interface ComponentDocData {
    */
   exports: ExportDoc[];
   /**
+   * Page title shown in the sidebar and heading; differs from `name` for
+   * pages documenting multiple components (e.g. `Text & Heading`).
+   */
+  label: string;
+  /**
    * Component directory name, e.g. `DateInput`.
    */
   name: string;

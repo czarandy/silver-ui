@@ -123,6 +123,13 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Layout** — page shell with header, footer, side panels, and content slots
 - **HStack / VStack** — horizontal and vertical flex containers with gap
 
+### Typography
+
+- **Blockquote** — styled quotation block
+- **CodeBlock** — read-only code display with line numbers, line highlighting, and copy button
+- **Kbd** — keyboard shortcut display with accessible labels
+- **Text / Heading** — typography primitives with size, color, and truncation
+
 ### Navigation
 
 - **Breadcrumbs** — hierarchical page location trail
@@ -130,6 +137,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **NavIcon** — circular accent-colored icon container for navigation headers
 - **Pagination** — page navigation controls
 - **SideNav** — vertical side navigation panel with collapsing support
+- **Stepper** — multi-step progress indicator
 - **Tabs** — tabbed content switching
 - **TopNav** — horizontal top navigation bar
 
@@ -143,34 +151,11 @@ mode details, scoped theming examples, and per-instance overrides.
 - **SplitButton** — primary action paired with a dropdown menu of related actions
 - **ToggleButton** — button with pressed/unpressed state
 
-### Data Display
-
-- **Avatar** — user or entity avatar with status indicators
-- **AvatarGroup** — stacked avatar collection with overflow count
-- **Badge** — small status label with icon support
-- **Blockquote** — styled quotation block
-- **CodeBlock** — read-only code display with line numbers, line highlighting, and copy button
-- **Icon** — renders Lucide icons with size and color tokens
-- **Item** — generic list item with icon, label, and description
-- **Kbd** — keyboard shortcut display with accessible labels
-- **Lightbox** — full-screen media viewer
-- **List** — ordered or unordered list with dividers
-- **MetadataList** — key-value metadata display
-- **Table** — data table with sorting, filtering, and column resize plugins
-- **Tag** — removable label for categories or filters
-- **Text / Heading** — typography primitives with size, color, and truncation
-- **Thumbnail** — image preview with fallback and remove action
-- **Timestamp** — displays a point in time as relative or absolute text
-- **TreeView** — hierarchical expandable tree
-
 ### Forms
 
-- **CheckboxInput** — checkbox with label and description
-- **CheckboxGroup** — controlled checkbox group for multi-value selection
 - **AutocompleteInput** — searchable autocomplete input (combobox)
-- **DateInput** — date picker field
-- **DateRangeInput** — date range picker field
-- **DateTimeInput** — combined date and time picker
+- **CheckboxGroup** — controlled checkbox group for multi-value selection
+- **CheckboxInput** — checkbox with label and description
 - **Field** — form field wrapper with label, description, and validation
 - **FileInput** — file upload with drag-and-drop support
 - **InputGroup** — groups related form inputs with shared label
@@ -186,7 +171,30 @@ mode details, scoped theming examples, and per-instance overrides.
 - **TagsInput** — free-form tag entry field
 - **TextArea** — multi-line text input
 - **TextInput** — single-line text input
+
+### Dates & Time
+
+- **Calendar** — date picker calendar grid with single and range selection
+- **DateInput** — date picker field
+- **DateRangeInput** — date range picker field
+- **DateTimeInput** — combined date and time picker
+- **Schedule** — event calendar with day, week, month, and list views
 - **TimeInput** — time picker field
+- **Timestamp** — displays a point in time as relative or absolute text
+
+### Data Display
+
+- **Avatar** — user or entity avatar with status indicators
+- **AvatarGroup** — stacked avatar collection with overflow count
+- **Badge** — small status label with icon support
+- **Icon** — renders Lucide icons with size and color tokens
+- **Item** — generic list item with icon, label, and description
+- **List** — ordered or unordered list with dividers
+- **MetadataList** — key-value metadata display
+- **Table** — data table with sorting, filtering, and column resize plugins
+- **Tag** — removable label for categories or filters
+- **Thumbnail** — image preview with fallback and remove action
+- **TreeView** — hierarchical expandable tree
 
 ### Feedback & Status
 
@@ -195,7 +203,6 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Progress** — determinate progress bar
 - **Skeleton** — loading placeholder with pulse animation
 - **Spinner** — indeterminate loading indicator
-- **Stepper** — multi-step progress indicator
 - **Toast** — temporary notification popup
 
 ### Overlays
@@ -204,16 +211,13 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Dialog** — modal dialog with header and content
 - **Drawer** — slide-in panel from screen edge
 - **HoverCard** — rich content popup on hover
+- **Lightbox** — full-screen media viewer
 - **Popover** — anchored popup with arbitrary content
 - **Tooltip** — informational popup on hover or focus
 
-### Composite
+### Utilities
 
-- **Calendar** — date picker calendar grid with single and range selection
-- **Schedule** — event calendar with day, week, month, and list views
-
-### Accessibility
-
+- **Theme** — scoped theme provider backed by CSS custom properties
 - **VisuallyHidden** — hides content visually while keeping it available to screen readers
 
 ---

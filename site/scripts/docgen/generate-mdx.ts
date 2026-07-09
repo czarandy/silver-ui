@@ -1,4 +1,5 @@
 import {isClientOnly} from './demo-exceptions';
+import {firstSentence} from './first-sentence';
 import type {StoriesFileDoc} from './extract-stories';
 import type {ComponentDocData} from './types';
 
@@ -15,8 +16,8 @@ export function componentMdx(
 ): string {
   const lines: string[] = [
     '---',
-    `title: ${JSON.stringify(data.name)}`,
-    `description: ${JSON.stringify(data.description)}`,
+    `title: ${JSON.stringify(data.label)}`,
+    `description: ${JSON.stringify(firstSentence(data.description))}`,
     '---',
     '',
     "import ComponentDoc from '../../../components/ComponentDoc.astro';",

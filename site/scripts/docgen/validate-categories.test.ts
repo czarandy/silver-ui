@@ -3,6 +3,7 @@ import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
 import {
+  componentPageLabel,
   componentSidebarGroups,
   componentSlug,
 } from '../../src/component-categories';
@@ -46,7 +47,17 @@ describe('componentSidebarGroups', () => {
     const groups = componentSidebarGroups();
     const forms = groups.find(group => group.label === 'Forms');
     expect(forms).toBeDefined();
-    expect(forms?.items).toContain('components/date-input');
+    expect(forms?.items).toContain('components/text-input');
     expect(forms?.items).toEqual([...(forms?.items ?? [])].sort());
+    const dates = groups.find(group => group.label === 'Dates & Time');
+    expect(dates?.items).toContain('components/date-input');
+    expect(dates?.items).toContain('components/calendar');
+  });
+});
+
+describe('componentPageLabel', () => {
+  it('labels multi-component pages and passes others through', () => {
+    expect(componentPageLabel('Text')).toBe('Text & Heading');
+    expect(componentPageLabel('Button')).toBe('Button');
   });
 });

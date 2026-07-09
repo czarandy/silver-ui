@@ -30,6 +30,7 @@ describe('componentsIndexMd', () => {
     const page = componentsIndexMd([
       {
         name: 'Button',
+        label: 'Button',
         slug: 'button',
         category: 'Buttons & Actions',
         description: 'Versatile action element.',
@@ -37,6 +38,7 @@ describe('componentsIndexMd', () => {
       },
       {
         name: 'Card',
+        label: 'Card',
         slug: 'card',
         category: 'Layout & Structure',
         description: 'Rounded container surface.',
