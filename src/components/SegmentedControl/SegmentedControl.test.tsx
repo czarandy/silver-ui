@@ -210,6 +210,39 @@ describe('SegmentedControl', () => {
       'class',
       screen.getByTestId('md-item').getAttribute('class') ?? '',
     );
+
+    expect(screen.getByTestId('sm-item')).toHaveClass('silver-fs_component.sm');
+    expect(screen.getByTestId('md-item')).toHaveClass('silver-fs_component.md');
+    expect(screen.getByTestId('lg-item')).toHaveClass('silver-fs_component.lg');
+  });
+
+  // The root — not the item — carries the shared control height, so the whole
+  // control matches a Button of the same size. Items fill what the root's
+  // padding leaves, which is why they must not take `component.*` themselves.
+  it('sizes the root from the shared control scale', () => {
+    const sizes = ['sm', 'md', 'lg'] as const;
+
+    render(
+      <>
+        {sizes.map(size => (
+          <SegmentedControl
+            data-testid={`${size}-root`}
+            key={size}
+            label={size}
+            onChange={() => {}}
+            size={size}
+            value="a">
+            <SegmentedControlItem label="A" value="a" />
+          </SegmentedControl>
+        ))}
+      </>,
+    );
+
+    for (const size of sizes) {
+      expect(screen.getByTestId(`${size}-root`)).toHaveClass(
+        `silver-h_component.${size}`,
+      );
+    }
   });
 
   it('blocks interactions when the root is disabled', async () => {
