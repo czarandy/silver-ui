@@ -21,6 +21,11 @@ export default defineConfig({
       title: 'silver-ui',
       description:
         'A comprehensive, themeable React component library built with Panda CSS.',
+      logo: {
+        src: './src/assets/wordmark.svg',
+        replacesTitle: true,
+        alt: 'silver-ui',
+      },
       favicon: '/favicon.ico',
       social: [
         {

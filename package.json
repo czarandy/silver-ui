@@ -60,7 +60,7 @@
     "storybook": "storybook dev -p 6006 --ci",
     "build": "panda codegen && tsup && node scripts/preserve-use-client.mjs && tsc -p tsconfig.build.json && node scripts/rewrite-declaration-aliases.mjs && panda cssgen --outfile dist/styles.css --minify && node scripts/inject-system-theme.mjs",
     "build:storybook": "panda codegen && storybook build",
-    "sync:brand": "cp brand/logo.svg brand/wordmark.svg site/public/",
+    "sync:brand": "cp brand/logo.svg brand/wordmark.svg site/public/ && cp brand/wordmark.svg site/src/assets/",
     "build:site": "pnpm sync:brand && pnpm -C site build",
     "test": "vitest run",
     "test:watch": "vitest",
