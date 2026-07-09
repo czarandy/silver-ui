@@ -99,6 +99,21 @@ describe('release-sync.sh', () => {
     expect(git(clone, 'tag', '--list')).toBe('v9.9.9');
   });
 
+  // `git checkout -b hotfix origin/main` leaves the local and remote branch
+  // names different; fetching `origin/<local name>` would blow up on a ref that
+  // doesn't exist. Follow the upstream, not the local branch name.
+  it('follows the upstream when the remote branch has a different name', () => {
+    const remoteHead = pushRemoteCommit('remote-work');
+    git(clone, 'checkout', '--quiet', '-b', 'hotfix', '--track', 'origin/main');
+
+    const {status, output} = sync(clone, 'hotfix');
+
+    expect(status).toBe(0);
+    expect(output).toMatch(/origin\/main/);
+    expect(output).not.toMatch(/origin\/hotfix/);
+    expect(git(clone, 'rev-parse', 'HEAD')).toBe(remoteHead);
+  });
+
   it('leaves unpushed local commits in place when ahead of origin', () => {
     commit(clone, 'local-work');
     const before = git(clone, 'rev-parse', 'HEAD');
@@ -118,7 +133,7 @@ describe('release-sync.sh', () => {
     const {status, output} = sync(clone);
 
     expect(status).toBe(1);
-    expect(output).toMatch(/diverged from origin \(1 ahead, 1 behind\)/);
+    expect(output).toMatch(/diverged from origin\/main \(1 ahead, 1 behind\)/);
     expect(git(clone, 'rev-parse', 'HEAD')).toBe(before);
   });
 

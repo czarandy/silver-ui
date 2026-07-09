@@ -32,33 +32,39 @@ BRANCH="${1:-}"
 
 # No upstream: a local-only branch has nothing to pull. Releasing from it is
 # unusual but legal (release.sh already warned about non-main branches).
-if ! git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+if ! UPSTREAM="$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)"; then
   warn "Branch '$BRANCH' has no upstream — skipping pull."
   exit 0
 fi
 
-info "Fetching origin/$BRANCH"
-git fetch --quiet --tags origin "$BRANCH" \
-  || die "Failed to fetch origin/$BRANCH. Check your network or remote and re-run."
+# Fetch what the branch actually tracks. The remote branch name need not match
+# the local one (`git checkout -b fix origin/main`), so read both off the
+# upstream rather than assuming `origin/$BRANCH` exists.
+REMOTE_NAME="$(git config --get "branch.${BRANCH}.remote" || echo origin)"
+REMOTE_BRANCH="${UPSTREAM#"${REMOTE_NAME}/"}"
+
+info "Fetching $UPSTREAM"
+git fetch --quiet --tags "$REMOTE_NAME" "$REMOTE_BRANCH" \
+  || die "Failed to fetch $UPSTREAM. Check your network or remote and re-run."
 
 AHEAD="$(git rev-list --count '@{u}..@')"
 BEHIND="$(git rev-list --count '@..@{u}')"
 
 if [ "$AHEAD" -gt 0 ] && [ "$BEHIND" -gt 0 ]; then
-  die "Local '$BRANCH' has diverged from origin ($AHEAD ahead, $BEHIND behind). Reconcile before releasing."
+  die "Local '$BRANCH' has diverged from $UPSTREAM ($AHEAD ahead, $BEHIND behind). Reconcile before releasing."
 fi
 
 if [ "$BEHIND" -gt 0 ]; then
-  info "Local '$BRANCH' is $BEHIND commit(s) behind origin — fast-forwarding"
+  info "Local '$BRANCH' is $BEHIND commit(s) behind $UPSTREAM — fast-forwarding"
   git merge --ff-only '@{u}' --quiet \
-    || die "Fast-forward onto origin/$BRANCH failed. Reconcile before releasing."
-  ok "Fast-forwarded '$BRANCH' to origin/$BRANCH"
+    || die "Fast-forward onto $UPSTREAM failed. Reconcile before releasing."
+  ok "Fast-forwarded '$BRANCH' to $UPSTREAM"
   exit 0
 fi
 
 if [ "$AHEAD" -gt 0 ]; then
-  ok "Local '$BRANCH' is up to date with origin ($AHEAD unpushed commit(s) will be released)"
+  ok "Local '$BRANCH' is up to date with $UPSTREAM ($AHEAD unpushed commit(s) will be released)"
   exit 0
 fi
 
-ok "Local '$BRANCH' is up to date with origin"
+ok "Local '$BRANCH' is up to date with $UPSTREAM"
