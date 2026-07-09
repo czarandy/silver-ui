@@ -26,6 +26,7 @@ export default defineConfig({
       'src/**/*.test.{ts,tsx}',
       'site/src/**/*.test.{ts,tsx}',
       'eslint/**/*.test.{js,ts}',
+      'scripts/**/*.test.{js,mjs,ts}',
     ],
     css: true,
     testTimeout: 20000,
