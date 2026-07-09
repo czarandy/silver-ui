@@ -5,7 +5,7 @@ import {useMemo} from 'react';
 import {layoutRecipe} from 'components/Layout/Layout.recipe';
 import {
   LayoutAreaContext,
-  LayoutDividerContext,
+  LayoutRegionsContext,
   type LayoutArea,
 } from 'components/Layout/LayoutContext';
 import type {LayoutHeight} from 'components/Layout/types';
@@ -38,7 +38,11 @@ export interface LayoutProps {
    */
   footer?: ReactNode;
   /**
-   * Whether child layout regions should show dividers.
+   * Whether child layout regions should show dividers. Default is `true`.
+   *
+   * Without dividers the regions read as one surface, so the content region
+   * drops its block padding on the edges that meet a header or a footer rather
+   * than stacking a second padding against theirs.
    */
   hasDividers?: boolean;
   /**
@@ -95,11 +99,16 @@ export function Layout({
   start,
   style,
 }: LayoutProps): React.JSX.Element {
-  const dividerValue = useMemo(() => ({hasDividers}), [hasDividers]);
+  const hasHeader = isReactNode(header);
+  const hasFooter = isReactNode(footer);
+  const regionsValue = useMemo(
+    () => ({hasDividers, hasFooter, hasHeader}),
+    [hasDividers, hasFooter, hasHeader],
+  );
   const classes = layoutRecipe({height, padding});
 
   return (
-    <LayoutDividerContext value={dividerValue}>
+    <LayoutRegionsContext value={regionsValue}>
       <div
         className={cx(classes.root, className)}
         data-testid={dataTestId}
@@ -115,7 +124,7 @@ export function Layout({
         </div>
         <AreaProvider area="footer">{footer}</AreaProvider>
       </div>
-    </LayoutDividerContext>
+    </LayoutRegionsContext>
   );
 }
 

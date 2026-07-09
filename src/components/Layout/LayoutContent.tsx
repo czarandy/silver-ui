@@ -1,8 +1,11 @@
+'use client';
+
 import type {ComponentPropsWithRef, ElementType} from 'react';
 import {
   layoutContentRecipe,
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
+import {useLayoutRegions} from 'components/Layout/LayoutContext';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
@@ -50,12 +53,23 @@ export function LayoutContent({
   style,
   ...rest
 }: LayoutContentProps): React.JSX.Element {
+  const regions = useLayoutRegions();
+  // A divider gives each region its own edge to pad against. Without one the
+  // regions read as a single surface, so the content lets the neighbouring
+  // header's or footer's padding do the spacing instead of adding its own.
+  const collapseAgainst =
+    regions != null && !regions.hasDividers ? regions : null;
+
   return (
     <Element
       {...rest}
       aria-label={label}
       className={cx(
-        layoutContentRecipe({isScrollable}),
+        layoutContentRecipe({
+          hasCollapsedBlockEnd: collapseAgainst?.hasFooter ?? false,
+          hasCollapsedBlockStart: collapseAgainst?.hasHeader ?? false,
+          isScrollable,
+        }),
         layoutRegionRecipe({padding}),
         className,
       )}

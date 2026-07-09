@@ -2,7 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {DialogContext} from 'components/Dialog/DialogContext';
-import {Layout} from 'components/Layout/Layout';
+import {Layout, type LayoutProps} from 'components/Layout/Layout';
 import {layoutHeaderRecipe} from 'components/Layout/Layout.recipe';
 import {LayoutContent} from 'components/Layout/LayoutContent';
 import {LayoutFooter} from 'components/Layout/LayoutFooter';
@@ -170,6 +170,54 @@ describe('LayoutContent', () => {
     expect(el).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(el).toHaveAttribute('id', 'main');
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+});
+
+describe('Layout region padding', () => {
+  const renderLayout = (props: Partial<LayoutProps> = {}) =>
+    render(
+      <Layout
+        content={<LayoutContent data-testid="content">Content</LayoutContent>}
+        footer={
+          <LayoutFooter primaryButton={<button type="button">Ok</button>} />
+        }
+        header={<LayoutHeader title="Header" />}
+        {...props}
+      />,
+    );
+
+  it('keeps the content padding when dividers separate the regions', () => {
+    renderLayout({hasDividers: true});
+
+    const content = screen.getByTestId('content');
+    expect(content).not.toHaveClass('silver-pbs_0');
+    expect(content).not.toHaveClass('silver-pbe_0');
+  });
+
+  it('drops the content padding against a header and a footer without dividers', () => {
+    renderLayout({hasDividers: false});
+
+    const content = screen.getByTestId('content');
+    expect(content).toHaveClass('silver-pbs_0');
+    expect(content).toHaveClass('silver-pbe_0');
+  });
+
+  it('only drops the padding on edges that actually meet a region', () => {
+    renderLayout({footer: undefined, hasDividers: false});
+
+    const content = screen.getByTestId('content');
+    expect(content).toHaveClass('silver-pbs_0');
+    // No footer, so the block-end padding still insets the content from the
+    // surface's bottom edge.
+    expect(content).not.toHaveClass('silver-pbe_0');
+  });
+
+  it('leaves a standalone LayoutContent untouched', () => {
+    render(<LayoutContent data-testid="content">Content</LayoutContent>);
+
+    const content = screen.getByTestId('content');
+    expect(content).not.toHaveClass('silver-pbs_0');
+    expect(content).not.toHaveClass('silver-pbe_0');
   });
 });
 

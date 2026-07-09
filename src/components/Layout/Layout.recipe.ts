@@ -109,9 +109,23 @@ export const layoutContentRecipe = cva({
     isScrollable: {
       true: {overflow: 'auto'},
     },
+    // Without a divider, the content's block padding stacks on top of the
+    // adjacent region's, so the gap between a title and the body reads as
+    // double the gap at the surface's outer edge. Dropping the padding on the
+    // meeting edge leaves the header's or footer's own padding to space them.
+    // These are longhands, so they override the `padding` shorthand that
+    // `layoutRegionRecipe` sets on the same element regardless of class order.
+    hasCollapsedBlockStart: {
+      true: {paddingBlockStart: '0'},
+    },
+    hasCollapsedBlockEnd: {
+      true: {paddingBlockEnd: '0'},
+    },
   },
   defaultVariants: {
     isScrollable: true,
+    hasCollapsedBlockStart: false,
+    hasCollapsedBlockEnd: false,
   },
 });
 
