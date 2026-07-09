@@ -3,6 +3,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {tableRecipe} from 'components/Table/Table.recipe';
 import {useTableContext} from 'components/Table/TableContext';
+import {useTableSection} from 'internal/TableSectionContext';
 import {cx} from 'utils/cx';
 
 export interface TableRowProps {
@@ -29,7 +30,9 @@ export interface TableRowProps {
 }
 
 /**
- * Table row with hover and striped styling from context.
+ * Table row with hover and striped styling from context. Header and footer
+ * rows are not interactive, so they render without that styling even when the
+ * surrounding table enables it.
  */
 export function TableRow({
   children,
@@ -39,9 +42,10 @@ export function TableRow({
   style,
 }: TableRowProps): React.JSX.Element {
   const context = useTableContext();
+  const isBodyRow = useTableSection() === 'body';
   const classes = tableRecipe({
-    isStriped: context?.isStriped,
-    hasHover: context?.hasHover,
+    isStriped: isBodyRow && context?.isStriped,
+    hasHover: isBodyRow && context?.hasHover,
   });
 
   return (

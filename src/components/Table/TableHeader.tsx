@@ -1,4 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {TableSectionProvider} from 'internal/TableSectionContext';
 
 export interface TableHeaderProps {
   /**
@@ -24,7 +25,8 @@ export interface TableHeaderProps {
 }
 
 /**
- * Wraps table header rows in a `<thead>` element.
+ * Wraps table header rows in a `<thead>` element. Rows rendered inside opt out
+ * of the table's hover and striping styling.
  */
 export function TableHeader({
   children,
@@ -39,7 +41,7 @@ export function TableHeader({
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      {children}
+      <TableSectionProvider section="header">{children}</TableSectionProvider>
     </thead>
   );
 }

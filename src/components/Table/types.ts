@@ -114,6 +114,7 @@ export interface TableHeaderCellComponentProps extends ThHTMLAttributes<HTMLTabl
 
 export type TableDensity = 'balanced' | 'compact' | 'spacious';
 export type TableDividers = 'columns' | 'grid' | 'none' | 'rows';
+export type TableSection = 'body' | 'footer' | 'header';
 export type TableTextOverflow = 'truncate' | 'wrap';
 
 export interface TableContextValue {

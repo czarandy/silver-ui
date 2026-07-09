@@ -43,6 +43,7 @@ export type {
   TablePlugin,
   TableRenderProps,
   TableRowComponentProps,
+  TableSection,
   TableSortableColumnConfig,
   TableStyle,
   TableTextOverflow,

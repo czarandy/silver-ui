@@ -1,4 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import {TableSectionProvider} from 'internal/TableSectionContext';
 
 export interface TableFooterProps {
   /**
@@ -24,7 +25,8 @@ export interface TableFooterProps {
 }
 
 /**
- * Wraps table footer rows in a `<tfoot>` element.
+ * Wraps table footer rows in a `<tfoot>` element. Rows rendered inside opt out
+ * of the table's hover and striping styling.
  */
 export function TableFooter({
   children,
@@ -39,7 +41,7 @@ export function TableFooter({
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      {children}
+      <TableSectionProvider section="footer">{children}</TableSectionProvider>
     </tfoot>
   );
 }

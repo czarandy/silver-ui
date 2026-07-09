@@ -11,7 +11,12 @@ import {useMemo, useState} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import type {SearchFilterInputConfig} from 'components/SearchFilterInput';
 import {Table} from 'components/Table/Table';
+import {TableBody} from 'components/Table/TableBody';
+import {TableCell} from 'components/Table/TableCell';
 import {TableFooter} from 'components/Table/TableFooter';
+import {TableHeader} from 'components/Table/TableHeader';
+import {TableHeaderCell} from 'components/Table/TableHeaderCell';
+import {TableRow} from 'components/Table/TableRow';
 import {
   defaultCellRenderer,
   generateColumns,
@@ -62,6 +67,8 @@ const columns: TableColumn<PersonRow>[] = [
   {key: 'role', header: 'Role'},
 ];
 
+const hoverBgClass = 'hover:[@media_(hover:_hover)]:silver-bg_bg.hover';
+const hoverSubtleBgClass = 'hover:[@media_(hover:_hover)]:silver-bg_bg.subtle';
 const lastBodyRowDividerResetClass =
   '[tbody_>_tr:last-child_>_&]:silver-bd-b-w_0';
 const maxWidthZeroClass = 'silver-max-w_0';
@@ -71,6 +78,7 @@ const overflowWrapBreakWordClass = 'silver-ov-wrap_break-word';
 const rowDividerWidthClass = 'silver-bd-b-w_default';
 const sortIconActiveColorClass = 'silver-c_primary';
 const sortIconInactiveOpacityClass = 'silver-op_0.35';
+const stripedBgClass = 'even:silver-bg_bg.subtle';
 const textOverflowEllipsisClass = 'silver-tov_ellipsis';
 const whiteSpaceNormalClass = 'silver-white-space_normal';
 const whiteSpaceNowrapClass = 'silver-white-space_nowrap';
@@ -189,6 +197,26 @@ describe('Table', () => {
     expect(compactGridClasses.rowClassName).not.toEqual(
       spaciousNoDividerClasses.rowClassName,
     );
+  });
+
+  it('keeps hover and stripe styling off the header row', () => {
+    render(<Table columns={columns} data={data} hasHover isStriped />);
+
+    const [headerRow, firstBodyRow] = screen.getAllByRole('row');
+
+    expect(headerRow).not.toHaveClass(hoverBgClass);
+    expect(headerRow).not.toHaveClass(stripedBgClass);
+    expect(firstBodyRow).toHaveClass(hoverBgClass);
+    expect(firstBodyRow).toHaveClass(stripedBgClass);
+  });
+
+  it('keeps the unstriped hover highlight off the header row', () => {
+    render(<Table columns={columns} data={data} hasHover />);
+
+    const [headerRow, firstBodyRow] = screen.getAllByRole('row');
+
+    expect(headerRow).not.toHaveClass(hoverSubtleBgClass);
+    expect(firstBodyRow).toHaveClass(hoverSubtleBgClass);
   });
 
   it('applies XDSTable-compatible cell overflow classes', () => {
@@ -315,6 +343,41 @@ describe('TableFooter', () => {
     expect(footer).toHaveClass('custom-footer');
     expect(footer).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(screen.getByRole('cell', {name: 'Total'})).toBeInTheDocument();
+  });
+});
+
+describe('TableRow', () => {
+  it('applies hover and stripe styling only to rows inside the body', () => {
+    render(
+      <Table hasHover isStriped>
+        <TableHeader>
+          <TableRow data-testid="header-row">
+            <TableHeaderCell>Name</TableHeaderCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow data-testid="body-row">
+            <TableCell>Alice</TableCell>
+          </TableRow>
+        </TableBody>
+        <TableFooter>
+          <TableRow data-testid="footer-row">
+            <TableCell>Total</TableCell>
+          </TableRow>
+        </TableFooter>
+      </Table>,
+    );
+
+    const bodyRow = screen.getByTestId('body-row');
+
+    for (const testId of ['header-row', 'footer-row']) {
+      const row = screen.getByTestId(testId);
+      expect(row).not.toHaveClass(hoverBgClass);
+      expect(row).not.toHaveClass(stripedBgClass);
+    }
+
+    expect(bodyRow).toHaveClass(hoverBgClass);
+    expect(bodyRow).toHaveClass(stripedBgClass);
   });
 });
 

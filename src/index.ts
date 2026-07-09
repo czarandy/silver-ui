@@ -77,6 +77,7 @@ export {
   type TableRenderProps,
   type TableRowComponentProps,
   type TableRowProps,
+  type TableSection,
   type TableSortableColumnConfig,
   type TableSortComparator,
   type TableSortDirection,
