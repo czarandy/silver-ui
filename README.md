@@ -218,6 +218,22 @@ mode details, scoped theming examples, and per-instance overrides.
 
 ---
 
+## Hooks
+
+The primitives silver-ui's own components are built on are published from
+`silver-ui/hooks`, so you can build custom widgets that behave the same way.
+
+```tsx
+import {useAnnounce, useListFocus, useTypeahead} from 'silver-ui/hooks';
+```
+
+- **useAnnounce** — visually hidden polite and assertive live regions, plus an `announce(message, politeness?)` function
+- **useListFocus** — roving-tabindex keyboard navigation over a list of elements (arrow keys, `Home`/`End`, wrapping, RTL)
+- **useTypeahead** — WAI-ARIA typeahead: multi-character search, repeat-press cycling, and wrap-around matching
+- **useConstant** — computes a value once and returns the same reference for the lifetime of the component
+
+---
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, development scripts, and component contribution guidelines.

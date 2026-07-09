@@ -15,6 +15,7 @@ import {
   type SegmentedControlLayout,
   type SegmentedControlSize,
 } from 'components/SegmentedControl/SegmentedControlContext';
+import useListFocus from 'hooks/useListFocus';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -102,64 +103,36 @@ export function SegmentedControl<TValue extends string = string>({
   );
   const classes = segmentedControlRecipe({isDisabled, layout});
 
+  const getItems = useCallback(
+    () =>
+      Array.from(
+        containerRef.current?.querySelectorAll<HTMLElement>(
+          '[role="radio"]:not([aria-disabled="true"])',
+        ) ?? [],
+      ),
+    [],
+  );
+  const {handleKeyDown: handleListKeyDown} = useListFocus({
+    getItems,
+    // Selection follows focus, per the WAI-ARIA radio group pattern.
+    onFocusItem: item => {
+      const nextValue = item.dataset.value;
+      if (nextValue != null) {
+        handleChange(nextValue);
+      }
+    },
+    // Laid out horizontally, but either axis navigates it.
+    orientation: 'both',
+  });
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (isDisabled) {
         return;
       }
-
-      const container = containerRef.current;
-      if (container == null) {
-        return;
-      }
-
-      const items = Array.from(
-        container.querySelectorAll<HTMLButtonElement>(
-          '[role="radio"]:not([aria-disabled="true"])',
-        ),
-      );
-
-      if (items.length === 0) {
-        return;
-      }
-
-      const currentIndex = items.findIndex(
-        item => item === document.activeElement,
-      );
-      let nextIndex: number;
-
-      switch (event.key) {
-        case 'ArrowRight':
-        case 'ArrowDown':
-          nextIndex =
-            currentIndex === -1 ? 0 : (currentIndex + 1) % items.length;
-          break;
-        case 'ArrowLeft':
-        case 'ArrowUp':
-          nextIndex =
-            currentIndex === -1
-              ? items.length - 1
-              : (currentIndex - 1 + items.length) % items.length;
-          break;
-        case 'Home':
-          nextIndex = 0;
-          break;
-        case 'End':
-          nextIndex = items.length - 1;
-          break;
-        default:
-          return;
-      }
-
-      event.preventDefault();
-      const nextItem = items[nextIndex];
-      nextItem.focus();
-      const nextValue = nextItem.dataset.value;
-      if (nextValue != null) {
-        handleChange(nextValue);
-      }
+      handleListKeyDown(event);
     },
-    [handleChange, isDisabled],
+    [handleListKeyDown, isDisabled],
   );
 
   return (

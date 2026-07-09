@@ -29,7 +29,7 @@ import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
-import {VisuallyHidden} from 'components/VisuallyHidden';
+import useAnnounce from 'hooks/useAnnounce';
 import {OverflowList} from 'internal/OverflowList';
 import isReactNode from 'internal/isReactNode';
 import useLatest from 'internal/useLatest';
@@ -317,7 +317,7 @@ export function TagsInput<T extends SearchableItem>({
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isFocusedWithin, setIsFocusedWithin] = useState(false);
-  const [announcement, setAnnouncement] = useState('');
+  const {announce, announcer} = useAnnounce();
   const [queryValue, setQueryValue] = useState('');
   const isLayerMode = tagOverflowBehavior === 'unfocusedLayer';
   const layer = useLayer();
@@ -414,11 +414,6 @@ export function TagsInput<T extends SearchableItem>({
 
   const valueRef = useLatest(value);
   const onChangeRef = useLatest(onChange);
-
-  const announce = useCallback((message: string) => {
-    setAnnouncement('');
-    requestAnimationFrame(() => setAnnouncement(message));
-  }, []);
 
   const removeItem = useCallback(
     (item: T) => {
@@ -621,9 +616,7 @@ export function TagsInput<T extends SearchableItem>({
           variant="ghost"
         />
       ) : null}
-      <VisuallyHidden aria-live="polite" as="div" role="status">
-        {announcement}
-      </VisuallyHidden>
+      {announcer}
     </div>
   );
 

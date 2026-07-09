@@ -17,6 +17,7 @@ const config: StorybookConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       components: resolve(__dirname, '../src/components'),
+      hooks: resolve(__dirname, '../src/hooks'),
       internal: resolve(__dirname, '../src/internal'),
       'styled-system': resolve(__dirname, '../styled-system'),
       themes: resolve(__dirname, '../src/themes'),

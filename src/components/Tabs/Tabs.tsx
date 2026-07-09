@@ -1,7 +1,9 @@
 'use client';
 
 import {
+  useCallback,
   useMemo,
+  useRef,
   type CSSProperties,
   type KeyboardEvent,
   type ReactNode,
@@ -13,6 +15,8 @@ import {
   type TabsLayout,
   type TabsSize,
 } from 'components/Tabs/TabsContext';
+import useListFocus from 'hooks/useListFocus';
+import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export interface TabsProps {
@@ -92,51 +96,44 @@ export function Tabs({
     [layout, onChange, size, value],
   );
   const classes = tabsRecipe({hasDivider, layout});
+  const tabListRef = useRef<HTMLDivElement>(null);
+
+  const getTabs = useCallback(
+    () =>
+      Array.from(
+        tabListRef.current?.querySelectorAll<HTMLElement>(
+          '[role="tab"]:not([data-tab-disabled="true"])',
+        ) ?? [],
+      ),
+    [],
+  );
+  const {getActiveIndex, handleKeyDown: handleListKeyDown} = useListFocus({
+    getItems: getTabs,
+    // Selection follows focus, per the WAI-ARIA tabs pattern.
+    onFocusItem: tab => {
+      const nextValue = tab.dataset.tabValue;
+      if (nextValue != null) {
+        onChange(nextValue);
+      }
+    },
+    orientation: 'horizontal',
+  });
 
   const handleKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    const activeTab = (event.target as HTMLElement).closest<HTMLElement>(
+      '[role="tab"]',
+    );
+    // Keys pressed inside a disabled tab, or outside the tablist entirely, are
+    // left alone.
     if (
-      event.key !== 'ArrowLeft' &&
-      event.key !== 'ArrowRight' &&
-      event.key !== 'Home' &&
-      event.key !== 'End'
+      activeTab == null ||
+      !event.currentTarget.contains(activeTab) ||
+      getActiveIndex() === -1
     ) {
       return;
     }
 
-    const activeTab = (event.target as HTMLElement).closest<HTMLElement>(
-      '[role="tab"]',
-    );
-    if (activeTab == null || !event.currentTarget.contains(activeTab)) {
-      return;
-    }
-
-    const tabs = Array.from(
-      event.currentTarget.querySelectorAll<HTMLElement>(
-        '[role="tab"]:not([data-tab-disabled="true"])',
-      ),
-    );
-    const currentIndex = tabs.indexOf(activeTab);
-    if (currentIndex === -1) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const nextIndex =
-      event.key === 'Home'
-        ? 0
-        : event.key === 'End'
-          ? tabs.length - 1
-          : event.key === 'ArrowRight'
-            ? (currentIndex + 1) % tabs.length
-            : (currentIndex - 1 + tabs.length) % tabs.length;
-    const nextTab = tabs[nextIndex];
-    nextTab.focus();
-
-    const nextValue = nextTab.dataset.tabValue;
-    if (nextValue != null) {
-      onChange(nextValue);
-    }
+    handleListKeyDown(event);
   };
 
   return (
@@ -146,7 +143,7 @@ export function Tabs({
         className={cx(classes.root, className)}
         data-testid={dataTestId}
         onKeyDown={handleKeyDown}
-        ref={ref as Ref<HTMLDivElement>}
+        ref={mergeRefs(ref as Ref<HTMLDivElement>, tabListRef)}
         role="tablist"
         style={style}
         tabIndex={-1}>

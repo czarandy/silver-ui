@@ -198,6 +198,54 @@ describe('TreeView', () => {
     expect(screen.getByRole('treeitem', {name: /Item B/})).toHaveFocus();
   });
 
+  describe('type-ahead', () => {
+    const fruitItems: TreeViewItemData[] = [
+      {id: 'banana', label: 'Banana'},
+      {id: 'blueberry', label: 'Blueberry'},
+      {id: 'cherry', label: 'Cherry'},
+    ];
+
+    function focusItem(name: RegExp): void {
+      act(() => {
+        screen.getByRole('treeitem', {name}).focus();
+      });
+    }
+
+    it('matches on the full string typed in quick succession', async () => {
+      const user = userEvent.setup();
+      render(<TreeView items={fruitItems} />);
+
+      focusItem(/Cherry/);
+      // "b" wraps to Banana; "bl" then narrows to Blueberry.
+      await user.keyboard('bl');
+
+      expect(screen.getByRole('treeitem', {name: /Blueberry/})).toHaveFocus();
+    });
+
+    it('cycles through items sharing a first character on repeated presses', async () => {
+      const user = userEvent.setup();
+      render(<TreeView items={fruitItems} />);
+
+      focusItem(/Banana/);
+
+      await user.keyboard('b');
+      expect(screen.getByRole('treeitem', {name: /Blueberry/})).toHaveFocus();
+
+      await user.keyboard('b');
+      expect(screen.getByRole('treeitem', {name: /Banana/})).toHaveFocus();
+    });
+
+    it('ignores characters typed with a modifier held', async () => {
+      const user = userEvent.setup();
+      render(<TreeView items={fruitItems} />);
+
+      focusItem(/Banana/);
+      await user.keyboard('{Control>}b{/Control}');
+
+      expect(screen.getByRole('treeitem', {name: /Banana/})).toHaveFocus();
+    });
+  });
+
   it('hides the visual focus state when focus leaves the tree', async () => {
     render(
       <>

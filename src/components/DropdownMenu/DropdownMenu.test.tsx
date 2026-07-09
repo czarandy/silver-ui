@@ -218,6 +218,38 @@ describe('DropdownMenu', () => {
       expect(item('Cherry')).toHaveFocus();
     });
 
+    it('narrows the type-ahead match as more characters are typed', async () => {
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu
+          button={{label: 'Actions'}}
+          items={[{label: 'Banana'}, {label: 'Apple'}, {label: 'Apricot'}]}
+        />,
+      );
+      await user.click(screen.getByRole('button', {name: 'Actions'}));
+      const item = (name: string) =>
+        screen.getByRole('menuitem', {hidden: true, name});
+
+      item('Banana').focus();
+      fireEvent.keyDown(item('Banana'), {key: 'a'});
+      expect(item('Apple')).toHaveFocus();
+
+      // "apr" describes Apricot. A single-character search would instead look
+      // for an item starting with "r" and find none.
+      fireEvent.keyDown(item('Apple'), {key: 'p'});
+      fireEvent.keyDown(item('Apple'), {key: 'r'});
+      expect(item('Apricot')).toHaveFocus();
+    });
+
+    it('ignores type-ahead characters typed with a modifier held', async () => {
+      const item = await openMenu();
+
+      item('Apple').focus();
+      fireEvent.keyDown(item('Apple'), {key: 'c', ctrlKey: true});
+
+      expect(item('Apple')).toHaveFocus();
+    });
+
     it('closes the menu and focuses the trigger on Tab', async () => {
       const item = await openMenu();
       const trigger = screen.getByRole('button', {name: 'Actions'});
