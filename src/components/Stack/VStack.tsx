@@ -17,6 +17,10 @@ export interface VStackProps extends Omit<
   vAlign?: StackMainAlignment;
 }
 
+/**
+ * A vertical flex container that lays out children in a column with a
+ * consistent gap.
+ */
 export function VStack({
   align,
   className,

@@ -25,6 +25,7 @@ export default defineConfig({
     include: [
       'src/**/*.test.{ts,tsx}',
       'site/src/**/*.test.{ts,tsx}',
+      'site/scripts/**/*.test.ts',
       'eslint/**/*.test.{js,ts}',
       'scripts/**/*.test.{js,mjs,ts}',
     ],

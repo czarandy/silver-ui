@@ -7,5 +7,7 @@ styled-system/
 *.log
 .pnpm-store/
 .astro/
+site/src/generated/
+site/src/content/docs/components/
 .codex-worktrees/
 .claude/worktrees/

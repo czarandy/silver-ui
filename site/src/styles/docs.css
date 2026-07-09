@@ -1,0 +1,37 @@
+/* Docs-page chrome for the generated component pages. */
+
+.component-lead {
+  font-size: var(--sl-text-lg);
+  color: var(--sl-color-gray-2);
+}
+
+.props-variant {
+  margin-top: 1.5rem;
+}
+
+/* Wide props tables scroll inside their own container. */
+.props-table {
+  overflow-x: auto;
+}
+
+.props-table table {
+  display: table;
+  width: 100%;
+}
+
+.props-table td:first-child {
+  white-space: nowrap;
+}
+
+.props-type {
+  word-break: break-word;
+}
+
+.props-required {
+  color: var(--sl-color-red);
+  margin-inline-start: 0.15em;
+}
+
+.props-none {
+  color: var(--sl-color-gray-4);
+}

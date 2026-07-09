@@ -48,6 +48,16 @@ check('getting-started docs page is generated', () => {
   assertContains(html, 'npm install silver-ui', 'install command');
 });
 
+check('component pages are generated with props tables', () => {
+  const html = read('components/button/index.html');
+  assertContains(html, '<h2', 'API heading');
+  assertContains(html, 'variant', 'variant prop row');
+  assertContains(html, 'isIconOnly', 'discriminated union group');
+  // Sidebar links to a page from another category prove the full sidebar
+  // rendered.
+  assertContains(html, '/components/date-input', 'sidebar cross-link');
+});
+
 check('sitemap index is generated', () => {
   const sitemap = read('sitemap-index.xml');
   assertContains(sitemap, '<sitemapindex', 'sitemapindex root element');
