@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  createElement,
   useCallback,
   useId,
   useMemo,
@@ -323,10 +322,10 @@ export function useLayer({
         style: {...anchorStyle, ...offsetStyle, ...props?.style},
       };
 
-      return createElement(
-        'div',
-        layerProps,
-        <LayerContext value={layerContextValue}>{children}</LayerContext>,
+      return (
+        <div {...layerProps}>
+          <LayerContext value={layerContextValue}>{children}</LayerContext>
+        </div>
       );
     },
     [anchorId, isDismissable, id, layerContextValue, popoverRefCallback],
