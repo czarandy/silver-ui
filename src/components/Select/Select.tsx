@@ -247,6 +247,7 @@ export function Select({
     isLoading,
     isListboxClosedOnCommit: true,
     isQueryClearedOnCommit: true,
+    isTypeaheadEnabled: true,
     onCommitOption: commitOption,
     options,
     selectedValues,

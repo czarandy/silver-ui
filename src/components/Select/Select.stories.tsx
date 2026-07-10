@@ -113,6 +113,14 @@ function CustomOptionsStory(args: React.ComponentProps<typeof Select>) {
 }
 
 export const Default: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'When the Select is focused and closed, type the beginning of an option label to select it without opening the menu.',
+      },
+    },
+  },
   render: (args: SelectProps) => <SelectStory {...args} />,
 };
 
