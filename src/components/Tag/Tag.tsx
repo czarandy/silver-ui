@@ -14,19 +14,10 @@ import {tagRecipe} from 'components/Tag/Tag.recipe';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
+import type {ColorName} from 'internal/colorNames';
 import {cx} from 'utils/cx';
 
-export type TagColor =
-  | 'red'
-  | 'orange'
-  | 'yellow'
-  | 'green'
-  | 'teal'
-  | 'cyan'
-  | 'blue'
-  | 'purple'
-  | 'pink'
-  | 'gray';
+export type TagColor = ColorName;
 
 export type TagSize = 'sm' | 'md' | 'lg';
 

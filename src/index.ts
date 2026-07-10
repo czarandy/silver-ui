@@ -308,6 +308,7 @@ export {
   type BadgeColor,
   type BadgeProps,
   type BadgeSize,
+  type BadgeStatusColor,
 } from 'components/Badge';
 export {
   Card,
@@ -525,6 +526,12 @@ export {
   type InputStatus,
   type InputStatusType,
 } from 'components/Field';
+export {
+  COLOR_NAMES,
+  ColorSwatchPicker,
+  type ColorName,
+  type ColorSwatchPickerProps,
+} from 'components/ColorSwatchPicker';
 export {
   TextInput,
   type TextInputProps,

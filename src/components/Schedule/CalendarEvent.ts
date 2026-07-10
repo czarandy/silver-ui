@@ -1,11 +1,11 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {Instant} from 'components/Schedule/types';
-import type {TagColor} from 'components/Tag';
+import type {ColorName} from 'internal/colorNames';
 import type {PlainDate} from 'internal/dateTypes';
 
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export type ScheduleEventColor = Exclude<TagColor, 'default'>;
+export type ScheduleEventColor = ColorName;
 
 export interface ScheduleCategory {
   color: ScheduleEventColor;
