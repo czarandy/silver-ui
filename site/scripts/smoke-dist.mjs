@@ -45,7 +45,14 @@ check('landing page is prerendered with SEO content', () => {
 check('getting-started docs page is generated', () => {
   const html = read('getting-started/index.html');
   assertContains(html, 'Installation', 'installation heading');
-  assertContains(html, 'npm install silver-ui', 'install command');
+  // The install commands render as Starlight package-manager tabs, which only
+  // compile because the page is emitted as .mdx (a plain .md would leak the
+  // literal <Tabs> markup instead). Assert the compiled tab UI and every
+  // command so a regression to markdown, or a dropped package manager, fails.
+  assertContains(html, 'starlight-tabs', 'compiled package-manager tabs');
+  assertContains(html, 'npm install silver-ui', 'npm install command');
+  assertContains(html, 'pnpm add silver-ui', 'pnpm install command');
+  assertContains(html, 'yarn add silver-ui', 'yarn install command');
 });
 
 check('theming guide is generated from THEME.md', () => {

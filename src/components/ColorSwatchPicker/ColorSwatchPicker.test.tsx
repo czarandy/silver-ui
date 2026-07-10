@@ -1,11 +1,4 @@
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from '@testing-library/react';
+import {fireEvent, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {createRef, useState} from 'react';
 import {
@@ -33,16 +26,6 @@ beforeEach(() => {
   shim.reset();
   shim.setFocusVisible(false);
 });
-
-/**
- * The tooltip anchored to `radio`, found by the color name it renders. Every
- * swatch renders its own tooltip popover, so the text is what tells them apart.
- */
-function getTooltipFor(radio: HTMLElement): HTMLElement {
-  const label = assertNonNull(radio.getAttribute('aria-label'));
-  const content = screen.getByText(label);
-  return assertNonNull(content.closest<HTMLElement>('[role="tooltip"]'));
-}
 
 describe('ColorSwatchPicker', () => {
   it('renders a labelled radiogroup with one radio per color', () => {
@@ -348,82 +331,10 @@ describe('ColorSwatchPicker', () => {
     expect(within(root).getByRole('radiogroup')).toBeInTheDocument();
   });
 
-  it('renders one tooltip per swatch naming its color', () => {
+  it('labels each swatch without rendering visual tooltips', () => {
     render(
       <ColorSwatchPicker
         colors={['red', 'blue']}
-        label="Office color"
-        onChange={() => {}}
-        value="red"
-      />,
-    );
-
-    expect(screen.getAllByRole('tooltip', {hidden: true})).toHaveLength(2);
-    expect(
-      getTooltipFor(screen.getByRole('radio', {name: 'Red'})),
-    ).toBeInTheDocument();
-    expect(
-      getTooltipFor(screen.getByRole('radio', {name: 'Blue'})),
-    ).toBeInTheDocument();
-  });
-
-  it('opens only the hovered swatch tooltip and closes it on mouse leave', async () => {
-    render(
-      <ColorSwatchPicker
-        colors={['red', 'blue']}
-        label="Office color"
-        onChange={() => {}}
-        value="red"
-      />,
-    );
-
-    const blue = screen.getByRole('radio', {name: 'Blue'});
-    const blueTooltip = getTooltipFor(blue);
-    const redTooltip = getTooltipFor(screen.getByRole('radio', {name: 'Red'}));
-
-    fireEvent.mouseEnter(blue);
-
-    await waitFor(() => {
-      expect(shim.isPopoverOpen(blueTooltip)).toBe(true);
-    });
-    expect(shim.isPopoverOpen(redTooltip)).toBe(false);
-
-    fireEvent.mouseLeave(blue);
-
-    await waitFor(() => {
-      expect(shim.isPopoverOpen(blueTooltip)).toBe(false);
-    });
-  });
-
-  it('opens tooltips on hover only, never on keyboard focus', () => {
-    shim.setFocusVisible(true);
-
-    render(
-      <ColorSwatchPicker
-        colors={['red', 'blue']}
-        label="Office color"
-        onChange={() => {}}
-        value="red"
-      />,
-    );
-
-    // The selected swatch is the group's tab stop, so it is the only one a
-    // focus-triggered tooltip could ever attach to.
-    const red = screen.getByRole('radio', {name: 'Red'});
-    expect(red).toHaveAttribute('tabindex', '0');
-
-    red.focus();
-    fireEvent.focusIn(red);
-
-    // The group's keyboard hint does open on focus, so assert on this swatch's
-    // own tooltip rather than on `showPopover` as a whole.
-    expect(shim.isPopoverOpen(getTooltipFor(red))).toBe(false);
-  });
-
-  it('does not describe swatches by their tooltip, which repeats the label', () => {
-    render(
-      <ColorSwatchPicker
-        colors={['red']}
         label="Office color"
         onChange={() => {}}
         value="red"
@@ -431,33 +342,13 @@ describe('ColorSwatchPicker', () => {
     );
 
     const red = screen.getByRole('radio', {name: 'Red'});
-    expect(red).not.toHaveAttribute('aria-describedby');
     expect(red).toHaveAccessibleName('Red');
-  });
-
-  it('does not open tooltips while disabled', () => {
-    vi.useFakeTimers();
-
-    try {
-      render(
-        <ColorSwatchPicker
-          colors={['red', 'blue']}
-          isDisabled
-          label="Office color"
-          onChange={() => {}}
-          value="red"
-        />,
-      );
-
-      fireEvent.mouseEnter(screen.getByRole('radio', {name: 'Blue'}));
-      act(() => {
-        vi.advanceTimersByTime(1000);
-      });
-
-      expect(shim.showPopover).not.toHaveBeenCalled();
-    } finally {
-      vi.useRealTimers();
-    }
+    expect(screen.getByRole('radio', {name: 'Blue'})).toHaveAccessibleName(
+      'Blue',
+    );
+    expect(
+      screen.queryByRole('tooltip', {hidden: true}),
+    ).not.toBeInTheDocument();
   });
 });
 

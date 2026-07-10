@@ -6,6 +6,12 @@ describe('gettingStartedPage', () => {
   it('single-sources the README Installation and Usage sections', () => {
     const page = gettingStartedPage();
     expect(page).toContain('title: "Getting started"');
+    expect(page).toContain('## Key features');
+    expect(page).toContain('**70+ accessible components.**');
+    expect(page).toContain('**Flexible theming.**');
+    expect(page).toContain('**Zero-runtime styling.**');
+    expect(page).toContain('**Modern React support.**');
+    expect(page).toContain('**Tree-shakeable imports.**');
     expect(page).toContain('## Installation');
     expect(page).toContain(
       "import {TabItem, Tabs} from '@astrojs/starlight/components';",
@@ -18,6 +24,8 @@ describe('gettingStartedPage', () => {
     expect(page).not.toContain('# or');
     expect(page).toContain('## Usage');
     expect(page).toContain("import 'silver-ui/styles.css';");
+    expect(page).not.toContain('takes its text via the `label` prop');
+    expect(page).not.toContain('install automatically');
     // Only those sections — not the README's component list.
     expect(page).not.toContain('## Components');
   });
