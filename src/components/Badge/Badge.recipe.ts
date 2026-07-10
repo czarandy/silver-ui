@@ -40,6 +40,7 @@ export const badgeRecipe = sva({
       error: {root: {bg: 'status.error.solid', color: 'status.error.solidFg'}},
       blue: {root: {bg: 'surface.blue', color: 'surface.blue.fg'}},
       cyan: {root: {bg: 'surface.cyan', color: 'surface.cyan.fg'}},
+      gray: {root: {bg: 'surface.gray', color: 'surface.gray.fg'}},
       green: {root: {bg: 'surface.green', color: 'surface.green.fg'}},
       orange: {root: {bg: 'surface.orange', color: 'surface.orange.fg'}},
       pink: {root: {bg: 'surface.pink', color: 'surface.pink.fg'}},

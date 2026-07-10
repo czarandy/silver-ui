@@ -1,25 +1,15 @@
 import type {CSSProperties, Ref} from 'react';
 import {badgeRecipe} from 'components/Badge/Badge.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
+import type {ColorName} from 'internal/colorNames';
 import {cx} from 'utils/cx';
 
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
-export type BadgeColor =
-  | 'neutral'
-  | 'info'
-  | 'success'
-  | 'warning'
-  | 'error'
-  | 'blue'
-  | 'cyan'
-  | 'green'
-  | 'orange'
-  | 'pink'
-  | 'purple'
-  | 'red'
-  | 'teal'
-  | 'yellow';
+export type BadgeStatusColor =
+  'neutral' | 'info' | 'success' | 'warning' | 'error';
+
+export type BadgeColor = ColorName | BadgeStatusColor;
 
 /**
  * A compact status label, category marker, or count.

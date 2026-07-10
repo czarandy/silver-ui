@@ -33,6 +33,14 @@ describe('Badge', () => {
     );
   });
 
+  it('applies gray as a named palette color', () => {
+    render(<Badge color="gray" data-testid="badge" label="Gray" />);
+
+    expect(screen.getByTestId('badge')).toHaveClass(
+      badgeRecipe({color: 'gray'}).root!,
+    );
+  });
+
   it('forwards ref to the root span', () => {
     const ref = vi.fn<(element: HTMLSpanElement | null) => void>();
 

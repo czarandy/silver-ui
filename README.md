@@ -167,6 +167,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **SearchFilterInput** — search input with structured filter tags
 - **Select** — single-value dropdown selector
 - **Slider** — range slider with marks and labels
+- **SwatchPicker** — swatch picker for the named theme palette
 - **Switch** — toggle switch
 - **TagsInput** — free-form tag entry field
 - **TextArea** — multi-line text input

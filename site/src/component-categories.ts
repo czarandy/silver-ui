@@ -53,6 +53,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'SearchFilterInput',
     'Select',
     'Slider',
+    'SwatchPicker',
     'Switch',
     'TagsInput',
     'TextArea',

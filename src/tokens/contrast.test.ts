@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 
+import {COLOR_NAMES} from 'internal/colorNames';
 import {themePresets} from 'themes/presets';
 
 // panda.config.ts lives at the repo root (outside src) and has no path alias;
@@ -107,19 +108,6 @@ function contrastRatio(a: string, b: string): number {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
-const SURFACE_COLORS = [
-  'blue',
-  'cyan',
-  'gray',
-  'green',
-  'orange',
-  'pink',
-  'purple',
-  'red',
-  'teal',
-  'yellow',
-] as const;
-
 // Every text-bearing solid fill paired with its intended foreground.
 // status.disabled.solid is intentionally omitted: WCAG 2.1 SC 1.4.3 exempts
 // inactive/disabled UI components from the contrast requirement.
@@ -135,7 +123,7 @@ const PAIRINGS: {name: string; bg: string; fg: string}[] = [
     bg: `{colors.status.${s}.solid}`,
     fg: `{colors.status.${s}.solidFg}`,
   })),
-  ...SURFACE_COLORS.map(c => ({
+  ...COLOR_NAMES.map(c => ({
     name: `surface.${c} tint`,
     bg: `{colors.surface.${c}.DEFAULT}`,
     fg: `{colors.surface.${c}.fg}`,
@@ -145,6 +133,12 @@ const PAIRINGS: {name: string; bg: string; fg: string}[] = [
 const MODES: Mode[] = ['base', '_dark'];
 
 describe('token color contrast (WCAG AA, normal text)', () => {
+  it('keeps ColorName in sync with surface semantic colors', () => {
+    const surface = (semantic.surface ?? {}) as Record<string, unknown>;
+
+    expect(Object.keys(surface).sort()).toEqual([...COLOR_NAMES].sort());
+  });
+
   it.each(PAIRINGS.flatMap(p => MODES.map(mode => ({...p, mode}))))(
     '$name meets 4.5:1 in $mode mode',
     ({bg, fg, mode}) => {
