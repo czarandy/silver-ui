@@ -402,14 +402,14 @@ describe('colorSwatchRecipe', () => {
     );
   });
 
-  it('draws the focus ring around the circle rather than the padded button', () => {
+  it('draws the focus ring around the circle in its own color', () => {
     const {button, fill} = swatch();
 
     expect(classesOf(fill)).toContain(
       '[[role="radio"]:focus-visible_&]:silver-ring-o_focusOffset',
     );
     expect(classesOf(fill)).toContain(
-      '[[role="radio"]:focus-visible_&]:silver-ring-c_primary',
+      '[[role="radio"]:focus-visible_&]:silver-ring-c_var(--swatch-ring,_token(colors.border.emphasized))',
     );
     expect(hasUtility(button, 'silver-ring-o_')).toBe(false);
   });

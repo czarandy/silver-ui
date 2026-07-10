@@ -13,7 +13,7 @@ export const colorSwatchPickerRecipe = cva({
  * The button reserves `spacing.1` of padding around the circle so the selected
  * ring and the focus ring both draw inside the button's own box, never over a
  * neighboring swatch. Both rings occupy the same 2px–4px band outside the
- * circle, so a focused swatch shows the primary outline in place of its
+ * circle, so a focused swatch shows its color-matched outline in place of its
  * selected ring; the check icon still marks which swatch is selected.
  */
 export const colorSwatchRecipe = sva({
@@ -54,7 +54,7 @@ export const colorSwatchRecipe = sva({
       '[role="radio"]:focus-visible &': {
         outlineWidth: 'focus',
         outlineStyle: 'solid',
-        outlineColor: 'primary',
+        outlineColor: 'var(--swatch-ring, token(colors.border.emphasized))',
         outlineOffset: 'focusOffset',
       },
     },
