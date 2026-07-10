@@ -5,6 +5,7 @@ export const dialogRecipe = sva({
   base: {
     root: {
       position: 'fixed',
+      inset: 0,
       m: 'auto',
       p: 0,
       borderWidth: 0,
