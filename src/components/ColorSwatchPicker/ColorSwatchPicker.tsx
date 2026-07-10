@@ -128,7 +128,9 @@ function ColorSwatch({
       tabIndex={isTabbable ? 0 : -1}
       type="button">
       <span aria-hidden="true" className={classes.fill}>
-        {isSelected ? <Icon icon={Check} size={size} /> : null}
+        {isSelected ? (
+          <Icon className={classes.icon} icon={Check} size={size} />
+        ) : null}
       </span>
     </button>
   );
