@@ -185,6 +185,31 @@ describe('Dialog', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
+  it('restores native open state when a blocked escape closes the dialog', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <Dialog
+        dismissBehavior={false}
+        isOpen
+        label="Preferences"
+        onOpenChange={onOpenChange}
+        role="alertdialog">
+        Content
+      </Dialog>,
+    );
+
+    const dialog = screen.getByRole('alertdialog');
+    const cancelEvent = new Event('cancel', {cancelable: true});
+    dialog.dispatchEvent(cancelEvent);
+    dialog.removeAttribute('open');
+    dialog.dispatchEvent(new Event('close'));
+
+    expect(cancelEvent.defaultPrevented).toBe(true);
+    expect(dialog).toHaveAttribute('open');
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
   it('calls onOpenChange(false) on cancel by default', () => {
     const onOpenChange = vi.fn();
 

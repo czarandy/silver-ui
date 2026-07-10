@@ -231,6 +231,30 @@ describe('Drawer', () => {
     expect(onOpenChange).not.toHaveBeenCalled();
   });
 
+  it('restores native open state when a blocked escape closes the drawer', () => {
+    const onOpenChange = vi.fn();
+
+    render(
+      <Drawer
+        dismissBehavior={false}
+        isOpen
+        label="Navigation"
+        onOpenChange={onOpenChange}>
+        Content
+      </Drawer>,
+    );
+
+    const drawer = screen.getByRole('dialog');
+    const cancelEvent = new Event('cancel', {cancelable: true});
+    drawer.dispatchEvent(cancelEvent);
+    drawer.removeAttribute('open');
+    drawer.dispatchEvent(new Event('close'));
+
+    expect(cancelEvent.defaultPrevented).toBe(true);
+    expect(drawer).toHaveAttribute('open');
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
   it('still closes on backdrop click when only escape dismiss is disabled', () => {
     const onOpenChange = vi.fn();
 

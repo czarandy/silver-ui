@@ -160,6 +160,12 @@ export function Drawer({
         }
       }}
       onClick={backdropDismiss.onClick}
+      onClose={event => {
+        const dialog = event.currentTarget;
+        if (isOpen && !dialog.open) {
+          dialog.showModal();
+        }
+      }}
       onPointerDown={backdropDismiss.onPointerDown}
       ref={mergeRefs(ref, dialogRef)}
       style={{...sizeStyle, ...style}}>

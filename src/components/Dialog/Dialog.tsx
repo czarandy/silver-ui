@@ -198,6 +198,12 @@ export function Dialog({
         }
       }}
       onClick={backdropDismiss.onClick}
+      onClose={event => {
+        const dialog = event.currentTarget;
+        if (isOpen && !dialog.open) {
+          dialog.showModal();
+        }
+      }}
       onPointerDown={backdropDismiss.onPointerDown}
       ref={mergeRefs(ref, dialogRef)}
       role={role === 'dialog' ? undefined : role}
