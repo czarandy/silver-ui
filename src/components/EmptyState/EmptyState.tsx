@@ -25,7 +25,7 @@ export interface EmptyStateProps {
   description?: string;
   /**
    * Semantic heading level for the title.
-   * @default 3
+   * @default 4
    */
   headingLevel?: HeadingLevel;
   /**
@@ -59,7 +59,7 @@ export function EmptyState({
   className,
   'data-testid': dataTestId,
   description,
-  headingLevel = 3,
+  headingLevel = 4,
   illustration,
   isCompact = false,
   ref,
@@ -87,7 +87,7 @@ export function EmptyState({
           {title}
         </Heading>
         {description != null ? (
-          <Text as="div" color="secondary" role="paragraph">
+          <Text as="div" color="secondary" role="paragraph" size="sm">
             {description}
           </Text>
         ) : null}

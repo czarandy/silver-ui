@@ -9,7 +9,7 @@ export const emptyStateRecipe = sva({
       alignItems: 'center',
       justifyContent: 'center',
       textAlign: 'center',
-      gap: '4',
+      gap: '2',
       w: 'full',
       px: '6',
       py: '8',
@@ -17,8 +17,8 @@ export const emptyStateRecipe = sva({
     illustration: {
       display: 'inline-flex',
       color: 'fg.muted',
-      w: '16',
-      h: '16',
+      w: '12',
+      h: '12',
       '& > svg': {
         w: 'full',
         h: 'full',
@@ -29,7 +29,7 @@ export const emptyStateRecipe = sva({
       flexDirection: 'column',
       alignItems: 'center',
       gap: '1',
-      maxW: '96',
+      maxW: '420px',
     },
     actions: {
       display: 'flex',
@@ -47,10 +47,6 @@ export const emptyStateRecipe = sva({
           gap: '2',
           px: '4',
           py: '4',
-        },
-        illustration: {
-          w: '12',
-          h: '12',
         },
         actions: {
           mt: '0',

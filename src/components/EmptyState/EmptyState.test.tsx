@@ -65,12 +65,35 @@ describe('EmptyState', () => {
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 
-  it('renders at the default heading level 3', () => {
+  it('renders at the default heading level 4', () => {
     render(<EmptyState title="Empty" />);
 
     expect(
-      screen.getByRole('heading', {level: 3, name: 'Empty'}),
+      screen.getByRole('heading', {level: 4, name: 'Empty'}),
     ).toBeInTheDocument();
+  });
+
+  it('uses the reduced illustration, spacing, and text sizing', () => {
+    const {container} = render(
+      <EmptyState
+        data-testid="empty"
+        description="Create an item to get started."
+        illustration={<Inbox />}
+        title="No items"
+      />,
+    );
+
+    expect(screen.getByTestId('empty')).toHaveClass('silver-gap_2');
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const illustration = container.querySelector('[aria-hidden="true"]');
+    expect(illustration).toHaveClass('silver-w_12', 'silver-h_12');
+    // eslint-disable-next-line testing-library/no-node-access
+    expect(screen.getByRole('heading').parentElement).toHaveClass(
+      'silver-max-w_420px',
+    );
+    expect(screen.getByText('Create an item to get started.')).toHaveClass(
+      'silver-fs_sm',
+    );
   });
 
   it('renders at a custom heading level', () => {
