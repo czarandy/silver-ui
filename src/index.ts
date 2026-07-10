@@ -527,10 +527,10 @@ export {
 } from 'components/Field';
 export {
   COLOR_NAMES,
-  SwatchPicker,
+  ColorSwatchPicker,
   type ColorName,
-  type SwatchPickerProps,
-} from 'components/SwatchPicker';
+  type ColorSwatchPickerProps,
+} from 'components/ColorSwatchPicker';
 export {
   TextInput,
   type TextInputProps,

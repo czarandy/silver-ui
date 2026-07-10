@@ -11,6 +11,10 @@ import {
   type Ref,
 } from 'react';
 import {
+  colorSwatchPickerRecipe,
+  colorSwatchRecipe,
+} from 'components/ColorSwatchPicker/ColorSwatchPicker.recipe';
+import {
   Field,
   getNecessity,
   type FieldNecessity,
@@ -19,17 +23,13 @@ import {
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon} from 'components/Icon';
-import {
-  swatchPickerRecipe,
-  swatchRecipe,
-} from 'components/SwatchPicker/SwatchPicker.recipe';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 
-export type SwatchPickerProps = {
+export type ColorSwatchPickerProps = {
   /**
    * Additional CSS class names applied to the field root.
    */
@@ -95,7 +95,7 @@ export type SwatchPickerProps = {
 /**
  * A controlled swatch picker for choosing one named theme color.
  */
-export function SwatchPicker({
+export function ColorSwatchPicker({
   className,
   colors = COLOR_NAMES,
   'data-testid': dataTestId,
@@ -112,7 +112,7 @@ export function SwatchPicker({
   status,
   style,
   value,
-}: SwatchPickerProps): React.JSX.Element {
+}: ColorSwatchPickerProps): React.JSX.Element {
   const inputId = useId();
   const labelId = `${inputId}-label`;
   const descriptionID = isReactNode(description)
@@ -197,7 +197,7 @@ export function SwatchPicker({
         aria-labelledby={labelId}
         aria-orientation="horizontal"
         aria-required={isRequired ?? undefined}
-        className={swatchPickerRecipe()}
+        className={colorSwatchPickerRecipe()}
         id={inputId}
         onBlur={hint.onBlur}
         onFocus={hint.onFocus}
@@ -207,7 +207,7 @@ export function SwatchPicker({
         tabIndex={-1}>
         {colors.map((color, index) => {
           const isSelected = color === value;
-          const classes = swatchRecipe({
+          const classes = colorSwatchRecipe({
             color,
             isDisabled,
             isSelected,
@@ -242,4 +242,4 @@ export function SwatchPicker({
   );
 }
 
-SwatchPicker.displayName = 'SwatchPicker';
+ColorSwatchPicker.displayName = 'ColorSwatchPicker';

@@ -10,7 +10,7 @@ import {
   it,
   vi,
 } from 'vitest';
-import {SwatchPicker} from 'components/SwatchPicker/SwatchPicker';
+import {ColorSwatchPicker} from 'components/ColorSwatchPicker/ColorSwatchPicker';
 import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
 import {createPopoverFocusShim} from 'internal/testHelpers';
 
@@ -23,10 +23,14 @@ beforeEach(() => {
   shim.setFocusVisible(false);
 });
 
-describe('SwatchPicker', () => {
+describe('ColorSwatchPicker', () => {
   it('renders a labelled radiogroup with one radio per color', () => {
     render(
-      <SwatchPicker label="Office color" onChange={() => {}} value="blue" />,
+      <ColorSwatchPicker
+        label="Office color"
+        onChange={() => {}}
+        value="blue"
+      />,
     );
 
     const group = screen.getByRole('radiogroup', {name: 'Office color'});
@@ -43,7 +47,11 @@ describe('SwatchPicker', () => {
 
   it('renders controlled checked state and roving tabindex', () => {
     render(
-      <SwatchPicker label="Office color" onChange={() => {}} value="blue" />,
+      <ColorSwatchPicker
+        label="Office color"
+        onChange={() => {}}
+        value="blue"
+      />,
     );
 
     const selected = screen.getByRole('radio', {name: 'Blue'});
@@ -63,7 +71,11 @@ describe('SwatchPicker', () => {
     function Example(): React.JSX.Element {
       const [value, setValue] = useState<ColorName>('red');
       return (
-        <SwatchPicker label="Office color" onChange={setValue} value={value} />
+        <ColorSwatchPicker
+          label="Office color"
+          onChange={setValue}
+          value={value}
+        />
       );
     }
 
@@ -80,7 +92,11 @@ describe('SwatchPicker', () => {
     const onChange = vi.fn();
 
     render(
-      <SwatchPicker label="Office color" onChange={onChange} value="red" />,
+      <ColorSwatchPicker
+        label="Office color"
+        onChange={onChange}
+        value="red"
+      />,
     );
 
     await user.click(screen.getByRole('radio', {name: 'Blue'}));
@@ -92,7 +108,11 @@ describe('SwatchPicker', () => {
     const onChange = vi.fn();
 
     render(
-      <SwatchPicker label="Office color" onChange={onChange} value="red" />,
+      <ColorSwatchPicker
+        label="Office color"
+        onChange={onChange}
+        value="red"
+      />,
     );
 
     await user.click(screen.getByRole('radio', {name: 'Red'}));
@@ -104,7 +124,7 @@ describe('SwatchPicker', () => {
     const onChange = vi.fn();
 
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         colors={['red', 'blue', 'green']}
         label="Office color"
         onChange={onChange}
@@ -133,7 +153,7 @@ describe('SwatchPicker', () => {
     const onChange = vi.fn();
 
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         colors={['red', 'blue', 'green']}
         label="Office color"
         onChange={onChange}
@@ -165,7 +185,7 @@ describe('SwatchPicker', () => {
 
   it('renders a custom color subset in order', () => {
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         colors={['red', 'blue']}
         label="Office color"
         onChange={() => {}}
@@ -180,7 +200,7 @@ describe('SwatchPicker', () => {
 
   it('keeps one swatch tabbable when value is not in colors', () => {
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         colors={['red', 'blue']}
         label="Office color"
         onChange={() => {}}
@@ -200,7 +220,7 @@ describe('SwatchPicker', () => {
     const onChange = vi.fn();
 
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         colors={['red', 'blue']}
         isDisabled
         label="Office color"
@@ -227,7 +247,7 @@ describe('SwatchPicker', () => {
 
   it('sets aria-invalid and describes status messages', () => {
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         label="Office color"
         onChange={() => {}}
         status={{type: 'error', message: 'Choose a color'}}
@@ -244,7 +264,7 @@ describe('SwatchPicker', () => {
 
   it('wires description and label ids', () => {
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         description="Used for schedule events."
         label="Office color"
         onChange={() => {}}
@@ -262,7 +282,7 @@ describe('SwatchPicker', () => {
 
   it('renders required and optional field indicators', () => {
     const {rerender} = render(
-      <SwatchPicker
+      <ColorSwatchPicker
         isRequired
         label="Office color"
         onChange={() => {}}
@@ -274,7 +294,7 @@ describe('SwatchPicker', () => {
     expect(screen.getByText('Required')).toBeInTheDocument();
 
     rerender(
-      <SwatchPicker
+      <ColorSwatchPicker
         isOptional
         label="Office color"
         onChange={() => {}}
@@ -289,7 +309,7 @@ describe('SwatchPicker', () => {
     const ref = createRef<HTMLDivElement>();
 
     render(
-      <SwatchPicker
+      <ColorSwatchPicker
         className="custom-picker"
         data-testid="picker"
         label="Office color"

@@ -156,6 +156,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **AutocompleteInput** — searchable autocomplete input (combobox)
 - **CheckboxGroup** — controlled checkbox group for multi-value selection
 - **CheckboxInput** — checkbox with label and description
+- **ColorSwatchPicker** — swatch picker for the named theme palette
 - **Field** — form field wrapper with label, description, and validation
 - **FileInput** — file upload with drag-and-drop support
 - **InputGroup** — groups related form inputs with shared label
@@ -167,7 +168,6 @@ mode details, scoped theming examples, and per-instance overrides.
 - **SearchFilterInput** — search input with structured filter tags
 - **Select** — single-value dropdown selector
 - **Slider** — range slider with marks and labels
-- **SwatchPicker** — swatch picker for the named theme palette
 - **Switch** — toggle switch
 - **TagsInput** — free-form tag entry field
 - **TextArea** — multi-line text input

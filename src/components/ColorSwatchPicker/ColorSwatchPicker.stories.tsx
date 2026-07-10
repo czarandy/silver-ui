@@ -2,38 +2,55 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {Badge} from 'components/Badge';
 import {
-  SwatchPicker,
+  ColorSwatchPicker,
   type ColorName,
-  type SwatchPickerProps,
-} from 'components/SwatchPicker';
+  type ColorSwatchPickerProps,
+} from 'components/ColorSwatchPicker';
 import {Tag} from 'components/Tag';
 
-function SwatchPickerStory(args: SwatchPickerProps): React.JSX.Element {
+function ColorSwatchPickerStory(
+  args: ColorSwatchPickerProps,
+): React.JSX.Element {
   const [value, setValue] = useState(args.value);
 
-  return <SwatchPicker {...args} onChange={setValue} value={value} />;
+  return <ColorSwatchPicker {...args} onChange={setValue} value={value} />;
 }
 
-function SizesStory(args: SwatchPickerProps): React.JSX.Element {
+function SizesStory(args: ColorSwatchPickerProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);
 
   return (
     <div style={{display: 'grid', gap: 16, justifyItems: 'start'}}>
-      <SwatchPicker {...args} onChange={setValue} size="sm" value={value} />
-      <SwatchPicker {...args} onChange={setValue} size="md" value={value} />
-      <SwatchPicker {...args} onChange={setValue} size="lg" value={value} />
+      <ColorSwatchPicker
+        {...args}
+        onChange={setValue}
+        size="sm"
+        value={value}
+      />
+      <ColorSwatchPicker
+        {...args}
+        onChange={setValue}
+        size="md"
+        value={value}
+      />
+      <ColorSwatchPicker
+        {...args}
+        onChange={setValue}
+        size="lg"
+        value={value}
+      />
     </div>
   );
 }
 
 function DrivesOtherComponentsStory(
-  args: SwatchPickerProps,
+  args: ColorSwatchPickerProps,
 ): React.JSX.Element {
   const [value, setValue] = useState<ColorName>(args.value);
 
   return (
     <div style={{display: 'grid', gap: 16, justifyItems: 'start'}}>
-      <SwatchPicker {...args} onChange={setValue} value={value} />
+      <ColorSwatchPicker {...args} onChange={setValue} value={value} />
       <div style={{display: 'flex', gap: 8}}>
         <Tag color={value} label="North office" />
         <Badge color={value} label="North office" />
@@ -43,8 +60,8 @@ function DrivesOtherComponentsStory(
 }
 
 const meta = {
-  title: 'Components/SwatchPicker',
-  component: SwatchPicker,
+  title: 'Components/ColorSwatchPicker',
+  component: ColorSwatchPicker,
   args: {
     label: 'Office color',
     description: 'Choose the named theme color used for this office.',
@@ -58,18 +75,18 @@ const meta = {
       options: ['sm', 'md', 'lg'],
     },
   },
-  render: (args: SwatchPickerProps): React.JSX.Element => (
-    <SwatchPickerStory {...args} />
+  render: (args: ColorSwatchPickerProps): React.JSX.Element => (
+    <ColorSwatchPickerStory {...args} />
   ),
-} satisfies Meta<SwatchPickerProps>;
+} satisfies Meta<ColorSwatchPickerProps>;
 
 export default meta;
-type Story = StoryObj<SwatchPickerProps>;
+type Story = StoryObj<ColorSwatchPickerProps>;
 
 export const Default: Story = {};
 
 export const Sizes: Story = {
-  render: (args: SwatchPickerProps): React.JSX.Element => (
+  render: (args: ColorSwatchPickerProps): React.JSX.Element => (
     <SizesStory {...args} />
   ),
 };
@@ -100,7 +117,7 @@ export const Required: Story = {
 };
 
 export const DrivesOtherComponents: Story = {
-  render: (args: SwatchPickerProps): React.JSX.Element => (
+  render: (args: ColorSwatchPickerProps): React.JSX.Element => (
     <DrivesOtherComponentsStory {...args} />
   ),
 };

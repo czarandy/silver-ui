@@ -1,6 +1,6 @@
 import {cva, sva, type RecipeVariantProps} from 'styled-system/css';
 
-export const swatchPickerRecipe = cva({
+export const colorSwatchPickerRecipe = cva({
   base: {
     display: 'flex',
     alignItems: 'center',
@@ -9,7 +9,7 @@ export const swatchPickerRecipe = cva({
   },
 });
 
-export const swatchRecipe = sva({
+export const colorSwatchRecipe = sva({
   slots: ['button', 'fill'],
   base: {
     button: {
@@ -147,4 +147,4 @@ export const swatchRecipe = sva({
   },
 });
 
-export type SwatchVariants = RecipeVariantProps<typeof swatchRecipe>;
+export type ColorSwatchVariants = RecipeVariantProps<typeof colorSwatchRecipe>;
