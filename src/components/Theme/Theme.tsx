@@ -1,8 +1,6 @@
 'use client';
 
 import {
-  Fragment,
-  createElement,
   useId,
   type CSSProperties,
   type ElementType,
@@ -561,31 +559,31 @@ export function Theme({
       : undefined;
   const themeStyle = createThemeStyle(tokens, style);
 
-  return createElement(
-    Element,
-    {
-      ...htmlProps,
-      className: cx(themeClassName, className),
-      'data-testid': dataTestId,
+  return (
+    <Element
+      {...htmlProps}
+      className={cx(themeClassName, className)}
+      data-testid={dataTestId}
       // Always emit `data-theme` — including `data-theme="system"`, which the
       // shipped styles.css targets under `@media (prefers-color-scheme: dark)`
       // to follow the OS. Explicit `light` / `dark` pin the theme and win.
-      'data-theme': mode,
-      ref,
-      style: themeStyle,
-    },
-    themeCss == null
-      ? children
-      : createElement(
-          Fragment,
-          null,
-          createElement(
-            'style',
-            dataTestId == null ? null : {'data-testid': `${dataTestId}-styles`},
-            themeCss,
-          ),
-          children,
-        ),
+      data-theme={mode}
+      ref={ref}
+      style={themeStyle}>
+      {themeCss == null ? (
+        children
+      ) : (
+        <>
+          <style
+            data-testid={
+              dataTestId == null ? undefined : `${dataTestId}-styles`
+            }>
+            {themeCss}
+          </style>
+          {children}
+        </>
+      )}
+    </Element>
   );
 }
 
