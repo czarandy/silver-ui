@@ -244,10 +244,7 @@ export function Lightbox({
     isEnabled: isOpen,
     onEscape: close,
   });
-  const layerContextValue = useMemo(
-    () => ({layerId: escapeDismiss.layerId}),
-    [escapeDismiss.layerId],
-  );
+  const layerContextValue = escapeDismiss.layerContextValue;
   const goPrev = useCallback(() => {
     if (canPrev) {
       setIndex(currentIndex - 1);

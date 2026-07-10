@@ -197,10 +197,7 @@ export function ContextMenu({
       triggerRef.current?.focus();
     },
   });
-  const layerContextValue = useMemo(
-    () => ({layerId: escapeDismiss.layerId}),
-    [escapeDismiss.layerId],
-  );
+  const layerContextValue = escapeDismiss.layerContextValue;
 
   const focusFirstItem = useCallback(() => {
     const firstItem = menuRef.current?.querySelector<HTMLElement>(

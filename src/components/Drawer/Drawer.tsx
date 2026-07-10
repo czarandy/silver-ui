@@ -1,7 +1,7 @@
 'use client';
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useEffect, useMemo, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
 import {LayerContext} from 'internal/LayerContext';
 import {
@@ -118,10 +118,7 @@ export function Drawer({
     isEnabled: isOpen && isEscapeDismissEnabled,
     onEscape: () => onOpenChange(false),
   });
-  const layerContextValue = useMemo(
-    () => ({layerId: escapeDismiss.layerId}),
-    [escapeDismiss.layerId],
-  );
+  const layerContextValue = escapeDismiss.layerContextValue;
 
   useEffect(() => {
     const dialog = dialogRef.current;

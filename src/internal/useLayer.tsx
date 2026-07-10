@@ -272,13 +272,18 @@ export function useLayer({
     [onHide],
   );
 
-  useEscapeDismiss({
+  // `useEscapeDismiss` reads the enclosing layer from `LayerContext` and adds
+  // this layer to the tree under it — even when `isEscapeDismissEnabled` is
+  // false. A layer that never handles Escape still has to be positioned in the
+  // tree, so that `useIsTopLayer()` calls beneath it can tell whether an
+  // Escape-handling layer sits above them.
+  const escapeDismiss = useEscapeDismiss({
     getElement: () => popoverRef.current,
     id,
     isEnabled: isOpen && isEscapeDismissEnabled,
     onEscape: onEscape ?? hide,
   });
-  const layerContextValue = useMemo(() => ({layerId: id}), [id]);
+  const layerContextValue = escapeDismiss.layerContextValue;
 
   const popoverRefCallback = useCallback(
     (element: HTMLElement | null) => {

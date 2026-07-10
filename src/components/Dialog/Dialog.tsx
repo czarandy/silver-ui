@@ -145,10 +145,7 @@ export function Dialog({
     () => ({onOpenChange, titleId}),
     [onOpenChange, titleId],
   );
-  const layerContextValue = useMemo(
-    () => ({layerId: escapeDismiss.layerId}),
-    [escapeDismiss.layerId],
-  );
+  const layerContextValue = escapeDismiss.layerContextValue;
   const classes = dialogRecipe({isOpen, variant});
 
   useEffect(() => {
