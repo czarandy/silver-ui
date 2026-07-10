@@ -23,6 +23,7 @@ import {
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon} from 'components/Icon';
+import {useTooltip} from 'components/Tooltip';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
@@ -91,6 +92,63 @@ export type ColorSwatchPickerProps = {
    */
   value: ColorName;
 } & FieldNecessity;
+
+interface ColorSwatchProps {
+  color: ColorName;
+  isDisabled: boolean;
+  isSelected: boolean;
+  isTabbable: boolean;
+  onSelect: (color: ColorName) => void;
+  size: InputSize;
+}
+
+function ColorSwatch({
+  color,
+  isDisabled,
+  isSelected,
+  isTabbable,
+  onSelect,
+  size,
+}: ColorSwatchProps): React.JSX.Element {
+  const label = COLOR_LABELS[color];
+  const classes = colorSwatchRecipe({color, isDisabled, isSelected, size});
+  // Hover-only: focus already surfaces the color through the accessible name,
+  // and a focus tooltip would collide with the group's keyboard hint and stay
+  // open on the focused swatch while the pointer hovers another one.
+  const {ref: tooltipRef, renderTooltip} = useTooltip({
+    focusTrigger: 'never',
+    isEnabled: !isDisabled,
+  });
+
+  return (
+    <>
+      <button
+        aria-checked={isSelected}
+        aria-disabled={isDisabled || undefined}
+        aria-label={label}
+        className={classes.button}
+        data-value={color}
+        onClick={() => {
+          if (!isDisabled) {
+            onSelect(color);
+          }
+        }}
+        ref={tooltipRef}
+        role="radio"
+        tabIndex={isTabbable ? 0 : -1}
+        type="button">
+        <span aria-hidden="true" className={classes.fill}>
+          {isSelected ? <Icon icon={Check} size={size} /> : null}
+        </span>
+      </button>
+      {/*
+        The tooltip repeats the swatch's accessible name, so it is deliberately
+        left out of `aria-describedby` — that would announce the color twice.
+      */}
+      {renderTooltip(label)}
+    </>
+  );
+}
 
 /**
  * A controlled swatch picker for choosing one named theme color.
@@ -205,37 +263,17 @@ export function ColorSwatchPicker({
         ref={mergeRefs(containerRef)}
         role="radiogroup"
         tabIndex={-1}>
-        {colors.map((color, index) => {
-          const isSelected = color === value;
-          const classes = colorSwatchRecipe({
-            color,
-            isDisabled,
-            isSelected,
-            size,
-          });
-
-          return (
-            <button
-              aria-checked={isSelected}
-              aria-disabled={isDisabled || undefined}
-              aria-label={COLOR_LABELS[color]}
-              className={classes.button}
-              data-value={color}
-              key={color}
-              onClick={() => {
-                if (!isDisabled) {
-                  handleChange(color);
-                }
-              }}
-              role="radio"
-              tabIndex={index === tabStopIndex ? 0 : -1}
-              type="button">
-              <span aria-hidden="true" className={classes.fill}>
-                {isSelected ? <Icon icon={Check} size={size} /> : null}
-              </span>
-            </button>
-          );
-        })}
+        {colors.map((color, index) => (
+          <ColorSwatch
+            color={color}
+            isDisabled={isDisabled}
+            isSelected={color === value}
+            isTabbable={index === tabStopIndex}
+            key={color}
+            onSelect={handleChange}
+            size={size}
+          />
+        ))}
         {hint.hintElement}
       </div>
     </Field>

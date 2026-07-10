@@ -1,4 +1,11 @@
-import {fireEvent, render, screen, within} from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {createRef, useState} from 'react';
 import {
@@ -11,8 +18,12 @@ import {
   vi,
 } from 'vitest';
 import {ColorSwatchPicker} from 'components/ColorSwatchPicker/ColorSwatchPicker';
+import {
+  colorSwatchPickerRecipe,
+  colorSwatchRecipe,
+} from 'components/ColorSwatchPicker/ColorSwatchPicker.recipe';
 import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
-import {createPopoverFocusShim} from 'internal/testHelpers';
+import {assertNonNull, createPopoverFocusShim} from 'internal/testHelpers';
 
 const shim = createPopoverFocusShim();
 
@@ -22,6 +33,16 @@ beforeEach(() => {
   shim.reset();
   shim.setFocusVisible(false);
 });
+
+/**
+ * The tooltip anchored to `radio`, found by the color name it renders. Every
+ * swatch renders its own tooltip popover, so the text is what tells them apart.
+ */
+function getTooltipFor(radio: HTMLElement): HTMLElement {
+  const label = assertNonNull(radio.getAttribute('aria-label'));
+  const content = screen.getByText(label);
+  return assertNonNull(content.closest<HTMLElement>('[role="tooltip"]'));
+}
 
 describe('ColorSwatchPicker', () => {
   it('renders a labelled radiogroup with one radio per color', () => {
@@ -325,5 +346,189 @@ describe('ColorSwatchPicker', () => {
     expect(root).toHaveStyle({maxWidth: '320px'});
     expect(ref.current).toBe(root);
     expect(within(root).getByRole('radiogroup')).toBeInTheDocument();
+  });
+
+  it('renders one tooltip per swatch naming its color', () => {
+    render(
+      <ColorSwatchPicker
+        colors={['red', 'blue']}
+        label="Office color"
+        onChange={() => {}}
+        value="red"
+      />,
+    );
+
+    expect(screen.getAllByRole('tooltip', {hidden: true})).toHaveLength(2);
+    expect(
+      getTooltipFor(screen.getByRole('radio', {name: 'Red'})),
+    ).toBeInTheDocument();
+    expect(
+      getTooltipFor(screen.getByRole('radio', {name: 'Blue'})),
+    ).toBeInTheDocument();
+  });
+
+  it('opens only the hovered swatch tooltip and closes it on mouse leave', async () => {
+    render(
+      <ColorSwatchPicker
+        colors={['red', 'blue']}
+        label="Office color"
+        onChange={() => {}}
+        value="red"
+      />,
+    );
+
+    const blue = screen.getByRole('radio', {name: 'Blue'});
+    const blueTooltip = getTooltipFor(blue);
+    const redTooltip = getTooltipFor(screen.getByRole('radio', {name: 'Red'}));
+
+    fireEvent.mouseEnter(blue);
+
+    await waitFor(() => {
+      expect(shim.isPopoverOpen(blueTooltip)).toBe(true);
+    });
+    expect(shim.isPopoverOpen(redTooltip)).toBe(false);
+
+    fireEvent.mouseLeave(blue);
+
+    await waitFor(() => {
+      expect(shim.isPopoverOpen(blueTooltip)).toBe(false);
+    });
+  });
+
+  it('opens tooltips on hover only, never on keyboard focus', () => {
+    shim.setFocusVisible(true);
+
+    render(
+      <ColorSwatchPicker
+        colors={['red', 'blue']}
+        label="Office color"
+        onChange={() => {}}
+        value="red"
+      />,
+    );
+
+    // The selected swatch is the group's tab stop, so it is the only one a
+    // focus-triggered tooltip could ever attach to.
+    const red = screen.getByRole('radio', {name: 'Red'});
+    expect(red).toHaveAttribute('tabindex', '0');
+
+    red.focus();
+    fireEvent.focusIn(red);
+
+    // The group's keyboard hint does open on focus, so assert on this swatch's
+    // own tooltip rather than on `showPopover` as a whole.
+    expect(shim.isPopoverOpen(getTooltipFor(red))).toBe(false);
+  });
+
+  it('does not describe swatches by their tooltip, which repeats the label', () => {
+    render(
+      <ColorSwatchPicker
+        colors={['red']}
+        label="Office color"
+        onChange={() => {}}
+        value="red"
+      />,
+    );
+
+    const red = screen.getByRole('radio', {name: 'Red'});
+    expect(red).not.toHaveAttribute('aria-describedby');
+    expect(red).toHaveAccessibleName('Red');
+  });
+
+  it('does not open tooltips while disabled', () => {
+    vi.useFakeTimers();
+
+    try {
+      render(
+        <ColorSwatchPicker
+          colors={['red', 'blue']}
+          isDisabled
+          label="Office color"
+          onChange={() => {}}
+          value="red"
+        />,
+      );
+
+      fireEvent.mouseEnter(screen.getByRole('radio', {name: 'Blue'}));
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+
+      expect(shim.showPopover).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});
+
+describe('colorSwatchRecipe', () => {
+  const swatch = (
+    overrides: Parameters<typeof colorSwatchRecipe>[0] = {},
+  ): ReturnType<typeof colorSwatchRecipe> =>
+    colorSwatchRecipe({color: 'blue', size: 'md', ...overrides});
+
+  /**
+   * Panda emits atomic class names whose suffix is the token, so `focusOffset`
+   * is a prefix of `focusOffsetLoose`. Compare whole classes, never substrings.
+   */
+  const classesOf = (className: string | undefined): ReadonlyArray<string> =>
+    assertNonNull(className).split(' ');
+
+  /**
+   * Whether any class applies `utility`, under any condition prefix — a
+   * `_focusVisible` style lands on `focus-visible:silver-ring-o_…`, so matching
+   * only the start of the class would miss it.
+   */
+  const hasUtility = (
+    className: string | undefined,
+    utility: string,
+  ): boolean => classesOf(className).some(name => name.includes(utility));
+
+  it('spaces swatches by spacing.1', () => {
+    expect(classesOf(colorSwatchPickerRecipe())).toContain('silver-gap_1');
+  });
+
+  it('marks the selected swatch with an outer ring in its own color', () => {
+    const selected = swatch({isSelected: true});
+    const unselected = swatch({isSelected: false});
+
+    expect(classesOf(selected.fill)).toContain(
+      'silver---swatch-ring_token(colors.surface.blue.accent)',
+    );
+    expect(classesOf(selected.fill)).toContain(
+      'silver-bx-sh_0_0_0_2px_token(colors.bg),_0_0_0_4px_var(--swatch-ring,_token(colors.border.emphasized))',
+    );
+    expect(hasUtility(unselected.fill, 'silver-bx-sh_')).toBe(false);
+  });
+
+  it('keeps the selected border width identical to the unselected one', () => {
+    // The old design thickened an inner border when selected; the ring replaced it.
+    expect(classesOf(swatch({isSelected: true}).fill)).toContain(
+      'silver-bd-w_thin',
+    );
+    expect(classesOf(swatch({isSelected: false}).fill)).toContain(
+      'silver-bd-w_thin',
+    );
+  });
+
+  it('draws the focus ring around the circle rather than the padded button', () => {
+    const {button, fill} = swatch();
+
+    expect(classesOf(fill)).toContain(
+      '[[role="radio"]:focus-visible_&]:silver-ring-o_focusOffset',
+    );
+    expect(classesOf(fill)).toContain(
+      '[[role="radio"]:focus-visible_&]:silver-ring-c_primary',
+    );
+    expect(hasUtility(button, 'silver-ring-o_')).toBe(false);
+  });
+
+  it('grows the circle on hover, except when disabled', () => {
+    expect(classesOf(swatch({isDisabled: false}).fill)).toContain(
+      '[[role="radio"]:hover_&]:silver-trf_scale(1.12)',
+    );
+    expect(classesOf(swatch({isDisabled: true}).fill)).toContain(
+      '[[role="radio"]:hover_&]:silver-trf_none',
+    );
   });
 });

@@ -5,10 +5,17 @@ export const colorSwatchPickerRecipe = cva({
     display: 'flex',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: '2',
+    gap: '1',
   },
 });
 
+/**
+ * The button reserves `spacing.1` of padding around the circle so the selected
+ * ring and the focus ring both draw inside the button's own box, never over a
+ * neighboring swatch. Both rings occupy the same 2px–4px band outside the
+ * circle, so a focused swatch shows the primary outline in place of its
+ * selected ring; the check icon still marks which swatch is selected.
+ */
 export const colorSwatchRecipe = sva({
   slots: ['button', 'fill'],
   base: {
@@ -25,10 +32,7 @@ export const colorSwatchRecipe = sva({
       color: 'inherit',
       cursor: 'pointer',
       _focusVisible: {
-        outlineWidth: 'focus',
-        outlineStyle: 'solid',
-        outlineColor: 'primary',
-        outlineOffset: 'focusOffset',
+        outline: 'none',
       },
     },
     fill: {
@@ -38,15 +42,28 @@ export const colorSwatchRecipe = sva({
       borderWidth: 'thin',
       borderStyle: 'solid',
       borderRadius: 'full',
-      transitionProperty: 'border-color, border-width, box-shadow, transform',
+      transitionProperty: 'box-shadow, transform',
       transitionDuration: 'fast',
       transitionTimingFunction: 'default',
+      '@media (prefers-reduced-motion: reduce)': {
+        transitionDuration: '0s',
+      },
+      '[role="radio"]:hover &': {
+        transform: 'scale(1.12)',
+      },
+      '[role="radio"]:focus-visible &': {
+        outlineWidth: 'focus',
+        outlineStyle: 'solid',
+        outlineColor: 'primary',
+        outlineOffset: 'focusOffset',
+      },
     },
   },
   variants: {
     color: {
       red: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.red.accent)',
           bg: 'surface.red',
           borderColor: 'surface.red.accent',
           color: 'surface.red.fg',
@@ -54,6 +71,7 @@ export const colorSwatchRecipe = sva({
       },
       orange: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.orange.accent)',
           bg: 'surface.orange',
           borderColor: 'surface.orange.accent',
           color: 'surface.orange.fg',
@@ -61,6 +79,7 @@ export const colorSwatchRecipe = sva({
       },
       yellow: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.yellow.accent)',
           bg: 'surface.yellow',
           borderColor: 'surface.yellow.accent',
           color: 'surface.yellow.fg',
@@ -68,6 +87,7 @@ export const colorSwatchRecipe = sva({
       },
       green: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.green.accent)',
           bg: 'surface.green',
           borderColor: 'surface.green.accent',
           color: 'surface.green.fg',
@@ -75,6 +95,7 @@ export const colorSwatchRecipe = sva({
       },
       teal: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.teal.accent)',
           bg: 'surface.teal',
           borderColor: 'surface.teal.accent',
           color: 'surface.teal.fg',
@@ -82,6 +103,7 @@ export const colorSwatchRecipe = sva({
       },
       cyan: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.cyan.accent)',
           bg: 'surface.cyan',
           borderColor: 'surface.cyan.accent',
           color: 'surface.cyan.fg',
@@ -89,6 +111,7 @@ export const colorSwatchRecipe = sva({
       },
       blue: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.blue.accent)',
           bg: 'surface.blue',
           borderColor: 'surface.blue.accent',
           color: 'surface.blue.fg',
@@ -96,6 +119,7 @@ export const colorSwatchRecipe = sva({
       },
       purple: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.purple.accent)',
           bg: 'surface.purple',
           borderColor: 'surface.purple.accent',
           color: 'surface.purple.fg',
@@ -103,6 +127,7 @@ export const colorSwatchRecipe = sva({
       },
       pink: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.pink.accent)',
           bg: 'surface.pink',
           borderColor: 'surface.pink.accent',
           color: 'surface.pink.fg',
@@ -110,6 +135,7 @@ export const colorSwatchRecipe = sva({
       },
       gray: {
         fill: {
+          '--swatch-ring': 'token(colors.surface.gray.accent)',
           bg: 'surface.gray',
           borderColor: 'surface.gray.accent',
           color: 'surface.gray.fg',
@@ -124,8 +150,8 @@ export const colorSwatchRecipe = sva({
     isSelected: {
       true: {
         fill: {
-          borderWidth: 'thick',
-          boxShadow: 'sm',
+          boxShadow:
+            '0 0 0 2px token(colors.bg), 0 0 0 4px var(--swatch-ring, token(colors.border.emphasized))',
         },
       },
       false: {},
@@ -135,6 +161,11 @@ export const colorSwatchRecipe = sva({
         button: {
           cursor: 'not-allowed',
           opacity: 0.55,
+        },
+        fill: {
+          '[role="radio"]:hover &': {
+            transform: 'none',
+          },
         },
       },
       false: {},
