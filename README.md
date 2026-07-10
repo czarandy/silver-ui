@@ -19,8 +19,7 @@ pnpm add silver-ui
 yarn add silver-ui
 ```
 
-silver-ui requires **React 19+** as a peer dependency. Its other runtime
-dependencies (`lucide-react`, `@js-temporal/polyfill`) install automatically.
+silver-ui requires **React 19+** as a peer dependency.
 
 ## Usage
 
@@ -45,9 +44,6 @@ function App() {
   );
 }
 ```
-
-`Button` takes its text via the `label` prop (not children), which keeps it
-accessible even in icon-only mode.
 
 For smaller JS bundles, import component subpaths:
 
