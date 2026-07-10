@@ -38,10 +38,46 @@ function section(markdown: string, heading: string): string {
   return `## ${heading}${match[1].trimEnd()}\n`;
 }
 
+function installationSection(markdown: string): string {
+  const installation = section(markdown, 'Installation');
+  const codeBlock = installation.match(/```bash\n([\s\S]*?)```/);
+  if (codeBlock == null) {
+    throw new Error('docgen: README Installation has no bash code block');
+  }
+
+  const commands = codeBlock[1]
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line !== '' && !line.startsWith('#'));
+  const packageManagers = ['npm', 'pnpm', 'yarn'];
+  if (
+    commands.length !== packageManagers.length ||
+    !packageManagers.every((manager, index) =>
+      commands[index].startsWith(`${manager} `),
+    )
+  ) {
+    throw new Error(
+      'docgen: README Installation must list npm, pnpm, and yarn commands in that order',
+    );
+  }
+
+  const tabs = commands
+    .map(
+      (command, index) =>
+        `<TabItem label="${packageManagers[index]}">\n\n\`\`\`bash\n${command}\n\`\`\`\n\n</TabItem>`,
+    )
+    .join('\n');
+
+  return installation.replace(
+    codeBlock[0],
+    `<Tabs syncKey="package-manager">\n${tabs}\n</Tabs>`,
+  );
+}
+
 /**
  * The getting-started guide, single-sourced from the README's Installation
- * and Usage sections. Emitted as plain markdown (not MDX) so no character
- * escaping is ever needed.
+ * and Usage sections. The install commands become Starlight tabs, so the
+ * generated page is MDX.
  */
 export function gettingStartedPage(): string {
   const readme = readFileSync(join(repoRoot, 'README.md'), 'utf-8');
@@ -50,10 +86,12 @@ export function gettingStartedPage(): string {
       'Getting started',
       'Install silver-ui and render your first components.',
     ),
+    "import {TabItem, Tabs} from '@astrojs/starlight/components';",
+    '',
     'silver-ui is a complete, themeable React component library, built with',
     '[Panda CSS](https://panda-css.com/).',
     '',
-    section(readme, 'Installation'),
+    installationSection(readme),
     '',
     section(readme, 'Usage'),
     '',

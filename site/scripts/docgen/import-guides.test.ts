@@ -7,7 +7,15 @@ describe('gettingStartedPage', () => {
     const page = gettingStartedPage();
     expect(page).toContain('title: "Getting started"');
     expect(page).toContain('## Installation');
+    expect(page).toContain(
+      "import {TabItem, Tabs} from '@astrojs/starlight/components';",
+    );
+    expect(page).toContain('<Tabs syncKey="package-manager">');
+    expect(page).toContain('<TabItem label="npm">');
+    expect(page).toContain('<TabItem label="pnpm">');
+    expect(page).toContain('<TabItem label="yarn">');
     expect(page).toContain('npm install silver-ui');
+    expect(page).not.toContain('# or');
     expect(page).toContain('## Usage');
     expect(page).toContain("import 'silver-ui/styles.css';");
     // Only those sections — not the README's component list.
