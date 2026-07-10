@@ -282,6 +282,21 @@ describe('Dialog', () => {
     expect(screen.getByTestId('dialog')).toHaveStyle({maxHeight: '60vh'});
   });
 
+  it('pins standard dialogs on every edge so auto margins center them', () => {
+    render(
+      <Dialog
+        data-testid="dialog"
+        isOpen
+        label="Preferences"
+        onOpenChange={() => {}}>
+        Content
+      </Dialog>,
+    );
+
+    expect(screen.getByTestId('dialog')).toHaveClass('silver-inset_0');
+    expect(screen.getByTestId('dialog')).toHaveClass('silver-m_auto');
+  });
+
   it('applies fixed position offsets and pins the remaining edges to auto', () => {
     render(
       <Dialog
