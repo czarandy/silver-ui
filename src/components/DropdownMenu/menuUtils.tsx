@@ -12,6 +12,7 @@ import type {DropdownMenuOption} from 'components/DropdownMenu/types';
 import {Text} from 'components/Text';
 import useListFocus from 'hooks/useListFocus';
 import useTypeahead from 'hooks/useTypeahead';
+import {isComposingEvent} from 'internal/isComposingEvent';
 import {css} from 'styled-system/css';
 
 const menuStyles = {
@@ -118,15 +119,15 @@ export function useMenuKeyboard(
 
   return useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
+      if (isComposingEvent(event)) {
+        return;
+      }
+
       switch (event.key) {
         case 'Tab':
           event.preventDefault();
           onClose();
           focusTargetRef?.current?.focus();
-          return;
-        case 'Escape':
-          event.preventDefault();
-          onClose();
           return;
         case 'Enter':
         case ' ':

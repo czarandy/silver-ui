@@ -160,13 +160,13 @@ export function usePopover({
 
   const layer = useLayer({
     isDismissable,
+    isEscapeDismissEnabled: true,
     id: layerId,
     onShow,
     onHide: handleHide,
   });
   const {containerRef: contentRef, focusFirst} = useFocusTrap<HTMLDivElement>({
     isActive: layer.isOpen,
-    onEscape: layer.hide,
   });
 
   useEffect(() => {

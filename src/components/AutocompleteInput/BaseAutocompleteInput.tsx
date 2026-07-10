@@ -27,6 +27,7 @@ import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
+import {isComposingEvent} from 'internal/isComposingEvent';
 import {mergeRefs} from 'internal/mergeRefs';
 import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 import {css} from 'styled-system/css';
@@ -473,6 +474,10 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
             return;
           }
 
+          if (isComposingEvent(event)) {
+            return;
+          }
+
           if (event.key === 'ArrowDown') {
             event.preventDefault();
             if (!isOpen) {
@@ -510,9 +515,6 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
           ) {
             event.preventDefault();
             selectItem(results[highlightedIndex]);
-          } else if (event.key === 'Escape' && isOpen) {
-            event.preventDefault();
-            setOpen(false);
           }
         }}
         placeholder={placeholder}

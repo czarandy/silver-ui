@@ -27,6 +27,7 @@ import {
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Spinner} from 'components/Spinner';
+import {isComposingEvent} from 'internal/isComposingEvent';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
@@ -231,7 +232,7 @@ export function TextInput({
         onChange={event => onChange(event.target.value, event)}
         onFocus={onFocus}
         onKeyDown={event => {
-          if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+          if (event.key === 'Enter' && !isComposingEvent(event)) {
             onEnter?.();
           }
           onKeyDown?.(event);

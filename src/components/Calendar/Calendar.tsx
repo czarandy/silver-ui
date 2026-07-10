@@ -15,6 +15,7 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
+import {useIsTopLayer} from 'internal/LayerContext';
 import type {DateRange, DayOfWeek} from 'internal/dateTypes';
 import {
   DATE_FORMAT_MONTH_YEAR,
@@ -427,6 +428,7 @@ export function Calendar({
   );
 
   const styles = calendarRecipe();
+  const isTopLayer = useIsTopLayer();
 
   return (
     // eslint-disable-next-line jsx-a11y-x/no-static-element-interactions
@@ -437,7 +439,8 @@ export function Calendar({
         if (
           mode === 'range' &&
           rangeSelectionStart != null &&
-          event.key === 'Escape'
+          event.key === 'Escape' &&
+          isTopLayer()
         ) {
           setRangeSelectionStart(null);
           event.preventDefault();

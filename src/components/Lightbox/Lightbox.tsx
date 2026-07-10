@@ -15,8 +15,10 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {lightboxRecipe} from 'components/Lightbox/Lightbox.recipe';
+import {LayerContext} from 'internal/LayerContext';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {useScrollLock} from 'internal/useScrollLock';
 import {cx} from 'utils/cx';
@@ -237,6 +239,12 @@ export function Lightbox({
   const close = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
+  const escapeDismiss = useEscapeDismiss({
+    getElement: () => dialogRef.current,
+    isEnabled: isOpen,
+    onEscape: close,
+  });
+  const layerContextValue = escapeDismiss.layerContextValue;
   const goPrev = useCallback(() => {
     if (canPrev) {
       setIndex(currentIndex - 1);
@@ -273,99 +281,101 @@ export function Lightbox({
       }}
       ref={mergeRefs(ref, dialogRef)}
       style={style}>
-      <div className={classes.container}>
-        <div className={classes.close}>
-          <Button
-            className={classes.controlButton}
-            icon={X}
-            isIconOnly
-            label="Close"
-            onClick={close}
-          />
-        </div>
-        {canPrev ? (
-          <div className={lightboxRecipe({position: 'prev'}).nav}>
+      <LayerContext value={layerContextValue}>
+        <div className={classes.container}>
+          <div className={classes.close}>
             <Button
               className={classes.controlButton}
-              icon={ChevronLeft}
+              icon={X}
               isIconOnly
-              label="Previous"
-              onClick={goPrev}
+              label="Close"
+              onClick={close}
             />
           </div>
-        ) : null}
-        {hasMedia ? (
-          <div className={classes.mediaGroup}>
-            {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- media viewport supports image zoom/pan gestures */}
-            <div
-              className={classes.mediaWrap}
-              onDoubleClick={() => {
-                if (!hasZoom || isVideo) {
-                  return;
-                }
-                setZoom(zoom === 1 ? 2 : 1);
-                setPan({x: 0, y: 0});
-              }}
-              onPointerDown={event => {
-                if (!hasZoom || isVideo || zoom <= 1) {
-                  return;
-                }
-                setIsDragging(true);
-                dragStartRef.current = {
-                  x: event.clientX,
-                  y: event.clientY,
-                  panX: pan.x,
-                  panY: pan.y,
-                };
-              }}>
-              {isVideo ? (
-                // eslint-disable-next-line jsx-a11y-x/media-has-caption -- captions are rendered only when callers provide a real WebVTT source
-                <video
-                  aria-label={currentItem.alt}
-                  autoPlay={hasAutoPlay}
-                  className={classes.video}
-                  controls
-                  src={currentItem.src}>
-                  {currentItem.captionsSrc != null ? (
-                    <track
-                      kind="captions"
-                      label="Captions"
-                      src={currentItem.captionsSrc}
-                    />
-                  ) : null}
-                </video>
-              ) : (
-                <img
-                  alt={currentItem.alt}
-                  className={classes.image}
-                  draggable={false}
-                  src={currentItem.src}
-                  style={{transform: imageTransform}}
-                />
-              )}
+          {canPrev ? (
+            <div className={lightboxRecipe({position: 'prev'}).nav}>
+              <Button
+                className={classes.controlButton}
+                icon={ChevronLeft}
+                isIconOnly
+                label="Previous"
+                onClick={goPrev}
+              />
             </div>
-            {isReactNode(currentItem.caption) ? (
-              <div className={classes.caption}>{currentItem.caption}</div>
-            ) : null}
-          </div>
-        ) : null}
-        {canNext ? (
-          <div className={lightboxRecipe({position: 'next'}).nav}>
-            <Button
-              className={classes.controlButton}
-              icon={ChevronRight}
-              isIconOnly
-              label="Next"
-              onClick={goNext}
-            />
-          </div>
-        ) : null}
-        {isGallery ? (
-          <div className={classes.counter}>
-            {currentIndex + 1} / {mediaItems.length}
-          </div>
-        ) : null}
-      </div>
+          ) : null}
+          {hasMedia ? (
+            <div className={classes.mediaGroup}>
+              {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- media viewport supports image zoom/pan gestures */}
+              <div
+                className={classes.mediaWrap}
+                onDoubleClick={() => {
+                  if (!hasZoom || isVideo) {
+                    return;
+                  }
+                  setZoom(zoom === 1 ? 2 : 1);
+                  setPan({x: 0, y: 0});
+                }}
+                onPointerDown={event => {
+                  if (!hasZoom || isVideo || zoom <= 1) {
+                    return;
+                  }
+                  setIsDragging(true);
+                  dragStartRef.current = {
+                    x: event.clientX,
+                    y: event.clientY,
+                    panX: pan.x,
+                    panY: pan.y,
+                  };
+                }}>
+                {isVideo ? (
+                  // eslint-disable-next-line jsx-a11y-x/media-has-caption -- captions are rendered only when callers provide a real WebVTT source
+                  <video
+                    aria-label={currentItem.alt}
+                    autoPlay={hasAutoPlay}
+                    className={classes.video}
+                    controls
+                    src={currentItem.src}>
+                    {currentItem.captionsSrc != null ? (
+                      <track
+                        kind="captions"
+                        label="Captions"
+                        src={currentItem.captionsSrc}
+                      />
+                    ) : null}
+                  </video>
+                ) : (
+                  <img
+                    alt={currentItem.alt}
+                    className={classes.image}
+                    draggable={false}
+                    src={currentItem.src}
+                    style={{transform: imageTransform}}
+                  />
+                )}
+              </div>
+              {isReactNode(currentItem.caption) ? (
+                <div className={classes.caption}>{currentItem.caption}</div>
+              ) : null}
+            </div>
+          ) : null}
+          {canNext ? (
+            <div className={lightboxRecipe({position: 'next'}).nav}>
+              <Button
+                className={classes.controlButton}
+                icon={ChevronRight}
+                isIconOnly
+                label="Next"
+                onClick={goNext}
+              />
+            </div>
+          ) : null}
+          {isGallery ? (
+            <div className={classes.counter}>
+              {currentIndex + 1} / {mediaItems.length}
+            </div>
+          ) : null}
+        </div>
+      </LayerContext>
     </dialog>
   );
 }

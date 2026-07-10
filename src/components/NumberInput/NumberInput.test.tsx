@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {InputGroup} from 'components/InputGroup';
@@ -164,6 +164,25 @@ describe('NumberInput', () => {
     screen.getByRole('spinbutton', {name: 'Count'}).focus();
     await user.keyboard('{Enter}');
     expect(onEnter).toHaveBeenCalledOnce();
+  });
+
+  it('does not call onEnter while composing', () => {
+    const onEnter = vi.fn();
+
+    render(
+      <NumberInput
+        label="Count"
+        onChange={vi.fn()}
+        onEnter={onEnter}
+        value={1}
+      />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    fireEvent.keyDown(input, {isComposing: true, key: 'Enter'});
+    fireEvent.keyDown(input, {key: 'Enter', keyCode: 229});
+
+    expect(onEnter).not.toHaveBeenCalled();
   });
 
   it('renders the units suffix', () => {

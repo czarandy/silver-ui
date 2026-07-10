@@ -7,7 +7,6 @@ const FOCUSABLE_SELECTOR =
 
 export interface UseFocusTrapOptions {
   isActive: boolean;
-  onEscape?: () => void;
 }
 
 export interface UseFocusTrapReturn<T extends HTMLElement = HTMLElement> {
@@ -32,7 +31,6 @@ function focusLastDescendant(container: HTMLElement): void {
 
 export function useFocusTrap<T extends HTMLElement = HTMLElement>({
   isActive,
-  onEscape,
 }: UseFocusTrapOptions): UseFocusTrapReturn<T> {
   const containerRef = useRef<T>(null);
 
@@ -50,12 +48,6 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>({
     const handleKeyDown = (event: KeyboardEvent) => {
       const container = containerRef.current;
       if (container == null) {
-        return;
-      }
-
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        onEscape?.();
         return;
       }
 
@@ -81,7 +73,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLElement>({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isActive, onEscape]);
+  }, [isActive]);
 
   return {containerRef, focusFirst};
 }
