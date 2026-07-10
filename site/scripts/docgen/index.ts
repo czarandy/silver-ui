@@ -137,8 +137,9 @@ export function runDocgen(): void {
   );
 
   // Guides are single-sourced from the repo's README.md and THEME.md.
+  rmSync(join(siteSrc, 'content/docs/getting-started.md'), {force: true});
   writeFileSync(
-    join(siteSrc, 'content/docs/getting-started.md'),
+    join(siteSrc, 'content/docs/getting-started.mdx'),
     gettingStartedPage(),
   );
   writeFileSync(join(siteSrc, 'content/docs/theming.md'), themingPage());

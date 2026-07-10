@@ -10,6 +10,7 @@ styled-system/
 site/src/generated/
 site/src/content/docs/components/
 site/src/content/docs/getting-started.md
+site/src/content/docs/getting-started.mdx
 site/src/content/docs/theming.md
 site/src/styles/panda.css
 site/public/swatches/
