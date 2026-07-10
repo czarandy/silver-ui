@@ -145,6 +145,31 @@ describe('Select', () => {
     expect(onChange).toHaveBeenCalledWith('Banana');
   });
 
+  it('selects options by typing while closed', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <Select
+        label="State"
+        onChange={onChange}
+        options={[
+          {label: 'Colorado', value: 'CO'},
+          {isDisabled: true, label: 'California disabled', value: 'disabled'},
+          {label: 'California', value: 'CA'},
+        ]}
+        value={null}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'State'});
+    trigger.focus();
+    await user.keyboard('ca');
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(onChange).toHaveBeenLastCalledWith('CA');
+  });
+
   it('scrolls the highlighted option into view during keyboard navigation', async () => {
     const user = userEvent.setup();
     const scrolled: HTMLElement[] = [];

@@ -71,6 +71,7 @@ export type UseSelectListboxOptions<TOption extends SelectListboxOptionData> = {
   isLoading?: boolean;
   isListboxClosedOnCommit?: boolean;
   isQueryClearedOnCommit?: boolean;
+  isTypeaheadEnabled?: boolean;
   onCommitOption: (option: TOption) => unknown;
   options: ReadonlyArray<SelectListboxOption<TOption>>;
   selectedValues: ReadonlySet<string>;
@@ -112,6 +113,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   isLoading = false,
   isListboxClosedOnCommit = false,
   isQueryClearedOnCommit = false,
+  isTypeaheadEnabled = false,
   onCommitOption,
   options,
   selectedValues,
@@ -153,11 +155,13 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     [filteredValues, selectableOptions],
   );
   const isInteractionDisabled = isDisabled || isLoading;
+  const typeaheadQueryRef = useRef('');
+  const typeaheadResetTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const {
     activeDescendantId,
     getOptionId,
-    handleKeyboardNavigation,
+    handleKeyboardNavigation: handleListboxKeyboardNavigation,
     highlightedValue,
     setHighlightedValue,
   } = useListboxNavigation({
@@ -186,6 +190,56 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     selectedValues,
     shouldClearOnCommit: isHighlightClearedOnCommit,
   });
+
+  const handleKeyboardNavigation = useCallback(
+    (event: KeyboardEvent<HTMLInputElement | HTMLButtonElement>): void => {
+      handleListboxKeyboardNavigation(event);
+
+      if (
+        event.defaultPrevented ||
+        isInteractionDisabled ||
+        !isTypeaheadEnabled ||
+        isOpen ||
+        event.currentTarget instanceof HTMLInputElement ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        event.key.length !== 1
+      ) {
+        return;
+      }
+
+      const nextQuery = `${typeaheadQueryRef.current}${event.key}`;
+      typeaheadQueryRef.current = nextQuery;
+      if (typeaheadResetTimeoutRef.current != null) {
+        clearTimeout(typeaheadResetTimeoutRef.current);
+      }
+      typeaheadResetTimeoutRef.current = setTimeout(() => {
+        typeaheadQueryRef.current = '';
+      }, 500);
+
+      const lowerQuery = nextQuery.toLocaleLowerCase();
+      const matchingOption = selectableOptions.find(
+        option =>
+          !option.isDisabled &&
+          (option.label ?? option.value)
+            .toLocaleLowerCase()
+            .startsWith(lowerQuery),
+      );
+      if (matchingOption != null) {
+        event.preventDefault();
+        onCommitOption(matchingOption);
+      }
+    },
+    [
+      handleListboxKeyboardNavigation,
+      isInteractionDisabled,
+      isOpen,
+      isTypeaheadEnabled,
+      onCommitOption,
+      selectableOptions,
+    ],
+  );
 
   const handleOptionClick = useCallback(
     (event: MouseEvent<HTMLElement>) => {
