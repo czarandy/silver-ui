@@ -17,7 +17,7 @@ export const colorSwatchPickerRecipe = cva({
  * selected ring; the check icon still marks which swatch is selected.
  */
 export const colorSwatchRecipe = sva({
-  slots: ['button', 'fill'],
+  slots: ['button', 'fill', 'icon'],
   base: {
     button: {
       display: 'inline-flex',
@@ -57,6 +57,9 @@ export const colorSwatchRecipe = sva({
         outlineColor: 'primary',
         outlineOffset: 'focusOffset',
       },
+    },
+    icon: {
+      mt: '1px',
     },
   },
   variants: {

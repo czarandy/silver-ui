@@ -488,6 +488,10 @@ describe('colorSwatchRecipe', () => {
     expect(classesOf(colorSwatchPickerRecipe())).toContain('silver-gap_1');
   });
 
+  it('positions the check icon one pixel lower', () => {
+    expect(classesOf(swatch().icon)).toContain('silver-mt_1px');
+  });
+
   it('marks the selected swatch with an outer ring in its own color', () => {
     const selected = swatch({isSelected: true});
     const unselected = swatch({isSelected: false});
