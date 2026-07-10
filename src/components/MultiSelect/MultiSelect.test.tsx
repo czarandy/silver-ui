@@ -575,6 +575,7 @@ describe('MultiSelect', () => {
     const root = container.querySelector('.custom-field');
     expect(root).toBeInTheDocument();
     expect(root).toHaveStyle({marginBottom: '8px'});
+    expect(root).toHaveTextContent('Columns');
   });
 
   it('opens the dropdown on mount when isDefaultOpen is set', () => {
