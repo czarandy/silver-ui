@@ -11,12 +11,14 @@ import {
 } from 'react';
 import {dialogRecipe} from 'components/Dialog/Dialog.recipe';
 import {DialogContext} from 'components/Dialog/DialogContext';
+import {LayerContext} from 'internal/LayerContext';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
 } from 'internal/dismissBehavior';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
+import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useScrollLock} from 'internal/useScrollLock';
 import {cx} from 'utils/cx';
 
@@ -134,9 +136,18 @@ export function Dialog({
     isEnabled: isBackdropDismissEnabled,
     onDismiss: () => onOpenChange(false),
   });
+  const escapeDismiss = useEscapeDismiss({
+    getElement: () => dialogRef.current,
+    isEnabled: isOpen && isEscapeDismissEnabled,
+    onEscape: () => onOpenChange(false),
+  });
   const dialogContextValue = useMemo(
     () => ({onOpenChange, titleId}),
     [onOpenChange, titleId],
+  );
+  const layerContextValue = useMemo(
+    () => ({layerId: escapeDismiss.layerId}),
+    [escapeDismiss.layerId],
   );
   const classes = dialogRecipe({isOpen, variant});
 
@@ -199,9 +210,11 @@ export function Dialog({
         ...positionStyle,
         ...style,
       }}>
-      <DialogContext value={dialogContextValue}>
-        <div className={classes.inner}>{children}</div>
-      </DialogContext>
+      <LayerContext value={layerContextValue}>
+        <DialogContext value={dialogContextValue}>
+          <div className={classes.inner}>{children}</div>
+        </DialogContext>
+      </LayerContext>
     </dialog>
   );
 }

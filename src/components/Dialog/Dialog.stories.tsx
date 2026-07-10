@@ -5,12 +5,14 @@ import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import {Dialog} from 'components/Dialog/Dialog';
 import {useDialog} from 'components/Dialog/useDialog';
+import {DropdownMenu} from 'components/DropdownMenu';
 import {
   Layout,
   LayoutContent,
   LayoutFooter,
   LayoutHeader,
 } from 'components/Layout';
+import {Select} from 'components/Select';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 
@@ -307,6 +309,62 @@ export const Scrollable: Story = {
               />
             }
             header={<LayoutHeader title="Terms of Service" />}
+          />
+        </Dialog>
+      </>
+    );
+  },
+};
+
+export const NestedOverlayEscape: Story = {
+  args: {width: 480},
+  render: args => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [fruit, setFruit] = useState<string | null>('Apple');
+
+    return (
+      <>
+        <Button label="Open nested overlays" onClick={() => setIsOpen(true)} />
+        <Dialog {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
+          <Layout
+            content={
+              <LayoutContent>
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 16,
+                  }}>
+                  <Select
+                    label="Fruit"
+                    onChange={setFruit}
+                    options={['Apple', 'Banana', 'Cherry']}
+                    value={fruit}
+                  />
+                  <DropdownMenu
+                    button={{label: 'Dialog actions'}}
+                    items={[
+                      {label: 'Duplicate'},
+                      {label: 'Archive'},
+                      {type: 'divider'},
+                      {label: 'Delete'},
+                    ]}
+                  />
+                </div>
+              </LayoutContent>
+            }
+            footer={
+              <LayoutFooter
+                primaryButton={
+                  <Button
+                    label="Done"
+                    onClick={() => setIsOpen(false)}
+                    variant="primary"
+                  />
+                }
+              />
+            }
+            header={<LayoutHeader title="Nested overlays" />}
           />
         </Dialog>
       </>

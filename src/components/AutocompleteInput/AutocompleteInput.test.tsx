@@ -266,6 +266,36 @@ describe('AutocompleteInput', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  it('does not select or close results while composing', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSearchSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'a');
+    await user.keyboard('{ArrowDown}');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+    const activeDescendant = input.getAttribute('aria-activedescendant');
+
+    fireEvent.keyDown(input, {isComposing: true, key: 'ArrowDown'});
+    expect(input).toHaveAttribute('aria-activedescendant', activeDescendant);
+
+    fireEvent.keyDown(input, {isComposing: true, key: 'Enter'});
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(input, {isComposing: true, key: 'Escape'});
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('scrolls the highlighted result into view during keyboard navigation', async () => {
     const user = userEvent.setup();
     const manyItems: SearchableItem[] = Array.from(

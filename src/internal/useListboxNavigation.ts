@@ -8,6 +8,7 @@ import {
   type KeyboardEvent,
   type SetStateAction,
 } from 'react';
+import {isComposingEvent} from 'internal/isComposingEvent';
 import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 
 export type ListboxNavigationOption = {
@@ -46,7 +47,10 @@ export function useListboxNavigation({
   selectedValues,
   shouldClearOnCommit = true,
 }: UseListboxNavigationOptions): UseListboxNavigationResult {
-  const [highlightedValue, setHighlightedValue] = useState<string | null>(null);
+  const [storedHighlightedValue, setStoredHighlightedValue] = useState<
+    string | null
+  >(null);
+  const highlightedValue = isOpen ? storedHighlightedValue : null;
   const enabledOptions = useMemo(
     () => options.filter(option => !option.isDisabled),
     [options],
@@ -122,11 +126,15 @@ export function useListboxNavigation({
         return;
       }
 
+      if (isComposingEvent(event)) {
+        return;
+      }
+
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
         if (!isOpen) {
           onOpenChange(true);
-          setHighlightedValue(
+          setStoredHighlightedValue(
             getInitialHighlight(event.key === 'ArrowUp' ? 'last' : 'first'),
           );
           return;
@@ -136,7 +144,7 @@ export function useListboxNavigation({
           highlightedValue,
           event.key === 'ArrowDown' ? 1 : -1,
         );
-        setHighlightedValue(nextValue);
+        setStoredHighlightedValue(nextValue);
         scrollHighlightIntoView(nextValue);
         return;
       }
@@ -144,7 +152,7 @@ export function useListboxNavigation({
       if (event.key === 'Home' && isOpen) {
         event.preventDefault();
         const nextValue = getInitialHighlight('first');
-        setHighlightedValue(nextValue);
+        setStoredHighlightedValue(nextValue);
         scrollHighlightIntoView(nextValue);
         return;
       }
@@ -152,7 +160,7 @@ export function useListboxNavigation({
       if (event.key === 'End' && isOpen) {
         event.preventDefault();
         const nextValue = getInitialHighlight('last');
-        setHighlightedValue(nextValue);
+        setStoredHighlightedValue(nextValue);
         scrollHighlightIntoView(nextValue);
         return;
       }
@@ -161,16 +169,12 @@ export function useListboxNavigation({
         event.preventDefault();
         onCommit(highlightedValue);
         if (shouldClearOnCommit) {
-          setHighlightedValue(null);
+          setStoredHighlightedValue(null);
         }
         return;
       }
 
-      if (event.key === 'Escape' && isOpen) {
-        event.preventDefault();
-        onOpenChange(false);
-        setHighlightedValue(null);
-      }
+      return;
     },
     [
       getInitialHighlight,
@@ -190,6 +194,6 @@ export function useListboxNavigation({
     getOptionId,
     handleKeyboardNavigation,
     highlightedValue,
-    setHighlightedValue,
+    setHighlightedValue: setStoredHighlightedValue,
   };
 }

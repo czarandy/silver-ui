@@ -15,6 +15,7 @@ import {tabMenuRecipe} from 'components/Tabs/TabMenu.recipe';
 import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {useTabsContext} from 'components/Tabs/TabsContext';
 import useListFocus from 'hooks/useListFocus';
+import {useIsTopLayer} from 'internal/LayerContext';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -108,10 +109,12 @@ export function TabMenu({
   const {handleKeyDown: handleListKeyDown} = useListFocus({
     getItems: getMenuItems,
   });
+  const isTopLayer = useIsTopLayer();
 
   const handleMenuKeyDown = (event: KeyboardEvent<HTMLElement>) => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && isTopLayer()) {
       event.preventDefault();
+      event.stopPropagation();
       setIsOpen(false);
       triggerRef.current?.focus();
       return;

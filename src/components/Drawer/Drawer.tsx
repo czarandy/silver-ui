@@ -1,14 +1,16 @@
 'use client';
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useEffect, useRef} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
+import {LayerContext} from 'internal/LayerContext';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
 } from 'internal/dismissBehavior';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
+import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useScrollLock} from 'internal/useScrollLock';
 import {cx} from 'utils/cx';
 
@@ -111,6 +113,15 @@ export function Drawer({
     isEnabled: isBackdropDismissEnabled,
     onDismiss: () => onOpenChange(false),
   });
+  const escapeDismiss = useEscapeDismiss({
+    getElement: () => dialogRef.current,
+    isEnabled: isOpen && isEscapeDismissEnabled,
+    onEscape: () => onOpenChange(false),
+  });
+  const layerContextValue = useMemo(
+    () => ({layerId: escapeDismiss.layerId}),
+    [escapeDismiss.layerId],
+  );
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -155,7 +166,9 @@ export function Drawer({
       onPointerDown={backdropDismiss.onPointerDown}
       ref={mergeRefs(ref, dialogRef)}
       style={{...sizeStyle, ...style}}>
-      <div className={classes.inner}>{children}</div>
+      <LayerContext value={layerContextValue}>
+        <div className={classes.inner}>{children}</div>
+      </LayerContext>
     </dialog>
   );
 }

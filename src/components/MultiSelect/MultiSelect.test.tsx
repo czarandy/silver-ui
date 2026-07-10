@@ -217,6 +217,36 @@ describe('MultiSelect', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('ignores navigation and commit keys while composing', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <MultiSelect
+        label="Columns"
+        onChange={onChange}
+        options={['Name', 'Email']}
+        value={['Name']}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    trigger.focus();
+
+    await user.keyboard('{ArrowDown}');
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    const highlightedId = trigger.getAttribute('aria-activedescendant');
+
+    fireEvent.keyDown(trigger, {isComposing: true, key: 'ArrowDown'});
+    expect(trigger).toHaveAttribute('aria-activedescendant', highlightedId);
+
+    fireEvent.keyDown(trigger, {isComposing: true, key: 'Enter'});
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(trigger, {isComposing: true, key: 'Escape'});
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
   it('filters options when search is enabled', async () => {
     const user = userEvent.setup();
 

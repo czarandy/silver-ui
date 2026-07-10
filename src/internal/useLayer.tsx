@@ -10,6 +10,8 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
+import {LayerContext} from 'internal/LayerContext';
+import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -71,6 +73,16 @@ interface LayerOptions {
    * mode and must be hidden programmatically. Defaults to `false`.
    */
   isDismissable?: boolean;
+  /**
+   * When `true`, registers this layer with the shared Escape-dismiss stack.
+   * Defaults to `false`.
+   */
+  isEscapeDismissEnabled?: boolean;
+  /**
+   * Called when this layer is the topmost layer and Escape is pressed. Defaults
+   * to hiding the layer.
+   */
+  onEscape?: () => void;
   /**
    * Called after the layer is hidden, including via light dismiss.
    */
@@ -195,7 +207,9 @@ function getOffsetStyle(
 export function useLayer({
   onShow,
   onHide,
+  onEscape,
   isDismissable = false,
+  isEscapeDismissEnabled = false,
   id: providedId,
 }: LayerOptions = {}): LayerReturn {
   const generatedId = useId();
@@ -258,6 +272,14 @@ export function useLayer({
     [onHide],
   );
 
+  useEscapeDismiss({
+    getElement: () => popoverRef.current,
+    id,
+    isEnabled: isOpen && isEscapeDismissEnabled,
+    onEscape: onEscape ?? hide,
+  });
+  const layerContextValue = useMemo(() => ({layerId: id}), [id]);
+
   const popoverRefCallback = useCallback(
     (element: HTMLElement | null) => {
       if (popoverRef.current != null) {
@@ -296,9 +318,13 @@ export function useLayer({
         style: {...anchorStyle, ...offsetStyle, ...props?.style},
       };
 
-      return createElement('div', layerProps, children);
+      return createElement(
+        'div',
+        layerProps,
+        <LayerContext value={layerContextValue}>{children}</LayerContext>,
+      );
     },
-    [anchorId, isDismissable, id, popoverRefCallback],
+    [anchorId, isDismissable, id, layerContextValue, popoverRefCallback],
   );
 
   return useMemo(

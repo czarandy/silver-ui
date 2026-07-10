@@ -23,6 +23,7 @@ import type {
 } from 'components/SearchFilterInput/types';
 import {Select} from 'components/Select';
 import {HStack, VStack} from 'components/Stack';
+import {useIsTopLayer} from 'internal/LayerContext';
 import {cx} from 'utils/cx';
 
 export interface SearchFilterInputEditPopoverProps {
@@ -520,6 +521,7 @@ export function SearchFilterInputEditPopover({
       </HStack>
     </div>
   ) : null;
+  const isTopLayer = useIsTopLayer();
 
   return (
     <div
@@ -535,8 +537,9 @@ export function SearchFilterInputEditPopover({
             event.preventDefault();
             handleSave();
           }
-        } else if (event.key === 'Escape' && !event.defaultPrevented) {
+        } else if (event.key === 'Escape' && isTopLayer()) {
           event.preventDefault();
+          event.stopPropagation();
           onCancel();
         }
       }}>

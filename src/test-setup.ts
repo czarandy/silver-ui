@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 
-import {vi} from 'vitest';
+import {afterEach, vi} from 'vitest';
+import {resetLayerStack} from 'internal/layerStack';
 
 // jsdom does not implement real navigation, so clicking real anchors/submit
 // buttons makes it emit a benign "Not implemented: navigation" error. jsdom
@@ -47,3 +48,7 @@ if (!Reflect.has(HTMLElement.prototype, 'scrollIntoView')) {
     writable: true,
   });
 }
+
+afterEach(() => {
+  resetLayerStack();
+});

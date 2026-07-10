@@ -189,3 +189,29 @@ export const CustomWidth: Story = {
     </Popover>
   ),
 };
+
+export const NestedPopovers: Story = {
+  render: () => (
+    <Popover
+      content={
+        <VStack gap={2}>
+          <Text as="p">Outer popover content</Text>
+          <Popover
+            content={
+              <VStack gap={2}>
+                <Text as="p">Inner popover content</Text>
+                <Button label="Apply" size="sm" variant="primary" />
+              </VStack>
+            }
+            label="Inner settings"
+            padding={3}>
+            <Button label="Open inner popover" size="sm" />
+          </Popover>
+        </VStack>
+      }
+      label="Outer settings"
+      padding={3}>
+      <Button label="Open outer popover" />
+    </Popover>
+  ),
+};

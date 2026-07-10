@@ -88,6 +88,20 @@ describe('TextInput', () => {
     expect(onEnter).toHaveBeenCalledOnce();
   });
 
+  it('does not call onEnter while composing', () => {
+    const onEnter = vi.fn();
+
+    render(
+      <TextInput label="Search" onChange={noop} onEnter={onEnter} value="" />,
+    );
+
+    const input = screen.getByRole('textbox', {name: 'Search'});
+    fireEvent.keyDown(input, {isComposing: true, key: 'Enter'});
+    fireEvent.keyDown(input, {key: 'Enter', keyCode: 229});
+
+    expect(onEnter).not.toHaveBeenCalled();
+  });
+
   it('forwards onKeyDown events', async () => {
     const user = userEvent.setup();
     const onKeyDown = vi.fn();

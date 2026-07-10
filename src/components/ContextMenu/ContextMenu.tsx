@@ -30,6 +30,8 @@ import {
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
+import {LayerContext} from 'internal/LayerContext';
+import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -186,6 +188,19 @@ export function ContextMenu({
     setIsOpen(false);
     onOpenChange?.(false);
   }, [isOpen, onOpenChange]);
+
+  const escapeDismiss = useEscapeDismiss({
+    getElement: () => menuRef.current,
+    isEnabled: isOpen,
+    onEscape: () => {
+      hide();
+      triggerRef.current?.focus();
+    },
+  });
+  const layerContextValue = useMemo(
+    () => ({layerId: escapeDismiss.layerId}),
+    [escapeDismiss.layerId],
+  );
 
   const focusFirstItem = useCallback(() => {
     const firstItem = menuRef.current?.querySelector<HTMLElement>(
@@ -374,9 +389,11 @@ export function ContextMenu({
           ...style,
         }}
         tabIndex={-1}>
-        <DropdownMenuContext value={contextValue}>
-          {menuNode}
-        </DropdownMenuContext>
+        <LayerContext value={layerContextValue}>
+          <DropdownMenuContext value={contextValue}>
+            {menuNode}
+          </DropdownMenuContext>
+        </LayerContext>
       </div>
     </>
   );
