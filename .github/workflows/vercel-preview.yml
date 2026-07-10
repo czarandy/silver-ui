@@ -1,0 +1,53 @@
+name: Vercel preview
+
+on:
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: vercel-preview-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: >-
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '#vercel') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - name: Get pull request head
+        id: pr
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: pull } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+
+            if (pull.state !== 'open') {
+              core.setFailed('Vercel previews can only be requested for open pull requests.');
+              return;
+            }
+
+            core.setOutput('sha', pull.head.sha);
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.pr.outputs.sha }}
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # Do not install or execute code from the PR in this secret-bearing job.
+      # Vercel receives the source and performs the preview build remotely.
+      - run: npx --yes vercel@latest deploy --yes --token="${{ secrets.VERCEL_TOKEN }}"
