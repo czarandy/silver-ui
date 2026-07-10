@@ -67,6 +67,12 @@ describe('public exports', () => {
   it('does not re-export symbols from internal modules', () => {
     expect(barrelSource).not.toMatch(/\bfrom\s*['"]internal(?:\/[^'"]*)?['"]/);
   });
+
+  it('re-exports AvatarColor from the root barrel', () => {
+    expect(barrelSource).toMatch(
+      /export\s*\{[^}]*\btype AvatarColor\b[^}]*\}\s*from\s*'components\/Avatar'/s,
+    );
+  });
 });
 
 describe('component barrel and docs coverage', () => {

@@ -120,6 +120,7 @@ export {
 export {
   Avatar,
   AvatarStatusDot,
+  type AvatarColor,
   type AvatarNamedSize,
   type AvatarNumericSize,
   type AvatarProps,
