@@ -23,7 +23,6 @@ import {
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon} from 'components/Icon';
-import {useTooltip} from 'components/Tooltip';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
@@ -112,41 +111,26 @@ function ColorSwatch({
 }: ColorSwatchProps): React.JSX.Element {
   const label = COLOR_LABELS[color];
   const classes = colorSwatchRecipe({color, isDisabled, isSelected, size});
-  // Hover-only: focus already surfaces the color through the accessible name,
-  // and a focus tooltip would collide with the group's keyboard hint and stay
-  // open on the focused swatch while the pointer hovers another one.
-  const {ref: tooltipRef, renderTooltip} = useTooltip({
-    focusTrigger: 'never',
-    isEnabled: !isDisabled,
-  });
 
   return (
-    <>
-      <button
-        aria-checked={isSelected}
-        aria-disabled={isDisabled || undefined}
-        aria-label={label}
-        className={classes.button}
-        data-value={color}
-        onClick={() => {
-          if (!isDisabled) {
-            onSelect(color);
-          }
-        }}
-        ref={tooltipRef}
-        role="radio"
-        tabIndex={isTabbable ? 0 : -1}
-        type="button">
-        <span aria-hidden="true" className={classes.fill}>
-          {isSelected ? <Icon icon={Check} size={size} /> : null}
-        </span>
-      </button>
-      {/*
-        The tooltip repeats the swatch's accessible name, so it is deliberately
-        left out of `aria-describedby` — that would announce the color twice.
-      */}
-      {renderTooltip(label)}
-    </>
+    <button
+      aria-checked={isSelected}
+      aria-disabled={isDisabled || undefined}
+      aria-label={label}
+      className={classes.button}
+      data-value={color}
+      onClick={() => {
+        if (!isDisabled) {
+          onSelect(color);
+        }
+      }}
+      role="radio"
+      tabIndex={isTabbable ? 0 : -1}
+      type="button">
+      <span aria-hidden="true" className={classes.fill}>
+        {isSelected ? <Icon icon={Check} size={size} /> : null}
+      </span>
+    </button>
   );
 }
 

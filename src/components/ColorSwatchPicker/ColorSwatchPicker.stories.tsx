@@ -99,12 +99,12 @@ export const Subset: Story = {
 };
 
 /**
- * Hovering a swatch grows it slightly and reveals a tooltip naming the color.
+ * Hovering a swatch grows it slightly.
  * The selected swatch carries an outer ring in its own color.
  */
-export const HoverAndTooltips: Story = {
+export const Hover: Story = {
   args: {
-    description: 'Hover a swatch to see its name and the grow effect.',
+    description: 'Hover a swatch to see the grow effect.',
     value: 'purple',
   },
 };
