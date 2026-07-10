@@ -51,7 +51,7 @@ const styles = {
 
 export type DateInputProps = {
   /**
-   * Additional CSS class names applied to the input wrapper.
+   * Additional CSS class names applied to the field root.
    */
   className?: string;
   /**
@@ -134,7 +134,7 @@ export type DateInputProps = {
    */
   status?: InputStatus;
   /**
-   * Inline styles applied to the input wrapper.
+   * Inline styles applied to the field root.
    */
   style?: CSSProperties;
   /**

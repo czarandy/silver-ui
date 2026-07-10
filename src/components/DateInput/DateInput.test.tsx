@@ -243,6 +243,24 @@ describe('DateInput', () => {
     expect(inputEl).toBeInstanceOf(HTMLInputElement);
   });
 
+  it('forwards className and style to the field root', () => {
+    const {container} = render(
+      <DateInput
+        className="custom-field"
+        label="Due date"
+        onChange={() => {}}
+        style={{marginBottom: '8px'}}
+        value={null}
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- className/style land on the Field root, which has no role or testid
+    const root = container.querySelector('.custom-field');
+    expect(root).toBeInTheDocument();
+    expect(root).toHaveStyle({marginBottom: '8px'});
+    expect(root).toHaveTextContent('Due date');
+  });
+
   describe('keyboard interaction', () => {
     it('commits a typed ISO date on Enter', async () => {
       const user = userEvent.setup();

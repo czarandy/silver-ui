@@ -40,7 +40,8 @@ type NumberInputBaseProps = {
    */
   autoComplete?: string;
   /**
-   * Additional CSS class names applied to the input wrapper.
+   * Additional CSS class names applied to the field root, or to the input
+   * wrapper when the input is inside an `InputGroup`.
    */
   className?: string;
   /**
@@ -146,7 +147,8 @@ type NumberInputBaseProps = {
    */
   step?: number | null;
   /**
-   * Inline styles applied to the input wrapper.
+   * Inline styles applied to the field root, or to the input wrapper when the
+   * input is inside an `InputGroup`.
    */
   style?: CSSProperties;
   /**

@@ -85,7 +85,7 @@ export type MultiSelectProps = {
    */
   children?: (option: MultiSelectOptionData) => ReactNode;
   /**
-   * Additional CSS class names applied to the trigger wrapper.
+   * Additional CSS class names applied to the field root.
    */
   className?: string;
   /**
@@ -189,7 +189,7 @@ export type MultiSelectProps = {
    */
   status?: InputStatus;
   /**
-   * Inline styles applied to the trigger wrapper.
+   * Inline styles applied to the field root.
    */
   style?: CSSProperties;
   /**

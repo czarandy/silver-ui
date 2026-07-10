@@ -249,6 +249,24 @@ describe('NumberInput', () => {
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLInputElement));
   });
 
+  it('forwards className and style to the field root', () => {
+    const {container} = render(
+      <NumberInput
+        className="custom-field"
+        label="Count"
+        onChange={vi.fn()}
+        style={{marginBottom: '8px'}}
+        value={1}
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- className/style land on the Field root, which has no role or testid
+    const root = container.querySelector('.custom-field');
+    expect(root).toBeInTheDocument();
+    expect(root).toHaveStyle({marginBottom: '8px'});
+    expect(root).toHaveTextContent('Count');
+  });
+
   it('renders endContent', () => {
     render(
       <NumberInput
@@ -326,5 +344,25 @@ describe('NumberInput', () => {
     // rather than a Field wrapper label element.
     const input = screen.getByRole('spinbutton', {name: 'Count'});
     expect(input).toHaveAttribute('aria-label', 'Count');
+  });
+
+  it('forwards className and style to the wrapper inside InputGroup', () => {
+    const {container} = render(
+      <InputGroup label="Price">
+        <NumberInput
+          className="custom-wrapper"
+          label="Count"
+          onChange={vi.fn()}
+          style={{maxWidth: 200}}
+          value={1}
+        />
+      </InputGroup>,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+    const wrapper = container.querySelector('.custom-wrapper');
+    expect(wrapper).toBeInTheDocument();
+    expect(wrapper).toHaveStyle({maxWidth: '200px'});
+    expect(wrapper).toContainElement(screen.getByRole('spinbutton'));
   });
 });

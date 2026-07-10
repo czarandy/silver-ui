@@ -39,7 +39,8 @@ export type TextInputProps = {
    */
   autoComplete?: string;
   /**
-   * Additional CSS class names applied to the input wrapper.
+   * Additional CSS class names applied to the field root, or to the input
+   * wrapper when the input is inside an `InputGroup`.
    */
   className?: string;
   /**
@@ -139,7 +140,8 @@ export type TextInputProps = {
    */
   status?: InputStatus;
   /**
-   * Inline styles applied to the wrapper.
+   * Inline styles applied to the field root, or to the input wrapper when the
+   * input is inside an `InputGroup`.
    */
   style?: CSSProperties;
   /**
