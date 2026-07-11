@@ -181,7 +181,11 @@ export function Field({
         {label}
       </Text>
       {statusText != null ? (
-        <Text as="span" className={classes.indicator} type="supporting">
+        <Text
+          as="span"
+          className={classes.indicator}
+          size="xs"
+          type="supporting">
           <span aria-hidden="true"> · </span>
           {statusText}
         </Text>
