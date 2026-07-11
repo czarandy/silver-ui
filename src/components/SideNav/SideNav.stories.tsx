@@ -109,6 +109,7 @@ export const WithFooter: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
+        footer={<Avatar name="Ada Lovelace" size="small" />}
         footerIcons={
           <>
             <Button
