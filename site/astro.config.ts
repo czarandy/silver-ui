@@ -41,11 +41,16 @@ export default defineConfig({
         {label: 'Components', slug: 'components'},
         ...componentSidebarGroups(),
       ],
-      // panda.css is generated with preflight scoped to the demo boxes, so
-      // it layers cleanly on top of Starlight's styles — do NOT add a global
-      // @layer order statement promoting Panda's layers above `starlight`;
-      // that outranks Starlight's own page styles and unstyles the docs.
-      customCss: ['./src/styles/panda.css', './src/styles/docs.css'],
+      // layers.css must come first: it fixes the cascade order between Panda's
+      // layers and Starlight's, and a layer's position is decided by the first
+      // stylesheet that names it. It promotes only Panda's `recipes` and
+      // `utilities` above `starlight.*` — promoting Panda's layers wholesale
+      // outranks Starlight's own page styles and unstyles the docs.
+      customCss: [
+        './src/styles/layers.css',
+        './src/styles/panda.css',
+        './src/styles/docs.css',
+      ],
       head: [
         {
           tag: 'link',
