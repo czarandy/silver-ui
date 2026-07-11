@@ -67,7 +67,7 @@ describe('Field', () => {
       </Field>,
     );
 
-    expect(screen.getByText('Optional')).toBeInTheDocument();
+    expect(screen.getByText('Optional')).toHaveClass('silver-fs_xs');
   });
 
   it('shows Required indicator when isRequired is true', () => {
@@ -77,7 +77,7 @@ describe('Field', () => {
       </Field>,
     );
 
-    expect(screen.getByText('Required')).toBeInTheDocument();
+    expect(screen.getByText('Required')).toHaveClass('silver-fs_xs');
   });
 
   describe('getNecessity', () => {
