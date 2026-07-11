@@ -38,6 +38,14 @@ export const avatarRecipe = sva({
     },
   },
   variants: {
+    hasInitials: {
+      true: {
+        fallback: {
+          paddingBottom: '1px',
+        },
+      },
+      false: {},
+    },
     color: {
       red: {
         content: {bg: 'surface.red', color: 'surface.red.fg'},
@@ -98,6 +106,7 @@ export const avatarRecipe = sva({
     },
   },
   defaultVariants: {
+    hasInitials: false,
     color: 'gray',
     isGrouped: false,
   },

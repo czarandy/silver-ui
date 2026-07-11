@@ -17,6 +17,12 @@ describe('Avatar', () => {
     expect(screen.getByText('AL')).toBeInTheDocument();
   });
 
+  it('nudges initials up with bottom padding', () => {
+    render(<Avatar name="Ada Lovelace" />);
+
+    expect(screen.getByText('AL')).toHaveClass('silver-pb_1px');
+  });
+
   it('uses alt as the accessible name when provided', () => {
     render(<Avatar alt="Profile photo" name="Ada Lovelace" />);
 
