@@ -202,6 +202,7 @@ export function Avatar({
   const showInitials = initials !== '';
   const classes = avatarRecipe({
     color: resolveAvatarColor(color, name, showInitials),
+    hasInitials: showInitials,
     isGrouped: avatarGroup != null,
   });
   const accessibleName = alt ?? (showInitials ? name : undefined) ?? 'Avatar';
