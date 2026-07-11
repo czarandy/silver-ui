@@ -1,0 +1,32 @@
+/*
+ * Cascade layer order for the docs pages. Must be the first stylesheet
+ * Starlight injects (see customCss in astro.config.ts): a layer's position is
+ * fixed the first time its name is seen, so this statement only decides the
+ * order if it is registered before Panda's and Starlight's own.
+ *
+ * Both sides ship layered CSS. Left alone, the browser registers Panda's five
+ * layers (from panda.css) and then Starlight's six, which puts *every*
+ * Starlight layer above every Panda one — so `@layer starlight.reset`'s
+ * `* { margin: 0 }` beats Panda's margin utilities and silently flattens the
+ * demos. The `mt: '-1'` that tucks a Field's status message under its input
+ * (see Field.recipe.ts) is where it shows: the message drops 4px and detaches
+ * from the control it belongs to.
+ *
+ * So split Panda's layers around Starlight's rather than promoting them
+ * wholesale (which unstyles the docs — Panda's preflight would outrank
+ * Starlight's prose):
+ *
+ *   - `reset`, `base`, `tokens` stay below. These are Panda's global layers,
+ *     and Starlight keeps the last word over its own chrome and prose.
+ *   - `recipes` and `utilities` go above. Every rule in them is selected by a
+ *     `silver-*` class, which only the demo components and the site's own
+ *     islands carry — they cannot reach Starlight's markup, but they do now
+ *     beat its reset.
+ *
+ * Any layer either side uses must be named here; an omitted one registers on
+ * first use and lands last, above `utilities`. layer-order.test.ts pins the
+ * Starlight list against the statement Starlight itself ships, so a version
+ * that adds a layer fails there instead of silently regressing the demos.
+ */
+@layer reset, base, tokens, starlight.base, starlight.reset, starlight.core,
+  starlight.content, starlight.components, starlight.utils, recipes, utilities;
