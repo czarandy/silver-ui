@@ -24,6 +24,11 @@ import {cx} from 'utils/cx';
  */
 export interface LayoutHeaderProps {
   /**
+   * Overrides the ARIA heading level of the title independently of the
+   * rendered heading element.
+   */
+  accessibilityLevel?: HeadingLevel;
+  /**
    * Cross-axis alignment of the start content, title, and end content within
    * the header row. Default is `start`.
    */
@@ -88,6 +93,7 @@ export interface LayoutHeaderProps {
  * on the parent Dialog and the title receives initial focus.
  */
 export function LayoutHeader({
+  accessibilityLevel,
   align = 'start',
   className,
   'data-testid': dataTestId,
@@ -134,6 +140,7 @@ export function LayoutHeader({
         ) : null}
         <div className={classes.titleArea}>
           <Heading
+            accessibilityLevel={accessibilityLevel}
             data-dialog-autofocus={dialogContext != null ? 'true' : undefined}
             id={dialogContext?.titleId}
             level={level}
