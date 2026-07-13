@@ -11,6 +11,7 @@ import {useMemo, useState} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import type {SearchFilterInputConfig} from 'components/SearchFilterInput';
 import {Table} from 'components/Table/Table';
+import {tableRecipe} from 'components/Table/Table.recipe';
 import {TableBody} from 'components/Table/TableBody';
 import {TableCell} from 'components/Table/TableCell';
 import {TableFooter} from 'components/Table/TableFooter';
@@ -110,6 +111,7 @@ describe('Table', () => {
 
     rerender(<Table columns={columns} data={[]} />);
     expect(screen.getByText('No data')).toBeInTheDocument();
+    expect(tableRecipe().emptyState).toContain('silver-my_8');
   });
 
   it('does not render the empty state when data is undefined', () => {
