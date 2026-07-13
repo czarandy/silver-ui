@@ -240,6 +240,17 @@ describe('LayoutHeader', () => {
     ).toBeInTheDocument();
   });
 
+  it('applies the configured accessibility level to the title', () => {
+    render(<LayoutHeader accessibilityLevel={4} level={2} title="My Title" />);
+
+    const heading = screen.getByRole('heading', {
+      level: 4,
+      name: 'My Title',
+    });
+    expect(heading).toHaveProperty('tagName', 'H2');
+    expect(heading).toHaveAttribute('aria-level', '4');
+  });
+
   it('renders subtitle when provided', () => {
     render(<LayoutHeader subtitle="Supporting text" title="Title" />);
 

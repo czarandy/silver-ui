@@ -377,6 +377,31 @@ export const HeaderLevel: Story = {
   ),
 };
 
+export const HeaderAccessibilityLevel: Story = {
+  render: args => (
+    <Card style={{height: 420}}>
+      <Layout
+        {...args}
+        content={
+          <LayoutContent>
+            <Text type="body">
+              Header title renders as an h2 but is announced as a level 4
+              heading.
+            </Text>
+          </LayoutContent>
+        }
+        header={
+          <LayoutHeader
+            accessibilityLevel={4}
+            level={2}
+            title="Account settings"
+          />
+        }
+      />
+    </Card>
+  ),
+};
+
 export const HeaderActions: Story = {
   render: args => (
     <Card style={{height: 420}}>
