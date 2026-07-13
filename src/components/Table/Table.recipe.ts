@@ -46,7 +46,7 @@ export const tableRecipe = sva({
       minW: 0,
     },
     emptyState: {
-      marginBlock: '8',
+      py: '8',
     },
     row: {
       transitionDuration: 'fast',
