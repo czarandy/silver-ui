@@ -498,7 +498,10 @@ function TableInner<T extends Record<string, unknown>>({
                 : data != null &&
                   (emptyState === undefined || isReactNode(emptyState)) && (
                     <tr>
-                      <td colSpan={Math.max(columns.length, 1)}>
+                      <td
+                        className={classes.emptyState}
+                        colSpan={Math.max(columns.length, 1)}
+                        data-part="empty-state">
                         {emptyState ?? <EmptyState isCompact title="No data" />}
                       </td>
                     </tr>

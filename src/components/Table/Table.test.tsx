@@ -78,6 +78,7 @@ const overflowWrapBreakWordClass = 'silver-ov-wrap_break-word';
 const rowDividerWidthClass = 'silver-bd-b-w_default';
 const sortIconActiveColorClass = 'silver-c_primary';
 const sortIconInactiveOpacityClass = 'silver-op_0.35';
+const emptyStatePaddingClass = 'silver-py_8';
 const stripedBgClass = 'even:silver-bg_bg.subtle';
 const textOverflowEllipsisClass = 'silver-tov_ellipsis';
 const whiteSpaceNormalClass = 'silver-white-space_normal';
@@ -110,6 +111,9 @@ describe('Table', () => {
 
     rerender(<Table columns={columns} data={[]} />);
     expect(screen.getByText('No data')).toBeInTheDocument();
+    const emptyStateCell = screen.getByRole('cell');
+    expect(emptyStateCell).toHaveAttribute('data-part', 'empty-state');
+    expect(emptyStateCell).toHaveClass(emptyStatePaddingClass);
   });
 
   it('does not render the empty state when data is undefined', () => {

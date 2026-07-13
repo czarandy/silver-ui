@@ -4,12 +4,20 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
  * Slot recipe consolidating the Table family's context-driven styling. The
  * structural sub-components (`TableCell`, `TableHeaderCell`, `TableRow`) read
  * shared visual state from `TableContext` and each render a single slot from
- * this recipe; `Table` owns the `wrapper`, `table`, and `headerLabelRow`
- * slots. The `density`/`dividers` variants previously lived
+ * this recipe; `Table` owns the `wrapper`, `table`, `headerLabelRow`, and
+ * `emptyState` slots. The `density`/`dividers` variants previously lived
  * duplicated across the cell and header-cell components and are unified here.
  */
 export const tableRecipe = sva({
-  slots: ['wrapper', 'table', 'headerLabelRow', 'row', 'cell', 'headerCell'],
+  slots: [
+    'wrapper',
+    'table',
+    'headerLabelRow',
+    'emptyState',
+    'row',
+    'cell',
+    'headerCell',
+  ],
   base: {
     wrapper: {
       overflowX: 'auto',
@@ -36,6 +44,9 @@ export const tableRecipe = sva({
       alignItems: 'center',
       gap: '1',
       minW: 0,
+    },
+    emptyState: {
+      py: '8',
     },
     row: {
       transitionDuration: 'fast',
