@@ -80,9 +80,9 @@ export type CheckboxInputProps = {
    */
   isReadOnly?: boolean;
   /**
-   * Field label text.
+   * Field label content.
    */
-  label: string;
+  label: ReactNode;
   /**
    * Optional content shown before the label.
    */

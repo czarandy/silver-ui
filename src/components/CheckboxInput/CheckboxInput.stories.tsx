@@ -7,6 +7,7 @@ import {
   type CheckboxInputProps,
 } from 'components/CheckboxInput/CheckboxInput';
 import {Icon} from 'components/Icon';
+import {Link} from 'components/Link';
 
 function CheckboxStory(args: CheckboxInputProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);
@@ -42,6 +43,16 @@ export const WithDescription: Story = {
   args: {
     label: 'Subscribe to newsletter',
     description: 'Receive weekly product updates and announcements.',
+  },
+};
+
+export const WithLinkInLabel: Story = {
+  args: {
+    label: (
+      <>
+        I agree to the <Link href="/terms">terms and conditions</Link>
+      </>
+    ),
   },
 };
 

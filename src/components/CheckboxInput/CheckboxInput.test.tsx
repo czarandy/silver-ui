@@ -25,6 +25,28 @@ describe('CheckboxInput', () => {
     );
   });
 
+  it('renders React nodes in the label', () => {
+    render(
+      <CheckboxInput
+        label={
+          <>
+            Accept the <a href="/terms">terms</a>
+          </>
+        }
+        onChange={() => {}}
+        value={false}
+      />,
+    );
+
+    expect(screen.getByRole('link', {name: 'terms'})).toHaveAttribute(
+      'href',
+      '/terms',
+    );
+    expect(
+      screen.getByRole('checkbox', {name: 'Accept the terms'}),
+    ).toBeInTheDocument();
+  });
+
   it('disables the input when isDisabled is true', () => {
     const onChange = vi.fn();
 
