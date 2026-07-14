@@ -15,7 +15,9 @@ import {Badge} from 'components/Badge';
 import {Tab} from 'components/Tabs/Tab';
 import {TabMenu} from 'components/Tabs/TabMenu';
 import {Tabs} from 'components/Tabs/Tabs';
+import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {assertNonNull, createPopoverFocusShim} from 'internal/testHelpers';
+import {css} from 'styled-system/css';
 
 function RouterLink({
   children,
@@ -140,6 +142,12 @@ describe('Tabs', () => {
       'class',
       screen.getByTestId('default-tab').getAttribute('class') ?? '',
     );
+  });
+
+  it('clips tab backgrounds above the divider', () => {
+    const tabClass = assertNonNull(tabsRecipe({hasDivider: true}).tab);
+
+    expect(tabClass.split(' ')).toContain(css({backgroundClip: 'padding-box'}));
   });
 
   it('links tabs to consumer-rendered panels with controls', () => {
