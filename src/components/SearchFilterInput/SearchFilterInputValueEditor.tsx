@@ -38,6 +38,8 @@ export interface SearchFilterInputValueEditorProps {
   timezoneID?: string;
 }
 
+const MIN_SEARCHABLE_ENUM_VALUES = 10;
+
 function enumItemsToSearchableItems(
   values: ReadonlyArray<EnumItem>,
 ): SearchableItem[] {
@@ -388,6 +390,7 @@ function EnumEditor({
 }): React.JSX.Element {
   return (
     <Select
+      hasSearch={operatorValue.values.length >= MIN_SEARCHABLE_ENUM_VALUES}
       isLabelHidden
       label="Value"
       onChange={value => {

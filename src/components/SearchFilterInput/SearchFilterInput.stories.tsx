@@ -35,6 +35,19 @@ const PRIORITIES: ReadonlyArray<EnumItem> = [
   {label: 'Critical', value: 'critical'},
 ];
 
+const DEPARTMENTS: ReadonlyArray<EnumItem> = [
+  {label: 'Customer Success', value: 'customer-success'},
+  {label: 'Design', value: 'design'},
+  {label: 'Engineering', value: 'engineering'},
+  {label: 'Finance', value: 'finance'},
+  {label: 'Human Resources', value: 'human-resources'},
+  {label: 'Legal', value: 'legal'},
+  {label: 'Marketing', value: 'marketing'},
+  {label: 'Operations', value: 'operations'},
+  {label: 'Product', value: 'product'},
+  {label: 'Sales', value: 'sales'},
+];
+
 const basicFields = [
   {key: 'name', label: 'Name', type: 'string'},
   {key: 'status', label: 'Status', type: 'enum', enumValues: STATUSES},
@@ -47,6 +60,30 @@ export const Default: Story = {
       ReadonlyArray<SearchFilterInputFilter>
     >([]);
     const {config} = useSearchFilterInputConfig(basicFields);
+
+    return (
+      <SearchFilterInput
+        config={config}
+        filters={filters}
+        onChange={next => setFilters(next)}
+      />
+    );
+  },
+};
+
+export const WithSearchableEnum: Story = {
+  render: () => {
+    const [filters, setFilters] = useState<
+      ReadonlyArray<SearchFilterInputFilter>
+    >([]);
+    const {config} = useSearchFilterInputConfig([
+      {
+        enumValues: DEPARTMENTS,
+        key: 'department',
+        label: 'Department',
+        type: 'enum',
+      },
+    ] as const);
 
     return (
       <SearchFilterInput
