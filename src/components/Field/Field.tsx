@@ -175,7 +175,12 @@ export function Field({
       {...(LabelComponent === 'label' ? {htmlFor: inputId} : undefined)}
       id={labelId}>
       {labelIcon != null ? (
-        <Icon color="secondary" icon={labelIcon} size="sm" />
+        <Icon
+          className={classes.labelIcon}
+          color="secondary"
+          icon={labelIcon}
+          size="sm"
+        />
       ) : null}
       <Text as="span" color="inherit" type="label">
         {label}

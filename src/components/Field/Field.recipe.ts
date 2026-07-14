@@ -4,6 +4,7 @@ export const fieldRecipe = sva({
   slots: [
     'root',
     'label',
+    'labelIcon',
     'indicator',
     'tooltipIcon',
     'inputWrapper',
@@ -17,11 +18,14 @@ export const fieldRecipe = sva({
     },
     label: {
       display: 'inline-flex',
-      alignItems: 'center',
+      alignItems: 'baseline',
       gap: '1',
       w: 'fit-content',
       color: 'fg',
       cursor: 'pointer',
+    },
+    labelIcon: {
+      alignSelf: 'center',
     },
     indicator: {
       fontWeight: 'normal',
@@ -29,6 +33,7 @@ export const fieldRecipe = sva({
     },
     tooltipIcon: {
       display: 'inline-flex',
+      alignSelf: 'center',
       color: 'fg.muted',
     },
     inputWrapper: {
