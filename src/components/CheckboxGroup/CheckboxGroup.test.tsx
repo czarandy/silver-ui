@@ -194,6 +194,20 @@ describe('CheckboxGroup', () => {
     expect(ref).toHaveBeenCalledWith(root);
   });
 
+  it('does not add gaps between horizontal checkbox items', () => {
+    render(
+      <CheckboxGroup
+        label="Notification channels"
+        onChange={() => {}}
+        orientation="horizontal"
+        value={['email']}>
+        <CheckboxGroupItem label="Email" value="email" />
+      </CheckboxGroup>,
+    );
+
+    expect(screen.getByRole('group')).toHaveClass('silver-cg_0', 'silver-rg_0');
+  });
+
   it('renders startContent on a checkbox item', () => {
     render(
       <CheckboxGroup

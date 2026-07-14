@@ -13,7 +13,7 @@ export const checkboxGroupRecipe = cva({
       horizontal: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        columnGap: '4',
+        columnGap: '0',
         rowGap: '0',
       },
     },
