@@ -48,6 +48,18 @@ function dispatchScrollEnd(element: HTMLElement): void {
   });
 }
 
+function dispatchTouch(
+  element: HTMLElement,
+  type: 'touchmove' | 'touchstart',
+  clientY: number,
+): void {
+  const event = new Event(type);
+  Object.defineProperty(event, 'touches', {value: [{clientY}]});
+  act(() => {
+    element.dispatchEvent(event);
+  });
+}
+
 const METRICS = {clientHeight: 400, offsetHeight: 400, scrollHeight: 1000};
 
 function renderScrollHook(element: HTMLElement) {
@@ -145,6 +157,39 @@ describe('useChatStreamScroll', () => {
     act(() => {
       element.dispatchEvent(new WheelEvent('wheel', {deltaY: -10}));
     });
+
+    expect(result.current.isLocked).toBe(false);
+  });
+
+  it('unlocks on wheel input while streaming content grows', () => {
+    const {element, state} = createScrollContainer(METRICS);
+    state.scrollTop = 600;
+    const {result} = renderScrollHook(element);
+
+    // The user's input arrives in the same frame as content growth. The
+    // following scroll event will look synthetic because scrollHeight changed,
+    // so the wheel handler must capture the intent before it fires.
+    state.scrollHeight = 1400;
+    act(() => {
+      element.dispatchEvent(new WheelEvent('wheel', {deltaY: -10}));
+    });
+    state.scrollTop = 599;
+    dispatchScroll(element);
+
+    expect(result.current.isLocked).toBe(false);
+  });
+
+  it('unlocks on a touch scroll-up while streaming content grows', () => {
+    const {element, state} = createScrollContainer(METRICS);
+    state.scrollTop = 600;
+    const {result} = renderScrollHook(element);
+
+    state.scrollHeight = 1400;
+    dispatchTouch(element, 'touchstart', 100);
+    // A finger moving down scrolls the content upward.
+    dispatchTouch(element, 'touchmove', 120);
+    state.scrollTop = 599;
+    dispatchScroll(element);
 
     expect(result.current.isLocked).toBe(false);
   });

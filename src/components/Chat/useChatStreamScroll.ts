@@ -222,26 +222,49 @@ export function useChatStreamScroll({
       }
     };
 
-    // Wheel up and touch drag interrupt an in-flight smooth scroll before
-    // the scroll position updates, so react to them directly.
+    // Explicit scroll-up input must unlock before the resulting scroll event.
+    // During streaming, content growth can change scrollHeight in the same
+    // frame and make onScroll classify that event as a synthetic resize.
     const onWheel = (event: WheelEvent) => {
-      if (event.deltaY < 0 && isProgrammaticScrollRef.current) {
+      if (event.deltaY < 0 && lockedRef.current) {
         isProgrammaticScrollRef.current = false;
         setLocked(false);
       }
     };
 
-    const onTouchMove = () => {
-      if (isProgrammaticScrollRef.current) {
+    let lastTouchY: number | null = null;
+
+    const onTouchStart = (event: TouchEvent) => {
+      lastTouchY = event.touches.length === 0 ? null : event.touches[0].clientY;
+    };
+
+    const onTouchMove = (event: TouchEvent) => {
+      const touchY =
+        event.touches.length === 0 ? null : event.touches[0].clientY;
+      const isScrollingUp =
+        touchY != null && lastTouchY != null && touchY > lastTouchY;
+      lastTouchY = touchY;
+
+      if (
+        lockedRef.current &&
+        (isScrollingUp || isProgrammaticScrollRef.current)
+      ) {
         isProgrammaticScrollRef.current = false;
         setLocked(false);
       }
+    };
+
+    const onTouchEnd = () => {
+      lastTouchY = null;
     };
 
     el.addEventListener('scroll', onScroll, {passive: true});
     el.addEventListener('scrollend', onScrollEnd);
     el.addEventListener('wheel', onWheel, {passive: true});
+    el.addEventListener('touchstart', onTouchStart, {passive: true});
     el.addEventListener('touchmove', onTouchMove, {passive: true});
+    el.addEventListener('touchend', onTouchEnd, {passive: true});
+    el.addEventListener('touchcancel', onTouchEnd, {passive: true});
 
     const initialFrame = requestAnimationFrame(() => {
       if (el.scrollHeight > el.clientHeight) {
@@ -255,7 +278,10 @@ export function useChatStreamScroll({
       el.removeEventListener('scroll', onScroll);
       el.removeEventListener('scrollend', onScrollEnd);
       el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
       el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
     };
   }, [buttonThreshold, isEnabled, lockThreshold, scrollRef, setLocked]);
 
