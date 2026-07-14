@@ -5,6 +5,8 @@ import {useDropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContex
 import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
+import {Tooltip} from 'components/Tooltip';
+import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
 export interface DropdownMenuItemProps {
@@ -49,6 +51,10 @@ export interface DropdownMenuItemProps {
    * Inline styles applied to the item.
    */
   style?: CSSProperties;
+  /**
+   * Tooltip content shown when the item is hovered or focused.
+   */
+  tooltip?: ReactNode;
 }
 
 /**
@@ -65,17 +71,25 @@ export function DropdownMenuItem({
   onClick,
   ref,
   style,
+  tooltip,
 }: DropdownMenuItemProps): React.JSX.Element {
   const context = useDropdownMenuContext();
   const menuSize = context?.menuSize ?? 'md';
   const classes = dropdownMenuItemRecipe({size: menuSize});
+  const hasTooltip = isReactNode(tooltip);
+  const useAriaDisabled = hasTooltip && isDisabled;
 
-  return (
+  const item = (
     <button
+      aria-disabled={useAriaDisabled || undefined}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
-      disabled={isDisabled}
-      onClick={() => {
+      disabled={isDisabled && !useAriaDisabled}
+      onClick={event => {
+        if (isDisabled) {
+          event.preventDefault();
+          return;
+        }
         onClick?.();
         context?.closeMenu();
       }}
@@ -98,6 +112,12 @@ export function DropdownMenuItem({
       />
     </button>
   );
+
+  if (hasTooltip) {
+    return <Tooltip content={tooltip}>{item}</Tooltip>;
+  }
+
+  return item;
 }
 
 DropdownMenuItem.displayName = 'DropdownMenuItem';

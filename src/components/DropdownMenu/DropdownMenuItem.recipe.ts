@@ -22,6 +22,10 @@ export const dropdownMenuItemRecipe = sva({
         opacity: 0.5,
         cursor: 'not-allowed',
       },
+      '&[aria-disabled="true"]': {
+        opacity: 0.5,
+        cursor: 'not-allowed',
+      },
     },
     icon: {
       display: 'inline-flex',

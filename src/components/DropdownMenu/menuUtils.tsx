@@ -74,6 +74,7 @@ export function renderMenuItems(
               key={sectionItem.label}
               label={sectionItem.label}
               onClick={sectionItem.onClick}
+              tooltip={sectionItem.tooltip}
             />
           ))}
         </div>
@@ -88,6 +89,7 @@ export function renderMenuItems(
         key={item.label}
         label={item.label}
         onClick={item.onClick}
+        tooltip={item.tooltip}
       />
     );
   });

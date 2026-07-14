@@ -1,4 +1,4 @@
-import {fireEvent, render, screen} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Edit, Trash2} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
@@ -328,6 +328,68 @@ describe('DropdownMenu', () => {
 
     await user.click(screen.getByRole('button', {name: 'Actions'}));
     expect(screen.getByText('⌘E')).toBeInTheDocument();
+  });
+
+  it('shows compound item tooltip content when the item is hovered', async () => {
+    render(
+      <DropdownMenu button={{label: 'Actions'}} isMenuOpen>
+        <DropdownMenuItem
+          label="Edit"
+          tooltip="Changes the item title and details."
+        />
+      </DropdownMenu>,
+    );
+
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    const item = screen.getByRole('menuitem', {hidden: true, name: 'Edit'});
+
+    expect(tooltip).toHaveTextContent('Changes the item title and details.');
+    expect(item).toHaveAttribute('aria-describedby', tooltip.id);
+
+    fireEvent.mouseEnter(item);
+    await waitFor(() => {
+      expect(tooltip).toHaveAttribute('popover-open');
+    });
+  });
+
+  it('keeps disabled items with tooltips hoverable but not actionable', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <DropdownMenu button={{label: 'Actions'}} isMenuOpen>
+        <DropdownMenuItem
+          isDisabled
+          label="Delete"
+          onClick={onClick}
+          tooltip="You do not have permission to delete this item."
+        />
+      </DropdownMenu>,
+    );
+
+    const item = screen.getByRole('menuitem', {hidden: true, name: 'Delete'});
+    expect(item).toBeEnabled();
+    expect(item).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'You do not have permission to delete this item.',
+    );
+
+    await user.click(item);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('renders tooltip content for data-driven items', () => {
+    render(
+      <DropdownMenu
+        button={{label: 'Actions'}}
+        isMenuOpen
+        items={[{label: 'Archive', tooltip: 'Moves this item to the archive.'}]}
+      />,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Moves this item to the archive.',
+    );
   });
 
   it('renders button endContent alongside the chevron', () => {

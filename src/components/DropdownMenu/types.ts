@@ -22,6 +22,10 @@ export interface DropdownMenuItemData {
    * Called when the item is selected.
    */
   onClick?: () => void;
+  /**
+   * Tooltip content shown when the item is hovered or focused.
+   */
+  tooltip?: ReactNode;
 }
 
 export interface DropdownMenuDivider {
