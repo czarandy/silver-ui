@@ -2,7 +2,7 @@
 // invariants that unit tests can't see (they run against source, not the
 // built dist/): the landing page is prerendered with real body content, the
 // docs pages exist, and the sitemap was generated.
-import {readFileSync, statSync} from 'node:fs';
+import {readdirSync, readFileSync, statSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import process from 'node:process';
 import {fileURLToPath} from 'node:url';
@@ -87,6 +87,32 @@ check('live demos are prerendered into the page', () => {
   }
   // And the code snippet next to it.
   assertContains(html, 'variant=', 'story snippet');
+});
+
+check('docs CSS preserves the cross-library cascade layer order', () => {
+  const assetDir = resolve(dist, '_astro');
+  const css = readdirSync(assetDir)
+    .filter(file => file.endsWith('.css'))
+    .map(file => readFileSync(resolve(assetDir, file), 'utf-8'))
+    .find(
+      stylesheet =>
+        stylesheet.includes('.silver-m_auto{margin:auto}') &&
+        stylesheet.includes('@layer starlight.reset'),
+    );
+  if (css == null) {
+    throw new Error('could not find the combined Panda and Starlight CSS');
+  }
+
+  // The production CSS optimizer may consume the order statement and emit
+  // the layer blocks in that order, so assert the browser-observable result.
+  const starlightReset = css.indexOf('@layer starlight.reset{');
+  const pandaUtilities = css.indexOf('@layer utilities{');
+  if (starlightReset < 0 || pandaUtilities < 0) {
+    throw new Error('missing Starlight reset or Panda utilities layer');
+  }
+  if (pandaUtilities < starlightReset) {
+    throw new Error('Starlight reset outranks Panda utilities');
+  }
 });
 
 check('sitemap index is generated', () => {

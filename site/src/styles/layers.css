@@ -1,8 +1,8 @@
 /*
- * Cascade layer order for the docs pages. Must be the first stylesheet
- * Starlight injects (see customCss in astro.config.ts): a layer's position is
- * fixed the first time its name is seen, so this statement only decides the
- * order if it is registered before Panda's and Starlight's own.
+ * Cascade layer order for the docs pages. It must be the first import in
+ * site.css: a layer's position is fixed the first time its name is seen, so
+ * this statement only decides the order if it is registered before Panda's
+ * and Starlight's own declarations.
  *
  * Both sides ship layered CSS. Left alone, the browser registers Panda's five
  * layers (from panda.css) and then Starlight's six, which puts *every*

@@ -1,0 +1,8 @@
+/*
+ * Single retained entry point for docs CSS. Astro drops a standalone
+ * declaration-only stylesheet from its production bundle, so import the layer
+ * order into the same module graph as the styles it orders.
+ */
+@import './layers.css';
+@import './panda.css';
+@import './docs.css';

@@ -22,6 +22,7 @@ const layersCss = readFileSync(
   resolve(siteRoot, 'src/styles/layers.css'),
   'utf-8',
 );
+const siteCss = readFileSync(resolve(siteRoot, 'src/styles/site.css'), 'utf-8');
 const astroConfig = readFileSync(resolve(siteRoot, 'astro.config.ts'), 'utf-8');
 
 /**
@@ -94,13 +95,17 @@ describe('docs cascade layer order', () => {
     }
   });
 
-  it('loads layers.css before the stylesheets whose layers it orders', () => {
+  it('imports the layer order before the styles from a single entry point', () => {
     const customCss = /customCss:\s*\[([^\]]*)\]/s.exec(astroConfig);
     expect(customCss).not.toBeNull();
     const files = [...(customCss?.[1].matchAll(/'([^']+)'/g) ?? [])].map(
       match => match[1],
     );
-    expect(files[0]).toBe('./src/styles/layers.css');
-    expect(files).toContain('./src/styles/panda.css');
+    expect(files).toEqual(['./src/styles/site.css']);
+
+    const imports = [...siteCss.matchAll(/@import '([^']+)';/g)].map(
+      match => match[1],
+    );
+    expect(imports).toEqual(['./layers.css', './panda.css', './docs.css']);
   });
 });
