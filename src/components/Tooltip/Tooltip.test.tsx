@@ -45,6 +45,18 @@ describe('Tooltip', () => {
     expect(trigger).toHaveAttribute('aria-describedby');
   });
 
+  it('keeps the surface background above the layer reset', () => {
+    render(
+      <Tooltip content="Tooltip text">
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    expect(tooltip).toHaveClass('silver-layer-reset', 'silver-bg_fg');
+    expect(tooltip).not.toHaveClass('silver-bg_transparent');
+  });
+
   it('hides tooltip on mouse leave', async () => {
     showPopoverMock.mockClear();
     hidePopoverMock.mockClear();

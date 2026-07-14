@@ -165,6 +165,14 @@ describe('HoverCard', () => {
     );
   });
 
+  it('keeps the surface background above the layer reset', () => {
+    render(<HoverCard content="Details">Hover target</HoverCard>);
+
+    const hoverCard = screen.getByRole('dialog', {hidden: true});
+    expect(hoverCard).toHaveClass('silver-layer-reset', 'silver-bg_bg');
+    expect(hoverCard).not.toHaveClass('silver-bg_transparent');
+  });
+
   it('applies placement to the hover card layer', () => {
     render(
       <HoverCard content="Details" placement="below">
