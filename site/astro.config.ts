@@ -41,16 +41,12 @@ export default defineConfig({
         {label: 'Components', slug: 'components'},
         ...componentSidebarGroups(),
       ],
-      // layers.css must come first: it fixes the cascade order between Panda's
-      // layers and Starlight's, and a layer's position is decided by the first
-      // stylesheet that names it. It promotes only Panda's `recipes` and
+      // site.css imports the cross-library layer order before Panda's generated
+      // CSS and our docs CSS, so Astro cannot drop the order-only module from
+      // production bundles. It promotes only Panda's `recipes` and
       // `utilities` above `starlight.*` — promoting Panda's layers wholesale
       // outranks Starlight's own page styles and unstyles the docs.
-      customCss: [
-        './src/styles/layers.css',
-        './src/styles/panda.css',
-        './src/styles/docs.css',
-      ],
+      customCss: ['./src/styles/site.css'],
       head: [
         {
           tag: 'link',
