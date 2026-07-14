@@ -16,3 +16,4 @@ site/src/styles/panda.css
 site/public/swatches/
 .codex-worktrees/
 .claude/worktrees/
+.worktrees/
