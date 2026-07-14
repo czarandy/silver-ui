@@ -7,6 +7,7 @@ import {
   SearchFilterInput,
   useSearchFilterInputConfig,
   type SearchFilterInputComponents,
+  type SearchFilterInputConfig,
   type SearchFilterInputEditorProps,
   type SearchFilterInputFilter,
   type SearchFilterInputProps,
@@ -53,6 +54,22 @@ const basicFields = [
   {key: 'status', label: 'Status', type: 'enum', enumValues: STATUSES},
   {key: 'age', label: 'Age', type: 'number'},
 ] as const;
+
+const emptyOperatorConfig = {
+  fields: [
+    {
+      defaultOperator: 'contains',
+      key: 'name',
+      label: 'Name',
+      operators: [
+        {key: 'contains', label: 'contains', value: {type: 'string'}},
+        {key: 'is_set', label: 'is set', value: {type: 'empty'}},
+        {key: 'is_not_set', label: 'is not set', value: {type: 'empty'}},
+      ],
+    },
+  ],
+  name: 'EmptyOperatorConfig',
+} as const satisfies SearchFilterInputConfig;
 
 export const Default: Story = {
   render: () => {
@@ -116,6 +133,28 @@ export const WithPrePopulated: Story = {
     return (
       <SearchFilterInput
         config={config}
+        filters={filters}
+        onChange={next => setFilters(next)}
+      />
+    );
+  },
+};
+
+export const WithEmptyOperator: Story = {
+  render: () => {
+    const [filters, setFilters] = useState<
+      ReadonlyArray<SearchFilterInputFilter>
+    >([
+      {
+        field: 'name',
+        operator: 'is_not_set',
+        value: {type: 'empty'},
+      },
+    ]);
+
+    return (
+      <SearchFilterInput
+        config={emptyOperatorConfig}
         filters={filters}
         onChange={next => setFilters(next)}
       />

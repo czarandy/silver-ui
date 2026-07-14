@@ -403,6 +403,10 @@ export function SearchFilterInputEditPopover({
   const [partialFilter, setPartialFilter] =
     useState<PartialFilter>(initialFilter);
   const valueEditorRef = useRef<HTMLDivElement>(null);
+  const previousSelectionRef = useRef<{
+    field: string;
+    operator?: string;
+  } | null>(null);
   const currentOperator =
     partialFilter.operator == null
       ? undefined
@@ -431,14 +435,28 @@ export function SearchFilterInputEditPopover({
   }, []);
 
   useEffect(() => {
-    if (isEmptyType && partialFilter.operator != null) {
+    const previousSelection = previousSelectionRef.current;
+    const selectionChanged =
+      previousSelection != null &&
+      (previousSelection.field !== partialFilter.field ||
+        previousSelection.operator !== partialFilter.operator);
+    previousSelectionRef.current = {
+      field: partialFilter.field,
+      operator: partialFilter.operator,
+    };
+
+    if (
+      isEmptyType &&
+      partialFilter.operator != null &&
+      (selectionChanged || (mode === 'create' && previousSelection == null))
+    ) {
       onSave({
         field: partialFilter.field,
         operator: partialFilter.operator,
         value: {type: 'empty'},
       });
     }
-  }, [isEmptyType, onSave, partialFilter.field, partialFilter.operator]);
+  }, [isEmptyType, mode, onSave, partialFilter.field, partialFilter.operator]);
 
   const fieldOptions = useMemo(
     () =>
@@ -495,32 +513,38 @@ export function SearchFilterInputEditPopover({
     }));
   };
 
-  const footer = !isEmptyType ? (
-    <div className={styles.footer}>
-      <HStack gap={2} hAlign="between">
-        {!isReadOnly && mode === 'edit' ? (
-          <Button
-            label="Delete"
-            onClick={() => onSave(null)}
-            size="sm"
-            variant="ghost"
-          />
-        ) : (
-          <div />
-        )}
-        <HStack gap={2}>
-          <Button label="Cancel" onClick={onCancel} size="sm" variant="ghost" />
-          <Button
-            isDisabled={isSaveDisabled}
-            label={saveButtonLabel}
-            onClick={handleSave}
-            size="sm"
-            variant="primary"
-          />
+  const footer =
+    !isEmptyType || mode === 'edit' ? (
+      <div className={styles.footer}>
+        <HStack gap={2} hAlign="between">
+          {!isReadOnly && mode === 'edit' ? (
+            <Button
+              label="Delete"
+              onClick={() => onSave(null)}
+              size="sm"
+              variant="ghost"
+            />
+          ) : (
+            <div />
+          )}
+          <HStack gap={2}>
+            <Button
+              label="Cancel"
+              onClick={onCancel}
+              size="sm"
+              variant="ghost"
+            />
+            <Button
+              isDisabled={isSaveDisabled}
+              label={saveButtonLabel}
+              onClick={handleSave}
+              size="sm"
+              variant="primary"
+            />
+          </HStack>
         </HStack>
-      </HStack>
-    </div>
-  ) : null;
+      </div>
+    ) : null;
   const isTopLayer = useIsTopLayer();
 
   return (
