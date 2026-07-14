@@ -35,6 +35,7 @@ export default tseslint.config(
       'eslint/',
       '.claude/',
       '.codex-worktrees/',
+      '.worktrees/',
       '**/.astro/',
     ],
   },
