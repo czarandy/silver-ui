@@ -1,7 +1,7 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const dropdownMenuItemRecipe = sva({
-  slots: ['root', 'icon', 'label', 'tooltipIcon'],
+  slots: ['root', 'icon'],
   base: {
     root: {
       display: 'block',
@@ -22,21 +22,13 @@ export const dropdownMenuItemRecipe = sva({
         opacity: 0.5,
         cursor: 'not-allowed',
       },
+      '&[aria-disabled="true"]': {
+        opacity: 0.5,
+        cursor: 'not-allowed',
+      },
     },
     icon: {
       display: 'inline-flex',
-      flexShrink: 0,
-      color: 'fg.muted',
-    },
-    label: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: '1',
-      minW: 0,
-    },
-    tooltipIcon: {
-      display: 'inline-flex',
-      alignItems: 'center',
       flexShrink: 0,
       color: 'fg.muted',
     },

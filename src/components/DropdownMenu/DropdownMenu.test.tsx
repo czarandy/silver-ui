@@ -4,8 +4,6 @@ import {Edit, Trash2} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
-import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
-import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -332,7 +330,7 @@ describe('DropdownMenu', () => {
     expect(screen.getByText('⌘E')).toBeInTheDocument();
   });
 
-  it('shows compound item tooltip content when its info icon is hovered', async () => {
+  it('shows compound item tooltip content when the item is hovered', async () => {
     render(
       <DropdownMenu button={{label: 'Actions'}} isMenuOpen>
         <DropdownMenuItem
@@ -343,20 +341,41 @@ describe('DropdownMenu', () => {
     );
 
     const tooltip = screen.getByRole('tooltip', {hidden: true});
-    const tooltipTrigger = assertNonNull(
-      // eslint-disable-next-line testing-library/no-node-access -- the info icon is intentionally hidden from the accessibility tree
-      document.querySelector(`[aria-describedby="${tooltip.id}"]`),
-    );
+    const item = screen.getByRole('menuitem', {hidden: true, name: 'Edit'});
 
     expect(tooltip).toHaveTextContent('Changes the item title and details.');
-    expect(tooltipTrigger).toHaveClass(
-      dropdownMenuItemRecipe().tooltipIcon ?? '',
-    );
+    expect(item).toHaveAttribute('aria-describedby', tooltip.id);
 
-    fireEvent.mouseEnter(tooltipTrigger);
+    fireEvent.mouseEnter(item);
     await waitFor(() => {
       expect(tooltip).toHaveAttribute('popover-open');
     });
+  });
+
+  it('keeps disabled items with tooltips hoverable but not actionable', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+
+    render(
+      <DropdownMenu button={{label: 'Actions'}} isMenuOpen>
+        <DropdownMenuItem
+          isDisabled
+          label="Delete"
+          onClick={onClick}
+          tooltip="You do not have permission to delete this item."
+        />
+      </DropdownMenu>,
+    );
+
+    const item = screen.getByRole('menuitem', {hidden: true, name: 'Delete'});
+    expect(item).toBeEnabled();
+    expect(item).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'You do not have permission to delete this item.',
+    );
+
+    await user.click(item);
+    expect(onClick).not.toHaveBeenCalled();
   });
 
   it('renders tooltip content for data-driven items', () => {

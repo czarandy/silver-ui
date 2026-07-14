@@ -1,6 +1,5 @@
 'use client';
 
-import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useDropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
 import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
@@ -53,7 +52,7 @@ export interface DropdownMenuItemProps {
    */
   style?: CSSProperties;
   /**
-   * Tooltip content shown from an info icon next to the label.
+   * Tooltip content shown when the item is hovered or focused.
    */
   tooltip?: ReactNode;
 }
@@ -77,13 +76,20 @@ export function DropdownMenuItem({
   const context = useDropdownMenuContext();
   const menuSize = context?.menuSize ?? 'md';
   const classes = dropdownMenuItemRecipe({size: menuSize});
+  const hasTooltip = isReactNode(tooltip);
+  const useAriaDisabled = hasTooltip && isDisabled;
 
-  return (
+  const item = (
     <button
+      aria-disabled={useAriaDisabled || undefined}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
-      disabled={isDisabled}
-      onClick={() => {
+      disabled={isDisabled && !useAriaDisabled}
+      onClick={event => {
+        if (isDisabled) {
+          event.preventDefault();
+          return;
+        }
         onClick?.();
         context?.closeMenu();
       }}
@@ -95,18 +101,7 @@ export function DropdownMenuItem({
         as="span"
         description={description}
         endContent={endContent}
-        label={
-          <span className={classes.label}>
-            {label}
-            {isReactNode(tooltip) ? (
-              <Tooltip content={tooltip}>
-                <span className={classes.tooltipIcon}>
-                  <Icon icon={Info} size="sm" />
-                </span>
-              </Tooltip>
-            ) : null}
-          </span>
-        }
+        label={label}
         startContent={
           icon != null ? (
             <span className={classes.icon}>
@@ -117,6 +112,12 @@ export function DropdownMenuItem({
       />
     </button>
   );
+
+  if (hasTooltip) {
+    return <Tooltip content={tooltip}>{item}</Tooltip>;
+  }
+
+  return item;
 }
 
 DropdownMenuItem.displayName = 'DropdownMenuItem';

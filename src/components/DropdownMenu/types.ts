@@ -23,7 +23,7 @@ export interface DropdownMenuItemData {
    */
   onClick?: () => void;
   /**
-   * Tooltip content shown from an info icon next to the label.
+   * Tooltip content shown when the item is hovered or focused.
    */
   tooltip?: ReactNode;
 }
