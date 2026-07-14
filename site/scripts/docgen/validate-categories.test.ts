@@ -72,9 +72,9 @@ describe('componentSidebarGroups', () => {
 describe('componentDocPages', () => {
   it('returns configured split pages and a default page otherwise', () => {
     expect(componentDocPages('Chat').map(page => page.label)).toEqual([
-      'Composer',
-      'Layout',
-      'Message',
+      'Chat Composer',
+      'Chat Layout',
+      'Chat Message',
     ]);
     expect(componentDocPages('Button')).toEqual([
       {label: 'Button', name: 'Button'},

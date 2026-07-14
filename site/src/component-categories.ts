@@ -143,19 +143,19 @@ export const componentDocPageSplits: Record<
   Chat: [
     {
       name: 'ChatComposer',
-      label: 'Composer',
+      label: 'Chat Composer',
       exportNames: ['ChatComposer', 'ChatComposerInput', 'ChatSendButton'],
       storyFiles: ['ChatComposer'],
     },
     {
       name: 'ChatLayout',
-      label: 'Layout',
+      label: 'Chat Layout',
       exportNames: ['ChatLayout', 'ChatMessageList', 'ChatScrollButton'],
       storyFiles: ['ChatLayout'],
     },
     {
       name: 'ChatMessage',
-      label: 'Message',
+      label: 'Chat Message',
       exportNames: [
         'ChatMessage',
         'ChatMessageBubble',

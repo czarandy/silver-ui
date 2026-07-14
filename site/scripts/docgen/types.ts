@@ -49,7 +49,7 @@ export interface ComponentDocData {
   exports: ExportDoc[];
   /**
    * Page title shown in the sidebar and heading; can differ from `name` for
-   * focused or multi-component pages (e.g. `Composer`, `Text & Heading`).
+   * focused or multi-component pages (e.g. `Chat Composer`, `Text & Heading`).
    */
   label: string;
   /**

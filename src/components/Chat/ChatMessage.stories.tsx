@@ -10,7 +10,7 @@ import {Timestamp} from 'components/Timestamp';
 import {css} from 'styled-system/css';
 
 const meta: Meta<typeof ChatMessage> = {
-  title: 'Components/Chat/Message',
+  title: 'Components/Chat/Chat Message',
   component: ChatMessage,
   args: {
     sender: 'assistant',
