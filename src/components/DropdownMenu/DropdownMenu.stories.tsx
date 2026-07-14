@@ -46,6 +46,29 @@ export const WithDescriptions: Story = {
   },
 };
 
+export const WithTooltips: Story = {
+  args: {
+    items: [
+      {
+        icon: Edit,
+        label: 'Edit',
+        tooltip: 'Change the item title and details.',
+      },
+      {
+        icon: Archive,
+        label: 'Archive',
+        tooltip: 'Move the item out of active lists without deleting it.',
+      },
+      {type: 'divider'},
+      {
+        icon: Trash2,
+        label: 'Delete',
+        tooltip: 'Permanently remove the item.',
+      },
+    ],
+  },
+};
+
 export const WithShortcuts: Story = {
   render: (args): React.JSX.Element => (
     <DropdownMenu {...args}>

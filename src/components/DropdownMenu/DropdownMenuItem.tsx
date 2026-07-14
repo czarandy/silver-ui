@@ -1,10 +1,13 @@
 'use client';
 
+import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useDropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
 import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
+import {Tooltip} from 'components/Tooltip';
+import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
 export interface DropdownMenuItemProps {
@@ -49,6 +52,10 @@ export interface DropdownMenuItemProps {
    * Inline styles applied to the item.
    */
   style?: CSSProperties;
+  /**
+   * Tooltip content shown from an info icon next to the label.
+   */
+  tooltip?: ReactNode;
 }
 
 /**
@@ -65,6 +72,7 @@ export function DropdownMenuItem({
   onClick,
   ref,
   style,
+  tooltip,
 }: DropdownMenuItemProps): React.JSX.Element {
   const context = useDropdownMenuContext();
   const menuSize = context?.menuSize ?? 'md';
@@ -87,7 +95,18 @@ export function DropdownMenuItem({
         as="span"
         description={description}
         endContent={endContent}
-        label={label}
+        label={
+          <span className={classes.label}>
+            {label}
+            {isReactNode(tooltip) ? (
+              <Tooltip content={tooltip}>
+                <span className={classes.tooltipIcon}>
+                  <Icon icon={Info} size="sm" />
+                </span>
+              </Tooltip>
+            ) : null}
+          </span>
+        }
         startContent={
           icon != null ? (
             <span className={classes.icon}>

@@ -1,9 +1,11 @@
-import {fireEvent, render, screen} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Edit, Trash2} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
+import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
+import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -328,6 +330,47 @@ describe('DropdownMenu', () => {
 
     await user.click(screen.getByRole('button', {name: 'Actions'}));
     expect(screen.getByText('⌘E')).toBeInTheDocument();
+  });
+
+  it('shows compound item tooltip content when its info icon is hovered', async () => {
+    render(
+      <DropdownMenu button={{label: 'Actions'}} isMenuOpen>
+        <DropdownMenuItem
+          label="Edit"
+          tooltip="Changes the item title and details."
+        />
+      </DropdownMenu>,
+    );
+
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    const tooltipTrigger = assertNonNull(
+      // eslint-disable-next-line testing-library/no-node-access -- the info icon is intentionally hidden from the accessibility tree
+      document.querySelector(`[aria-describedby="${tooltip.id}"]`),
+    );
+
+    expect(tooltip).toHaveTextContent('Changes the item title and details.');
+    expect(tooltipTrigger).toHaveClass(
+      dropdownMenuItemRecipe().tooltipIcon ?? '',
+    );
+
+    fireEvent.mouseEnter(tooltipTrigger);
+    await waitFor(() => {
+      expect(tooltip).toHaveAttribute('popover-open');
+    });
+  });
+
+  it('renders tooltip content for data-driven items', () => {
+    render(
+      <DropdownMenu
+        button={{label: 'Actions'}}
+        isMenuOpen
+        items={[{label: 'Archive', tooltip: 'Moves this item to the archive.'}]}
+      />,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Moves this item to the archive.',
+    );
   });
 
   it('renders button endContent alongside the chevron', () => {
