@@ -17,6 +17,7 @@ import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {Schedule} from 'components/Schedule/Schedule';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
+import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {
   enumerateDates,
@@ -1303,6 +1304,24 @@ describe('Schedule', () => {
         name: 'Wednesday, May 13, 2026 all day. Design review, Design, all day',
       }),
     ).toHaveAttribute('aria-colindex', '2');
+  });
+
+  it('baseline-aligns the weekday and date number in time grid headers', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 10, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+    const classes = scheduleTimeGridViewRecipe();
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the alignment class on the header content wrapper
+    expect(screen.getByText('13').parentElement).toHaveClass(
+      classes.dayHeaderContent ?? '',
+    );
+    expect(classes.dayHeaderContent).toContain('silver-ai_baseline');
   });
 
   it('collapses overflowing all-day time grid events into a see-more popover', () => {
