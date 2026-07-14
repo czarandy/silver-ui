@@ -56,14 +56,14 @@ function SchedulePaginationControls({
   }, [nextDateRange, shiftToRange]);
 
   return (
-    <ButtonGroup label="Schedule pagination" size="sm">
+    <ButtonGroup label="Schedule pagination">
       <Button
         icon={ChevronLeft}
         isIconOnly
         label={previousDateRange.label}
         onClick={onPreviousDate}
       />
-      <Button label="Today" onClick={onToday} size="sm" />
+      <Button label="Today" onClick={onToday} />
       <Button
         icon={ChevronRight}
         isIconOnly

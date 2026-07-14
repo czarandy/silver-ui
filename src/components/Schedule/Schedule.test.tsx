@@ -1868,7 +1868,7 @@ describe('Schedule', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('renders pagination controls with the default button variant', () => {
+  it('renders pagination controls with the default button size and variant', () => {
     function Fixture(): React.JSX.Element {
       const paginationPlugin = useSchedulePaginationPlugin({
         onViewDateChange: vi.fn(),
@@ -1888,14 +1888,12 @@ describe('Schedule', () => {
 
     const defaultIconButtonClassName = buttonRecipe({
       iconOnly: true,
-      size: 'sm',
     }).root as string;
     const ghostIconButtonClassName = buttonRecipe({
       iconOnly: true,
-      size: 'sm',
       variant: 'ghost',
     }).root as string;
-    const todayClassName = buttonRecipe({size: 'sm'}).root as string;
+    const todayClassName = buttonRecipe({}).root as string;
 
     expect(screen.getByRole('button', {name: 'Previous day'})).toHaveClass(
       defaultIconButtonClassName,
@@ -2977,7 +2975,9 @@ describe('Schedule', () => {
     render(<ScheduleWithViewSelector />);
 
     const selectorButton = screen.getByRole('button', {name: /Day/});
+    const defaultButtonClassName = buttonRecipe({}).root as string;
     expect(selectorButton).toBeEnabled();
+    expect(selectorButton).toHaveClass(defaultButtonClassName);
 
     fireEvent.click(selectorButton);
 

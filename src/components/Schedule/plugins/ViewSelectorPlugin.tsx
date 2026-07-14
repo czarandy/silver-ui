@@ -42,7 +42,6 @@ function ScheduleViewSelectorControl<View extends ScheduleViewBase>({
       button={{
         isDisabled: onChangeView == null,
         label: currentOption?.label ?? 'View',
-        size: 'sm',
       }}
       menuWidth={160}>
       {options.map(option => (
