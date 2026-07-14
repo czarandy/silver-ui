@@ -5,6 +5,7 @@ export const drawerRecipe = sva({
   base: {
     root: {
       position: 'fixed',
+      m: 0,
       p: 0,
       borderWidth: 0,
       bg: 'bg',
@@ -35,11 +36,14 @@ export const drawerRecipe = sva({
       true: {root: {display: 'flex'}},
       false: {},
     },
+    // Set both logical edges directly instead of aligning an `inset: 0`
+    // dialog with auto margins, which a host application's reset can flatten.
     placement: {
       start: {
         root: {
-          inset: 0,
-          marginInlineEnd: 'auto',
+          insetBlock: 0,
+          insetInlineStart: 0,
+          insetInlineEnd: 'auto',
           h: '100dvh',
           maxH: '100dvh',
           borderRadius: 0,
@@ -50,8 +54,9 @@ export const drawerRecipe = sva({
       },
       end: {
         root: {
-          inset: 0,
-          marginInlineStart: 'auto',
+          insetBlock: 0,
+          insetInlineStart: 'auto',
+          insetInlineEnd: 0,
           h: '100dvh',
           maxH: '100dvh',
           borderRadius: 0,
@@ -62,8 +67,9 @@ export const drawerRecipe = sva({
       },
       top: {
         root: {
-          inset: 0,
-          mb: 'auto',
+          insetBlockStart: 0,
+          insetBlockEnd: 'auto',
+          insetInline: 0,
           w: '100dvw',
           maxW: '100dvw',
           borderRadius: 0,
@@ -74,8 +80,9 @@ export const drawerRecipe = sva({
       },
       bottom: {
         root: {
-          inset: 0,
-          mt: 'auto',
+          insetBlockStart: 'auto',
+          insetBlockEnd: 0,
+          insetInline: 0,
           w: '100dvw',
           maxW: '100dvw',
           borderRadius: 0,

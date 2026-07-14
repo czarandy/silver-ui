@@ -360,6 +360,35 @@ describe('Drawer', () => {
     expect(screen.getByTestId('drawer')).toHaveStyle({height: '40vh'});
   });
 
+  it.each([
+    ['start', ['silver-inset-y_0', 'silver-inset-s_0', 'silver-inset-e_auto']],
+    ['end', ['silver-inset-y_0', 'silver-inset-s_auto', 'silver-inset-e_0']],
+    ['top', ['silver-inset-bs_0', 'silver-inset-be_auto', 'silver-inset-x_0']],
+    [
+      'bottom',
+      ['silver-inset-bs_auto', 'silver-inset-be_0', 'silver-inset-x_0'],
+    ],
+  ] as const)(
+    'anchors the %s placement to its viewport edge',
+    (placement, classes) => {
+      render(
+        <Drawer
+          data-testid="drawer"
+          isOpen
+          label="Nav"
+          onOpenChange={() => {}}
+          placement={placement}>
+          Content
+        </Drawer>,
+      );
+
+      expect(screen.getByTestId('drawer')).toHaveClass(
+        'silver-m_0',
+        ...classes,
+      );
+    },
+  );
+
   it('applies custom size based on placement', () => {
     const {rerender} = render(
       <Drawer
