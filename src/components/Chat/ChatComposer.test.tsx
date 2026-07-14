@@ -110,6 +110,25 @@ describe('ChatComposer', () => {
     expect(onStop).toHaveBeenCalledOnce();
   });
 
+  it('keeps the stop button clickable while disabled', async () => {
+    const user = userEvent.setup();
+    const onStop = vi.fn();
+    render(
+      <ChatComposer
+        isDisabled
+        isStopShown
+        onStop={onStop}
+        onSubmit={vi.fn()}
+      />,
+    );
+
+    const stopButton = screen.getByRole('button', {name: 'Stop'});
+    expect(stopButton).toBeEnabled();
+    await user.click(stopButton);
+
+    expect(onStop).toHaveBeenCalledOnce();
+  });
+
   it('ignores submit while disabled', () => {
     const onSubmit = vi.fn();
     render(<ChatComposer isDisabled onSubmit={onSubmit} value="hello" />);

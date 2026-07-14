@@ -88,6 +88,25 @@ describe('useChatNewMessages', () => {
     expect(result.current.hasNewMessages).toBe(false);
   });
 
+  it('clears the flag when scrolling re-locks', () => {
+    const content = document.createElement('div');
+    const {rerender, result} = renderHook(
+      ({isLocked}: {isLocked: boolean}) => useChatNewMessages({isLocked}),
+      {initialProps: {isLocked: false}},
+    );
+
+    act(() => result.current.contentRef(content));
+    appendMessage(content);
+    fireResize(content);
+    expect(result.current.hasNewMessages).toBe(true);
+
+    // Manually scrolling back to the bottom re-locks auto-follow; the user
+    // has seen the messages, so the flag must clear without dismiss().
+    rerender({isLocked: true});
+
+    expect(result.current.hasNewMessages).toBe(false);
+  });
+
   it('dismiss clears the flag', () => {
     const content = document.createElement('div');
     const {result} = renderHook(() => useChatNewMessages({isLocked: false}));

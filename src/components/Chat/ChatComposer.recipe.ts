@@ -102,9 +102,12 @@ export const chatComposerRecipe = sva({
         body: {p: '4', gap: '2'},
       },
     },
+    // Only dims: the input and send button disable natively, and blocking
+    // pointer events here would make the (intentionally enabled) stop button
+    // unreachable by mouse while isStopShown.
     isDisabled: {
       true: {
-        root: {opacity: 0.6, pointerEvents: 'none'},
+        root: {opacity: 0.6},
       },
     },
     statusType: {

@@ -16,6 +16,7 @@ import {chatMessageListRecipe} from 'components/Chat/ChatMessageList.recipe';
 import {Spinner} from 'components/Spinner';
 import isReactNode from 'internal/isReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
+import useLatest from 'internal/useLatest';
 import {cx} from 'utils/cx';
 
 export interface ChatMessageListProps extends ComponentPropsWithoutRef<'div'> {
@@ -99,9 +100,16 @@ export function ChatMessageList({
     return () => contentRef(null);
   }, [contentRef]);
 
+  // Read the action through a latest ref so a new function identity (common
+  // when the action closes over a paging cursor) doesn't recreate the
+  // observer — a recreated observer fires immediately while the sentinel is
+  // still intersecting, which would chain-load every history page.
+  const scrollToTopActionRef = useLatest(scrollToTopAction);
+  const hasScrollToTopAction = scrollToTopAction != null;
+
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (scrollToTopAction == null || sentinel == null) {
+    if (!hasScrollToTopAction || sentinel == null) {
       return;
     }
 
@@ -109,7 +117,7 @@ export function ChatMessageList({
       entries => {
         if (entries[0]?.isIntersecting) {
           startTransition(async () => {
-            await scrollToTopAction();
+            await scrollToTopActionRef.current?.();
           });
         }
       },
@@ -118,7 +126,7 @@ export function ChatMessageList({
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [scrollToTopAction, scrollContainerRef]);
+  }, [hasScrollToTopAction, scrollContainerRef, scrollToTopActionRef]);
 
   const contextValue = useMemo(() => ({density}), [density]);
   const classes = chatMessageListRecipe({density, gap});

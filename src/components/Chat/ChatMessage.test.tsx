@@ -289,6 +289,24 @@ describe('ChatSystemMessage', () => {
     expect(screen.getByRole('separator', {name: 'Today'})).toBeInTheDocument();
   });
 
+  it('carries the chat-message marker in both variants', () => {
+    render(<ChatSystemMessage data-testid="notice">Started</ChatSystemMessage>);
+    render(
+      <ChatSystemMessage data-testid="divider-notice" variant="divider">
+        Today
+      </ChatSystemMessage>,
+    );
+
+    expect(screen.getByTestId('notice')).toHaveAttribute('data-chat-message');
+    expect(screen.getByTestId('notice')).toHaveAttribute(
+      'data-sender',
+      'system',
+    );
+    expect(screen.getByTestId('divider-notice')).toHaveAttribute(
+      'data-chat-message',
+    );
+  });
+
   it('applies className, style, and ref to the root', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 

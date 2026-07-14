@@ -36,20 +36,22 @@ export const chatMessageBubbleRecipe = sva({
         bubble: {bg: 'transparent', color: 'fg', paddingBlock: 0},
       },
     },
+    // Block padding is density-dependent but must stay zero for the ghost
+    // variant, so it lives in compoundVariants below.
     density: {
       compact: {
         nameRow: {px: '4'},
-        bubble: {borderRadius: 'xl', paddingBlock: '3', paddingInline: '4'},
+        bubble: {borderRadius: 'xl', paddingInline: '4'},
         metadataRow: {px: '4'},
       },
       balanced: {
         nameRow: {px: '4'},
-        bubble: {borderRadius: '2xl', paddingBlock: '3', paddingInline: '4'},
+        bubble: {borderRadius: '2xl', paddingInline: '4'},
         metadataRow: {px: '4'},
       },
       spacious: {
         nameRow: {px: '5'},
-        bubble: {borderRadius: '2xl', paddingBlock: '4', paddingInline: '5'},
+        bubble: {borderRadius: '2xl', paddingInline: '5'},
         metadataRow: {px: '5'},
       },
     },
@@ -70,6 +72,21 @@ export const chatMessageBubbleRecipe = sva({
     },
   },
   compoundVariants: [
+    {
+      variant: 'filled',
+      density: 'compact',
+      css: {bubble: {paddingBlock: '3'}},
+    },
+    {
+      variant: 'filled',
+      density: 'balanced',
+      css: {bubble: {paddingBlock: '3'}},
+    },
+    {
+      variant: 'filled',
+      density: 'spacious',
+      css: {bubble: {paddingBlock: '4'}},
+    },
     {
       sender: 'assistant',
       group: 'first',

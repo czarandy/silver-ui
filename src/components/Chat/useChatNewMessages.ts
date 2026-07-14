@@ -47,6 +47,17 @@ export function useChatNewMessages({
   const isLockedRef = useLatest(isLocked);
   const onResizeRef = useLatest(onResize);
 
+  // Reaching the bottom (re-locking) means the user has seen the new
+  // messages, so the flag clears without an explicit dismiss(). Adjusted
+  // during render so the cleared state paints in the same pass.
+  const [prevIsLocked, setPrevIsLocked] = useState(isLocked);
+  if (isLocked !== prevIsLocked) {
+    setPrevIsLocked(isLocked);
+    if (isLocked) {
+      setHasNewMessages(false);
+    }
+  }
+
   const elementRef = useRef<HTMLElement | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
 

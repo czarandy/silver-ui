@@ -99,9 +99,11 @@ export function ChatLayout({
   ...rest
 }: ChatLayoutProps): React.JSX.Element {
   const rootRef = useRef<HTMLDivElement>(null);
+  const dockContainerRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = externalScrollRef ?? rootRef;
   const isSelfScrolling = externalScrollRef == null;
   const [density, setDensity] = useState<ChatDensity>('balanced');
+  const [dockInset, setDockInset] = useState(0);
 
   const scroll = useChatStreamScroll({scrollRef: scrollContainerRef});
   const newMessages = useChatNewMessages({
@@ -129,6 +131,20 @@ export function ChatLayout({
     return () => unobserveResize(root);
   }, []);
 
+  // With an external scroll container the dock is position: fixed and out of
+  // that container's flow, so the message area must reserve the dock's
+  // measured height or the final messages hide underneath it.
+  useEffect(() => {
+    const dock = dockContainerRef.current;
+    if (isSelfScrolling || dock == null) {
+      return;
+    }
+    observeResize(dock, () => {
+      setDockInset(dock.offsetHeight);
+    });
+    return () => unobserveResize(dock);
+  }, [isSelfScrolling]);
+
   const classes = chatLayoutRecipe({density, isSelfScrolling});
   const showEmpty = !hasVisibleContent(children);
   const defaultScrollButton = (
@@ -151,14 +167,16 @@ export function ChatLayout({
         data-testid={dataTestId}
         ref={mergeRefs(ref, rootRef)}
         style={style}>
-        <div className={classes.messageArea}>
+        <div
+          className={classes.messageArea}
+          style={isSelfScrolling ? undefined : {paddingBlockEnd: dockInset}}>
           {showEmpty && isReactNode(emptyState) ? (
             <div className={classes.emptyState}>{emptyState}</div>
           ) : (
             children
           )}
         </div>
-        <div className={classes.dockContainer}>
+        <div className={classes.dockContainer} ref={dockContainerRef}>
           {scrollButton === undefined ? defaultScrollButton : scrollButton}
           <div className={classes.blurLayer} />
           <div className={classes.dock}>

@@ -120,6 +120,32 @@ describe('ChatLayout', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('reserves the measured dock height with an external scroll container', async () => {
+    const external = document.createElement('div');
+    document.body.append(external);
+    renderLayout({scrollRef: {current: external}});
+
+    const layout = screen.getByTestId('layout');
+    // The dock and message area are structural slots without roles, so they
+    // are located relative to the layout root.
+    // eslint-disable-next-line testing-library/no-node-access -- see above
+    const dock = layout.lastElementChild as HTMLElement;
+    Object.defineProperty(dock, 'offsetHeight', {
+      configurable: true,
+      value: 120,
+    });
+    resizeCallbacks.get(dock)?.([{target: dock}]);
+
+    // The fixed dock is out of the external container's flow, so the
+    // message area must pad by the measured dock height.
+    await waitFor(() =>
+      // eslint-disable-next-line testing-library/no-node-access -- see above
+      expect(layout.firstElementChild).toHaveStyle({
+        paddingBlockEnd: '120px',
+      }),
+    );
+  });
+
   it('applies className, style, and ref to the root', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 

@@ -127,6 +127,33 @@ describe('ChatMessageList', () => {
     );
   });
 
+  it('keeps the observer stable when the action identity changes', async () => {
+    const firstAction = vi.fn(async () => {});
+    const {rerender} = render(
+      <ChatMessageList scrollToTopAction={firstAction}>
+        <ChatMessage sender="user">Hi</ChatMessage>
+      </ChatMessageList>,
+    );
+    expect(intersectionCallbacks).toHaveLength(1);
+
+    // A parent completing a page load typically passes a new function
+    // closing over the next cursor. This must not recreate the observer —
+    // a recreated observer fires again while the sentinel is still
+    // intersecting and would chain-load every page.
+    const secondAction = vi.fn(async () => {});
+    rerender(
+      <ChatMessageList scrollToTopAction={secondAction}>
+        <ChatMessage sender="user">Hi</ChatMessage>
+      </ChatMessageList>,
+    );
+    expect(intersectionCallbacks).toHaveLength(1);
+
+    // The observer still invokes the latest action, not the stale one.
+    intersectionCallbacks[0]([{isIntersecting: true}]);
+    await waitFor(() => expect(secondAction).toHaveBeenCalledOnce());
+    expect(firstAction).not.toHaveBeenCalled();
+  });
+
   it('does not observe intersections without scrollToTopAction', () => {
     render(
       <ChatMessageList>

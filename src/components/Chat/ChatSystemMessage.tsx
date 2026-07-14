@@ -65,6 +65,8 @@ export function ChatSystemMessage({
       <div
         {...rest}
         className={cx(classes.dividerWrap, className)}
+        data-chat-message=""
+        data-sender="system"
         data-testid={dataTestId}
         ref={ref}
         role="status"
@@ -78,6 +80,8 @@ export function ChatSystemMessage({
     <div
       {...rest}
       className={cx(classes.root, className)}
+      data-chat-message=""
+      data-sender="system"
       data-testid={dataTestId}
       ref={ref}
       role="status"
