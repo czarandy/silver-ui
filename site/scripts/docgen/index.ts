@@ -4,7 +4,7 @@ import process from 'node:process';
 import {fileURLToPath} from 'node:url';
 import {
   categoryOf,
-  componentPageLabel,
+  componentDocPages,
   componentSlug,
 } from '../../src/component-categories';
 import {
@@ -51,54 +51,133 @@ export function runDocgen(): void {
     data: ComponentDocData;
     storyFiles: StoriesFileDoc[];
   }> = [];
-  for (const name of components) {
-    const exports = extractComponentExports(program, name);
-    const storyFiles = storyFilesOf(name).map(file =>
-      extractStoriesFile(name, file),
+  for (const sourceName of components) {
+    const exports = extractComponentExports(program, sourceName);
+    const storyFiles = storyFilesOf(sourceName).map(file =>
+      extractStoriesFile(sourceName, file),
     );
     if (exports.length === 0) {
       problems.push(
-        `${name}: no documented exports — expected at least one exported component with a paired <Name>Props type export`,
+        `${sourceName}: no documented exports — expected at least one exported component with a paired <Name>Props type export`,
       );
       continue;
     }
-    const primary = exports.find(exported => exported.name === name);
-    // README bullets are sentence fragments ("versatile action element…");
-    // normalize them into a sentence when used as the page description. A
-    // combined bullet (e.g. "HStack / VStack") is looked up via the page
-    // label's first component name.
-    const fallback =
-      fallbackDescriptions.get(name) ??
-      fallbackDescriptions.get(componentPageLabel(name).split(' & ')[0]);
-    const fallbackSentence =
-      fallback == null
-        ? undefined
-        : `${fallback[0].toUpperCase()}${fallback.slice(1)}${fallback.endsWith('.') ? '' : '.'}`;
-    // Pages without a directory-named export (Stack) describe the pair of
-    // components, which the README bullet does better than either JSDoc.
-    const description =
-      primary?.description ||
-      (primary == null ? fallbackSentence : undefined) ||
-      exports[0].description ||
-      fallbackSentence ||
-      '';
-    if (description === '') {
-      problems.push(
-        `${name}: no description — add a JSDoc summary to the ${name} component (or its ${name}Props type)`,
-      );
-      continue;
+
+    const exportByName = new Map(
+      exports.map(exported => [exported.name, exported]),
+    );
+    const storyFileByName = new Map(
+      storyFiles.map(storyFile => [storyFile.file, storyFile]),
+    );
+    const pages = componentDocPages(sourceName);
+    const isSplit = pages.some(
+      page => page.exportNames != null || page.storyFiles != null,
+    );
+    const assignedExports = new Set<string>();
+    const assignedStoryFiles = new Set<string>();
+
+    for (const page of pages) {
+      const pageExports =
+        page.exportNames == null
+          ? exports
+          : page.exportNames.flatMap(exportName => {
+              const exported = exportByName.get(exportName);
+              if (exported == null) {
+                problems.push(
+                  `${sourceName}/${page.name}: unknown export "${exportName}"`,
+                );
+                return [];
+              }
+              if (assignedExports.has(exportName)) {
+                problems.push(
+                  `${sourceName}: export "${exportName}" is assigned to more than one docs page`,
+                );
+              }
+              assignedExports.add(exportName);
+              return [exported];
+            });
+      const pageStoryFiles =
+        page.storyFiles == null
+          ? storyFiles
+          : page.storyFiles.flatMap(file => {
+              const storyFile = storyFileByName.get(file);
+              if (storyFile == null) {
+                problems.push(
+                  `${sourceName}/${page.name}: unknown stories file "${file}"`,
+                );
+                return [];
+              }
+              if (assignedStoryFiles.has(file)) {
+                problems.push(
+                  `${sourceName}: stories file "${file}" is assigned to more than one docs page`,
+                );
+              }
+              assignedStoryFiles.add(file);
+              return [storyFile];
+            });
+
+      if (pageExports.length === 0) {
+        problems.push(`${sourceName}/${page.name}: no documented exports`);
+        continue;
+      }
+
+      const primary = pageExports.find(exported => exported.name === page.name);
+      // README bullets are sentence fragments ("versatile action element…");
+      // normalize them into a sentence when used as the page description. A
+      // combined bullet (e.g. "HStack / VStack") is looked up via the page
+      // label's first component name.
+      const fallback =
+        fallbackDescriptions.get(page.name) ??
+        fallbackDescriptions.get(sourceName) ??
+        fallbackDescriptions.get(page.label.split(' & ')[0]);
+      const fallbackSentence =
+        fallback == null
+          ? undefined
+          : `${fallback[0].toUpperCase()}${fallback.slice(1)}${fallback.endsWith('.') ? '' : '.'}`;
+      // Pages without a page-named export (Stack) describe the pair of
+      // components, which the README bullet does better than either JSDoc.
+      const description =
+        primary?.description ||
+        (primary == null ? fallbackSentence : undefined) ||
+        pageExports[0].description ||
+        fallbackSentence ||
+        '';
+      if (description === '') {
+        problems.push(
+          `${sourceName}/${page.name}: no description — add a JSDoc summary to the primary component (or its props type)`,
+        );
+        continue;
+      }
+      generated.push({
+        data: {
+          name: page.name,
+          sourceName,
+          label: page.label,
+          slug: componentSlug(page.name),
+          category: categoryOf(sourceName) ?? '',
+          description,
+          exports: pageExports,
+        },
+        storyFiles: pageStoryFiles,
+      });
     }
-    generated.push({
-      data: {
-        name,
-        label: componentPageLabel(name),
-        slug: componentSlug(name),
-        category: categoryOf(name) ?? '',
-        description,
-        exports,
-      },
-      storyFiles,
-    });
+
+    if (isSplit) {
+      for (const exported of exports) {
+        if (!assignedExports.has(exported.name)) {
+          problems.push(
+            `${sourceName}: export "${exported.name}" is not assigned to a docs page`,
+          );
+        }
+      }
+      for (const storyFile of storyFiles) {
+        if (!assignedStoryFiles.has(storyFile.file)) {
+          problems.push(
+            `${sourceName}: stories file "${storyFile.file}" is not assigned to a docs page`,
+          );
+        }
+      }
+    }
   }
 
   if (problems.length > 0) {
@@ -123,7 +202,7 @@ export function runDocgen(): void {
     if (withStories.length > 0) {
       writeFileSync(
         join(demosOutDir, `${data.name}.tsx`),
-        demosModule(data.name, withStories),
+        demosModule(data.sourceName, withStories),
       );
     }
     writeFileSync(

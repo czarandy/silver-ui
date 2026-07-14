@@ -7,7 +7,7 @@ import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
 
 const meta: Meta<typeof ChatComposer> = {
-  title: 'Components/ChatComposer',
+  title: 'Components/Chat/Composer',
   component: ChatComposer,
   args: {
     onSubmit: () => {},

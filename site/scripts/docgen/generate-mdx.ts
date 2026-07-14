@@ -42,7 +42,7 @@ export function componentMdx(
           `docgen: ${data.name}/${file}#${story.exportName}: snippet contains a code fence`,
         );
       }
-      const directive = isClientOnly(data.name, file, story.exportName)
+      const directive = isClientOnly(data.sourceName, file, story.exportName)
         ? 'client:only="react"'
         : 'client:visible';
       lines.push(

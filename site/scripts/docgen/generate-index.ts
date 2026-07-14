@@ -7,23 +7,22 @@ import type {ComponentDocData} from './types';
  * its one-line description. Emitted as plain markdown.
  */
 export function componentsIndexMd(all: ComponentDocData[]): string {
-  const byName = new Map(all.map(data => [data.name, data]));
+  const componentCount = new Set(all.map(data => data.sourceName)).size;
   const lines: string[] = [
     '---',
     'title: "Components"',
-    `description: "The ${all.length} components of silver-ui, grouped by category — each with live examples and full props documentation."`,
+    `description: "The ${componentCount} components of silver-ui, grouped by category — each with live examples and full props documentation."`,
     '---',
     '',
-    `silver-ui ships ${all.length} components. Every page shows live examples`,
+    `silver-ui ships ${componentCount} components. Every page shows live examples`,
     'with copyable code and the complete props API, generated from the source.',
   ];
-  for (const [category, names] of Object.entries(componentCategories)) {
+  for (const category of Object.keys(componentCategories)) {
     lines.push('', `## ${category}`, '');
-    for (const name of [...names].sort()) {
-      const data = byName.get(name);
-      if (data == null) {
-        continue;
-      }
+    const pages = all
+      .filter(data => data.category === category)
+      .sort((a, b) => a.label.localeCompare(b.label));
+    for (const data of pages) {
       const description = firstSentence(data.description).replace(/\.$/, '');
       lines.push(
         `- [${data.label}](/components/${data.slug}/) — ${description}`,

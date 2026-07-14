@@ -46,6 +46,7 @@ describe('componentsIndexMd', () => {
     const page = componentsIndexMd([
       {
         name: 'Button',
+        sourceName: 'Button',
         label: 'Button',
         slug: 'button',
         category: 'Buttons & Actions',
@@ -54,6 +55,7 @@ describe('componentsIndexMd', () => {
       },
       {
         name: 'Card',
+        sourceName: 'Card',
         label: 'Card',
         slug: 'card',
         category: 'Layout & Structure',
@@ -69,5 +71,49 @@ describe('componentsIndexMd', () => {
     expect(page).toContain('- [Card](/components/card/)');
     // Categories with no generated components render no dangling entries.
     expect(page).not.toContain('undefined');
+  });
+
+  it('lists each focused page from a split component directory', () => {
+    const page = componentsIndexMd([
+      {
+        name: 'ChatComposer',
+        sourceName: 'Chat',
+        label: 'Composer',
+        slug: 'chat-composer',
+        category: 'Chat & Messaging',
+        description: 'Chat input shell.',
+        exports: [],
+      },
+      {
+        name: 'ChatLayout',
+        sourceName: 'Chat',
+        label: 'Layout',
+        slug: 'chat-layout',
+        category: 'Chat & Messaging',
+        description: 'Full-page chat shell.',
+        exports: [],
+      },
+      {
+        name: 'ChatMessage',
+        sourceName: 'Chat',
+        label: 'Message',
+        slug: 'chat-message',
+        category: 'Chat & Messaging',
+        description: 'Sender-aware chat message.',
+        exports: [],
+      },
+    ]);
+
+    expect(page).toContain(
+      '- [Composer](/components/chat-composer/) — Chat input shell',
+    );
+    expect(page).toContain(
+      '- [Layout](/components/chat-layout/) — Full-page chat shell',
+    );
+    expect(page).toContain(
+      '- [Message](/components/chat-message/) — Sender-aware chat message',
+    );
+    expect(page).toContain('silver-ui ships 1 components');
+    expect(page).not.toContain('/components/chat/');
   });
 });
