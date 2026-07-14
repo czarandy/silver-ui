@@ -30,6 +30,8 @@ export const tabsRecipe = sva({
       borderBottomStyle: 'solid',
       borderBottomColor: 'transparent',
       bg: 'transparent',
+      // Keep hover fills out of the underline area so the divider stays visible.
+      backgroundClip: 'padding-box',
       color: 'fg.muted',
       cursor: 'pointer',
       fontFamily: 'body',
