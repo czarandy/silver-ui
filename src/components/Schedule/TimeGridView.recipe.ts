@@ -56,7 +56,7 @@ export const scheduleTimeGridViewRecipe = sva({
     },
     dayHeaderContent: {
       display: 'inline-flex',
-      alignItems: 'center',
+      alignItems: 'baseline',
       justifyContent: 'center',
       gap: '1',
     },
