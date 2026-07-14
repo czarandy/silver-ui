@@ -748,7 +748,7 @@ export const CustomPlugin: Story = {
             endContent: (
               <>
                 {endContent}
-                <Button label="Export" size="sm" />
+                <Button label="Export" />
               </>
             ),
             startContent: (
