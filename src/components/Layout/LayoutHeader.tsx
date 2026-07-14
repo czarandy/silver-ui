@@ -18,9 +18,9 @@ import {cx} from 'utils/cx';
  * Header landmark region within a Layout with a structured title,
  * optional subtitle, and start/end content slots.
  *
- * When rendered inside a Dialog, a close button is automatically
+ * When rendered inside a Dialog or Drawer, a close button is automatically
  * appended after `endContent`. The button calls `onOpenChange(false)`
- * on the parent Dialog and the title receives initial focus.
+ * on the parent surface and the title receives initial focus.
  */
 export interface LayoutHeaderProps {
   /**
@@ -88,9 +88,9 @@ export interface LayoutHeaderProps {
  * Header landmark region within a Layout with a structured title,
  * optional subtitle, and start/end content slots.
  *
- * When rendered inside a Dialog, a close button is automatically
+ * When rendered inside a Dialog or Drawer, a close button is automatically
  * appended after `endContent`. The button calls `onOpenChange(false)`
- * on the parent Dialog and the title receives initial focus.
+ * on the parent surface and the title receives initial focus.
  */
 export function LayoutHeader({
   accessibilityLevel,
