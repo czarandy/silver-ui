@@ -193,6 +193,10 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Thumbnail** — image preview with fallback and remove action
 - **TreeView** — hierarchical expandable tree
 
+### Chat & Messaging
+
+- **Chat** — composable chat/message UI: layout with streaming auto-scroll, message list, bubbles, metadata, system messages, and a composer with send/stop
+
 ### Feedback & Status
 
 - **Alert** — dismissable notification banner

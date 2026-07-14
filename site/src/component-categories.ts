@@ -81,6 +81,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Thumbnail',
     'TreeView',
   ],
+  'Chat & Messaging': ['Chat'],
   'Feedback & Status': [
     'Alert',
     'EmptyState',
