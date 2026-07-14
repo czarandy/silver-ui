@@ -1,6 +1,8 @@
 import {render, screen} from '@testing-library/react';
+import {Mail} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {Field, getNecessity} from 'components/Field/Field';
+import {fieldRecipe} from 'components/Field/Field.recipe';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {assertNonNull} from 'internal/testHelpers';
 import {token} from 'styled-system/tokens';
@@ -78,6 +80,34 @@ describe('Field', () => {
     );
 
     expect(screen.getByText('Required')).toHaveClass('silver-fs_xs');
+  });
+
+  it('baseline-aligns label text and necessity indicators while centering icons', () => {
+    const {container} = render(
+      <Field
+        inputId="alignment"
+        isRequired
+        label="Name"
+        labelIcon={Mail}
+        labelTooltip="Why we need this">
+        <input id="alignment" />
+      </Field>,
+    );
+    const classes = fieldRecipe();
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying alignment classes on the label and its icon children
+    expect(screen.getByText('Name').parentElement).toHaveClass(
+      classes.label ?? '',
+    );
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- icons are intentionally hidden from the accessibility tree
+    const icons = container.querySelectorAll('svg');
+    expect(icons).toHaveLength(2);
+    expect(icons[0]).toHaveClass(classes.labelIcon ?? '');
+    // eslint-disable-next-line testing-library/no-node-access -- the tooltip alignment class belongs to the icon wrapper
+    expect(icons[1].parentElement).toHaveClass(classes.tooltipIcon ?? '');
+    expect(classes.label).toContain('silver-ai_baseline');
+    expect(classes.labelIcon).toContain('silver-as_center');
+    expect(classes.tooltipIcon).toContain('silver-as_center');
   });
 
   describe('getNecessity', () => {
