@@ -194,6 +194,20 @@ describe('CheckboxGroup', () => {
     expect(ref).toHaveBeenCalledWith(root);
   });
 
+  it('applies a custom gap between checkbox items', () => {
+    render(
+      <CheckboxGroup
+        gap={0}
+        label="Notification channels"
+        onChange={() => {}}
+        value={['email']}>
+        <CheckboxGroupItem label="Email" value="email" />
+      </CheckboxGroup>,
+    );
+
+    expect(screen.getByRole('group')).toHaveClass('silver-gap_0');
+  });
+
   it('renders startContent on a checkbox item', () => {
     render(
       <CheckboxGroup

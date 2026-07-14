@@ -22,6 +22,7 @@ import {
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import isReactNode from 'internal/isReactNode';
+import type {SpacingToken} from 'internal/spacingTokens';
 
 export type {CheckboxGroupOrientation} from 'components/CheckboxGroup/CheckboxGroupContext';
 
@@ -42,6 +43,12 @@ export type CheckboxGroupProps = {
    * Supporting text displayed below the label.
    */
   description?: ReactNode;
+  /**
+   * Space between checkbox items.
+   * Uses the orientation-specific default when omitted.
+   * @default 0.5 for vertical; 4 between columns and 0 between rows for horizontal
+   */
+  gap?: SpacingToken;
   /**
    * HTML name attribute shared by checkbox inputs for native form submission.
    */
@@ -105,6 +112,7 @@ export function CheckboxGroup({
   className,
   'data-testid': dataTestId,
   description,
+  gap,
   htmlName,
   isDisabled = false,
   isLabelHidden = false,
@@ -177,7 +185,7 @@ export function CheckboxGroup({
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
-        className={checkboxGroupRecipe({orientation})}
+        className={checkboxGroupRecipe({gap: gap ?? orientation, orientation})}
         id={inputId}
         role="group">
         <CheckboxGroupContext value={contextValue}>

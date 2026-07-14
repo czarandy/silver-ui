@@ -116,6 +116,8 @@ export const Default: Story = {};
 
 export const Horizontal: Story = {args: {orientation: 'horizontal'}};
 
+export const CustomGap: Story = {args: {gap: 6}};
+
 export const WrappingRow: Story = {
   args: {
     description: 'Choose the teams that should receive access.',
