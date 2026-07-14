@@ -731,6 +731,75 @@ describe('SearchFilterInput interactions', () => {
     );
   });
 
+  it('allows searching an enum with at least 10 values', async () => {
+    const user = userEvent.setup();
+    const enumValues = Array.from({length: 10}, (_, index) => ({
+      label: `Choice ${index + 1}`,
+      value: `choice-${index + 1}`,
+    }));
+    const {config: searchableEnumConfig} = createSearchFilterInputConfig([
+      {
+        enumValues,
+        key: 'choice',
+        label: 'Choice',
+        type: 'enum',
+      },
+    ]);
+
+    render(
+      <SearchFilterInput
+        config={searchableEnumConfig}
+        filters={[]}
+        onChange={() => {}}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Search'}), 'Choice');
+    await user.click(await screen.findByText('Choice'));
+    await user.click(await screen.findByRole('combobox', {name: 'Value'}));
+
+    const enumSearch = screen.getByRole('searchbox', {
+      hidden: true,
+      name: 'Search Value',
+    });
+    await user.type(enumSearch, '10');
+
+    expect(screen.getByText('Choice 10')).toBeInTheDocument();
+    expect(screen.queryByText('Choice 1')).not.toBeInTheDocument();
+  });
+
+  it('does not show search for an enum with fewer than 10 values', async () => {
+    const user = userEvent.setup();
+    const enumValues = Array.from({length: 9}, (_, index) => ({
+      label: `Choice ${index + 1}`,
+      value: `choice-${index + 1}`,
+    }));
+    const {config: shortEnumConfig} = createSearchFilterInputConfig([
+      {
+        enumValues,
+        key: 'choice',
+        label: 'Choice',
+        type: 'enum',
+      },
+    ]);
+
+    render(
+      <SearchFilterInput
+        config={shortEnumConfig}
+        filters={[]}
+        onChange={() => {}}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Search'}), 'Choice');
+    await user.click(await screen.findByText('Choice'));
+    await user.click(await screen.findByRole('combobox', {name: 'Value'}));
+
+    expect(
+      screen.queryByRole('searchbox', {hidden: true, name: 'Search Value'}),
+    ).not.toBeInTheDocument();
+  });
+
   it('edits a filter value by clicking its tag and applying', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
