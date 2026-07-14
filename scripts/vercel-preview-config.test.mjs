@@ -23,3 +23,21 @@ test('Vercel previews require a trusted #vercel pull request comment', async () 
   expect(workflow).toMatch(/vercel@latest deploy --yes/);
   expect(workflow).not.toMatch(/pnpm install|vercel build/);
 });
+
+test('a successful release deploys the docs to Vercel production', async () => {
+  const workflow = await readFile('.github/workflows/publish.yml', 'utf8');
+  const deployJob = workflow.slice(workflow.indexOf('  deploy-docs:'));
+
+  expect(workflow).toMatch(/^\s*release:\s*$/m);
+  expect(deployJob).toMatch(/^ {2}deploy-docs:\s*$/m);
+  expect(deployJob).toMatch(/^ {4}needs: publish\s*$/m);
+  expect(deployJob).toMatch(
+    /VERCEL_ORG_ID: \$\{\{ secrets\.VERCEL_ORG_ID \}\}/,
+  );
+  expect(deployJob).toMatch(
+    /VERCEL_PROJECT_ID: \$\{\{ secrets\.VERCEL_PROJECT_ID \}\}/,
+  );
+  expect(deployJob).toMatch(
+    /vercel@latest deploy --prod --yes --token="\$\{\{ secrets\.VERCEL_TOKEN \}\}"/,
+  );
+});
