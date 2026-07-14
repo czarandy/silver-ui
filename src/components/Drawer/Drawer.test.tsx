@@ -4,7 +4,9 @@ import {useState} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {Drawer} from 'components/Drawer/Drawer';
+import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
 import {useDrawer} from 'components/Drawer/useDrawer';
+import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 
 beforeAll(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
@@ -68,6 +70,47 @@ describe('Drawer', () => {
       'open',
     );
     expect(screen.getByText('Drawer content')).toBeInTheDocument();
+  });
+
+  it('fills its inner surface so a Layout footer stays at the bottom', () => {
+    const {inner} = drawerRecipe({isOpen: true, placement: 'end'});
+
+    expect(inner).toContain('silver-h_100%');
+  });
+
+  it('integrates its close action into LayoutHeader', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+
+    render(
+      <Drawer isOpen label="Details" onOpenChange={onOpenChange}>
+        <Layout
+          content={<LayoutContent>Content</LayoutContent>}
+          header={<LayoutHeader title="Details" />}
+        />
+      </Drawer>,
+    );
+
+    const closeButton = screen.getByRole('button', {name: 'Close'});
+    expect(closeButton).toHaveClass('silver-mbs_-2');
+
+    await user.click(closeButton);
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('focuses the LayoutHeader title when no explicit autofocus target exists', async () => {
+    render(
+      <Drawer isOpen label="Details" onOpenChange={() => {}}>
+        <Layout
+          content={<LayoutContent>Content</LayoutContent>}
+          header={<LayoutHeader title="Details" />}
+        />
+      </Drawer>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', {name: 'Details'})).toHaveFocus();
+    });
   });
 
   it('does not open when isOpen is false', () => {

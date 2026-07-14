@@ -1,7 +1,8 @@
 'use client';
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useEffect, useRef} from 'react';
+import {useEffect, useId, useMemo, useRef} from 'react';
+import {DialogContext} from 'components/Dialog/DialogContext';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
 import {LayerContext} from 'internal/LayerContext';
 import {
@@ -107,6 +108,7 @@ export function Drawer({
 }: DrawerProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const titleId = useId();
   const {isBackdropDismissEnabled, isEscapeDismissEnabled} =
     resolveDismissBehavior(dismissBehavior);
   const backdropDismiss = useBackdropDismiss<HTMLDialogElement>({
@@ -118,6 +120,10 @@ export function Drawer({
     isEnabled: isOpen && isEscapeDismissEnabled,
     onEscape: () => onOpenChange(false),
   });
+  const dialogContextValue = useMemo(
+    () => ({onOpenChange, titleId}),
+    [onOpenChange, titleId],
+  );
   const layerContextValue = escapeDismiss.layerContextValue;
 
   useEffect(() => {
@@ -131,9 +137,12 @@ export function Drawer({
       if (!dialog.open) {
         dialog.showModal();
       }
-      dialog
-        .querySelector<HTMLElement>('[data-autofocus="true"], [autofocus]')
-        ?.focus();
+      const autofocusTarget =
+        dialog.querySelector<HTMLElement>(
+          '[data-autofocus="true"], [autofocus]',
+        ) ??
+        dialog.querySelector<HTMLElement>('[data-dialog-autofocus="true"]');
+      autofocusTarget?.focus();
     } else if (dialog.open) {
       dialog.close();
       triggerRef.current?.focus();
@@ -170,7 +179,9 @@ export function Drawer({
       ref={mergeRefs(ref, dialogRef)}
       style={{...sizeStyle, ...style}}>
       <LayerContext value={layerContextValue}>
-        <div className={classes.inner}>{children}</div>
+        <DialogContext value={dialogContextValue}>
+          <div className={classes.inner}>{children}</div>
+        </DialogContext>
       </LayerContext>
     </dialog>
   );

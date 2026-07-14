@@ -84,6 +84,26 @@ export const Default: Story = {
   },
 };
 
+export const WithLayout: Story = {
+  args: {
+    label: 'Project details',
+    placement: 'end',
+    size: 360,
+  },
+  render: args => {
+    const [isOpen, setIsOpen] = useState(true);
+
+    return (
+      <>
+        <Button label="Open layout drawer" onClick={() => setIsOpen(true)} />
+        <Drawer {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
+          <DrawerContent onClose={() => setIsOpen(false)} />
+        </Drawer>
+      </>
+    );
+  },
+};
+
 const placements: {
   label: string;
   placement: DrawerPlacement;
