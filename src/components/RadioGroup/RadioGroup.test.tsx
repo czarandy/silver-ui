@@ -176,21 +176,6 @@ describe('RadioGroup', () => {
     expect(ref).toHaveBeenCalledWith(root);
   });
 
-  it('applies a custom gap between radio items', () => {
-    render(
-      <RadioGroup
-        gap={6}
-        label="Notification preference"
-        onChange={() => {}}
-        orientation="horizontal"
-        value="email">
-        <RadioGroupItem label="Email" value="email" />
-      </RadioGroup>,
-    );
-
-    expect(screen.getByRole('radiogroup')).toHaveClass('silver-gap_6');
-  });
-
   it('renders startContent on a radio item', () => {
     render(
       <RadioGroup

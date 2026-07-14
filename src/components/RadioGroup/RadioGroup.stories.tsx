@@ -99,8 +99,6 @@ export const Default: Story = {};
 
 export const Horizontal: Story = {args: {orientation: 'horizontal'}};
 
-export const CustomGap: Story = {args: {gap: 6, orientation: 'horizontal'}};
-
 export const Small: Story = {args: {size: 'sm'}};
 
 export const Large: Story = {args: {size: 'lg'}};

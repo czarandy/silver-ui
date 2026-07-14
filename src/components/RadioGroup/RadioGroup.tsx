@@ -21,7 +21,6 @@ import {
   type RadioGroupSize,
 } from 'components/RadioGroup/RadioGroupContext';
 import isReactNode from 'internal/isReactNode';
-import type {SpacingToken} from 'internal/spacingTokens';
 
 export type {RadioGroupOrientation} from 'components/RadioGroup/RadioGroupContext';
 
@@ -42,12 +41,6 @@ export type RadioGroupProps = {
    * Supporting text displayed below the label.
    */
   description?: ReactNode;
-  /**
-   * Space between radio items.
-   * Uses the orientation-specific default when omitted.
-   * @default 0.5 for vertical; 4 between columns and 0 between rows for horizontal
-   */
-  gap?: SpacingToken;
   /**
    * Whether all radio items are disabled.
    * @default false
@@ -107,7 +100,6 @@ export function RadioGroup({
   className,
   'data-testid': dataTestId,
   description,
-  gap,
   isDisabled = false,
   isLabelHidden = false,
   isOptional,
@@ -169,7 +161,7 @@ export function RadioGroup({
         aria-labelledby={labelId}
         aria-orientation={orientation}
         aria-required={isRequired ?? undefined}
-        className={radioGroupRecipe({gap: gap ?? orientation, orientation})}
+        className={radioGroupRecipe({orientation})}
         id={inputId}
         role="radiogroup">
         <RadioGroupContext value={contextValue}>{children}</RadioGroupContext>
