@@ -63,3 +63,23 @@ jobs:
           else
             npm publish --access public
           fi
+
+  # vercel.json disables git deployments so PR pushes stay quiet. Deploy the
+  # trusted release explicitly instead.
+  deploy-docs:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Deploy docs to production
+        run: npx --yes vercel@latest deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}"
