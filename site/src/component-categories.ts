@@ -2,7 +2,8 @@
  * The sidebar taxonomy for the component docs. This is the one manual step
  * when adding a component: put its directory name (src/components/<Name>) in
  * exactly one category. The docs generator fails the build if a component is
- * missing from this map or if a name here has no matching directory.
+ * missing from this map or if a name here has no matching directory. A
+ * directory can opt into multiple focused pages via componentDocPageSplits.
  *
  * Categories describe what a component is for, not how it is built, and
  * mirror the README's `## Components` section — update both together.
@@ -112,6 +113,60 @@ export const componentPageLabels: Record<string, string> = {
   Text: 'Text & Heading',
 };
 
+export interface ComponentDocPage {
+  /**
+   * Component exports whose API tables appear on this page.
+   */
+  exportNames?: readonly string[];
+  /**
+   * Page title shown in the sidebar and heading.
+   */
+  label: string;
+  /**
+   * Unique generated-data name and the basis of the page slug.
+   */
+  name: string;
+  /**
+   * Story files whose examples appear on this page.
+   */
+  storyFiles?: readonly string[];
+}
+
+/**
+ * Splits a component directory across focused docs pages. Directories not
+ * listed here keep the default one-directory/one-page behavior.
+ */
+export const componentDocPageSplits: Record<
+  string,
+  readonly ComponentDocPage[]
+> = {
+  Chat: [
+    {
+      name: 'ChatComposer',
+      label: 'Composer',
+      exportNames: ['ChatComposer', 'ChatComposerInput', 'ChatSendButton'],
+      storyFiles: ['ChatComposer'],
+    },
+    {
+      name: 'ChatLayout',
+      label: 'Layout',
+      exportNames: ['ChatLayout', 'ChatMessageList', 'ChatScrollButton'],
+      storyFiles: ['ChatLayout'],
+    },
+    {
+      name: 'ChatMessage',
+      label: 'Message',
+      exportNames: [
+        'ChatMessage',
+        'ChatMessageBubble',
+        'ChatMessageMetadata',
+        'ChatSystemMessage',
+      ],
+      storyFiles: ['ChatMessage'],
+    },
+  ],
+};
+
 /**
  * The title shown for a component page in the sidebar and page heading.
  */
@@ -124,6 +179,15 @@ export function componentPageLabel(name: string): string {
  */
 export function componentSlug(name: string): string {
   return name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
+/**
+ * Returns the docs pages emitted for a component directory.
+ */
+export function componentDocPages(name: string): readonly ComponentDocPage[] {
+  return (
+    componentDocPageSplits[name] ?? [{name, label: componentPageLabel(name)}]
+  );
 }
 
 /**
@@ -148,6 +212,9 @@ export function componentSidebarGroups(): Array<{
 }> {
   return Object.entries(componentCategories).map(([category, names]) => ({
     label: category,
-    items: [...names].sort().map(name => `components/${componentSlug(name)}`),
+    items: names
+      .flatMap(name => componentDocPages(name))
+      .map(page => `components/${componentSlug(page.name)}`)
+      .sort(),
   }));
 }

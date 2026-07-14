@@ -35,7 +35,7 @@ export interface ExportDoc {
 }
 
 /**
- * The generated docs data for one component directory / page.
+ * The generated docs data for one component page.
  */
 export interface ComponentDocData {
   category: string;
@@ -44,20 +44,24 @@ export interface ComponentDocData {
    */
   description: string;
   /**
-   * All documented exports; the primary (directory-named) export first.
+   * All documented exports; the primary page export first.
    */
   exports: ExportDoc[];
   /**
-   * Page title shown in the sidebar and heading; differs from `name` for
-   * pages documenting multiple components (e.g. `Text & Heading`).
+   * Page title shown in the sidebar and heading; can differ from `name` for
+   * focused or multi-component pages (e.g. `Composer`, `Text & Heading`).
    */
   label: string;
   /**
-   * Component directory name, e.g. `DateInput`.
+   * Unique docs-page name, e.g. `DateInput` or `ChatComposer`.
    */
   name: string;
   /**
    * URL slug, e.g. `date-input`.
    */
   slug: string;
+  /**
+   * Source component directory, which can back multiple focused docs pages.
+   */
+  sourceName: string;
 }

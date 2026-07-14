@@ -3,6 +3,7 @@ import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
 import {
+  componentDocPages,
   componentPageLabel,
   componentSidebarGroups,
   componentSlug,
@@ -52,6 +53,32 @@ describe('componentSidebarGroups', () => {
     const dates = groups.find(group => group.label === 'Dates & Time');
     expect(dates?.items).toContain('components/date-input');
     expect(dates?.items).toContain('components/calendar');
+  });
+
+  it('expands split component docs into separate sidebar items', () => {
+    const chat = componentSidebarGroups().find(
+      group => group.label === 'Chat & Messaging',
+    );
+
+    expect(chat?.items).toEqual([
+      'components/chat-composer',
+      'components/chat-layout',
+      'components/chat-message',
+    ]);
+    expect(chat?.items).not.toContain('components/chat');
+  });
+});
+
+describe('componentDocPages', () => {
+  it('returns configured split pages and a default page otherwise', () => {
+    expect(componentDocPages('Chat').map(page => page.label)).toEqual([
+      'Composer',
+      'Layout',
+      'Message',
+    ]);
+    expect(componentDocPages('Button')).toEqual([
+      {label: 'Button', name: 'Button'},
+    ]);
   });
 });
 

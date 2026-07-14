@@ -7,6 +7,7 @@ describe('componentMdx', () => {
   it('renders frontmatter, lead, and one API section per export', () => {
     const mdx = componentMdx({
       name: 'Stack',
+      sourceName: 'Stack',
       label: 'Stack',
       slug: 'stack',
       category: 'Layout & Structure',
@@ -29,6 +30,7 @@ describe('componentMdx', () => {
   it('escapes quotes in descriptions via JSON stringification', () => {
     const mdx = componentMdx({
       name: 'Kbd',
+      sourceName: 'Kbd',
       label: 'Kbd',
       slug: 'kbd',
       category: 'Data Display',
