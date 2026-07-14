@@ -9,10 +9,10 @@ export const keyboardHintRecipe = sva({
      * - No `display`. The UA stylesheet hides a closed popover with
      *   `display: none`, and an author `display` here would win on cascade
      *   origin and pin the hint permanently open.
-     * - No surface. `useLayer` resets the layer with `bg: 'transparent'`, and
-     *   `cx` is a plain join that cannot resolve competing Panda atomic
-     *   classes, so whichever rule Panda happens to emit last would win. The
-     *   surface lives on `content`, where nothing competes with it.
+     * - No surface. `useLayer` resets the layer in Panda's lower-precedence
+     *   recipe layer, so a utility surface could safely override it. The
+     *   visible surface still lives on `content` to keep it separate from this
+     *   positioning and transition wrapper.
      */
     root: {
       // A passive affordance must never intercept clicks meant for the control

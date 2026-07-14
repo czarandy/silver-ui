@@ -11,7 +11,7 @@ import {
 } from 'react';
 import {LayerContext} from 'internal/LayerContext';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
-import {css} from 'styled-system/css';
+import {layerReset} from 'styled-system/recipes';
 import {cx} from 'utils/cx';
 
 export type LayerPlacement = 'above' | 'below' | 'start' | 'end';
@@ -129,18 +129,6 @@ export interface LayerReturn {
    */
   show: () => void;
 }
-
-const styles = {
-  layer: css({
-    m: 0,
-    p: 0,
-    borderWidth: 0,
-    borderStyle: 'none',
-    borderColor: 'transparent',
-    overflow: 'visible',
-    bg: 'transparent',
-  }),
-};
 
 function getPositionArea(
   placement: LayerPlacement = 'above',
@@ -318,7 +306,7 @@ export function useLayer({
         'aria-hidden': props?.['aria-hidden'],
         role: props?.role,
         popover: isDismissable ? 'auto' : 'manual',
-        className: cx(styles.layer, props?.className),
+        className: cx(layerReset(), props?.className),
         style: {...anchorStyle, ...offsetStyle, ...props?.style},
       };
 

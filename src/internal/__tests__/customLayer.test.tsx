@@ -68,11 +68,13 @@ function CustomLayer({
   isEscapeDismissEnabled = false,
   isOpen = true,
   onEscape,
+  role,
 }: {
   children: ReactNode;
   isEscapeDismissEnabled?: boolean;
   isOpen?: boolean;
   onEscape?: () => void;
+  role?: string;
 }) {
   const layer = useLayer({isEscapeDismissEnabled, onEscape});
   const {hide, show} = layer;
@@ -85,10 +87,22 @@ function CustomLayer({
     }
   }, [hide, isOpen, show]);
 
-  return <>{layer.render(children)}</>;
+  return <>{layer.render(children, {role})}</>;
 }
 
 describe('custom useLayer() and LayerContext', () => {
+  it('applies the layer reset as a recipe instead of atomic utilities', () => {
+    render(
+      <CustomLayer role="dialog">
+        <span>Custom layer content</span>
+      </CustomLayer>,
+    );
+
+    const layer = screen.getByRole('dialog', {hidden: true});
+    expect(layer).toHaveClass('silver-layer-reset');
+    expect(layer).not.toHaveClass('silver-bg_transparent');
+  });
+
   it('lets descendants act on Escape when no layer handles Escape', async () => {
     render(
       <CustomLayer>

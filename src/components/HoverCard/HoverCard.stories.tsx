@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Button} from 'components/Button';
+import {Card} from 'components/Card';
 import {HoverCard} from 'components/HoverCard/HoverCard';
 import {HStack, VStack} from 'components/Stack';
 import {Text} from 'components/Text';
@@ -61,6 +62,41 @@ export const ButtonTrigger: Story = {
       }>
       <Button label="Workspace" />
     </HoverCard>
+  ),
+};
+
+export const OpaqueSurface: Story = {
+  render: () => (
+    <Card
+      padding={8}
+      style={{
+        backgroundImage:
+          'repeating-linear-gradient(135deg, var(--silver-colors-fg) 0 12px, var(--silver-colors-primary) 12px 24px)',
+        minHeight: 240,
+      }}>
+      <Card padding={4} style={{maxWidth: 320}}>
+        <VStack gap={3}>
+          <Text as="p">
+            The patterned backdrop must not show through the hover card.
+          </Text>
+          <HoverCard
+            content={
+              <VStack gap={1} style={{maxWidth: 240}}>
+                <Text as="p" type="label">
+                  Opaque panel
+                </Text>
+                <Text as="p" color="secondary">
+                  This content has the theme surface background.
+                </Text>
+              </VStack>
+            }
+            delay={0}
+            placement="below">
+            Hover to inspect the surface
+          </HoverCard>
+        </VStack>
+      </Card>
+    </Card>
   ),
 };
 

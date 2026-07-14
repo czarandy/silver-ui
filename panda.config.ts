@@ -1,4 +1,4 @@
-import {defineConfig} from '@pandacss/dev';
+import {defineConfig, defineRecipe} from '@pandacss/dev';
 import {generateColorScale} from './scripts/generate-color-scale';
 
 const gray = {
@@ -51,6 +51,20 @@ export default defineConfig({
   },
   theme: {
     extend: {
+      recipes: {
+        layerReset: defineRecipe({
+          className: 'layer-reset',
+          base: {
+            m: 0,
+            p: 0,
+            borderWidth: 0,
+            borderStyle: 'none',
+            borderColor: 'transparent',
+            overflow: 'visible',
+            bg: 'transparent',
+          },
+        }),
+      },
       tokens: {
         colors: {
           gray,
