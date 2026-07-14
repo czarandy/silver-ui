@@ -78,7 +78,7 @@ describe('componentsIndexMd', () => {
       {
         name: 'ChatComposer',
         sourceName: 'Chat',
-        label: 'Composer',
+        label: 'Chat Composer',
         slug: 'chat-composer',
         category: 'Chat & Messaging',
         description: 'Chat input shell.',
@@ -87,7 +87,7 @@ describe('componentsIndexMd', () => {
       {
         name: 'ChatLayout',
         sourceName: 'Chat',
-        label: 'Layout',
+        label: 'Chat Layout',
         slug: 'chat-layout',
         category: 'Chat & Messaging',
         description: 'Full-page chat shell.',
@@ -96,7 +96,7 @@ describe('componentsIndexMd', () => {
       {
         name: 'ChatMessage',
         sourceName: 'Chat',
-        label: 'Message',
+        label: 'Chat Message',
         slug: 'chat-message',
         category: 'Chat & Messaging',
         description: 'Sender-aware chat message.',
@@ -105,13 +105,13 @@ describe('componentsIndexMd', () => {
     ]);
 
     expect(page).toContain(
-      '- [Composer](/components/chat-composer/) — Chat input shell',
+      '- [Chat Composer](/components/chat-composer/) — Chat input shell',
     );
     expect(page).toContain(
-      '- [Layout](/components/chat-layout/) — Full-page chat shell',
+      '- [Chat Layout](/components/chat-layout/) — Full-page chat shell',
     );
     expect(page).toContain(
-      '- [Message](/components/chat-message/) — Sender-aware chat message',
+      '- [Chat Message](/components/chat-message/) — Sender-aware chat message',
     );
     expect(page).toContain('silver-ui ships 1 components');
     expect(page).not.toContain('/components/chat/');

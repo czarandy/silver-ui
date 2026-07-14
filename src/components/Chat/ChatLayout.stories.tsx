@@ -12,7 +12,7 @@ import {EmptyState} from 'components/EmptyState';
 import {css} from 'styled-system/css';
 
 const meta: Meta<typeof ChatLayout> = {
-  title: 'Components/Chat/Layout',
+  title: 'Components/Chat/Chat Layout',
   component: ChatLayout,
 };
 
