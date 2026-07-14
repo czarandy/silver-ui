@@ -13,6 +13,7 @@ import {chatComposerRecipe} from 'components/Chat/ChatComposer.recipe';
 import {ChatComposerInput} from 'components/Chat/ChatComposerInput';
 import {
   ChatComposerContext,
+  useChatLayoutContext,
   type ChatDensity,
 } from 'components/Chat/ChatContext';
 import {ChatSendButton} from 'components/Chat/ChatSendButton';
@@ -44,7 +45,8 @@ export interface ChatComposerProps extends Omit<
    */
   'data-testid'?: string;
   /**
-   * Density preset controlling body padding and gaps.
+   * Density preset controlling body padding and gaps. Defaults to the
+   * surrounding ChatLayout density.
    * @default 'balanced'
    */
   density?: ChatDensity;
@@ -133,7 +135,7 @@ export interface ChatComposerProps extends Omit<
 export function ChatComposer({
   className,
   'data-testid': dataTestId,
-  density = 'balanced',
+  density: densityProp,
   footerActions,
   headerActions,
   headerContext,
@@ -153,6 +155,8 @@ export function ChatComposer({
   value: controlledValue,
   ...rest
 }: ChatComposerProps): React.JSX.Element {
+  const layoutContext = useChatLayoutContext();
+  const density = densityProp ?? layoutContext?.density ?? 'balanced';
   const [internalValue, setInternalValue] = useState('');
   const bodyRef = useRef<HTMLDivElement>(null);
   const isControlled = controlledValue !== undefined;

@@ -84,6 +84,65 @@ describe('ChatLayout', () => {
     );
   });
 
+  it('flows its responsive density to the composer', async () => {
+    render(
+      <ChatLayout
+        composer={<ChatComposer data-testid="composer" onSubmit={() => {}} />}
+        data-testid="layout"
+      />,
+    );
+
+    const layout = screen.getByTestId('layout');
+    const composer = screen.getByTestId('composer');
+    // The composer body is a structural slot without a role.
+    // eslint-disable-next-line testing-library/no-node-access -- see above
+    const composerBody = composer.firstElementChild;
+    const balancedClasses = composerBody?.className;
+
+    Object.defineProperty(layout, 'clientWidth', {
+      configurable: true,
+      value: 400,
+    });
+    resizeCallbacks.get(layout)?.([{target: layout}]);
+
+    await waitFor(() =>
+      expect(composerBody?.className).not.toBe(balancedClasses),
+    );
+  });
+
+  it('lets an explicit composer density override the layout density', async () => {
+    render(
+      <ChatLayout
+        composer={
+          <ChatComposer
+            data-testid="composer"
+            density="spacious"
+            onSubmit={() => {}}
+          />
+        }
+        data-testid="layout"
+      />,
+    );
+
+    const layout = screen.getByTestId('layout');
+    const composer = screen.getByTestId('composer');
+    // The composer body is a structural slot without a role.
+    // eslint-disable-next-line testing-library/no-node-access -- see above
+    const composerBody = composer.firstElementChild;
+    const spaciousClasses = composerBody?.className;
+
+    Object.defineProperty(layout, 'clientWidth', {
+      configurable: true,
+      value: 400,
+    });
+    resizeCallbacks.get(layout)?.([{target: layout}]);
+    await waitFor(() =>
+      expect(layout).toHaveAttribute('data-density', 'compact'),
+    );
+
+    expect(composerBody?.className).toBe(spaciousClasses);
+  });
+
   it('shows the empty state only when there are no messages', () => {
     render(
       <ChatLayout
