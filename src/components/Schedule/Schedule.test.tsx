@@ -1591,7 +1591,16 @@ describe('Schedule', () => {
     ).toHaveStyle({height: '132px', minHeight: '132px'});
   });
 
-  it('marks the highlighted day in time grid views', async () => {
+  it('marks and styles the highlighted day in time grid views', async () => {
+    expect(
+      scheduleTimeGridViewRecipe.raw({isCurrentDay: true}).dayHeaderDayNumber,
+    ).toMatchObject({
+      height: '32px',
+      marginBottom: '-1px',
+      marginTop: '-1px',
+      paddingRight: '1px',
+      width: '32px',
+    });
     mockCurrentTime('2026-05-13T09:30:00.000Z');
 
     render(
@@ -1604,11 +1613,14 @@ describe('Schedule', () => {
       />,
     );
 
-    await waitFor(() => {
-      expect(
-        screen.getByRole('columnheader', {name: 'Thursday, May 14, 2026'}),
-      ).toHaveAttribute('aria-current', 'date');
+    const highlightedHeader = await screen.findByRole('columnheader', {
+      name: 'Thursday, May 14, 2026',
     });
+    expect(highlightedHeader).toHaveAttribute('aria-current', 'date');
+    expect(within(highlightedHeader).getByText('14')).toHaveClass(
+      scheduleTimeGridViewRecipe({isCurrentDay: true})
+        .dayHeaderDayNumber as string,
+    );
   });
 
   it('renders the current-time line in the active time grid hour', async () => {
