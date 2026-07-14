@@ -25,6 +25,38 @@ const fields = [
 
 const {config} = createSearchFilterInputConfig(fields);
 
+const emptyFilter = {
+  field: 'name',
+  operator: 'is_not_set',
+  value: {type: 'empty'},
+} as const;
+
+const emptyOperatorConfig = {
+  fields: [
+    {
+      defaultOperator: 'contains',
+      key: 'name',
+      label: 'Name',
+      operators: [
+        {key: 'contains', label: 'contains', value: {type: 'string'}},
+        {key: 'is_set', label: 'is set', value: {type: 'empty'}},
+        {key: 'is_not_set', label: 'is not set', value: {type: 'empty'}},
+      ],
+    },
+    {
+      defaultOperator: 'is_not_set',
+      key: 'description',
+      label: 'Description',
+      operators: [
+        {key: 'contains', label: 'contains', value: {type: 'string'}},
+        {key: 'is_set', label: 'is set', value: {type: 'empty'}},
+        {key: 'is_not_set', label: 'is not set', value: {type: 'empty'}},
+      ],
+    },
+  ],
+  name: 'EmptyOperatorTestConfig',
+} as const satisfies SearchFilterInputConfig;
+
 describe('SearchFilterInput', () => {
   it('renders with no filters', () => {
     render(
@@ -857,6 +889,187 @@ describe('SearchFilterInput interactions', () => {
       'edit',
       0,
     );
+  });
+
+  it('keeps an existing empty filter open for editing without saving it', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const {rerender} = render(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[emptyFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+
+    expect(
+      await screen.findByRole('combobox', {name: 'Field'}),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', {name: 'Operator'}),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Delete'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Cancel'})).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Apply'})).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+
+    rerender(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[emptyFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    expect(screen.getByRole('button', {name: 'Apply'})).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('applies an existing empty filter unchanged', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[emptyFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('button', {name: 'Apply'}));
+
+    expect(onChange).toHaveBeenCalledWith([emptyFilter], 'edit', 0);
+  });
+
+  it('deletes an empty filter from the edit popover', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[emptyFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('button', {name: 'Delete'}));
+
+    expect(onChange).toHaveBeenCalledWith([], 'remove', 0);
+  });
+
+  it('changes an empty filter to a value-bearing operator', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[emptyFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('combobox', {name: 'Operator'}));
+    await user.click(screen.getByText('contains'));
+    await user.type(
+      await screen.findByPlaceholderText('Enter value...'),
+      'details',
+    );
+    await user.click(screen.getByRole('button', {name: 'Apply'}));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'name',
+          operator: 'contains',
+          value: {type: 'string', value: 'details'},
+        },
+      ],
+      'edit',
+      0,
+    );
+  });
+
+  it('auto-saves an empty operator selected while creating a filter', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Search'}), 'Name');
+    await user.click(await screen.findByText('Name'));
+    await user.click(await screen.findByRole('combobox', {name: 'Operator'}));
+    await user.click(screen.getByText('is not set'));
+
+    expect(onChange).toHaveBeenCalledWith([emptyFilter], 'add', 0);
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('auto-saves a different empty operator selected while editing', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[emptyFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('combobox', {name: 'Operator'}));
+    await user.click(screen.getByText('is set'));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'name',
+          operator: 'is_set',
+          value: {type: 'empty'},
+        },
+      ],
+      'edit',
+      0,
+    );
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('auto-saves an empty default operator when the field changes', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <SearchFilterInput
+        config={emptyOperatorConfig}
+        filters={[emptyFilter]}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+    await user.click(await screen.findByRole('combobox', {name: 'Field'}));
+    await user.click(screen.getByText('Description'));
+
+    expect(onChange).toHaveBeenCalledWith(
+      [
+        {
+          field: 'description',
+          operator: 'is_not_set',
+          value: {type: 'empty'},
+        },
+      ],
+      'edit',
+      0,
+    );
+    expect(onChange).toHaveBeenCalledTimes(1);
   });
 
   it('removes a filter via the tag remove button', async () => {
