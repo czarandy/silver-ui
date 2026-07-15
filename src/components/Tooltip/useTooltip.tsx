@@ -75,6 +75,7 @@ const styles = {
     borderRadius: 'md',
     fontFamily: 'body',
     fontSize: 'sm',
+    fontWeight: 'normal',
     lineHeight: 'normal',
     boxShadow: 'md',
     '--silver-text-color': 'currentColor',
