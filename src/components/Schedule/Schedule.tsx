@@ -8,16 +8,18 @@ import {
   type CSSProperties,
   type Ref,
 } from 'react';
+import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {ScheduleContext} from 'components/Schedule/context';
 import {eventOverlapsRange, sortEvents} from 'components/Schedule/dateMath';
 import {defaultSchedulePlugins} from 'components/Schedule/plugins';
 import {createScheduleZonedInstant} from 'components/Schedule/scheduleZonedInstant';
-import {createCategoryMap, scheduleClasses} from 'components/Schedule/shared';
+import {createCategoryMap} from 'components/Schedule/shared';
 import type {
   CalendarEvent,
   Instant,
   ScheduleCategory,
   ScheduleEventSource,
+  ScheduleHeight,
   SchedulePlugin,
   ScheduleRange,
   ScheduleView,
@@ -29,6 +31,8 @@ import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
 import {cx} from 'utils/cx';
 
 const EMPTY_CATEGORIES: ReadonlyArray<ScheduleCategory> = [];
+
+export type {ScheduleHeight} from 'components/Schedule/types';
 
 export interface ScheduleProps<
   Options extends ScheduleViewOptions = ScheduleViewOptions,
@@ -49,6 +53,12 @@ export interface ScheduleProps<
    * Static events or an async event loader.
    */
   events: ScheduleEventSource;
+  /**
+   * Height behavior. `auto` grows with the active view; `fill` occupies a
+   * finite-height parent and scrolls the view below the fixed toolbar.
+   * @default 'auto'
+   */
+  height?: ScheduleHeight;
   /**
    * Instant highlighted as the current date. Defaults to mount time.
    */
@@ -170,6 +180,7 @@ function useRange<Options extends ScheduleViewOptions>(
 function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories,
   eventSource,
+  height,
   highlightDate,
   plugins,
   view,
@@ -177,6 +188,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
 }: {
   categories: ReadonlyArray<ScheduleCategory>;
   eventSource: ScheduleEventSource;
+  height: ScheduleHeight;
   highlightDate: ScheduleZonedInstant;
   plugins: ReadonlyArray<SchedulePlugin>;
   view: ScheduleView<Options>;
@@ -218,7 +230,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
 
   return (
     <ScheduleContext value={contextValue}>
-      <Component options={view.options} />
+      <Component height={height} options={view.options} />
     </ScheduleContext>
   );
 }
@@ -231,6 +243,7 @@ export function Schedule({
   className,
   'data-testid': dataTestId,
   events,
+  height = 'auto',
   highlightDate: highlightDateFromProps,
   plugins = defaultSchedulePlugins,
   ref,
@@ -252,16 +265,18 @@ export function Schedule({
     () => createScheduleZonedInstant(highlightDate, timezoneID),
     [highlightDate, timezoneID],
   );
+  const classes = scheduleRecipe({height});
 
   return (
     <div
-      className={cx(scheduleClasses.root, className)}
+      className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       <ScheduleViewContent
         categories={categories}
         eventSource={events}
+        height={height}
         highlightDate={highlightScheduleZonedInstant}
         plugins={plugins}
         view={view}

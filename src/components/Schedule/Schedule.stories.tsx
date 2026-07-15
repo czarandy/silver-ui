@@ -31,6 +31,7 @@ import type {
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import {ToastViewport, useToast} from 'components/Toast';
+import {css} from 'styled-system/css';
 
 // Anchor every story to the current date in the viewer's local timezone so the
 // seeded events fall in the visible range and their displayed times match the
@@ -270,6 +271,8 @@ const meta: Meta<typeof Schedule> = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+const fillHeightStoryContainer = css({h: '600px'});
 
 function ResizableEventsStory(): React.JSX.Element {
   const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
@@ -735,6 +738,46 @@ export const ViewSelector: Story = {
     });
 
     return <ScheduleStory plugins={[viewSelectorPlugin]} view={view} />;
+  },
+};
+
+export const FillHeight: Story = {
+  render: () => {
+    const views = useMemo(
+      (): {label: string; view: ScheduleView}[] => [
+        {label: 'Month', view: createScheduleMonthlyView()},
+        {
+          label: 'Week',
+          view: createScheduleWeeklyView({maxHour: 18, minHour: 8}),
+        },
+        {label: 'Day', view: createScheduleDayView({maxHour: 18, minHour: 8})},
+        {label: 'List', view: createScheduleListView({days: 7})},
+      ],
+      [],
+    );
+    const [view, setView] = useState<ScheduleView>(views[1].view);
+    const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
+    const paginationPlugin = useSchedulePaginationPlugin({
+      onViewDateChange: setViewDate,
+    });
+    const viewSelectorPlugin = useScheduleViewSelectorPlugin(views, {
+      onChangeView: setView,
+    });
+
+    return (
+      <div className={fillHeightStoryContainer}>
+        <Schedule
+          categories={categories}
+          events={events}
+          height="fill"
+          highlightDate={defaultHighlightDate}
+          plugins={[paginationPlugin, viewSelectorPlugin]}
+          timezoneID={localTimezoneID}
+          view={view}
+          viewDate={viewDate}
+        />
+      </div>
+    );
   },
 };
 

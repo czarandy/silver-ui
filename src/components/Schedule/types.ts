@@ -33,6 +33,8 @@ export type ScheduleDate = Instant;
 
 export type ScheduleCategoryMap = ReadonlyMap<string, ScheduleCategory>;
 
+export type ScheduleHeight = 'auto' | 'fill';
+
 export interface ScheduleRange {
   end: Instant;
   endDate: PlainDate;
@@ -45,6 +47,7 @@ export type ScheduleViewOptions = object;
 export interface ScheduleViewComponentProps<
   Options extends ScheduleViewOptions = ScheduleViewOptions,
 > {
+  height: ScheduleHeight;
   options: Options;
 }
 

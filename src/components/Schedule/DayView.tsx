@@ -44,15 +44,20 @@ export interface ScheduleDayViewOptions {
  * Internal view component that renders a single-day time grid.
  */
 function ScheduleDayView({
+  height,
   options,
 }: ScheduleViewComponentProps<ScheduleDayViewOptions>): React.JSX.Element {
   const {viewDate} = useScheduleContext();
   const day = viewDate.toPlainDate();
   return (
-    <ScheduleFrame title={formatMonthTitle(day)} titleLabel={formatDate(day)}>
+    <ScheduleFrame
+      height={height}
+      title={formatMonthTitle(day)}
+      titleLabel={formatDate(day)}>
       <TimeGridView
         allDayEventLimit={options.allDayEventLimit}
         days={[day]}
+        height={height}
         hourHeight={options.hourHeight}
         maxHour={options.maxHour}
         minHour={options.minHour}

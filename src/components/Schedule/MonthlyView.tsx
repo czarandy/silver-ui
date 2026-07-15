@@ -4,6 +4,7 @@
 import {useMemo} from 'react';
 import type {CSSProperties, HTMLAttributes} from 'react';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
+import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
 import {
@@ -12,7 +13,6 @@ import {
   getEventAccessibleLabel,
   hasEventPopoverPlugin,
   isEventInPast,
-  scheduleClasses,
   ScheduleEventOverflowPopover,
   ScheduleFrame,
 } from 'components/Schedule/shared';
@@ -479,6 +479,7 @@ function getGridCellName({
  * Internal view component that renders a month grid with day cells and events.
  */
 function ScheduleMonthlyView({
+  height,
   options,
 }: ScheduleViewComponentProps<ScheduleMonthlyViewOptions>): React.JSX.Element {
   const {categoryMap, events, highlightDate, plugins, timezoneID, viewDate} =
@@ -578,13 +579,15 @@ function ScheduleMonthlyView({
     }),
     [autoRowHeights, minMonthRowHeight],
   );
+  const scheduleClasses = scheduleRecipe({height});
 
   return (
-    <ScheduleFrame title={title} titleLabel={title}>
+    <ScheduleFrame height={height} title={title} titleLabel={title}>
       <div
         aria-label={title}
         className={cx(scheduleClasses.surface, styles.grid)}
-        role="grid">
+        role="grid"
+        tabIndex={0}>
         {visibleWeekdays.map((weekday, index) => (
           <div
             aria-colindex={index + 1}

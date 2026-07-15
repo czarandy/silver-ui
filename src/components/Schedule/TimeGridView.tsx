@@ -9,6 +9,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
+import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -23,7 +24,6 @@ import {
   getMinutesSinceStartOfDay,
   getTimedEventBlockStyle,
   isEventInPast,
-  scheduleClasses,
   ScheduleCurrentTimeIndicator,
   ScheduleEventOverflowPopover,
   useScheduleEventPluginProps,
@@ -32,6 +32,7 @@ import {
 import type {
   CalendarEvent,
   CalendarInstantEvent,
+  ScheduleHeight,
 } from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
@@ -292,6 +293,7 @@ function getCellName({
 export function TimeGridView({
   allDayEventLimit = 3,
   days,
+  height,
   hourHeight = 100,
   maxHour = 24,
   minHour = 0,
@@ -306,6 +308,10 @@ export function TimeGridView({
    * Days to display as columns in the grid.
    */
   days: PlainDate[];
+  /**
+   * Height behavior inherited from the schedule shell.
+   */
+  height: ScheduleHeight;
   /**
    * Pixel height used for each hourly row.
    * @default 100
@@ -342,6 +348,7 @@ export function TimeGridView({
   const gridStyle: GridStyle = {
     '--schedule-day-count': String(days.length),
   };
+  const scheduleClasses = scheduleRecipe({height});
   const normalizedHourHeight = Math.max(1, Math.floor(hourHeight));
   const normalizedAllDayEventLimit = Number.isFinite(allDayEventLimit)
     ? Math.max(0, Math.floor(allDayEventLimit))

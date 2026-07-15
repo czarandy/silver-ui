@@ -32,6 +32,7 @@ export const scheduleRecipe = sva({
       display: 'grid',
       gridTemplateColumns: '1fr auto 1fr',
       alignItems: 'center',
+      flexShrink: 0,
       gap: '3',
     },
     headerSlotStart: {
@@ -70,6 +71,30 @@ export const scheduleRecipe = sva({
       overflow: 'hidden',
       bg: 'bg',
     },
+  },
+  variants: {
+    height: {
+      auto: {},
+      fill: {
+        root: {
+          h: 'full',
+          minH: 0,
+        },
+        frame: {
+          h: 'full',
+          minH: 0,
+        },
+        surface: {
+          flex: 1,
+          minH: 0,
+          overflow: 'auto',
+          overscrollBehavior: 'contain',
+        },
+      },
+    },
+  },
+  defaultVariants: {
+    height: 'auto',
   },
 });
 
