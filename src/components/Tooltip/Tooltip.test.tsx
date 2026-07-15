@@ -57,6 +57,20 @@ describe('Tooltip', () => {
     expect(tooltip).not.toHaveClass('silver-bg_transparent');
   });
 
+  it('uses normal font weight inside a bold ancestor', () => {
+    render(
+      <div style={{fontWeight: 'bold'}}>
+        <Tooltip content="Tooltip text">
+          <button type="button">Trigger</button>
+        </Tooltip>
+      </div>,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveClass(
+      'silver-fw_normal',
+    );
+  });
+
   it('hides tooltip on mouse leave', async () => {
     showPopoverMock.mockClear();
     hidePopoverMock.mockClear();

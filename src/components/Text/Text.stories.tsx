@@ -10,6 +10,12 @@ const constrainWidth =
     </div>
   );
 
+const boldAncestor: Decorator = (Story): JSX.Element => (
+  <div style={{fontWeight: 'bold', width: 320}}>
+    <Story />
+  </div>
+);
+
 const meta: Meta<typeof Text> = {
   title: 'Components/Text',
   component: Text,
@@ -155,4 +161,15 @@ export const Truncated: Story = {
       'This paragraph is intentionally long enough to demonstrate multiline clamping while preserving the full text for a truncation tooltip when the content overflows its container. It continues with additional sentences to ensure the text reliably exceeds two lines across a range of viewport widths, including wider desktop screens where a single line can accommodate a significant amount of text before wrapping.',
   },
   decorators: [constrainWidth(480)],
+};
+
+export const TruncatedUnderBoldAncestor: Story = {
+  args: {
+    as: 'p',
+    maxLines: 1,
+    type: 'supporting',
+    children:
+      'This supporting text stays normal weight, and its truncation tooltip should also use normal tooltip typography instead of inheriting bold from the container.',
+  },
+  decorators: [boldAncestor],
 };
