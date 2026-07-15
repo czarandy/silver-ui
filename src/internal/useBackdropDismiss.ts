@@ -22,6 +22,21 @@ function isPointerOutsideElement(
   );
 }
 
+/**
+ * Native dialog backdrop events target the dialog itself. Events from a child
+ * top-layer element, such as a popover extending beyond the dialog's border
+ * box, can have the same outside coordinates but retain the child as their
+ * target while bubbling through the dialog.
+ */
+function isBackdropPointerEvent<T extends HTMLElement>(
+  event: MouseEvent<T> | PointerEvent<T>,
+): boolean {
+  return (
+    event.target === event.currentTarget &&
+    isPointerOutsideElement(event.currentTarget, event.clientX, event.clientY)
+  );
+}
+
 export interface BackdropDismissHandlers<T extends HTMLElement> {
   onClick: (event: MouseEvent<T>) => void;
   onPointerDown: (event: PointerEvent<T>) => void;
@@ -52,21 +67,13 @@ export function useBackdropDismiss<T extends HTMLElement>({
       if (event.detail === 0) {
         return;
       }
-      const releasedOnBackdrop = isPointerOutsideElement(
-        event.currentTarget,
-        event.clientX,
-        event.clientY,
-      );
+      const releasedOnBackdrop = isBackdropPointerEvent(event);
       if (startedOnBackdrop && releasedOnBackdrop && isEnabled) {
         onDismiss();
       }
     },
     onPointerDown: event => {
-      pointerDownOnBackdropRef.current = isPointerOutsideElement(
-        event.currentTarget,
-        event.clientX,
-        event.clientY,
-      );
+      pointerDownOnBackdropRef.current = isBackdropPointerEvent(event);
     },
   };
 }
