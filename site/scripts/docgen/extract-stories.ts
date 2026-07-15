@@ -55,6 +55,17 @@ function unwrapSatisfies(expression: ts.Expression): ts.Expression {
     : expression;
 }
 
+function unwrapComponentExpression(expression: ts.Expression): ts.Expression {
+  if (
+    ts.isAsExpression(expression) ||
+    ts.isParenthesizedExpression(expression) ||
+    ts.isSatisfiesExpression(expression)
+  ) {
+    return unwrapComponentExpression(expression.expression);
+  }
+  return expression;
+}
+
 function objectProperty(
   object: ts.ObjectLiteralExpression,
   name: string,
@@ -89,6 +100,14 @@ function dedent(text: string): string {
   );
 }
 
+function plainReturnExpression(block: ts.Block): ts.Expression | undefined {
+  if (block.statements.length !== 1) {
+    return undefined;
+  }
+  const [statement] = block.statements;
+  return ts.isReturnStatement(statement) ? statement.expression : undefined;
+}
+
 /**
  * The snippet for a `render:` story: the JSX the render function returns
  * (unwrapping parens); if the body isn't a plain return, the whole function
@@ -98,9 +117,9 @@ function renderSnippet(render: ts.Expression): string {
   if (ts.isArrowFunction(render)) {
     let body: ts.Node = render.body;
     if (ts.isBlock(body)) {
-      const returns = body.statements.find(ts.isReturnStatement);
-      if (returns?.expression != null) {
-        body = returns.expression;
+      const returned = plainReturnExpression(body);
+      if (returned != null) {
+        body = returned;
       } else {
         return dedent(render.getText());
       }
@@ -111,6 +130,172 @@ function renderSnippet(render: ts.Expression): string {
     return dedent(body.getText());
   }
   return dedent(render.getText());
+}
+
+function snippetNode(render: ts.Expression): ts.Node {
+  if (ts.isArrowFunction(render)) {
+    let body: ts.Node = render.body;
+    if (ts.isBlock(body)) {
+      const returned = plainReturnExpression(body);
+      if (returned != null) {
+        body = returned;
+      } else {
+        return render;
+      }
+    }
+    while (ts.isParenthesizedExpression(body)) {
+      body = body.expression;
+    }
+    return body;
+  }
+  return render;
+}
+
+function jsxTagName(node: ts.Node): string | undefined {
+  if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+    const {tagName} = node;
+    if (ts.isIdentifier(tagName)) {
+      return tagName.text;
+    }
+  }
+  return undefined;
+}
+
+function referencedComponents(node: ts.Node): Set<string> {
+  const names = new Set<string>();
+  function visit(child: ts.Node): void {
+    const name = jsxTagName(child);
+    if (name != null) {
+      names.add(name);
+    }
+    ts.forEachChild(child, visit);
+  }
+  visit(node);
+  return names;
+}
+
+function localComponentDefinitions(
+  source: ts.SourceFile,
+): Map<string, ts.Node> {
+  const definitions = new Map<string, ts.Node>();
+  for (const statement of source.statements) {
+    if (ts.isFunctionDeclaration(statement) && statement.name != null) {
+      definitions.set(statement.name.text, statement);
+      continue;
+    }
+    if (!ts.isVariableStatement(statement)) {
+      continue;
+    }
+    for (const declaration of statement.declarationList.declarations) {
+      if (
+        ts.isIdentifier(declaration.name) &&
+        declaration.initializer != null &&
+        (ts.isArrowFunction(declaration.initializer) ||
+          ts.isFunctionExpression(declaration.initializer))
+      ) {
+        definitions.set(declaration.name.text, statement);
+      }
+    }
+  }
+  return definitions;
+}
+
+function importedLibraryHooks(source: ts.SourceFile): Set<string> {
+  const hooks = new Set<string>();
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      !statement.moduleSpecifier.text.startsWith('components/')
+    ) {
+      continue;
+    }
+    const bindings = statement.importClause?.namedBindings;
+    if (bindings == null || !ts.isNamedImports(bindings)) {
+      continue;
+    }
+    for (const element of bindings.elements) {
+      if (!element.isTypeOnly && /^use[A-Z]/.test(element.name.text)) {
+        hooks.add(element.name.text);
+      }
+    }
+  }
+  return hooks;
+}
+
+function referencesLibraryApi(
+  node: ts.Node,
+  publicComponentNames: ReadonlySet<string>,
+  libraryHooks: ReadonlySet<string>,
+): boolean {
+  let found = false;
+  function visit(child: ts.Node): void {
+    if (found) {
+      return;
+    }
+    const tagName = jsxTagName(child);
+    if (tagName != null && publicComponentNames.has(tagName)) {
+      found = true;
+      return;
+    }
+    if (
+      ts.isCallExpression(child) &&
+      ts.isIdentifier(child.expression) &&
+      libraryHooks.has(child.expression.text)
+    ) {
+      found = true;
+      return;
+    }
+    ts.forEachChild(child, visit);
+  }
+  visit(node);
+  return found;
+}
+
+/**
+ * Expands local story components referenced by a render. Keeping their
+ * declarations preserves state and event handling, while the invocation
+ * preserves story-specific props.
+ */
+function usefulRenderSnippet(
+  render: ts.Expression,
+  source: ts.SourceFile,
+  publicComponentNames: ReadonlySet<string>,
+): string | undefined {
+  const rendered = snippetNode(render);
+  const libraryHooks = importedLibraryHooks(source);
+  const definitions = localComponentDefinitions(source);
+  const expanded: ts.Node[] = [];
+  const seen = new Set<string>();
+  let hasLibraryApi = referencesLibraryApi(
+    rendered,
+    publicComponentNames,
+    libraryHooks,
+  );
+
+  function expand(node: ts.Node): void {
+    if (referencesLibraryApi(node, publicComponentNames, libraryHooks)) {
+      hasLibraryApi = true;
+    }
+    for (const name of referencedComponents(node)) {
+      const definition = definitions.get(name);
+      if (definition == null || seen.has(name)) {
+        continue;
+      }
+      seen.add(name);
+      expanded.push(definition);
+      expand(definition);
+    }
+  }
+
+  expand(rendered);
+  if (!hasLibraryApi) {
+    return undefined;
+  }
+  if (expanded.length === 0) {
+    return renderSnippet(render);
+  }
+  return `${expanded.map(node => dedent(node.getText())).join('\n\n')}\n\n${renderSnippet(render)}`;
 }
 
 function mergedArgs(
@@ -153,6 +338,7 @@ function displayNameOf(
 export function extractStoriesFile(
   componentName: string,
   file: string,
+  publicComponentNames: ReadonlySet<string>,
 ): StoriesFileDoc {
   const path = join(
     repoRoot,
@@ -160,9 +346,25 @@ export function extractStoriesFile(
     componentName,
     `${file}.stories.tsx`,
   );
-  const source = ts.createSourceFile(
+  return extractStoriesSource(
+    componentName,
+    file,
     path,
     readFileSync(path, 'utf-8'),
+    publicComponentNames,
+  );
+}
+
+export function extractStoriesSource(
+  componentName: string,
+  file: string,
+  path: string,
+  sourceText: string,
+  publicComponentNames: ReadonlySet<string>,
+): StoriesFileDoc {
+  const source = ts.createSourceFile(
+    path,
+    sourceText,
     ts.ScriptTarget.ES2022,
     true,
     ts.ScriptKind.TSX,
@@ -195,7 +397,7 @@ export function extractStoriesFile(
       if (declaration.name.text === 'meta') {
         const component = objectProperty(initializer, 'component');
         if (component != null) {
-          componentIdentifier = component.getText();
+          componentIdentifier = unwrapComponentExpression(component).getText();
         }
         metaArgs = objectProperty(initializer, 'args');
         continue;
@@ -211,12 +413,19 @@ export function extractStoriesFile(
       const exportName = declaration.name.text;
       const render = objectProperty(initializer, 'render');
       const snippet =
-        render != null
-          ? renderSnippet(render)
-          : synthesizeJsx(
-              componentIdentifier,
-              mergedArgs(metaArgs, objectProperty(initializer, 'args')),
-            );
+        render == null
+          ? publicComponentNames.has(componentIdentifier)
+            ? synthesizeJsx(
+                componentIdentifier,
+                mergedArgs(metaArgs, objectProperty(initializer, 'args')),
+              )
+            : undefined
+          : usefulRenderSnippet(render, source, publicComponentNames);
+      if (snippet == null) {
+        throw new Error(
+          `docgen: ${componentName}/${file}#${exportName}: code snippet does not explicitly use a silver-ui component or hook`,
+        );
+      }
       stories.push({
         exportName,
         displayName: displayNameOf(exportName, initializer),

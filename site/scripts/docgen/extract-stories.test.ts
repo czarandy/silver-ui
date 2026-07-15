@@ -1,7 +1,20 @@
 import ts from 'typescript';
 import {describe, expect, it} from 'vitest';
-import {extractStoriesFile, storyFilesOf} from './extract-stories';
+import {
+  extractStoriesFile,
+  extractStoriesSource,
+  storyFilesOf,
+} from './extract-stories';
 import {synthesizeJsx} from './synthesize-jsx';
+
+const publicComponentNames = new Set([
+  'Button',
+  'Icon',
+  'SegmentedControl',
+  'SegmentedControlItem',
+  'Switch',
+  'TextInput',
+]);
 
 function argsMap(objectLiteral: string): Map<string, ts.Expression> {
   const source = ts.createSourceFile(
@@ -59,7 +72,7 @@ describe('synthesizeJsx', () => {
 });
 
 describe('extractStoriesFile', () => {
-  const button = extractStoriesFile('Button', 'Button');
+  const button = extractStoriesFile('Button', 'Button', publicComponentNames);
 
   it('synthesizes args-only stories from merged meta and story args', () => {
     const primary = button.stories.find(s => s.exportName === 'Primary');
@@ -85,6 +98,114 @@ describe('extractStoriesFile', () => {
 
   it('extracts every exported Story const', () => {
     expect(button.stories.length).toBeGreaterThanOrEqual(15);
+  });
+
+  it('expands local story wrappers so the snippet renders the library component', () => {
+    const stories = extractStoriesFile(
+      'Switch',
+      'Switch',
+      publicComponentNames,
+    );
+    const defaultStory = stories.stories.find(
+      story => story.exportName === 'Default',
+    );
+    expect(defaultStory?.snippet).toContain('function SwitchStory');
+    expect(defaultStory?.snippet).toContain('<Switch');
+    expect(defaultStory?.snippet).toContain('<SwitchStory {...args} />');
+  });
+
+  it('rejects snippets without a public library component or hook', () => {
+    const source = `
+      type Story = unknown;
+      function WrappedStory() {
+        return <div>Only a wrapper</div>;
+      }
+      export const Default: Story = {
+        render: () => <WrappedStory />,
+      };
+    `;
+    expect(() =>
+      extractStoriesSource(
+        'Example',
+        'Example',
+        'Example.stories.tsx',
+        source,
+        new Set(['Example']),
+      ),
+    ).toThrow(
+      'docgen: Example/Example#Default: code snippet does not explicitly use a silver-ui component or hook',
+    );
+  });
+
+  it('rejects args-only stories whose meta component is a local wrapper', () => {
+    const source = `
+      type Story = unknown;
+      function WrappedStory() {
+        return <Example />;
+      }
+      const meta = {component: WrappedStory};
+      export const Default: Story = {};
+    `;
+    expect(() =>
+      extractStoriesSource(
+        'Example',
+        'Example',
+        'Example.stories.tsx',
+        source,
+        new Set(['Example']),
+      ),
+    ).toThrow(
+      'docgen: Example/Example#Default: code snippet does not explicitly use a silver-ui component or hook',
+    );
+  });
+
+  it('expands wrappers that demonstrate a public library hook', () => {
+    const source = `
+      import {useExample} from 'components/Example/useExample';
+      type Story = unknown;
+      function HookStory() {
+        const example = useExample();
+        return example.element;
+      }
+      export const WithHook: Story = {
+        render: () => <HookStory />,
+      };
+    `;
+    const stories = extractStoriesSource(
+      'Example',
+      'Example',
+      'Example.stories.tsx',
+      source,
+      new Set(['Example']),
+    );
+    expect(stories.stories[0]?.snippet).toContain(
+      'const example = useExample()',
+    );
+    expect(stories.stories[0]?.snippet).toContain('<HookStory />');
+  });
+
+  it('keeps setup statements in block-bodied render functions', () => {
+    const source = `
+      import {useExample} from 'components/Example/useExample';
+      type Story = unknown;
+      export const WithHook: Story = {
+        render: () => {
+          const example = useExample();
+          return example.element;
+        },
+      };
+    `;
+    const stories = extractStoriesSource(
+      'Example',
+      'Example',
+      'Example.stories.tsx',
+      source,
+      new Set(['Example']),
+    );
+    expect(stories.stories[0]?.snippet).toContain(
+      'const example = useExample()',
+    );
+    expect(stories.stories[0]?.snippet).toContain('return example.element');
   });
 });
 
