@@ -15,6 +15,7 @@ export const dialogRecipe = sva({
       boxShadow: 'xl',
       flexDirection: 'column',
       overscrollBehavior: 'contain',
+      whiteSpace: 'normal',
       _backdrop: {
         bg: 'overlay.scrim',
         backdropFilter: 'blur(2px)',
