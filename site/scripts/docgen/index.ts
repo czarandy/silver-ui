@@ -45,6 +45,17 @@ export function runDocgen(): void {
 
   const fallbackDescriptions = readmeDescriptions();
   const program = createLibraryProgram(components);
+  const exportsByComponent = new Map(
+    components.map(sourceName => [
+      sourceName,
+      extractComponentExports(program, sourceName),
+    ]),
+  );
+  const publicComponentNames = new Set(
+    [...exportsByComponent.values()].flatMap(exports =>
+      exports.map(exported => exported.name),
+    ),
+  );
 
   const problems: string[] = [];
   const generated: Array<{
@@ -52,16 +63,16 @@ export function runDocgen(): void {
     storyFiles: StoriesFileDoc[];
   }> = [];
   for (const sourceName of components) {
-    const exports = extractComponentExports(program, sourceName);
-    const storyFiles = storyFilesOf(sourceName).map(file =>
-      extractStoriesFile(sourceName, file),
-    );
+    const exports = exportsByComponent.get(sourceName) ?? [];
     if (exports.length === 0) {
       problems.push(
         `${sourceName}: no documented exports — expected at least one exported component with a paired <Name>Props type export`,
       );
       continue;
     }
+    const storyFiles = storyFilesOf(sourceName).map(file =>
+      extractStoriesFile(sourceName, file, publicComponentNames),
+    );
 
     const exportByName = new Map(
       exports.map(exported => [exported.name, exported]),
