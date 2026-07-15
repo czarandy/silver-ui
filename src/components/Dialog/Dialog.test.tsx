@@ -72,6 +72,20 @@ describe('Dialog', () => {
     expect(screen.getByText('Dialog content')).toBeInTheDocument();
   });
 
+  it('resets white-space inherited from its DOM ancestry', () => {
+    render(
+      <div style={{whiteSpace: 'nowrap'}}>
+        <Dialog isOpen label="Instructions" onOpenChange={() => {}}>
+          Long dialog instructions should wrap within the dialog width.
+        </Dialog>
+      </div>,
+    );
+
+    expect(screen.getByRole('dialog', {name: 'Instructions'})).toHaveClass(
+      'silver-white-space_normal',
+    );
+  });
+
   it('closes the native dialog when isOpen is false', () => {
     render(
       <Dialog
