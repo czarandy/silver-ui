@@ -23,6 +23,7 @@ export const scheduleListViewRecipe = sva({
     },
     day: {
       display: 'grid',
+      flexShrink: 0,
       gridTemplateColumns: '112px minmax(0, 1fr)',
       alignItems: 'start',
       columnGap: '3',

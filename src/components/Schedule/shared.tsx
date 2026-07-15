@@ -21,6 +21,7 @@ import type {
   ScheduleCategoryMap,
   ScheduleEventPropsRenderProps,
   ScheduleEventPopoverControls,
+  ScheduleHeight,
   ScheduleHeaderContent,
   SchedulePlugin,
 } from 'components/Schedule/types';
@@ -37,13 +38,6 @@ import {
   type PlainDate,
 } from 'internal/plainDate';
 import {cva} from 'styled-system/css';
-
-/**
- * Static slot classes for the schedule shell (root, frame/header, surface).
- * The recipe carries no variants, so a single evaluation is shared by the
- * shell and every view.
- */
-export const scheduleClasses = scheduleRecipe();
 
 const categoryFallback: ScheduleCategory = {label: 'Event', color: 'blue'};
 
@@ -537,6 +531,7 @@ export function ScheduleEventOverflowPopover({
  */
 export function ScheduleFrame({
   children,
+  height,
   title,
   titleLabel,
 }: {
@@ -544,6 +539,10 @@ export function ScheduleFrame({
    * View content rendered below the header.
    */
   children: ReactNode;
+  /**
+   * Height behavior inherited from the schedule shell.
+   */
+  height: ScheduleHeight;
   /**
    * Title displayed in the header center slot.
    */
@@ -554,15 +553,16 @@ export function ScheduleFrame({
   titleLabel: string;
 }): React.JSX.Element {
   const {isLoading, plugins} = useScheduleContext();
+  const classes = scheduleRecipe({height});
   const initialHeader: ScheduleHeaderContent = {
     startContent: null,
     centerContent: (
-      <span className={scheduleClasses.headerTitleContent}>
+      <span className={classes.headerTitleContent}>
         <Heading level={2}>{title}</Heading>
         {isLoading ? (
           <Spinner
             aria-label="Loading events"
-            className={scheduleClasses.headerTitleSpinner}
+            className={classes.headerTitleSpinner}
             size="sm"
           />
         ) : null}
@@ -581,15 +581,11 @@ export function ScheduleFrame({
   );
 
   return (
-    <section aria-label={titleLabel} className={scheduleClasses.frame}>
-      <div className={scheduleClasses.header}>
-        <div className={scheduleClasses.headerSlotStart}>
-          {header.startContent}
-        </div>
-        <div className={scheduleClasses.headerSlotCenter}>
-          {header.centerContent}
-        </div>
-        <div className={scheduleClasses.headerSlotEnd}>{header.endContent}</div>
+    <section aria-label={titleLabel} className={classes.frame}>
+      <div className={classes.header}>
+        <div className={classes.headerSlotStart}>{header.startContent}</div>
+        <div className={classes.headerSlotCenter}>{header.centerContent}</div>
+        <div className={classes.headerSlotEnd}>{header.endContent}</div>
       </div>
       {children}
     </section>

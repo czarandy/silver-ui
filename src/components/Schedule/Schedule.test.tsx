@@ -16,6 +16,7 @@ import {createScheduleListView} from 'components/Schedule/ListView';
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {Schedule} from 'components/Schedule/Schedule';
+import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
@@ -51,6 +52,7 @@ import type {
   CalendarEvent,
   Instant,
   ScheduleCategory,
+  ScheduleHeight,
   SchedulePlugin,
   ScheduleView,
 } from 'components/Schedule/types';
@@ -197,6 +199,95 @@ describe('Schedule', () => {
       title: 'Outside range',
     }),
   ];
+
+  describe.each<ScheduleHeight>(['auto', 'fill'])('%s height', height => {
+    it.each([
+      {
+        createView: () => createScheduleDayView({maxHour: 10, minHour: 8}),
+        getFrame: () =>
+          screen.getByRole('region', {
+            name: 'Wednesday, May 13, 2026',
+          }),
+        getSurface: () =>
+          screen.getByRole('grid', {name: 'Schedule time grid'}),
+        name: 'day',
+      },
+      {
+        createView: () => createScheduleWeeklyView({maxHour: 10, minHour: 8}),
+        getFrame: () => screen.getByRole('region', {name: 'May 2026'}),
+        getSurface: () =>
+          screen.getByRole('grid', {name: 'Schedule time grid'}),
+        name: 'week',
+      },
+      {
+        createView: () => createScheduleMonthlyView(),
+        getFrame: () => screen.getByRole('region', {name: 'May 2026'}),
+        getSurface: () => screen.getByRole('grid', {name: 'May 2026'}),
+        name: 'month',
+      },
+      {
+        createView: () => createScheduleListView({days: 7}),
+        getFrame: () => screen.getByRole('region', {name: 'May 2026'}),
+        getSurface: () => screen.getByRole('region', {name: /events$/}),
+        name: 'list',
+      },
+    ])(
+      'applies the layout to the $name view',
+      ({createView, getFrame, getSurface}) => {
+        render(
+          <Schedule
+            data-testid="schedule"
+            events={events}
+            height={height}
+            highlightDate={instantUTC(2026, 4, 13)}
+            timezoneID="UTC"
+            view={createView()}
+            viewDate={instantUTC(2026, 4, 13)}
+          />,
+        );
+
+        const classes = scheduleRecipe({height});
+        const root = screen.getByTestId('schedule');
+        const frame = getFrame();
+        const surface = getSurface();
+        const frameClasses = classes.frame?.split(' ') ?? [];
+        const rootClasses = classes.root?.split(' ') ?? [];
+        const surfaceClasses = classes.surface?.split(' ') ?? [];
+
+        expect(rootClasses).not.toHaveLength(0);
+        expect(frameClasses).not.toHaveLength(0);
+        expect(surfaceClasses).not.toHaveLength(0);
+        expect(root).toHaveClass(...rootClasses);
+        expect(frame).toHaveClass(...frameClasses);
+        expect(surface).toHaveClass(...surfaceClasses);
+        expect(surface).toHaveAccessibleName();
+        expect(surface).toHaveAttribute('tabindex', '0');
+      },
+    );
+  });
+
+  it('defaults to auto height behavior', () => {
+    render(
+      <Schedule
+        data-testid="schedule"
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 10, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const autoClasses = scheduleRecipe({height: 'auto'});
+    const rootClasses = autoClasses.root?.split(' ') ?? [];
+    const surfaceClasses = autoClasses.surface?.split(' ') ?? [];
+
+    expect(rootClasses).not.toHaveLength(0);
+    expect(surfaceClasses).not.toHaveLength(0);
+    expect(screen.getByTestId('schedule')).toHaveClass(...rootClasses);
+    expect(screen.getByRole('grid', {name: 'Schedule time grid'})).toHaveClass(
+      ...surfaceClasses,
+    );
+  });
 
   it('filters array events to the active view range', async () => {
     render(

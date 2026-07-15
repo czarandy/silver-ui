@@ -63,6 +63,7 @@ export interface ScheduleWeeklyViewOptions {
  * Internal view component that renders a weekly time grid.
  */
 function ScheduleWeeklyView({
+  height,
   options,
 }: ScheduleViewComponentProps<ScheduleWeeklyViewOptions>): React.JSX.Element {
   const {range} = useScheduleContext();
@@ -76,10 +77,11 @@ function ScheduleWeeklyView({
   const days = visibleDays.length > 0 ? visibleDays : weekDays;
   const title = formatWeekTitle(days[0], days[days.length - 1]);
   return (
-    <ScheduleFrame title={title} titleLabel={title}>
+    <ScheduleFrame height={height} title={title} titleLabel={title}>
       <TimeGridView
         allDayEventLimit={options.allDayEventLimit}
         days={days}
+        height={height}
         hourHeight={options.hourHeight}
         maxHour={options.maxHour}
         minHour={options.minHour}

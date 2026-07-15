@@ -272,6 +272,7 @@ export {
   type ScheduleEventResizePluginOptions,
   type ScheduleEventSource,
   type ScheduleHeaderContent,
+  type ScheduleHeight,
   type ScheduleListViewOptions,
   type ScheduleMonthlyViewOptions,
   type ScheduleMonthCellPropsRenderProps,

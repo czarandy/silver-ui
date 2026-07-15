@@ -1,7 +1,9 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
+/* eslint-disable jsx-a11y-x/no-noninteractive-tabindex -- the labelled list surface is an intentionally focusable scroll region */
 'use client';
 
 import {scheduleListViewRecipe} from 'components/Schedule/ListView.recipe';
+import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {
@@ -14,7 +16,6 @@ import {
   getEventTimeLabel,
   isEventInPast,
   formatListRangeTitle,
-  scheduleClasses,
   ScheduleCurrentTimeIndicator,
   ScheduleFrame,
   useScheduleEventPopover,
@@ -23,6 +24,7 @@ import type {
   CalendarEvent,
   Instant,
   ScheduleView,
+  ScheduleViewComponentProps,
   ScheduleZonedInstant,
 } from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
@@ -108,7 +110,9 @@ function ListEvent({
 /**
  * Internal view component that renders events as a chronological day-by-day list.
  */
-function ScheduleListView(): React.JSX.Element {
+function ScheduleListView({
+  height,
+}: ScheduleViewComponentProps<ScheduleListViewOptions>): React.JSX.Element {
   const {events, highlightDate, isLoading, range, timezoneID} =
     useScheduleContext();
   const days = enumerateDates(range.startDate, range.endDate);
@@ -134,10 +138,15 @@ function ScheduleListView(): React.JSX.Element {
       };
     })
     .filter(dayRecord => dayRecord.isVisible);
+  const scheduleClasses = scheduleRecipe({height});
 
   return (
-    <ScheduleFrame title={title} titleLabel={title}>
-      <div className={cx(scheduleClasses.surface, styles.list)}>
+    <ScheduleFrame height={height} title={title} titleLabel={title}>
+      <div
+        aria-label={`${title} events`}
+        className={cx(scheduleClasses.surface, styles.list)}
+        role="region"
+        tabIndex={0}>
         {visibleDays.map(
           ({day, dayEvents, isCurrentDay, isHighlightedDay}, index) => {
             const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
