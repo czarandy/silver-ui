@@ -2,6 +2,7 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {useRef} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
+import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover/Popover';
 import {assertNonNull} from 'internal/testHelpers';
 import {token} from 'styled-system/tokens';
@@ -378,6 +379,52 @@ describe('Popover', () => {
       screen.getByRole('button', {hidden: true, name: 'Close popover'}),
     );
     await waitFor(() => expect(hidePopoverMock).toHaveBeenCalled());
+  });
+
+  it('integrates its close action into LayoutHeader', async () => {
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <Popover
+        content={
+          <Layout
+            content={<LayoutContent>Content</LayoutContent>}
+            header={<LayoutHeader title="Details" />}
+            height="auto"
+          />
+        }
+        label="Details">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
+    await waitFor(() => expect(showPopoverMock).toHaveBeenCalled());
+
+    const closeButton = screen.getByRole('button', {
+      hidden: true,
+      name: 'Close',
+    });
+    expect(closeButton).toHaveClass('silver-mbs_-2');
+
+    fireEvent.click(closeButton);
+    await waitFor(() => expect(hidePopoverMock).toHaveBeenCalled());
+  });
+
+  it('does not add a LayoutHeader close action when close buttons are disabled', () => {
+    render(
+      <Popover
+        content={<LayoutHeader title="Details" />}
+        hasCloseButton={false}
+        label="Details">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    expect(
+      screen.queryByRole('button', {hidden: true, name: 'Close'}),
+    ).not.toBeInTheDocument();
   });
 
   it('honors a custom closeButtonLabel', () => {

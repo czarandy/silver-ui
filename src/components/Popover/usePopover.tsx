@@ -10,6 +10,7 @@ import {
   type RefCallback,
 } from 'react';
 import {Button} from 'components/Button';
+import {DialogContext} from 'components/Dialog/DialogContext';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {useFocusTrap} from 'internal/useFocusTrap';
 import {useLayer, type ContextRenderProps} from 'internal/useLayer';
@@ -188,6 +189,20 @@ export function usePopover({
     [layer],
   );
 
+  const dialogContextValue = useMemo(
+    () => ({
+      onOpenChange: (isNextOpen: boolean) => {
+        if (isNextOpen) {
+          show();
+        } else {
+          layer.hide();
+        }
+      },
+      titleId: `${layer.id}-title`,
+    }),
+    [layer, show],
+  );
+
   const toggle = useCallback(() => {
     if (isDismissingRef.current) {
       return;
@@ -203,7 +218,7 @@ export function usePopover({
 
   const render = useCallback(
     (children: ReactNode, props?: ContextRenderProps): ReactNode => {
-      return layer.render(
+      const surface = (
         <div
           aria-label={label}
           className={hasSurface ? styles.surface : undefined}
@@ -222,7 +237,15 @@ export function usePopover({
               />
             </VisuallyHidden>
           ) : null}
-        </div>,
+        </div>
+      );
+
+      return layer.render(
+        hasCloseButton && role === 'dialog' ? (
+          <DialogContext value={dialogContextValue}>{surface}</DialogContext>
+        ) : (
+          surface
+        ),
         {
           ...props,
           className: props?.className,
@@ -232,6 +255,7 @@ export function usePopover({
     [
       closeButtonLabel,
       contentRef,
+      dialogContextValue,
       hasCloseButton,
       hasSurface,
       label,

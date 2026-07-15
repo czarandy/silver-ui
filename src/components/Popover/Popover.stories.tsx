@@ -3,6 +3,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {Button} from 'components/Button';
+import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover/Popover';
 import {HStack, VStack} from 'components/Stack';
 import {Text} from 'components/Text';
@@ -45,6 +46,29 @@ export const Default: Story = {
   render: args => (
     <Popover {...args} content={popoverContent} padding={3}>
       <Button label="Open popover" />
+    </Popover>
+  ),
+};
+
+export const WithLayout: Story = {
+  args: {width: 320},
+  render: args => (
+    <Popover
+      {...args}
+      content={
+        <Layout
+          content={
+            <LayoutContent>
+              <Text as="p" color="secondary">
+                Review project activity and open follow-ups.
+              </Text>
+            </LayoutContent>
+          }
+          header={<LayoutHeader title="Project details" />}
+          height="auto"
+        />
+      }>
+      <Button label="Open layout popover" />
     </Popover>
   ),
 };
