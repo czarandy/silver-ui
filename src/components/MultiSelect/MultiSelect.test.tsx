@@ -2,6 +2,9 @@ import {fireEvent, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {InputGroup} from 'components/InputGroup';
+import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {MultiSelect} from 'components/MultiSelect/MultiSelect';
 import {SelectOption} from 'components/Select';
 import {assertNonNull} from 'internal/testHelpers';
@@ -626,5 +629,176 @@ describe('MultiSelect', () => {
     expect(
       screen.getByRole('listbox', {hidden: true, name: 'Columns options'}),
     ).toBeInTheDocument();
+  });
+
+  describe('inside an InputGroup', () => {
+    const noop = () => {};
+
+    it('exposes the label via aria-label rather than a field label', () => {
+      render(
+        <InputGroup label="Filter">
+          <MultiSelect
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Columns'});
+      expect(trigger).toHaveAttribute('aria-label', 'Columns');
+      // eslint-disable-next-line testing-library/no-node-access -- the group renders the field label, so no <label> is tied to the trigger
+      expect(trigger.closest('label')).toBeNull();
+    });
+
+    it('is disabled when the group is disabled even if its own isDisabled is false', () => {
+      render(
+        <InputGroup isDisabled label="Filter">
+          <MultiSelect
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByRole('combobox', {name: 'Columns'})).toBeDisabled();
+    });
+
+    it('does not open when the group is disabled', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <InputGroup isDisabled label="Filter">
+          <MultiSelect
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Columns'});
+      await user.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('hides the clear button when the group is disabled', () => {
+      render(
+        <InputGroup isDisabled label="Filter">
+          <MultiSelect
+            hasClear
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            value={['Name']}
+          />
+        </InputGroup>,
+      );
+
+      expect(
+        screen.queryByRole('button', {name: 'Clear Columns'}),
+      ).not.toBeInTheDocument();
+    });
+
+    it('inherits the group size', () => {
+      render(
+        <InputGroup label="Filter" size="lg">
+          <MultiSelect
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            size="sm"
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Columns'});
+      // eslint-disable-next-line testing-library/no-node-access -- the recipe classes land on the trigger wrapper, which has no role
+      expect(trigger.parentElement).toHaveClass(inputRecipe({size: 'lg'}));
+    });
+
+    it('applies the group status type to the trigger wrapper', () => {
+      render(
+        <InputGroup label="Filter" status={{message: 'Bad', type: 'error'}}>
+          <MultiSelect
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Columns'});
+      // eslint-disable-next-line testing-library/no-node-access -- the recipe classes land on the trigger wrapper, which has no role
+      expect(trigger.parentElement).toHaveClass(inputRecipe({status: 'error'}));
+      // Group status styling must not flag the field as invalid.
+      expect(trigger).not.toHaveAttribute('aria-invalid');
+    });
+
+    it('forwards className and style to the wrapper instead of a field', () => {
+      const {container} = render(
+        <InputGroup label="Filter">
+          <MultiSelect
+            className="custom-wrapper"
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            style={{maxWidth: 200}}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      const wrapper = container.querySelector('.custom-wrapper');
+      expect(wrapper).toBeInTheDocument();
+      expect(wrapper).toHaveStyle({maxWidth: '200px'});
+      expect(wrapper).toContainElement(screen.getByRole('combobox'));
+      // It must be the trigger wrapper itself, not a Field root around it.
+      expect(wrapper).toHaveClass(inputRecipe({size: 'md'}));
+    });
+
+    it('renders its popover layer outside the group item flow', () => {
+      render(
+        <InputGroup label="Filter">
+          <InputGroupText>Show</InputGroupText>
+          <MultiSelect
+            isLabelHidden
+            label="Columns"
+            onChange={noop}
+            options={['Name', 'Email']}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      const group = screen.getByRole('group');
+      /* eslint-disable testing-library/no-node-access -- asserting the group's
+         own child structure is the point: the recipe keys its border/radius
+         rules off child position, so which nodes are direct children matters. */
+      const children = Array.from(group.children);
+      expect(
+        children.filter(child => child.hasAttribute('popover')),
+      ).toHaveLength(1);
+
+      const items = children.filter(child => !child.hasAttribute('popover'));
+      const trigger = screen.getByRole('combobox', {name: 'Columns'});
+      expect(items).toHaveLength(2);
+      expect(items[1]).toBe(trigger.parentElement);
+      /* eslint-enable testing-library/no-node-access */
+    });
   });
 });

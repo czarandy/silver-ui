@@ -27,8 +27,10 @@ import {
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
+import {useInputGroup} from 'components/InputGroup';
 import {Tag} from 'components/Tag';
 import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -213,12 +215,17 @@ export function AutocompleteInput<T extends SearchableItem>({
   ref,
   renderItem,
   searchSource,
-  size = 'md',
+  size: sizeProp = 'md',
   startIcon,
   status,
   style,
   value,
 }: AutocompleteInputProps<T>): React.JSX.Element {
+  const inputGroup = useInputGroup();
+  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const size = inputGroup?.size ?? sizeProp;
+  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
+
   const inputId = useId();
   const descriptionID = isReactNode(description)
     ? `${inputId}-description`
@@ -240,7 +247,7 @@ export function AutocompleteInput<T extends SearchableItem>({
 
   const startEditing = useCallback(
     (seedQuery: string) => {
-      if (isDisabled) {
+      if (effectiveDisabled) {
         return;
       }
       setIsEditing(true);
@@ -253,8 +260,101 @@ export function AutocompleteInput<T extends SearchableItem>({
         }
       });
     },
-    [isDisabled],
+    [effectiveDisabled],
   );
+
+  const wrapper = (
+    // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- wrapper delegates focus to the inner input; keyboard users interact with the input directly
+    <div
+      className={cx(
+        inputRecipe({
+          size,
+          status: effectiveStatusType,
+          isDisabled: effectiveDisabled,
+        }),
+        styles.wrapper,
+        inputGroup != null ? className : undefined,
+      )}
+      data-testid={dataTestId}
+      onClick={() => {
+        if (showTag) {
+          startEditing(value.label);
+        }
+      }}
+      // Outside a group the ref targets the Field root; in a group there is no
+      // Field, so it targets the wrapper -- the component's outermost element
+      // either way.
+      ref={inputGroup != null ? mergeRefs(ref, wrapperRef) : wrapperRef}
+      style={inputGroup != null ? style : undefined}>
+      {startIcon != null ? (
+        <span className={inputStyles.iconSlot}>
+          <Icon color="secondary" icon={startIcon} size="sm" />
+        </span>
+      ) : null}
+      {showTag ? (
+        <span className={styles.tagSlot}>
+          <Tag
+            className={styles.tag}
+            isDisabled={effectiveDisabled}
+            label={value.label}
+            onClick={() => startEditing(value.label)}
+            size={size}
+          />
+        </span>
+      ) : null}
+      <BaseAutocompleteInput
+        anchorRef={wrapperRef}
+        ariaDescribedBy={describedBy}
+        ariaLabel={inputGroup != null ? label : undefined}
+        className={showTag ? styles.inputHidden : undefined}
+        debounceMs={debounceMs}
+        emptySearchResultsText={emptySearchResultsText}
+        errorText={errorText}
+        hasAutoFocus={hasAutoFocus}
+        hasEntriesOnFocus={hasEntriesOnFocus}
+        inputId={inputId}
+        isDisabled={effectiveDisabled}
+        isRequired={isRequired}
+        maxMenuItems={maxMenuItems}
+        onChange={item => {
+          setIsEditing(false);
+          setQueryValue('');
+          onChange(item);
+        }}
+        onOpenChange={onOpenChange}
+        onQueryChange={nextQuery => {
+          setQueryValue(nextQuery);
+          onQueryChange?.(nextQuery);
+        }}
+        placeholder={showTag ? undefined : placeholder}
+        query={queryValue}
+        ref={inputRef}
+        renderItem={renderItem}
+        searchSource={searchSource}
+        size={size}
+        value={value}
+      />
+      {hasClear && value != null && !effectiveDisabled ? (
+        <Button
+          icon={X}
+          isIconOnly
+          label={`Clear ${label}`}
+          onClick={event => {
+            event.stopPropagation();
+            setIsEditing(false);
+            onChange(null);
+            inputRef.current?.focus();
+          }}
+          size="sm"
+          variant="ghost"
+        />
+      ) : null}
+    </div>
+  );
+
+  if (inputGroup != null) {
+    return wrapper;
+  }
 
   return (
     <Field
@@ -271,86 +371,7 @@ export function AutocompleteInput<T extends SearchableItem>({
       ref={ref}
       status={fieldStatus}
       style={style}>
-      {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- wrapper delegates focus to the inner input; keyboard users interact with the input directly */}
-      <div
-        className={cx(
-          inputRecipe({
-            size,
-            status: status?.type,
-            isDisabled,
-          }),
-          styles.wrapper,
-        )}
-        data-testid={dataTestId}
-        onClick={() => {
-          if (showTag) {
-            startEditing(value.label);
-          }
-        }}
-        ref={wrapperRef}>
-        {startIcon != null ? (
-          <span className={inputStyles.iconSlot}>
-            <Icon color="secondary" icon={startIcon} size="sm" />
-          </span>
-        ) : null}
-        {showTag ? (
-          <span className={styles.tagSlot}>
-            <Tag
-              className={styles.tag}
-              isDisabled={isDisabled}
-              label={value.label}
-              onClick={() => startEditing(value.label)}
-              size={size}
-            />
-          </span>
-        ) : null}
-        <BaseAutocompleteInput
-          anchorRef={wrapperRef}
-          ariaDescribedBy={describedBy}
-          className={showTag ? styles.inputHidden : undefined}
-          debounceMs={debounceMs}
-          emptySearchResultsText={emptySearchResultsText}
-          errorText={errorText}
-          hasAutoFocus={hasAutoFocus}
-          hasEntriesOnFocus={hasEntriesOnFocus}
-          inputId={inputId}
-          isDisabled={isDisabled}
-          isRequired={isRequired}
-          maxMenuItems={maxMenuItems}
-          onChange={item => {
-            setIsEditing(false);
-            setQueryValue('');
-            onChange(item);
-          }}
-          onOpenChange={onOpenChange}
-          onQueryChange={nextQuery => {
-            setQueryValue(nextQuery);
-            onQueryChange?.(nextQuery);
-          }}
-          placeholder={showTag ? undefined : placeholder}
-          query={queryValue}
-          ref={inputRef}
-          renderItem={renderItem}
-          searchSource={searchSource}
-          size={size}
-          value={value}
-        />
-        {hasClear && value != null && !isDisabled ? (
-          <Button
-            icon={X}
-            isIconOnly
-            label={`Clear ${label}`}
-            onClick={event => {
-              event.stopPropagation();
-              setIsEditing(false);
-              onChange(null);
-              inputRef.current?.focus();
-            }}
-            size="sm"
-            variant="ghost"
-          />
-        ) : null}
-      </div>
+      {wrapper}
     </Field>
   );
 }

@@ -27,11 +27,13 @@ import {
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
+import {useInputGroup} from 'components/InputGroup';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import useAnnounce from 'hooks/useAnnounce';
 import {OverflowList} from 'internal/OverflowList';
 import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
 import {useLayer} from 'internal/useLayer';
 import {cx} from 'utils/cx';
@@ -301,13 +303,18 @@ export function TagsInput<T extends SearchableItem>({
   renderItem,
   renderTag,
   searchSource,
-  size = 'md',
+  size: sizeProp = 'md',
   startIcon,
   status,
   style,
   tagOverflowBehavior = 'none',
   value,
 }: TagsInputProps<T>): React.JSX.Element {
+  const inputGroup = useInputGroup();
+  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const size = inputGroup?.size ?? sizeProp;
+  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
+
   const inputId = useId();
   const descriptionID = isReactNode(description)
     ? `${inputId}-description`
@@ -454,7 +461,7 @@ export function TagsInput<T extends SearchableItem>({
   );
 
   const handleWrapperPointerDown = useCallback(() => {
-    if (!isDisabled) {
+    if (!effectiveDisabled) {
       if (isLayerMode) {
         layer.show();
         setIsFocusedWithin(true);
@@ -475,7 +482,7 @@ export function TagsInput<T extends SearchableItem>({
         {once: true},
       );
     }
-  }, [isDisabled, isFocusInTagsInput, isLayerMode, layer]);
+  }, [effectiveDisabled, isFocusInTagsInput, isLayerMode, layer]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -483,7 +490,7 @@ export function TagsInput<T extends SearchableItem>({
     <span className={classes.tag} key={item.id}>
       {renderTag == null ? (
         <Tag
-          isDisabled={isDisabled}
+          isDisabled={effectiveDisabled}
           label={item.label}
           onRemove={() => removeItem(item)}
           size={size}
@@ -494,6 +501,11 @@ export function TagsInput<T extends SearchableItem>({
     </span>
   ));
 
+  // In layer mode the in-flow element is the collapsed placeholder, so that is
+  // the group's item and owns className/style; wrapperContent then lives inside
+  // the layer popover. Outside layer mode wrapperContent is itself the item.
+  const isWrapperGroupItem = inputGroup != null && !isLayerMode;
+
   const wrapperContent = (
     /* eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- pointerdown delegates to inner input for focus convenience */
     <div
@@ -501,17 +513,19 @@ export function TagsInput<T extends SearchableItem>({
       className={cx(
         inputRecipe({
           size,
-          status: status?.type,
-          isDisabled,
+          status: effectiveStatusType,
+          isDisabled: effectiveDisabled,
         }),
         classes.wrapper,
+        isWrapperGroupItem ? className : undefined,
       )}
       data-testid={dataTestId}
       onBlur={handleBlur}
       onFocus={handleFocus}
       onPointerDown={handleWrapperPointerDown}
-      ref={wrapperRef}
-      role="group">
+      ref={isWrapperGroupItem ? mergeRefs(ref, wrapperRef) : wrapperRef}
+      role="group"
+      style={isWrapperGroupItem ? style : undefined}>
       {startIcon != null ? (
         <span className={inputStyles.iconSlot}>
           <Icon color="secondary" icon={startIcon} size="sm" />
@@ -534,6 +548,7 @@ export function TagsInput<T extends SearchableItem>({
       <BaseAutocompleteInput
         anchorRef={wrapperRef}
         ariaDescribedBy={describedBy}
+        ariaLabel={inputGroup != null ? label : undefined}
         className={classes.input}
         debounceMs={debounceMs}
         emptySearchResultsText={emptySearchResultsText}
@@ -541,7 +556,7 @@ export function TagsInput<T extends SearchableItem>({
         hasEntriesOnFocus={hasEntriesOnFocus}
         hasReopenOnSelect={hasEntriesOnFocus}
         inputId={inputId}
-        isDisabled={isDisabled || isReadOnly || isAtMax}
+        isDisabled={effectiveDisabled || isReadOnly || isAtMax}
         maxMenuItems={maxMenuItems}
         onChange={item => {
           if (item == null) {
@@ -599,7 +614,7 @@ export function TagsInput<T extends SearchableItem>({
       {isReactNode(endContent) ? (
         <span className={classes.endContent}>{endContent}</span>
       ) : null}
-      {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
+      {hasClear && value.length > 0 && !effectiveDisabled && !isReadOnly ? (
         <Button
           icon={X}
           isIconOnly
@@ -633,13 +648,17 @@ export function TagsInput<T extends SearchableItem>({
         className={cx(
           inputRecipe({
             size,
-            status: status?.type,
-            isDisabled,
+            status: effectiveStatusType,
+            isDisabled: effectiveDisabled,
           }),
           placeholderClasses.wrapper,
+          inputGroup != null ? className : undefined,
         )}
         onPointerDown={handleWrapperPointerDown}
-        ref={placeholderRef}>
+        ref={
+          inputGroup != null ? mergeRefs(ref, placeholderRef) : placeholderRef
+        }
+        style={inputGroup != null ? style : undefined}>
         {isTruncated ? (
           <>
             {startIcon != null ? (
@@ -677,6 +696,10 @@ export function TagsInput<T extends SearchableItem>({
   ) : (
     wrapperContent
   );
+
+  if (inputGroup != null) {
+    return inputContent;
+  }
 
   return (
     <Field
