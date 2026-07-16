@@ -1,6 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {Theme} from 'components/Theme/Theme';
+import {token} from 'styled-system/tokens';
 
 describe('Theme', () => {
   it('renders children and defaults to system mode', () => {
@@ -151,6 +152,29 @@ describe('Theme', () => {
       '4px',
     );
   });
+
+  it.each([
+    ['focusError', 'error'],
+    ['focusWarning', 'warning'],
+    ['focusSuccess', 'success'],
+  ] as const)(
+    'maps the %s override to Panda’s generated focus shadow variable',
+    (themeToken, status) => {
+      const value = `inset 0 0 0 2px ${status}`;
+      const variableName = `--silver-shadows-focus-${status}`;
+
+      render(
+        <Theme data-testid="theme" tokens={{shadows: {[themeToken]: value}}}>
+          Content
+        </Theme>,
+      );
+
+      expect(token.var(`shadows.focus.${status}`)).toBe(`var(${variableName})`);
+      expect(
+        screen.getByTestId('theme').style.getPropertyValue(variableName),
+      ).toBe(value);
+    },
+  );
 
   it('uses themes for mode-aware variables', () => {
     render(
