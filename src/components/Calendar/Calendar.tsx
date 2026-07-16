@@ -677,6 +677,7 @@ const MonthGrid = memo(function MonthGrid({
         {weeks.map(week => {
           const weekDate =
             week.find(day => !day.isOutside)?.date ?? week[0].date;
+          const disabledDays = week.map(day => isDisabled(day.date));
           return (
             <div
               className={styles.weekRow}
@@ -687,29 +688,41 @@ const MonthGrid = memo(function MonthGrid({
                   {plainDateGetWeekNumber(weekDate)}
                 </div>
               ) : null}
-              {week.map((day, dayIndex) => (
-                <DayCell
-                  day={day}
-                  dayIndex={dayIndex}
-                  hasOutsideDays={hasOutsideDays}
-                  isDisabled={isDisabled(day.date)}
-                  isSelectingRange={isSelectingRange}
-                  isTabbable={
-                    tabbableDate != null &&
-                    plainDateIsEqual(tabbableDate, day.date)
-                  }
-                  key={day.date.toString()}
-                  mode={mode}
-                  onDayClick={onDayClick}
-                  onDayHover={onDayHover}
-                  previewEnd={previewEnd}
-                  previewStart={previewStart}
-                  rangeEnd={rangeEnd}
-                  rangeStart={rangeStart}
-                  selectedDate={selectedDate}
-                  today={today}
-                />
-              ))}
+              {week.map((day, dayIndex) => {
+                return (
+                  <DayCell
+                    day={day}
+                    dayIndex={dayIndex}
+                    hasOutsideDays={hasOutsideDays}
+                    isDisabled={disabledDays[dayIndex]}
+                    isNextDayUnavailable={
+                      dayIndex < 6 &&
+                      (week[dayIndex + 1].isOutside ||
+                        disabledDays[dayIndex + 1])
+                    }
+                    isPreviousDayUnavailable={
+                      dayIndex > 0 &&
+                      (week[dayIndex - 1].isOutside ||
+                        disabledDays[dayIndex - 1])
+                    }
+                    isSelectingRange={isSelectingRange}
+                    isTabbable={
+                      tabbableDate != null &&
+                      plainDateIsEqual(tabbableDate, day.date)
+                    }
+                    key={day.date.toString()}
+                    mode={mode}
+                    onDayClick={onDayClick}
+                    onDayHover={onDayHover}
+                    previewEnd={previewEnd}
+                    previewStart={previewStart}
+                    rangeEnd={rangeEnd}
+                    rangeStart={rangeStart}
+                    selectedDate={selectedDate}
+                    today={today}
+                  />
+                );
+              })}
             </div>
           );
         })}
@@ -723,6 +736,8 @@ interface DayCellProps {
   dayIndex: number;
   hasOutsideDays: boolean;
   isDisabled: boolean;
+  isNextDayUnavailable: boolean;
+  isPreviousDayUnavailable: boolean;
   isSelectingRange: boolean;
   isTabbable: boolean;
   mode: 'single' | 'range';
@@ -748,6 +763,8 @@ const DayCell = memo(function DayCell({
   today,
   hasOutsideDays,
   isDisabled,
+  isNextDayUnavailable,
+  isPreviousDayUnavailable,
   isSelectingRange,
   isTabbable,
   onDayClick,
@@ -764,26 +781,34 @@ const DayCell = memo(function DayCell({
     selectedDate != null &&
     plainDateIsEqual(day.date, selectedDate);
   const isInRange =
+    !effectivelyDisabled &&
     mode === 'range' &&
     rangeStart != null &&
     rangeEnd != null &&
     plainDateIsInRange(day.date, [rangeStart, rangeEnd]);
   const isRangeStart =
+    !effectivelyDisabled &&
     mode === 'range' &&
     rangeStart != null &&
     plainDateIsEqual(day.date, rangeStart);
   const isRangeEnd =
+    !effectivelyDisabled &&
     mode === 'range' &&
     rangeEnd != null &&
     plainDateIsEqual(day.date, rangeEnd);
   const isInPreview =
+    !effectivelyDisabled &&
     previewStart != null &&
     previewEnd != null &&
     plainDateIsInRange(day.date, [previewStart, previewEnd]);
   const isPreviewStart =
-    previewStart != null && plainDateIsEqual(day.date, previewStart);
+    !effectivelyDisabled &&
+    previewStart != null &&
+    plainDateIsEqual(day.date, previewStart);
   const isPreviewEnd =
-    previewEnd != null && plainDateIsEqual(day.date, previewEnd);
+    !effectivelyDisabled &&
+    previewEnd != null &&
+    plainDateIsEqual(day.date, previewEnd);
   const isFirstColumn = dayIndex === 0;
   const isLastColumn = dayIndex === 6;
 
@@ -796,13 +821,13 @@ const DayCell = memo(function DayCell({
   });
   const rangeBackgroundClass = calendarRecipe({
     rangeTone: 'range',
-    roundedStart: isRangeStart || isFirstColumn,
-    roundedEnd: isRangeEnd || isLastColumn,
+    roundedStart: isRangeStart || isFirstColumn || isPreviousDayUnavailable,
+    roundedEnd: isRangeEnd || isLastColumn || isNextDayUnavailable,
   }).rangeBackground;
   const previewBackgroundClass = calendarRecipe({
     rangeTone: 'preview',
-    roundedStart: isPreviewStart || isFirstColumn,
-    roundedEnd: isPreviewEnd || isLastColumn,
+    roundedStart: isPreviewStart || isFirstColumn || isPreviousDayUnavailable,
+    roundedEnd: isPreviewEnd || isLastColumn || isNextDayUnavailable,
   }).rangeBackground;
 
   return (
