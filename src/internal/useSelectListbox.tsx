@@ -15,6 +15,7 @@ import {
 } from 'react';
 import type {InputStatus} from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import useTypeahead from 'hooks/useTypeahead';
 import isReactNode from 'internal/isReactNode';
 import {useListboxNavigation} from 'internal/useListboxNavigation';
 
@@ -154,9 +155,11 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     () => selectableOptions.filter(option => filteredValues.has(option.value)),
     [filteredValues, selectableOptions],
   );
+  const enabledSelectableOptions = useMemo(
+    () => selectableOptions.filter(option => !option.isDisabled),
+    [selectableOptions],
+  );
   const isInteractionDisabled = isDisabled || isLoading;
-  const typeaheadQueryRef = useRef('');
-  const typeaheadResetTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const {
     activeDescendantId,
@@ -191,6 +194,16 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     shouldClearOnCommit: isHighlightClearedOnCommit,
   });
 
+  const handleTypeahead = useTypeahead<TOption>({
+    getActiveIndex: () =>
+      enabledSelectableOptions.findIndex(option =>
+        selectedValues.has(option.value),
+      ),
+    getItems: () => enabledSelectableOptions,
+    getLabel: option => option.label ?? option.value,
+    onMatch: onCommitOption,
+  });
+
   const handleKeyboardNavigation = useCallback(
     (event: KeyboardEvent<HTMLInputElement | HTMLButtonElement>): void => {
       handleListboxKeyboardNavigation(event);
@@ -200,44 +213,19 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
         isInteractionDisabled ||
         !isTypeaheadEnabled ||
         isOpen ||
-        event.currentTarget instanceof HTMLInputElement ||
-        event.ctrlKey ||
-        event.metaKey ||
-        event.altKey ||
-        event.key.length !== 1
+        event.currentTarget instanceof HTMLInputElement
       ) {
         return;
       }
 
-      const nextQuery = `${typeaheadQueryRef.current}${event.key}`;
-      typeaheadQueryRef.current = nextQuery;
-      if (typeaheadResetTimeoutRef.current != null) {
-        clearTimeout(typeaheadResetTimeoutRef.current);
-      }
-      typeaheadResetTimeoutRef.current = setTimeout(() => {
-        typeaheadQueryRef.current = '';
-      }, 500);
-
-      const lowerQuery = nextQuery.toLocaleLowerCase();
-      const matchingOption = selectableOptions.find(
-        option =>
-          !option.isDisabled &&
-          (option.label ?? option.value)
-            .toLocaleLowerCase()
-            .startsWith(lowerQuery),
-      );
-      if (matchingOption != null) {
-        event.preventDefault();
-        onCommitOption(matchingOption);
-      }
+      handleTypeahead(event);
     },
     [
       handleListboxKeyboardNavigation,
+      handleTypeahead,
       isInteractionDisabled,
       isOpen,
       isTypeaheadEnabled,
-      onCommitOption,
-      selectableOptions,
     ],
   );
 
