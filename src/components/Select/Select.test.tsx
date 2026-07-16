@@ -23,6 +23,40 @@ beforeAll(() => {
 });
 
 describe('Select', () => {
+  it('submits the selected value with htmlName', () => {
+    render(
+      <form data-testid="form">
+        <Select
+          htmlName="fruit"
+          label="Fruit"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          value="Banana"
+        />
+        <Select
+          htmlName="empty"
+          label="Empty"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          value={null}
+        />
+        <Select
+          htmlName="disabled"
+          isDisabled
+          label="Disabled"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          value="Apple"
+        />
+      </form>,
+    );
+
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(formData.get('fruit')).toBe('Banana');
+    expect(formData.has('empty')).toBe(false);
+    expect(formData.has('disabled')).toBe(false);
+  });
+
   it('selects an option', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

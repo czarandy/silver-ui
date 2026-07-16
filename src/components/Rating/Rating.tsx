@@ -38,6 +38,10 @@ export interface RatingProps {
    */
   filledColor?: IconColor;
   /**
+   * HTML name attribute shared by radio inputs for native form submission.
+   */
+  htmlName?: string;
+  /**
    * Whether the rating is disabled.
    * @default false
    */
@@ -103,6 +107,7 @@ export function Rating({
   count = 5,
   emptyColor = 'disabled',
   filledColor = 'yellow',
+  htmlName,
   size = 'md',
   isReadOnly = false,
   isDisabled = false,
@@ -183,7 +188,7 @@ export function Rating({
             <input
               checked={value === starValue}
               className={classes.input}
-              name={groupId}
+              name={htmlName ?? groupId}
               onChange={() => onChange(starValue)}
               type="radio"
               value={starValue}

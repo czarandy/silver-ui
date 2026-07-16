@@ -85,6 +85,7 @@ const meta = {
   args: {
     label: 'Notification preference',
     description: 'Choose one delivery channel.',
+    htmlName: 'notificationPreference',
     value: 'email',
   },
   render: (args: RadioGroupProps): React.JSX.Element => (

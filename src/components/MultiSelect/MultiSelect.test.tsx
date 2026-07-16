@@ -22,6 +22,32 @@ beforeAll(() => {
 });
 
 describe('MultiSelect', () => {
+  it('submits each selected value with htmlName', () => {
+    render(
+      <form data-testid="form">
+        <MultiSelect
+          htmlName="columns"
+          label="Columns"
+          onChange={() => {}}
+          options={['Name', 'Email', 'Role']}
+          value={['Name', 'Role']}
+        />
+        <MultiSelect
+          htmlName="disabled"
+          isDisabled
+          label="Disabled"
+          onChange={() => {}}
+          options={['Name']}
+          value={['Name']}
+        />
+      </form>,
+    );
+
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(formData.getAll('columns')).toEqual(['Name', 'Role']);
+    expect(formData.has('disabled')).toBe(false);
+  });
+
   it('toggles an option', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

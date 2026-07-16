@@ -49,6 +49,7 @@ const meta = {
   title: 'Components/Select',
   component: Select,
   args: {
+    htmlName: 'assignee',
     label: 'Assignee',
     options: peopleOptions,
     placeholder: 'Select a person',

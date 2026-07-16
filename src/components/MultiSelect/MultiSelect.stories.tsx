@@ -44,7 +44,12 @@ const sectionedOptions: MultiSelectProps['options'] = [
 const meta = {
   title: 'Components/MultiSelect',
   component: MultiSelect,
-  args: {label: 'Columns', options, placeholder: 'Select columns'},
+  args: {
+    htmlName: 'columns',
+    label: 'Columns',
+    options,
+    placeholder: 'Select columns',
+  },
 } satisfies Meta<MultiSelectProps>;
 
 export default meta;

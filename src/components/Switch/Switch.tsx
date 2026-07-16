@@ -37,6 +37,10 @@ export type SwitchProps = {
    */
   description?: ReactNode;
   /**
+   * HTML name attribute for native form submission.
+   */
+  htmlName?: string;
+  /**
    * Whether the switch is disabled.
    * @default false
    */
@@ -110,6 +114,7 @@ export function Switch({
   className,
   'data-testid': dataTestId,
   description,
+  htmlName,
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
@@ -156,6 +161,7 @@ export function Switch({
         data-testid={dataTestId}
         disabled={isDisabled}
         id={inputId}
+        name={htmlName}
         onBlur={onBlur}
         onChange={event => onChange(event.target.checked, event)}
         onFocus={onFocus}

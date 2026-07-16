@@ -10,6 +10,37 @@ function LabelIcon(props: LucideProps): React.JSX.Element {
 }
 
 describe('Switch', () => {
+  it('submits its checked value with htmlName', () => {
+    render(
+      <form data-testid="form">
+        <Switch
+          htmlName="notifications"
+          isSelected
+          label="Notifications"
+          onChange={() => {}}
+        />
+        <Switch
+          htmlName="digest"
+          isSelected={false}
+          label="Digest"
+          onChange={() => {}}
+        />
+        <Switch
+          htmlName="disabled"
+          isDisabled
+          isSelected
+          label="Disabled"
+          onChange={() => {}}
+        />
+      </form>,
+    );
+
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(formData.get('notifications')).toBe('on');
+    expect(formData.has('digest')).toBe(false);
+    expect(formData.has('disabled')).toBe(false);
+  });
+
   it('calls onChange with the next checked value', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

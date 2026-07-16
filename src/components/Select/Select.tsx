@@ -94,6 +94,10 @@ export type SelectProps = {
    */
   hasClear?: boolean;
   /**
+   * HTML name attribute for native form submission.
+   */
+  htmlName?: string;
+  /**
    * Whether to show search input in the dropdown.
    * @default false
    */
@@ -183,6 +187,7 @@ export function Select({
   description,
   hasClear = false,
   hasSearch = false,
+  htmlName,
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
@@ -436,6 +441,14 @@ export function Select({
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
       style={style}>
+      {htmlName == null || value == null ? null : (
+        <input
+          disabled={isDisabled}
+          name={htmlName}
+          type="hidden"
+          value={value}
+        />
+      )}
       {trigger}
       <Popover
         anchorRef={triggerRef}

@@ -83,6 +83,32 @@ describe('Slider', () => {
     );
   }
 
+  it('submits single and range values with htmlName', () => {
+    render(
+      <form data-testid="form">
+        <Slider htmlName="volume" label="Volume" onChange={noop} value={50} />
+        <Slider
+          htmlName="price"
+          label="Price"
+          onChange={noop}
+          value={[20, 80]}
+        />
+        <Slider
+          htmlName="disabled"
+          isDisabled
+          label="Disabled"
+          onChange={noop}
+          value={25}
+        />
+      </form>,
+    );
+
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(formData.get('volume')).toBe('50');
+    expect(formData.getAll('price')).toEqual(['20', '80']);
+    expect(formData.has('disabled')).toBe(false);
+  });
+
   it('renders a labelled single-value slider', () => {
     render(<Slider label="Volume" onChange={noop} value={50} />);
 
