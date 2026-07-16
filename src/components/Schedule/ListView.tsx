@@ -18,6 +18,7 @@ import {
   formatListRangeTitle,
   ScheduleCurrentTimeIndicator,
   ScheduleFrame,
+  useScheduleEventPluginProps,
   useScheduleEventPopover,
 } from 'components/Schedule/shared';
 import type {
@@ -62,6 +63,7 @@ function ListEvent({
   const {popover, triggerProps} = useScheduleEventPopover(event, {
     placement: 'end',
   });
+  const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});
   const category = getCategory(categoryMap, event);
   const eventDataState = isPast ? 'past' : undefined;
   const classes = scheduleListViewRecipe({
@@ -90,6 +92,7 @@ function ListEvent({
           className={classes.eventContent}
           data-state={eventDataState}
           data-testid={`schedule-event-${event.id}`}
+          {...pluginProps}
           type="button"
           {...triggerProps}>
           {eventContent}
@@ -98,7 +101,8 @@ function ListEvent({
         <div
           className={classes.eventContent}
           data-state={eventDataState}
-          data-testid={`schedule-event-${event.id}`}>
+          data-testid={`schedule-event-${event.id}`}
+          {...pluginProps}>
           {eventContent}
         </div>
       )}

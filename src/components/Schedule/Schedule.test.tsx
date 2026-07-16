@@ -461,6 +461,50 @@ describe('Schedule', () => {
     );
   });
 
+  it.each([
+    {isInteractive: false, tagName: 'DIV'},
+    {isInteractive: true, tagName: 'BUTTON'},
+  ])(
+    'applies event plugin props to $tagName list event roots',
+    ({isInteractive, tagName}) => {
+      const getEventProps = vi.fn();
+      const event = events[0];
+      const plugin: SchedulePlugin = {
+        getEventProps: props => {
+          getEventProps(props);
+          return {
+            'aria-description': 'Example',
+            'data-example': 'present',
+          };
+        },
+        renderEventPopover: isInteractive
+          ? () => <span>Details</span>
+          : undefined,
+      };
+
+      render(
+        <Schedule
+          categories={categories}
+          events={[event]}
+          plugins={[plugin]}
+          timezoneID="UTC"
+          view={createScheduleListView({days: 7})}
+          viewDate={instantUTC(2026, 4, 13)}
+        />,
+      );
+
+      const eventRoot = screen.getByTestId('schedule-event-visible');
+      expect(eventRoot.tagName).toBe(tagName);
+      expect(eventRoot).toHaveAttribute('aria-description', 'Example');
+      expect(eventRoot).toHaveAttribute('data-example', 'present');
+      expect(getEventProps).toHaveBeenCalledWith({
+        event,
+        layout: 'inline',
+        timezoneID: 'UTC',
+      });
+    },
+  );
+
   it('renders loading state while async events are pending', () => {
     const pendingEvents = new Promise<CalendarEvent[]>(() => {});
     const loader = vi.fn(async () => pendingEvents);
