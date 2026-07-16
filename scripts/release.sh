@@ -94,8 +94,9 @@ command -v gh >/dev/null 2>&1 || die "GitHub CLI ('gh') not found. Install it: h
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "Not inside a git repository."
 
 # CI publishes via a GitHub Release, so we need gh auth — not npm auth — locally.
-gh auth status >/dev/null 2>&1 || die "Not logged in to GitHub CLI. Run 'gh auth login' first."
-ok "Authenticated to GitHub CLI"
+# Delegated so a GitHub outage isn't misreported as a broken login (see the
+# script's header for why `gh auth status` alone is not enough).
+bash "$SCRIPT_DIR/release-gh-auth.sh" || exit 1
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 if [ "$BRANCH" != "main" ]; then
