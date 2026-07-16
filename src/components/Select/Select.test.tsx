@@ -1,6 +1,7 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
+import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {Select} from 'components/Select/Select';
 import {SelectOption} from 'components/Select/SelectOption';
@@ -168,6 +169,38 @@ describe('Select', () => {
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     expect(onChange).toHaveBeenLastCalledWith('CA');
+  });
+
+  it('cycles through options starting with the same typed character', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    function MonthSelect() {
+      const [value, setValue] = useState<string | null>(null);
+      return (
+        <Select
+          label="Month"
+          onChange={nextValue => {
+            onChange(nextValue);
+            setValue(nextValue);
+          }}
+          options={['January', 'March', 'May']}
+          value={value}
+        />
+      );
+    }
+
+    render(<MonthSelect />);
+
+    const trigger = screen.getByRole('combobox', {name: 'Month'});
+    trigger.focus();
+
+    await user.keyboard('m');
+    expect(onChange).toHaveBeenLastCalledWith('March');
+
+    await user.keyboard('m');
+    expect(onChange).toHaveBeenLastCalledWith('May');
+    expect(onChange).toHaveBeenCalledTimes(2);
   });
 
   it('scrolls the highlighted option into view during keyboard navigation', async () => {
