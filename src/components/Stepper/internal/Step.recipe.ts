@@ -116,7 +116,7 @@ export const stepRecipe = sva({
         },
         labelRow: {
           alignItems: 'flex-start',
-          pt: '0.5',
+          pt: '3px',
         },
         label: {textAlign: 'start'},
         description: {textAlign: 'start'},

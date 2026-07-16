@@ -2,6 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {Stepper, type StepConfig} from 'components/Stepper/Stepper';
+import {stepRecipe} from 'components/Stepper/internal/Step.recipe';
 
 const threeSteps: StepConfig[] = [
   {id: 'account', label: 'Step 1'},
@@ -292,5 +293,13 @@ describe('Stepper', () => {
     expect(
       screen.queryByRole('button', {name: /Profile/}),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe('stepRecipe', () => {
+  it('adds three pixels of top padding to vertical step labels', () => {
+    expect(
+      stepRecipe({orientation: 'vertical'}).labelRow?.split(' '),
+    ).toContain('silver-pt_3px');
   });
 });
