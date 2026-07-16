@@ -216,7 +216,7 @@ export function MultiSelect({
   hasSearch = false,
   hasSelectAll = false,
   isDefaultOpen = false,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isLoading = false,
   isOptional,
@@ -239,9 +239,9 @@ export function MultiSelect({
   value,
 }: MultiSelectProps): React.JSX.Element {
   const inputGroup = useInputGroup();
-  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
-  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
+  const statusType = status?.type ?? inputGroup?.statusType;
 
   const selectedValues = useMemo(() => new Set(value), [value]);
 
@@ -288,7 +288,7 @@ export function MultiSelect({
   } = useSelectListbox({
     description,
     isDefaultOpen,
-    isDisabled: effectiveDisabled,
+    isDisabled,
     isHighlightClearedOnCommit: false,
     isLoading,
     onCommitOption: toggleValue,
@@ -471,8 +471,8 @@ export function MultiSelect({
       className={cx(
         inputRecipe({
           size,
-          status: effectiveStatusType,
-          isDisabled: effectiveDisabled,
+          status: statusType,
+          isDisabled,
         }),
         triggerClasses.wrapper,
         inputGroup != null ? className : undefined,
@@ -509,7 +509,7 @@ export function MultiSelect({
         {renderTriggerValue()}
       </button>
       {isLoading ? <Spinner size="sm" /> : null}
-      {hasClear && value.length > 0 && !effectiveDisabled ? (
+      {hasClear && value.length > 0 && !isDisabled ? (
         <Button
           icon={X}
           isIconOnly

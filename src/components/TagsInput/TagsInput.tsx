@@ -284,7 +284,7 @@ export function TagsInput<T extends SearchableItem>({
   hasCreate = false,
   hasEntriesOnFocus = false,
   handleRef,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isReadOnly = false,
   isOptional,
@@ -311,9 +311,9 @@ export function TagsInput<T extends SearchableItem>({
   value,
 }: TagsInputProps<T>): React.JSX.Element {
   const inputGroup = useInputGroup();
-  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
-  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
+  const statusType = status?.type ?? inputGroup?.statusType;
 
   const inputId = useId();
   const descriptionID = isReactNode(description)
@@ -461,7 +461,7 @@ export function TagsInput<T extends SearchableItem>({
   );
 
   const handleWrapperPointerDown = useCallback(() => {
-    if (!effectiveDisabled) {
+    if (!isDisabled) {
       if (isLayerMode) {
         layer.show();
         setIsFocusedWithin(true);
@@ -482,7 +482,7 @@ export function TagsInput<T extends SearchableItem>({
         {once: true},
       );
     }
-  }, [effectiveDisabled, isFocusInTagsInput, isLayerMode, layer]);
+  }, [isDisabled, isFocusInTagsInput, isLayerMode, layer]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -490,7 +490,7 @@ export function TagsInput<T extends SearchableItem>({
     <span className={classes.tag} key={item.id}>
       {renderTag == null ? (
         <Tag
-          isDisabled={effectiveDisabled}
+          isDisabled={isDisabled}
           label={item.label}
           onRemove={() => removeItem(item)}
           size={size}
@@ -513,8 +513,8 @@ export function TagsInput<T extends SearchableItem>({
       className={cx(
         inputRecipe({
           size,
-          status: effectiveStatusType,
-          isDisabled: effectiveDisabled,
+          status: statusType,
+          isDisabled,
         }),
         classes.wrapper,
         isWrapperGroupItem ? className : undefined,
@@ -556,7 +556,7 @@ export function TagsInput<T extends SearchableItem>({
         hasEntriesOnFocus={hasEntriesOnFocus}
         hasReopenOnSelect={hasEntriesOnFocus}
         inputId={inputId}
-        isDisabled={effectiveDisabled || isReadOnly || isAtMax}
+        isDisabled={isDisabled || isReadOnly || isAtMax}
         maxMenuItems={maxMenuItems}
         onChange={item => {
           if (item == null) {
@@ -614,7 +614,7 @@ export function TagsInput<T extends SearchableItem>({
       {isReactNode(endContent) ? (
         <span className={classes.endContent}>{endContent}</span>
       ) : null}
-      {hasClear && value.length > 0 && !effectiveDisabled && !isReadOnly ? (
+      {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
         <Button
           icon={X}
           isIconOnly
@@ -648,8 +648,8 @@ export function TagsInput<T extends SearchableItem>({
         className={cx(
           inputRecipe({
             size,
-            status: effectiveStatusType,
-            isDisabled: effectiveDisabled,
+            status: statusType,
+            isDisabled,
           }),
           placeholderClasses.wrapper,
           inputGroup != null ? className : undefined,

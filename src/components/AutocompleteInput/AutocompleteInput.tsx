@@ -200,7 +200,7 @@ export function AutocompleteInput<T extends SearchableItem>({
   hasAutoFocus = false,
   hasClear = true,
   hasEntriesOnFocus = false,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -222,9 +222,9 @@ export function AutocompleteInput<T extends SearchableItem>({
   value,
 }: AutocompleteInputProps<T>): React.JSX.Element {
   const inputGroup = useInputGroup();
-  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
-  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
+  const statusType = status?.type ?? inputGroup?.statusType;
 
   const inputId = useId();
   const descriptionID = isReactNode(description)
@@ -247,7 +247,7 @@ export function AutocompleteInput<T extends SearchableItem>({
 
   const startEditing = useCallback(
     (seedQuery: string) => {
-      if (effectiveDisabled) {
+      if (isDisabled) {
         return;
       }
       setIsEditing(true);
@@ -260,7 +260,7 @@ export function AutocompleteInput<T extends SearchableItem>({
         }
       });
     },
-    [effectiveDisabled],
+    [isDisabled],
   );
 
   const wrapper = (
@@ -269,8 +269,8 @@ export function AutocompleteInput<T extends SearchableItem>({
       className={cx(
         inputRecipe({
           size,
-          status: effectiveStatusType,
-          isDisabled: effectiveDisabled,
+          status: statusType,
+          isDisabled,
         }),
         styles.wrapper,
         inputGroup != null ? className : undefined,
@@ -295,7 +295,7 @@ export function AutocompleteInput<T extends SearchableItem>({
         <span className={styles.tagSlot}>
           <Tag
             className={styles.tag}
-            isDisabled={effectiveDisabled}
+            isDisabled={isDisabled}
             label={value.label}
             onClick={() => startEditing(value.label)}
             size={size}
@@ -313,7 +313,7 @@ export function AutocompleteInput<T extends SearchableItem>({
         hasAutoFocus={hasAutoFocus}
         hasEntriesOnFocus={hasEntriesOnFocus}
         inputId={inputId}
-        isDisabled={effectiveDisabled}
+        isDisabled={isDisabled}
         isRequired={isRequired}
         maxMenuItems={maxMenuItems}
         onChange={item => {
@@ -334,7 +334,7 @@ export function AutocompleteInput<T extends SearchableItem>({
         size={size}
         value={value}
       />
-      {hasClear && value != null && !effectiveDisabled ? (
+      {hasClear && value != null && !isDisabled ? (
         <Button
           icon={X}
           isIconOnly
