@@ -3,13 +3,26 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {
+  AutocompleteInput,
+  createStaticSearchSource,
+  type SearchableItem,
+} from 'components/AutocompleteInput';
+import {
   InputGroup,
   type InputGroupProps,
 } from 'components/InputGroup/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
+import {MultiSelect} from 'components/MultiSelect';
 import {NumberInput} from 'components/NumberInput';
 import {Select} from 'components/Select';
+import {TagsInput} from 'components/TagsInput';
 import {TextInput} from 'components/TextInput';
+
+const PEOPLE: SearchableItem[] = [
+  {id: 'ada', label: 'Ada Lovelace'},
+  {id: 'grace', label: 'Grace Hopper'},
+  {id: 'katherine', label: 'Katherine Johnson'},
+];
 
 const meta = {
   title: 'Components/InputGroup',
@@ -101,6 +114,65 @@ export const WithSelect: Story = {
           onChange={setCurrency}
           options={['USD', 'EUR', 'GBP']}
           value={currency}
+        />
+      </InputGroup>
+    );
+  },
+};
+
+export const WithMultiSelect: Story = {
+  args: {label: 'Columns'},
+  render: (args: InputGroupProps) => {
+    const [value, setValue] = useState<string[]>(['Name']);
+    return (
+      <InputGroup {...args}>
+        <InputGroupText>Show</InputGroupText>
+        <MultiSelect
+          isLabelHidden
+          label="Columns"
+          onChange={setValue}
+          options={['Name', 'Email', 'Role']}
+          value={value}
+        />
+      </InputGroup>
+    );
+  },
+};
+
+export const WithAutocompleteInput: Story = {
+  args: {label: 'Assignee'},
+  render: (args: InputGroupProps) => {
+    const [value, setValue] = useState<SearchableItem | null>(null);
+    return (
+      <InputGroup {...args}>
+        <InputGroupText>@</InputGroupText>
+        <AutocompleteInput
+          isLabelHidden
+          label="Person"
+          onChange={setValue}
+          placeholder="Search people"
+          searchSource={createStaticSearchSource(PEOPLE)}
+          value={value}
+        />
+      </InputGroup>
+    );
+  },
+};
+
+export const WithTagsInput: Story = {
+  args: {label: 'Recipients'},
+  render: (args: InputGroupProps) => {
+    const [value, setValue] = useState<SearchableItem[]>([PEOPLE[0]]);
+    return (
+      <InputGroup {...args}>
+        <InputGroupText>To</InputGroupText>
+        <TagsInput
+          isLabelHidden
+          label="People"
+          onChange={setValue}
+          placeholder="Add people"
+          searchSource={createStaticSearchSource(PEOPLE)}
+          value={value}
         />
       </InputGroup>
     );
