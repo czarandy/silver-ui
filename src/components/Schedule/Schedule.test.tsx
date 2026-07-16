@@ -3086,9 +3086,13 @@ describe('Schedule', () => {
     const onChangeView = vi.fn();
     const dayView = createScheduleDayView();
     const monthView = createScheduleMonthlyView();
-    const viewOptions: {label: string; view: ScheduleView}[] = [
-      {label: 'Month', view: monthView},
-      {label: 'Day', view: dayView},
+    const viewOptions: {
+      hotkey: string;
+      label: string;
+      view: ScheduleView;
+    }[] = [
+      {hotkey: 'm', label: 'Month', view: monthView},
+      {hotkey: 'd', label: 'Day', view: dayView},
     ];
 
     function ScheduleWithViewSelector() {
@@ -3124,6 +3128,10 @@ describe('Schedule', () => {
       hidden: true,
       name: 'Month',
     });
+    expect(selectedItem).toHaveAttribute('aria-keyshortcuts', 'd');
+    expect(unselectedItem).toHaveAttribute('aria-keyshortcuts', 'm');
+    expect(within(selectedItem).getByLabelText('D')).toBeInTheDocument();
+    expect(within(unselectedItem).getByLabelText('M')).toBeInTheDocument();
     expect(
       within(selectedItem).getByTestId('schedule-view-selector-selected-icon'),
     ).toBeInTheDocument();
@@ -3135,6 +3143,46 @@ describe('Schedule', () => {
 
     fireEvent.click(unselectedItem);
     expect(onChangeView).toHaveBeenCalledWith(monthView);
+  });
+
+  it('changes views with unmodified hotkeys outside editable controls', () => {
+    const onChangeView = vi.fn();
+    const dayView = createScheduleDayView();
+    const monthView = createScheduleMonthlyView();
+    const viewOptions = [
+      {hotkey: 'm', label: 'Month', view: monthView},
+      {hotkey: 'd', label: 'Day', view: dayView},
+    ];
+
+    function ScheduleWithViewSelector() {
+      const viewSelectorPlugin = useScheduleViewSelectorPlugin(viewOptions, {
+        onChangeView,
+      });
+      return (
+        <>
+          <input aria-label="Event title" />
+          <Schedule
+            categories={categories}
+            events={events}
+            plugins={[viewSelectorPlugin]}
+            timezoneID="UTC"
+            view={dayView}
+            viewDate={instantUTC(2026, 4, 13)}
+          />
+        </>
+      );
+    }
+
+    render(<ScheduleWithViewSelector />);
+
+    fireEvent.keyDown(screen.getByRole('textbox', {name: 'Event title'}), {
+      key: 'm',
+    });
+    fireEvent.keyDown(document, {ctrlKey: true, key: 'm'});
+    expect(onChangeView).not.toHaveBeenCalled();
+
+    fireEvent.keyDown(document, {key: 'M'});
+    expect(onChangeView).toHaveBeenCalledExactlyOnceWith(monthView);
   });
 
   it('disables the view selector plugin when no change handler is provided', () => {

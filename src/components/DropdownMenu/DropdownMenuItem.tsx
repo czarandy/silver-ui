@@ -1,6 +1,6 @@
 'use client';
 
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {AriaAttributes, CSSProperties, ReactNode, Ref} from 'react';
 import {useDropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
 import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
@@ -10,6 +10,10 @@ import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
 export interface DropdownMenuItemProps {
+  /**
+   * Keyboard shortcuts that activate the menu item.
+   */
+  'aria-keyshortcuts'?: AriaAttributes['aria-keyshortcuts'];
   /**
    * Additional CSS class names applied to the item.
    */
@@ -61,6 +65,7 @@ export interface DropdownMenuItemProps {
  * Action item inside a `DropdownMenu`.
  */
 export function DropdownMenuItem({
+  'aria-keyshortcuts': ariaKeyshortcuts,
   className,
   'data-testid': dataTestId,
   description,
@@ -82,6 +87,7 @@ export function DropdownMenuItem({
   const item = (
     <button
       aria-disabled={useAriaDisabled || undefined}
+      aria-keyshortcuts={ariaKeyshortcuts}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       disabled={isDisabled && !useAriaDisabled}
