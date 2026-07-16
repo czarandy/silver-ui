@@ -167,6 +167,13 @@ else
   ok "Release type: $RELEASE_TYPE  (next version computed by npm)"
 fi
 
+# Catch a leftover tag now rather than after the full test+build gate. Skipped
+# for pre-releases, whose exact tag only npm can compute; the bump rolls itself
+# back if it hits one.
+if [ -n "$NEXT_VERSION" ]; then
+  bash "$SCRIPT_DIR/release-bump.sh" --check "v$NEXT_VERSION" || exit 1
+fi
+
 IS_PRERELEASE=0
 [[ "$RELEASE_TYPE" == pre* ]] && IS_PRERELEASE=1
 
@@ -229,10 +236,12 @@ if [ -z "$NOTES_FILE" ] && [ -z "$NOTES_TEXT" ]; then
 fi
 
 # 1. Version bump — updates package.json, commits, and creates a tag (vX.Y.Z).
+#    Delegated so a failed bump rolls itself back instead of stranding an
+#    unpushed commit on the branch (see the script's header).
 if [ "$IS_PRERELEASE" -eq 1 ]; then
-  NEW_TAG="$(npm version "$RELEASE_TYPE" --preid="$PREID")"
+  NEW_TAG="$(bash "$SCRIPT_DIR/release-bump.sh" "$RELEASE_TYPE" "$PREID")"
 else
-  NEW_TAG="$(npm version "$RELEASE_TYPE")"
+  NEW_TAG="$(bash "$SCRIPT_DIR/release-bump.sh" "$RELEASE_TYPE")"
 fi
 ok "Bumped to $NEW_TAG (commit + tag created)"
 
