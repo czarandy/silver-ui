@@ -235,6 +235,9 @@ if [ -z "$NOTES_FILE" ] && [ -z "$NOTES_TEXT" ]; then
   [ -z "$DEFAULT_NOTES" ] && DEFAULT_NOTES="- (no changes since ${PREV_TAG:-the previous release})"
 fi
 
+# Where to restore to if the bump or the push fails partway.
+PRE_BUMP_SHA="$(git rev-parse HEAD)"
+
 # 1. Version bump — updates package.json, commits, and creates a tag (vX.Y.Z).
 #    Delegated so a failed bump rolls itself back instead of stranding an
 #    unpushed commit on the branch (see the script's header).
@@ -245,15 +248,11 @@ else
 fi
 ok "Bumped to $NEW_TAG (commit + tag created)"
 
-# 2. Push commit + tag. Roll back locally if the push fails so we can retry.
+# 2. Push commit + tag. Delegated because `git push --follow-tags` can land the
+#    tag while rejecting the branch; the rollback has to clean up origin too, or
+#    the stray tag wedges every future release (see the script's header).
 info "Pushing commit and tag to origin"
-if ! git push --follow-tags; then
-  warn "Push failed. Rolling back the version commit and tag."
-  git tag -d "$NEW_TAG" 2>/dev/null || true
-  git reset --hard HEAD~1
-  die "Push failed — repository restored to pre-bump state. Fix the issue and re-run."
-fi
-ok "Pushed commit and tag to origin"
+bash "$SCRIPT_DIR/release-push.sh" "$NEW_TAG" "$PRE_BUMP_SHA" || exit 1
 
 # 3. Create the GitHub Release. This is what triggers the publish workflow.
 #    Marking a pre-release tells CI to publish under the 'next' dist-tag.

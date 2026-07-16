@@ -150,6 +150,43 @@ describe('release-bump.sh', () => {
       expect(status).toBe(1);
       expect(stderr).toMatch(/Usage: release-bump\.sh --check/);
     });
+
+    // A tag on origin is the case that actually wedges releases: release-sync
+    // fetches --tags every run, so `git tag -d` is undone before npm ever runs.
+    describe('when the tag is on origin', () => {
+      let remote;
+
+      beforeEach(() => {
+        // Outside `root`, so the bare repo never dirties the package's tree.
+        remote = mkdtempSync(join(tmpdir(), 'release-bump-remote-'));
+        execFileSync('git', ['init', '--bare', '--quiet', remote]);
+        git('remote', 'add', 'origin', remote);
+        git('tag', '-a', 'v1.5.5', '-m', 'pushed by an aborted release');
+        git('push', '--quiet', 'origin', 'v1.5.5');
+        git('tag', '-d', 'v1.5.5'); // gone locally, still on origin
+      });
+
+      afterEach(() => {
+        rmSync(remote, {recursive: true, force: true});
+      });
+
+      it('fails even though the tag is absent locally', () => {
+        const {status} = bump('--check', 'v1.5.5');
+
+        expect(status).toBe(1);
+      });
+
+      it('gives the remote remedy, not a useless local delete', () => {
+        const {stderr} = bump('--check', 'v1.5.5');
+
+        expect(stderr).toMatch(/git push --delete origin v1\.5\.5/);
+        expect(stderr).toMatch(/next sync fetches it back/);
+      });
+
+      it('passes for a tag origin does not have', () => {
+        expect(bump('--check', 'v1.6.0').status).toBe(0);
+      });
+    });
   });
 
   it('rejects a missing release type', () => {

@@ -27,12 +27,24 @@ warn() { printf '\033[33m!\033[0m %s\n' "$1" >&2; }
 die() { printf '\033[31m✗ %s\033[0m\n' "$1" >&2; exit 1; }
 
 # A tag left over from an aborted release blocks `npm version` forever, and the
-# fix (delete it) is not guessable from npm's "unknown git error".
+# fix is not guessable from npm's "unknown git error". Check the remote as well
+# as here: release-sync.sh fetches --tags, so a tag on origin is re-created
+# locally on every run and `git tag -d` alone accomplishes nothing.
 if [ "${1:-}" = "--check" ]; then
   TAG="${2:-}"
   [ -n "$TAG" ] || die "Usage: release-bump.sh --check <tag>"
+
+  ON_REMOTE=""
+  if git ls-remote --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+    ON_REMOTE="$(git ls-remote --tags origin "refs/tags/$TAG" 2>/dev/null | awk '{print $1}')"
+  fi
+
+  if [ -n "$ON_REMOTE" ]; then
+    die "Tag $TAG is on origin but this release would create it. If $TAG was really released, this release should be a later version. If it is debris from an aborted release, remove it — deleting it only locally will not help, because the next sync fetches it back: git push --delete origin $TAG"
+  fi
+
   if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
-    die "Tag $TAG already exists locally but this release would create it. It is left over from an aborted release — delete it with 'git tag -d $TAG' and re-run. (Check 'git ls-remote --tags origin $TAG' first; if the remote has it, this version was already released.)"
+    die "Tag $TAG exists locally (but not on origin) and this release would create it. It is left over from an aborted release — delete it with 'git tag -d $TAG' and re-run."
   fi
   exit 0
 fi
