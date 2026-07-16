@@ -59,6 +59,27 @@ export const Currency: Story = {
   },
 };
 
+export const PhoneNumber: Story = {
+  args: {label: 'Phone number'},
+  render: (args: InputGroupProps) => {
+    const [value, setValue] = useState('');
+    return (
+      <InputGroup {...args}>
+        <InputGroupText>+1</InputGroupText>
+        <TextInput
+          autoComplete="tel"
+          isLabelHidden
+          label="Phone number"
+          onChange={setValue}
+          placeholder="(555) 123-4567"
+          type="tel"
+          value={value}
+        />
+      </InputGroup>
+    );
+  },
+};
+
 export const WithStatus: Story = {
   args: {
     description: 'Enter a complete website host name.',
