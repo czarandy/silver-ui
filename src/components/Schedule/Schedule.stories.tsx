@@ -19,7 +19,10 @@ import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPo
 import {useScheduleEventResizePlugin} from 'components/Schedule/plugins/EventResizePlugin';
 import {useSchedulePaginationPlugin} from 'components/Schedule/plugins/PaginationPlugin';
 import {ScheduleEventPopoverContent} from 'components/Schedule/plugins/ScheduleEventPopoverContent';
-import {useScheduleViewSelectorPlugin} from 'components/Schedule/plugins/ViewSelectorPlugin';
+import {
+  useScheduleViewSelectorPlugin,
+  type ScheduleViewSelectorOption,
+} from 'components/Schedule/plugins/ViewSelectorPlugin';
 import type {
   CalendarEvent,
   Instant,
@@ -721,14 +724,19 @@ export const AsyncEventsWithToastError: Story = {
 export const ViewSelector: Story = {
   render: () => {
     const views = useMemo(
-      (): {label: string; view: ScheduleView}[] => [
-        {label: 'Month', view: createScheduleMonthlyView()},
+      (): ScheduleViewSelectorOption[] => [
+        {hotkey: 'm', label: 'Month', view: createScheduleMonthlyView()},
         {
+          hotkey: 'w',
           label: 'Week',
           view: createScheduleWeeklyView({maxHour: 18, minHour: 8}),
         },
-        {label: 'Day', view: createScheduleDayView({maxHour: 18, minHour: 8})},
-        {label: 'List', view: createScheduleListView({days: 7})},
+        {
+          hotkey: 'd',
+          label: 'Day',
+          view: createScheduleDayView({maxHour: 18, minHour: 8}),
+        },
+        {hotkey: 'l', label: 'List', view: createScheduleListView({days: 7})},
       ],
       [],
     );
