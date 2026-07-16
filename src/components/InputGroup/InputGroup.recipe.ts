@@ -1,9 +1,17 @@
 import type {InputSize, InputStatusType} from 'components/Field';
 import {cva, type RecipeVariantProps} from 'styled-system/css';
 
+// Popover layers (native `popover` elements, e.g. a Select's menu) render inline
+// as a sibling of the control they belong to rather than through a portal, so
+// they must not be treated as group items. `:first-child`/`:last-child` are
+// structural and would still resolve to the layer, so the edge radii are keyed
+// off `nth-child(... of :not([popover]))` — the first/last *real* control.
+const realItem = ':not([popover])';
 const addonSelector = '& > [data-silver-input-group-text]';
-const controlSelector = '& > :not([data-silver-input-group-text])';
-const itemSelector = '& > *';
+const controlSelector = `& > :not([data-silver-input-group-text])${realItem}`;
+const itemSelector = `& > *${realItem}`;
+const firstItemSelector = `& > *:nth-child(1 of ${realItem})`;
+const lastItemSelector = `& > *:nth-last-child(1 of ${realItem})`;
 
 const statusStyles = {
   error: {
@@ -30,14 +38,14 @@ export const inputGroupRecipe = cva({
       position: 'relative',
       borderRadius: 0,
     },
-    [`${itemSelector}:not(:first-child)`]: {
+    [`${itemSelector}:not(:nth-child(1 of ${realItem}))`]: {
       marginInlineStart: '-1px',
     },
-    [`${itemSelector}:first-child`]: {
+    [firstItemSelector]: {
       borderStartStartRadius: 'md',
       borderEndStartRadius: 'md',
     },
-    [`${itemSelector}:last-child`]: {
+    [lastItemSelector]: {
       borderStartEndRadius: 'md',
       borderEndEndRadius: 'md',
     },
