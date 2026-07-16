@@ -8,6 +8,7 @@ import {
 } from 'components/InputGroup/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {NumberInput} from 'components/NumberInput';
+import {Select} from 'components/Select';
 import {TextInput} from 'components/TextInput';
 
 const meta = {
@@ -74,6 +75,32 @@ export const PhoneNumber: Story = {
           placeholder="(555) 123-4567"
           type="tel"
           value={value}
+        />
+      </InputGroup>
+    );
+  },
+};
+
+export const WithSelect: Story = {
+  args: {label: 'Price'},
+  render: (args: InputGroupProps) => {
+    const [amount, setAmount] = useState<number | null>(24);
+    const [currency, setCurrency] = useState<string | null>('USD');
+    return (
+      <InputGroup {...args}>
+        <NumberInput
+          isLabelHidden
+          label="Amount"
+          min={0}
+          onChange={setAmount}
+          value={amount}
+        />
+        <Select
+          isLabelHidden
+          label="Currency"
+          onChange={setCurrency}
+          options={['USD', 'EUR', 'GBP']}
+          value={currency}
         />
       </InputGroup>
     );

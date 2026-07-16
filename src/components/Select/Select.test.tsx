@@ -3,6 +3,9 @@ import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
 import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {InputGroup} from 'components/InputGroup';
+import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {Select} from 'components/Select/Select';
 import {SelectOption} from 'components/Select/SelectOption';
 import {assertNonNull} from 'internal/testHelpers';
@@ -618,5 +621,185 @@ describe('SelectOption', () => {
     expect(ref).toHaveBeenCalledWith(option);
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- lucide icons are decorative SVGs
     expect(container.querySelector('.lucide-user')).toBeInTheDocument();
+  });
+
+  describe('inside an InputGroup', () => {
+    const noop = () => {};
+
+    it('exposes the label via aria-label rather than a field label', () => {
+      render(
+        <InputGroup label="Amount">
+          <Select
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Currency'});
+      expect(trigger).toHaveAttribute('aria-label', 'Currency');
+      // The group renders the field label, so no <label> is tied to the trigger.
+      // eslint-disable-next-line testing-library/no-node-access
+      expect(trigger.closest('label')).toBeNull();
+    });
+
+    it('is disabled when the group is disabled even if its own isDisabled is false', () => {
+      render(
+        <InputGroup isDisabled label="Amount">
+          <Select
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByRole('combobox', {name: 'Currency'})).toBeDisabled();
+    });
+
+    it('does not open when the group is disabled', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <InputGroup isDisabled label="Amount">
+          <Select
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Currency'});
+      await user.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('hides the clear button when the group is disabled', () => {
+      render(
+        <InputGroup isDisabled label="Amount">
+          <Select
+            hasClear
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      expect(
+        screen.queryByRole('button', {name: 'Clear Currency'}),
+      ).not.toBeInTheDocument();
+    });
+
+    it('inherits the group size', () => {
+      render(
+        <InputGroup label="Amount" size="lg">
+          <Select
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            size="sm"
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Currency'});
+      // eslint-disable-next-line testing-library/no-node-access -- the recipe classes land on the trigger wrapper, which has no role
+      const wrapper = trigger.parentElement;
+      expect(wrapper).toHaveClass(inputRecipe({size: 'lg'}));
+    });
+
+    it('applies the group status type to the trigger wrapper', () => {
+      render(
+        <InputGroup label="Amount" status={{message: 'Bad', type: 'error'}}>
+          <Select
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Currency'});
+      // eslint-disable-next-line testing-library/no-node-access -- the recipe classes land on the trigger wrapper, which has no role
+      expect(trigger.parentElement).toHaveClass(inputRecipe({status: 'error'}));
+      // Group status styling must not flag the field as invalid.
+      expect(trigger).not.toHaveAttribute('aria-invalid');
+    });
+
+    it('forwards className and style to the wrapper instead of a field', () => {
+      const {container} = render(
+        <InputGroup label="Amount">
+          <Select
+            className="custom-wrapper"
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            style={{maxWidth: 200}}
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      const wrapper = container.querySelector('.custom-wrapper');
+      expect(wrapper).toBeInTheDocument();
+      expect(wrapper).toHaveStyle({maxWidth: '200px'});
+      expect(wrapper).toContainElement(screen.getByRole('combobox'));
+      // It must be the trigger wrapper itself, not a Field root wrapped around
+      // it -- the group owns the label, so no field should be rendered.
+      expect(wrapper).toHaveClass(inputRecipe({size: 'md'}));
+    });
+
+    it('renders its popover layer outside the group item flow', () => {
+      render(
+        <InputGroup label="Amount">
+          <InputGroupText>$</InputGroupText>
+          <Select
+            isLabelHidden
+            label="Currency"
+            onChange={noop}
+            options={['USD', 'EUR']}
+            value="USD"
+          />
+        </InputGroup>,
+      );
+
+      const group = screen.getByRole('group');
+      /* eslint-disable testing-library/no-node-access -- asserting the group's
+         own child structure is the point of this test: the recipe keys its
+         border/radius rules off child position, so which nodes are direct
+         children of the group is exactly what must be pinned. */
+      const children = Array.from(group.children);
+      // The menu renders inline as a sibling of the trigger rather than through
+      // a portal, so it really is a direct child of the group.
+      expect(
+        children.filter(child => child.hasAttribute('popover')),
+      ).toHaveLength(1);
+
+      // ...but only the addon and the trigger are real group items. The trigger
+      // must be the direct child so the group's border/radius rules land on it.
+      const items = children.filter(child => !child.hasAttribute('popover'));
+      const trigger = screen.getByRole('combobox', {name: 'Currency'});
+      expect(items).toHaveLength(2);
+      expect(items[1]).toBe(trigger.parentElement);
+      expect(items[1]).toHaveClass(inputRecipe({size: 'md'}));
+      /* eslint-enable testing-library/no-node-access */
+    });
   });
 });
