@@ -63,6 +63,24 @@ describe('InputGroup', () => {
     expect(group).toHaveAttribute('aria-describedby');
   });
 
+  it('supports detached status messages', () => {
+    render(
+      <InputGroup
+        label="Price"
+        status={{message: 'Price is required', type: 'error'}}
+        statusVariant="detached">
+        <InputGroupText>$</InputGroupText>
+        <TextInput isLabelHidden label="Amount" onChange={() => {}} value="" />
+      </InputGroup>,
+    );
+
+    const detachedField = fieldRecipe({
+      statusType: 'error',
+      statusVariant: 'detached',
+    });
+    expect(screen.getByRole('alert')).toHaveClass(detachedField.status ?? '');
+  });
+
   it('applies data-testid, className, style, and ref', () => {
     const ref = vi.fn<(el: HTMLDivElement | null) => void>();
 

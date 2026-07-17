@@ -11,6 +11,7 @@ import {
   Field,
   getNecessity,
   type FieldNecessity,
+  type FieldStatusVariant,
   type InputSize,
   type InputStatus,
 } from 'components/Field';
@@ -68,6 +69,11 @@ export type InputGroupProps = {
    */
   status?: InputStatus;
   /**
+   * How the status message is positioned.
+   * @default 'attached'
+   */
+  statusVariant?: FieldStatusVariant;
+  /**
    * Inline styles applied to the group wrapper.
    */
   style?: CSSProperties;
@@ -86,6 +92,7 @@ export function InputGroup({
   isRequired,
   size = 'md',
   status,
+  statusVariant = 'attached',
   labelTooltip,
   className,
   'data-testid': dataTestId,
@@ -126,7 +133,8 @@ export function InputGroup({
         {...necessity}
         label={label}
         labelTooltip={labelTooltip}
-        status={status == null ? undefined : {...status, messageID: statusID}}>
+        status={status == null ? undefined : {...status, messageID: statusID}}
+        statusVariant={statusVariant}>
         <div
           aria-describedby={describedBy}
           aria-disabled={isDisabled || undefined}

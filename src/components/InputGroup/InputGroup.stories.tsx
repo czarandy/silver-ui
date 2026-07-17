@@ -201,6 +201,28 @@ export const WithStatus: Story = {
   },
 };
 
+export const WithDetachedStatus: Story = {
+  args: {
+    label: 'Website',
+    status: {message: 'Website is required', type: 'error'},
+    statusVariant: 'detached',
+  },
+  render: (args: InputGroupProps) => {
+    const [value, setValue] = useState('');
+    return (
+      <InputGroup {...args}>
+        <InputGroupText>https://</InputGroupText>
+        <TextInput
+          isLabelHidden
+          label="URL"
+          onChange={setValue}
+          value={value}
+        />
+      </InputGroup>
+    );
+  },
+};
+
 export const Disabled: Story = {
   args: {isDisabled: true},
   render: (args: InputGroupProps) => (
