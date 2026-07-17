@@ -16,6 +16,20 @@ describe('Thumbnail', () => {
     expect(screen.getByTestId('thumbnail')).toBeInTheDocument();
   });
 
+  it('exposes the root accessible name on a group role', () => {
+    render(
+      <Thumbnail
+        alt="Quarterly report"
+        label="report-q3.pdf"
+        src="/thumb.png"
+      />,
+    );
+
+    expect(
+      screen.getByRole('group', {name: 'report-q3.pdf'}),
+    ).toBeInTheDocument();
+  });
+
   it('calls click and remove handlers', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

@@ -166,6 +166,7 @@ export function Thumbnail({
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
+      role="group"
       style={style}>
       <ThumbnailImageArea
         accessibleName={accessibleName}
