@@ -325,12 +325,13 @@ export function Calendar({
   });
   const viewDate = isViewDateControlled ? viewDateFromProps : internalViewDate;
   const baseMonth = useMemo(() => viewDate.with({day: 1}), [viewDate]);
+  const effectiveNumberOfMonths = numberOfMonths === 2 ? 2 : 1;
   const visibleMonths = useMemo(
     () =>
-      Array.from({length: numberOfMonths}, (_, index) =>
+      Array.from({length: effectiveNumberOfMonths}, (_, index) =>
         baseMonth.add({months: index}),
       ),
-    [baseMonth, numberOfMonths],
+    [baseMonth, effectiveNumberOfMonths],
   );
   const monthYearLabel = useMemo(
     () =>

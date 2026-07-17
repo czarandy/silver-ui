@@ -279,6 +279,19 @@ describe('DateRangeInput', () => {
   });
 
   describe('calendar popover', () => {
+    it('falls back to one month for an invalid numberOfMonths', () => {
+      render(
+        <DateRangeInput
+          label="Window"
+          numberOfMonths={500 as 1 | 2}
+          onChange={() => {}}
+          value={defaultRange}
+        />,
+      );
+
+      expect(screen.getAllByRole('grid', {hidden: true})).toHaveLength(1);
+    });
+
     it('opens the calendar, commits a selected range, and closes', async () => {
       const user = userEvent.setup();
       const onChange = vi.fn();
