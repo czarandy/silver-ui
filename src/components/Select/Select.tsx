@@ -18,6 +18,7 @@ import {
 } from 'components/Field';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {Icon, type IconComponent} from 'components/Icon';
+import {useInputGroup} from 'components/InputGroup';
 import {Popover} from 'components/Popover';
 import {
   selectMenuRecipe,
@@ -197,12 +198,17 @@ export function Select({
   ref,
   renderOption: renderOptionProp,
   searchPlaceholder = 'Search...',
-  size = 'md',
+  size: sizeProp = 'md',
   startIcon,
   status,
   style,
   value,
 }: SelectProps): React.JSX.Element {
+  const inputGroup = useInputGroup();
+  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const size = inputGroup?.size ?? sizeProp;
+  const effectiveStatusType = status?.type ?? inputGroup?.statusType;
+
   const selectedValues = useMemo(
     () => (value == null ? new Set<string>() : new Set([value])),
     [value],
@@ -243,7 +249,7 @@ export function Select({
     triggerRef,
   } = useSelectListbox({
     description,
-    isDisabled,
+    isDisabled: effectiveDisabled,
     isLoading,
     isListboxClosedOnCommit: true,
     isQueryClearedOnCommit: true,
@@ -364,17 +370,19 @@ export function Select({
       className={cx(
         inputRecipe({
           size,
-          status: status?.type,
-          isDisabled,
+          status: effectiveStatusType,
+          isDisabled: effectiveDisabled,
         }),
         triggerClasses.wrapper,
+        inputGroup != null ? className : undefined,
       )}
       onClick={() => {
         if (!isInteractionDisabled) {
           setIsOpen(currentIsOpen => !currentIsOpen);
         }
       }}
-      ref={triggerRef}>
+      ref={triggerRef}
+      style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={menuClasses.iconSlot}>
           <Icon color="secondary" icon={startIcon} size="sm" />
@@ -388,6 +396,7 @@ export function Select({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
+        aria-label={inputGroup != null ? label : undefined}
         className={triggerClasses.trigger}
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
@@ -401,7 +410,7 @@ export function Select({
         </span>
       </button>
       {isLoading ? <Spinner size="sm" /> : null}
-      {hasClear && selectedOption != null && !isDisabled ? (
+      {hasClear && selectedOption != null && !effectiveDisabled ? (
         <Button
           icon={X}
           isIconOnly
@@ -420,6 +429,27 @@ export function Select({
     </div>
   );
 
+  const popover = (
+    <Popover
+      anchorRef={triggerRef}
+      content={menu}
+      hasAutoFocus={hasSearch}
+      hasCloseButton={false}
+      isEnabled={false}
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+    />
+  );
+
+  if (inputGroup != null) {
+    return (
+      <>
+        {trigger}
+        {popover}
+      </>
+    );
+  }
+
   return (
     <Field
       className={className}
@@ -437,15 +467,7 @@ export function Select({
       }
       style={style}>
       {trigger}
-      <Popover
-        anchorRef={triggerRef}
-        content={menu}
-        hasAutoFocus={hasSearch}
-        hasCloseButton={false}
-        isEnabled={false}
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-      />
+      {popover}
     </Field>
   );
 }

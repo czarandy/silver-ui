@@ -94,8 +94,9 @@ command -v gh >/dev/null 2>&1 || die "GitHub CLI ('gh') not found. Install it: h
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "Not inside a git repository."
 
 # CI publishes via a GitHub Release, so we need gh auth — not npm auth — locally.
-gh auth status >/dev/null 2>&1 || die "Not logged in to GitHub CLI. Run 'gh auth login' first."
-ok "Authenticated to GitHub CLI"
+# Delegated so a GitHub outage isn't misreported as a broken login (see the
+# script's header for why `gh auth status` alone is not enough).
+bash "$SCRIPT_DIR/release-gh-auth.sh" || exit 1
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 if [ "$BRANCH" != "main" ]; then
@@ -166,6 +167,13 @@ else
   ok "Release type: $RELEASE_TYPE  (next version computed by npm)"
 fi
 
+# Catch a leftover tag now rather than after the full test+build gate. Skipped
+# for pre-releases, whose exact tag only npm can compute; the bump rolls itself
+# back if it hits one.
+if [ -n "$NEXT_VERSION" ]; then
+  bash "$SCRIPT_DIR/release-bump.sh" --check "v$NEXT_VERSION" || exit 1
+fi
+
 IS_PRERELEASE=0
 [[ "$RELEASE_TYPE" == pre* ]] && IS_PRERELEASE=1
 
@@ -227,23 +235,24 @@ if [ -z "$NOTES_FILE" ] && [ -z "$NOTES_TEXT" ]; then
   [ -z "$DEFAULT_NOTES" ] && DEFAULT_NOTES="- (no changes since ${PREV_TAG:-the previous release})"
 fi
 
+# Where to restore to if the bump or the push fails partway.
+PRE_BUMP_SHA="$(git rev-parse HEAD)"
+
 # 1. Version bump — updates package.json, commits, and creates a tag (vX.Y.Z).
+#    Delegated so a failed bump rolls itself back instead of stranding an
+#    unpushed commit on the branch (see the script's header).
 if [ "$IS_PRERELEASE" -eq 1 ]; then
-  NEW_TAG="$(npm version "$RELEASE_TYPE" --preid="$PREID")"
+  NEW_TAG="$(bash "$SCRIPT_DIR/release-bump.sh" "$RELEASE_TYPE" "$PREID")"
 else
-  NEW_TAG="$(npm version "$RELEASE_TYPE")"
+  NEW_TAG="$(bash "$SCRIPT_DIR/release-bump.sh" "$RELEASE_TYPE")"
 fi
 ok "Bumped to $NEW_TAG (commit + tag created)"
 
-# 2. Push commit + tag. Roll back locally if the push fails so we can retry.
+# 2. Push commit + tag. Delegated because `git push --follow-tags` can land the
+#    tag while rejecting the branch; the rollback has to clean up origin too, or
+#    the stray tag wedges every future release (see the script's header).
 info "Pushing commit and tag to origin"
-if ! git push --follow-tags; then
-  warn "Push failed. Rolling back the version commit and tag."
-  git tag -d "$NEW_TAG" 2>/dev/null || true
-  git reset --hard HEAD~1
-  die "Push failed — repository restored to pre-bump state. Fix the issue and re-run."
-fi
-ok "Pushed commit and tag to origin"
+bash "$SCRIPT_DIR/release-push.sh" "$NEW_TAG" "$PRE_BUMP_SHA" || exit 1
 
 # 3. Create the GitHub Release. This is what triggers the publish workflow.
 #    Marking a pre-release tells CI to publish under the 'next' dist-tag.
