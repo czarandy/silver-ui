@@ -56,7 +56,7 @@ describe('Card', () => {
     expect(screen.getByTestId('card')).toHaveClass('silver-bg_bg.subtle');
   });
 
-  it('applies the section variant class', () => {
+  it('keeps the parity border on the section variant', () => {
     render(
       <Card data-testid="card" variant="section">
         Content
@@ -65,7 +65,7 @@ describe('Card', () => {
 
     const card = screen.getByTestId('card');
     expect(card).toHaveClass('silver-bdr_0');
-    expect(card).toHaveClass('silver-bd-w_0');
+    expect(card).toHaveClass('silver-bd-w_default');
   });
 
   it('applies a color class', () => {
@@ -87,7 +87,7 @@ describe('Card', () => {
 
     const card = screen.getByTestId('card');
     expect(card).toHaveClass('silver-bdr_0');
-    expect(card).toHaveClass('silver-bd-w_0');
+    expect(card).toHaveClass('silver-bd-w_default');
     expect(card).toHaveClass('silver-bg_surface.blue');
   });
 
