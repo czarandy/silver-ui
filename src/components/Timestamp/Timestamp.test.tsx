@@ -48,6 +48,22 @@ describe('Timestamp.utils', () => {
       const threeDaysEarlier = REFERENCE_MS - 3 * 86400 * 1000;
       expect(formatRelative(REFERENCE, threeDaysEarlier)).toBe('in 3 days');
     });
+
+    it.each([
+      [-3599, '59 minutes ago'],
+      [-3571, '59 minutes ago'],
+      [-3570, '59 minutes ago'],
+      [-86399, '23 hours ago'],
+      [-84601, '23 hours ago'],
+      [3599, 'in 59 minutes'],
+      [86399, 'in 23 hours'],
+    ])(
+      'does not round a %i-second difference up to the next relative unit',
+      (diffSeconds, expected) => {
+        const nowMs = REFERENCE_MS - diffSeconds * 1000;
+        expect(formatRelative(REFERENCE, nowMs)).toBe(expected);
+      },
+    );
   });
 
   describe('formatAbsolute', () => {
