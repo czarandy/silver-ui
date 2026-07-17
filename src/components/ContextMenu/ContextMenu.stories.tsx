@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Copy, Download, Pencil, Trash} from 'lucide-react';
+import {useEffect, useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Card} from 'components/Card';
 import {ContextMenu, ContextMenuItem} from 'components/ContextMenu/ContextMenu';
@@ -11,6 +12,31 @@ import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
 
 const styles = {
+  edgeTarget: css({
+    alignSelf: 'flex-end',
+    mt: 'auto',
+  }),
+  positioningExample: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '3',
+  }),
+  scrollContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    minH: '160',
+    minW: '160',
+    p: '4',
+  }),
+  scrollRegion: css({
+    h: '80',
+    overflow: 'auto',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'border',
+    borderRadius: 'md',
+    bg: 'bg.subtle',
+  }),
   target: css({
     display: 'grid',
     minH: '40',
@@ -25,6 +51,69 @@ const styles = {
     py: '8',
   }),
 } as const;
+
+function GrowingMenuContent(): React.JSX.Element {
+  const [hasGrown, setHasGrown] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setHasGrown(true), 800);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  return (
+    <>
+      <ContextMenuItem icon={Pencil} label="Rename" />
+      <ContextMenuItem icon={Copy} label="Duplicate" />
+      {hasGrown ? (
+        <>
+          <Divider />
+          <ContextMenuItem label="Move to project" />
+          <ContextMenuItem label="Share link" />
+          <ContextMenuItem icon={Download} label="Export archive" />
+          <ContextMenuItem icon={Trash} label="Delete" />
+        </>
+      ) : null}
+    </>
+  );
+}
+
+function PositioningAndScrollExample(): React.JSX.Element {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className={styles.positioningExample}>
+      <Text color="secondary" type="supporting">
+        Scroll to the bottom-right target and right-click it. Scrolling this
+        region again dismisses the menu. If left open, the menu grows after a
+        moment so its edge flipping can be checked at narrow canvas sizes.
+      </Text>
+      <div className={styles.scrollRegion}>
+        <div className={styles.scrollContent}>
+          <Text color="secondary" type="supporting">
+            Scroll down and right
+          </Text>
+          <div className={styles.edgeTarget}>
+            <ContextMenu
+              menuContent={
+                isOpen ? (
+                  <GrowingMenuContent />
+                ) : (
+                  <ContextMenuItem icon={Pencil} label="Rename" />
+                )
+              }
+              onOpenChange={setIsOpen}>
+              <div className={styles.target}>
+                <Text as="span" type="body">
+                  Right-click near the edge
+                </Text>
+              </div>
+            </ContextMenu>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const meta = {
   title: 'Components/ContextMenu',
@@ -228,6 +317,10 @@ export const Sections: Story = {
       </div>
     </ContextMenu>
   ),
+};
+
+export const PositioningAndScroll: Story = {
+  render: (): React.JSX.Element => <PositioningAndScrollExample />,
 };
 
 export const CardTrigger: Story = {
