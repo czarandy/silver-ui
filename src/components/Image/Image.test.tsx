@@ -5,10 +5,6 @@ import {Image, type ImageObjectFit} from 'components/Image/Image';
 import {imageRecipe} from 'components/Image/Image.recipe';
 import {assertNonNull} from 'internal/testHelpers';
 
-function getMedia(root: HTMLElement): HTMLDivElement {
-  return assertNonNull(root.firstElementChild) as HTMLDivElement;
-}
-
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -81,17 +77,27 @@ describe('Image', () => {
     );
 
     const root = screen.getByTestId('image-root');
-    const media = getMedia(root);
     const image = screen.getByRole('img', {name: 'Landscape'});
-    expect(media).toHaveAttribute('aria-busy', 'true');
+    expect(root).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByRole('status', {name: 'Loading'})).toBeInTheDocument();
     expect(image).toHaveClass('silver-vis_hidden');
 
     fireEvent.load(image);
 
-    expect(media).not.toHaveAttribute('aria-busy');
+    expect(root).not.toHaveAttribute('aria-busy');
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(image).toHaveClass('silver-vis_visible');
+  });
+
+  it('wraps the image in a single element', () => {
+    render(
+      <Image alt="Landscape" data-testid="image-root" src="/landscape.jpg" />,
+    );
+
+    const root = screen.getByTestId('image-root');
+    const image = screen.getByRole('img', {name: 'Landscape'});
+    // eslint-disable-next-line testing-library/no-node-access -- pinning that the image is a direct child (no intermediate wrapper) is the point of this test
+    expect(image.parentElement).toBe(root);
   });
 
   it('calls onLoad while updating internal state', () => {
@@ -157,7 +163,7 @@ describe('Image', () => {
 
     const image = screen.getByRole('img', {name: 'Product'});
     expect(image).toHaveAttribute('src', '/new.jpg');
-    expect(getMedia(screen.getByTestId('image-root'))).toHaveAttribute(
+    expect(screen.getByTestId('image-root')).toHaveAttribute(
       'aria-busy',
       'true',
     );
@@ -186,11 +192,40 @@ describe('Image', () => {
 
     const image = screen.getByRole('img', {name: 'Product'});
     expect(image).toHaveAttribute('srcset', '/new-large.jpg 2x');
-    expect(getMedia(screen.getByTestId('image-root'))).toHaveAttribute(
+    expect(screen.getByTestId('image-root')).toHaveAttribute(
       'aria-busy',
       'true',
     );
     expect(screen.getByRole('status', {name: 'Loading'})).toBeInTheDocument();
+  });
+
+  it('does not reset the loaded state when only sizes changes', () => {
+    const {rerender} = render(
+      <Image
+        alt="Product"
+        data-testid="image-root"
+        sizes="(max-width: 600px) 100vw, 600px"
+        src="/product.jpg"
+        srcSet="/product-small.jpg 400w, /product-large.jpg 800w"
+      />,
+    );
+
+    fireEvent.load(screen.getByRole('img', {name: 'Product'}));
+    rerender(
+      <Image
+        alt="Product"
+        data-testid="image-root"
+        sizes="(max-width: 900px) 100vw, 900px"
+        src="/product.jpg"
+        srcSet="/product-small.jpg 400w, /product-large.jpg 800w"
+      />,
+    );
+
+    const image = screen.getByRole('img', {name: 'Product'});
+    expect(image).toHaveAttribute('sizes', '(max-width: 900px) 100vw, 900px');
+    expect(image).toHaveClass('silver-vis_visible');
+    expect(screen.getByTestId('image-root')).not.toHaveAttribute('aria-busy');
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
   it('reveals an already-complete cached image', () => {
@@ -210,12 +245,33 @@ describe('Image', () => {
     );
 
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
-    expect(getMedia(screen.getByTestId('image-root'))).not.toHaveAttribute(
-      'aria-busy',
-    );
+    expect(screen.getByTestId('image-root')).not.toHaveAttribute('aria-busy');
     expect(screen.getByRole('img', {name: 'Cached landscape'})).toHaveClass(
       'silver-vis_visible',
     );
+  });
+
+  it('shows the fallback for an already-complete broken cached image', () => {
+    vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(
+      true,
+    );
+    vi.spyOn(HTMLImageElement.prototype, 'naturalWidth', 'get').mockReturnValue(
+      0,
+    );
+
+    render(
+      <Image alt="Broken product" data-testid="image-root" src="/broken.jpg" />,
+    );
+
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByTestId('image-root')).not.toHaveAttribute('aria-busy');
+    expect(screen.getByAltText('Broken product')).toHaveAttribute(
+      'aria-hidden',
+      'true',
+    );
+    expect(
+      screen.getByRole('img', {name: 'Broken product'}),
+    ).toBeInTheDocument();
   });
 
   it('applies all object-fit variants and defaults to cover', () => {

@@ -1,7 +1,7 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const imageRecipe = sva({
-  slots: ['root', 'media', 'image', 'loading', 'fallback'],
+  slots: ['root', 'image', 'loading', 'fallback'],
   base: {
     root: {
       position: 'relative',
@@ -9,11 +9,6 @@ export const imageRecipe = sva({
       w: 'full',
       h: 'full',
       overflow: 'hidden',
-    },
-    media: {
-      position: 'relative',
-      w: 'full',
-      h: 'full',
     },
     image: {
       display: 'block',

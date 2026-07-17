@@ -94,37 +94,42 @@ export interface ImageProps extends NativeImageProps {
 }
 
 type ImageState = 'error' | 'loaded' | 'loading';
-type ImageEventHandler = ComponentPropsWithoutRef<'img'>['onLoad'];
-type ImageErrorEventHandler = ComponentPropsWithoutRef<'img'>['onError'];
-type ForwardedImageProps = Omit<NativeImageProps, 'onError' | 'onLoad'>;
 
-interface ImageMediaProps extends ForwardedImageProps {
-  alt: string;
-  decoding: NonNullable<ImageProps['decoding']>;
-  fallback?: ReactNode;
-  loading: NonNullable<ImageProps['loading']>;
-  objectFit: ImageObjectFit;
-  onError?: ImageErrorEventHandler;
-  onLoad?: ImageEventHandler;
-  sizes?: string;
-  src: string;
-  srcSet?: string;
-}
-
-function ImageMedia({
+/**
+ * Responsive image with lazy loading, async decoding, and an error fallback.
+ * Reserve layout space with native dimensions, wrapper sizing, or
+ * `AspectRatio`.
+ */
+export function Image({
   alt,
-  decoding,
+  className,
+  'data-testid': dataTestId,
+  decoding = 'async',
   fallback,
-  loading,
-  objectFit,
+  loading = 'lazy',
+  objectFit = 'cover',
   onError,
   onLoad,
+  ref,
   sizes,
   src,
   srcSet,
+  style,
   ...imageProps
-}: ImageMediaProps): React.JSX.Element {
+}: ImageProps): React.JSX.Element {
+  // `sizes` is intentionally excluded: it tweaks source selection but does not
+  // change the underlying resource, so it should not force a reload/reset.
+  const sourceKey = JSON.stringify([src, srcSet]);
   const [imageState, setImageState] = useState<ImageState>('loading');
+  // Reset to loading when the source changes. The keyed <img> below remounts on
+  // the same change, so `imageRef` re-runs and reveals already-cached images
+  // synchronously (no skeleton flash).
+  const [prevSourceKey, setPrevSourceKey] = useState(sourceKey);
+  if (sourceKey !== prevSourceKey) {
+    setPrevSourceKey(sourceKey);
+    setImageState('loading');
+  }
+
   const classes = imageRecipe({
     isLoaded: imageState === 'loaded',
     objectFit,
@@ -138,8 +143,12 @@ function ImageMedia({
   return (
     <div
       aria-busy={imageState === 'loading' || undefined}
-      className={classes.media}>
+      className={cx(classes.root, className)}
+      data-testid={dataTestId}
+      ref={ref}
+      style={style}>
       <img
+        key={sourceKey}
         {...imageProps}
         alt={alt}
         aria-hidden={imageState === 'error' || undefined}
@@ -171,55 +180,6 @@ function ImageMedia({
           )}
         </div>
       ) : null}
-    </div>
-  );
-}
-
-/**
- * Responsive image with lazy loading, async decoding, and an error fallback.
- * Reserve layout space with native dimensions, wrapper sizing, or
- * `AspectRatio`.
- */
-export function Image({
-  alt,
-  className,
-  'data-testid': dataTestId,
-  decoding = 'async',
-  fallback,
-  loading = 'lazy',
-  objectFit = 'cover',
-  onError,
-  onLoad,
-  ref,
-  sizes,
-  src,
-  srcSet,
-  style,
-  ...imageProps
-}: ImageProps): React.JSX.Element {
-  const classes = imageRecipe();
-  const sourceKey = JSON.stringify([src, srcSet, sizes]);
-
-  return (
-    <div
-      className={cx(classes.root, className)}
-      data-testid={dataTestId}
-      ref={ref}
-      style={style}>
-      <ImageMedia
-        key={sourceKey}
-        {...imageProps}
-        alt={alt}
-        decoding={decoding}
-        fallback={fallback}
-        loading={loading}
-        objectFit={objectFit}
-        onError={onError}
-        onLoad={onLoad}
-        sizes={sizes}
-        src={src}
-        srcSet={srcSet}
-      />
     </div>
   );
 }
