@@ -93,7 +93,7 @@ describe('ContextMenu', () => {
       getAnchorName(anchor),
     );
     expect(getStyleProperty(layer, 'positionArea')).toBe(
-      'bottom span-inline-end',
+      'block-end span-inline-end',
     );
     expect(getStyleProperty(layer, 'positionTryFallbacks')).toBe(
       'flip-block, flip-inline, flip-block flip-inline',

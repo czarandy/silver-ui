@@ -2887,7 +2887,7 @@ describe('Schedule', () => {
       // eslint-disable-next-line testing-library/no-node-access
       const layer = document.getElementById(layerId ?? '');
       const style = layer?.getAttribute('style') ?? '';
-      expect(layer?.style.positionArea).toBe('inline-end span-bottom');
+      expect(layer?.style.positionArea).toBe('inline-end span-block-end');
       expect(style).toContain('margin-inline-start: 8px');
     });
 
