@@ -128,7 +128,7 @@ describe('useHotkey', () => {
     const handler = vi.fn();
     renderHook(() =>
       useHotkey('k', handler, {
-        preventDefault: true,
+        hasPreventDefault: true,
       }),
     );
 
@@ -168,7 +168,7 @@ describe('useHotkey', () => {
 
   it('always ignores native composition and Safari keyCode 229 events', () => {
     const handler = vi.fn();
-    renderHook(() => useHotkey('k', handler, {preventDefault: true}));
+    renderHook(() => useHotkey('k', handler, {hasPreventDefault: true}));
 
     const composingEvent = dispatchKey(document, 'k', {isComposing: true});
     const safariEvent = new KeyboardEvent('keydown', {
@@ -218,7 +218,7 @@ describe('useHotkey', () => {
     const handler = vi.fn();
     render(
       <>
-        <Hotkey handler={handler} options={{enableOnFormElements: true}} />
+        <Hotkey handler={handler} options={{isEnabledOnFormElements: true}} />
         <input aria-label="input" />
       </>,
     );
@@ -288,11 +288,13 @@ describe('useHotkey', () => {
     const firstHandler = vi.fn();
     const nextHandler = vi.fn();
     const {rerender} = render(
-      <Hotkey handler={firstHandler} options={{preventDefault: false}} />,
+      <Hotkey handler={firstHandler} options={{hasPreventDefault: false}} />,
     );
 
     fireEvent.keyDown(document, {key: 'k'});
-    rerender(<Hotkey handler={nextHandler} options={{preventDefault: true}} />);
+    rerender(
+      <Hotkey handler={nextHandler} options={{hasPreventDefault: true}} />,
+    );
     const event = dispatchKey(document, 'k');
 
     expect(firstHandler).toHaveBeenCalledOnce();

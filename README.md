@@ -252,9 +252,10 @@ elsewhere.
 
 The listener targets `document` by default; pass `target: 'window'` or a React
 ref to listen elsewhere. It is enabled by default and does not call
-`preventDefault()` unless requested. Composition events are always ignored,
-and shortcuts do not fire from inputs, selects, textareas, editable content, or
-textbox roles unless `enableOnFormElements: true` is set. Sequences and priority
+`preventDefault()` unless `hasPreventDefault: true` is set. Composition events
+are always ignored, and shortcuts do not fire from inputs, selects, textareas,
+editable content, or textbox roles unless `isEnabledOnFormElements: true` is
+set. Sequences and priority
 arbitration between duplicate registrations are not supported.
 
 ---

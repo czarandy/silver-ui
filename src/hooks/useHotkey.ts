@@ -20,20 +20,20 @@ export type HotkeyTarget =
 
 export interface UseHotkeyOptions {
   /**
-   * Whether shortcuts may fire from inputs and other editable elements.
+   * Whether to suppress the matched browser shortcut before calling `handler`.
    * @default false
    */
-  enableOnFormElements?: boolean;
+  hasPreventDefault?: boolean;
   /**
    * Whether the hotkey listener is active.
    * @default true
    */
   isEnabled?: boolean;
   /**
-   * Whether to suppress the matched browser shortcut before calling `handler`.
+   * Whether shortcuts may fire from inputs and other editable elements.
    * @default false
    */
-  preventDefault?: boolean;
+  isEnabledOnFormElements?: boolean;
   /**
    * Where to listen for keydown events.
    * @default 'document'
@@ -127,17 +127,17 @@ const useHotkey = (
   handler: HotkeyHandler,
   {
     isEnabled = true,
-    enableOnFormElements = false,
-    preventDefault = false,
+    isEnabledOnFormElements = false,
+    hasPreventDefault = false,
     target = 'document',
   }: UseHotkeyOptions = {},
 ): void => {
   const descriptor = useMemo(() => parseHotkeyDescriptor(keys), [keys]);
   const currentRef = useLatest({
     descriptor,
-    enableOnFormElements,
     handler,
-    preventDefault,
+    hasPreventDefault,
+    isEnabledOnFormElements,
   });
   const registrationRef = useRef<HotkeyRegistration | null>(null);
 
@@ -148,13 +148,13 @@ const useHotkey = (
       if (
         current.descriptor == null ||
         isComposingEvent(keyboardEvent) ||
-        (!current.enableOnFormElements && isEditableTarget(event.target)) ||
+        (!current.isEnabledOnFormElements && isEditableTarget(event.target)) ||
         !matchesHotkey(keyboardEvent, current.descriptor)
       ) {
         return;
       }
 
-      if (current.preventDefault) {
+      if (current.hasPreventDefault) {
         keyboardEvent.preventDefault();
       }
       current.handler(keyboardEvent);

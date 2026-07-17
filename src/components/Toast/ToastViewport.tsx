@@ -177,8 +177,8 @@ export function ToastViewport({
 
   useHotkey('f6', () => viewportRef.current?.focus(), {
     isEnabled: toasts.length > 0,
-    enableOnFormElements: true,
-    preventDefault: true,
+    isEnabledOnFormElements: true,
+    hasPreventDefault: true,
   });
 
   const addToast = useCallback((entry: ToastEntry) => {

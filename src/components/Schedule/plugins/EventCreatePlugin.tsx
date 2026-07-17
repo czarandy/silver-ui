@@ -575,7 +575,7 @@ export function useScheduleEventCreatePlugin(
   }, [dismiss, endDrag]);
 
   useHotkey('escape', handlePointerCancel, {
-    enableOnFormElements: true,
+    isEnabledOnFormElements: true,
     target: 'window',
   });
 

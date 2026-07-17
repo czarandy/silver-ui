@@ -146,7 +146,7 @@ function HotkeyDemo(): React.JSX.Element {
 
   useHotkey('mod+k', () => setTriggerCount(count => count + 1), {
     isEnabled,
-    preventDefault: true,
+    hasPreventDefault: true,
   });
 
   return (
