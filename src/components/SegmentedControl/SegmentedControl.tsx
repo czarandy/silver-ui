@@ -1,11 +1,14 @@
 'use client';
 
 import {
+  Children,
+  isValidElement,
   useCallback,
   useMemo,
   useRef,
   type CSSProperties,
   type KeyboardEvent,
+  type ReactElement,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -15,6 +18,10 @@ import {
   type SegmentedControlLayout,
   type SegmentedControlSize,
 } from 'components/SegmentedControl/SegmentedControlContext';
+import {
+  SegmentedControlItem,
+  type SegmentedControlItemProps,
+} from 'components/SegmentedControl/SegmentedControlItem';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {mergeRefs} from 'internal/mergeRefs';
@@ -65,9 +72,21 @@ export interface SegmentedControlProps<TValue extends string = string> {
    */
   style?: CSSProperties;
   /**
-   * Current selected value.
+   * Current selected value, or `undefined` when no segment is selected.
    */
-  value: TValue;
+  value?: TValue;
+}
+
+function getEnabledItemValues(children: ReactNode): string[] {
+  // eslint-disable-next-line @eslint-react/no-children-to-array -- the control owns its SegmentedControlItem children and needs their render order for the roving tab stop
+  return Children.toArray(children)
+    .filter(
+      (child): child is ReactElement<SegmentedControlItemProps<string>> =>
+        isValidElement<SegmentedControlItemProps<string>>(child) &&
+        child.type === SegmentedControlItem,
+    )
+    .filter(child => child.props.isDisabled !== true)
+    .map(child => child.props.value);
 }
 
 /**
@@ -98,9 +117,27 @@ export function SegmentedControl<TValue extends string = string>({
     },
     [onChange],
   );
+  const tabStopValue = useMemo(() => {
+    if (isDisabled) {
+      return undefined;
+    }
+
+    const enabledItemValues = getEnabledItemValues(children);
+    return (
+      enabledItemValues.find(itemValue => itemValue === value) ??
+      enabledItemValues[0]
+    );
+  }, [children, isDisabled, value]);
   const contextValue = useMemo(
-    () => ({isDisabled, layout, onChange: handleChange, size, value}),
-    [handleChange, isDisabled, layout, size, value],
+    () => ({
+      isDisabled,
+      layout,
+      onChange: handleChange,
+      size,
+      tabStopValue,
+      value,
+    }),
+    [handleChange, isDisabled, layout, size, tabStopValue, value],
   );
   const classes = segmentedControlRecipe({isDisabled, layout, size});
 

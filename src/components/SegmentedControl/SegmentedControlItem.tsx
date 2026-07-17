@@ -88,7 +88,7 @@ export function SegmentedControlItem<TValue extends string = string>({
       ref={ref}
       role="radio"
       style={style}
-      tabIndex={isSelected ? 0 : -1}
+      tabIndex={!isItemDisabled && context.tabStopValue === value ? 0 : -1}
       type="button">
       {icon != null ? (
         <span className={classes.icon}>

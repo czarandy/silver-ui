@@ -73,6 +73,18 @@ function DisabledItemStory(args: SegmentedControlProps): React.JSX.Element {
   );
 }
 
+function EmptySelectionStory(args: SegmentedControlProps): React.JSX.Element {
+  const [value, setValue] = useState<string>();
+
+  return (
+    <SegmentedControl {...args} onChange={setValue} value={value}>
+      <SegmentedControlItem isDisabled label="Day" value="day" />
+      <SegmentedControlItem label="Week" value="week" />
+      <SegmentedControlItem label="Month" value="month" />
+    </SegmentedControl>
+  );
+}
+
 function IconOnlyStory(args: SegmentedControlProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);
 
@@ -196,6 +208,20 @@ export const Disabled: Story = {
 export const DisabledItem: Story = {
   render: (args: SegmentedControlProps): React.JSX.Element => (
     <DisabledItemStory {...args} />
+  ),
+};
+
+export const EmptySelection: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With no selected value, Tab focuses the first enabled segment without selecting it. Arrow keys then move focus and selection together.',
+      },
+    },
+  },
+  render: (args: SegmentedControlProps): React.JSX.Element => (
+    <EmptySelectionStory {...args} />
   ),
 };
 
