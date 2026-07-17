@@ -126,8 +126,7 @@ export function InputGroup({
         {...necessity}
         label={label}
         labelTooltip={labelTooltip}
-        status={status == null ? undefined : {...status, messageID: statusID}}
-        statusVariant="detached">
+        status={status == null ? undefined : {...status, messageID: statusID}}>
         <div
           aria-describedby={describedBy}
           aria-disabled={isDisabled || undefined}
