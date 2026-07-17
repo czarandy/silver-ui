@@ -230,6 +230,22 @@ describe('Calendar', () => {
     expect(grids).toHaveLength(2);
   });
 
+  it.each([0, -1, 500, Number.NaN])(
+    'falls back to one month when numberOfMonths is %s',
+    numberOfMonths => {
+      render(
+        <Calendar
+          numberOfMonths={numberOfMonths as 1 | 2}
+          onChange={() => {}}
+          viewDate={plainDateCreate(2026, 5, 1)}
+        />,
+      );
+
+      expect(screen.getByText('May 2026')).toBeInTheDocument();
+      expect(screen.getAllByRole('grid')).toHaveLength(1);
+    },
+  );
+
   it('highlights a date only in its own month in a two-month range', () => {
     render(
       <Calendar
