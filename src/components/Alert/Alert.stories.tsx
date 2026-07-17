@@ -97,6 +97,25 @@ export const WithEndContent: Story = {
   },
 };
 
+export const WithPrimaryAction: Story = {
+  args: {
+    title: 'Your trial ends in 3 days',
+    status: 'warning',
+    endContent: <Button label="Upgrade plan" size="sm" variant="primary" />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use a `primary` button in `endContent` when the alert is steering the ' +
+          'reader toward one recommended action. Prefer a `ghost` button (see ' +
+          '**With End Content**) for actions that are merely available, so a ' +
+          'stack of alerts does not compete for attention.',
+      },
+    },
+  },
+};
+
 export const SectionContainer: Story = {
   render: () => (
     <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
