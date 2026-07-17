@@ -62,6 +62,22 @@ describe('Progress', () => {
     );
   });
 
+  it('treats NaN as empty progress', () => {
+    render(<Progress hasValueLabel label="Progress" value={Number.NaN} />);
+
+    const bar = screen.getByRole('progressbar');
+    expect(bar).toHaveAttribute('aria-valuenow', '0');
+    expect(bar).toHaveAttribute('aria-valuetext', '0%');
+    expect(screen.getByText('0%')).toBeInTheDocument();
+
+    // eslint-disable-next-line testing-library/no-node-access -- verifying fill element style
+    const fill = bar.firstElementChild;
+    if (fill == null) {
+      throw new Error('Expected progress fill to render');
+    }
+    expect(fill).toHaveStyle({width: '0%'});
+  });
+
   it('renders indeterminate progress as a progressbar', () => {
     render(<Progress isIndeterminate label="Loading" />);
     const progressbar = screen.getByRole('progressbar');
