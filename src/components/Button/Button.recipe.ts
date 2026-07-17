@@ -1,4 +1,15 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
+import {token} from 'styled-system/tokens';
+
+// A coloured surface that hosts a Button can retint `primary` by setting these
+// vars, so `variant="primary"` still reads as the recommended action instead of
+// dropping the global accent onto a background it was never picked against.
+// Alert sets them per status; anywhere else these fall back to the accent.
+const primaryBg = `var(--silver-button-primary-bg, ${token.var('colors.primary')})`;
+const primaryFg = `var(--silver-button-primary-fg, ${token.var('colors.fg.onPrimary')})`;
+const primaryBgHover = `var(--silver-button-primary-bg-hover, ${token.var('colors.primary.hover')})`;
+const primaryBgActive = `var(--silver-button-primary-bg-active, ${token.var('colors.primary.active')})`;
+const focusColor = `var(--silver-button-focus-color, ${token.var('colors.primary')})`;
 
 export const buttonRecipe = sva({
   slots: [
@@ -46,7 +57,7 @@ export const buttonRecipe = sva({
       _focusVisible: {
         outlineWidth: 'focus',
         outlineStyle: 'solid',
-        outlineColor: 'primary',
+        outlineColor: focusColor,
         outlineOffset: 'focusOffsetLoose',
       },
     },
@@ -91,10 +102,10 @@ export const buttonRecipe = sva({
     variant: {
       primary: {
         root: {
-          bg: 'primary',
-          color: 'fg.onPrimary',
-          _hover: {bg: 'primary.hover'},
-          _active: {bg: 'primary.active'},
+          bg: primaryBg,
+          color: primaryFg,
+          _hover: {bg: primaryBgHover},
+          _active: {bg: primaryBgActive},
         },
       },
       secondary: {

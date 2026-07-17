@@ -1,4 +1,40 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
+import {token} from 'styled-system/tokens';
+
+/**
+ * Each status fills a `primary` action with the foreground its own header is
+ * built from, so the action inverts the surface it sits on rather than dropping
+ * the global accent onto it.
+ *
+ * The label is `bg` rather than `fg.onPrimary`: these fills track the theme
+ * (`surface.X.fg` is dark on a light theme and light on a dark one), while
+ * `fg.onPrimary` is tuned against the accent and stays near-white in both — it
+ * would vanish on the light fills a dark theme produces. `bg` is the neutral
+ * that flips the same way the fills do, so the label reads white on a light
+ * theme and near-black on a dark one.
+ *
+ * Hover and active shade the fill back toward the tint, mirroring how
+ * `primary.hover` lightens the accent. Written out per status because Panda
+ * extracts these statically.
+ */
+const labelOnFill = token.var('colors.bg');
+const blueFg = token.var('colors.surface.blue.fg');
+const blueTint = token.var('colors.surface.blue');
+const greenFg = token.var('colors.surface.green.fg');
+const greenTint = token.var('colors.surface.green');
+const redFg = token.var('colors.surface.red.fg');
+const redTint = token.var('colors.surface.red');
+const yellowFg = token.var('colors.surface.yellow.fg');
+const yellowTint = token.var('colors.surface.yellow');
+
+const blueHover = `color-mix(in srgb, ${blueFg} 88%, ${blueTint})`;
+const blueActive = `color-mix(in srgb, ${blueFg} 78%, ${blueTint})`;
+const greenHover = `color-mix(in srgb, ${greenFg} 88%, ${greenTint})`;
+const greenActive = `color-mix(in srgb, ${greenFg} 78%, ${greenTint})`;
+const redHover = `color-mix(in srgb, ${redFg} 88%, ${redTint})`;
+const redActive = `color-mix(in srgb, ${redFg} 78%, ${redTint})`;
+const yellowHover = `color-mix(in srgb, ${yellowFg} 88%, ${yellowTint})`;
+const yellowActive = `color-mix(in srgb, ${yellowFg} 78%, ${yellowTint})`;
 
 /**
  * Symmetric padding overrides for the collapsible body. Keys mirror the
@@ -99,6 +135,11 @@ export const alertRecipe = sva({
           color: 'surface.red.fg',
           '--silver-text-color': 'token(colors.surface.red.fg)',
           '--silver-text-color-muted': 'token(colors.surface.red.fg)',
+          '--silver-button-primary-bg': redFg,
+          '--silver-button-primary-fg': labelOnFill,
+          '--silver-button-primary-bg-hover': redHover,
+          '--silver-button-primary-bg-active': redActive,
+          '--silver-button-focus-color': redFg,
         },
       },
       info: {
@@ -107,6 +148,11 @@ export const alertRecipe = sva({
           color: 'surface.blue.fg',
           '--silver-text-color': 'token(colors.surface.blue.fg)',
           '--silver-text-color-muted': 'token(colors.surface.blue.fg)',
+          '--silver-button-primary-bg': blueFg,
+          '--silver-button-primary-fg': labelOnFill,
+          '--silver-button-primary-bg-hover': blueHover,
+          '--silver-button-primary-bg-active': blueActive,
+          '--silver-button-focus-color': blueFg,
         },
       },
       success: {
@@ -115,6 +161,11 @@ export const alertRecipe = sva({
           color: 'surface.green.fg',
           '--silver-text-color': 'token(colors.surface.green.fg)',
           '--silver-text-color-muted': 'token(colors.surface.green.fg)',
+          '--silver-button-primary-bg': greenFg,
+          '--silver-button-primary-fg': labelOnFill,
+          '--silver-button-primary-bg-hover': greenHover,
+          '--silver-button-primary-bg-active': greenActive,
+          '--silver-button-focus-color': greenFg,
         },
       },
       warning: {
@@ -123,6 +174,11 @@ export const alertRecipe = sva({
           color: 'surface.yellow.fg',
           '--silver-text-color': 'token(colors.surface.yellow.fg)',
           '--silver-text-color-muted': 'token(colors.surface.yellow.fg)',
+          '--silver-button-primary-bg': yellowFg,
+          '--silver-button-primary-fg': labelOnFill,
+          '--silver-button-primary-bg-hover': yellowHover,
+          '--silver-button-primary-bg-active': yellowActive,
+          '--silver-button-focus-color': yellowFg,
         },
       },
     },
