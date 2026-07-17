@@ -5,6 +5,7 @@ import {Text} from 'components/Text';
 import type {TextColor, TextSize, TextType, TextWeight} from 'components/Text';
 import {
   formatTimestamp,
+  type FormattedTimestamp,
   type TimestampFormat,
   type TimestampValue,
 } from 'components/Timestamp/Timestamp.utils';
@@ -82,27 +83,21 @@ export interface TimestampProps {
   weight?: TextWeight;
 }
 
-export function Timestamp({
-  autoThreshold = 604800,
+function TimestampContent({
   className,
   color = 'secondary',
   'data-testid': dataTestId,
-  format = 'auto',
+  formattedTimestamp,
   hasTooltip = true,
-  isTimezoneShown = false,
   ref,
   size,
   style,
   type = 'supporting',
-  value,
   weight,
-}: TimestampProps): React.JSX.Element {
-  const {absoluteLabel, dateTime, isRelative, text} = formatTimestamp(
-    value,
-    format,
-    autoThreshold,
-    isTimezoneShown,
-  );
+}: TimestampProps & {
+  formattedTimestamp: FormattedTimestamp;
+}): React.JSX.Element {
+  const {absoluteLabel, dateTime, isRelative, text} = formattedTimestamp;
 
   const isTooltipEnabled = hasTooltip && isRelative;
   const {
@@ -130,6 +125,37 @@ export function Timestamp({
       </Text>
       {isTooltipEnabled ? renderTooltip(absoluteLabel) : null}
     </>
+  );
+}
+
+export function Timestamp(props: TimestampProps): React.JSX.Element | null {
+  const {
+    autoThreshold = 604800,
+    format = 'auto',
+    isTimezoneShown = false,
+    value,
+  } = props;
+
+  let formattedTimestamp: FormattedTimestamp;
+  try {
+    formattedTimestamp = formatTimestamp(
+      value,
+      format,
+      autoThreshold,
+      isTimezoneShown,
+    );
+  } catch (error) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn(
+        'Timestamp: `value` could not be parsed; nothing will be rendered.',
+        error,
+      );
+    }
+    return null;
+  }
+
+  return (
+    <TimestampContent {...props} formattedTimestamp={formattedTimestamp} />
   );
 }
 

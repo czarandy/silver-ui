@@ -121,6 +121,23 @@ describe('Timestamp.utils', () => {
 });
 
 describe('Timestamp', () => {
+  it.each([
+    ['an empty string', ''],
+    ['an invalid ISO string', 'not-a-date'],
+    ['a NaN epoch', Number.NaN],
+  ])('renders nothing and warns for %s', (_description, value) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const {container} = render(<Timestamp value={value} />);
+
+    expect(container).toBeEmptyDOMElement();
+    expect(warn).toHaveBeenCalledWith(
+      'Timestamp: `value` could not be parsed; nothing will be rendered.',
+      expect.any(RangeError),
+    );
+
+    warn.mockRestore();
+  });
+
   it('renders a <time> element with an ISO dateTime attribute', () => {
     render(<Timestamp data-testid="ts" format="date" value={REFERENCE_ISO} />);
 
