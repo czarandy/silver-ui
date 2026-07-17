@@ -8,6 +8,7 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
+import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import {
   useHoverLayer,
   type HoverLayerFocusTrigger,
@@ -59,12 +60,6 @@ const styles = {
   content: css({
     p: '3',
   }),
-  margin: {
-    above: css({mb: '1'}),
-    below: css({mt: '1'}),
-    start: css({mr: '1'}),
-    end: css({ml: '1'}),
-  },
 } as const;
 
 export function useHoverCard({
@@ -160,7 +155,7 @@ export function useHoverCard({
           alignment: props?.alignment ?? alignment,
           className: cx(
             styles.container,
-            styles.margin[renderPlacement],
+            layerPlacementGapRecipe({placement: renderPlacement}),
             props?.className,
           ),
           role: props?.role ?? 'dialog',

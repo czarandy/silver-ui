@@ -5,6 +5,7 @@ import {Button} from 'components/Button';
 import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover/Popover';
 import {assertNonNull} from 'internal/testHelpers';
+import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 import {token} from 'styled-system/tokens';
 
 const showPopoverMock = vi.fn();
@@ -25,9 +26,26 @@ async function nextAnimationFrame(): Promise<void> {
 
 // The native popover element carries the `toggle` listener but has no
 // accessible role to query by, so reach for the `[popover]` attribute directly.
-function getPopoverElement(): Element {
-  return assertNonNull(document.querySelector('[popover]'));
+function getPopoverElement(): HTMLElement {
+  return assertNonNull(document.querySelector<HTMLElement>('[popover]'));
 }
+
+const positionAreaCases = [
+  ['above', 'start', 'top span-inline-end', 'ltr'],
+  ['above', 'center', 'top', 'rtl'],
+  ['above', 'end', 'top span-inline-start', 'ltr'],
+  ['below', 'start', 'bottom span-inline-end', 'rtl'],
+  ['below', 'center', 'bottom', 'ltr'],
+  ['below', 'end', 'bottom span-inline-start', 'rtl'],
+  ['start', 'start', 'inline-start span-bottom', 'ltr'],
+  ['start', 'center', 'inline-start center', 'rtl'],
+  ['start', 'end', 'inline-start span-top', 'ltr'],
+  ['end', 'start', 'inline-end span-bottom', 'rtl'],
+  ['end', 'center', 'inline-end center', 'ltr'],
+  ['end', 'end', 'inline-end span-top', 'rtl'],
+] as const satisfies ReadonlyArray<
+  readonly [LayerPlacement, LayerAlignment, string, 'ltr' | 'rtl']
+>;
 
 beforeAll(() => {
   HTMLElement.prototype.showPopover = showPopoverMock;
@@ -40,6 +58,50 @@ afterAll(() => {
 });
 
 describe('Popover', () => {
+  it.each(positionAreaCases)(
+    'maps placement=%s and alignment=%s to %s under dir=%s',
+    (placement, alignment, expectedPositionArea, direction) => {
+      render(
+        <div dir={direction}>
+          <Popover
+            alignment={alignment}
+            content={<div>Popover content</div>}
+            label="Actions"
+            placement={placement}>
+            <Button label="Open" />
+          </Popover>
+        </div>,
+      );
+
+      const positionArea = getPopoverElement().style.positionArea;
+      expect(positionArea).toBe(expectedPositionArea);
+      expect(positionArea).not.toMatch(
+        /\b(?:left|right|span-left|span-right)\b/,
+      );
+    },
+  );
+
+  it.each([
+    ['start', 'silver-me_1'],
+    ['end', 'silver-ms_1'],
+  ] as const)(
+    'uses a logical default gap for placement=%s',
+    (placement, expectedClassName) => {
+      render(
+        <div dir="rtl">
+          <Popover
+            content={<div>Popover content</div>}
+            label="Actions"
+            placement={placement}>
+            <Button label="Open" />
+          </Popover>
+        </div>,
+      );
+
+      expect(getPopoverElement()).toHaveClass(expectedClassName);
+    },
+  );
+
   it('attaches dialog trigger attributes to a button child', () => {
     render(
       <Popover content={<div>Popover content</div>} label="Actions">
@@ -73,9 +135,9 @@ describe('Popover', () => {
   });
 
   it('puts the inline gap on the trigger-facing edge so it flips with placement', () => {
-    // `end` (popover to the right): gap on its inline-start edge. When
-    // `position-try` flips it to the left, that margin flips to inline-end,
-    // keeping the gap between the popover and trigger.
+    // `end`: gap on its inline-start edge. When `position-try` flips it to
+    // `start`, that margin flips to inline-end, keeping the gap between the
+    // popover and trigger.
     const {unmount} = render(
       <Popover
         content={<div>Popover content</div>}
@@ -90,7 +152,7 @@ describe('Popover', () => {
     );
     unmount();
 
-    // `start` (popover to the left): gap on the opposite (inline-end) edge.
+    // `start`: gap on the opposite (inline-end) edge.
     render(
       <Popover
         content={<div>Popover content</div>}

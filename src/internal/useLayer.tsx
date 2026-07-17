@@ -19,8 +19,9 @@ export type LayerAlignment = 'start' | 'center' | 'end';
 
 export interface ContextRenderProps {
   /**
-   * How the layer aligns along the edge it is placed against. Defaults to
-   * `'center'`.
+   * How the layer aligns along the edge it is placed against. `start` and
+   * `end` are logical directions that follow the document direction. Defaults
+   * to `'center'`.
    */
   alignment?: LayerAlignment;
   /**
@@ -47,7 +48,9 @@ export interface ContextRenderProps {
    */
   offsetY?: number;
   /**
-   * Which side of the anchor the layer is placed on. Defaults to `'above'`.
+   * Which side of the anchor the layer is placed on. `start` and `end` are
+   * logical directions that follow the document direction. Defaults to
+   * `'above'`.
    */
   placement?: LayerPlacement;
   /**
@@ -137,18 +140,18 @@ function getPositionArea(
   const placementMap: Record<LayerPlacement, string> = {
     above: 'top',
     below: 'bottom',
-    start: 'left',
-    end: 'right',
+    start: 'inline-start',
+    end: 'inline-end',
   };
 
   const cssPlacement = placementMap[placement];
 
   if (placement === 'above' || placement === 'below') {
     if (alignment === 'start') {
-      return `${cssPlacement} span-right`;
+      return `${cssPlacement} span-inline-end`;
     }
     if (alignment === 'end') {
-      return `${cssPlacement} span-left`;
+      return `${cssPlacement} span-inline-start`;
     }
     return cssPlacement;
   }

@@ -8,6 +8,7 @@ import {
   type ReactNode,
   type RefCallback,
 } from 'react';
+import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import {
   useHoverLayer,
   type HoverLayerFocusTrigger,
@@ -88,12 +89,6 @@ const styles = {
     maxW: 'xs',
     wordBreak: 'break-word',
   }),
-  marginByPlacement: {
-    above: css({mb: '1'}),
-    below: css({mt: '1'}),
-    start: css({mr: '1'}),
-    end: css({ml: '1'}),
-  },
 } as const;
 
 export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
@@ -150,7 +145,7 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
           alignment: props?.alignment ?? alignment,
           className: cx(
             styles.tooltipContainer,
-            styles.marginByPlacement[renderPlacement],
+            layerPlacementGapRecipe({placement: renderPlacement}),
             props?.className,
           ),
           role: 'tooltip',

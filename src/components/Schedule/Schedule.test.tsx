@@ -2831,7 +2831,7 @@ describe('Schedule', () => {
       expect(pill).toHaveAttribute('aria-expanded', 'true');
     });
 
-    it('positions list view event popovers to the right by default', () => {
+    it('positions list view event popovers at inline end by default', () => {
       render(
         <ScheduleWithPopover
           eventsList={events}
@@ -2849,7 +2849,7 @@ describe('Schedule', () => {
       // eslint-disable-next-line testing-library/no-node-access
       const layer = document.getElementById(layerId ?? '');
       const style = layer?.getAttribute('style') ?? '';
-      expect(style).toContain('position-area: right span-bottom');
+      expect(layer?.style.positionArea).toBe('inline-end span-bottom');
       expect(style).toContain('margin-inline-start: 8px');
     });
 

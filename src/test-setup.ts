@@ -49,6 +49,32 @@ if (!Reflect.has(HTMLElement.prototype, 'scrollIntoView')) {
   });
 }
 
+// jsdom recognizes `position-area`, but its parser does not yet accept the
+// logical inline keywords supported by browsers. Keep the authored value
+// available through the CSSOM so positioning tests can assert it exactly while
+// still delegating to jsdom's native setter for values it does understand.
+const positionAreaDescriptor = Object.getOwnPropertyDescriptor(
+  CSSStyleProperties.prototype,
+  'positionArea',
+);
+if (positionAreaDescriptor?.get != null && positionAreaDescriptor.set != null) {
+  const positionAreaValues = new WeakMap<CSSStyleDeclaration, string>();
+  Object.defineProperty(CSSStyleProperties.prototype, 'positionArea', {
+    configurable: true,
+    enumerable: positionAreaDescriptor.enumerable,
+    get(this: CSSStyleDeclaration): string {
+      return (
+        positionAreaValues.get(this) ??
+        (positionAreaDescriptor.get?.call(this) as string)
+      );
+    },
+    set(this: CSSStyleDeclaration, value: string) {
+      positionAreaDescriptor.set?.call(this, value);
+      positionAreaValues.set(this, value);
+    },
+  });
+}
+
 afterEach(() => {
   resetLayerStack();
 });
