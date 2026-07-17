@@ -108,7 +108,9 @@ export function Progress({
     console.warn('Progress: `max` must be greater than 0.');
   }
 
-  const clampedValue = Math.min(Math.max(0, value), max);
+  const clampedValue = Number.isNaN(value)
+    ? 0
+    : Math.min(Math.max(0, value), max);
   const percentage = max > 0 ? (clampedValue / max) * 100 : 0;
   const valueText = formatValueLabel(clampedValue, max);
   const showValueLabel = hasValueLabel && !isIndeterminate;
