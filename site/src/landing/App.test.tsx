@@ -54,7 +54,7 @@ describe('prerendered marketing page', () => {
     // Headings and hero copy must be present in the served HTML so crawlers
     // and link unfurlers see real content, not an empty island.
     expect(html).toContain('component library');
-    expect(html).toContain('70+ fast and accessible');
+    expect(html).toContain('80+ fast and accessible');
     expect(html).toContain('Themeable');
     expect(html).toContain('Tree-shakeable');
     // Real anchors to the primary destinations are crawlable.

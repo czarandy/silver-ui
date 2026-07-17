@@ -39,7 +39,7 @@ check('landing page is prerendered with SEO content', () => {
   assertContains(html, 'application/ld+json', 'JSON-LD');
   // The React island must be statically rendered, not an empty shell.
   assertContains(html, 'component library', 'prerendered hero copy');
-  assertContains(html, '70+ fast and accessible', 'prerendered lede');
+  assertContains(html, '80+ fast and accessible', 'prerendered lede');
 });
 
 check('getting-started docs page is generated', () => {
