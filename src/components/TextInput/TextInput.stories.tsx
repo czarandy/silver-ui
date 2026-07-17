@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Mail, Search} from 'lucide-react';
+import {Mail, Phone, Search} from 'lucide-react';
 import {useState} from 'react';
 import {Badge} from 'components/Badge';
 import {getNecessity} from 'components/Field';
@@ -149,6 +149,18 @@ export const EmailType: Story = {
     placeholder: 'you@example.com',
     startIcon: Mail,
     type: 'email',
+  },
+  render: args => <ControlledTextInput {...args} />,
+};
+
+export const PhoneType: Story = {
+  args: {
+    autoComplete: 'tel',
+    description: 'For international numbers, include the country code.',
+    label: 'Phone number',
+    placeholder: '(555) 123-4567',
+    startIcon: Phone,
+    type: 'tel',
   },
   render: args => <ControlledTextInput {...args} />,
 };

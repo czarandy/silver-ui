@@ -657,13 +657,13 @@ export default defineConfig({
             value: 'inset 0 0 0 {borderWidths.focus} {colors.primary.subtle}',
           },
           'focus.error': {
-            value: 'inset 0 0 0 {borderWidths.focus} {colors.red.100}',
+            value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.red}',
           },
           'focus.warning': {
-            value: 'inset 0 0 0 {borderWidths.focus} {colors.yellow.100}',
+            value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.yellow}',
           },
           'focus.success': {
-            value: 'inset 0 0 0 {borderWidths.focus} {colors.green.100}',
+            value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.green}',
           },
         },
       },

@@ -10,6 +10,9 @@ import {
   type SearchableItem,
   type SearchSource,
 } from 'components/AutocompleteInput/types';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {InputGroup} from 'components/InputGroup';
+import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {assertNonNull} from 'internal/testHelpers';
 
 const items: SearchableItem[] = [
@@ -807,5 +810,155 @@ describe('createStaticSearchSource', () => {
     });
 
     expect(source.search('engine')).toEqual([items[0]]);
+  });
+
+  describe('inside an InputGroup', () => {
+    const noop = () => {};
+
+    it('exposes the label via aria-label rather than a field label', () => {
+      render(
+        <InputGroup label="Assignee">
+          <AutocompleteInput
+            isLabelHidden
+            label="Person"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={null}
+          />
+        </InputGroup>,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Person'});
+      expect(input).toHaveAttribute('aria-label', 'Person');
+      // eslint-disable-next-line testing-library/no-node-access -- the group renders the field label, so no <label> is tied to the input
+      expect(input.closest('label')).toBeNull();
+    });
+
+    it('is disabled when the group is disabled even if its own isDisabled is false', () => {
+      render(
+        <InputGroup isDisabled label="Assignee">
+          <AutocompleteInput
+            isLabelHidden
+            label="Person"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={null}
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByRole('combobox', {name: 'Person'})).toBeDisabled();
+    });
+
+    it('hides the clear button when the group is disabled', () => {
+      render(
+        <InputGroup isDisabled label="Assignee">
+          <AutocompleteInput
+            isLabelHidden
+            label="Person"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={items[0]}
+          />
+        </InputGroup>,
+      );
+
+      expect(
+        screen.queryByRole('button', {name: 'Clear Person'}),
+      ).not.toBeInTheDocument();
+    });
+
+    it('inherits the group size', () => {
+      render(
+        <InputGroup label="Assignee" size="lg">
+          <AutocompleteInput
+            data-testid="ac"
+            isLabelHidden
+            label="Person"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            size="sm"
+            value={null}
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByTestId('ac')).toHaveClass(inputRecipe({size: 'lg'}));
+    });
+
+    it('applies the group status type to the input wrapper', () => {
+      render(
+        <InputGroup label="Assignee" status={{message: 'Bad', type: 'error'}}>
+          <AutocompleteInput
+            data-testid="ac"
+            isLabelHidden
+            label="Person"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={null}
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByTestId('ac')).toHaveClass(
+        inputRecipe({status: 'error'}),
+      );
+      // Group status styling must not flag the field as invalid.
+      expect(
+        screen.getByRole('combobox', {name: 'Person'}),
+      ).not.toHaveAttribute('aria-invalid');
+    });
+
+    it('forwards className, style and ref to the wrapper instead of a field', () => {
+      const ref = vi.fn<(element: HTMLDivElement | null) => void>();
+      const {container} = render(
+        <InputGroup label="Assignee">
+          <AutocompleteInput
+            className="custom-wrapper"
+            isLabelHidden
+            label="Person"
+            onChange={noop}
+            ref={ref}
+            searchSource={createStaticSearchSource(items)}
+            style={{maxWidth: 200}}
+            value={null}
+          />
+        </InputGroup>,
+      );
+
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      const wrapper = container.querySelector('.custom-wrapper');
+      expect(wrapper).toBeInTheDocument();
+      expect(wrapper).toHaveStyle({maxWidth: '200px'});
+      expect(wrapper).toContainElement(screen.getByRole('combobox'));
+      // It must be the input wrapper itself, not a Field root around it.
+      expect(wrapper).toHaveClass(inputRecipe({size: 'md'}));
+      // There is no Field in a group, so the ref retargets to the wrapper
+      // rather than being silently dropped.
+      expect(ref).toHaveBeenCalledWith(wrapper);
+    });
+
+    it('keeps its menu nested inside the wrapper, not as a group item', () => {
+      render(
+        <InputGroup label="Assignee">
+          <InputGroupText>@</InputGroupText>
+          <AutocompleteInput
+            data-testid="ac"
+            isLabelHidden
+            label="Person"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={null}
+          />
+        </InputGroup>,
+      );
+
+      // Unlike Select, this menu renders nested inside the wrapper, so the
+      // group only ever sees the addon and the wrapper as children.
+      // eslint-disable-next-line testing-library/no-node-access -- asserting the group's own child structure is the point of this test
+      const children = Array.from(screen.getByRole('group').children);
+      expect(children).toHaveLength(2);
+      expect(children[1]).toBe(screen.getByTestId('ac'));
+    });
   });
 });

@@ -31,7 +31,7 @@ import {isComposingEvent} from 'internal/isComposingEvent';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
-export type TextInputType = 'email' | 'password' | 'text';
+export type TextInputType = 'email' | 'password' | 'tel' | 'text';
 
 export type TextInputProps = {
   /**

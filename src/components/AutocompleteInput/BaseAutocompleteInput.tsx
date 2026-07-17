@@ -43,6 +43,11 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    */
   ariaDescribedBy?: string;
   /**
+   * Accessible name for the input. Use when no visible `<label>` is tied to
+   * it, such as inside an `InputGroup` where the group owns the label.
+   */
+  ariaLabel?: string;
+  /**
    * Additional CSS class names applied to the input.
    */
   className?: string;
@@ -178,6 +183,7 @@ const styles = {
 export function BaseAutocompleteInput<T extends SearchableItem>({
   anchorRef,
   ariaDescribedBy,
+  ariaLabel,
   className,
   'data-testid': dataTestId,
   debounceMs = 150,
@@ -429,6 +435,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         aria-controls={listboxId}
         aria-describedby={ariaDescribedBy}
         aria-expanded={isOpen}
+        aria-label={ariaLabel}
         aria-required={isRequired || undefined}
         autoComplete="off"
         // eslint-disable-next-line jsx-a11y-x/no-autofocus

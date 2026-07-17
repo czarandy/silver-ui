@@ -65,6 +65,29 @@ describe('EmptyState', () => {
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 
+  it('forwards native DOM props and allows overriding the default role', () => {
+    const handleClick = vi.fn();
+
+    render(
+      <EmptyState
+        aria-live="polite"
+        data-source="search"
+        data-testid="empty"
+        onClick={handleClick}
+        role="status"
+        title="Nothing here"
+      />,
+    );
+
+    const root = screen.getByTestId('empty');
+    expect(root).toHaveAttribute('aria-live', 'polite');
+    expect(root).toHaveAttribute('data-source', 'search');
+    expect(root).toHaveAttribute('role', 'status');
+
+    root.click();
+    expect(handleClick).toHaveBeenCalledOnce();
+  });
+
   it('renders at the default heading level 4', () => {
     render(<EmptyState title="Empty" />);
 

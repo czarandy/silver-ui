@@ -169,6 +169,39 @@ describe('TextInput', () => {
     expect(screen.getByTestId('input')).toHaveAttribute('type', 'password');
   });
 
+  it('renders a tel input for phone number entry', () => {
+    render(
+      <TextInput
+        autoComplete="tel"
+        label="Phone number"
+        onChange={noop}
+        type="tel"
+        value=""
+      />,
+    );
+
+    const input = screen.getByRole('textbox', {name: 'Phone number'});
+    expect(input).toHaveAttribute('type', 'tel');
+    expect(input).toHaveAttribute('autocomplete', 'tel');
+  });
+
+  it('does not reformat the value typed into a tel input', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <TextInput
+        label="Phone number"
+        onChange={onChange}
+        type="tel"
+        value=""
+      />,
+    );
+
+    await user.type(screen.getByRole('textbox', {name: 'Phone number'}), '(');
+
+    expect(onChange).toHaveBeenCalledWith('(', expect.anything());
+  });
+
   it('renders placeholder text', () => {
     render(
       <TextInput

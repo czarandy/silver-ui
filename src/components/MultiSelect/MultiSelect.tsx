@@ -19,6 +19,7 @@ import {
 } from 'components/Field';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {Icon, type IconComponent} from 'components/Icon';
+import {useInputGroup} from 'components/InputGroup';
 import {
   multiSelectMenuRecipe,
   multiSelectTriggerRecipe,
@@ -221,7 +222,7 @@ export function MultiSelect({
   hasSelectAll = false,
   htmlName,
   isDefaultOpen = false,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isLoading = false,
   isOptional,
@@ -236,13 +237,18 @@ export function MultiSelect({
   ref,
   searchPlaceholder = 'Search...',
   selectAllLabel = 'Select all',
-  size = 'md',
+  size: sizeProp = 'md',
   startIcon,
   status,
   style,
   triggerDisplay = 'count',
   value,
 }: MultiSelectProps): React.JSX.Element {
+  const inputGroup = useInputGroup();
+  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
+  const size = inputGroup?.size ?? sizeProp;
+  const statusType = status?.type ?? inputGroup?.statusType;
+
   const selectedValues = useMemo(() => new Set(value), [value]);
 
   const toggleValue = useCallback(
@@ -471,17 +477,19 @@ export function MultiSelect({
       className={cx(
         inputRecipe({
           size,
-          status: status?.type,
+          status: statusType,
           isDisabled,
         }),
         triggerClasses.wrapper,
+        inputGroup != null ? className : undefined,
       )}
       onClick={() => {
         if (!isInteractionDisabled) {
           setIsOpen(currentIsOpen => !currentIsOpen);
         }
       }}
-      ref={triggerRef}>
+      ref={triggerRef}
+      style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={menuClasses.iconSlot}>
           <Icon color="secondary" icon={startIcon} size="sm" />
@@ -495,6 +503,7 @@ export function MultiSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
+        aria-label={inputGroup != null ? label : undefined}
         className={triggerClasses.trigger}
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
@@ -527,6 +536,27 @@ export function MultiSelect({
 
   const necessity = getNecessity(isOptional, isRequired);
 
+  const popover = (
+    <Popover
+      anchorRef={triggerRef}
+      content={menu}
+      hasAutoFocus={hasSearch}
+      hasCloseButton={false}
+      isEnabled={false}
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+    />
+  );
+
+  if (inputGroup != null) {
+    return (
+      <>
+        {trigger}
+        {popover}
+      </>
+    );
+  }
+
   return (
     <Field
       className={className}
@@ -555,15 +585,7 @@ export function MultiSelect({
             />
           ))}
       {trigger}
-      <Popover
-        anchorRef={triggerRef}
-        content={menu}
-        hasAutoFocus={hasSearch}
-        hasCloseButton={false}
-        isEnabled={false}
-        isOpen={isOpen}
-        onOpenChange={setIsOpen}
-      />
+      {popover}
     </Field>
   );
 }

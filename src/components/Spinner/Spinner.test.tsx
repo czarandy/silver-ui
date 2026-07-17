@@ -18,6 +18,28 @@ describe('Spinner', () => {
     expect(screen.getByRole('status')).toHaveStyle({color: 'rgb(255, 0, 0)'});
   });
 
+  it('forwards native DOM props and allows overriding the default role', () => {
+    const handleClick = vi.fn();
+
+    render(
+      <Spinner
+        aria-live="assertive"
+        data-source="upload"
+        data-testid="spinner"
+        onClick={handleClick}
+        role="alert"
+      />,
+    );
+
+    const root = screen.getByTestId('spinner');
+    expect(root).toHaveAttribute('aria-live', 'assertive');
+    expect(root).toHaveAttribute('data-source', 'upload');
+    expect(root).toHaveAttribute('role', 'alert');
+
+    root.click();
+    expect(handleClick).toHaveBeenCalledOnce();
+  });
+
   it('renders available sizes', () => {
     const {rerender} = render(<Spinner data-testid="spinner" size="sm" />);
     expect(screen.getByTestId('spinner')).toHaveClass(

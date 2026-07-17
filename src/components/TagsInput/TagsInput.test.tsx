@@ -6,6 +6,9 @@ import {
   createStaticSearchSource,
   type SearchableItem,
 } from 'components/AutocompleteInput';
+import {inputRecipe} from 'components/Field/inputStyles';
+import {InputGroup} from 'components/InputGroup';
+import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {TagsInput} from 'components/TagsInput/TagsInput';
 
 const items: SearchableItem[] = [
@@ -555,5 +558,189 @@ describe('TagsInput', () => {
     expect(optionLabels).not.toContain('Ada Lovelace');
     expect(optionLabels).toContain('Grace Hopper');
     expect(optionLabels).toContain('Katherine Johnson');
+  });
+
+  describe('inside an InputGroup', () => {
+    const noop = () => {};
+
+    it('names the input via aria-label rather than a field label', () => {
+      render(
+        <InputGroup label="Recipients">
+          <TagsInput
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'People'});
+      expect(input).toHaveAttribute('aria-label', 'People');
+      // eslint-disable-next-line testing-library/no-node-access -- the group renders the field label, so no <label> is tied to the input
+      expect(input.closest('label')).toBeNull();
+    });
+
+    it('is disabled when the group is disabled even if its own isDisabled is false', () => {
+      render(
+        <InputGroup isDisabled label="Recipients">
+          <TagsInput
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByRole('combobox', {name: 'People'})).toBeDisabled();
+    });
+
+    it('hides the clear button when the group is disabled', () => {
+      render(
+        <InputGroup isDisabled label="Recipients">
+          <TagsInput
+            hasClear
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={[items[0]]}
+          />
+        </InputGroup>,
+      );
+
+      expect(
+        screen.queryByRole('button', {name: 'Clear People'}),
+      ).not.toBeInTheDocument();
+    });
+
+    it('inherits the group size', () => {
+      render(
+        <InputGroup label="Recipients" size="lg">
+          <TagsInput
+            data-testid="tags"
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            size="sm"
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByTestId('tags')).toHaveClass(inputRecipe({size: 'lg'}));
+    });
+
+    it('applies the group status type to the input wrapper', () => {
+      render(
+        <InputGroup label="Recipients" status={{message: 'Bad', type: 'error'}}>
+          <TagsInput
+            data-testid="tags"
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      expect(screen.getByTestId('tags')).toHaveClass(
+        inputRecipe({status: 'error'}),
+      );
+      expect(
+        screen.getByRole('combobox', {name: 'People'}),
+      ).not.toHaveAttribute('aria-invalid');
+    });
+
+    it('forwards className, style and ref to the wrapper instead of a field', () => {
+      const ref = vi.fn<(element: HTMLDivElement | null) => void>();
+      const {container} = render(
+        <InputGroup label="Recipients">
+          <TagsInput
+            className="custom-wrapper"
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            ref={ref}
+            searchSource={createStaticSearchSource(items)}
+            style={{maxWidth: 200}}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
+      const wrapper = container.querySelector('.custom-wrapper');
+      expect(wrapper).toBeInTheDocument();
+      expect(wrapper).toHaveStyle({maxWidth: '200px'});
+      expect(wrapper).toContainElement(screen.getByRole('combobox'));
+      // It must be the input wrapper itself, not a Field root around it.
+      expect(wrapper).toHaveClass(inputRecipe({size: 'md'}));
+      // There is no Field in a group, so the ref retargets to the wrapper.
+      expect(ref).toHaveBeenCalledWith(wrapper);
+    });
+
+    it('keeps its own tag group nested inside the input group', () => {
+      render(
+        <InputGroup label="Recipients">
+          <TagsInput
+            data-testid="tags"
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            value={[]}
+          />
+        </InputGroup>,
+      );
+
+      // TagsInput's wrapper is itself a role="group" naming the tag
+      // collection, so grouping it nests two groups. Both must stay
+      // addressable by their own accessible names.
+      const group = screen.getByRole('group', {name: 'Recipients'});
+      const tagGroup = screen.getByRole('group', {name: 'People'});
+      expect(group).toContainElement(tagGroup);
+      expect(tagGroup).toBe(screen.getByTestId('tags'));
+      // The tag group must be a *direct* child of the input group -- if a Field
+      // root were still rendered in between, the group's border and radius
+      // rules would land on the field instead of the control.
+      // eslint-disable-next-line testing-library/no-node-access -- direct-child position is exactly what this pins
+      expect(Array.from(group.children)).toContain(tagGroup);
+    });
+
+    it('makes the collapsed placeholder the group item in layer mode', () => {
+      render(
+        <InputGroup label="Recipients">
+          <InputGroupText>To</InputGroupText>
+          <TagsInput
+            className="custom-wrapper"
+            isLabelHidden
+            label="People"
+            onChange={noop}
+            searchSource={createStaticSearchSource(items)}
+            tagOverflowBehavior="unfocusedLayer"
+            value={[items[0]]}
+          />
+        </InputGroup>,
+      );
+
+      const group = screen.getByRole('group', {name: 'Recipients'});
+      /* eslint-disable testing-library/no-node-access -- asserting the group's
+         own child structure is the point: in layer mode the in-flow
+         placeholder, not the wrapper, must be the styled group item. */
+      const children = Array.from(group.children);
+      const items_ = children.filter(child => !child.hasAttribute('popover'));
+      // The addon and the collapsed placeholder are the only in-flow items;
+      // the layer popover holding the real wrapper must not count as one.
+      expect(items_).toHaveLength(2);
+      expect(items_[1]).toHaveClass('custom-wrapper');
+      expect(children.some(child => child.hasAttribute('popover'))).toBe(true);
+      /* eslint-enable testing-library/no-node-access */
+    });
   });
 });

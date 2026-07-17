@@ -6,6 +6,20 @@ import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
 import {plainDateCreate} from 'internal/plainDate';
 import {assertNonNull} from 'internal/testHelpers';
 
+function getRangeBackground(day: HTMLElement): Element | null {
+  return day.previousElementSibling;
+}
+
+function getAddedClasses(
+  baseClasses: string | undefined,
+  variantClasses: string | undefined,
+): string[] {
+  const baseClassSet = new Set(assertNonNull(baseClasses).split(' '));
+  return assertNonNull(variantClasses)
+    .split(' ')
+    .filter(className => !baseClassSet.has(className));
+}
+
 describe('Calendar', () => {
   it('renders the selected month and selected day', () => {
     render(
@@ -188,6 +202,103 @@ describe('Calendar', () => {
     expect(screen.getByText('May 2026 - June 2026')).toBeInTheDocument();
     const grids = screen.getAllByRole('grid');
     expect(grids).toHaveLength(2);
+  });
+
+  it('highlights a date only in its own month in a two-month range', () => {
+    render(
+      <Calendar
+        mode="range"
+        numberOfMonths={2}
+        onChange={() => {}}
+        value={{
+          start: plainDateCreate(2026, 5, 30),
+          end: plainDateCreate(2026, 6, 1),
+        }}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />,
+    );
+
+    const [mayGrid, juneGrid] = screen.getAllByRole('grid');
+    const may31 = within(assertNonNull(mayGrid)).getByRole('gridcell', {
+      name: /May 31, 2026/,
+    });
+    const outsideJune1 = within(assertNonNull(mayGrid)).getByRole('gridcell', {
+      name: /June 1, 2026/,
+    });
+    const inMonthJune1 = within(assertNonNull(juneGrid)).getByRole('gridcell', {
+      name: /June 1, 2026/,
+    });
+    const selectedDayClasses = getAddedClasses(
+      calendarRecipe({isSelected: false}).day,
+      calendarRecipe({isSelected: true}).day,
+    );
+    const roundedEnd = assertNonNull(
+      calendarRecipe({roundedEnd: true}).rangeBackground,
+    );
+
+    expect(getRangeBackground(may31)).toHaveClass(roundedEnd);
+    expect(getRangeBackground(outsideJune1)).toBeNull();
+    expect(outsideJune1).not.toHaveAttribute('aria-selected');
+    expect(selectedDayClasses).not.toHaveLength(0);
+    for (const className of selectedDayClasses) {
+      expect(outsideJune1).not.toHaveClass(className);
+    }
+    expect(getRangeBackground(inMonthJune1)).not.toBeNull();
+    expect(inMonthJune1).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('clips range highlighting to min and max with rounded caps', () => {
+    render(
+      <Calendar
+        max={plainDateCreate(2026, 5, 14)}
+        min={plainDateCreate(2026, 5, 12)}
+        mode="range"
+        onChange={() => {}}
+        value={{
+          start: plainDateCreate(2026, 5, 10),
+          end: plainDateCreate(2026, 5, 16),
+        }}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />,
+    );
+
+    const may11 = screen.getByRole('gridcell', {name: /May 11, 2026/});
+    const may12 = screen.getByRole('gridcell', {name: /May 12, 2026/});
+    const may14 = screen.getByRole('gridcell', {name: /May 14, 2026/});
+    const may15 = screen.getByRole('gridcell', {name: /May 15, 2026/});
+    const roundedStart = assertNonNull(
+      calendarRecipe({roundedStart: true}).rangeBackground,
+    );
+    const roundedEnd = assertNonNull(
+      calendarRecipe({roundedEnd: true}).rangeBackground,
+    );
+
+    expect(getRangeBackground(may11)).toBeNull();
+    expect(getRangeBackground(may12)).toHaveClass(roundedStart);
+    expect(getRangeBackground(may14)).toHaveClass(roundedEnd);
+    expect(getRangeBackground(may15)).toBeNull();
+  });
+
+  it('rounds a range clipped by hidden outside days', () => {
+    render(
+      <Calendar
+        hasOutsideDays={false}
+        mode="range"
+        onChange={() => {}}
+        value={{
+          start: plainDateCreate(2026, 4, 29),
+          end: plainDateCreate(2026, 5, 3),
+        }}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />,
+    );
+
+    const may1 = screen.getByRole('gridcell', {name: /May 1, 2026/});
+    const roundedStart = assertNonNull(
+      calendarRecipe({roundedStart: true}).rangeBackground,
+    );
+
+    expect(getRangeBackground(may1)).toHaveClass(roundedStart);
   });
 
   it('calls onViewDateChange when navigating months', async () => {

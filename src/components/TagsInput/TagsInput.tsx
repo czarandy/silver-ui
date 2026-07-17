@@ -27,11 +27,13 @@ import {
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
+import {useInputGroup} from 'components/InputGroup';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import useAnnounce from 'hooks/useAnnounce';
 import {OverflowList} from 'internal/OverflowList';
 import isReactNode from 'internal/isReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
 import {useLayer} from 'internal/useLayer';
 import {cx} from 'utils/cx';
@@ -288,7 +290,7 @@ export function TagsInput<T extends SearchableItem>({
   hasEntriesOnFocus = false,
   handleRef,
   htmlName,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isReadOnly = false,
   isOptional,
@@ -307,13 +309,18 @@ export function TagsInput<T extends SearchableItem>({
   renderItem,
   renderTag,
   searchSource,
-  size = 'md',
+  size: sizeProp = 'md',
   startIcon,
   status,
   style,
   tagOverflowBehavior = 'none',
   value,
 }: TagsInputProps<T>): React.JSX.Element {
+  const inputGroup = useInputGroup();
+  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
+  const size = inputGroup?.size ?? sizeProp;
+  const statusType = status?.type ?? inputGroup?.statusType;
+
   const inputId = useId();
   const descriptionID = isReactNode(description)
     ? `${inputId}-description`
@@ -500,6 +507,11 @@ export function TagsInput<T extends SearchableItem>({
     </span>
   ));
 
+  // In layer mode the in-flow element is the collapsed placeholder, so that is
+  // the group's item and owns className/style; wrapperContent then lives inside
+  // the layer popover. Outside layer mode wrapperContent is itself the item.
+  const isWrapperGroupItem = inputGroup != null && !isLayerMode;
+
   const wrapperContent = (
     /* eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- pointerdown delegates to inner input for focus convenience */
     <div
@@ -507,17 +519,19 @@ export function TagsInput<T extends SearchableItem>({
       className={cx(
         inputRecipe({
           size,
-          status: status?.type,
+          status: statusType,
           isDisabled,
         }),
         classes.wrapper,
+        isWrapperGroupItem ? className : undefined,
       )}
       data-testid={dataTestId}
       onBlur={handleBlur}
       onFocus={handleFocus}
       onPointerDown={handleWrapperPointerDown}
-      ref={wrapperRef}
-      role="group">
+      ref={isWrapperGroupItem ? mergeRefs(ref, wrapperRef) : wrapperRef}
+      role="group"
+      style={isWrapperGroupItem ? style : undefined}>
       {startIcon != null ? (
         <span className={inputStyles.iconSlot}>
           <Icon color="secondary" icon={startIcon} size="sm" />
@@ -540,6 +554,7 @@ export function TagsInput<T extends SearchableItem>({
       <BaseAutocompleteInput
         anchorRef={wrapperRef}
         ariaDescribedBy={describedBy}
+        ariaLabel={inputGroup != null ? label : undefined}
         className={classes.input}
         debounceMs={debounceMs}
         emptySearchResultsText={emptySearchResultsText}
@@ -639,13 +654,17 @@ export function TagsInput<T extends SearchableItem>({
         className={cx(
           inputRecipe({
             size,
-            status: status?.type,
+            status: statusType,
             isDisabled,
           }),
           placeholderClasses.wrapper,
+          inputGroup != null ? className : undefined,
         )}
         onPointerDown={handleWrapperPointerDown}
-        ref={placeholderRef}>
+        ref={
+          inputGroup != null ? mergeRefs(ref, placeholderRef) : placeholderRef
+        }
+        style={inputGroup != null ? style : undefined}>
         {isTruncated ? (
           <>
             {startIcon != null ? (
@@ -683,6 +702,10 @@ export function TagsInput<T extends SearchableItem>({
   ) : (
     wrapperContent
   );
+
+  if (inputGroup != null) {
+    return inputContent;
+  }
 
   return (
     <Field

@@ -1,4 +1,4 @@
-import type {CSSProperties, Ref} from 'react';
+import type {CSSProperties, HTMLAttributes, Ref} from 'react';
 import {spinnerRecipe} from 'components/Spinner/Spinner.recipe';
 import type {
   SpinnerSize,
@@ -7,7 +7,9 @@ import type {
 import {Text} from 'components/Text';
 import {cx} from 'utils/cx';
 
-export interface SpinnerProps {
+type NativeSpinnerProps = Omit<HTMLAttributes<HTMLSpanElement>, 'size'>;
+
+export interface SpinnerProps extends NativeSpinnerProps {
   /**
    * Accessible label for the loading status. Defaults to a string label when
    * provided, otherwise "Loading".
@@ -65,7 +67,9 @@ export function Spinner({
   'data-testid': dataTestId,
   style,
   ref,
+  role = 'status',
   'aria-label': ariaLabelFromProps,
+  ...htmlProps
 }: SpinnerProps): React.JSX.Element {
   const hasLabel = typeof label === 'string' && label !== '';
   const hasDescription = typeof description === 'string' && description !== '';
@@ -88,11 +92,12 @@ export function Spinner({
 
   return (
     <span
+      {...htmlProps}
       aria-label={ariaLabel}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
-      role="status"
+      role={role}
       style={style}>
       <span aria-hidden="true" className={classes.visual} />
       {hasText ? (
