@@ -303,13 +303,13 @@ describe('useHotkey', () => {
   it('cleans up on disable and unmount', () => {
     const handler = vi.fn();
     const {rerender, unmount} = render(
-      <Hotkey handler={handler} options={{enabled: true}} />,
+      <Hotkey handler={handler} options={{isEnabled: true}} />,
     );
 
     fireEvent.keyDown(document, {key: 'k'});
-    rerender(<Hotkey handler={handler} options={{enabled: false}} />);
+    rerender(<Hotkey handler={handler} options={{isEnabled: false}} />);
     fireEvent.keyDown(document, {key: 'k'});
-    rerender(<Hotkey handler={handler} options={{enabled: true}} />);
+    rerender(<Hotkey handler={handler} options={{isEnabled: true}} />);
     fireEvent.keyDown(document, {key: 'k'});
     unmount();
     fireEvent.keyDown(document, {key: 'k'});

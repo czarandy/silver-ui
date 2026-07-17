@@ -140,12 +140,12 @@ export const Announce: Story = {
 };
 
 function HotkeyDemo(): React.JSX.Element {
-  const [enabled, setEnabled] = useState(true);
+  const [isEnabled, setIsEnabled] = useState(true);
   const [query, setQuery] = useState('');
   const [triggerCount, setTriggerCount] = useState(0);
 
   useHotkey('mod+k', () => setTriggerCount(count => count + 1), {
-    enabled,
+    isEnabled,
     preventDefault: true,
   });
 
@@ -163,12 +163,12 @@ function HotkeyDemo(): React.JSX.Element {
         value={query}
       />
       <Text>
-        Shortcut {enabled ? 'enabled' : 'disabled'} · Triggered {triggerCount}{' '}
+        Shortcut {isEnabled ? 'enabled' : 'disabled'} · Triggered {triggerCount}{' '}
         {triggerCount === 1 ? 'time' : 'times'}
       </Text>
       <Button
-        label={enabled ? 'Disable shortcut' : 'Enable shortcut'}
-        onClick={() => setEnabled(value => !value)}
+        label={isEnabled ? 'Disable shortcut' : 'Enable shortcut'}
+        onClick={() => setIsEnabled(value => !value)}
         size="sm"
         variant="secondary"
       />

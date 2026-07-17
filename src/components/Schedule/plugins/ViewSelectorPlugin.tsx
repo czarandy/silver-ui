@@ -67,7 +67,7 @@ function ScheduleViewHotkey<View extends ScheduleViewBase>({
       event.preventDefault();
       onChangeView?.(view);
     },
-    {enabled: onChangeView != null},
+    {isEnabled: onChangeView != null},
   );
   return null;
 }

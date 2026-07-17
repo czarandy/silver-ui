@@ -176,7 +176,7 @@ export function ToastViewport({
   }, [toasts]);
 
   useHotkey('f6', () => viewportRef.current?.focus(), {
-    enabled: toasts.length > 0,
+    isEnabled: toasts.length > 0,
     enableOnFormElements: true,
     preventDefault: true,
   });

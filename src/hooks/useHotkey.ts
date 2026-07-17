@@ -20,15 +20,15 @@ export type HotkeyTarget =
 
 export interface UseHotkeyOptions {
   /**
-   * Whether the hotkey listener is active.
-   * @default true
-   */
-  enabled?: boolean;
-  /**
    * Whether shortcuts may fire from inputs and other editable elements.
    * @default false
    */
   enableOnFormElements?: boolean;
+  /**
+   * Whether the hotkey listener is active.
+   * @default true
+   */
+  isEnabled?: boolean;
   /**
    * Whether to suppress the matched browser shortcut before calling `handler`.
    * @default false
@@ -126,7 +126,7 @@ const useHotkey = (
   keys: string,
   handler: HotkeyHandler,
   {
-    enabled = true,
+    isEnabled = true,
     enableOnFormElements = false,
     preventDefault = false,
     target = 'document',
@@ -165,7 +165,7 @@ const useHotkey = (
   // This effect intentionally runs after every render so a ref target that is
   // conditionally mounted can be detected without requiring a callback ref.
   useEffect(() => {
-    const nextTarget = enabled ? resolveTarget(target) : null;
+    const nextTarget = isEnabled ? resolveTarget(target) : null;
     const registration = registrationRef.current;
     if (registration?.target === nextTarget) {
       return;
