@@ -1187,6 +1187,50 @@ describe('Table plugins', () => {
     expect(nameHeader).toHaveStyle({width: '200px'});
   });
 
+  it('cleans up an active column resize when the table unmounts', () => {
+    const onColumnResizeEnd = vi.fn();
+    const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
+    const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
+    const pointerColumns: TableColumn<PersonRow>[] = [
+      {key: 'name', header: 'Name', width: pixel(100)},
+      {key: 'age', header: 'Age', width: pixel(100)},
+    ];
+
+    function ResizableTable() {
+      const resizePlugin = useTableColumnResize<PersonRow>({
+        columnWidths: {age: 200, name: 200},
+        columns: pointerColumns as TableColumn<Record<string, unknown>>[],
+        onColumnResizeEnd,
+      });
+      return (
+        <Table columns={pointerColumns} data={data} plugins={{resizePlugin}} />
+      );
+    }
+
+    const {unmount} = render(<ResizableTable />);
+    const handle = screen.getByRole('separator', {name: 'Resize column Name'});
+    fireEvent.pointerDown(handle, {clientX: 100});
+
+    const pointerListeners = (
+      ['pointermove', 'pointerup', 'pointercancel'] as const
+    ).map(eventType => ({
+      eventType,
+      listener: [...addEventListenerSpy.mock.calls]
+        .reverse()
+        .find(([type]) => type === eventType)?.[1],
+    }));
+
+    unmount();
+
+    for (const {eventType, listener} of pointerListeners) {
+      expect(listener).toBeTypeOf('function');
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(eventType, listener);
+    }
+
+    fireEvent.pointerUp(window, {clientX: 150});
+    expect(onColumnResizeEnd).not.toHaveBeenCalled();
+  });
+
   it('commits all affected proportional column widths after pointer drag', () => {
     const onColumnResizeEnd = vi.fn();
     const proportionalColumns: TableColumn<PersonRow>[] = [

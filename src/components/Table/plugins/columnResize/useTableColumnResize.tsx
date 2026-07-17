@@ -235,6 +235,14 @@ function ResizeHandle({
     pointerListenersRef.current = null;
   }, []);
 
+  useEffect(
+    () => () => {
+      removePointerListeners();
+      dragStateRef.current = null;
+    },
+    [removePointerListeners],
+  );
+
   const buildDragState = useCallback(
     (th: HTMLTableCellElement, startX: number): DragState | null => {
       const headerRow = th.parentElement;
