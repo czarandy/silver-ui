@@ -3,11 +3,9 @@
 import {
   useCallback,
   useEffect,
-  useId,
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
   type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
@@ -30,8 +28,8 @@ import {
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
-import {LayerContext} from 'internal/LayerContext';
-import {useEscapeDismiss} from 'internal/useEscapeDismiss';
+import {mergeRefs} from 'internal/mergeRefs';
+import {useLayer, type LayerReturn} from 'internal/useLayer';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -115,11 +113,19 @@ interface ContextMenuCompoundProps extends ContextMenuBaseProps {
 export type ContextMenuProps = ContextMenuDataProps | ContextMenuCompoundProps;
 
 const styles = {
+  anchor: css({
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    w: 0,
+    h: 0,
+    pointerEvents: 'none',
+  }),
   trigger: css({
     display: 'contents',
   }),
   menu: css({
-    display: 'none',
+    display: 'flex',
     flexDirection: 'column',
     gap: '0.5',
     maxH: '80',
@@ -129,29 +135,12 @@ const styles = {
     p: '1',
     borderWidth: 0,
     borderRadius: 'md',
-    _open: {
-      display: 'flex',
-    },
     bg: 'bg',
     boxShadow: 'lg',
     borderStyle: 'solid',
     borderColor: 'border',
   }),
 } as const;
-
-function isPopoverOpen(element: HTMLElement | null): boolean {
-  if (element == null) {
-    return false;
-  }
-  if (element.hasAttribute('popover-open')) {
-    return true;
-  }
-  try {
-    return element.matches(':popover-open');
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Right-click (or touch long-press) context menu for contextual actions on a
@@ -170,34 +159,32 @@ export function ContextMenu({
   style,
   ...props
 }: ContextMenuProps): React.JSX.Element {
-  const menuId = useId();
+  const anchorRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressOriginRef = useRef<{x: number; y: number} | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({x: 0, y: 0});
   const items = 'items' in props ? props.items : undefined;
   const menuContent = 'menuContent' in props ? props.menuContent : undefined;
 
-  const hide = useCallback(() => {
-    if (!isOpen) {
-      return;
-    }
-    menuRef.current?.hidePopover();
-    setIsOpen(false);
-    onOpenChange?.(false);
-  }, [isOpen, onOpenChange]);
+  const handleShow = useCallback(() => {
+    onOpenChange?.(true);
+  }, [onOpenChange]);
 
-  const escapeDismiss = useEscapeDismiss({
-    getElement: () => menuRef.current,
-    isEnabled: isOpen,
+  const handleHide = useCallback(() => {
+    onOpenChange?.(false);
+  }, [onOpenChange]);
+
+  const layer: LayerReturn = useLayer({
+    isDismissable: false,
+    isEscapeDismissEnabled: true,
     onEscape: () => {
-      hide();
+      layer.hide();
       triggerRef.current?.focus();
     },
+    onHide: handleHide,
+    onShow: handleShow,
   });
-  const layerContextValue = escapeDismiss.layerContextValue;
 
   const focusFirstItem = useCallback(() => {
     const firstItem = menuRef.current?.querySelector<HTMLElement>(
@@ -208,33 +195,22 @@ export function ContextMenu({
 
   const show = useCallback(
     (x: number, y: number) => {
-      setPosition({x, y});
-      if (isPopoverOpen(menuRef.current)) {
-        menuRef.current?.hidePopover();
+      if (anchorRef.current == null) {
+        return;
       }
-      menuRef.current?.showPopover();
-      setIsOpen(true);
-      onOpenChange?.(true);
-      requestAnimationFrame(() => {
-        if (menuRef.current != null) {
-          const rect = menuRef.current.getBoundingClientRect();
-          const margin = 4;
-          const clampedX = Math.min(x, window.innerWidth - rect.width - margin);
-          const clampedY = Math.min(
-            y,
-            window.innerHeight - rect.height - margin,
-          );
-          setPosition({
-            x: Math.max(0, clampedX),
-            y: Math.max(0, clampedY),
-          });
-        }
-        if (hasAutoFocus) {
+
+      anchorRef.current.style.left = `${x}px`;
+      anchorRef.current.style.top = `${y}px`;
+      const shouldAutoFocus = hasAutoFocus && !layer.isOpen;
+      layer.show();
+
+      if (shouldAutoFocus) {
+        requestAnimationFrame(() => {
           focusFirstItem();
-        }
-      });
+        });
+      }
     },
-    [focusFirstItem, hasAutoFocus, onOpenChange],
+    [focusFirstItem, hasAutoFocus, layer],
   );
 
   const cancelLongPress = useCallback(() => {
@@ -248,7 +224,7 @@ export function ContextMenu({
   useEffect(() => cancelLongPress, [cancelLongPress]);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (!layer.isOpen) {
       return;
     }
 
@@ -261,23 +237,36 @@ export function ContextMenu({
       ) {
         return;
       }
-      hide();
+      layer.hide();
+    };
+
+    const handleScroll = (event: Event) => {
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        menuRef.current?.contains(target) === true
+      ) {
+        return;
+      }
+      layer.hide();
     };
 
     document.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('scroll', handleScroll, true);
     return () => {
       document.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('scroll', handleScroll, true);
     };
-  }, [hide, isOpen]);
+  }, [layer]);
 
   useImperativeHandle(ref, () => triggerRef.current as HTMLDivElement);
 
   const contextValue = useMemo(
     () => ({
-      closeMenu: hide,
+      closeMenu: layer.hide,
       menuSize: size,
     }),
-    [hide, size],
+    [layer.hide, size],
   );
 
   const handleContextMenu = useCallback(
@@ -344,7 +333,7 @@ export function ContextMenu({
     [isDisabled, show],
   );
 
-  const handleMenuKeyDown = useMenuKeyboard(menuRef, hide, triggerRef);
+  const handleMenuKeyDown = useMenuKeyboard(menuRef, layer.hide, triggerRef);
 
   const menuNode = useMemo(
     (): ReactNode => (items == null ? menuContent : renderMenuItems(items)),
@@ -354,8 +343,8 @@ export function ContextMenu({
   return (
     <>
       <div
-        aria-controls={isOpen ? menuId : undefined}
-        aria-expanded={isOpen}
+        aria-controls={layer.isOpen ? layer.id : undefined}
+        aria-expanded={layer.isOpen}
         aria-haspopup="menu"
         className={styles.trigger}
         data-testid={dataTestId}
@@ -371,27 +360,25 @@ export function ContextMenu({
         {children}
       </div>
       <div
-        aria-label="Context menu"
-        className={cx(styles.menu, className)}
-        id={menuId}
-        onKeyDown={handleMenuKeyDown}
-        popover="manual"
-        ref={menuRef}
-        role="menu"
-        style={{
-          left: position.x,
-          position: 'fixed',
-          top: position.y,
-          width: formatMenuWidth(menuWidth),
-          ...style,
-        }}
-        tabIndex={-1}>
-        <LayerContext value={layerContextValue}>
+        aria-hidden="true"
+        className={styles.anchor}
+        ref={mergeRefs(anchorRef, layer.ref)}
+      />
+      {layer.render(
+        <div
+          aria-label="Context menu"
+          className={cx(styles.menu, className)}
+          onKeyDown={handleMenuKeyDown}
+          ref={menuRef}
+          role="menu"
+          style={{width: formatMenuWidth(menuWidth), ...style}}
+          tabIndex={-1}>
           <DropdownMenuContext value={contextValue}>
             {menuNode}
           </DropdownMenuContext>
-        </LayerContext>
-      </div>
+        </div>,
+        {alignment: 'start', placement: 'below'},
+      )}
     </>
   );
 }
