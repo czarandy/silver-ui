@@ -160,6 +160,62 @@ export const WithEndContent: Story = {
   ),
 };
 
+export const WithPrimaryAction: Story = {
+  render: (): React.JSX.Element => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+      <Toast
+        autoHideDuration={5000}
+        body="A new version is available"
+        endContent={<Button label="Update now" size="sm" variant="primary" />}
+        isAutoHide={false}
+        onDismiss={() => {}}
+        type="info"
+      />
+      <Toast
+        autoHideDuration={5000}
+        body="Your export is ready"
+        endContent={<Button label="Download" size="sm" variant="primary" />}
+        isAutoHide={false}
+        onDismiss={() => {}}
+        type="success"
+      />
+      <Toast
+        autoHideDuration={5000}
+        body="Storage almost full"
+        endContent={<Button label="Upgrade plan" size="sm" variant="primary" />}
+        isAutoHide={false}
+        onDismiss={() => {}}
+        type="warning"
+      />
+      <Toast
+        autoHideDuration={5000}
+        body="Unable to save"
+        endContent={<Button label="Retry" size="sm" variant="primary" />}
+        isAutoHide={false}
+        onDismiss={() => {}}
+        type="error"
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A toast is already the loud element, so a `primary` action inside one ' +
+          'collapses to the same `onSolid` treatment the dismiss button uses — ' +
+          'passing `primary` is safe, it just does not add a second solid fill on ' +
+          'top of a solid toast. Left alone it would paint the global accent on a ' +
+          'fill it was never picked against (teal on teal for `info`).\n\n' +
+          'A filled action cannot work here: each type pairs its fill with the ' +
+          'one foreground that contrasts against it, so no single button colour ' +
+          'clears 3:1 against both the light `warning` amber and the dark `info` ' +
+          'teal. The label follows the toast’s own text instead — white on the ' +
+          'dark fills, dark on `warning`, exactly as the body copy does.',
+      },
+    },
+  },
+};
+
 export const Positions: Story = {
   render: (): React.JSX.Element => <PositionsStory />,
 };
