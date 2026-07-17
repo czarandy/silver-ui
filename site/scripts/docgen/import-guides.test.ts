@@ -7,7 +7,7 @@ describe('gettingStartedPage', () => {
     const page = gettingStartedPage();
     expect(page).toContain('title: "Getting started"');
     expect(page).toContain('## Key features');
-    expect(page).toContain('**70+ accessible components.**');
+    expect(page).toContain('**80+ accessible components.**');
     expect(page).toContain('**Flexible theming.**');
     expect(page).toContain('**Zero-runtime styling.**');
     expect(page).toContain('**Modern React support.**');

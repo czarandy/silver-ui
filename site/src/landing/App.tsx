@@ -314,7 +314,7 @@ export function App(): JSX.Element {
             component library
           </h1>
           <Text as="p" className="hero__lede" color="secondary" type="large">
-            silver-ui has 70+ fast and accessible components with support for
+            silver-ui has 80+ fast and accessible components with support for
             theming and dark mode to help you build polished web apps.
           </Text>
 

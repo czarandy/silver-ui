@@ -93,7 +93,7 @@ export function gettingStartedPage(): string {
     '',
     '## Key features',
     '',
-    '- **70+ accessible components.** Keyboard navigation, focus rings, and ARIA wiring are built into interactive components.',
+    '- **80+ accessible components.** Keyboard navigation, focus rings, and ARIA wiring are built into interactive components.',
     '- **Flexible theming.** Customize colors, radii, fonts, and more with CSS variables, including first-class light and dark modes.',
     '- **Zero-runtime styling.** Panda CSS compiles type-safe styles into a small atomic stylesheet.',
     '- **Modern React support.** Fully typed APIs are designed for React 19 and the React Compiler.',
