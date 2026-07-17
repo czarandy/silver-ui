@@ -167,10 +167,10 @@ export function formatRelative(
   const rtf = new Intl.RelativeTimeFormat(undefined, {numeric: 'auto'});
   for (const [unit, seconds] of RELATIVE_UNITS) {
     if (Math.abs(diffSeconds) >= seconds) {
-      return rtf.format(Math.round(diffSeconds / seconds), unit);
+      return rtf.format(Math.trunc(diffSeconds / seconds), unit);
     }
   }
-  // Unreachable: values under a minute are handled by the "now" window above.
+  // Values between the "now" threshold and one minute also read as "now".
   return 'now';
 }
 
