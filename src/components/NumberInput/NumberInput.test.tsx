@@ -1,8 +1,31 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {InputGroup} from 'components/InputGroup';
 import {NumberInput} from 'components/NumberInput/NumberInput';
+
+function ControlledClearableNumberInput({
+  initialValue,
+  onChange,
+}: {
+  initialValue: number;
+  onChange: (value: number | null) => void;
+}): React.JSX.Element {
+  const [value, setValue] = useState<number | null>(initialValue);
+
+  return (
+    <NumberInput
+      hasClear
+      label="Count"
+      onChange={nextValue => {
+        setValue(nextValue);
+        onChange(nextValue);
+      }}
+      value={value}
+    />
+  );
+}
 
 describe('NumberInput', () => {
   it('calls onChange with valid numbers', async () => {
@@ -26,6 +49,52 @@ describe('NumberInput', () => {
 
     await user.click(screen.getByRole('button', {name: 'Clear Count'}));
     expect(onChange).toHaveBeenCalledWith(null);
+  });
+
+  it('clears nullable values from the keyboard on blur', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <ControlledClearableNumberInput initialValue={4} onChange={onChange} />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    await user.clear(input);
+    await user.tab();
+
+    expect(onChange).toHaveBeenCalledWith(null);
+    expect(input).toHaveValue(null);
+  });
+
+  it('clears nullable values from the keyboard on Enter', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <ControlledClearableNumberInput initialValue={4} onChange={onChange} />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    await user.clear(input);
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith(null);
+    expect(input).toHaveValue(null);
+  });
+
+  it('does not clear non-nullable values from the keyboard', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(<NumberInput label="Count" onChange={onChange} value={4} />);
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    await user.clear(input);
+    await user.tab();
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input).toHaveValue(4);
   });
 
   it('clamps values to max on blur', async () => {

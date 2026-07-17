@@ -2,6 +2,7 @@
 
 import {X} from 'lucide-react';
 import {
+  useCallback,
   useId,
   useMemo,
   useState,
@@ -283,6 +284,27 @@ export function NumberInput({
     return value == null ? '' : String(value);
   }, [pendingInput, value]);
 
+  const commitPendingInput = useCallback(() => {
+    if (pendingInput == null) {
+      return;
+    }
+
+    const parsed = parseNumberInput(pendingInput, {isIntegerOnly});
+    if (parsed != null) {
+      const clamped = clampValue(parsed, min, max);
+      if (clamped !== value) {
+        onChange(clamped);
+      }
+    } else if (
+      hasClear === true &&
+      pendingInput.trim() === '' &&
+      value != null
+    ) {
+      onChange(null);
+    }
+    setPendingInput(null);
+  }, [hasClear, isIntegerOnly, max, min, onChange, pendingInput, value]);
+
   const necessity = getNecessity(isOptional, isRequired);
 
   const inputWrapper = (
@@ -319,16 +341,7 @@ export function NumberInput({
         min={min ?? undefined}
         name={htmlName}
         onBlur={event => {
-          if (pendingInput != null) {
-            const parsed = parseNumberInput(pendingInput, {isIntegerOnly});
-            if (parsed != null) {
-              const clamped = clampValue(parsed, min, max);
-              if (clamped !== value) {
-                onChange(clamped);
-              }
-            }
-            setPendingInput(null);
-          }
+          commitPendingInput();
           onBlur?.(event);
         }}
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -345,6 +358,7 @@ export function NumberInput({
         onFocus={onFocus}
         onKeyDown={event => {
           if (event.key === 'Enter' && !isComposingEvent(event)) {
+            commitPendingInput();
             onEnter?.();
           }
           onKeyDown?.(event);
