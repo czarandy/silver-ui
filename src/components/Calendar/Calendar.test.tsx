@@ -1,6 +1,7 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {act, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Calendar, type CalendarHandle} from 'components/Calendar/Calendar';
 import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
 import {plainDateCreate} from 'internal/plainDate';
@@ -20,6 +21,10 @@ function getAddedClasses(
     .filter(className => !baseClassSet.has(className));
 }
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('Calendar', () => {
   it('renders the selected month and selected day', () => {
     render(
@@ -30,6 +35,43 @@ describe('Calendar', () => {
     expect(
       screen.getByRole('gridcell', {name: /May 21, 2026/}),
     ).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('marks today as current independently of selection state', () => {
+    vi.spyOn(Temporal.Now, 'plainDateISO').mockReturnValue(
+      plainDateCreate(2026, 5, 15),
+    );
+
+    const {unmount} = render(
+      <Calendar onChange={() => {}} value={plainDateCreate(2026, 5, 15)} />,
+    );
+
+    const selectedToday = screen.getByRole('gridcell', {
+      name: /May 15, 2026/,
+    });
+    expect(selectedToday).toHaveAttribute('aria-current', 'date');
+    expect(selectedToday).toHaveAttribute('aria-selected', 'true');
+    expect(
+      screen.getByRole('gridcell', {name: /May 14, 2026/}),
+    ).not.toHaveAttribute('aria-current');
+
+    unmount();
+    render(
+      <Calendar
+        mode="range"
+        onChange={() => {}}
+        value={{
+          start: plainDateCreate(2026, 5, 10),
+          end: plainDateCreate(2026, 5, 20),
+        }}
+      />,
+    );
+
+    const inRangeToday = screen.getByRole('gridcell', {
+      name: /May 15, 2026/,
+    });
+    expect(inRangeToday).toHaveAttribute('aria-current', 'date');
+    expect(inRangeToday).toHaveAttribute('aria-selected', 'true');
   });
 
   it('mirrors month navigation chevrons in RTL', () => {
