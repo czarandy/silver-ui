@@ -32,7 +32,6 @@ import type {
   TableContextValue,
   TableDensity,
   TableDividers,
-  TableHeaderCellComponentProps,
   TablePlugin,
   TableRenderProps,
   TableRowComponentProps,
@@ -310,8 +309,7 @@ function TableInner<T extends Record<string, unknown>>({
   const RowComponent = TableRow as React.ComponentType<TableRowComponentProps>;
   const CellComponent =
     TableCell as React.ComponentType<TableCellComponentProps>;
-  const HeaderCellComponent =
-    TableHeaderCell as React.ComponentType<TableHeaderCellComponentProps>;
+  const HeaderCellComponent = TableHeaderCell;
 
   const baseColumns =
     columnsProp ?? (data == null ? [] : generateColumns(data));

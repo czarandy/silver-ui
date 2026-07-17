@@ -102,9 +102,10 @@ describe('Table', () => {
       <Table columns={columns} data={data} idKey="id" />,
     );
 
-    expect(
-      screen.getByRole('columnheader', {name: 'Name'}),
-    ).toBeInTheDocument();
+    const nameHeader = screen.getByRole('columnheader', {name: 'Name'});
+    expect(nameHeader).toBeInTheDocument();
+    expect(nameHeader).toHaveAttribute('data-column-key', 'name');
+    expect(nameHeader).toHaveAttribute('title', 'Name');
     expect(screen.getByText('Name')).toHaveClass('silver-fs_md');
     expect(screen.getByRole('cell', {name: 'Alice'})).toBeInTheDocument();
     expect(screen.getByRole('cell', {name: '24'})).toBeInTheDocument();
@@ -483,6 +484,13 @@ describe('Table plugins', () => {
     expect(
       screen.getByRole('button', {name: /Age, sorted ascending/}),
     ).toBeInTheDocument();
+    const ageHeader = screen.getByRole('columnheader', {name: /Age/});
+    expect(ageHeader).toHaveAttribute('aria-sort', 'ascending');
+
+    await user.click(
+      screen.getByRole('button', {name: /Age, sorted ascending/}),
+    );
+    expect(ageHeader).toHaveAttribute('aria-sort', 'descending');
   });
 
   it('dims inactive sort icons and marks active sort icons distinctly', () => {
