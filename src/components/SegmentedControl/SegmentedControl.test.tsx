@@ -94,6 +94,54 @@ describe('SegmentedControl', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it.each([
+    {name: 'undefined', value: undefined},
+    {name: 'stale', value: 'missing'},
+  ])(
+    'uses the first enabled item as the only tab stop when value is $name',
+    ({value}) => {
+      render(
+        <SegmentedControl label="View mode" onChange={() => {}} value={value}>
+          <SegmentedControlItem isDisabled label="Grid" value="grid" />
+          <SegmentedControlItem label="List" value="list" />
+          <SegmentedControlItem label="Table" value="table" />
+        </SegmentedControl>,
+      );
+
+      const radios = screen.getAllByRole('radio');
+      expect(radios.filter(radio => radio.tabIndex === 0)).toEqual([
+        screen.getByRole('radio', {name: 'List'}),
+      ]);
+    },
+  );
+
+  it('moves focus into an empty control without changing its value', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const value: string | undefined = undefined;
+    render(
+      <>
+        <button type="button">Before control</button>
+        <SegmentedControl label="View mode" onChange={onChange} value={value}>
+          <SegmentedControlItem isDisabled label="Grid" value="grid" />
+          <SegmentedControlItem label="List" value="list" />
+          <SegmentedControlItem label="Table" value="table" />
+        </SegmentedControl>
+      </>,
+    );
+
+    await user.tab();
+    await user.tab();
+
+    expect(screen.getByRole('radio', {name: 'List'})).toHaveFocus();
+    expect(onChange).not.toHaveBeenCalled();
+
+    await user.keyboard('{ArrowRight}');
+
+    expect(screen.getByRole('radio', {name: 'Table'})).toHaveFocus();
+    expect(onChange).toHaveBeenCalledExactlyOnceWith('table');
+  });
+
   it('supports roving keyboard navigation', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

@@ -10,7 +10,8 @@ export interface SegmentedControlContextValue {
   layout: SegmentedControlLayout;
   onChange: (value: string) => void;
   size: SegmentedControlSize;
-  value: string;
+  tabStopValue: string | undefined;
+  value: string | undefined;
 }
 
 export const SegmentedControlContext =
