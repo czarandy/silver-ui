@@ -1,18 +1,17 @@
 'use client';
 
 import {ImageIcon} from 'lucide-react';
-import {
-  useCallback,
-  useState,
-  type ComponentPropsWithoutRef,
-  type CSSProperties,
-  type ReactNode,
-  type Ref,
+import type {
+  ComponentPropsWithoutRef,
+  CSSProperties,
+  ReactNode,
+  Ref,
 } from 'react';
 import {Icon} from 'components/Icon';
 import {imageRecipe} from 'components/Image/Image.recipe';
 import {Skeleton} from 'components/Skeleton';
 import isReactNode from 'internal/isReactNode';
+import useImageLoadState from 'internal/useImageLoadState';
 import {cx} from 'utils/cx';
 
 export type ImageObjectFit =
@@ -93,8 +92,6 @@ export interface ImageProps extends NativeImageProps {
   style?: CSSProperties;
 }
 
-type ImageState = 'error' | 'loaded' | 'loading';
-
 /**
  * Responsive image with lazy loading, async decoding, and an error fallback.
  * Reserve layout space with native dimensions, wrapper sizing, or
@@ -120,29 +117,20 @@ export function Image({
   // `sizes` is intentionally excluded: it tweaks source selection but does not
   // change the underlying resource, so it should not force a reload/reset.
   const sourceKey = JSON.stringify([src, srcSet]);
-  const [imageState, setImageState] = useState<ImageState>('loading');
-  // Reset to loading when the source changes. The keyed <img> below remounts on
-  // the same change, so `imageRef` re-runs and reveals already-cached images
-  // synchronously (no skeleton flash).
-  const [prevSourceKey, setPrevSourceKey] = useState(sourceKey);
-  if (sourceKey !== prevSourceKey) {
-    setPrevSourceKey(sourceKey);
-    setImageState('loading');
-  }
-
+  const {
+    status,
+    ref: imageRef,
+    onLoad: markLoaded,
+    onError: markError,
+  } = useImageLoadState(sourceKey);
   const classes = imageRecipe({
-    isLoaded: imageState === 'loaded',
+    isLoaded: status === 'loaded',
     objectFit,
   });
-  const imageRef = useCallback((image: HTMLImageElement | null) => {
-    if (image?.complete === true) {
-      setImageState(image.naturalWidth > 0 ? 'loaded' : 'error');
-    }
-  }, []);
 
   return (
     <div
-      aria-busy={imageState === 'loading' || undefined}
+      aria-busy={status === 'loading' || undefined}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
@@ -151,16 +139,16 @@ export function Image({
         key={sourceKey}
         {...imageProps}
         alt={alt}
-        aria-hidden={imageState === 'error' || undefined}
+        aria-hidden={status === 'error' || undefined}
         className={classes.image}
         decoding={decoding}
         loading={loading}
         onError={event => {
-          setImageState('error');
+          markError();
           onError?.(event);
         }}
         onLoad={event => {
-          setImageState('loaded');
+          markLoaded();
           onLoad?.(event);
         }}
         ref={imageRef}
@@ -168,10 +156,10 @@ export function Image({
         src={src}
         srcSet={srcSet}
       />
-      {imageState === 'loading' ? (
+      {status === 'loading' ? (
         <Skeleton className={classes.loading} radius="none" />
       ) : null}
-      {imageState === 'error' ? (
+      {status === 'error' ? (
         <div className={classes.fallback}>
           {isReactNode(fallback) ? (
             fallback
