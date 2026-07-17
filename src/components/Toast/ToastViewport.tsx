@@ -215,12 +215,10 @@ export function ToastViewport({
 
   const removeToast = useCallback((id: string, reason: ToastDismissReason) => {
     const entry = toastsRef.current.find(toast => toast.id === id);
-    entry?.options.onHide?.(reason);
-    setExitingIds(previous => new Set(previous).add(id));
-    const existingTimeout = exitTimeoutsRef.current.get(id);
-    if (existingTimeout != null) {
-      globalThis.clearTimeout(existingTimeout);
+    if (entry == null || exitTimeoutsRef.current.has(id)) {
+      return;
     }
+    setExitingIds(previous => new Set(previous).add(id));
     const timeout = globalThis.setTimeout(() => {
       exitTimeoutsRef.current.delete(id);
       setExitingIds(previous => {
@@ -231,6 +229,7 @@ export function ToastViewport({
       setToasts(previous => previous.filter(toast => toast.id !== id));
     }, 180);
     exitTimeoutsRef.current.set(id, timeout);
+    entry.options.onHide?.(reason);
   }, []);
 
   const findByUniqueID = useCallback((uniqueID: string) => {
