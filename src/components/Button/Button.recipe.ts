@@ -1,10 +1,6 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
 
-// A coloured surface that hosts a Button can retint `primary` by setting these
-// vars, so `variant="primary"` still reads as the recommended action instead of
-// dropping the global accent onto a background it was never picked against.
-// Alert sets them per status; anywhere else these fall back to the accent.
 const primaryBg = `var(--silver-button-primary-bg, ${token.var('colors.primary')})`;
 const primaryFg = `var(--silver-button-primary-fg, ${token.var('colors.fg.onPrimary')})`;
 const primaryBgHover = `var(--silver-button-primary-bg-hover, ${token.var('colors.primary.hover')})`;
