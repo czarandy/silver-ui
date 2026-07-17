@@ -20,7 +20,7 @@ export const ReadOnly: Story = {
 };
 
 export const Interactive: Story = {
-  args: {value: 2, onChange: () => {}},
+  args: {htmlName: 'rating', value: 2, onChange: () => {}},
 };
 
 export const Disabled: Story = {

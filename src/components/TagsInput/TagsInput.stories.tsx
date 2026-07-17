@@ -88,7 +88,12 @@ function EmptyTagsInputStory(
 const meta = {
   title: 'Components/TagsInput',
   component: TagsInput,
-  args: {label: 'Team', onChange: () => {}, placeholder: 'Search people'},
+  args: {
+    htmlName: 'team',
+    label: 'Team',
+    onChange: () => {},
+    placeholder: 'Search people',
+  },
   render: (args: TagsInputProps): React.JSX.Element => (
     <TagsInputStory {...args} />
   ),

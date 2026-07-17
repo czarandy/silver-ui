@@ -103,6 +103,11 @@ export type MultiSelectProps = {
    */
   hasClear?: boolean;
   /**
+   * HTML name attribute for native form submission. Each selected value is
+   * submitted as a separate entry.
+   */
+  htmlName?: string;
+  /**
    * Whether to show search input in the dropdown.
    * @default false
    */
@@ -215,6 +220,7 @@ export function MultiSelect({
   hasClear = false,
   hasSearch = false,
   hasSelectAll = false,
+  htmlName,
   isDefaultOpen = false,
   isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
@@ -567,6 +573,17 @@ export function MultiSelect({
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
       style={style}>
+      {htmlName == null
+        ? null
+        : value.map(selectedValue => (
+            <input
+              disabled={isDisabled}
+              key={selectedValue}
+              name={htmlName}
+              type="hidden"
+              value={selectedValue}
+            />
+          ))}
       {trigger}
       {popover}
     </Field>

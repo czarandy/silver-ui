@@ -18,6 +18,7 @@ const meta = {
   title: 'Components/Slider',
   component: Slider as Meta['component'],
   args: {
+    htmlName: 'volume',
     label: 'Volume',
     value: 50,
   },

@@ -9,6 +9,7 @@ const meta = {
   component: Switch,
   args: {
     description: 'Receive product updates and account alerts.',
+    htmlName: 'notifications',
     isSelected: true,
     label: 'Notifications',
   },

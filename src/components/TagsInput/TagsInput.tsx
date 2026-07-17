@@ -137,6 +137,11 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    */
   endContent?: ReactNode;
   /**
+   * HTML name attribute for native form submission. Each selected item ID is
+   * submitted as a separate entry.
+   */
+  htmlName?: string;
+  /**
    * Imperative focus/blur handle.
    */
   handleRef?: Ref<TagsInputHandle>;
@@ -284,6 +289,7 @@ export function TagsInput<T extends SearchableItem>({
   hasCreate = false,
   hasEntriesOnFocus = false,
   handleRef,
+  htmlName,
   isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isReadOnly = false,
@@ -718,6 +724,17 @@ export function TagsInput<T extends SearchableItem>({
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
       style={style}>
+      {htmlName == null
+        ? null
+        : value.map(item => (
+            <input
+              disabled={isDisabled}
+              key={item.id}
+              name={htmlName}
+              type="hidden"
+              value={item.id}
+            />
+          ))}
       {inputContent}
     </Field>
   );

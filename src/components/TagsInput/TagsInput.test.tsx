@@ -53,6 +53,32 @@ beforeEach(() => {
 });
 
 describe('TagsInput', () => {
+  it('submits each selected item ID with htmlName', () => {
+    render(
+      <form data-testid="form">
+        <TagsInput
+          htmlName="team"
+          label="Team"
+          onChange={() => {}}
+          searchSource={emptySource}
+          value={[items[0], items[2]]}
+        />
+        <TagsInput
+          htmlName="disabled"
+          isDisabled
+          label="Disabled"
+          onChange={() => {}}
+          searchSource={emptySource}
+          value={[items[1]]}
+        />
+      </form>,
+    );
+
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(formData.getAll('team')).toEqual(['ada', 'katherine']);
+    expect(formData.has('disabled')).toBe(false);
+  });
+
   it('adds a selected item', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

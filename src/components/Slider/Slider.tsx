@@ -54,6 +54,11 @@ export type SliderBaseProps = {
    */
   formatValue?: (value: number) => string;
   /**
+   * HTML name attribute for native form submission. Range sliders submit one
+   * entry per value.
+   */
+  htmlName?: string;
+  /**
    * Whether the slider is disabled.
    * @default false
    */
@@ -177,6 +182,7 @@ export function Slider({
   'data-testid': dataTestId,
   description,
   formatValue,
+  htmlName,
   isDisabled = false,
   isLabelHidden = false,
   isOptional,
@@ -464,6 +470,17 @@ export function Slider({
       }
       statusVariant="detached"
       style={style}>
+      {htmlName == null
+        ? null
+        : values.map((currentValue, index) => (
+            <input
+              disabled={isDisabled}
+              key={isRange ? (index === 0 ? 'minimum' : 'maximum') : 'value'}
+              name={htmlName}
+              type="hidden"
+              value={currentValue}
+            />
+          ))}
       <div className={classes.row}>
         <div
           aria-label={isRange ? label : undefined}

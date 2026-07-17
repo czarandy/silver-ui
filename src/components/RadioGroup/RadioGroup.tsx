@@ -42,6 +42,10 @@ export type RadioGroupProps = {
    */
   description?: ReactNode;
   /**
+   * HTML name attribute shared by radio inputs for native form submission.
+   */
+  htmlName?: string;
+  /**
    * Whether all radio items are disabled.
    * @default false
    */
@@ -100,6 +104,7 @@ export function RadioGroup({
   className,
   'data-testid': dataTestId,
   description,
+  htmlName,
   isDisabled = false,
   isLabelHidden = false,
   isOptional,
@@ -126,13 +131,22 @@ export function RadioGroup({
     () => ({
       isDisabled,
       isRequired,
-      name: nameId,
+      name: htmlName ?? nameId,
       onChange,
       orientation,
       size,
       value,
     }),
-    [isDisabled, isRequired, nameId, onChange, orientation, size, value],
+    [
+      htmlName,
+      isDisabled,
+      isRequired,
+      nameId,
+      onChange,
+      orientation,
+      size,
+      value,
+    ],
   );
 
   const necessity = getNecessity(isOptional, isRequired);

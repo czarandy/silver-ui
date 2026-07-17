@@ -6,6 +6,26 @@ import {RadioGroup} from 'components/RadioGroup/RadioGroup';
 import {RadioGroupItem} from 'components/RadioGroup/RadioGroupItem';
 
 describe('RadioGroup', () => {
+  it('submits the selected value with htmlName', () => {
+    render(
+      <form data-testid="form">
+        <RadioGroup
+          htmlName="notificationPreference"
+          label="Notification preference"
+          onChange={() => {}}
+          value="email">
+          <RadioGroupItem label="Email" value="email" />
+          <RadioGroupItem label="SMS" value="sms" />
+        </RadioGroup>
+      </form>,
+    );
+
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(Array.from(formData.entries())).toEqual([
+      ['notificationPreference', 'email'],
+    ]);
+  });
+
   it('calls onChange with the selected item value', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

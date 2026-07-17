@@ -29,6 +29,17 @@ describe('Rating', () => {
   });
 
   describe('interactive', () => {
+    it('submits the selected value with htmlName', () => {
+      render(
+        <form data-testid="form">
+          <Rating htmlName="rating" onChange={() => {}} value={3} />
+        </form>,
+      );
+
+      const formData = new FormData(screen.getByTestId('form'));
+      expect(Array.from(formData.entries())).toEqual([['rating', '3']]);
+    });
+
     it('renders as a radiogroup', () => {
       const onChange = vi.fn();
       render(<Rating onChange={onChange} value={3} />);
