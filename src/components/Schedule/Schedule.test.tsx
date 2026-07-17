@@ -2688,8 +2688,14 @@ describe('Schedule', () => {
     it('discards the draft when Escape is pressed mid-drag', () => {
       render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
 
+      fireEvent.keyDown(window, {key: 'Escape'});
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
       fireEvent.pointerMove(window, {clientY: 30, pointerId: 1});
+      fireEvent.keyDown(window, {isComposing: true, key: 'Escape'});
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
+
       fireEvent.keyDown(window, {key: 'Escape'});
 
       expect(
@@ -3250,14 +3256,54 @@ describe('Schedule', () => {
 
     render(<ScheduleWithViewSelector />);
 
-    fireEvent.keyDown(screen.getByRole('textbox', {name: 'Event title'}), {
+    const input = screen.getByRole('textbox', {name: 'Event title'});
+    fireEvent.keyDown(input, {
       key: 'm',
     });
     fireEvent.keyDown(document, {ctrlKey: true, key: 'm'});
+    fireEvent.keyDown(document, {key: 'm', repeat: true});
+    fireEvent.keyDown(document, {isComposing: true, key: 'm'});
+    const prevented = createEvent.keyDown(document, {key: 'm'});
+    prevented.preventDefault();
+    fireEvent(document, prevented);
     expect(onChangeView).not.toHaveBeenCalled();
 
     fireEvent.keyDown(document, {key: 'M'});
-    expect(onChangeView).toHaveBeenCalledExactlyOnceWith(monthView);
+    fireEvent.keyDown(document, {key: 'd'});
+    expect(onChangeView.mock.calls).toEqual([[monthView], [dayView]]);
+  });
+
+  it('uses the first configured view when hotkey descriptors collide', () => {
+    const onChangeView = vi.fn();
+    const dayView = createScheduleDayView();
+    const firstMonthView = createScheduleMonthlyView();
+    const secondMonthView = createScheduleMonthlyView();
+    const viewOptions = [
+      {hotkey: 'm', label: 'First month', view: firstMonthView},
+      {hotkey: 'm', label: 'Second month', view: secondMonthView},
+      {hotkey: 'd', label: 'Day', view: dayView},
+    ];
+
+    function ScheduleWithViewSelector() {
+      const viewSelectorPlugin = useScheduleViewSelectorPlugin(viewOptions, {
+        onChangeView,
+      });
+      return (
+        <Schedule
+          categories={categories}
+          events={events}
+          plugins={[viewSelectorPlugin]}
+          timezoneID="UTC"
+          view={dayView}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    render(<ScheduleWithViewSelector />);
+    fireEvent.keyDown(document, {key: 'm'});
+
+    expect(onChangeView).toHaveBeenCalledExactlyOnceWith(firstMonthView);
   });
 
   it('disables the view selector plugin when no change handler is provided', () => {

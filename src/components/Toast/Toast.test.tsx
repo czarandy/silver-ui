@@ -243,6 +243,43 @@ describe('Toast', () => {
     vi.useRealTimers();
   });
 
+  it('guards and suppresses the F6 shortcut only while notifications exist', () => {
+    render(
+      <ToastViewport isTopLayer={false}>
+        <ShowToastFixture body="Item saved" />
+        <input aria-label="Title" />
+      </ToastViewport>,
+    );
+
+    const beforeToast = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'F6',
+    });
+    document.dispatchEvent(beforeToast);
+    expect(beforeToast.defaultPrevented).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show'}));
+    const input = screen.getByRole('textbox', {name: 'Title'});
+    const viewport = screen.getByRole('region', {name: 'Notifications'});
+    input.focus();
+
+    fireEvent.keyDown(input, {ctrlKey: true, key: 'F6'});
+    fireEvent.keyDown(input, {key: 'F6', shiftKey: true});
+    fireEvent.keyDown(input, {isComposing: true, key: 'F6'});
+    expect(input).toHaveFocus();
+
+    const accepted = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'F6',
+    });
+    input.dispatchEvent(accepted);
+
+    expect(accepted.defaultPrevented).toBe(true);
+    expect(viewport).toHaveFocus();
+  });
+
   it('deduplicates by uniqueID using overwrite behavior', async () => {
     const user = userEvent.setup();
 

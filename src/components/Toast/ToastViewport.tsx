@@ -21,6 +21,7 @@ import type {
   ToastEntry,
   ToastPosition,
 } from 'components/Toast/types';
+import useHotkey from 'hooks/useHotkey';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -174,24 +175,11 @@ export function ToastViewport({
     toastsRef.current = toasts;
   }, [toasts]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key !== 'F6' ||
-        event.altKey ||
-        event.ctrlKey ||
-        event.metaKey ||
-        toastsRef.current.length === 0
-      ) {
-        return;
-      }
-      event.preventDefault();
-      viewportRef.current?.focus();
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  useHotkey('f6', () => viewportRef.current?.focus(), {
+    isEnabled: toasts.length > 0,
+    isEnabledOnFormElements: true,
+    hasPreventDefault: true,
+  });
 
   const addToast = useCallback((entry: ToastEntry) => {
     setToasts(previous => {
