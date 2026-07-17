@@ -1,7 +1,11 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Thumbnail} from 'components/Thumbnail/Thumbnail';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe('Thumbnail', () => {
   it('renders an image thumbnail', () => {
@@ -67,6 +71,22 @@ describe('Thumbnail', () => {
     render(<Thumbnail alt="Preview" label="photo.jpg" src="/broken.jpg" />);
 
     fireEvent.error(screen.getByRole('img', {name: 'Preview'}));
+
+    expect(
+      screen.queryByRole('img', {name: 'Preview'}),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText('photo.jpg')).toBeInTheDocument();
+  });
+
+  it('shows the placeholder for an already-complete broken cached image', () => {
+    vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(
+      true,
+    );
+    vi.spyOn(HTMLImageElement.prototype, 'naturalWidth', 'get').mockReturnValue(
+      0,
+    );
+
+    render(<Thumbnail alt="Preview" label="photo.jpg" src="/broken.jpg" />);
 
     expect(
       screen.queryByRole('img', {name: 'Preview'}),

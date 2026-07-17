@@ -1,13 +1,14 @@
 'use client';
 
 import {ImageIcon, X} from 'lucide-react';
-import {useState, type CSSProperties, type MouseEvent, type Ref} from 'react';
+import type {CSSProperties, MouseEvent, Ref} from 'react';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
 import {Skeleton} from 'components/Skeleton';
 import {Spinner} from 'components/Spinner';
 import {thumbnailRecipe} from 'components/Thumbnail/Thumbnail.recipe';
 import {Tooltip} from 'components/Tooltip';
+import useImageLoadState from 'internal/useImageLoadState';
 import {cx} from 'utils/cx';
 
 export interface ThumbnailProps {
@@ -82,8 +83,8 @@ function ThumbnailImageArea({
   onRemove,
   src,
 }: ThumbnailImageAreaProps): React.JSX.Element {
-  const [hasImageError, setHasImageError] = useState(false);
-  const hasImage = src != null && !hasImageError;
+  const {status, ref: imageRef, onLoad, onError} = useImageLoadState(src ?? '');
+  const hasImage = src != null && status !== 'error';
   const isInteractive = onClick != null && !isDisabled && !isLoading;
   const imageContent =
     isLoading && !hasImage ? (
@@ -92,7 +93,10 @@ function ThumbnailImageArea({
       <img
         alt={alt ?? ''}
         className={classes.image}
-        onError={() => setHasImageError(true)}
+        key={src}
+        onError={onError}
+        onLoad={onLoad}
+        ref={imageRef}
         src={src}
       />
     ) : (
@@ -174,7 +178,6 @@ export function Thumbnail({
         classes={classes}
         isDisabled={isDisabled}
         isLoading={isLoading}
-        key={src ?? 'empty'}
         onClick={onClick}
         onRemove={onRemove}
         src={src}
