@@ -5,7 +5,7 @@ import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {Toast} from 'components/Toast/Toast';
 import {ToastViewport} from 'components/Toast/ToastViewport';
-import type {ToastDismissFn} from 'components/Toast/types';
+import type {ToastDismissFn, ToastOptions} from 'components/Toast/types';
 import {useToast} from 'components/Toast/useToast';
 
 beforeAll(() => {
@@ -65,7 +65,9 @@ function IgnoreFixture(): React.JSX.Element {
   );
 }
 
-function DismissFnFixture(): React.JSX.Element {
+function DismissFnFixture({
+  onHide,
+}: Pick<ToastOptions, 'onHide'>): React.JSX.Element {
   const toast = useToast();
   const dismissRef = useRef<ToastDismissFn | null>(null);
   return (
@@ -73,7 +75,11 @@ function DismissFnFixture(): React.JSX.Element {
       <Button
         label="Show"
         onClick={() => {
-          dismissRef.current = toast({body: 'Programmatic', isAutoHide: false});
+          dismissRef.current = toast({
+            body: 'Programmatic',
+            isAutoHide: false,
+            onHide,
+          });
         }}
       />
       <Button label="Dismiss" onClick={() => dismissRef.current?.()} />
@@ -303,7 +309,7 @@ describe('Toast', () => {
     vi.useRealTimers();
   });
 
-  it('calls onHide when toast is dismissed', async () => {
+  it('calls onHide once when a toast is dismissed repeatedly', async () => {
     const user = userEvent.setup();
     const onHide = vi.fn();
 
@@ -314,19 +320,21 @@ describe('Toast', () => {
     );
 
     await user.click(screen.getByRole('button', {name: 'Show'}));
-    await user.click(
+    await user.dblClick(
       screen.getByRole('button', {name: 'Dismiss notification'}),
     );
 
+    expect(onHide).toHaveBeenCalledTimes(1);
     expect(onHide).toHaveBeenCalledWith('manual');
   });
 
   it('dismisses programmatically via returned function', async () => {
     vi.useFakeTimers();
+    const onHide = vi.fn();
 
     render(
       <ToastViewport isTopLayer={false}>
-        <DismissFnFixture />
+        <DismissFnFixture onHide={onHide} />
       </ToastViewport>,
     );
 
@@ -334,12 +342,40 @@ describe('Toast', () => {
     expect(screen.getByText('Programmatic')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', {name: 'Dismiss'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Dismiss'}));
+    expect(onHide).toHaveBeenCalledTimes(1);
+    expect(onHide).toHaveBeenCalledWith('manual');
+
     await act(async () => {
       await vi.advanceTimersByTimeAsync(200);
     });
     expect(screen.queryByText('Programmatic')).not.toBeInTheDocument();
 
     vi.useRealTimers();
+  });
+
+  it('keeps the first dismissal reason when manual and auto dismissals race', async () => {
+    vi.useFakeTimers();
+    const onHide = vi.fn();
+
+    render(
+      <ToastViewport isTopLayer={false}>
+        <ShowToastFixture
+          autoHideDuration={100}
+          body="Racing dismissals"
+          onHide={onHide}
+        />
+      </ToastViewport>,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Dismiss notification'}));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(200);
+    });
+
+    expect(onHide).toHaveBeenCalledTimes(1);
+    expect(onHide).toHaveBeenCalledWith('manual');
   });
 
   it('clears pending exit timers when the viewport unmounts', () => {
