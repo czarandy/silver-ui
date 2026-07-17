@@ -74,6 +74,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'AvatarGroup',
     'Badge',
     'Icon',
+    'Image',
     'Item',
     'List',
     'MetadataList',
