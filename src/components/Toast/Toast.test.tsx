@@ -120,6 +120,64 @@ describe('Toast', () => {
     );
   });
 
+  // Left alone, a primary action would paint the global accent on a fill it was
+  // never picked against — teal on teal for `info`.
+  it('collapses a primary end action to the onSolid treatment', () => {
+    render(
+      <Toast
+        autoHideDuration={5000}
+        body="A new version is available"
+        data-testid="toast"
+        endContent={<Button label="Update" size="sm" variant="primary" />}
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="info"
+      />,
+    );
+
+    const toast = screen.getByTestId('toast');
+    expect(toast).toHaveClass('silver---silver-button-primary-bg_transparent');
+    expect(toast).toHaveClass('silver---silver-button-primary-fg_currentColor');
+  });
+
+  // `currentColor` is what keeps this type-agnostic: the label follows the
+  // toast's own text, so the light `warning` fill gets a dark label without a
+  // per-type value. A filled action cannot do this — no single fill colour
+  // clears 3:1 against both the light amber and the dark teal.
+  it('collapses a primary end action on every type', () => {
+    const {rerender} = render(
+      <Toast
+        autoHideDuration={5000}
+        body="Storage almost full"
+        data-testid="toast"
+        endContent={<Button label="Upgrade" size="sm" variant="primary" />}
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="warning"
+      />,
+    );
+
+    expect(screen.getByTestId('toast')).toHaveClass(
+      'silver---silver-button-primary-fg_currentColor',
+    );
+
+    rerender(
+      <Toast
+        autoHideDuration={5000}
+        body="Unable to save"
+        data-testid="toast"
+        endContent={<Button label="Retry" size="sm" variant="primary" />}
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="error"
+      />,
+    );
+
+    expect(screen.getByTestId('toast')).toHaveClass(
+      'silver---silver-button-primary-fg_currentColor',
+    );
+  });
+
   it('renders a dismissable toast', async () => {
     const user = userEvent.setup();
     const onDismiss = vi.fn();
