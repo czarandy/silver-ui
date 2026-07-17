@@ -147,6 +147,73 @@ export const Alignments: Story = {
   ),
 };
 
+export const RTL: Story = {
+  render: () => (
+    <div
+      dir="rtl"
+      style={{
+        display: 'grid',
+        gap: '220px 320px',
+        gridTemplateColumns: 'repeat(2, max-content)',
+        justifyContent: 'center',
+        minHeight: 640,
+        minWidth: 960,
+        padding: '160px 240px',
+      }}>
+      <Popover
+        content={<Text as="p">Logical start (right in RTL)</Text>}
+        hasAutoFocus={false}
+        hasCloseButton={false}
+        isDismissable={false}
+        isOpen
+        label="Logical start"
+        padding={3}
+        placement="start"
+        width={176}>
+        <Button label="placement=start" />
+      </Popover>
+      <Popover
+        content={<Text as="p">Logical end (left in RTL)</Text>}
+        hasAutoFocus={false}
+        hasCloseButton={false}
+        isDismissable={false}
+        isOpen
+        label="Logical end"
+        padding={3}
+        placement="end"
+        width={176}>
+        <Button label="placement=end" />
+      </Popover>
+      <Popover
+        alignment="start"
+        content={<Text as="p">Below, aligned to logical start</Text>}
+        hasAutoFocus={false}
+        hasCloseButton={false}
+        isDismissable={false}
+        isOpen
+        label="Below, start aligned"
+        padding={3}
+        placement="below"
+        width={176}>
+        <Button label="alignment=start" />
+      </Popover>
+      <Popover
+        alignment="end"
+        content={<Text as="p">Below, aligned to logical end</Text>}
+        hasAutoFocus={false}
+        hasCloseButton={false}
+        isDismissable={false}
+        isOpen
+        label="Below, end aligned"
+        padding={3}
+        placement="below"
+        width={176}>
+        <Button label="alignment=end" />
+      </Popover>
+    </div>
+  ),
+};
+
 export const Controlled: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);

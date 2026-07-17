@@ -192,10 +192,30 @@ describe('HoverCard', () => {
       </HoverCard>,
     );
 
-    expect(screen.getByRole('dialog', {hidden: true})).toHaveStyle({
-      positionArea: 'top span-right',
-    });
+    const hoverCard = screen.getByRole('dialog', {hidden: true});
+    const positionArea = hoverCard.style.positionArea;
+    expect(positionArea).toBe('top span-inline-end');
   });
+
+  it.each([
+    ['start', 'silver-me_1'],
+    ['end', 'silver-ms_1'],
+  ] as const)(
+    'uses a logical default gap for placement=%s',
+    (placement, expectedClassName) => {
+      render(
+        <div dir="rtl">
+          <HoverCard content="Details" placement={placement}>
+            Hover target
+          </HoverCard>
+        </div>,
+      );
+
+      expect(screen.getByRole('dialog', {hidden: true})).toHaveClass(
+        expectedClassName,
+      );
+    },
+  );
 
   it('allows an explicit role to override the dialog default', () => {
     function CustomRoleHoverCard(): React.JSX.Element {

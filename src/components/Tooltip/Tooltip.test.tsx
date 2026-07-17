@@ -209,6 +209,27 @@ describe('Tooltip', () => {
     );
 
     const tooltip = screen.getByRole('tooltip', {hidden: true});
-    expect(tooltip).toHaveStyle({positionArea: 'top span-right'});
+    const positionArea = tooltip.style.positionArea;
+    expect(positionArea).toBe('top span-inline-end');
   });
+
+  it.each([
+    ['start', 'silver-me_1'],
+    ['end', 'silver-ms_1'],
+  ] as const)(
+    'uses a logical default gap for placement=%s',
+    (placement, expectedClassName) => {
+      render(
+        <div dir="rtl">
+          <Tooltip content="Tooltip text" placement={placement}>
+            <button type="button">Trigger</button>
+          </Tooltip>
+        </div>,
+      );
+
+      expect(screen.getByRole('tooltip', {hidden: true})).toHaveClass(
+        expectedClassName,
+      );
+    },
+  );
 });

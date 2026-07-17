@@ -10,6 +10,7 @@ import {
 } from 'react';
 import {usePopover} from 'components/Popover/usePopover';
 import isReactNode from 'internal/isReactNode';
+import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
@@ -135,12 +136,6 @@ const styles = {
     display: 'inline-flex',
   }),
   content: css({}),
-  gap: {
-    above: css({mb: '1'}),
-    below: css({mt: '1'}),
-    start: css({mr: '1'}),
-    end: css({ml: '1'}),
-  },
 } as const;
 
 function findTriggerButton(element: HTMLElement): HTMLElement | null {
@@ -312,7 +307,7 @@ export function Popover({
       alignment,
       offsetX,
       offsetY,
-      className: styles.gap[placement],
+      className: layerPlacementGapRecipe({placement}),
       style: {minWidth: 'anchor-size(width)'},
     },
   );
