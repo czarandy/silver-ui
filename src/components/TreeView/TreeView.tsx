@@ -47,9 +47,19 @@ export interface TreeViewProps {
    */
   items: TreeViewItemData[];
   /**
+   * Called when an enabled item is activated. Providing this callback enables
+   * controlled single selection.
+   */
+  onSelectionChange?: (selectedKey: string) => void;
+  /**
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * ID of the selected item when controlled selection is enabled. Omit or pass
+   * `null` when no item is selected.
+   */
+  selectedKey?: string | null;
   /**
    * Inline styles applied to the root.
    */
@@ -146,7 +156,9 @@ export function TreeView({
   density = 'balanced',
   header,
   items,
+  onSelectionChange,
   ref,
+  selectedKey,
   style,
 }: TreeViewProps): React.JSX.Element {
   const headerId = useId();
@@ -162,6 +174,7 @@ export function TreeView({
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [hasFocusWithin, setHasFocusWithin] = useState(false);
   const [focusVisibleId, setFocusVisibleId] = useState<string | null>(null);
+  const isSelectionEnabled = onSelectionChange != null;
 
   const visibleItems = useMemo(
     () =>
@@ -175,7 +188,11 @@ export function TreeView({
   const activeFocusedId =
     focusedId != null && focusableItems.some(item => item.id === focusedId)
       ? focusedId
-      : (focusableItems[0]?.id ?? null);
+      : isSelectionEnabled &&
+          selectedKey != null &&
+          focusableItems.some(item => item.id === selectedKey)
+        ? selectedKey
+        : (focusableItems[0]?.id ?? null);
 
   const handleToggle = useCallback(
     (id: string) => {
@@ -201,6 +218,13 @@ export function TreeView({
     setFocusedId(id);
     itemElementsRef.current.get(id)?.focus();
   }, []);
+
+  const handleSelect = useCallback(
+    (id: string) => {
+      onSelectionChange?.(id);
+    },
+    [onSelectionChange],
+  );
 
   const handleItemFocus = useCallback((id: string, isFocusVisible = false) => {
     setFocusedId(id);
@@ -253,6 +277,12 @@ export function TreeView({
       }
 
       const currentItem = focusableItems[currentIndex];
+      const direction = event.currentTarget
+        .closest<HTMLElement>('[dir]')
+        ?.getAttribute('dir');
+      const isRtl = direction?.toLowerCase() === 'rtl';
+      const expandKey = isRtl ? 'ArrowLeft' : 'ArrowRight';
+      const collapseKey = isRtl ? 'ArrowRight' : 'ArrowLeft';
       if (event.key === 'ArrowDown') {
         event.preventDefault();
         const nextIndex = currentIndex + 1;
@@ -287,7 +317,7 @@ export function TreeView({
         return;
       }
 
-      if (event.key === 'ArrowRight') {
+      if (event.key === expandKey) {
         if (!currentItem.hasChildren) {
           return;
         }
@@ -306,7 +336,7 @@ export function TreeView({
         return;
       }
 
-      if (event.key === 'ArrowLeft') {
+      if (event.key === collapseKey) {
         event.preventDefault();
         if (currentItem.hasChildren && currentItem.isExpanded) {
           handleToggle(currentItem.id);
@@ -361,13 +391,19 @@ export function TreeView({
             isDisabled={item.isDisabled}
             isExpanded={isExpanded}
             isFocused={hasFocusWithin && focusVisibleId === item.id}
-            isSelected={item.isSelected}
+            isSelected={
+              isSelectionEnabled
+                ? item.isDisabled !== true && selectedKey === item.id
+                : item.isSelected
+            }
+            isSelectionEnabled={isSelectionEnabled}
             key={item.id}
             label={item.label}
             nestedLevel={nestedLevel}
             onClick={item.onClick}
             onFocusItem={handleItemFocus}
             onItemKeyDown={handleItemKeyDown}
+            onSelect={handleSelect}
             onToggle={handleToggle}
             ref={(element: HTMLLIElement | null) => {
               if (element == null) {
@@ -392,7 +428,10 @@ export function TreeView({
       hasFocusWithin,
       handleItemFocus,
       handleItemKeyDown,
+      handleSelect,
       handleToggle,
+      isSelectionEnabled,
+      selectedKey,
     ],
   );
 

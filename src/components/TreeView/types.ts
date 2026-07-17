@@ -39,7 +39,9 @@ export interface TreeViewItemData {
    */
   isExpanded?: boolean;
   /**
-   * Whether the item is currently selected.
+   * Legacy presentational selected state used when root-controlled selection
+   * is disabled. `TreeView.selectedKey` takes precedence when
+   * `TreeView.onSelectionChange` is provided.
    * @default false
    */
   isSelected?: boolean;

@@ -63,6 +63,10 @@ interface TreeViewItemProps {
    */
   isSelected?: boolean;
   /**
+   * Whether root-controlled selection is enabled.
+   */
+  isSelectionEnabled: boolean;
+  /**
    * Primary label content.
    */
   label: React.ReactNode;
@@ -85,6 +89,10 @@ interface TreeViewItemProps {
     event: React.KeyboardEvent<HTMLLIElement>,
     id: string,
   ) => void;
+  /**
+   * Called when the item requests selection.
+   */
+  onSelect: (id: string) => void;
   /**
    * Called when the expand/collapse toggle is activated.
    */
@@ -127,11 +135,13 @@ export function TreeViewItem({
   isExpanded,
   isFocused,
   isSelected = false,
+  isSelectionEnabled,
   label,
   nestedLevel,
   onClick,
   onFocusItem,
   onItemKeyDown,
+  onSelect,
   onToggle,
   ref,
   renderedChildren,
@@ -142,8 +152,10 @@ export function TreeViewItem({
   const labelId = useId();
   const descriptionId = useId();
   const actionRef = useRef<HTMLElement>(null);
-  const isInteractive = onClick != null || href != null;
-  const togglesOnRow = hasChildren && onClick == null && onToggle != null;
+  const hasPrimaryAction =
+    isSelectionEnabled || onClick != null || href != null;
+  const isInteractive = hasPrimaryAction;
+  const togglesOnRow = hasChildren && !hasPrimaryAction && onToggle != null;
   const styles = treeViewItemRecipe({
     density,
     isInteractive: isInteractive || togglesOnRow,
@@ -161,37 +173,55 @@ export function TreeViewItem({
   const handleToggle = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
+      if (isDisabled) {
+        return;
+      }
       onToggle?.(id);
     },
-    [id, onToggle],
+    [id, isDisabled, onToggle],
   );
 
-  const handleRowClick = useCallback(() => {
-    if (!togglesOnRow) {
-      return;
-    }
-
+  const handleRowActivation = useCallback(() => {
     if (isDisabled) {
       return;
     }
-    onToggle(id);
-  }, [id, isDisabled, onToggle, togglesOnRow]);
+    if (isSelectionEnabled) {
+      onSelect(id);
+      return;
+    }
+    if (togglesOnRow) {
+      onToggle(id);
+    }
+  }, [id, isDisabled, isSelectionEnabled, onSelect, onToggle, togglesOnRow]);
+
+  const handleRowClick = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (actionRef.current?.contains(event.target as Node) === true) {
+        return;
+      }
+      handleRowActivation();
+    },
+    [handleRowActivation],
+  );
 
   const handleRowKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLLIElement>) => {
       event.stopPropagation();
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        if (togglesOnRow) {
-          handleRowClick();
+        if (isDisabled) {
           return;
         }
-        actionRef.current?.click();
+        if (actionRef.current != null) {
+          actionRef.current.click();
+          return;
+        }
+        handleRowActivation();
         return;
       }
       onItemKeyDown(event, id);
     },
-    [handleRowClick, id, onItemKeyDown, togglesOnRow],
+    [handleRowActivation, id, isDisabled, onItemKeyDown],
   );
 
   const handleFocus = useCallback(
@@ -217,8 +247,11 @@ export function TreeViewItem({
       }
 
       onClick?.(event);
+      if (isSelectionEnabled) {
+        onSelect(id);
+      }
     },
-    [isDisabled, onClick],
+    [id, isDisabled, isSelectionEnabled, onClick, onSelect],
   );
 
   const labelAndDescription = (
@@ -241,10 +274,11 @@ export function TreeViewItem({
   );
 
   const toggle = hasChildren ? (
-    onClick != null ? (
+    hasPrimaryAction ? (
       <button
         aria-label={`Toggle ${textLabel} children`}
         className={styles.toggleButton}
+        disabled={isDisabled}
         onClick={handleToggle}
         tabIndex={-1}
         type="button">
@@ -295,7 +329,9 @@ export function TreeViewItem({
       aria-disabled={isDisabled || undefined}
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-labelledby={labelId}
-      aria-selected={isSelected || undefined}
+      aria-selected={
+        isSelectionEnabled && !isDisabled ? isSelected : isSelected || undefined
+      }
       className={styles.wrapper}
       onFocus={handleFocus}
       onKeyDown={handleRowKeyDown}
