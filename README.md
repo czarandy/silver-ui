@@ -185,6 +185,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **AvatarGroup** — stacked avatar collection with overflow count
 - **Badge** — small status label with icon support
 - **Icon** — renders Lucide icons with size and color tokens
+- **Image** — responsive image with intrinsic loading and error fallback
 - **Item** — generic list item with icon, label, and description
 - **List** — ordered or unordered list with dividers
 - **MetadataList** — key-value metadata display

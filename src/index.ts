@@ -379,6 +379,7 @@ export {
   type AppShellVariant,
 } from 'components/AppShell';
 export {AspectRatio, type AspectRatioProps} from 'components/AspectRatio';
+export {Image, type ImageObjectFit, type ImageProps} from 'components/Image';
 export {
   Accordion,
   AccordionItem,
