@@ -7,6 +7,7 @@ import {
   type Ref,
 } from 'react';
 import {kbdRecipe} from 'components/Kbd/Kbd.recipe';
+import {isApplePlatform, tokenizeKeyboardKeys} from 'internal/keyboard';
 import {cx} from 'utils/cx';
 
 export type KbdSize = 'sm' | 'md' | 'lg';
@@ -75,22 +76,6 @@ const keyLabel: Record<string, string> = {
 
 const subscribePlatform = (): (() => void) => () => {};
 
-function getIsMacSnapshot(): boolean {
-  if (typeof navigator === 'undefined') {
-    return false;
-  }
-  const userAgentData =
-    'userAgentData' in navigator ? navigator.userAgentData : null;
-  if (
-    userAgentData != null &&
-    typeof userAgentData === 'object' &&
-    'platform' in userAgentData
-  ) {
-    return /mac/i.test(String(userAgentData.platform));
-  }
-  return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
-}
-
 function getServerSnapshot(): boolean {
   return false;
 }
@@ -98,7 +83,7 @@ function getServerSnapshot(): boolean {
 function useIsMac(): boolean {
   return useSyncExternalStore(
     subscribePlatform,
-    getIsMacSnapshot,
+    isApplePlatform,
     getServerSnapshot,
   );
 }
@@ -130,10 +115,7 @@ export function Kbd({
 }: KbdProps): React.JSX.Element {
   const isMac = useIsMac();
   const {keyedParts, ariaLabel} = useMemo(() => {
-    const parts = keys
-      .split('+')
-      .map(key => key.trim().toLowerCase())
-      .filter(Boolean);
+    const parts = tokenizeKeyboardKeys(keys);
 
     if (process.env.NODE_ENV !== 'production' && parts.length === 0) {
       throw new Error(

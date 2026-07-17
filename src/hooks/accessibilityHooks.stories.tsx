@@ -1,8 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useCallback, useRef, useState, type KeyboardEvent} from 'react';
 import {Button} from 'components/Button';
+import {Kbd} from 'components/Kbd';
 import {Text} from 'components/Text';
+import {TextInput} from 'components/TextInput';
 import useAnnounce from 'hooks/useAnnounce';
+import useHotkey from 'hooks/useHotkey';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import useTypeahead from 'hooks/useTypeahead';
@@ -134,6 +137,52 @@ function AnnounceDemo(): React.JSX.Element {
  */
 export const Announce: Story = {
   render: () => <AnnounceDemo />,
+};
+
+function HotkeyDemo(): React.JSX.Element {
+  const [enabled, setEnabled] = useState(true);
+  const [query, setQuery] = useState('');
+  const [triggerCount, setTriggerCount] = useState(0);
+
+  useHotkey('mod+k', () => setTriggerCount(count => count + 1), {
+    enabled,
+    preventDefault: true,
+  });
+
+  return (
+    <div className={styles.column}>
+      <Text type="supporting">
+        Press <Kbd keys="mod+k" size="sm" /> outside the input to run the
+        shortcut. The same keys are ignored while you type in the input because
+        form elements are excluded by default.
+      </Text>
+      <TextInput
+        label="Search"
+        onChange={setQuery}
+        placeholder="Focus here and try the shortcut"
+        value={query}
+      />
+      <Text>
+        Shortcut {enabled ? 'enabled' : 'disabled'} · Triggered {triggerCount}{' '}
+        {triggerCount === 1 ? 'time' : 'times'}
+      </Text>
+      <Button
+        label={enabled ? 'Disable shortcut' : 'Enable shortcut'}
+        onClick={() => setEnabled(value => !value)}
+        size="sm"
+        variant="secondary"
+      />
+    </div>
+  );
+}
+
+/**
+ * `useHotkey` registers a global, IME-safe keyboard shortcut. Descriptors use
+ * the same vocabulary as `Kbd`, including platform-aware `mod`, so the
+ * displayed shortcut and the listener stay in sync.
+ */
+export const Hotkey: Story = {
+  render: () => <HotkeyDemo />,
 };
 
 function ToolbarDemo(): React.JSX.Element {

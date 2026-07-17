@@ -1,6 +1,12 @@
 export {default as useAnnounce} from 'hooks/useAnnounce';
 export type {AnnouncePoliteness, UseAnnounceResult} from 'hooks/useAnnounce';
 export {default as useConstant} from 'hooks/useConstant';
+export {default as useHotkey} from 'hooks/useHotkey';
+export type {
+  HotkeyHandler,
+  HotkeyTarget,
+  UseHotkeyOptions,
+} from 'hooks/useHotkey';
 export {default as useKeyboardHint} from 'hooks/useKeyboardHint';
 export type {
   KeyboardHintOrientation,

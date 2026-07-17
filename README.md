@@ -229,13 +229,33 @@ The primitives silver-ui's own components are built on are published from
 `silver-ui/hooks`, so you can build custom widgets that behave the same way.
 
 ```tsx
-import {useAnnounce, useListFocus, useTypeahead} from 'silver-ui/hooks';
+import {
+  useAnnounce,
+  useHotkey,
+  useListFocus,
+  useTypeahead,
+} from 'silver-ui/hooks';
 ```
 
 - **useAnnounce** — visually hidden polite and assertive live regions, plus an `announce(message, politeness?)` function
+- **useHotkey** — global, IME-safe keyboard shortcuts with exact modifier matching and automatic listener cleanup
 - **useListFocus** — roving-tabindex keyboard navigation over a list of elements (arrow keys, `Home`/`End`, wrapping, RTL)
 - **useTypeahead** — WAI-ARIA typeahead: multi-character search, repeat-press cycling, and wrap-around matching
 - **useConstant** — computes a value once and returns the same reference for the lifetime of the component
+
+`useHotkey(keys, handler, options?)` accepts one case-insensitive descriptor
+such as `f6`, `shift+k`, or `mod+k`. Separate tokens with `+`; supported
+modifiers are `mod`, `ctrl`, `alt`, and `shift`, and the special-key vocabulary
+matches `Kbd`: `enter`, `backspace`, `escape`, `tab`, `up`, `down`, `left`,
+`right`, and `plus`. `mod` resolves to Command on Apple platforms and Control
+elsewhere.
+
+The listener targets `document` by default; pass `target: 'window'` or a React
+ref to listen elsewhere. It is enabled by default and does not call
+`preventDefault()` unless requested. Composition events are always ignored,
+and shortcuts do not fire from inputs, selects, textareas, editable content, or
+textbox roles unless `enableOnFormElements: true` is set. Sequences and priority
+arbitration between duplicate registrations are not supported.
 
 ---
 

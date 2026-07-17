@@ -23,6 +23,7 @@ import type {
   SchedulePlugin,
   ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
+import useHotkey from 'hooks/useHotkey';
 import {plainDateIsEqual} from 'internal/plainDate';
 import useLatest from 'internal/useLatest';
 import {sva} from 'styled-system/css';
@@ -477,7 +478,6 @@ export function useScheduleEventCreatePlugin(
   const ghostElementRef = useRef<HTMLElement | null>(null);
   const listenersRef = useRef<{
     cancel: (event: globalThis.PointerEvent) => void;
-    keyDown: (event: globalThis.KeyboardEvent) => void;
     move: (event: globalThis.PointerEvent) => void;
     up: (event: globalThis.PointerEvent) => void;
   } | null>(null);
@@ -514,7 +514,6 @@ export function useScheduleEventCreatePlugin(
     window.removeEventListener('pointermove', listeners.move);
     window.removeEventListener('pointerup', listeners.up);
     window.removeEventListener('pointercancel', listeners.cancel);
-    window.removeEventListener('keydown', listeners.keyDown);
     listenersRef.current = null;
   }, []);
 
@@ -575,14 +574,10 @@ export function useScheduleEventCreatePlugin(
     }
   }, [dismiss, endDrag]);
 
-  const handleKeyDown = useCallback(
-    (event: globalThis.KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        handlePointerCancel();
-      }
-    },
-    [handlePointerCancel],
-  );
+  useHotkey('escape', handlePointerCancel, {
+    enableOnFormElements: true,
+    target: 'window',
+  });
 
   const handlePointerDown = useCallback(
     (
@@ -629,18 +624,15 @@ export function useScheduleEventCreatePlugin(
 
       listenersRef.current = {
         cancel: handlePointerCancel,
-        keyDown: handleKeyDown,
         move: handlePointerMove,
         up: handlePointerUp,
       };
       window.addEventListener('pointermove', handlePointerMove);
       window.addEventListener('pointerup', handlePointerUp);
       window.addEventListener('pointercancel', handlePointerCancel);
-      window.addEventListener('keydown', handleKeyDown);
     },
     [
       defaultDurationMinutes,
-      handleKeyDown,
       handlePointerCancel,
       handlePointerMove,
       handlePointerUp,

@@ -82,9 +82,11 @@ import {Button, type ButtonProps} from 'silver-ui/Button';
 import {Layout, type LayoutProps, type SpacingToken} from 'silver-ui/Layout';
 import {Popover, type PopoverProps} from 'silver-ui/Popover';
 import {Spinner, type SpinnerProps} from 'silver-ui/Spinner';
+import {useHotkey, type UseHotkeyOptions} from 'silver-ui/hooks';
 
 export const components = [Alert, Button, Layout, Popover, Spinner] as const;
 export const className = cx('base', 'extra');
+export const hooks = [useHotkey] as const;
 export type PublicProps =
   | AlertProps
   | ButtonProps
@@ -93,6 +95,7 @@ export type PublicProps =
   | RootButtonProps
   | SpinnerProps;
 export type PublicToken = SpacingToken;
+export type PublicHookOptions = UseHotkeyOptions;
 `.trimStart(),
   );
   await writeFile(
