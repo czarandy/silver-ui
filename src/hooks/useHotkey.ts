@@ -162,8 +162,10 @@ const useHotkey = (
     [currentRef],
   );
 
-  // This effect intentionally runs after every render so a ref target that is
-  // conditionally mounted can be detected without requiring a callback ref.
+  // This effect intentionally resolves the target after every render so a ref
+  // that is populated or changed post-commit can be detected without requiring
+  // a callback ref. The identity guard keeps stable targets registered without
+  // remove/add listener churn.
   useEffect(() => {
     const nextTarget = isEnabled ? resolveTarget(target) : null;
     const registration = registrationRef.current;

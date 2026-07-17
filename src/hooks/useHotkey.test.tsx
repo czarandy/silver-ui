@@ -252,29 +252,23 @@ describe('useHotkey', () => {
     expect(refHandler).toHaveBeenCalledOnce();
   });
 
-  it('re-resolves ref targets that mount conditionally or change', () => {
+  it('re-resolves a stable ref target that mounts conditionally or changes', () => {
     const handler = vi.fn();
     function Fixture({
       target,
     }: {
-      target: 'first' | 'second';
-    }): React.JSX.Element {
-      const firstRef = useRef<HTMLDivElement>(null);
-      const secondRef = useRef<HTMLDivElement>(null);
-      useHotkey('k', handler, {
-        target: target === 'second' ? secondRef : firstRef,
-      });
-      return (
-        <>
-          <div data-testid="first" ref={firstRef} />
-          {target === 'second' ? (
-            <div data-testid="second" ref={secondRef} />
-          ) : null}
-        </>
+      target: 'first' | 'second' | null;
+    }): React.JSX.Element | null {
+      const targetRef = useRef<HTMLDivElement>(null);
+      useHotkey('k', handler, {target: targetRef});
+      return target == null ? null : (
+        <div data-testid={target} key={target} ref={targetRef} />
       );
     }
 
-    const {rerender} = render(<Fixture target="first" />);
+    const {rerender} = render(<Fixture target={null} />);
+    fireEvent.keyDown(document, {key: 'k'});
+    rerender(<Fixture target="first" />);
     const first = screen.getByTestId('first');
     fireEvent.keyDown(first, {key: 'k'});
     rerender(<Fixture target="second" />);
@@ -282,6 +276,31 @@ describe('useHotkey', () => {
     fireEvent.keyDown(screen.getByTestId('second'), {key: 'k'});
 
     expect(handler).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not re-register a stable target after rerender', () => {
+    const target = new EventTarget();
+    const targetRef = {current: target};
+    const addEventListener = vi.spyOn(target, 'addEventListener');
+    const removeEventListener = vi.spyOn(target, 'removeEventListener');
+    const firstHandler = vi.fn();
+    const nextHandler = vi.fn();
+    const {rerender, unmount} = renderHook(
+      ({handler}) => useHotkey('k', handler, {target: targetRef}),
+      {initialProps: {handler: firstHandler}},
+    );
+
+    expect(addEventListener).toHaveBeenCalledOnce();
+    rerender({handler: nextHandler});
+    dispatchKey(target, 'k');
+
+    expect(addEventListener).toHaveBeenCalledOnce();
+    expect(removeEventListener).not.toHaveBeenCalled();
+    expect(firstHandler).not.toHaveBeenCalled();
+    expect(nextHandler).toHaveBeenCalledOnce();
+
+    unmount();
+    expect(removeEventListener).toHaveBeenCalledOnce();
   });
 
   it('uses the latest handler and options after rerender', () => {
