@@ -97,6 +97,49 @@ export const WithEndContent: Story = {
   },
 };
 
+export const WithPrimaryAction: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+      <Alert
+        endContent={<Button label="Update now" size="sm" variant="primary" />}
+        status="info"
+        title="A new version is available"
+      />
+      <Alert
+        endContent={<Button label="Download" size="sm" variant="primary" />}
+        status="success"
+        title="Your export is ready"
+      />
+      <Alert
+        endContent={<Button label="Upgrade plan" size="sm" variant="primary" />}
+        status="warning"
+        title="Your trial ends in 3 days"
+      />
+      <Alert
+        endContent={
+          <Button label="Update payment" size="sm" variant="primary" />
+        }
+        status="error"
+        title="Payment failed"
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use a `primary` button in `endContent` when the alert is steering the ' +
+          'reader toward one recommended action. No extra styling is needed: the ' +
+          'alert retints `primary` with its own status colours, so the action ' +
+          'inverts the surface it sits on instead of dropping the global accent ' +
+          'onto it. Prefer a `ghost` button (see **With End Content**) for actions ' +
+          'that are merely available, so a stack of alerts does not compete for ' +
+          'attention.',
+      },
+    },
+  },
+};
+
 export const SectionContainer: Story = {
   render: () => (
     <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>

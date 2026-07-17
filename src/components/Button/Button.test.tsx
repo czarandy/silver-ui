@@ -55,6 +55,20 @@ describe('Button', () => {
     ).toBeInTheDocument();
   });
 
+  // A coloured surface can retint `primary` by setting these vars (see Alert);
+  // with no surface overriding them the accent has to come through unchanged.
+  it('falls back to the accent when no surface retints primary', () => {
+    render(<Button label="Primary" variant="primary" />);
+
+    const button = screen.getByRole('button', {name: 'Primary'});
+    expect(button).toHaveClass(
+      'silver-bg_var(--silver-button-primary-bg,_var(--silver-colors-primary))',
+    );
+    expect(button).toHaveClass(
+      'silver-c_var(--silver-button-primary-fg,_var(--silver-colors-fg-on-primary))',
+    );
+  });
+
   it('renders icon-only button with aria-label', () => {
     render(<Button icon={Home} isIconOnly label="Settings" />);
 

@@ -3,7 +3,21 @@ import userEvent from '@testing-library/user-event';
 import {Rocket} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {Alert} from 'components/Alert/Alert';
+import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
+
+/**
+ * The status colours a `primary` end action reads from live on the header slot,
+ * which carries no role or text of its own to query by.
+ */
+function alertHeader(): HTMLElement {
+  // eslint-disable-next-line testing-library/no-node-access -- the header slot is the element under test and has no queryable role of its own
+  const header = screen.getByTestId('alert').firstElementChild;
+  if (!(header instanceof HTMLElement)) {
+    throw new Error('Alert header not found');
+  }
+  return header;
+}
 
 describe('Alert', () => {
   it('renders title and description with the correct role', () => {
@@ -101,6 +115,54 @@ describe('Alert', () => {
     );
 
     expect(screen.getByRole('button', {name: 'Action'})).toBeInTheDocument();
+  });
+
+  it('fills a primary end action with the status foreground', () => {
+    render(
+      <Alert
+        data-testid="alert"
+        endContent={<Button label="Upgrade" size="sm" variant="primary" />}
+        status="info"
+        title="Trial ending"
+      />,
+    );
+
+    expect(alertHeader()).toHaveClass(
+      'silver---silver-button-primary-bg_var(--silver-colors-surface-blue-fg)',
+    );
+  });
+
+  it('retints a primary end action per status', () => {
+    render(
+      <Alert
+        data-testid="alert"
+        endContent={<Button label="Retry" size="sm" variant="primary" />}
+        status="error"
+        title="Payment failed"
+      />,
+    );
+
+    expect(alertHeader()).toHaveClass(
+      'silver---silver-button-primary-bg_var(--silver-colors-surface-red-fg)',
+    );
+  });
+
+  // The fill follows the theme (dark on light, light on dark), so the label has
+  // to invert with it. `fg.onPrimary` is tuned against the accent and stays
+  // near-white in both themes, which disappeared on a dark theme's light fill.
+  it('labels a primary end action with the theme-inverting neutral', () => {
+    render(
+      <Alert
+        data-testid="alert"
+        endContent={<Button label="Upgrade" size="sm" variant="primary" />}
+        status="warning"
+        title="Trial ending"
+      />,
+    );
+
+    expect(alertHeader()).toHaveClass(
+      'silver---silver-button-primary-fg_var(--silver-colors-bg)',
+    );
   });
 
   it('renders custom icon instead of default', () => {
