@@ -654,16 +654,18 @@ export default defineConfig({
         },
         shadows: {
           focus: {
-            value: 'inset 0 0 0 {borderWidths.focus} {colors.primary.subtle}',
-          },
-          'focus.error': {
-            value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.red}',
-          },
-          'focus.warning': {
-            value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.yellow}',
-          },
-          'focus.success': {
-            value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.green}',
+            DEFAULT: {
+              value: 'inset 0 0 0 {borderWidths.focus} {colors.primary.subtle}',
+            },
+            error: {
+              value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.red}',
+            },
+            warning: {
+              value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.yellow}',
+            },
+            success: {
+              value: 'inset 0 0 0 {borderWidths.focus} {colors.surface.green}',
+            },
           },
         },
       },
