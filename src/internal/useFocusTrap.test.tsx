@@ -3,23 +3,38 @@ import {describe, expect, it, vi} from 'vitest';
 import {useFocusTrap} from 'internal/useFocusTrap';
 
 function FocusTrapFixture() {
-  const {containerRef} = useFocusTrap<HTMLDivElement>({isActive: true});
+  const {containerRef, focusFirst} = useFocusTrap<HTMLDivElement>({
+    isActive: true,
+  });
 
   return (
-    <div ref={containerRef}>
-      <svg aria-hidden="true">
-        <use href="#first-icon" />
-      </svg>
-      <a href="#first-link">First link</a>
-      <button type="button">Last button</button>
-      <svg aria-hidden="true">
-        <use href="#last-icon" />
-      </svg>
-    </div>
+    <>
+      <button onClick={focusFirst} type="button">
+        Focus first
+      </button>
+      <div ref={containerRef}>
+        <svg aria-hidden="true">
+          <use href="#first-icon" />
+        </svg>
+        <a href="#first-link">First link</a>
+        <button type="button">Last button</button>
+        <svg aria-hidden="true">
+          <use href="#last-icon" />
+        </svg>
+      </div>
+    </>
   );
 }
 
 describe('useFocusTrap', () => {
+  it('focuses the first link instead of a preceding href element', () => {
+    render(<FocusTrapFixture />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Focus first'}));
+
+    expect(screen.getByRole('link', {name: 'First link'})).toHaveFocus();
+  });
+
   it('does not treat non-link href elements as focusable', () => {
     render(<FocusTrapFixture />);
 
