@@ -836,6 +836,7 @@ const DayCell = memo(function DayCell({
       {isInRange ? <div className={rangeBackgroundClass} /> : null}
       {isInPreview ? <div className={previewBackgroundClass} /> : null}
       <button
+        aria-current={isToday ? 'date' : undefined}
         aria-disabled={effectivelyDisabled || undefined}
         aria-label={plainDateFormat(day.date, DATE_FORMAT_WITH_WEEKDAY)}
         aria-selected={isSelected || isInRange || undefined}
