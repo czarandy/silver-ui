@@ -266,6 +266,44 @@ describe('Schedule', () => {
     );
   });
 
+  it('keeps time-grid headers and all-day events fixed above the scrolling hours', () => {
+    render(
+      <Schedule
+        events={events}
+        height="fill"
+        highlightDate={instantUTC(2026, 4, 13)}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 10, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const fixedRows = screen.getByTestId('schedule-time-grid-fixed-rows');
+    const timeRows = screen.getByTestId('schedule-time-grid-time-rows');
+    const fillClasses = scheduleTimeGridViewRecipe({height: 'fill'});
+    const fixedRowClasses = fillClasses.fixedRows?.split(' ') ?? [];
+    const timeRowClasses = fillClasses.timeRows?.split(' ') ?? [];
+
+    expect(fixedRowClasses).not.toHaveLength(0);
+    expect(timeRowClasses).not.toHaveLength(0);
+    expect(fixedRows).toHaveClass(...fixedRowClasses);
+    expect(timeRows).toHaveClass(...timeRowClasses);
+    expect(
+      within(fixedRows).getByRole('columnheader', {
+        name: 'Wednesday, May 13, 2026',
+      }),
+    ).toBeInTheDocument();
+    expect(
+      within(fixedRows).getByRole('rowheader', {name: 'UTC all day'}),
+    ).toBeInTheDocument();
+    expect(
+      within(fixedRows).getByTestId('schedule-event-all-day'),
+    ).toBeInTheDocument();
+    expect(
+      within(timeRows).getByTestId('schedule-time-grid-cell-2026-05-13-8'),
+    ).toBeInTheDocument();
+  });
+
   it('defaults to auto height behavior', () => {
     render(
       <Schedule

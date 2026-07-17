@@ -2,11 +2,14 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 /**
  * Slot recipe for the schedule time grid shared by day and week views.
- * Variants cover the edge borders and highlighted day header.
+ * Variants cover scrolling behavior, edge borders, and the highlighted day
+ * header.
  */
 export const scheduleTimeGridViewRecipe = sva({
   slots: [
     'grid',
+    'fixedRows',
+    'timeRows',
     'header',
     'corner',
     'dayHeader',
@@ -30,6 +33,18 @@ export const scheduleTimeGridViewRecipe = sva({
       display: 'grid',
       gridTemplateColumns: '72px 1fr',
       overflow: 'auto',
+    },
+    fixedRows: {
+      display: 'grid',
+      gridColumn: '1 / -1',
+      gridTemplateColumns: '72px 1fr',
+    },
+    timeRows: {
+      position: 'relative',
+      zIndex: 0,
+      display: 'grid',
+      gridColumn: '1 / -1',
+      gridTemplateColumns: '72px 1fr',
     },
     header: {
       display: 'grid',
@@ -175,6 +190,17 @@ export const scheduleTimeGridViewRecipe = sva({
     },
   },
   variants: {
+    height: {
+      auto: {},
+      fill: {
+        fixedRows: {
+          position: 'sticky',
+          top: 0,
+          zIndex: 1,
+          bg: 'bg',
+        },
+      },
+    },
     isCurrentDay: {
       true: {
         dayHeaderDayNumber: {
@@ -201,6 +227,7 @@ export const scheduleTimeGridViewRecipe = sva({
     },
   },
   defaultVariants: {
+    height: 'auto',
     isCurrentDay: false,
     isLastColumn: false,
     isLastRow: false,
