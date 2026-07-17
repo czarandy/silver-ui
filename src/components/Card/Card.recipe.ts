@@ -16,7 +16,6 @@ export const cardRecipe = cva({
       section: {
         bg: 'bg',
         borderRadius: 0,
-        borderWidth: 0,
       },
       transparent: {
         bg: 'transparent',
