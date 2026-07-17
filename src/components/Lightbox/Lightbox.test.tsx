@@ -66,6 +66,30 @@ afterEach(() => {
 });
 
 describe('Lightbox', () => {
+  it('mirrors previous and next chevrons in RTL', () => {
+    render(
+      <div dir="rtl">
+        <Lightbox index={1} isOpen media={media} onOpenChange={() => {}} />
+      </div>,
+    );
+
+    const previousButton = screen.getByRole('button', {name: 'Previous'});
+    const nextButton = screen.getByRole('button', {name: 'Next'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const previousIcon = previousButton.querySelector('svg');
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const nextIcon = nextButton.querySelector('svg');
+
+    expect(previousIcon).toHaveClass(
+      'lucide-chevron-left',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+    expect(nextIcon).toHaveClass(
+      'lucide-chevron-right',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+  });
+
   it('opens, closes, and returns focus to the trigger element', async () => {
     function Fixture(): React.JSX.Element {
       const [isOpen, setIsOpen] = useState(false);

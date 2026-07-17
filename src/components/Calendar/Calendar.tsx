@@ -1,7 +1,6 @@
 'use client';
 
 import {Temporal} from '@js-temporal/polyfill';
-import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {
   memo,
   useCallback,
@@ -16,6 +15,7 @@ import {
 import {Button} from 'components/Button';
 import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
 import {useIsTopLayer} from 'internal/LayerContext';
+import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import type {DateRange, DayOfWeek} from 'internal/dateTypes';
 import {
   DATE_FORMAT_MONTH_YEAR,
@@ -451,7 +451,7 @@ export function Calendar({
       style={style}>
       <div className={styles.header}>
         <Button
-          icon={ChevronLeft}
+          icon={LogicalChevronStart}
           isDisabled={!canNavigatePrevious}
           isIconOnly
           label="Previous month"
@@ -461,7 +461,7 @@ export function Calendar({
         />
         <span className={styles.monthYear}>{monthYearLabel}</span>
         <Button
-          icon={ChevronRight}
+          icon={LogicalChevronEnd}
           isDisabled={!canNavigateNext}
           isIconOnly
           label="Next month"

@@ -818,6 +818,35 @@ describe('SideNav collapsed state', () => {
     ).toBeInTheDocument();
   });
 
+  it('mirrors the built-in collapse and expand chevrons in RTL', async () => {
+    const user = userEvent.setup();
+    render(
+      <div dir="rtl">
+        <SideNav isCollapsible>
+          <SideNavItem href="/home" icon={Home} label="Home" />
+        </SideNav>
+      </div>,
+    );
+
+    const collapseButton = screen.getByRole('button', {
+      name: 'Collapse sidebar',
+    });
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    expect(collapseButton.querySelector('svg')).toHaveClass(
+      'lucide-chevron-left',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+
+    await user.click(collapseButton);
+
+    const expandButton = screen.getByRole('button', {name: 'Expand sidebar'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    expect(expandButton.querySelector('svg')).toHaveClass(
+      'lucide-chevron-right',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+  });
+
   it('toggles via built-in collapse button', async () => {
     const user = userEvent.setup();
     render(

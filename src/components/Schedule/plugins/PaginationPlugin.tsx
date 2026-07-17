@@ -1,6 +1,5 @@
 'use client';
 
-import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {useCallback, useMemo, type ReactNode} from 'react';
 import {Button} from 'components/Button';
 import {ButtonGroup} from 'components/ButtonGroup';
@@ -12,6 +11,7 @@ import type {
   SchedulePluginPosition,
   ScheduleZonedInstantRange,
 } from 'components/Schedule/types';
+import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import {nowEpochMilliseconds} from 'internal/time';
 
 export interface SchedulePaginationPluginOptions {
@@ -58,14 +58,14 @@ function SchedulePaginationControls({
   return (
     <ButtonGroup label="Schedule pagination">
       <Button
-        icon={ChevronLeft}
+        icon={LogicalChevronStart}
         isIconOnly
         label={previousDateRange.label}
         onClick={onPreviousDate}
       />
       <Button label="Today" onClick={onToday} />
       <Button
-        icon={ChevronRight}
+        icon={LogicalChevronEnd}
         isIconOnly
         label={nextDateRange.label}
         onClick={onNextDate}

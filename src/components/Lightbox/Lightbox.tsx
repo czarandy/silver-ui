@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y-x/no-noninteractive-element-interactions */
 'use client';
 
-import {ChevronLeft, ChevronRight, X} from 'lucide-react';
+import {X} from 'lucide-react';
 import {
   useCallback,
   useEffect,
@@ -16,6 +16,7 @@ import {
 import {Button} from 'components/Button';
 import {lightboxRecipe} from 'components/Lightbox/Lightbox.recipe';
 import {LayerContext} from 'internal/LayerContext';
+import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
@@ -296,7 +297,7 @@ export function Lightbox({
             <div className={lightboxRecipe({position: 'prev'}).nav}>
               <Button
                 className={classes.controlButton}
-                icon={ChevronLeft}
+                icon={LogicalChevronStart}
                 isIconOnly
                 label="Previous"
                 onClick={goPrev}
@@ -362,7 +363,7 @@ export function Lightbox({
             <div className={lightboxRecipe({position: 'next'}).nav}>
               <Button
                 className={classes.controlButton}
-                icon={ChevronRight}
+                icon={LogicalChevronEnd}
                 isIconOnly
                 label="Next"
                 onClick={goNext}

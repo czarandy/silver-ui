@@ -48,6 +48,14 @@ export const Single: Story = {
   },
 };
 
+export const RightToLeft: Story = {
+  render: () => (
+    <div dir="rtl">
+      <Calendar onChange={() => {}} value={plainDateCreate(2026, 5, 21)} />
+    </div>
+  ),
+};
+
 export const Range: Story = {
   render: () => {
     const [value, setValue] = useState<DateRange | undefined>(() => ({

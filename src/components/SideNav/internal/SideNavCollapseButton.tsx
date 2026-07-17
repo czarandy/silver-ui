@@ -1,8 +1,8 @@
 'use client';
 
-import {ChevronLeft, ChevronRight} from 'lucide-react';
 import {Button} from 'components/Button';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
+import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import {css} from 'styled-system/css';
 
 const styles = {
@@ -27,7 +27,7 @@ export function SideNavCollapseButton(): React.JSX.Element | null {
   return (
     <Button
       className={isCollapsed ? undefined : styles.expanded}
-      icon={isCollapsed ? ChevronRight : ChevronLeft}
+      icon={isCollapsed ? LogicalChevronEnd : LogicalChevronStart}
       isIconOnly
       label={tooltipLabel}
       onClick={toggle}
