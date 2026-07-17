@@ -11,6 +11,7 @@ import {
   createSearchFilterInputConfig,
   type FieldDefinition,
 } from 'components/SearchFilterInput/useSearchFilterInputConfig';
+import {assertNonNull} from 'internal/testHelpers';
 
 const STATUSES: ReadonlyArray<EnumItem> = [
   {label: 'Active', value: 'active'},
@@ -707,6 +708,29 @@ describe('SearchFilterInput interactions', () => {
     operator: 'contains',
     value: {type: 'string', value: 'John'},
   } as const;
+
+  it('positions the edit popover below the input', async () => {
+    const user = userEvent.setup();
+    render(
+      <SearchFilterInput
+        config={config}
+        filters={[nameFilter]}
+        onChange={() => {}}
+      />,
+    );
+
+    await user.click(screen.getByText(/Name/));
+
+    const applyButton = screen.getByRole('button', {name: 'Apply'});
+    /* eslint-disable testing-library/no-node-access -- positioning styles live on the native popover around the editor content */
+    const editPopover = assertNonNull(
+      applyButton.closest<HTMLElement>('[popover]'),
+    );
+    /* eslint-enable testing-library/no-node-access */
+    expect(editPopover).toHaveStyle({
+      positionArea: 'block-end span-inline-end',
+    });
+  });
 
   it('adds a string filter through the combobox and Apply button', async () => {
     const user = userEvent.setup();

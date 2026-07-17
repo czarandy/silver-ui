@@ -210,7 +210,7 @@ describe('Tooltip', () => {
 
     const tooltip = screen.getByRole('tooltip', {hidden: true});
     const positionArea = tooltip.style.positionArea;
-    expect(positionArea).toBe('top span-inline-end');
+    expect(positionArea).toBe('block-start span-inline-end');
   });
 
   it.each([

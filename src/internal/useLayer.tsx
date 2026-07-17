@@ -138,8 +138,8 @@ function getPositionArea(
   alignment: LayerAlignment = 'center',
 ): string {
   const placementMap: Record<LayerPlacement, string> = {
-    above: 'top',
-    below: 'bottom',
+    above: 'block-start',
+    below: 'block-end',
     start: 'inline-start',
     end: 'inline-end',
   };
@@ -157,10 +157,10 @@ function getPositionArea(
   }
 
   if (alignment === 'start') {
-    return `${cssPlacement} span-bottom`;
+    return `${cssPlacement} span-block-end`;
   }
   if (alignment === 'end') {
-    return `${cssPlacement} span-top`;
+    return `${cssPlacement} span-block-start`;
   }
   return `${cssPlacement} center`;
 }

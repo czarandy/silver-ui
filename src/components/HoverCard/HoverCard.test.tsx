@@ -181,7 +181,7 @@ describe('HoverCard', () => {
     );
 
     expect(screen.getByRole('dialog', {hidden: true})).toHaveStyle({
-      positionArea: 'bottom',
+      positionArea: 'block-end',
     });
   });
 
@@ -194,7 +194,7 @@ describe('HoverCard', () => {
 
     const hoverCard = screen.getByRole('dialog', {hidden: true});
     const positionArea = hoverCard.style.positionArea;
-    expect(positionArea).toBe('top span-inline-end');
+    expect(positionArea).toBe('block-start span-inline-end');
   });
 
   it.each([

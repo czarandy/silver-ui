@@ -31,18 +31,18 @@ function getPopoverElement(): HTMLElement {
 }
 
 const positionAreaCases = [
-  ['above', 'start', 'top span-inline-end', 'ltr'],
-  ['above', 'center', 'top', 'rtl'],
-  ['above', 'end', 'top span-inline-start', 'ltr'],
-  ['below', 'start', 'bottom span-inline-end', 'rtl'],
-  ['below', 'center', 'bottom', 'ltr'],
-  ['below', 'end', 'bottom span-inline-start', 'rtl'],
-  ['start', 'start', 'inline-start span-bottom', 'ltr'],
+  ['above', 'start', 'block-start span-inline-end', 'ltr'],
+  ['above', 'center', 'block-start', 'rtl'],
+  ['above', 'end', 'block-start span-inline-start', 'ltr'],
+  ['below', 'start', 'block-end span-inline-end', 'rtl'],
+  ['below', 'center', 'block-end', 'ltr'],
+  ['below', 'end', 'block-end span-inline-start', 'rtl'],
+  ['start', 'start', 'inline-start span-block-end', 'ltr'],
   ['start', 'center', 'inline-start center', 'rtl'],
-  ['start', 'end', 'inline-start span-top', 'ltr'],
-  ['end', 'start', 'inline-end span-bottom', 'rtl'],
+  ['start', 'end', 'inline-start span-block-start', 'ltr'],
+  ['end', 'start', 'inline-end span-block-end', 'rtl'],
   ['end', 'center', 'inline-end center', 'ltr'],
-  ['end', 'end', 'inline-end span-top', 'rtl'],
+  ['end', 'end', 'inline-end span-block-start', 'rtl'],
 ] as const satisfies ReadonlyArray<
   readonly [LayerPlacement, LayerAlignment, string, 'ltr' | 'rtl']
 >;
@@ -76,7 +76,7 @@ describe('Popover', () => {
       const positionArea = getPopoverElement().style.positionArea;
       expect(positionArea).toBe(expectedPositionArea);
       expect(positionArea).not.toMatch(
-        /\b(?:left|right|span-left|span-right)\b/,
+        /\b(?:top|bottom|left|right|span-top|span-bottom|span-left|span-right)\b/,
       );
     },
   );
