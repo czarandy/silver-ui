@@ -50,8 +50,6 @@ import {cx} from 'utils/cx';
 type GridStyle = CSSProperties & {'--schedule-day-count': string};
 type HourStyle = Pick<CSSProperties, 'height' | 'minHeight'>;
 
-const styles = scheduleTimeGridViewRecipe();
-
 function eventOverlapsHour(
   event: CalendarEvent,
   day: PlainDate,
@@ -349,6 +347,7 @@ export function TimeGridView({
     '--schedule-day-count': String(days.length),
   };
   const scheduleClasses = scheduleRecipe({height});
+  const styles = scheduleTimeGridViewRecipe({height});
   const normalizedHourHeight = Math.max(1, Math.floor(hourHeight));
   const normalizedAllDayEventLimit = Number.isFinite(allDayEventLimit)
     ? Math.max(0, Math.floor(allDayEventLimit))
@@ -381,229 +380,246 @@ export function TimeGridView({
       role="grid"
       style={gridStyle}
       tabIndex={0}>
-      <div className={styles.rowContents} role="row">
-        <div
-          aria-colindex={1}
-          aria-label="Time"
-          className={styles.corner}
-          role="columnheader"
-        />
-        <div className={styles.header}>
-          {days.map((day, index) => {
-            const isCurrentDay = plainDateIsEqual(day, highlightPlainDate);
-            const dayHeaderClasses = scheduleTimeGridViewRecipe({
-              isCurrentDay,
-              isLastColumn: index === days.length - 1,
-            });
-            return (
-              <div
-                aria-colindex={index + 2}
-                aria-current={isCurrentDay ? 'date' : undefined}
-                aria-label={plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY)}
-                className={dayHeaderClasses.dayHeader}
-                key={day.toString()}
-                role="columnheader">
-                <Heading
-                  aria-hidden="true"
-                  color="secondary"
-                  level={4}
-                  textWrap="nowrap">
-                  <span className={styles.dayHeaderContent}>
-                    {plainDateFormat(day, {weekday: 'short'})}
-                    <span className={dayHeaderClasses.dayHeaderDayNumber}>
-                      {day.day}
+      <div
+        className={styles.fixedRows}
+        data-testid="schedule-time-grid-fixed-rows"
+        role="rowgroup">
+        <div className={styles.rowContents} role="row">
+          <div
+            aria-colindex={1}
+            aria-label="Time"
+            className={styles.corner}
+            role="columnheader"
+          />
+          <div className={styles.header}>
+            {days.map((day, index) => {
+              const isCurrentDay = plainDateIsEqual(day, highlightPlainDate);
+              const dayHeaderClasses = scheduleTimeGridViewRecipe({
+                isCurrentDay,
+                isLastColumn: index === days.length - 1,
+              });
+              return (
+                <div
+                  aria-colindex={index + 2}
+                  aria-current={isCurrentDay ? 'date' : undefined}
+                  aria-label={plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY)}
+                  className={dayHeaderClasses.dayHeader}
+                  key={day.toString()}
+                  role="columnheader">
+                  <Heading
+                    aria-hidden="true"
+                    color="secondary"
+                    level={4}
+                    textWrap="nowrap">
+                    <span className={styles.dayHeaderContent}>
+                      {plainDateFormat(day, {weekday: 'short'})}
+                      <span className={dayHeaderClasses.dayHeaderDayNumber}>
+                        {day.day}
+                      </span>
                     </span>
-                  </span>
-                </Heading>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div className={styles.rowContents} role="row">
-        <div
-          aria-colindex={1}
-          aria-label={`${timezoneLabel} all day`}
-          className={styles.allDayLabel}
-          role="rowheader">
-          <Text color="secondary" type="supporting" weight="bold">
-            {timezoneLabel}
-          </Text>
-        </div>
-        <div className={styles.allDayRow}>
-          {days.map((day, index) => {
-            const dayEvents = events.filter(
-              event =>
-                isDayEvent(event) && eventOccursOnDate(event, day, timezoneID),
-            );
-            const visibleDayEvents = dayEvents.slice(
-              0,
-              normalizedAllDayEventLimit,
-            );
-            const hiddenDayEvents = dayEvents.slice(normalizedAllDayEventLimit);
-            const dayCellClasses = scheduleTimeGridViewRecipe({
-              isLastColumn: index === days.length - 1,
-            });
-            const dateLabel = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
-            const seeMoreLabel = `Show ${hiddenDayEvents.length} more all-day events for ${dateLabel}`;
-            return (
-              <div
-                aria-colindex={index + 2}
-                aria-label={getCellName({
-                  categoryMap,
-                  date: day,
-                  events: dayEvents,
-                  hourLabel: 'all day',
-                  timezoneID,
-                })}
-                className={dayCellClasses.dayCell}
-                key={`${day.toString()}-all-day`}
-                role="gridcell">
-                <div className={styles.allDayEvents}>
-                  {visibleDayEvents.map(event => (
-                    <CalendarEventPill
-                      event={event}
-                      isPast={isEventInPast(event, currentTime, timezoneID)}
-                      key={event.id}
-                    />
-                  ))}
-                  {hiddenDayEvents.length > 0 ? (
-                    <ScheduleEventOverflowPopover
-                      buttonClassName={styles.allDaySeeMoreButton}
-                      contentClassName={styles.allDayPopoverContent}
-                      events={dayEvents}
-                      eventsClassName={styles.allDayPopoverEvents}
-                      hiddenEventCount={hiddenDayEvents.length}
-                      label={seeMoreLabel}
-                      renderEvent={event => (
-                        <CalendarEventPill
-                          event={event}
-                          isFullWidth
-                          isPast={isEventInPast(event, currentTime, timezoneID)}
-                        />
-                      )}
-                      testId={`schedule-all-day-see-more-${day.toString()}`}
-                      title={dateLabel}
-                    />
-                  ) : null}
+                  </Heading>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
-      {hours.map(hour => {
-        const hourLabel = formatHour(hour);
-        const isLastHour = hour === hours[hours.length - 1];
-        const timeLabelClasses = scheduleTimeGridViewRecipe({
-          isLastRow: isLastHour,
-        });
-        return (
-          <div className={styles.rowContents} key={hour} role="row">
-            <div
-              aria-colindex={1}
-              className={timeLabelClasses.timeLabel}
-              role="rowheader"
-              style={hourStyle}>
-              {hourLabel}
-            </div>
-            <div className={styles.timeRow}>
-              {days.map((day, index) => {
-                const hourEvents = events.filter(event =>
-                  eventOverlapsHour(event, day, hour, timezoneID),
-                );
-                const visibleTimedEventLayouts = timedEventLayoutsByDay[
-                  index
-                ].filter(layout => layout.startHour === hour);
-                const currentTimeTop = getCurrentTimeTopForHour({
-                  currentTime,
-                  day,
-                  hour,
-                  maxHour: normalizedMaxHour,
-                  minHour: normalizedMinHour,
-                  timezoneID,
-                });
-                const hourCellClasses = scheduleTimeGridViewRecipe({
-                  isLastColumn: index === days.length - 1,
-                  isLastRow: isLastHour,
-                });
-                const hourCellPluginProps = plugins.reduce<
-                  HTMLAttributes<HTMLElement>
-                >(
-                  (props, plugin) => ({
-                    ...props,
-                    ...plugin.getTimeGridCellProps?.({
-                      date: day,
-                      hour,
-                      hourHeight: normalizedHourHeight,
-                      maxHour: normalizedMaxHour,
-                      minHour: normalizedMinHour,
-                      timezoneID,
-                    }),
-                  }),
-                  {},
-                );
-                // The plugins array is stable, ordered config that is never
-                // reordered, so the index is a safe key for the cell content.
-                const hourCellContent = plugins.map(
-                  (plugin, pluginIndex): ReactNode => {
-                    const content = plugin.renderTimeGridCellContent?.({
-                      date: day,
-                      hour,
-                      hourHeight: normalizedHourHeight,
-                      maxHour: normalizedMaxHour,
-                      minHour: normalizedMinHour,
-                      timezoneID,
-                    });
-                    return isReactNode(content) ? (
-                      // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
-                      <Fragment key={pluginIndex}>{content}</Fragment>
-                    ) : null;
-                  },
-                );
-                return (
-                  <div
-                    aria-colindex={index + 2}
-                    aria-label={getCellName({
-                      categoryMap,
-                      date: day,
-                      events: hourEvents,
-                      hourLabel,
-                      timezoneID,
-                    })}
-                    className={hourCellClasses.hourCell}
-                    data-testid={`schedule-time-grid-cell-${day.toString()}-${hour}`}
-                    key={`${day.toString()}-${hour}`}
-                    role="gridcell"
-                    style={hourStyle}
-                    {...hourCellPluginProps}>
-                    {currentTimeTop != null ? (
-                      <ScheduleCurrentTimeIndicator
-                        layout="timeGrid"
-                        style={{top: `${currentTimeTop}%`}}
-                        testId="schedule-current-time-line"
+        <div className={styles.rowContents} role="row">
+          <div
+            aria-colindex={1}
+            aria-label={`${timezoneLabel} all day`}
+            className={styles.allDayLabel}
+            role="rowheader">
+            <Text color="secondary" type="supporting" weight="bold">
+              {timezoneLabel}
+            </Text>
+          </div>
+          <div className={styles.allDayRow}>
+            {days.map((day, index) => {
+              const dayEvents = events.filter(
+                event =>
+                  isDayEvent(event) &&
+                  eventOccursOnDate(event, day, timezoneID),
+              );
+              const visibleDayEvents = dayEvents.slice(
+                0,
+                normalizedAllDayEventLimit,
+              );
+              const hiddenDayEvents = dayEvents.slice(
+                normalizedAllDayEventLimit,
+              );
+              const dayCellClasses = scheduleTimeGridViewRecipe({
+                isLastColumn: index === days.length - 1,
+              });
+              const dateLabel = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
+              const seeMoreLabel = `Show ${hiddenDayEvents.length} more all-day events for ${dateLabel}`;
+              return (
+                <div
+                  aria-colindex={index + 2}
+                  aria-label={getCellName({
+                    categoryMap,
+                    date: day,
+                    events: dayEvents,
+                    hourLabel: 'all day',
+                    timezoneID,
+                  })}
+                  className={dayCellClasses.dayCell}
+                  key={`${day.toString()}-all-day`}
+                  role="gridcell">
+                  <div className={styles.allDayEvents}>
+                    {visibleDayEvents.map(event => (
+                      <CalendarEventPill
+                        event={event}
+                        isPast={isEventInPast(event, currentTime, timezoneID)}
+                        key={event.id}
+                      />
+                    ))}
+                    {hiddenDayEvents.length > 0 ? (
+                      <ScheduleEventOverflowPopover
+                        buttonClassName={styles.allDaySeeMoreButton}
+                        contentClassName={styles.allDayPopoverContent}
+                        events={dayEvents}
+                        eventsClassName={styles.allDayPopoverEvents}
+                        hiddenEventCount={hiddenDayEvents.length}
+                        label={seeMoreLabel}
+                        renderEvent={event => (
+                          <CalendarEventPill
+                            event={event}
+                            isFullWidth
+                            isPast={isEventInPast(
+                              event,
+                              currentTime,
+                              timezoneID,
+                            )}
+                          />
+                        )}
+                        testId={`schedule-all-day-see-more-${day.toString()}`}
+                        title={dateLabel}
                       />
                     ) : null}
-                    <div className={styles.events}>
-                      {visibleTimedEventLayouts.map(layout => (
-                        <TimeGridEvent
-                          currentTime={currentTime}
-                          hourHeight={normalizedHourHeight}
-                          key={layout.event.id}
-                          layout={layout}
-                          maxHour={normalizedMaxHour}
-                          minHour={normalizedMinHour}
-                        />
-                      ))}
-                    </div>
-                    {hourCellContent}
                   </div>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+        </div>
+      </div>
+      <div
+        className={styles.timeRows}
+        data-testid="schedule-time-grid-time-rows"
+        role="rowgroup">
+        {hours.map(hour => {
+          const hourLabel = formatHour(hour);
+          const isLastHour = hour === hours[hours.length - 1];
+          const timeLabelClasses = scheduleTimeGridViewRecipe({
+            isLastRow: isLastHour,
+          });
+          return (
+            <div className={styles.rowContents} key={hour} role="row">
+              <div
+                aria-colindex={1}
+                className={timeLabelClasses.timeLabel}
+                role="rowheader"
+                style={hourStyle}>
+                {hourLabel}
+              </div>
+              <div className={styles.timeRow}>
+                {days.map((day, index) => {
+                  const hourEvents = events.filter(event =>
+                    eventOverlapsHour(event, day, hour, timezoneID),
+                  );
+                  const visibleTimedEventLayouts = timedEventLayoutsByDay[
+                    index
+                  ].filter(layout => layout.startHour === hour);
+                  const currentTimeTop = getCurrentTimeTopForHour({
+                    currentTime,
+                    day,
+                    hour,
+                    maxHour: normalizedMaxHour,
+                    minHour: normalizedMinHour,
+                    timezoneID,
+                  });
+                  const hourCellClasses = scheduleTimeGridViewRecipe({
+                    isLastColumn: index === days.length - 1,
+                    isLastRow: isLastHour,
+                  });
+                  const hourCellPluginProps = plugins.reduce<
+                    HTMLAttributes<HTMLElement>
+                  >(
+                    (props, plugin) => ({
+                      ...props,
+                      ...plugin.getTimeGridCellProps?.({
+                        date: day,
+                        hour,
+                        hourHeight: normalizedHourHeight,
+                        maxHour: normalizedMaxHour,
+                        minHour: normalizedMinHour,
+                        timezoneID,
+                      }),
+                    }),
+                    {},
+                  );
+                  // The plugins array is stable, ordered config that is never
+                  // reordered, so the index is a safe key for the cell content.
+                  const hourCellContent = plugins.map(
+                    (plugin, pluginIndex): ReactNode => {
+                      const content = plugin.renderTimeGridCellContent?.({
+                        date: day,
+                        hour,
+                        hourHeight: normalizedHourHeight,
+                        maxHour: normalizedMaxHour,
+                        minHour: normalizedMinHour,
+                        timezoneID,
+                      });
+                      return isReactNode(content) ? (
+                        // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
+                        <Fragment key={pluginIndex}>{content}</Fragment>
+                      ) : null;
+                    },
+                  );
+                  return (
+                    <div
+                      aria-colindex={index + 2}
+                      aria-label={getCellName({
+                        categoryMap,
+                        date: day,
+                        events: hourEvents,
+                        hourLabel,
+                        timezoneID,
+                      })}
+                      className={hourCellClasses.hourCell}
+                      data-testid={`schedule-time-grid-cell-${day.toString()}-${hour}`}
+                      key={`${day.toString()}-${hour}`}
+                      role="gridcell"
+                      style={hourStyle}
+                      {...hourCellPluginProps}>
+                      {currentTimeTop != null ? (
+                        <ScheduleCurrentTimeIndicator
+                          layout="timeGrid"
+                          style={{top: `${currentTimeTop}%`}}
+                          testId="schedule-current-time-line"
+                        />
+                      ) : null}
+                      <div className={styles.events}>
+                        {visibleTimedEventLayouts.map(layout => (
+                          <TimeGridEvent
+                            currentTime={currentTime}
+                            hourHeight={normalizedHourHeight}
+                            key={layout.event.id}
+                            layout={layout}
+                            maxHour={normalizedMaxHour}
+                            minHour={normalizedMinHour}
+                          />
+                        ))}
+                      </div>
+                      {hourCellContent}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
