@@ -2047,6 +2047,43 @@ describe('Schedule', () => {
     );
   });
 
+  it('mirrors pagination chevrons in RTL', () => {
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange: vi.fn(),
+      });
+      return (
+        <div dir="rtl">
+          <Schedule
+            events={events}
+            plugins={[paginationPlugin]}
+            timezoneID="UTC"
+            view={createScheduleDayView()}
+            viewDate={instantUTC(2026, 4, 13)}
+          />
+        </div>
+      );
+    }
+
+    render(<Fixture />);
+
+    const previousButton = screen.getByRole('button', {name: 'Previous day'});
+    const nextButton = screen.getByRole('button', {name: 'Next day'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const previousIcon = previousButton.querySelector('svg');
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const nextIcon = nextButton.querySelector('svg');
+
+    expect(previousIcon).toHaveClass(
+      'lucide-chevron-left',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+    expect(nextIcon).toHaveClass(
+      'lucide-chevron-right',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+  });
+
   it('defaults highlightDate to current time at mount', () => {
     vi.spyOn(Temporal.Now, 'instant').mockReturnValue(
       Temporal.Instant.from('2026-05-14T12:00:00Z'),

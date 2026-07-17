@@ -32,6 +32,32 @@ describe('Calendar', () => {
     ).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('mirrors month navigation chevrons in RTL', () => {
+    render(
+      <div dir="rtl">
+        <Calendar onChange={() => {}} viewDate={plainDateCreate(2026, 5, 1)} />
+      </div>,
+    );
+
+    const previousButton = screen.getByRole('button', {
+      name: 'Previous month',
+    });
+    const nextButton = screen.getByRole('button', {name: 'Next month'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const previousIcon = previousButton.querySelector('svg');
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const nextIcon = nextButton.querySelector('svg');
+
+    expect(previousIcon).toHaveClass(
+      'lucide-chevron-left',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+    expect(nextIcon).toHaveClass(
+      'lucide-chevron-right',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+  });
+
   it('calls onChange when a day is selected', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

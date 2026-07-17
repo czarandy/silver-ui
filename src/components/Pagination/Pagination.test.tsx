@@ -12,6 +12,32 @@ describe('Pagination', () => {
     ).toBeInTheDocument();
   });
 
+  it('mirrors previous and next chevrons in RTL', () => {
+    render(
+      <div dir="rtl">
+        <Pagination onChange={() => {}} page={3} totalPages={5} />
+      </div>,
+    );
+
+    const previousButton = screen.getByRole('button', {
+      name: 'Go to previous page',
+    });
+    const nextButton = screen.getByRole('button', {name: 'Go to next page'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const previousIcon = previousButton.querySelector('svg');
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
+    const nextIcon = nextButton.querySelector('svg');
+
+    expect(previousIcon).toHaveClass(
+      'lucide-chevron-left',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+    expect(nextIcon).toHaveClass(
+      'lucide-chevron-right',
+      'rtl:silver-trf_scaleX(-1)',
+    );
+  });
+
   it('renders page buttons and marks the current page', () => {
     render(<Pagination onChange={() => {}} page={3} totalPages={5} />);
     expect(

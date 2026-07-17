@@ -1,11 +1,11 @@
 'use client';
 
-import {ChevronLeft, ChevronRight} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
 import {useMemo} from 'react';
 import {Button} from 'components/Button';
 import type {ButtonSize} from 'components/Button';
 import {Text} from 'components/Text';
+import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -297,7 +297,7 @@ export function Pagination({
       style={style}>
       <div className={styles.controls}>
         <Button
-          icon={ChevronLeft}
+          icon={LogicalChevronStart}
           isDisabled={isDisabled || !hasPrevious}
           isIconOnly
           label="Go to previous page"
@@ -307,7 +307,7 @@ export function Pagination({
         />
         {renderIndicator()}
         <Button
-          icon={ChevronRight}
+          icon={LogicalChevronEnd}
           isDisabled={isDisabled || !hasNext}
           isIconOnly
           label="Go to next page"
