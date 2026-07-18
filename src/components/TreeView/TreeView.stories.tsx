@@ -11,6 +11,7 @@ import {
   Lock,
   Settings,
 } from 'lucide-react';
+import {useState} from 'react';
 import {fn} from 'storybook/test';
 import {Badge} from 'components/Badge';
 import {Icon} from 'components/Icon';
@@ -214,14 +215,34 @@ export const DisabledItems: Story = {
   },
 };
 
-export const SelectedItems: Story = {
-  args: {
-    items: [
-      {id: 'inbox', label: 'Inbox'},
-      {id: 'assigned', isSelected: true, label: 'Assigned to me'},
-      {id: 'completed', label: 'Completed'},
-    ],
-  },
+function ControlledSelectionExample(): React.JSX.Element {
+  const [selectedKey, setSelectedKey] = useState<string | null>('projects');
+
+  return (
+    <VStack align="stretch" gap={2}>
+      <Text>Selected key: {selectedKey ?? 'None'}</Text>
+      <TreeView
+        items={[
+          {
+            children: [
+              {id: 'silver-ui', label: 'silver-ui'},
+              {id: 'design-system', label: 'design-system'},
+            ],
+            id: 'projects',
+            isExpanded: true,
+            label: 'Projects',
+          },
+          {id: 'archive', label: 'Archive'},
+        ]}
+        onSelectionChange={setSelectedKey}
+        selectedKey={selectedKey}
+      />
+    </VStack>
+  );
+}
+
+export const ControlledSelection: Story = {
+  render: () => <ControlledSelectionExample />,
 };
 
 export const Density: Story = {

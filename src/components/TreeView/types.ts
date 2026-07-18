@@ -39,11 +39,6 @@ export interface TreeViewItemData {
    */
   isExpanded?: boolean;
   /**
-   * Whether the item is currently selected.
-   * @default false
-   */
-  isSelected?: boolean;
-  /**
    * Primary item label.
    */
   label: ReactNode;

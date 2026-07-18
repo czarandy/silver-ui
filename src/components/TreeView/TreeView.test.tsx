@@ -187,6 +187,34 @@ describe('TreeView', () => {
     expect(screen.queryByText('Child 1')).not.toBeInTheDocument();
   });
 
+  it('reverses horizontal tree navigation under an inherited RTL direction', async () => {
+    const user = userEvent.setup();
+    render(
+      <div dir="rtl">
+        <TreeView items={nestedItems} />
+      </div>,
+    );
+
+    const parent = screen.getByRole('treeitem', {name: /Parent/});
+    act(() => {
+      parent.focus();
+    });
+
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByText('Child 1')).toBeInTheDocument();
+    expect(parent).toHaveFocus();
+
+    await user.keyboard('{ArrowLeft}');
+    const childOne = screen.getByRole('treeitem', {name: /Child 1/});
+    expect(childOne).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(parent).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(screen.queryByText('Child 1')).not.toBeInTheDocument();
+  });
+
   it('supports type-ahead navigation', async () => {
     const user = userEvent.setup();
     render(<TreeView items={simpleItems} />);
@@ -339,23 +367,295 @@ describe('TreeView', () => {
     expect(link).toHaveAttribute('tabindex', '-1');
   });
 
-  it('sets disabled and selected states', () => {
+  it('sets the disabled state without exposing selection semantics', () => {
     render(
       <TreeView
         items={[
           {
             id: 'a',
             isDisabled: true,
-            isSelected: true,
-            label: 'Selected',
+            label: 'Disabled',
           },
         ]}
       />,
     );
 
-    const item = screen.getByRole('treeitem', {name: /Selected/});
+    const item = screen.getByRole('treeitem', {name: /Disabled/});
     expect(item).toHaveAttribute('aria-disabled', 'true');
-    expect(item).toHaveAttribute('aria-selected', 'true');
+    expect(item).not.toHaveAttribute('aria-selected');
+  });
+
+  describe('controlled selection', () => {
+    it('renders one selected item from the root selection state', () => {
+      const onSelectionChange = vi.fn();
+      render(
+        <TreeView
+          items={simpleItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey="b"
+        />,
+      );
+
+      expect(screen.getByRole('treeitem', {name: /Item A/})).toHaveAttribute(
+        'aria-selected',
+        'false',
+      );
+      expect(screen.getByRole('treeitem', {name: /Item B/})).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByRole('tree')).not.toHaveAttribute(
+        'aria-multiselectable',
+      );
+    });
+
+    it('requests a change without updating rendered selection', async () => {
+      const user = userEvent.setup();
+      const onSelectionChange = vi.fn();
+      const {rerender} = render(
+        <TreeView
+          items={simpleItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey="a"
+        />,
+      );
+
+      await user.click(screen.getByText('Item B'));
+
+      expect(onSelectionChange).toHaveBeenCalledExactlyOnceWith('b');
+      expect(screen.getByRole('treeitem', {name: /Item A/})).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByRole('treeitem', {name: /Item B/})).toHaveAttribute(
+        'aria-selected',
+        'false',
+      );
+
+      rerender(
+        <TreeView
+          items={simpleItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey="b"
+        />,
+      );
+      expect(screen.getByRole('treeitem', {name: /Item B/})).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+    });
+
+    it('renders no selection for null and unknown keys', () => {
+      const onSelectionChange = vi.fn();
+      const {rerender} = render(
+        <TreeView
+          items={simpleItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey={null}
+        />,
+      );
+
+      for (const item of screen.getAllByRole('treeitem')) {
+        expect(item).toHaveAttribute('aria-selected', 'false');
+      }
+
+      rerender(
+        <TreeView
+          items={simpleItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey="missing"
+        />,
+      );
+      for (const item of screen.getAllByRole('treeitem')) {
+        expect(item).toHaveAttribute('aria-selected', 'false');
+      }
+    });
+
+    it('selects a branch row without expanding and toggles without selecting', async () => {
+      const user = userEvent.setup();
+      const onSelectionChange = vi.fn();
+      render(
+        <TreeView
+          items={nestedItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey={null}
+        />,
+      );
+
+      await user.click(screen.getByText('Parent'));
+      expect(onSelectionChange).toHaveBeenCalledWith('parent');
+      expect(screen.queryByText('Child 1')).not.toBeInTheDocument();
+
+      onSelectionChange.mockClear();
+      await user.click(
+        screen.getByRole('button', {name: 'Toggle Parent children'}),
+      );
+      expect(screen.getByText('Child 1')).toBeInTheDocument();
+      expect(onSelectionChange).not.toHaveBeenCalled();
+    });
+
+    it('runs item actions and selection exactly once', async () => {
+      const user = userEvent.setup();
+      const onClick = vi.fn();
+      const onSelectionChange = vi.fn();
+      render(
+        <TreeView
+          items={[{id: 'action', label: 'Action', onClick}]}
+          onSelectionChange={onSelectionChange}
+          selectedKey={null}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', {name: 'Action'}));
+
+      expect(onClick).toHaveBeenCalledOnce();
+      expect(onSelectionChange).toHaveBeenCalledExactlyOnceWith('action');
+    });
+
+    it('uses Enter and Space to select branches without toggling them', async () => {
+      const user = userEvent.setup();
+      const onSelectionChange = vi.fn();
+      render(
+        <TreeView
+          items={nestedItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey={null}
+        />,
+      );
+
+      const parent = screen.getByRole('treeitem', {name: /Parent/});
+      act(() => {
+        parent.focus();
+      });
+
+      await user.keyboard('{Enter}');
+      await user.keyboard(' ');
+
+      expect(onSelectionChange).toHaveBeenCalledTimes(2);
+      expect(onSelectionChange).toHaveBeenNthCalledWith(1, 'parent');
+      expect(onSelectionChange).toHaveBeenNthCalledWith(2, 'parent');
+      expect(screen.queryByText('Child 1')).not.toBeInTheDocument();
+    });
+
+    it('moves focus with arrows and typeahead without selecting', async () => {
+      const user = userEvent.setup();
+      const onSelectionChange = vi.fn();
+      render(
+        <TreeView
+          items={[
+            {id: 'apple', label: 'Apple'},
+            {id: 'banana', label: 'Banana'},
+            {id: 'cherry', label: 'Cherry'},
+          ]}
+          onSelectionChange={onSelectionChange}
+          selectedKey="apple"
+        />,
+      );
+
+      act(() => {
+        screen.getByRole('treeitem', {name: /Apple/}).focus();
+      });
+      await user.keyboard('{ArrowDown}');
+      expect(screen.getByRole('treeitem', {name: /Banana/})).toHaveFocus();
+      await user.keyboard('c');
+      expect(screen.getByRole('treeitem', {name: /Cherry/})).toHaveFocus();
+      expect(onSelectionChange).not.toHaveBeenCalled();
+    });
+
+    it('does not select disabled items', () => {
+      const onSelectionChange = vi.fn();
+      render(
+        <TreeView
+          items={[{id: 'disabled', isDisabled: true, label: 'Disabled'}]}
+          onSelectionChange={onSelectionChange}
+          selectedKey="disabled"
+        />,
+      );
+
+      const item = screen.getByRole('treeitem', {name: /Disabled/});
+      expect(item).not.toHaveAttribute('aria-selected');
+      fireEvent.click(screen.getByText('Disabled'));
+      fireEvent.keyDown(item, {key: 'Enter'});
+      expect(onSelectionChange).not.toHaveBeenCalled();
+    });
+
+    it('uses a visible enabled selection as the initial roving tab stop', () => {
+      const onSelectionChange = vi.fn();
+      render(
+        <TreeView
+          items={expandedItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey="child-2"
+        />,
+      );
+
+      expect(screen.getByRole('treeitem', {name: /Parent/})).toHaveAttribute(
+        'tabindex',
+        '-1',
+      );
+      expect(screen.getByRole('treeitem', {name: /Child 2/})).toHaveAttribute(
+        'tabindex',
+        '0',
+      );
+    });
+
+    it('falls back to the first enabled item for unusable selections', () => {
+      const onSelectionChange = vi.fn();
+      const fallbackItems: TreeViewItemData[] = [
+        {id: 'first', label: 'First'},
+        {
+          children: [{id: 'hidden', label: 'Hidden'}],
+          id: 'collapsed',
+          label: 'Collapsed',
+        },
+        {id: 'disabled', isDisabled: true, label: 'Disabled'},
+      ];
+      const {rerender} = render(
+        <TreeView
+          items={fallbackItems}
+          onSelectionChange={onSelectionChange}
+          selectedKey="hidden"
+        />,
+      );
+
+      const first = screen.getByRole('treeitem', {name: /First/});
+      expect(first).toHaveAttribute('tabindex', '0');
+
+      for (const selectedKey of ['disabled', 'missing', null]) {
+        rerender(
+          <TreeView
+            items={fallbackItems}
+            onSelectionChange={onSelectionChange}
+            selectedKey={selectedKey}
+          />,
+        );
+        expect(first).toHaveAttribute('tabindex', '0');
+      }
+    });
+
+    it('preserves focused roving state when the controlled value differs', async () => {
+      const user = userEvent.setup();
+      render(
+        <TreeView
+          items={simpleItems}
+          onSelectionChange={vi.fn()}
+          selectedKey="a"
+        />,
+      );
+
+      await user.click(screen.getByText('Item B'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('treeitem', {name: /Item B/})).toHaveAttribute(
+          'tabindex',
+          '0',
+        );
+      });
+      expect(screen.getByRole('treeitem', {name: /Item A/})).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+    });
   });
 
   it('does not trigger disabled item actions or toggles', () => {
@@ -518,6 +818,31 @@ describe('TreeView', () => {
     );
     expect(screen.getByText('Child')).toBeInTheDocument();
     expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('provides a separate child toggle for link branches', async () => {
+    const user = userEvent.setup();
+    render(
+      <TreeView
+        items={[
+          {
+            children: [{id: 'child', label: 'Child'}],
+            href: '/parent',
+            id: 'parent',
+            label: 'Parent',
+          },
+        ]}
+      />,
+    );
+
+    expect(screen.getByRole('link', {name: 'Parent'})).toHaveAttribute(
+      'href',
+      '/parent',
+    );
+    await user.click(
+      screen.getByRole('button', {name: 'Toggle Parent children'}),
+    );
+    expect(screen.getByText('Child')).toBeInTheDocument();
   });
 
   it('toggles child visibility with keyboard without firing item action', async () => {
