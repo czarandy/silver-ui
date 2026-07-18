@@ -157,7 +157,7 @@ export const buttonRecipe = sva({
       md: {
         root: {
           h: 'component.md',
-          px: 'component.md',
+          px: '3',
           fontSize: 'component.md',
           gap: '2',
           borderRadius: 'component.md',
@@ -167,9 +167,9 @@ export const buttonRecipe = sva({
       lg: {
         root: {
           h: 'component.lg',
-          px: 'component.lg',
+          px: '4',
           fontSize: 'component.lg',
-          gap: '2.5',
+          gap: '2',
           borderRadius: 'component.lg',
           '--button-icon-size': 'var(--silver-sizes-icon-lg)',
         },

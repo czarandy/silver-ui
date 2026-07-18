@@ -257,12 +257,15 @@ describe('Button', () => {
     expect(screen.getByRole('button', {name: 'Medium'})).toHaveClass(
       'silver-h_component.md',
       'silver-fs_component.md',
+      'silver-px_3',
     );
 
     rerender(<Button label="Large" size="lg" />);
     expect(screen.getByRole('button', {name: 'Large'})).toHaveClass(
       'silver-h_component.lg',
       'silver-fs_component.lg',
+      'silver-px_4',
+      'silver-gap_2',
     );
   });
 
