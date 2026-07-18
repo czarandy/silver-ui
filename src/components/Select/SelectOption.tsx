@@ -4,6 +4,8 @@ import {Item} from 'components/Item';
 import {selectOptionItemRecipe} from 'components/Select/Select.recipe';
 import {cx} from 'utils/cx';
 
+const classes = selectOptionItemRecipe();
+
 export interface SelectOptionProps {
   /**
    * Additional CSS class names applied to the option layout.
@@ -52,8 +54,6 @@ export function SelectOption({
   ref,
   style,
 }: SelectOptionProps): React.JSX.Element {
-  const classes = selectOptionItemRecipe();
-
   return (
     <Item
       as="span"

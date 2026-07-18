@@ -32,6 +32,8 @@ import {
 } from 'internal/useSelectListbox';
 import {cx} from 'utils/cx';
 
+const menuClasses = selectMenuRecipe();
+
 export interface SelectOptionData extends SelectListboxOptionData {
   /**
    * Icon displayed before the label.
@@ -270,8 +272,6 @@ export function Select({
     [selectableOptions, value],
   );
 
-  const menuClasses = selectMenuRecipe();
-
   const renderOption = useCallback(
     (option: SelectOptionData): ReactNode => {
       if (!filteredValues.has(option.value)) {
@@ -320,7 +320,6 @@ export function Select({
       handleOptionClick,
       handleOptionMouseEnter,
       highlightedValue,
-      menuClasses,
       renderOptionProp,
       value,
     ],

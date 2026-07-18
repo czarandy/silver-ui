@@ -8,6 +8,8 @@ import {
 } from 'components/Breadcrumbs/BreadcrumbsContext';
 import {cx} from 'utils/cx';
 
+const classes = breadcrumbsRecipe();
+
 export interface BreadcrumbsProps {
   /**
    * BreadcrumbItem children.
@@ -63,8 +65,6 @@ export function Breadcrumbs({
     () => ({separator, variant}),
     [separator, variant],
   );
-  const classes = breadcrumbsRecipe();
-
   return (
     <BreadcrumbsContext value={contextValue}>
       <nav

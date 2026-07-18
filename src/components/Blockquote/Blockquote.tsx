@@ -3,6 +3,8 @@ import {blockquoteRecipe} from 'components/Blockquote/Blockquote.recipe';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
+const classes = blockquoteRecipe();
+
 /**
  * Styled block quotation with an optional citation footer.
  */
@@ -44,8 +46,6 @@ export function Blockquote({
   ref,
   style,
 }: BlockquoteProps): React.JSX.Element {
-  const classes = blockquoteRecipe();
-
   return (
     <blockquote
       className={cx(classes.root, className)}

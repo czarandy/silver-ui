@@ -420,6 +420,18 @@ export default tseslint.config(
       'silver-ui/no-recipe-exports': 'error',
     },
   },
+  // Zero-argument recipe calls return a constant class map — hoist them to
+  // module scope instead of recomputing them on every render.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/*.stories.{ts,tsx}', '**/*.recipe.ts'],
+    plugins: {
+      'silver-ui': silverUiPlugin,
+    },
+    rules: {
+      'silver-ui/prefer-hoisted-recipes': 'error',
+    },
+  },
   // 'use client' — source files using client-only React features (hooks,
   // createContext, browser APIs, event handlers) must declare the directive so
   // it survives the build (see scripts/preserve-use-client.mjs) and consumers in

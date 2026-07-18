@@ -14,6 +14,8 @@ import {cx} from 'utils/cx';
 
 const OVERLAP_RATIO = 0.25;
 
+const rootClass = avatarGroupRecipe();
+
 /**
  * Displays a stacked group of Avatars with shared size and overlap.
  *
@@ -88,7 +90,7 @@ export function AvatarGroup({
       <div
         {...rest}
         aria-label={ariaLabel}
-        className={cx(avatarGroupRecipe(), className)}
+        className={cx(rootClass, className)}
         data-testid={dataTestId}
         ref={ref}
         role="group"

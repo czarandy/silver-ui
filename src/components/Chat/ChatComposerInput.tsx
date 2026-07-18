@@ -19,6 +19,8 @@ import {mergeRefs} from 'internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
 
+const rootClass = chatComposerInputRecipe();
+
 export interface ChatComposerInputProps extends Omit<
   ComponentPropsWithoutRef<'textarea'>,
   'onChange' | 'value'
@@ -149,7 +151,7 @@ export function ChatComposerInput({
   return (
     <textarea
       {...rest}
-      className={cx(chatComposerInputRecipe(), className)}
+      className={cx(rootClass, className)}
       data-testid={dataTestId}
       disabled={currentDisabled}
       onChange={handleChange}

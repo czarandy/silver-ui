@@ -36,6 +36,10 @@ import {getBrowserTimezoneID} from 'internal/time';
 import {useGridFocus} from 'internal/useGridFocus';
 import {cx} from 'utils/cx';
 
+const styles = calendarRecipe();
+
+const outsideDayCellClass = styles.cell;
+
 export type {DateRange, DayOfWeek} from 'internal/dateTypes';
 
 export interface CalendarHandle {
@@ -428,7 +432,6 @@ export function Calendar({
     [],
   );
 
-  const styles = calendarRecipe();
   const isTopLayer = useIsTopLayer();
 
   return (
@@ -772,7 +775,7 @@ const DayCell = memo(function DayCell({
   onDayHover,
 }: DayCellProps): React.JSX.Element {
   if (day.isOutside && !hasOutsideDays) {
-    return <div className={calendarRecipe().cell} />;
+    return <div className={outsideDayCellClass} />;
   }
 
   const effectivelyDisabled = isDisabled || day.isOutside;
