@@ -94,11 +94,7 @@ export function Timeline({
               )}
             </div>
             {index < items.length - 1 ? (
-              <div
-                className={classes.connectorWrapper}
-                data-timeline-connector="">
-                <div className={classes.connector} />
-              </div>
+              <div className={classes.connector} data-timeline-connector="" />
             ) : null}
           </div>
           <div className={classes.content} data-timeline-content="">
