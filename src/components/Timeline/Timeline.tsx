@@ -6,6 +6,8 @@ import {Timestamp, type TimestampFormat} from 'components/Timestamp';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
+const classes = timelineRecipe();
+
 export interface TimelineItemConfig {
   /**
    * Free-form detail rendered below the entry title.
@@ -72,8 +74,6 @@ export function Timeline({
   style,
   timestampFormat = 'auto',
 }: TimelineProps): React.JSX.Element {
-  const classes = timelineRecipe();
-
   return (
     <ol
       className={cx(classes.root, className)}
