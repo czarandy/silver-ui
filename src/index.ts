@@ -231,6 +231,11 @@ export {
   type StepState,
 } from 'components/Stepper';
 export {
+  Timeline,
+  type TimelineItemConfig,
+  type TimelineProps,
+} from 'components/Timeline';
+export {
   createEventFromISO,
   createScheduleDayView,
   createScheduleListView,

@@ -81,6 +81,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Table',
     'Tag',
     'Thumbnail',
+    'Timeline',
     'TreeView',
   ],
   'Chat & Messaging': ['Chat'],

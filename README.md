@@ -192,6 +192,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Table** — data table with sorting, filtering, and column resize plugins
 - **Tag** — removable label for categories or filters
 - **Thumbnail** — image preview with fallback and remove action
+- **Timeline** — ordered chronological event sequence with timestamps and custom indicators
 - **TreeView** — hierarchical expandable tree
 
 ### Chat & Messaging
