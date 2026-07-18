@@ -11,6 +11,7 @@ import eslintReact from '@eslint-react/eslint-plugin';
  * - silver-ui/exhaustive-deps: React exhaustive deps with silver-ui stable hook support
  * - silver-ui/prefer-is-react-node: ReactNode null checks must use isReactNode
  * - silver-ui/no-recipe-type-imports: Public types must not depend on Panda recipe modules
+ * - silver-ui/prefer-hoisted-recipes: Zero-argument recipe calls must be hoisted to module scope
  */
 
 const reactExhaustiveDeps = eslintReact.rules['exhaustive-deps'];
@@ -1152,6 +1153,189 @@ const noUselessUndefinedProp = {
   },
 };
 
+/**
+ * Disallow calling a zero-argument Panda recipe inside a function body when it
+ * could be hoisted to module scope.
+ *
+ * A recipe called with no arguments (e.g. `blockquoteRecipe()`) returns a
+ * constant class-name map that never varies. Calling it inside a component
+ * render (or any hook/callback) recomputes that constant on every invocation.
+ * The repo convention hoists these to module scope so the map is built once.
+ *
+ * Recipe identifiers are detected by their import: any binding imported from a
+ * "*.recipe" module. Calls WITH arguments are left alone — they depend on
+ * props/variants and must stay in render. Calls already at module scope are
+ * fine.
+ *
+ * The autofix only handles the simple `const x = fooRecipe();` declaration
+ * form: it moves that declaration to module scope, directly after the import
+ * block, and removes the in-body line. Inline calls (e.g. inside a `cx(...)`
+ * argument or `fooRecipe().slot`) are reported without a fix.
+ */
+const preferHoistedRecipes = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description:
+        'Disallow calling a zero-argument Panda recipe inside a function; hoist it to module scope so the class map is computed once.',
+    },
+    fixable: 'code',
+    messages: {
+      hoistRecipeCall:
+        'Recipe "{{name}}" is called with no arguments inside a function, recomputing a constant on every call. Hoist it to module scope.',
+    },
+    schema: [],
+  },
+  create(context) {
+    const recipeSourcePattern = /\.recipe(?:\.[cm]?[jt]sx?)?$/;
+    const recipeNames = new Set();
+    let programNode = null;
+    let lastImport = null;
+
+    function getEnclosingFunction(node) {
+      let current = node.parent;
+      while (current != null) {
+        if (
+          current.type === 'FunctionDeclaration' ||
+          current.type === 'FunctionExpression' ||
+          current.type === 'ArrowFunctionExpression'
+        ) {
+          return current;
+        }
+        current = current.parent;
+      }
+      return null;
+    }
+
+    // A hoist is only safe when the declared name is bound exactly once in the
+    // whole file. Any other binding of the same name — a module-scope const, an
+    // import, or a shadowing declaration in an enclosing function — would make
+    // the moved reference resolve to a different variable once its in-place
+    // declaration is removed.
+    function isNameBoundOnce(name) {
+      const sourceCode = context.sourceCode || context.getSourceCode();
+      let count = 0;
+      const stack = [sourceCode.getScope(programNode)];
+
+      while (stack.length > 0) {
+        const scope = stack.pop();
+        for (const variable of scope.variables) {
+          if (variable.name === name) {
+            count += variable.defs.length;
+            if (count > 1) {
+              return false;
+            }
+          }
+        }
+        stack.push(...scope.childScopes);
+      }
+
+      return count === 1;
+    }
+
+    return {
+      Program(node) {
+        programNode = node;
+      },
+      ImportDeclaration(node) {
+        lastImport = node;
+
+        if (
+          typeof node.source.value !== 'string' ||
+          !recipeSourcePattern.test(node.source.value)
+        ) {
+          return;
+        }
+
+        for (const specifier of node.specifiers) {
+          if (
+            specifier.type === 'ImportSpecifier' ||
+            specifier.type === 'ImportDefaultSpecifier'
+          ) {
+            recipeNames.add(specifier.local.name);
+          }
+        }
+      },
+      CallExpression(node) {
+        if (
+          node.arguments.length !== 0 ||
+          node.callee.type !== 'Identifier' ||
+          !recipeNames.has(node.callee.name)
+        ) {
+          return;
+        }
+
+        if (getEnclosingFunction(node) == null) {
+          return;
+        }
+
+        const name = node.callee.name;
+        const declarator = node.parent;
+        const declaration =
+          declarator.type === 'VariableDeclarator' ? declarator.parent : null;
+        const isSimpleDeclaration =
+          declarator.type === 'VariableDeclarator' &&
+          declarator.init === node &&
+          declarator.id.type === 'Identifier' &&
+          declaration != null &&
+          declaration.type === 'VariableDeclaration' &&
+          declaration.kind === 'const' &&
+          declaration.declarations.length === 1 &&
+          lastImport != null &&
+          isNameBoundOnce(declarator.id.name);
+
+        context.report({
+          node,
+          messageId: 'hoistRecipeCall',
+          data: {name},
+          fix: isSimpleDeclaration
+            ? fixer => {
+                const sourceCode =
+                  context.sourceCode || context.getSourceCode();
+                const text = sourceCode.getText();
+                const declarationText = sourceCode.getText(declaration);
+
+                // Remove the in-body declaration, its indentation, and a single
+                // trailing blank line so no gap is left after the opening brace.
+                let start = declaration.range[0];
+                while (
+                  start > 0 &&
+                  (text[start - 1] === ' ' || text[start - 1] === '\t')
+                ) {
+                  start--;
+                }
+
+                let end = declaration.range[1];
+                if (text[end] === '\r') {
+                  end++;
+                }
+                if (text[end] === '\n') {
+                  end++;
+                }
+
+                let probe = end;
+                while (text[probe] === ' ' || text[probe] === '\t') {
+                  probe++;
+                }
+                if (text[probe] === '\r') {
+                  probe++;
+                }
+                if (text[probe] === '\n') {
+                  end = probe + 1;
+                }
+
+                return [
+                  fixer.insertTextAfter(lastImport, `\n\n${declarationText}`),
+                  fixer.removeRange([start, end]),
+                ];
+              }
+            : null,
+        });
+      },
+    };
+  },
+};
+
 const plugin = {
   meta: {
     name: 'eslint-plugin-silver-ui',
@@ -1166,6 +1350,7 @@ const plugin = {
     'no-redundant-box-sizing': noRedundantBoxSizing,
     'no-useless-fragment-with-comment': noUselessFragmentWithComment,
     'no-useless-undefined-prop': noUselessUndefinedProp,
+    'prefer-hoisted-recipes': preferHoistedRecipes,
     'prefer-is-react-node': preferIsReactNode,
     'require-component-props': requireComponentProps,
   },

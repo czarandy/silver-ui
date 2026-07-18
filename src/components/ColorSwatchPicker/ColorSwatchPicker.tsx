@@ -29,6 +29,8 @@ import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
 import isReactNode from 'internal/isReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 
+const pickerClass = colorSwatchPickerRecipe();
+
 export type ColorSwatchPickerProps = {
   /**
    * Additional CSS class names applied to the field root.
@@ -241,7 +243,7 @@ export function ColorSwatchPicker({
         aria-labelledby={labelId}
         aria-orientation="horizontal"
         aria-required={isRequired ?? undefined}
-        className={colorSwatchPickerRecipe()}
+        className={pickerClass}
         id={inputId}
         onBlur={hint.onBlur}
         onFocus={hint.onFocus}

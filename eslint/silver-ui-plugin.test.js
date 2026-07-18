@@ -13,6 +13,7 @@ const preferIsReactNodeRule = plugin.rules['prefer-is-react-node'];
 const noUselessFragmentWithCommentRule =
   plugin.rules['no-useless-fragment-with-comment'];
 const noUselessUndefinedPropRule = plugin.rules['no-useless-undefined-prop'];
+const preferHoistedRecipesRule = plugin.rules['prefer-hoisted-recipes'];
 const tester = new RuleTester({
   languageOptions: {
     parser: tseslint.parser,
@@ -989,6 +990,153 @@ tester.run('no-useless-undefined-prop', noUselessUndefinedPropRule, {
       code: 'const x = (\n  <Foo\n    bar={undefined}\n    c={2}\n  />\n);',
       output: 'const x = (\n  <Foo\n    c={2}\n  />\n);',
       errors: [{messageId: 'uselessUndefinedProp', data: {name: 'bar'}}],
+    },
+  ],
+});
+
+tester.run('prefer-hoisted-recipes', preferHoistedRecipesRule, {
+  valid: [
+    {
+      name: 'zero-arg recipe call already at module scope',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+const styles = fooRecipe();
+`,
+    },
+    {
+      name: 'recipe call with variant args stays in render',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+export function Foo({size}) {
+  const classes = fooRecipe({size});
+  return <div className={classes.root} />;
+}
+`,
+    },
+    {
+      name: 'call to an identifier not imported from a recipe module is ignored',
+      code: `import {helper} from 'utils/helper';
+
+export function Foo() {
+  const value = helper();
+  return <div className={value} />;
+}
+`,
+    },
+    {
+      name: 'a locally defined recipe (not imported) is ignored',
+      code: `import {cva} from 'styled-system/css';
+
+const fooRecipe = cva({});
+
+export function Foo() {
+  const classes = fooRecipe();
+  return <div className={classes.root} />;
+}
+`,
+    },
+  ],
+  invalid: [
+    {
+      name: 'hoists a simple declaration from the component body',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+export function Foo() {
+  const classes = fooRecipe();
+  return <div className={classes.root} />;
+}
+`,
+      output: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+const classes = fooRecipe();
+
+export function Foo() {
+  return <div className={classes.root} />;
+}
+`,
+      errors: [{messageId: 'hoistRecipeCall', data: {name: 'fooRecipe'}}],
+    },
+    {
+      name: 'hoists a declaration and removes the trailing blank line',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+export function Foo() {
+  const classes = fooRecipe();
+
+  return <div className={classes.root} />;
+}
+`,
+      output: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+const classes = fooRecipe();
+
+export function Foo() {
+  return <div className={classes.root} />;
+}
+`,
+      errors: [{messageId: 'hoistRecipeCall', data: {name: 'fooRecipe'}}],
+    },
+    {
+      name: 'hoists a declaration out of a nested callback',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+export function Foo() {
+  const render = () => {
+    const classes = fooRecipe();
+    return classes.root;
+  };
+  return render();
+}
+`,
+      output: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+const classes = fooRecipe();
+
+export function Foo() {
+  const render = () => {
+    return classes.root;
+  };
+  return render();
+}
+`,
+      errors: [{messageId: 'hoistRecipeCall', data: {name: 'fooRecipe'}}],
+    },
+    {
+      name: 'reports an inline recipe call inside cx without a fix',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+import {cx} from 'utils/cx';
+
+export function Foo({className}) {
+  return <div className={cx(fooRecipe(), className)} />;
+}
+`,
+      output: null,
+      errors: [{messageId: 'hoistRecipeCall', data: {name: 'fooRecipe'}}],
+    },
+    {
+      name: 'reports a member access on a recipe call without a fix',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+export function Foo() {
+  return <div className={fooRecipe().root} />;
+}
+`,
+      output: null,
+      errors: [{messageId: 'hoistRecipeCall', data: {name: 'fooRecipe'}}],
+    },
+    {
+      name: 'does not autofix when a module-scope binding already uses the name',
+      code: `import {fooRecipe} from 'components/Foo/Foo.recipe';
+
+const classes = 'existing';
+
+export function Foo() {
+  const classes = fooRecipe();
+  return <div className={classes.root} />;
+}
+`,
+      output: null,
+      errors: [{messageId: 'hoistRecipeCall', data: {name: 'fooRecipe'}}],
     },
   ],
 });

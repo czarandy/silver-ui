@@ -9,6 +9,8 @@ import {topNavHeadingRecipe} from 'components/TopNav/TopNavHeading.recipe';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
+const classes = topNavHeadingRecipe();
+
 export interface TopNavHeadingProps {
   /**
    * Accessible label for the heading link. Use when `heading` text is absent
@@ -47,8 +49,6 @@ export function TopNavHeading({
   const LinkComponent = useLinkComponent(as);
   const resolvedHref = headingHref ?? href;
   const Element = resolvedHref != null ? LinkComponent : 'div';
-  const classes = topNavHeadingRecipe();
-
   return (
     <Element
       aria-label={ariaLabel}

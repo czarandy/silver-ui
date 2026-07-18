@@ -34,6 +34,8 @@ import {
 } from 'internal/useSelectListbox';
 import {cx} from 'utils/cx';
 
+const menuClasses = multiSelectMenuRecipe();
+
 export interface MultiSelectOptionData extends SelectListboxOptionData {
   /**
    * Icon displayed before the label.
@@ -333,7 +335,6 @@ export function MultiSelect({
     onChange(Array.from(nextValues));
   }, [allSelected, onChange, enabledVisibleOptions, value]);
 
-  const menuClasses = multiSelectMenuRecipe();
   const triggerClasses = multiSelectTriggerRecipe({
     isDisabled: isInteractionDisabled,
     isPlaceholder: selectedOptions.length === 0,

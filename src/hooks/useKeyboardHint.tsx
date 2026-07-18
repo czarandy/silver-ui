@@ -12,6 +12,8 @@ import {Kbd} from 'components/Kbd';
 import {keyboardHintRecipe} from 'hooks/useKeyboardHint.recipe';
 import {useLayer} from 'internal/useLayer';
 
+const classes = keyboardHintRecipe();
+
 /**
  * Which arrow keys the hint advertises. Mirrors `ListFocusOrientation`, so a
  * composite widget can pass the same value it gives `useListFocus`.
@@ -185,7 +187,6 @@ const useKeyboardHint = ({
     [dismiss],
   );
 
-  const classes = keyboardHintRecipe();
   const hintElement = layer.render(
     <span className={classes.content}>
       <span className={classes.keys}>

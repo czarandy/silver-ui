@@ -12,6 +12,8 @@ import {MobileNav, MobileNavToggle} from 'internal/MobileNav';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
 
+const drawerClasses = topNavRecipe();
+
 export interface TopNavProps {
   /**
    * Content rendered in the center section of the navigation bar.
@@ -119,17 +121,16 @@ export function TopNav({
       return null;
     }
 
-    const classes = topNavRecipe();
     return (
       <MobileNav header={heading}>
         {hasCollapsibleContent ? (
-          <div className={classes.drawerItems}>
+          <div className={drawerClasses.drawerItems}>
             {resolvedStartContent}
             {centerContent}
           </div>
         ) : null}
         {hasCollapsibleContent && isReactNode(mobileContent) ? (
-          <div className={classes.drawerDivider}>
+          <div className={drawerClasses.drawerDivider}>
             <Divider />
           </div>
         ) : null}

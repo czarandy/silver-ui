@@ -17,6 +17,8 @@ export interface AspectRatioProps extends ComponentPropsWithRef<'div'> {
   ratio: number;
 }
 
+const rootClass = aspectRatioRecipe();
+
 const styles = {
   child: css({
     position: 'absolute',
@@ -50,7 +52,7 @@ export function AspectRatio({
   return (
     <div
       {...rest}
-      className={cx(aspectRatioRecipe(), className)}
+      className={cx(rootClass, className)}
       data-testid={dataTestId}
       ref={ref}
       style={{...style, aspectRatio: resolvedRatio}}>
