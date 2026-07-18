@@ -367,34 +367,30 @@ describe('TreeView', () => {
     expect(link).toHaveAttribute('tabindex', '-1');
   });
 
-  it('sets disabled and selected states', () => {
+  it('sets the disabled state without exposing selection semantics', () => {
     render(
       <TreeView
         items={[
           {
             id: 'a',
             isDisabled: true,
-            isSelected: true,
-            label: 'Selected',
+            label: 'Disabled',
           },
         ]}
       />,
     );
 
-    const item = screen.getByRole('treeitem', {name: /Selected/});
+    const item = screen.getByRole('treeitem', {name: /Disabled/});
     expect(item).toHaveAttribute('aria-disabled', 'true');
-    expect(item).toHaveAttribute('aria-selected', 'true');
+    expect(item).not.toHaveAttribute('aria-selected');
   });
 
   describe('controlled selection', () => {
-    it('renders one selected item and overrides item-level selected state', () => {
+    it('renders one selected item from the root selection state', () => {
       const onSelectionChange = vi.fn();
       render(
         <TreeView
-          items={[
-            {id: 'a', isSelected: true, label: 'Item A'},
-            {id: 'b', label: 'Item B'},
-          ]}
+          items={simpleItems}
           onSelectionChange={onSelectionChange}
           selectedKey="b"
         />,
@@ -659,26 +655,6 @@ describe('TreeView', () => {
         'aria-selected',
         'true',
       );
-    });
-
-    it('keeps legacy item selection when the callback is omitted', () => {
-      render(
-        <TreeView
-          items={[
-            {id: 'a', isSelected: true, label: 'Item A'},
-            {id: 'b', label: 'Item B'},
-          ]}
-          selectedKey="b"
-        />,
-      );
-
-      expect(screen.getByRole('treeitem', {name: /Item A/})).toHaveAttribute(
-        'aria-selected',
-        'true',
-      );
-      expect(
-        screen.getByRole('treeitem', {name: /Item B/}),
-      ).not.toHaveAttribute('aria-selected');
     });
   });
 

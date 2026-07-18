@@ -59,9 +59,8 @@ interface TreeViewItemProps {
   isFocused: boolean;
   /**
    * Whether the item is selected.
-   * @default false
    */
-  isSelected?: boolean;
+  isSelected: boolean;
   /**
    * Whether root-controlled selection is enabled.
    */
@@ -134,7 +133,7 @@ export function TreeViewItem({
   isDisabled = false,
   isExpanded,
   isFocused,
-  isSelected = false,
+  isSelected,
   isSelectionEnabled,
   label,
   nestedLevel,
@@ -329,9 +328,7 @@ export function TreeViewItem({
       aria-disabled={isDisabled || undefined}
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-labelledby={labelId}
-      aria-selected={
-        isSelectionEnabled && !isDisabled ? isSelected : isSelected || undefined
-      }
+      aria-selected={isSelectionEnabled && !isDisabled ? isSelected : undefined}
       className={styles.wrapper}
       onFocus={handleFocus}
       onKeyDown={handleRowKeyDown}

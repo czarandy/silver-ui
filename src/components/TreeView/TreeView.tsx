@@ -392,9 +392,9 @@ export function TreeView({
             isExpanded={isExpanded}
             isFocused={hasFocusWithin && focusVisibleId === item.id}
             isSelected={
-              isSelectionEnabled
-                ? item.isDisabled !== true && selectedKey === item.id
-                : item.isSelected
+              isSelectionEnabled &&
+              item.isDisabled !== true &&
+              selectedKey === item.id
             }
             isSelectionEnabled={isSelectionEnabled}
             key={item.id}

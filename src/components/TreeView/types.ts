@@ -39,13 +39,6 @@ export interface TreeViewItemData {
    */
   isExpanded?: boolean;
   /**
-   * Legacy presentational selected state used when root-controlled selection
-   * is disabled. `TreeView.selectedKey` takes precedence when
-   * `TreeView.onSelectionChange` is provided.
-   * @default false
-   */
-  isSelected?: boolean;
-  /**
    * Primary item label.
    */
   label: ReactNode;
