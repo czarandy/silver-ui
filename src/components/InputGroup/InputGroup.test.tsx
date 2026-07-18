@@ -1,5 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
+import {fieldRecipe} from 'components/Field/Field.recipe';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
@@ -51,9 +52,33 @@ describe('InputGroup', () => {
       </InputGroup>,
     );
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Price is required');
+    const status = screen.getByRole('alert');
+    const attachedField = fieldRecipe({
+      statusType: 'error',
+      statusVariant: 'attached',
+    });
+    expect(status).toHaveTextContent('Price is required');
+    expect(status).toHaveClass(attachedField.status ?? '');
     const group = screen.getByRole('group', {name: 'Price'});
     expect(group).toHaveAttribute('aria-describedby');
+  });
+
+  it('supports detached status messages', () => {
+    render(
+      <InputGroup
+        label="Price"
+        status={{message: 'Price is required', type: 'error'}}
+        statusVariant="detached">
+        <InputGroupText>$</InputGroupText>
+        <TextInput isLabelHidden label="Amount" onChange={() => {}} value="" />
+      </InputGroup>,
+    );
+
+    const detachedField = fieldRecipe({
+      statusType: 'error',
+      statusVariant: 'detached',
+    });
+    expect(screen.getByRole('alert')).toHaveClass(detachedField.status ?? '');
   });
 
   it('applies data-testid, className, style, and ref', () => {
