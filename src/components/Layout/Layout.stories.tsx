@@ -465,16 +465,16 @@ export const HeaderAlign: Story = {
                 align={key === 'center-subtitle' ? 'center' : key}
                 endContent={
                   <>
-                    <Button label="New Treatment Plan" variant="secondary" />
-                    <Button label="Share Documents" variant="primary" />
+                    <Button label="New Project" variant="secondary" />
+                    <Button label="Share" variant="primary" />
                   </>
                 }
                 subtitle={
                   key === 'center-subtitle'
-                    ? 'Patients assigned to you'
+                    ? 'Projects assigned to you'
                     : undefined
                 }
-                title="Assigned"
+                title="Projects"
               />
             }
             height="auto"
