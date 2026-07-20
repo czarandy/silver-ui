@@ -78,6 +78,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Item',
     'List',
     'MetadataList',
+    'Stat',
     'Table',
     'Tag',
     'Thumbnail',

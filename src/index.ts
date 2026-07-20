@@ -756,6 +756,7 @@ export {
   type MetadataListLabelPosition,
   type MetadataListProps,
 } from 'components/MetadataList';
+export {Stat, type StatProps} from 'components/Stat';
 export {
   RadioGroup,
   RadioGroupItem,
