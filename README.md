@@ -154,8 +154,9 @@ mode details, scoped theming examples, and per-instance overrides.
 - **CheckboxInput** — checkbox with label and description
 - **ColorSwatchPicker** — swatch picker for the named theme palette
 - **Field** — form field wrapper with label, description, and validation
+- **Fieldset** — native legend container for normally stacked, related fields
 - **FileInput** — file upload with drag-and-drop support
-- **InputGroup** — groups related form inputs with shared label
+- **InputGroup** — combines controls and addons into one connected input row
 - **MultiSelect** — multi-value dropdown selector
 - **NumberInput** — numeric input with increment/decrement
 - **PasswordInput** — text input with show/hide toggle

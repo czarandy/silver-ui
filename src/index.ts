@@ -572,6 +572,7 @@ export {
   type InputStatus,
   type InputStatusType,
 } from 'components/Field';
+export {Fieldset, type FieldsetProps} from 'components/Fieldset';
 export {
   COLOR_NAMES,
   ColorSwatchPicker,
