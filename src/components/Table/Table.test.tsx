@@ -493,6 +493,53 @@ describe('Table plugins', () => {
     expect(ageHeader).toHaveAttribute('aria-sort', 'descending');
   });
 
+  it('sorts NaN values after valid numbers without disrupting their order', () => {
+    const sortData = [
+      {id: '1', name: 'Alice', score: 10},
+      {id: '2', name: 'Bob', score: Number.NaN},
+      {id: '3', name: 'Carol', score: 5},
+      {id: '4', name: 'Dave', score: 20},
+    ];
+
+    const {result} = renderHook(() =>
+      useTableSortableState({
+        data: sortData,
+        sort: [{direction: 'ascending', sortKey: 'score'}],
+      }),
+    );
+
+    expect(result.current.sortedData.map(row => row.name)).toEqual([
+      'Carol',
+      'Alice',
+      'Dave',
+      'Bob',
+    ]);
+  });
+
+  it('applies multi-sort tiebreakers to rows with NaN values', () => {
+    const sortData = [
+      {id: '1', name: 'Charlie', score: Number.NaN},
+      {id: '2', name: 'Alice', score: Number.NaN},
+      {id: '3', name: 'Bob', score: 5},
+    ];
+
+    const {result} = renderHook(() =>
+      useTableSortableState({
+        data: sortData,
+        sort: [
+          {direction: 'ascending', sortKey: 'score'},
+          {direction: 'ascending', sortKey: 'name'},
+        ],
+      }),
+    );
+
+    expect(result.current.sortedData.map(row => row.name)).toEqual([
+      'Bob',
+      'Alice',
+      'Charlie',
+    ]);
+  });
+
   it('dims inactive sort icons and marks active sort icons distinctly', () => {
     function SortableTable() {
       const sortPlugin = useTableSortable<PersonRow>({
