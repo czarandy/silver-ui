@@ -623,6 +623,49 @@ describe('Table plugins', () => {
     expect(screen.getByLabelText('Selected count')).toHaveTextContent('2');
   });
 
+  it('keeps select all unchecked when filtering hides every selected row', async () => {
+    const user = userEvent.setup();
+
+    function FilterableSelectableTable() {
+      const [visibleData, setVisibleData] = useState(data);
+      const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
+      const selection = useTableSelectionState({
+        data: visibleData,
+        idKey: 'id',
+        selectedKeys,
+        setSelectedKeys,
+      });
+      const selectionPlugin = useTableSelection(selection.selectionConfig);
+      return (
+        <>
+          <button onClick={() => setVisibleData([])} type="button">
+            Hide all rows
+          </button>
+          <output aria-label="Selected count">{selectedKeys.size}</output>
+          <Table
+            columns={columns}
+            data={visibleData}
+            idKey="id"
+            plugins={{selectionPlugin}}
+          />
+        </>
+      );
+    }
+
+    render(<FilterableSelectableTable />);
+    await user.click(screen.getAllByLabelText('Select row')[0]);
+    await user.click(screen.getByRole('button', {name: 'Hide all rows'}));
+
+    const selectAll = screen.getByLabelText('Select all rows');
+    expect(screen.getByText('No data')).toBeInTheDocument();
+    expect(selectAll).not.toBeChecked();
+    expect(screen.getByLabelText('Selected count')).toHaveTextContent('1');
+
+    await user.click(selectAll);
+    expect(selectAll).not.toBeChecked();
+    expect(screen.getByLabelText('Selected count')).toHaveTextContent('1');
+  });
+
   it('applies selected row styling with a token-safe class', () => {
     function SelectableTable() {
       const [selectedKeys, setSelectedKeys] = useState(
