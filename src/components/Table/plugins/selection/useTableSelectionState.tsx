@@ -80,9 +80,8 @@ export function useTableSelectionState<T extends Record<string, unknown>>({
     [getId, setSelectedKeys],
   );
   const getIsAllSelected = useCallback(
-    () =>
-      allSelectableIDs.size > 0 && allSelectableIDs.size === selectedKeys.size,
-    [allSelectableIDs, selectedKeys],
+    () => actionableIDs.size > 0 && allSelectableIDs.size === selectedKeys.size,
+    [actionableIDs.size, allSelectableIDs, selectedKeys],
   );
   const getIsIndeterminate = useCallback(() => {
     const selectedActionableCount = data.filter(
