@@ -16,6 +16,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Card',
     'Center',
     'Divider',
+    'Grid',
     'Layout',
     'Stack',
   ],
