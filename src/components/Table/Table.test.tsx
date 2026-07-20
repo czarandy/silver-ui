@@ -1005,6 +1005,33 @@ describe('Table plugins', () => {
     expect(handle).toHaveAttribute('aria-valuemax', '220');
   });
 
+  it('uses rendered or minimum widths for uncontrolled resize handle values', () => {
+    const getBoundingClientRect = vi
+      .spyOn(HTMLTableCellElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLTableCellElement) {
+        const width = this.dataset.columnKey === 'name' ? 180 : 0;
+        return new DOMRect(0, 0, width, 0);
+      });
+
+    function ResizableTable() {
+      const resizePlugin = useTableColumnResize<PersonRow>({
+        columns: columns as TableColumn<Record<string, unknown>>[],
+      });
+      return <Table columns={columns} data={data} plugins={{resizePlugin}} />;
+    }
+
+    render(<ResizableTable />);
+
+    expect(
+      screen.getByRole('separator', {name: 'Resize column Name'}),
+    ).toHaveAttribute('aria-valuenow', '180');
+    expect(
+      screen.getByRole('separator', {name: 'Resize column Age'}),
+    ).toHaveAttribute('aria-valuenow', '120');
+
+    getBoundingClientRect.mockRestore();
+  });
+
   it('uses RTL-aware ArrowLeft and ArrowRight resize behavior', () => {
     const onColumnResizeEnd = vi.fn();
     const rtlColumns: TableColumn<PersonRow>[] = [

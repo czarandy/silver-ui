@@ -5,6 +5,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type CSSProperties,
   type ReactNode,
 } from 'react';
@@ -222,7 +223,42 @@ function ResizeHandle({
   neighborKey: string | null;
 }): React.JSX.Element {
   const dragStateRef = useRef<DragState | null>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
   const pointerListenersRef = useRef<PointerListeners | null>(null);
+  const [renderedWidth, setRenderedWidth] = useState(0);
+
+  const updateRenderedWidth = useCallback(() => {
+    const width =
+      handleRef.current?.closest('th')?.getBoundingClientRect().width ?? 0;
+    setRenderedWidth(previousWidth =>
+      previousWidth === width ? previousWidth : width,
+    );
+  }, []);
+
+  const handleRefCallback = useCallback(
+    (element: HTMLDivElement | null) => {
+      handleRef.current = element;
+      if (element != null && currentWidth == null) {
+        updateRenderedWidth();
+      }
+    },
+    [currentWidth, updateRenderedWidth],
+  );
+
+  useEffect(() => {
+    if (currentWidth != null) {
+      return;
+    }
+
+    const th = handleRef.current?.closest('th');
+    if (th == null || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver(updateRenderedWidth);
+    observer.observe(th);
+    return () => observer.disconnect();
+  }, [currentWidth, updateRenderedWidth]);
 
   const removePointerListeners = useCallback(() => {
     const listeners = pointerListenersRef.current;
@@ -464,11 +500,14 @@ function ResizeHandle({
       aria-orientation="vertical"
       aria-valuemax={Number.isFinite(maxWidth) ? maxWidth : undefined}
       aria-valuemin={minWidth}
-      aria-valuenow={currentWidth}
+      aria-valuenow={
+        currentWidth ?? (renderedWidth > 0 ? renderedWidth : minWidth)
+      }
       className={styles.handle}
       data-column-key={columnKey}
       onKeyDown={handleKeyDown}
       onPointerDown={handlePointerDown}
+      ref={handleRefCallback}
       role="separator"
       tabIndex={0}
     />
