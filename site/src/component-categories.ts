@@ -50,6 +50,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'MultiSelect',
     'NumberInput',
     'PasswordInput',
+    'PinInput',
     'RadioGroup',
     'Rating',
     'SearchFilterInput',

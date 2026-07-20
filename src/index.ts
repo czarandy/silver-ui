@@ -583,6 +583,11 @@ export {
   type TextInputProps,
   type TextInputType,
 } from 'components/TextInput';
+export {
+  PinInput,
+  type PinInputProps,
+  type PinInputType,
+} from 'components/PinInput';
 export {PasswordInput, type PasswordInputProps} from 'components/PasswordInput';
 export {
   InputGroup,
