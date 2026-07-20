@@ -1,8 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {Fieldset, type FieldsetProps} from 'components/Fieldset/Fieldset';
-import {InputGroup} from 'components/InputGroup/InputGroup';
-import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {VStack} from 'components/Stack';
 import {TextInput} from 'components/TextInput';
 
@@ -26,23 +24,6 @@ function ProfileFields(): React.JSX.Element {
         value={organization}
       />
     </>
-  );
-}
-
-function ConnectedWebsiteInput(): React.JSX.Element {
-  const [website, setWebsite] = useState('example');
-
-  return (
-    <InputGroup label="Website">
-      <InputGroupText>https://</InputGroupText>
-      <TextInput
-        isLabelHidden
-        label="URL"
-        onChange={setWebsite}
-        value={website}
-      />
-      <InputGroupText>.com</InputGroupText>
-    </InputGroup>
   );
 }
 
@@ -142,33 +123,5 @@ export const Disabled: Story = {
     <Fieldset {...args}>
       <ProfileFields />
     </Fieldset>
-  ),
-};
-
-export const CustomGap: Story = {
-  args: {gap: 8},
-  render: args => (
-    <Fieldset {...args}>
-      <ProfileFields />
-    </Fieldset>
-  ),
-};
-
-export const FieldsetVersusInputGroup: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          '`Fieldset` stacks independently labeled controls under a native legend. `InputGroup` combines controls and addons into one connected field.',
-      },
-    },
-  },
-  render: () => (
-    <VStack gap={8}>
-      <Fieldset legend="Profile details">
-        <ProfileFields />
-      </Fieldset>
-      <ConnectedWebsiteInput />
-    </VStack>
   ),
 };

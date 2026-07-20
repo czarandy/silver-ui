@@ -3,6 +3,7 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const fieldsetRecipe = sva({
   slots: [
+    'wrapper',
     'root',
     'legend',
     'legendContent',
@@ -11,6 +12,9 @@ export const fieldsetRecipe = sva({
     'content',
   ],
   base: {
+    wrapper: {
+      w: 'full',
+    },
     root: {
       minW: 0,
       w: 'full',
@@ -53,9 +57,11 @@ export const fieldsetRecipe = sva({
     isDisabled: {
       false: {},
       true: {
+        wrapper: {
+          opacity: 0.55,
+        },
         root: {
           cursor: 'not-allowed',
-          opacity: 0.55,
         },
         legendContent: {color: 'fg.disabled'},
         description: {color: 'fg.disabled'},

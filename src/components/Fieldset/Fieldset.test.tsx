@@ -115,6 +115,23 @@ describe('Fieldset', () => {
     expect(group).toHaveAttribute('aria-describedby', summary.id);
   });
 
+  it('renders the status summary below the fieldset instead of inside it', () => {
+    render(
+      <Fieldset
+        legend="Profile"
+        status={{message: 'Fix the highlighted fields.', type: 'error'}}>
+        <input aria-label="Name" />
+      </Fieldset>,
+    );
+
+    const group = screen.getByRole('group', {name: 'Profile'});
+    const summary = screen.getByRole('alert');
+
+    expect(group).not.toContainElement(summary);
+    expect(summary.previousElementSibling).toBe(group);
+    expect(summary.parentElement).toBe(group.parentElement);
+  });
+
   it.each([
     ['warning', 'Review these values.'],
     ['success', 'All values are valid.'],
@@ -196,7 +213,7 @@ describe('Fieldset', () => {
     expect(screen.getByRole('textbox', {name: 'Name'})).toBeEnabled();
   });
 
-  it('lays out children in a vertical stack with the default gap', () => {
+  it('lays out children in a vertical stack with the fixed gap', () => {
     render(
       <Fieldset legend="Profile">
         <span>First child</span>
@@ -208,20 +225,6 @@ describe('Fieldset', () => {
       screen.getByText('First child').parentElement,
     );
     expect(content).toHaveClass(stackRecipe({direction: 'vertical', gap: 4}));
-  });
-
-  it('honors a custom child gap', () => {
-    render(
-      <Fieldset gap={8} legend="Profile">
-        <span>First child</span>
-        <span>Second child</span>
-      </Fieldset>,
-    );
-
-    const content = assertNonNull(
-      screen.getByText('First child').parentElement,
-    );
-    expect(content).toHaveClass(stackRecipe({direction: 'vertical', gap: 8}));
   });
 
   it('forwards native props, className, style, data-testid, and ref', () => {

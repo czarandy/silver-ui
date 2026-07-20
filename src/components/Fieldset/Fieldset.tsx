@@ -10,7 +10,7 @@ import type {FieldNecessity, InputStatus} from 'components/Field';
 import {fieldRecipe} from 'components/Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {fieldsetRecipe} from 'components/Fieldset/Fieldset.recipe';
-import {VStack, type StackGap} from 'components/Stack';
+import {VStack} from 'components/Stack';
 import {Text} from 'components/Text';
 import isReactNode from 'internal/isReactNode';
 import {cx} from 'utils/cx';
@@ -34,11 +34,6 @@ export type FieldsetProps = NativeFieldsetProps &
      * Supporting text rendered below the legend.
      */
     description?: ReactNode;
-    /**
-     * Gap between child fields.
-     * @default 4
-     */
-    gap?: StackGap;
     /**
      * Whether native form controls in the fieldset are disabled.
      * @default false
@@ -70,7 +65,6 @@ export function Fieldset({
   className,
   'data-testid': dataTestId,
   description,
-  gap = 4,
   isDisabled = false,
   isOptional = false,
   isRequired = false,
@@ -97,46 +91,48 @@ export function Fieldset({
   }).status;
 
   return (
-    <fieldset
-      {...fieldsetProps}
-      aria-describedby={describedBy}
-      aria-invalid={status?.type === 'error' ? true : ariaInvalid}
-      className={cx(classes.root, className)}
-      data-testid={dataTestId}
-      disabled={isDisabled}
-      ref={ref}
-      style={style}>
-      <legend className={classes.legend}>
-        <span className={classes.legendContent}>
-          <Text as="span" color="inherit" type="label">
-            {legend}
-          </Text>
-          {statusText != null ? (
-            <Text
-              as="span"
-              className={classes.indicator}
-              color="inherit"
-              size="xs"
-              type="supporting">
-              <span aria-hidden="true"> · </span>
-              {statusText}
+    <div className={classes.wrapper}>
+      <fieldset
+        {...fieldsetProps}
+        aria-describedby={describedBy}
+        aria-invalid={status?.type === 'error' ? true : ariaInvalid}
+        className={cx(classes.root, className)}
+        data-testid={dataTestId}
+        disabled={isDisabled}
+        ref={ref}
+        style={style}>
+        <legend className={classes.legend}>
+          <span className={classes.legendContent}>
+            <Text as="span" color="inherit" type="label">
+              {legend}
             </Text>
-          ) : null}
-        </span>
-      </legend>
-      {isReactNode(description) ? (
-        <Text
-          as="p"
-          className={classes.description}
-          color="inherit"
-          id={descriptionId}
-          type="supporting">
-          {description}
-        </Text>
-      ) : null}
-      <VStack className={classes.content} gap={gap}>
-        {children}
-      </VStack>
+            {statusText != null ? (
+              <Text
+                as="span"
+                className={classes.indicator}
+                color="inherit"
+                size="xs"
+                type="supporting">
+                <span aria-hidden="true"> · </span>
+                {statusText}
+              </Text>
+            ) : null}
+          </span>
+        </legend>
+        {isReactNode(description) ? (
+          <Text
+            as="p"
+            className={classes.description}
+            color="inherit"
+            id={descriptionId}
+            type="supporting">
+            {description}
+          </Text>
+        ) : null}
+        <VStack className={classes.content} gap={4}>
+          {children}
+        </VStack>
+      </fieldset>
       {status?.message != null ? (
         <div
           aria-live={status.type === 'error' ? 'assertive' : 'polite'}
@@ -146,7 +142,7 @@ export function Fieldset({
           {status.message}
         </div>
       ) : null}
-    </fieldset>
+    </div>
   );
 }
 
