@@ -117,6 +117,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Center** — centers content horizontally, vertically, or both
 - **Divider** — visual separator between sections
 - **Layout** — page shell with header, footer, side panels, and content slots
+- **OverflowList** — shows the items that fit and collapses the rest into a custom overflow indicator
 - **HStack / VStack** — horizontal and vertical flex containers with gap
 
 ### Typography

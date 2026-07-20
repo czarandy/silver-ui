@@ -17,6 +17,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Center',
     'Divider',
     'Layout',
+    'OverflowList',
     'Stack',
   ],
   Typography: ['Blockquote', 'CodeBlock', 'Kbd', 'Text'],

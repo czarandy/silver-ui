@@ -63,6 +63,22 @@ describe('VisuallyHidden public export', () => {
   });
 });
 
+describe('OverflowList public export', () => {
+  it('re-exports the component and its public types', () => {
+    expect(barrelSource).toMatch(
+      /export\s*\{[^}]*\bOverflowList\b[^}]*\btype OverflowItem\b[^}]*\btype OverflowListProps\b[^}]*\}\s*from\s*'components\/OverflowList'/s,
+    );
+  });
+
+  it('does not surface OverflowList through the internal barrel', () => {
+    const internalBarrel = readFileSync(
+      resolve(here, 'internal', 'index.ts'),
+      'utf8',
+    );
+    expect(internalBarrel).not.toContain('OverflowList');
+  });
+});
+
 describe('public exports', () => {
   it('does not re-export symbols from internal modules', () => {
     expect(barrelSource).not.toMatch(/\bfrom\s*['"]internal(?:\/[^'"]*)?['"]/);
