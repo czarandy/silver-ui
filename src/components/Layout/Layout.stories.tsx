@@ -435,6 +435,56 @@ export const HeaderActions: Story = {
   ),
 };
 
+/**
+ * The header's `align` prop controls cross-axis alignment between the title
+ * area and the start/end content. The default is `start`, which top-aligns
+ * taller end content such as buttons against the title. Pass `align="center"`
+ * to vertically center the title with action buttons in `endContent`.
+ */
+export const HeaderAlign: Story = {
+  render: args => (
+    <VStack gap={4}>
+      {(
+        [
+          ['center', 'align="center" — recommended with action buttons'],
+          ['center-subtitle', 'align="center" with a subtitle'],
+          ['start', 'align="start" — the default'],
+          ['end', 'align="end"'],
+        ] as const
+      ).map(([key, description]) => (
+        <Card key={key}>
+          <Layout
+            {...args}
+            content={
+              <LayoutContent>
+                <Text type="body">{description}</Text>
+              </LayoutContent>
+            }
+            header={
+              <LayoutHeader
+                align={key === 'center-subtitle' ? 'center' : key}
+                endContent={
+                  <>
+                    <Button label="New Project" variant="secondary" />
+                    <Button label="Share" variant="primary" />
+                  </>
+                }
+                subtitle={
+                  key === 'center-subtitle'
+                    ? 'Projects assigned to you'
+                    : undefined
+                }
+                title="Projects"
+              />
+            }
+            height="auto"
+          />
+        </Card>
+      ))}
+    </VStack>
+  ),
+};
+
 export const HeaderHeight: Story = {
   render: args => (
     <Card style={{height: 420}}>
