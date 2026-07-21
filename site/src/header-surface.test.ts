@@ -80,14 +80,18 @@ describe('header surface', () => {
   });
 
   it('draws both hairlines from the same border token', () => {
+    // The selector must stay element-qualified (`header.header`): Starlight
+    // also puts class `header` on a layout div inside the bar, and a bare
+    // `.header` width paints a second stray hairline through the header.
     const docsBorder = tokenFor(
       docsCss,
-      /\.header\s*\{[^}]*border-bottom-color:\s*var\((--silver-colors-[\w-]+)\)/,
+      /(?<![\w.])header\.header\s*\{[^}]*border-bottom-color:\s*var\((--silver-colors-[\w-]+)\)/,
     );
     const docsBorderWidth = tokenFor(
       docsCss,
-      /\.header\s*\{[^}]*border-bottom-width:\s*var\((--silver-border-widths-[\w-]+)\)/,
+      /(?<![\w.])header\.header\s*\{[^}]*border-bottom-width:\s*var\((--silver-border-widths-[\w-]+)\)/,
     );
+    expect(stripComments(docsCss)).not.toMatch(/(^|[,}\s])\.header\s*[{,]/m);
 
     expect(docsBorder).toBe('--silver-colors-border');
     // The landing side gets its hairline from AppShell's `headerDivider`
