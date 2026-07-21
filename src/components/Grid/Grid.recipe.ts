@@ -30,8 +30,10 @@ export const gridRecipe = cva({
         },
       },
       minChildWidth: {
+        // min(100%, …) keeps a minimum wider than the container from forcing
+        // horizontal overflow; the column clamps to the container instead.
         gridTemplateColumns:
-          'repeat(auto-fit, minmax(var(--silver-grid-min-child-width), 1fr))',
+          'repeat(auto-fit, minmax(min(100%, var(--silver-grid-min-child-width)), 1fr))',
       },
     },
   },
