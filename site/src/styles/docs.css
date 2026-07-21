@@ -37,6 +37,7 @@
 
 .header {
   border-bottom-color: var(--silver-colors-border);
+  border-bottom-width: var(--silver-border-widths-default);
 }
 
 /*
