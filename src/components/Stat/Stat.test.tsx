@@ -48,6 +48,58 @@ describe('Stat', () => {
     expect(value).toHaveClass('silver-fv-num_tabular-nums');
   });
 
+  it('keeps the value on one line', () => {
+    render(<Stat label="Revenue" value="$1.2 million" />);
+
+    expect(screen.getByText('$1.2 million')).toHaveClass(
+      'silver-white-space_nowrap',
+    );
+  });
+
+  it.each([
+    {
+      change: 12.5,
+      direction: 'increase',
+      iconClass: 'lucide-trending-up',
+      text: '12.5% increased',
+    },
+    {
+      change: -8.2,
+      direction: 'decrease',
+      iconClass: 'lucide-trending-down',
+      text: '8.2% decreased',
+    },
+    {
+      change: 0,
+      direction: 'unchanged',
+      iconClass: 'lucide-minus',
+      text: '0% unchanged',
+    },
+  ])(
+    'renders a $direction percentage change',
+    ({change, direction, iconClass, text}) => {
+      const {container} = render(
+        <Stat change={change} label="Revenue" value="$1.2M" />,
+      );
+
+      const changeText = screen.getByText(text);
+      const changeElement = assertNonNull(
+        changeText.closest('[data-direction]'),
+      );
+
+      expect(changeElement).toHaveAttribute('data-direction', direction);
+      expect(changeElement).toHaveClass(...classesOf(statRecipe().change));
+      expect(changeText).toHaveClass('silver-fv-num_tabular-nums');
+      expect(container.querySelector(`.${iconClass}`)).toBeInTheDocument();
+    },
+  );
+
+  it('does not emit a percentage change when omitted', () => {
+    const {container} = render(<Stat label="Revenue" value="$1.2M" />);
+
+    expect(container.querySelector('[data-direction]')).not.toBeInTheDocument();
+  });
+
   it('renders the optional description in the value details', () => {
     render(
       <Stat
@@ -85,9 +137,11 @@ describe('Stat', () => {
     );
 
     const icon = assertNonNull(container.querySelector('svg'));
+    const label = assertNonNull(screen.getByText('Revenue').closest('dt'));
     expect(icon).toHaveAttribute('aria-hidden', 'true');
     expect(icon).toHaveAttribute('focusable', 'false');
-    expect(icon).toHaveClass('silver-w_icon.lg', 'silver-h_icon.lg');
+    expect(icon).toHaveClass('silver-w_icon.sm', 'silver-h_icon.sm');
+    expect(label.firstElementChild).toBe(icon);
   });
 
   it('does not emit an SVG when the icon is omitted', () => {

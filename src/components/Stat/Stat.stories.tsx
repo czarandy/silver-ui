@@ -40,11 +40,18 @@ export const WithIcon: Story = {
   },
 };
 
+export const WithChange: Story = {
+  args: {
+    change: 12.5,
+  },
+};
+
 export const Dashboard: Story = {
   render: () => (
     <div className={dashboardGrid}>
       <Card padding={4}>
         <Stat
+          change={12.5}
           description="Year to date"
           icon={CircleDollarSign}
           label="Revenue"
@@ -53,6 +60,7 @@ export const Dashboard: Story = {
       </Card>
       <Card padding={4}>
         <Stat
+          change={8.2}
           description="Active accounts"
           icon={Users}
           label="Customers"
@@ -61,6 +69,7 @@ export const Dashboard: Story = {
       </Card>
       <Card padding={4}>
         <Stat
+          change={-3.4}
           description="This month"
           icon={ShoppingCart}
           label="Orders"
@@ -69,6 +78,7 @@ export const Dashboard: Story = {
       </Card>
       <Card padding={4}>
         <Stat
+          change={0}
           description="Last 30 days"
           icon={Percent}
           label="Conversion"

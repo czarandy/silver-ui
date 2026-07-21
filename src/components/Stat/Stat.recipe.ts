@@ -8,23 +8,24 @@ export const statRecipe = sva({
     'label',
     'details',
     'value',
+    'change',
     'description',
   ],
   base: {
     root: {
-      display: 'flex',
-      alignItems: 'flex-start',
-      gap: '3',
+      minW: 0,
     },
     icon: {
       flexShrink: 0,
     },
     definition: {
-      flex: 1,
       minW: 0,
       m: 0,
     },
     label: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1.5',
       m: 0,
     },
     details: {
@@ -36,7 +37,23 @@ export const statRecipe = sva({
       mt: '1',
     },
     value: {
-      overflowWrap: 'break-word',
+      whiteSpace: 'nowrap',
+    },
+    change: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: '1',
+      whiteSpace: 'nowrap',
+      '&[data-direction="increase"]': {
+        color: 'status.success.fg',
+      },
+      '&[data-direction="decrease"]': {
+        color: 'status.error.fg',
+      },
+      '&[data-direction="unchanged"]': {
+        color: 'fg.muted',
+      },
     },
     description: {
       overflowWrap: 'break-word',
