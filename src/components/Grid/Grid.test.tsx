@@ -1,7 +1,6 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-// Avoid Panda treating silver-ui's Grid JSX as its built-in grid pattern.
-import {Grid as SilverGrid, type GridProps} from 'components/Grid/Grid';
+import {Grid} from 'components/Grid';
 
 const breakpointNames = ['base', 'sm', 'md', 'lg', 'xl', '2xl'] as const;
 
@@ -12,10 +11,10 @@ function columnVariable(breakpoint: (typeof breakpointNames)[number]): string {
 describe('Grid', () => {
   it('renders children in a grid', () => {
     render(
-      <SilverGrid data-testid="grid">
+      <Grid data-testid="grid">
         <div>One</div>
         <div>Two</div>
-      </SilverGrid>,
+      </Grid>,
     );
 
     expect(screen.getByText('One')).toBeInTheDocument();
@@ -25,9 +24,9 @@ describe('Grid', () => {
 
   it('applies a scalar column count at every breakpoint', () => {
     render(
-      <SilverGrid columns={3} data-testid="grid">
+      <Grid columns={3} data-testid="grid">
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     const grid = screen.getByTestId('grid');
@@ -42,9 +41,9 @@ describe('Grid', () => {
 
   it('carries responsive column counts forward across omitted breakpoints', () => {
     render(
-      <SilverGrid columns={{base: 1, sm: 2, lg: 4}} data-testid="grid">
+      <Grid columns={{base: 1, sm: 2, lg: 4}} data-testid="grid">
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     const grid = screen.getByTestId('grid');
@@ -58,9 +57,9 @@ describe('Grid', () => {
 
   it('uses one column below the first specified breakpoint', () => {
     render(
-      <SilverGrid columns={{md: 3}} data-testid="grid">
+      <Grid columns={{md: 3}} data-testid="grid">
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     const grid = screen.getByTestId('grid');
@@ -76,9 +75,9 @@ describe('Grid', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     render(
-      <SilverGrid columns={0} data-testid="grid">
+      <Grid columns={0} data-testid="grid">
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     const grid = screen.getByTestId('grid');
@@ -94,9 +93,9 @@ describe('Grid', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     render(
-      <SilverGrid columns={{base: 2.5, md: 0}} data-testid="grid">
+      <Grid columns={{base: 2.5, md: 0}} data-testid="grid">
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     const grid = screen.getByTestId('grid');
@@ -114,9 +113,9 @@ describe('Grid', () => {
 
   it('converts numeric minimum child widths to pixels and uses auto-fit', () => {
     render(
-      <SilverGrid data-testid="grid" minChildWidth={220}>
+      <Grid data-testid="grid" minChildWidth={220}>
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     const grid = screen.getByTestId('grid');
@@ -130,9 +129,9 @@ describe('Grid', () => {
 
   it('preserves string minimum child widths', () => {
     render(
-      <SilverGrid data-testid="grid" minChildWidth="20rem">
+      <Grid data-testid="grid" minChildWidth="20rem">
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     expect(
@@ -146,9 +145,9 @@ describe('Grid', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     render(
-      <SilverGrid data-testid="grid" minChildWidth="220">
+      <Grid data-testid="grid" minChildWidth="220">
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     expect(
@@ -162,34 +161,11 @@ describe('Grid', () => {
     );
   });
 
-  it('warns and ignores minChildWidth when columns is also set', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    // The prop types forbid combining the two; plain-JS callers can still do
-    // it, so the conflict has to be handled at runtime.
-    const conflicting = {columns: 2, minChildWidth: 220};
-
-    render(
-      <SilverGrid data-testid="grid" {...(conflicting as unknown as GridProps)}>
-        Content
-      </SilverGrid>,
-    );
-
-    const grid = screen.getByTestId('grid');
-    expect(grid.style.getPropertyValue(columnVariable('base'))).toBe('2');
-    expect(grid.style.getPropertyValue('--silver-grid-min-child-width')).toBe(
-      '',
-    );
-    expect(warn).toHaveBeenCalledWith(
-      'Grid: `columns` and `minChildWidth` are mutually exclusive; ' +
-        '`minChildWidth` is ignored when `columns` is set.',
-    );
-  });
-
   it('applies gap class for the given gap value', () => {
     render(
-      <SilverGrid data-testid="grid" gap={4}>
+      <Grid data-testid="grid" gap={4}>
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     expect(screen.getByTestId('grid')).toHaveClass('silver-gap_4');
@@ -197,16 +173,16 @@ describe('Grid', () => {
 
   it('applies gap={0} class', () => {
     render(
-      <SilverGrid data-testid="grid" gap={0}>
+      <Grid data-testid="grid" gap={0}>
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     expect(screen.getByTestId('grid')).toHaveClass('silver-gap_0');
   });
 
   it('does not apply a gap class when gap is omitted', () => {
-    render(<SilverGrid data-testid="grid">Content</SilverGrid>);
+    render(<Grid data-testid="grid">Content</Grid>);
 
     const classList = Array.from(screen.getByTestId('grid').classList);
     expect(classList.some(className => className.includes('gap'))).toBe(false);
@@ -216,7 +192,7 @@ describe('Grid', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 
     render(
-      <SilverGrid
+      <Grid
         aria-label="Results"
         className="custom-grid"
         data-testid="grid"
@@ -224,7 +200,7 @@ describe('Grid', () => {
         role="region"
         style={{color: 'red'}}>
         Content
-      </SilverGrid>,
+      </Grid>,
     );
 
     const grid = screen.getByTestId('grid');
@@ -236,7 +212,7 @@ describe('Grid', () => {
   });
 
   it('leaves a bare grid without an explicit template mode', () => {
-    render(<SilverGrid data-testid="grid">Content</SilverGrid>);
+    render(<Grid data-testid="grid">Content</Grid>);
 
     const grid = screen.getByTestId('grid');
     expect(

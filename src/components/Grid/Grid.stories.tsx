@@ -1,14 +1,13 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Card} from 'components/Card';
-// Avoid Panda treating silver-ui's Grid JSX as its built-in grid pattern.
-import {Grid as SilverGrid} from 'components/Grid/Grid';
+import {Grid} from 'components/Grid';
 import {VStack} from 'components/Stack';
 import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
 
-const meta: Meta<typeof SilverGrid> = {
+const meta: Meta<typeof Grid> = {
   title: 'Components/Grid',
-  component: SilverGrid,
+  component: Grid,
 };
 
 export default meta;
@@ -43,9 +42,9 @@ function GalleryCards(): React.JSX.Element {
 
 export const FixedColumns: Story = {
   render: () => (
-    <SilverGrid columns={3} gap={4}>
+    <Grid columns={3} gap={4}>
       <GalleryCards />
-    </SilverGrid>
+    </Grid>
   ),
 };
 
@@ -56,9 +55,9 @@ export const ResponsiveColumns: Story = {
         Resize the viewport to see the gallery change from one to two to four
         columns.
       </Text>
-      <SilverGrid columns={{base: 1, sm: 2, lg: 4}} gap={3}>
+      <Grid columns={{base: 1, sm: 2, lg: 4}} gap={3}>
         <GalleryCards />
-      </SilverGrid>
+      </Grid>
     </VStack>
   ),
 };
@@ -69,9 +68,9 @@ export const AutoFit: Story = {
       <Text type="body">
         Cards reflow automatically without configured breakpoints.
       </Text>
-      <SilverGrid gap={5} minChildWidth={220}>
+      <Grid gap={5} minChildWidth={220}>
         <GalleryCards />
-      </SilverGrid>
+      </Grid>
     </VStack>
   ),
 };
@@ -91,9 +90,9 @@ export const AutoFitNarrowContainer: Story = {
         width instead of overflowing it.
       </Text>
       <div className={narrowContainerClass}>
-        <SilverGrid gap={3} minChildWidth={320}>
+        <Grid gap={3} minChildWidth={320}>
           <GalleryCards />
-        </SilverGrid>
+        </Grid>
       </div>
     </VStack>
   ),

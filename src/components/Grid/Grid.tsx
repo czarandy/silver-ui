@@ -121,17 +121,6 @@ export function Grid({
   style,
   ...htmlProps
 }: GridProps): React.JSX.Element {
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    columns !== undefined &&
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the prop types forbid the combination, but plain-JS callers can still pass both
-    minChildWidth !== undefined
-  ) {
-    console.warn(
-      'Grid: `columns` and `minChildWidth` are mutually exclusive; ' +
-        '`minChildWidth` is ignored when `columns` is set.',
-    );
-  }
   const normalizedColumns =
     columns === undefined ? undefined : normalizeColumns(columns);
   const gridStyle: GridStyle = {
@@ -146,8 +135,7 @@ export function Grid({
           '--silver-grid-columns-sm': normalizedColumns.sm,
           '--silver-grid-columns-xl': normalizedColumns.xl,
         }),
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- guards plain-JS callers that pass both props
-    ...(minChildWidth === undefined || columns !== undefined
+    ...(minChildWidth === undefined
       ? undefined
       : {
           '--silver-grid-min-child-width': toPixelSize(minChildWidth),
