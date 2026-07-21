@@ -17,7 +17,7 @@ import {
 } from 'components/Field';
 import {inputGroupRecipe} from 'components/InputGroup/InputGroup.recipe';
 import {InputGroupContext} from 'components/InputGroup/InputGroupContext';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type InputGroupProps = {
@@ -101,7 +101,7 @@ export function InputGroup({
 }: InputGroupProps): React.JSX.Element {
   const inputId = useId();
   const labelId = `${inputId}-label`;
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusID = status?.message != null ? `${inputId}-status` : undefined;

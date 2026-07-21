@@ -6,7 +6,7 @@ import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -75,7 +75,7 @@ export function SideNavHeading({
   const resolvedHref = headingHref ?? href;
   const Element = resolvedHref != null ? LinkComponent : 'div';
 
-  if (isCollapsed && !isReactNode(logo)) {
+  if (isCollapsed && !isNonEmptyReactNode(logo)) {
     return null;
   }
 
@@ -88,7 +88,9 @@ export function SideNavHeading({
       ref={ref as Ref<HTMLAnchorElement & HTMLDivElement>}
       style={style}
       to={Element === 'a' ? undefined : resolvedHref}>
-      {isReactNode(logo) ? <span className={styles.logo}>{logo}</span> : null}
+      {isNonEmptyReactNode(logo) ? (
+        <span className={styles.logo}>{logo}</span>
+      ) : null}
       {!isCollapsed ? (
         <span className={styles.text}>
           {superheading != null ? (
@@ -108,7 +110,7 @@ export function SideNavHeading({
           ) : null}
         </span>
       ) : null}
-      {!isCollapsed && isReactNode(headerEndContent) ? (
+      {!isCollapsed && isNonEmptyReactNode(headerEndContent) ? (
         <span className={styles.endContent}>{headerEndContent}</span>
       ) : null}
     </Element>

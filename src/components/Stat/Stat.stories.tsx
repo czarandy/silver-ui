@@ -46,6 +46,26 @@ export const WithChange: Story = {
   },
 };
 
+export const InvertedChange: Story = {
+  args: {
+    change: -3.4,
+    changeSentiment: 'inverted',
+    description: 'Lower is better',
+    label: 'Churn rate',
+    value: '2.1%',
+  },
+};
+
+export const CustomChangeText: Story = {
+  args: {
+    change: 340,
+    formatChange: change => `+${change}`,
+    increaseLabel: 'this month',
+    label: 'Customers',
+    value: '8,429',
+  },
+};
+
 export const Dashboard: Story = {
   render: () => (
     <div className={dashboardGrid}>

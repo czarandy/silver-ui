@@ -10,7 +10,7 @@ import {
 } from 'components/Layout/Layout.recipe';
 import {useLayoutRegions} from 'components/Layout/LayoutContext';
 import {Heading, Text, type HeadingLevel} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
@@ -127,7 +127,7 @@ export function LayoutHeader({
         variant="ghost"
       />
     ) : null;
-  const hasEnd = isReactNode(endContent) || closeButton != null;
+  const hasEnd = isNonEmptyReactNode(endContent) || closeButton != null;
 
   return (
     <header
@@ -137,7 +137,7 @@ export function LayoutHeader({
       ref={ref}
       style={rootStyle}>
       <div className={cx(classes.inner, layoutRegionRecipe({padding}))}>
-        {isReactNode(startContent) ? (
+        {isNonEmptyReactNode(startContent) ? (
           <div className={classes.actions}>{startContent}</div>
         ) : null}
         <div className={classes.titleArea}>

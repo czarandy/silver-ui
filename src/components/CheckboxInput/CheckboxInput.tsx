@@ -21,7 +21,7 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -171,7 +171,7 @@ export function CheckboxInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(
-    isReactNode(description) ? descriptionId : undefined,
+    isNonEmptyReactNode(description) ? descriptionId : undefined,
     statusMessageID,
   );
   const isIndeterminate = value === 'indeterminate';
@@ -260,7 +260,7 @@ export function CheckboxInput({
           {statusText}
         </Text>
       ) : null}
-      {isReactNode(labelTooltip) ? (
+      {isNonEmptyReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>
             <Icon icon={Info} size="sm" />
@@ -299,7 +299,7 @@ export function CheckboxInput({
   const item = (
     <Item
       description={
-        isReactNode(description) ? (
+        isNonEmptyReactNode(description) ? (
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }

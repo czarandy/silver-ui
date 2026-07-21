@@ -9,7 +9,7 @@ import {
 } from 'react';
 import {emptyStateRecipe} from 'components/EmptyState/EmptyState.recipe';
 import {Heading, type HeadingLevel, Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 type NativeEmptyStateProps = Omit<HTMLAttributes<HTMLDivElement>, 'title'>;
@@ -88,7 +88,7 @@ export function EmptyState({
       ref={ref}
       role={role}
       style={style}>
-      {isReactNode(illustration) ? (
+      {isNonEmptyReactNode(illustration) ? (
         <div aria-hidden="true" className={classes.illustration}>
           {illustration}
         </div>
@@ -103,7 +103,7 @@ export function EmptyState({
           </Text>
         ) : null}
       </div>
-      {isReactNode(actions) ? (
+      {isNonEmptyReactNode(actions) ? (
         <div className={classes.actions}>{actions}</div>
       ) : null}
     </div>

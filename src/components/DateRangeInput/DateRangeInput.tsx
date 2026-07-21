@@ -30,7 +30,7 @@ import type {IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import type {DateRange} from 'internal/dateTypes';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
   DATE_FORMAT_SHORT_WITH_YEAR,
   plainDateFormat,
@@ -175,7 +175,7 @@ export function DateRangeInput({
 }: DateRangeInputProps): React.JSX.Element {
   const inputId = useId();
   const popoverId = `${inputId}-calendar`;
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

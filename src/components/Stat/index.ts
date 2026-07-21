@@ -1,1 +1,5 @@
-export {Stat, type StatProps} from 'components/Stat/Stat';
+export {
+  Stat,
+  type StatChangeSentiment,
+  type StatProps,
+} from 'components/Stat/Stat';

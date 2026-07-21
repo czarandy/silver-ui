@@ -18,7 +18,7 @@ import {
 } from 'components/Chat/ChatContext';
 import {ChatSendButton} from 'components/Chat/ChatSendButton';
 import {Icon} from 'components/Icon';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export interface ChatComposerStatus {
@@ -251,7 +251,8 @@ export function ChatComposer({
             control; keyboard users focus the textarea directly. */}
         {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions, jsx-a11y-x/click-events-have-key-events */}
         <div className={classes.body} onClick={handleBodyClick} ref={bodyRef}>
-          {isReactNode(headerActions) || isReactNode(headerContext) ? (
+          {isNonEmptyReactNode(headerActions) ||
+          isNonEmptyReactNode(headerContext) ? (
             <div className={classes.header}>
               <div className={classes.headerStart}>{headerActions}</div>
               <div className={classes.headerEnd}>{headerContext}</div>

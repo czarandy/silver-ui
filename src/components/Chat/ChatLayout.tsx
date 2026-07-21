@@ -13,7 +13,7 @@ import {chatLayoutRecipe} from 'components/Chat/ChatLayout.recipe';
 import {ChatScrollButton} from 'components/Chat/ChatScrollButton';
 import {useChatNewMessages} from 'components/Chat/useChatNewMessages';
 import {useChatStreamScroll} from 'components/Chat/useChatStreamScroll';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
 import {cx} from 'utils/cx';
@@ -29,7 +29,7 @@ function getDensity(width: number): ChatDensity {
 }
 
 function hasVisibleContent(children: ReactNode): boolean {
-  if (!isReactNode(children) || children === false) {
+  if (!isNonEmptyReactNode(children) || children === false) {
     return false;
   }
   return !(Array.isArray(children) && children.length === 0);
@@ -170,7 +170,7 @@ export function ChatLayout({
         <div
           className={classes.messageArea}
           style={isSelfScrolling ? undefined : {paddingBlockEnd: dockInset}}>
-          {showEmpty && isReactNode(emptyState) ? (
+          {showEmpty && isNonEmptyReactNode(emptyState) ? (
             <div className={classes.emptyState}>{emptyState}</div>
           ) : (
             children

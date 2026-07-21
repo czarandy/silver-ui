@@ -1,6 +1,6 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {blockquoteRecipe} from 'components/Blockquote/Blockquote.recipe';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 const classes = blockquoteRecipe();
@@ -53,7 +53,7 @@ export function Blockquote({
       ref={ref}
       style={style}>
       {children}
-      {isReactNode(cite) ? (
+      {isNonEmptyReactNode(cite) ? (
         <footer>
           <cite className={classes.cite}>{cite}</cite>
         </footer>

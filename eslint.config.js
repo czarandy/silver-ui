@@ -232,7 +232,7 @@ export default tseslint.config(
       '@typescript-eslint/return-await': 'error',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
       '@typescript-eslint/unbound-method': 'error',
-      'silver-ui/prefer-is-react-node': 'error',
+      'silver-ui/prefer-is-non-empty-react-node': 'error',
     },
   },
   // React rules — component and source files

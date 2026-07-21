@@ -8,7 +8,7 @@ import {TreeViewBranches} from 'components/TreeView/TreeViewBranches';
 import {treeViewItemRecipe} from 'components/TreeView/TreeViewItem.recipe';
 import type {TreeViewDensity} from 'components/TreeView/types';
 import {ActionElement} from 'internal/ActionElement';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 interface TreeViewItemProps {
@@ -291,7 +291,7 @@ export function TreeViewItem({
   const content = (
     <>
       {toggle}
-      {!isReactNode(startContent) ? null : (
+      {!isNonEmptyReactNode(startContent) ? null : (
         <span className={styles.startContent}>{startContent}</span>
       )}
       {href != null || onClick != null ? (
@@ -312,7 +312,7 @@ export function TreeViewItem({
       ) : (
         <span className={styles.content}>{labelAndDescription}</span>
       )}
-      {!isReactNode(endContent) ? null : (
+      {!isNonEmptyReactNode(endContent) ? null : (
         <span className={styles.endContent}>{endContent}</span>
       )}
     </>
@@ -351,7 +351,7 @@ export function TreeViewItem({
           {content}
         </div>
       </div>
-      {isExpanded && isReactNode(renderedChildren) ? (
+      {isExpanded && isNonEmptyReactNode(renderedChildren) ? (
         <ul className={styles.childGroup} role="group">
           {renderedChildren}
         </ul>

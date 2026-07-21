@@ -3,7 +3,6 @@ import {sva} from 'styled-system/css';
 export const statRecipe = sva({
   slots: [
     'root',
-    'icon',
     'definition',
     'label',
     'details',
@@ -15,11 +14,7 @@ export const statRecipe = sva({
     root: {
       minW: 0,
     },
-    icon: {
-      flexShrink: 0,
-    },
     definition: {
-      minW: 0,
       m: 0,
     },
     label: {
@@ -32,7 +27,6 @@ export const statRecipe = sva({
       display: 'flex',
       flexDirection: 'column',
       gap: '1',
-      minW: 0,
       m: 0,
       mt: '1',
     },
@@ -45,18 +39,25 @@ export const statRecipe = sva({
       alignSelf: 'flex-start',
       gap: '1',
       whiteSpace: 'nowrap',
-      '&[data-direction="increase"]': {
-        color: 'status.success.fg',
-      },
-      '&[data-direction="decrease"]': {
-        color: 'status.error.fg',
-      },
-      '&[data-direction="unchanged"]': {
-        color: 'fg.muted',
-      },
     },
     description: {
       overflowWrap: 'break-word',
     },
+  },
+  variants: {
+    changeTone: {
+      positive: {
+        change: {color: 'status.success.fg'},
+      },
+      negative: {
+        change: {color: 'status.error.fg'},
+      },
+      neutral: {
+        change: {color: 'fg.muted'},
+      },
+    },
+  },
+  defaultVariants: {
+    changeTone: 'neutral',
   },
 });

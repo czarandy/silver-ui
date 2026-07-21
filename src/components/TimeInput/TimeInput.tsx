@@ -25,7 +25,7 @@ import {
 } from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -206,7 +206,7 @@ export function TimeInput({
   ref,
 }: TimeInputProps): React.JSX.Element {
   const inputId = useId();
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
