@@ -116,6 +116,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Card** — rounded container surface for grouping content
 - **Center** — centers content horizontally, vertically, or both
 - **Divider** — visual separator between sections
+- **Grid** — responsive equal-width columns with minimum-child-width reflow
 - **Layout** — page shell with header, footer, side panels, and content slots
 - **HStack / VStack** — horizontal and vertical flex containers with gap
 
