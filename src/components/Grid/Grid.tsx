@@ -59,26 +59,46 @@ type GridStyle = CSSProperties & {
   '--silver-grid-min-child-width'?: number | string;
 };
 
+/**
+ * CSS `repeat()` requires a positive integer; anything else invalidates the
+ * whole `grid-template-columns` declaration and silently collapses the grid
+ * to a single column, so invalid counts are clamped with a dev-only warning.
+ */
+function toColumnCount(value: number): number {
+  if (Number.isInteger(value) && value >= 1) {
+    return value;
+  }
+  const clamped = Number.isFinite(value) ? Math.max(1, Math.floor(value)) : 1;
+  if (process.env.NODE_ENV !== 'production') {
+    console.warn(
+      `Grid: \`columns\` values must be positive integers but received ` +
+        `${value}; using ${clamped}.`,
+    );
+  }
+  return clamped;
+}
+
 function normalizeColumns(columns: GridColumns): NormalizedGridColumns {
   if (typeof columns === 'number') {
+    const count = toColumnCount(columns);
     return {
-      '2xl': columns,
-      base: columns,
-      lg: columns,
-      md: columns,
-      sm: columns,
-      xl: columns,
+      '2xl': count,
+      base: count,
+      lg: count,
+      md: count,
+      sm: count,
+      xl: count,
     };
   }
 
-  const base = columns.base ?? 1;
-  const sm = columns.sm ?? base;
-  const md = columns.md ?? sm;
-  const lg = columns.lg ?? md;
-  const xl = columns.xl ?? lg;
+  const base = columns.base === undefined ? 1 : toColumnCount(columns.base);
+  const sm = columns.sm === undefined ? base : toColumnCount(columns.sm);
+  const md = columns.md === undefined ? sm : toColumnCount(columns.md);
+  const lg = columns.lg === undefined ? md : toColumnCount(columns.lg);
+  const xl = columns.xl === undefined ? lg : toColumnCount(columns.xl);
 
   return {
-    '2xl': columns['2xl'] ?? xl,
+    '2xl': columns['2xl'] === undefined ? xl : toColumnCount(columns['2xl']),
     base,
     lg,
     md,
@@ -101,6 +121,17 @@ export function Grid({
   style,
   ...htmlProps
 }: GridProps): React.JSX.Element {
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    columns !== undefined &&
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- the prop types forbid the combination, but plain-JS callers can still pass both
+    minChildWidth !== undefined
+  ) {
+    console.warn(
+      'Grid: `columns` and `minChildWidth` are mutually exclusive; ' +
+        '`minChildWidth` is ignored when `columns` is set.',
+    );
+  }
   const normalizedColumns =
     columns === undefined ? undefined : normalizeColumns(columns);
   const gridStyle: GridStyle = {
@@ -115,7 +146,8 @@ export function Grid({
           '--silver-grid-columns-sm': normalizedColumns.sm,
           '--silver-grid-columns-xl': normalizedColumns.xl,
         }),
-    ...(minChildWidth === undefined
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- guards plain-JS callers that pass both props
+    ...(minChildWidth === undefined || columns !== undefined
       ? undefined
       : {
           '--silver-grid-min-child-width': toPixelSize(minChildWidth),

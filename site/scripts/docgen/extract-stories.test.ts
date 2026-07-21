@@ -184,6 +184,47 @@ describe('extractStoriesFile', () => {
     expect(stories.stories[0]?.snippet).toContain('<HookStory />');
   });
 
+  it('canonicalizes renamed library imports in snippets', () => {
+    const source = `
+      import {Grid as SilverGrid} from 'components/Grid/Grid';
+      type Story = unknown;
+      export const Default: Story = {
+        render: () => (
+          <SilverGrid columns={3}>Content</SilverGrid>
+        ),
+      };
+    `;
+    const stories = extractStoriesSource(
+      'Grid',
+      'Grid',
+      'Grid.stories.tsx',
+      source,
+      new Set(['Grid']),
+    );
+    expect(stories.stories[0]?.snippet).toBe(
+      '<Grid columns={3}>Content</Grid>',
+    );
+  });
+
+  it('resolves a renamed meta component for args-only stories', () => {
+    const source = `
+      import {Grid as SilverGrid} from 'components/Grid/Grid';
+      type Story = unknown;
+      const meta = {component: SilverGrid};
+      export const Default: Story = {
+        args: {columns: 2},
+      };
+    `;
+    const stories = extractStoriesSource(
+      'Grid',
+      'Grid',
+      'Grid.stories.tsx',
+      source,
+      new Set(['Grid']),
+    );
+    expect(stories.stories[0]?.snippet).toBe('<Grid columns={2} />');
+  });
+
   it('keeps setup statements in block-bodied render functions', () => {
     const source = `
       import {useExample} from 'components/Example/useExample';

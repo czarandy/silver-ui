@@ -1,7 +1,7 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 // Avoid Panda treating silver-ui's Grid JSX as its built-in grid pattern.
-import {Grid as SilverGrid, type GridGap} from 'components/Grid/Grid';
+import {Grid as SilverGrid, type GridProps} from 'components/Grid/Grid';
 
 const breakpointNames = ['base', 'sm', 'md', 'lg', 'xl', '2xl'] as const;
 
@@ -72,15 +72,43 @@ describe('Grid', () => {
     expect(grid.style.getPropertyValue(columnVariable('2xl'))).toBe('3');
   });
 
-  it('uses equal-width minmax tracks for column mode', () => {
+  it('clamps non-positive column counts to one column and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
     render(
-      <SilverGrid columns={2} data-testid="grid">
+      <SilverGrid columns={0} data-testid="grid">
         Content
       </SilverGrid>,
     );
 
-    expect(screen.getByTestId('grid')).toHaveClass(
-      'silver-grid-tc_repeat(var(--silver-grid-columns-base),_minmax(0,_1fr))',
+    const grid = screen.getByTestId('grid');
+    for (const breakpoint of breakpointNames) {
+      expect(grid.style.getPropertyValue(columnVariable(breakpoint))).toBe('1');
+    }
+    expect(warn).toHaveBeenCalledWith(
+      'Grid: `columns` values must be positive integers but received 0; using 1.',
+    );
+  });
+
+  it('floors fractional column counts and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(
+      <SilverGrid columns={{base: 2.5, md: 0}} data-testid="grid">
+        Content
+      </SilverGrid>,
+    );
+
+    const grid = screen.getByTestId('grid');
+    expect(grid.style.getPropertyValue(columnVariable('base'))).toBe('2');
+    expect(grid.style.getPropertyValue(columnVariable('sm'))).toBe('2');
+    expect(grid.style.getPropertyValue(columnVariable('md'))).toBe('1');
+    expect(grid.style.getPropertyValue(columnVariable('2xl'))).toBe('1');
+    expect(warn).toHaveBeenCalledWith(
+      'Grid: `columns` values must be positive integers but received 2.5; using 2.',
+    );
+    expect(warn).toHaveBeenCalledWith(
+      'Grid: `columns` values must be positive integers but received 0; using 1.',
     );
   });
 
@@ -96,7 +124,7 @@ describe('Grid', () => {
       '220px',
     );
     expect(grid).toHaveClass(
-      'silver-grid-tc_repeat(auto-fit,_minmax(var(--silver-grid-min-child-width),_1fr))',
+      'silver-grid-tc_repeat(auto-fit,_minmax(min(100%,_var(--silver-grid-min-child-width)),_1fr))',
     );
   });
 
@@ -114,32 +142,68 @@ describe('Grid', () => {
     ).toBe('20rem');
   });
 
-  it.each([
-    [0, '0'],
-    [0.5, '0.5'],
-    [1, '1'],
-    [1.5, '1.5'],
-    [2, '2'],
-    [3, '3'],
-    [4, '4'],
-    [5, '5'],
-    [6, '6'],
-    [8, '8'],
-    [10, '10'],
-  ] satisfies ReadonlyArray<readonly [GridGap, string]>)(
-    'applies gap=%s',
-    (gap, classValue) => {
-      render(
-        <SilverGrid data-testid="grid" gap={gap}>
-          Content
-        </SilverGrid>,
-      );
+  it('converts unit-less string minimum child widths to pixels and warns', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-      expect(screen.getByTestId('grid')).toHaveClass(
-        `silver-gap_${classValue}`,
-      );
-    },
-  );
+    render(
+      <SilverGrid data-testid="grid" minChildWidth="220">
+        Content
+      </SilverGrid>,
+    );
+
+    expect(
+      screen
+        .getByTestId('grid')
+        .style.getPropertyValue('--silver-grid-min-child-width'),
+    ).toBe('220px');
+    expect(warn).toHaveBeenCalledWith(
+      "silver-ui: size string '220' has no unit and is not valid CSS; " +
+        'treating it as 220px. Pass a number or include a unit.',
+    );
+  });
+
+  it('warns and ignores minChildWidth when columns is also set', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // The prop types forbid combining the two; plain-JS callers can still do
+    // it, so the conflict has to be handled at runtime.
+    const conflicting = {columns: 2, minChildWidth: 220};
+
+    render(
+      <SilverGrid data-testid="grid" {...(conflicting as unknown as GridProps)}>
+        Content
+      </SilverGrid>,
+    );
+
+    const grid = screen.getByTestId('grid');
+    expect(grid.style.getPropertyValue(columnVariable('base'))).toBe('2');
+    expect(grid.style.getPropertyValue('--silver-grid-min-child-width')).toBe(
+      '',
+    );
+    expect(warn).toHaveBeenCalledWith(
+      'Grid: `columns` and `minChildWidth` are mutually exclusive; ' +
+        '`minChildWidth` is ignored when `columns` is set.',
+    );
+  });
+
+  it('applies gap class for the given gap value', () => {
+    render(
+      <SilverGrid data-testid="grid" gap={4}>
+        Content
+      </SilverGrid>,
+    );
+
+    expect(screen.getByTestId('grid')).toHaveClass('silver-gap_4');
+  });
+
+  it('applies gap={0} class', () => {
+    render(
+      <SilverGrid data-testid="grid" gap={0}>
+        Content
+      </SilverGrid>,
+    );
+
+    expect(screen.getByTestId('grid')).toHaveClass('silver-gap_0');
+  });
 
   it('does not apply a gap class when gap is omitted', () => {
     render(<SilverGrid data-testid="grid">Content</SilverGrid>);

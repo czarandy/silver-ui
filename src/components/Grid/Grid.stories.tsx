@@ -75,3 +75,26 @@ export const AutoFit: Story = {
     </VStack>
   ),
 };
+
+const narrowContainerClass = css({
+  borderColor: 'border',
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  maxWidth: '240px',
+});
+
+export const AutoFitNarrowContainer: Story = {
+  render: () => (
+    <VStack gap={4}>
+      <Text type="body">
+        A minimum child width wider than its container clamps to the container
+        width instead of overflowing it.
+      </Text>
+      <div className={narrowContainerClass}>
+        <SilverGrid gap={3} minChildWidth={320}>
+          <GalleryCards />
+        </SilverGrid>
+      </div>
+    </VStack>
+  ),
+};
