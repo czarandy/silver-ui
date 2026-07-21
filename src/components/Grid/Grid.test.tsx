@@ -1,10 +1,9 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {Grid} from 'components/Grid';
+import {breakpointNames, type Breakpoint} from 'internal/breakpoints';
 
-const breakpointNames = ['base', 'sm', 'md', 'lg', 'xl', '2xl'] as const;
-
-function columnVariable(breakpoint: (typeof breakpointNames)[number]): string {
+function columnVariable(breakpoint: Breakpoint): string {
   return `--silver-grid-columns-${breakpoint}`;
 }
 
