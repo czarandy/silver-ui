@@ -117,6 +117,22 @@ describe('Alert', () => {
     expect(screen.getByRole('button', {name: 'Action'})).toBeInTheDocument();
   });
 
+  it('centers endContent within the header when requested', () => {
+    render(
+      <Alert
+        description="Supporting detail on another line"
+        endContent={<button type="button">Action</button>}
+        endContentAlignment="center"
+        status="info"
+        title="With centered end content"
+      />,
+    );
+
+    const action = screen.getByRole('button', {name: 'Action'});
+    // eslint-disable-next-line testing-library/no-node-access -- the end-area slot has no semantic role of its own
+    expect(action.parentElement).toHaveClass('silver-as_center');
+  });
+
   it('fills a primary end action with the status foreground', () => {
     render(
       <Alert
