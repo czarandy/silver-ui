@@ -1,17 +1,13 @@
 import type {ComponentPropsWithRef, CSSProperties} from 'react';
 import {gridRecipe} from 'components/Grid/Grid.recipe';
+import {breakpointNames, type Breakpoint} from 'internal/breakpoints';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
-export interface GridResponsiveColumns {
-  '2xl'?: number;
-  base?: number;
-  lg?: number;
-  md?: number;
-  sm?: number;
-  xl?: number;
-}
+export type {SizeValue};
+
+export type GridResponsiveColumns = Partial<Record<Breakpoint, number>>;
 
 export type GridColumns = GridResponsiveColumns | number;
 export type GridGap = SpacingToken;
@@ -50,12 +46,8 @@ export type GridProps = GridBaseProps &
 type NormalizedGridColumns = Required<GridResponsiveColumns>;
 
 type GridStyle = CSSProperties & {
-  '--silver-grid-columns-2xl'?: number;
-  '--silver-grid-columns-base'?: number;
-  '--silver-grid-columns-lg'?: number;
-  '--silver-grid-columns-md'?: number;
-  '--silver-grid-columns-sm'?: number;
-  '--silver-grid-columns-xl'?: number;
+  [Name in Breakpoint as `--silver-grid-columns-${Name}`]?: number;
+} & {
   '--silver-grid-min-child-width'?: number | string;
 };
 
@@ -78,33 +70,30 @@ function toColumnCount(value: number): number {
   return clamped;
 }
 
+/**
+ * Fills every breakpoint, carrying the last specified count forward and
+ * defaulting to one column below the first specified breakpoint.
+ */
 function normalizeColumns(columns: GridColumns): NormalizedGridColumns {
-  if (typeof columns === 'number') {
-    const count = toColumnCount(columns);
-    return {
-      '2xl': count,
-      base: count,
-      lg: count,
-      md: count,
-      sm: count,
-      xl: count,
-    };
+  const byBreakpoint = typeof columns === 'number' ? {base: columns} : columns;
+  const normalized: GridResponsiveColumns = {};
+  let previous = 1;
+  for (const breakpoint of breakpointNames) {
+    const value = byBreakpoint[breakpoint];
+    if (value !== undefined) {
+      previous = toColumnCount(value);
+    }
+    normalized[breakpoint] = previous;
   }
+  return normalized as NormalizedGridColumns;
+}
 
-  const base = columns.base === undefined ? 1 : toColumnCount(columns.base);
-  const sm = columns.sm === undefined ? base : toColumnCount(columns.sm);
-  const md = columns.md === undefined ? sm : toColumnCount(columns.md);
-  const lg = columns.lg === undefined ? md : toColumnCount(columns.lg);
-  const xl = columns.xl === undefined ? lg : toColumnCount(columns.xl);
-
-  return {
-    '2xl': columns['2xl'] === undefined ? xl : toColumnCount(columns['2xl']),
-    base,
-    lg,
-    md,
-    sm,
-    xl,
-  };
+function columnVariables(columns: NormalizedGridColumns): GridStyle {
+  const variables: GridStyle = {};
+  for (const breakpoint of breakpointNames) {
+    variables[`--silver-grid-columns-${breakpoint}`] = columns[breakpoint];
+  }
+  return variables;
 }
 
 /**
@@ -127,14 +116,7 @@ export function Grid({
     ...style,
     ...(normalizedColumns === undefined
       ? undefined
-      : {
-          '--silver-grid-columns-2xl': normalizedColumns['2xl'],
-          '--silver-grid-columns-base': normalizedColumns.base,
-          '--silver-grid-columns-lg': normalizedColumns.lg,
-          '--silver-grid-columns-md': normalizedColumns.md,
-          '--silver-grid-columns-sm': normalizedColumns.sm,
-          '--silver-grid-columns-xl': normalizedColumns.xl,
-        }),
+      : columnVariables(normalizedColumns)),
     ...(minChildWidth === undefined
       ? undefined
       : {
