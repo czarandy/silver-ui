@@ -2,6 +2,7 @@ import {readFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
+import {token} from 'styled-system/tokens';
 
 /**
  * The landing page and the docs pages render different headers — one is
@@ -18,10 +19,6 @@ const siteRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = resolve(siteRoot, '..');
 
 const docsCss = readFileSync(resolve(siteRoot, 'src/styles/docs.css'), 'utf-8');
-const pandaCss = readFileSync(
-  resolve(siteRoot, 'src/styles/panda.css'),
-  'utf-8',
-);
 const landingCss = readFileSync(
   resolve(siteRoot, 'src/landing/styles.css'),
   'utf-8',
@@ -142,7 +139,7 @@ describe('header content', () => {
       /line-height:\s*var\(--silver-line-heights-normal\)/,
     );
     // Pin the token to the value Panda's base styles give the landing nav.
-    expect(pandaCss).toMatch(/--silver-line-heights-normal:\s*1\.5[;}]/);
+    expect(token('lineHeights.normal')).toBe('1.5');
   });
 
   it('sizes the inner header row exactly so zoom cannot re-round it', () => {
