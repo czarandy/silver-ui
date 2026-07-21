@@ -110,6 +110,15 @@ header.header {
   font-family: var(--silver-fonts-body);
   font-size: var(--silver-font-sizes-md);
   font-weight: var(--silver-font-weights-medium);
+  /*
+   * The landing TopNavItem inherits Panda's base 1.5 line height; here the
+   * ambient value is Starlight's 1.75, which grows the link box (40px vs
+   * 36px) and lets the text baseline snap to a different device pixel at
+   * fractional display scaling — the links visibly jump ~1-2px when crossing
+   * between the two headers. Restate the shared token like the other
+   * declarations above.
+   */
+  line-height: var(--silver-line-heights-normal);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -133,6 +142,19 @@ header.header {
  * declarations and let the browser do the arithmetic — and mirror the colors
  * too, `fg.muted` throughout with only the background moving on hover.
  */
+/*
+ * The landing toggle is a direct flex item of its nav, centered by
+ * `align-items`. Here the button sits inside the `<silver-theme-toggle>`
+ * custom element, which would otherwise be the flex item and leave the button
+ * on a text baseline governed by Starlight's 1.75 line strut — a fraction of
+ * a pixel lower than the landing button, which snaps visibly at fractional
+ * display scaling. `display: contents` promotes the button itself to the
+ * flex item, matching the landing geometry.
+ */
+silver-theme-toggle {
+  display: contents;
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;

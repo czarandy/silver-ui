@@ -18,6 +18,10 @@ const siteRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = resolve(siteRoot, '..');
 
 const docsCss = readFileSync(resolve(siteRoot, 'src/styles/docs.css'), 'utf-8');
+const pandaCss = readFileSync(
+  resolve(siteRoot, 'src/styles/panda.css'),
+  'utf-8',
+);
 const landingCss = readFileSync(
   resolve(siteRoot, 'src/landing/styles.css'),
   'utf-8',
@@ -124,6 +128,29 @@ describe('header surface', () => {
 
 describe('header content', () => {
   const toggleRule = /\.theme-toggle\s*\{([^}]*)\}/.exec(docsCss)?.[1] ?? '';
+
+  it('keeps the nav links on the landing line height so text does not jump', () => {
+    // The landing TopNavItem inherits Panda's base 1.5 line height, while the
+    // docs header sits in Starlight's ambient 1.75. Without restating the
+    // token, the docs link boxes grow 4px and the text baseline snaps to a
+    // different device pixel at fractional display scaling, so the links
+    // visibly shift when crossing between the two headers.
+    const linkRule = /\.header-nav-link\s*\{([^}]*)\}/.exec(docsCss)?.[1] ?? '';
+    expect(linkRule).toMatch(
+      /line-height:\s*var\(--silver-line-heights-normal\)/,
+    );
+    // Pin the token to the value Panda's base styles give the landing nav.
+    expect(pandaCss).toMatch(/--silver-line-heights-normal:\s*1\.5[;}]/);
+  });
+
+  it('keeps the toggle a direct flex item like the landing one', () => {
+    // The landing toggle is centered by its nav's `align-items`. The docs
+    // button sits inside the `<silver-theme-toggle>` custom element; without
+    // `display: contents` that wrapper is the flex item and the button rides
+    // a text baseline set by Starlight's 1.75 line strut, a fraction of a
+    // pixel lower than the landing button.
+    expect(docsCss).toMatch(/silver-theme-toggle\s*\{[^}]*display:\s*contents/);
+  });
 
   it('sizes the docs toggle off the same values as the landing TopNavItem', () => {
     // The recipe's icon-only box is `min-height: sizes.8`, `px: '2'`,
