@@ -47,6 +47,23 @@ header.header {
 }
 
 /*
+ * Starlight's inner layout div fills the bar with `height: 100%`. Under
+ * fractional page zoom Chrome resolves that percentage against a rounded
+ * ancestor size (e.g. 48.75px content becomes a 49px div at 125% zoom), so
+ * everything centered in the div — the nav links and the theme toggle —
+ * lands a fraction of a pixel lower than the landing nav's flex items and
+ * snaps to a different device pixel: the controls visibly jump when crossing
+ * headers. Stating the same height as an exact calc keeps both sides'
+ * centering math identical at every zoom level.
+ */
+header.header > .header {
+  height: calc(
+    var(--sl-nav-height) - 2 * var(--sl-nav-pad-y) -
+      var(--silver-border-widths-default)
+  );
+}
+
+/*
  * Sidebar current page: silver-ui's selected-item treatment (the SideNav
  * `bg.selected` subtle teal with regular foreground text) instead of
  * Starlight's solid accent pill with inverted text.

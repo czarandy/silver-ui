@@ -95,7 +95,9 @@ describe('header surface', () => {
       docsCss,
       /(?<![\w.])header\.header\s*\{[^}]*border-bottom-width:\s*var\((--silver-border-widths-[\w-]+)\)/,
     );
-    expect(stripComments(docsCss)).not.toMatch(/(^|[,}\s])\.header\s*[{,]/m);
+    // Forbid a selector that STARTS with bare `.header` (it would match both
+    // elements); `header.header > .header` deliberately targets the inner div.
+    expect(stripComments(docsCss)).not.toMatch(/(^|[,}])\s*\.header\s*[{,]/m);
 
     expect(docsBorder).toBe('--silver-colors-border');
     // The landing side gets its hairline from AppShell's `headerDivider`
@@ -141,6 +143,18 @@ describe('header content', () => {
     );
     // Pin the token to the value Panda's base styles give the landing nav.
     expect(pandaCss).toMatch(/--silver-line-heights-normal:\s*1\.5[;}]/);
+  });
+
+  it('sizes the inner header row exactly so zoom cannot re-round it', () => {
+    // Starlight gives its inner layout div `height: 100%`; under fractional
+    // page zoom that percentage resolves against a rounded ancestor box, so
+    // the centered links and toggle land a fraction of a pixel lower than the
+    // landing nav's and snap to a different device pixel. The override states
+    // the same height as an exact calc from the vars Starlight sizes the bar
+    // with, keeping both headers' centering math identical at every zoom.
+    expect(docsCss).toMatch(
+      /header\.header\s*>\s*\.header\s*\{[^}]*height:\s*calc\(\s*var\(--sl-nav-height\)\s*-\s*2\s*\*\s*var\(--sl-nav-pad-y\)\s*-\s*var\(--silver-border-widths-default\)\s*\)/,
+    );
   });
 
   it('keeps the toggle a direct flex item like the landing one', () => {
