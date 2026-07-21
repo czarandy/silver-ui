@@ -32,7 +32,7 @@ import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import useAnnounce from 'hooks/useAnnounce';
 import {OverflowList} from 'internal/OverflowList';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
 import {useLayer} from 'internal/useLayer';
@@ -322,7 +322,7 @@ export function TagsInput<T extends SearchableItem>({
   const statusType = status?.type ?? inputGroup?.statusType;
 
   const inputId = useId();
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
@@ -617,7 +617,7 @@ export function TagsInput<T extends SearchableItem>({
         size={size}
         value={null}
       />
-      {isReactNode(endContent) ? (
+      {isNonEmptyReactNode(endContent) ? (
         <span className={classes.endContent}>{endContent}</span>
       ) : null}
       {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (

@@ -62,22 +62,25 @@ describe('Stat', () => {
       direction: 'increase',
       iconClass: 'lucide-trending-up',
       text: '12.5% increased',
+      tone: 'positive',
     },
     {
       change: -8.2,
       direction: 'decrease',
       iconClass: 'lucide-trending-down',
       text: '8.2% decreased',
+      tone: 'negative',
     },
     {
       change: 0,
       direction: 'unchanged',
       iconClass: 'lucide-minus',
       text: '0% unchanged',
+      tone: 'neutral',
     },
-  ])(
+  ] as const)(
     'renders a $direction percentage change',
-    ({change, direction, iconClass, text}) => {
+    ({change, direction, iconClass, text, tone}) => {
       const {container} = render(
         <Stat change={change} label="Revenue" value="$1.2M" />,
       );
@@ -88,11 +91,90 @@ describe('Stat', () => {
       );
 
       expect(changeElement).toHaveAttribute('data-direction', direction);
-      expect(changeElement).toHaveClass(...classesOf(statRecipe().change));
+      expect(changeElement).toHaveClass(
+        ...classesOf(statRecipe({changeTone: tone}).change),
+      );
       expect(changeText).toHaveClass('silver-fv-num_tabular-nums');
       expect(container.querySelector(`.${iconClass}`)).toBeInTheDocument();
     },
   );
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    'does not emit a change for the non-finite value %d',
+    change => {
+      const {container} = render(
+        <Stat change={change} label="Revenue" value="$1.2M" />,
+      );
+
+      expect(
+        container.querySelector('[data-direction]'),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it('rounds the change instead of rendering raw float artifacts', () => {
+    render(<Stat change={8.0392156} label="Revenue" value="$1.2M" />);
+
+    expect(screen.getByText('8% increased')).toBeInTheDocument();
+  });
+
+  it('formats the change with locale grouping', () => {
+    render(<Stat change={-1234.56} label="Revenue" value="$1.2M" />);
+
+    expect(screen.getByText('1,234.6% decreased')).toBeInTheDocument();
+  });
+
+  it.each([
+    {change: -3.4, changeSentiment: 'inverted', tone: 'positive'},
+    {change: 3.4, changeSentiment: 'inverted', tone: 'negative'},
+    {change: 3.4, changeSentiment: 'neutral', tone: 'neutral'},
+  ] as const)(
+    'colors a $changeSentiment sentiment change of $change with the $tone tone',
+    ({change, changeSentiment, tone}) => {
+      render(
+        <Stat
+          change={change}
+          changeSentiment={changeSentiment}
+          label="Churn rate"
+          value="2.1%"
+        />,
+      );
+
+      const changeElement = assertNonNull(
+        screen.getByText(/3\.4%/).closest('[data-direction]'),
+      );
+      expect(changeElement).toHaveClass(
+        ...classesOf(statRecipe({changeTone: tone}).change),
+      );
+    },
+  );
+
+  it('renders custom direction labels', () => {
+    render(
+      <Stat
+        change={12.5}
+        increaseLabel="up year over year"
+        label="Revenue"
+        value="$1.2M"
+      />,
+    );
+
+    expect(screen.getByText('12.5% up year over year')).toBeInTheDocument();
+  });
+
+  it('formats the change with a custom formatter', () => {
+    render(
+      <Stat
+        change={340}
+        formatChange={change => `+${change}`}
+        increaseLabel="this month"
+        label="Customers"
+        value="8,429"
+      />,
+    );
+
+    expect(screen.getByText('+340 this month')).toBeInTheDocument();
+  });
 
   it('does not emit a percentage change when omitted', () => {
     const {container} = render(<Stat label="Revenue" value="$1.2M" />);
@@ -126,6 +208,13 @@ describe('Stat', () => {
 
   it('does not emit a description node when omitted', () => {
     render(<Stat label="Revenue" value="$1.2M" />);
+
+    const details = assertNonNull(screen.getByText('$1.2M').closest('dd'));
+    expect(details.children).toHaveLength(1);
+  });
+
+  it('does not emit a description node for an empty string', () => {
+    render(<Stat description="" label="Revenue" value="$1.2M" />);
 
     const details = assertNonNull(screen.getByText('$1.2M').closest('dd'));
     expect(details.children).toHaveLength(1);
@@ -188,13 +277,11 @@ describe('Stat', () => {
     );
     const classes = statRecipe();
     const root = assertNonNull(container.firstElementChild);
-    const icon = assertNonNull(root.querySelector('svg'));
     const definition = assertNonNull(root.querySelector('dl'));
     const label = assertNonNull(definition.querySelector('dt'));
     const details = assertNonNull(definition.querySelector('dd'));
 
     expect(root).toHaveClass(...classesOf(classes.root));
-    expect(icon).toHaveClass(...classesOf(classes.icon));
     expect(definition).toHaveClass(...classesOf(classes.definition));
     expect(label).toHaveClass(...classesOf(classes.label));
     expect(details).toHaveClass(...classesOf(classes.details));

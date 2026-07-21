@@ -18,7 +18,7 @@ import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
 import {cx} from 'utils/cx';
 
@@ -268,8 +268,8 @@ export function Button({
     getAriaLabel(
       isIconOnly ||
         isLoading ||
-        isReactNode(startContent) ||
-        isReactNode(endContent) ||
+        isNonEmptyReactNode(startContent) ||
+        isNonEmptyReactNode(endContent) ||
         opensInNewTab
         ? label
         : undefined,
@@ -336,11 +336,11 @@ export function Button({
             )}
           </span>
         ) : null}
-        {!isIconOnly && isReactNode(startContent) ? (
+        {!isIconOnly && isNonEmptyReactNode(startContent) ? (
           <span className={classes.startContent}>{startContent}</span>
         ) : null}
         {!isIconOnly ? <span className={classes.label}>{label}</span> : null}
-        {!isIconOnly && isReactNode(endContent) ? (
+        {!isIconOnly && isNonEmptyReactNode(endContent) ? (
           <span className={classes.endContent}>{endContent}</span>
         ) : null}
         {!isIconOnly && isLoading ? (

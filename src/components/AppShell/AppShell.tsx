@@ -19,7 +19,7 @@ import {
   TopNavRenderContext,
 } from 'components/TopNav';
 import {MobileNavToggle} from 'internal/MobileNav';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
 import type {SpacingToken} from 'internal/spacingTokens';
@@ -214,11 +214,11 @@ export function AppShell({
   const isBelowBreakpoint = useMediaQuery(breakpointQuery);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const {ref: topNavPresenceRef, hasContent: hasTopNavContent} =
-    useSlotPresence(isReactNode(topNav));
+    useSlotPresence(isNonEmptyReactNode(topNav));
   const {ref: sideNavPresenceRef, hasContent: hasSideNavContent} =
-    useSlotPresence(isReactNode(sideNav));
-  const hasTopNav = isReactNode(topNav);
-  const hasSideNav = isReactNode(sideNav);
+    useSlotPresence(isNonEmptyReactNode(sideNav));
+  const hasTopNav = isNonEmptyReactNode(topNav);
+  const hasSideNav = isNonEmptyReactNode(sideNav);
   const hasNavContent = hasTopNavContent || hasSideNavContent;
   const mobileNavEnabled = !isMobileNavDisabled && hasNavContent;
   const showSideNavInline = hasSideNav && !isBelowBreakpoint;
@@ -295,12 +295,12 @@ export function AppShell({
       topNav
     );
   const headerContent =
-    hasTopNav || isReactNode(banner) ? (
+    hasTopNav || isNonEmptyReactNode(banner) ? (
       <div
         className={cx(isAuto && styles.headerSticky, classes.header)}
         ref={headerRef}>
         <header style={{flexShrink: 0}}>
-          {isReactNode(banner) ? (
+          {isNonEmptyReactNode(banner) ? (
             <div className={styles.banner}>{banner}</div>
           ) : null}
           {hasTopNav ? (

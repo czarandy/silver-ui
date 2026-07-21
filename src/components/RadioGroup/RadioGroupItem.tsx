@@ -4,7 +4,7 @@ import {use, useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {Item} from 'components/Item';
 import {radioGroupItemRecipe} from 'components/RadioGroup/RadioGroup.recipe';
 import {RadioGroupContext} from 'components/RadioGroup/RadioGroupContext';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export interface RadioGroupItemProps {
   /**
@@ -79,7 +79,9 @@ export function RadioGroupItem({
   const control = (
     <span className={classes.controlWrap}>
       <input
-        aria-describedby={isReactNode(description) ? descriptionId : undefined}
+        aria-describedby={
+          isNonEmptyReactNode(description) ? descriptionId : undefined
+        }
         checked={isChecked}
         className={classes.input}
         disabled={isDisabled}
@@ -101,7 +103,7 @@ export function RadioGroupItem({
       className={className}
       data-testid={dataTestId}
       description={
-        isReactNode(description) ? (
+        isNonEmptyReactNode(description) ? (
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }

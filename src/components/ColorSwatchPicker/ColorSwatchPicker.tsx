@@ -26,7 +26,7 @@ import {Icon} from 'components/Icon';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 
 const pickerClass = colorSwatchPickerRecipe();
@@ -161,7 +161,7 @@ export function ColorSwatchPicker({
 }: ColorSwatchPickerProps): React.JSX.Element {
   const inputId = useId();
   const labelId = `${inputId}-label`;
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

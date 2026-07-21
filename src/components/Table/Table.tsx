@@ -40,7 +40,7 @@ import type {
 } from 'components/Table/types';
 import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
 import {Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import useShallowEqualMemo from 'internal/useShallowEqualMemo';
 import {cx} from 'utils/cx';
 
@@ -305,7 +305,7 @@ function TableInner<T extends Record<string, unknown>>({
     [density, dividers, hasHover, isStriped, textOverflow, verticalAlign],
   );
 
-  const classes = tableRecipe({isAutoLayout: isReactNode(children)});
+  const classes = tableRecipe({isAutoLayout: isNonEmptyReactNode(children)});
   const RowComponent = TableRow as React.ComponentType<TableRowComponentProps>;
   const CellComponent =
     TableCell as React.ComponentType<TableCellComponentProps>;
@@ -378,10 +378,10 @@ function TableInner<T extends Record<string, unknown>>({
         resolvedContent
       );
     const hasSlots =
-      isReactNode(headerCellProps.before) ||
-      isReactNode(headerCellProps.after) ||
-      isReactNode(headerCellProps.overlay) ||
-      isReactNode(headerCellProps.below);
+      isNonEmptyReactNode(headerCellProps.before) ||
+      isNonEmptyReactNode(headerCellProps.after) ||
+      isNonEmptyReactNode(headerCellProps.overlay) ||
+      isNonEmptyReactNode(headerCellProps.below);
 
     return (
       <HeaderCellComponent
@@ -396,7 +396,7 @@ function TableInner<T extends Record<string, unknown>>({
         {hasSlots ? (
           <>
             {headerCellProps.before}
-            {!isReactNode(headerCellProps.after) ? (
+            {!isNonEmptyReactNode(headerCellProps.after) ? (
               renderedContent
             ) : (
               <div
@@ -494,7 +494,8 @@ function TableInner<T extends Record<string, unknown>>({
                     );
                   })
                 : data != null &&
-                  (emptyState === undefined || isReactNode(emptyState)) && (
+                  (emptyState === undefined ||
+                    isNonEmptyReactNode(emptyState)) && (
                     <tr>
                       <td
                         className={classes.emptyState}

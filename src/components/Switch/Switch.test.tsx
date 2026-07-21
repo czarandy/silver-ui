@@ -223,6 +223,21 @@ describe('Switch', () => {
     );
   });
 
+  it('treats an empty-string description as absent', () => {
+    render(
+      <Switch
+        description=""
+        isSelected
+        label="Notifications"
+        onChange={() => {}}
+      />,
+    );
+
+    expect(
+      screen.getByRole('switch', {name: 'Notifications'}),
+    ).not.toHaveAttribute('aria-describedby');
+  });
+
   it('renders required and optional text', () => {
     render(
       <>

@@ -17,7 +17,7 @@ import {switchRecipe} from 'components/Switch/Switch.recipe';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type SwitchLabelPosition = 'end' | 'start';
@@ -134,7 +134,7 @@ export function Switch({
   isSelected,
 }: SwitchProps): React.JSX.Element {
   const inputId = useId();
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
@@ -203,7 +203,7 @@ export function Switch({
             {requirednessText}
           </Text>
         ) : null}
-        {isReactNode(labelTooltip) ? (
+        {isNonEmptyReactNode(labelTooltip) ? (
           <Tooltip content={labelTooltip}>
             <span className={classes.tooltipIcon}>
               <Icon icon={Info} size="sm" />
@@ -211,7 +211,7 @@ export function Switch({
           </Tooltip>
         ) : null}
       </label>
-      {isReactNode(description) ? (
+      {isNonEmptyReactNode(description) ? (
         <Text as="span" color="secondary" id={descriptionID} type="supporting">
           {description}
         </Text>

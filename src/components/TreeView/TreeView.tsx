@@ -20,7 +20,7 @@ import type {
   TreeViewItemData,
 } from 'components/TreeView/types';
 import useTypeahead from 'hooks/useTypeahead';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export interface TreeViewProps {
@@ -445,13 +445,13 @@ export function TreeView({
       onPointerDownCapture={handlePointerDownCapture}
       ref={ref}
       style={style}>
-      {!isReactNode(header) ? null : (
+      {!isNonEmptyReactNode(header) ? null : (
         <div className={styles.header} id={headerId}>
           {header}
         </div>
       )}
       <ul
-        aria-labelledby={!isReactNode(header) ? undefined : headerId}
+        aria-labelledby={!isNonEmptyReactNode(header) ? undefined : headerId}
         className={styles.list}
         role="tree">
         {renderItems(items, 0, [])}

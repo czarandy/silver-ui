@@ -30,7 +30,7 @@ import {
 import type {IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {parseDateInput} from 'internal/parseDateInput';
 import {
@@ -199,7 +199,7 @@ export function DateInput({
   const generatedId = useId();
   const inputId = htmlId ?? generatedId;
   const popoverId = `${inputId}-calendar`;
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

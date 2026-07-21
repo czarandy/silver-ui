@@ -16,7 +16,7 @@ import {
 import type {InputStatus} from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import useTypeahead from 'hooks/useTypeahead';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {useListboxNavigation} from 'internal/useListboxNavigation';
 
 export interface SelectListboxOptionData {
@@ -121,7 +121,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   status,
 }: UseSelectListboxOptions<TOption>): UseSelectListboxResult<TOption> {
   const inputId = useId();
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

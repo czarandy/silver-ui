@@ -6,7 +6,7 @@ import {dropdownMenuItemRecipe} from 'components/DropdownMenu/DropdownMenuItem.r
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
 import {Tooltip} from 'components/Tooltip';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export interface DropdownMenuItemProps {
@@ -81,7 +81,7 @@ export function DropdownMenuItem({
   const context = useDropdownMenuContext();
   const menuSize = context?.menuSize ?? 'md';
   const classes = dropdownMenuItemRecipe({size: menuSize});
-  const hasTooltip = isReactNode(tooltip);
+  const hasTooltip = isNonEmptyReactNode(tooltip);
   const useAriaDisabled = hasTooltip && isDisabled;
 
   const item = (
