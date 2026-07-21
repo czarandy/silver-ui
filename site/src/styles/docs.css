@@ -30,12 +30,18 @@
  * same `data-theme` attribute Starlight toggles. And Starlight scopes all of
  * its own rules to `@layer starlight.*` while this file is unlayered, so these
  * win the cascade outright — no specificity games needed.
+ *
+ * The selector must be element-qualified: Starlight renders two elements with
+ * class `header` — the fixed `<header>` bar and a layout `<div>` inside it.
+ * A bare `.header` also hands the width to that inner div, whose bottom edge
+ * sits ~13px above the bar's, painting a second stray hairline through the
+ * header.
  */
 :root {
   --sl-color-bg-nav: var(--silver-colors-bg-subtle);
 }
 
-.header {
+header.header {
   border-bottom-color: var(--silver-colors-border);
   border-bottom-width: var(--silver-border-widths-default);
 }
