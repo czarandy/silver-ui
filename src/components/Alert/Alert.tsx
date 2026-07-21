@@ -53,6 +53,11 @@ export interface AlertProps {
    */
   endContent?: ReactNode;
   /**
+   * Vertical alignment of the end content within the header.
+   * @default 'start'
+   */
+  endContentAlignment?: 'center' | 'start';
+  /**
    * Custom status icon. A default icon is rendered when omitted.
    */
   icon?: ReactNode;
@@ -118,6 +123,7 @@ export function Alert({
   'data-testid': dataTestId,
   description,
   endContent,
+  endContentAlignment = 'start',
   icon,
   isDefaultExpanded = false,
   isDismissable = false,
@@ -149,6 +155,7 @@ export function Alert({
 
   const classes = alertRecipe({
     container,
+    endContentAlignment,
     hasContent: showContent,
     isCentered: isSingleLine,
     isExpanded,
