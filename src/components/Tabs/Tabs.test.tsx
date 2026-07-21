@@ -150,6 +150,19 @@ describe('Tabs', () => {
     expect(tabClass.split(' ')).toContain(css({backgroundClip: 'padding-box'}));
   });
 
+  it('uses a thick divider and the primary color for the selected underline', () => {
+    const dividerClass = assertNonNull(tabsRecipe({hasDivider: true}).root);
+    const selectedTabClass = assertNonNull(tabsRecipe({isSelected: true}).tab);
+
+    expect(dividerClass.split(' ')).toContain(
+      css({borderBlockEndWidth: 'emphasized'}),
+    );
+    expect(selectedTabClass.split(' ')).toContain(
+      css({borderBottomColor: 'primary'}),
+    );
+    expect(selectedTabClass.split(' ')).toContain(css({mb: '-2px'}));
+  });
+
   it('links tabs to consumer-rendered panels with controls', () => {
     render(
       <>

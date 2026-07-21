@@ -23,7 +23,7 @@ export const tabsRecipe = sva({
       alignItems: 'center',
       justifyContent: 'center',
       gap: '1',
-      mb: '-1px',
+      mb: '-2px',
       px: '3',
       borderWidth: 0,
       borderBottomWidth: 'emphasized',
@@ -95,7 +95,7 @@ export const tabsRecipe = sva({
     isSelected: {
       true: {
         tab: {
-          borderBottomColor: 'fg',
+          borderBottomColor: 'primary',
           color: 'fg',
           fontWeight: 'semibold',
         },
@@ -117,7 +117,7 @@ export const tabsRecipe = sva({
     hasDivider: {
       true: {
         root: {
-          borderBlockEndWidth: 'default',
+          borderBlockEndWidth: 'emphasized',
           borderBlockEndStyle: 'solid',
           borderBlockEndColor: 'border',
         },
