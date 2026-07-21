@@ -84,11 +84,17 @@ describe('header surface', () => {
       docsCss,
       /\.header\s*\{[^}]*border-bottom-color:\s*var\((--silver-colors-[\w-]+)\)/,
     );
+    const docsBorderWidth = tokenFor(
+      docsCss,
+      /\.header\s*\{[^}]*border-bottom-width:\s*var\((--silver-border-widths-[\w-]+)\)/,
+    );
 
     expect(docsBorder).toBe('--silver-colors-border');
     // The landing side gets its hairline from AppShell's `headerDivider`
-    // variant, which resolves the same `border` token through Panda.
+    // variant, which resolves the same color and width tokens through Panda.
     expect(appShellRecipe).toMatch(/borderBlockEndColor:\s*'border'/);
+    expect(docsBorderWidth).toBe('--silver-border-widths-default');
+    expect(appShellRecipe).toMatch(/borderBlockEndWidth:\s*'default'/);
   });
 
   it('stays unlayered so it outranks Starlight’s own layered rules', () => {
@@ -100,12 +106,14 @@ describe('header surface', () => {
 
   it('matches the docs header geometry so the wordmark holds its place', () => {
     // Starlight's nav is 3.5rem tall with 1rem of inline padding, growing to
-    // 4rem / 1.5rem at its 50rem breakpoint. The landing nav tracks both.
+    // 4rem / 1.5rem at its 50rem breakpoint. Its divider is inside that fixed
+    // height; AppShell's divider wraps TopNav, so the landing nav subtracts
+    // the shared width to give both wordmarks the same vertical center.
     expect(landingCss).toMatch(
-      /\.page \.site-nav\s*\{[^}]*min-height:\s*3\.5rem;[^}]*padding:\s*0\.75rem 1rem;/,
+      /\.page \.site-nav\s*\{[^}]*min-height:\s*calc\(3\.5rem - var\(--silver-border-widths-default\)\);[^}]*padding:\s*0\.75rem 1rem;/,
     );
     expect(landingCss).toMatch(
-      /@media \(min-width: 50rem\)\s*\{\s*\.page \.site-nav\s*\{[^}]*min-height:\s*4rem;[^}]*padding-inline:\s*1\.5rem;/,
+      /@media \(min-width: 50rem\)\s*\{\s*\.page \.site-nav\s*\{[^}]*min-height:\s*calc\(4rem - var\(--silver-border-widths-default\)\);[^}]*padding-inline:\s*1\.5rem;/,
     );
   });
 });
