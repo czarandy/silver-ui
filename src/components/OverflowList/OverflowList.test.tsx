@@ -37,6 +37,10 @@ function renderOverflow(overflowItems: OverflowItem[]): React.JSX.Element {
   return <span data-width="20">+{overflowItems.length}</span>;
 }
 
+function NullItem(): React.JSX.Element | null {
+  return null;
+}
+
 beforeEach(() => {
   containerWidth = 200;
   vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
@@ -155,6 +159,25 @@ describe('OverflowList', () => {
     );
 
     expect(screen.getByTestId('list')).toHaveTextContent('AlphaBeta+1');
+  });
+
+  it('keeps measurement aligned when a child renders no DOM element', () => {
+    containerWidth = 70;
+    render(
+      <OverflowList data-testid="list" overflowRenderer={renderOverflow}>
+        <Item>Alpha</Item>
+        <NullItem />
+        <Item>Beta</Item>
+        <Item>Gamma</Item>
+      </OverflowList>,
+    );
+
+    // The null-rendering child occupies a zero-width slot; the indicator is
+    // still recognized as the indicator and reserves its width.
+    const root = screen.getByTestId('list');
+    expect(root).toHaveTextContent('Alpha+2');
+    expect(within(root).queryByText('Beta')).not.toBeInTheDocument();
+    expect(within(root).queryByText('Gamma')).not.toBeInTheDocument();
   });
 
   it('observes and measures the parent content box with observeParent', () => {

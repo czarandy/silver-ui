@@ -257,7 +257,15 @@ export function OverflowList({
         data-testid={dataTestId == null ? undefined : `${dataTestId}-measure`}
         inert
         ref={measureRefCallback}>
-        {childArray}
+        {childArray.map(child => (
+          // Each child is measured through its own wrapper so the measure
+          // row always holds exactly one element per React child — children
+          // that render null, text, or fragments would otherwise misalign
+          // the width-to-child mapping.
+          <div className={classes.measureItem} key={child.key}>
+            {child}
+          </div>
+        ))}
         {isNonEmptyReactNode(measureIndicator) ? (
           <div className={classes.measureIndicator}>{measureIndicator}</div>
         ) : null}

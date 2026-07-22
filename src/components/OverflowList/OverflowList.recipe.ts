@@ -19,7 +19,7 @@ const gapSlotVariants = {
 } as const satisfies Record<SpacingToken, unknown>;
 
 export const overflowListRecipe = sva({
-  slots: ['root', 'measure', 'measureIndicator'],
+  slots: ['root', 'measure', 'measureItem', 'measureIndicator'],
   base: {
     root: {
       display: 'flex',
@@ -37,6 +37,9 @@ export const overflowListRecipe = sva({
       alignItems: 'center',
       whiteSpace: 'nowrap',
       pointerEvents: 'none',
+    },
+    measureItem: {
+      display: 'inline-flex',
     },
     measureIndicator: {
       display: 'inline-flex',
