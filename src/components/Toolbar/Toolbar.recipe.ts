@@ -1,4 +1,77 @@
+import {gapVariants, type SpacingToken} from 'internal/spacingTokens';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
+
+// All four slots share one gap so the bar and its slots space uniformly; the
+// values come from the shared `gapVariants` map and the `satisfies` clause
+// keeps the keys in lockstep with `SpacingToken`.
+const gapSlotVariants = {
+  0: {
+    root: gapVariants[0],
+    start: gapVariants[0],
+    center: gapVariants[0],
+    end: gapVariants[0],
+  },
+  0.5: {
+    root: gapVariants[0.5],
+    start: gapVariants[0.5],
+    center: gapVariants[0.5],
+    end: gapVariants[0.5],
+  },
+  1: {
+    root: gapVariants[1],
+    start: gapVariants[1],
+    center: gapVariants[1],
+    end: gapVariants[1],
+  },
+  1.5: {
+    root: gapVariants[1.5],
+    start: gapVariants[1.5],
+    center: gapVariants[1.5],
+    end: gapVariants[1.5],
+  },
+  2: {
+    root: gapVariants[2],
+    start: gapVariants[2],
+    center: gapVariants[2],
+    end: gapVariants[2],
+  },
+  3: {
+    root: gapVariants[3],
+    start: gapVariants[3],
+    center: gapVariants[3],
+    end: gapVariants[3],
+  },
+  4: {
+    root: gapVariants[4],
+    start: gapVariants[4],
+    center: gapVariants[4],
+    end: gapVariants[4],
+  },
+  5: {
+    root: gapVariants[5],
+    start: gapVariants[5],
+    center: gapVariants[5],
+    end: gapVariants[5],
+  },
+  6: {
+    root: gapVariants[6],
+    start: gapVariants[6],
+    center: gapVariants[6],
+    end: gapVariants[6],
+  },
+  8: {
+    root: gapVariants[8],
+    start: gapVariants[8],
+    center: gapVariants[8],
+    end: gapVariants[8],
+  },
+  10: {
+    root: gapVariants[10],
+    start: gapVariants[10],
+    center: gapVariants[10],
+    end: gapVariants[10],
+  },
+} as const satisfies Record<SpacingToken, unknown>;
 
 export const toolbarRecipe = sva({
   slots: ['root', 'start', 'center', 'end'],
@@ -51,74 +124,7 @@ export const toolbarRecipe = sva({
         },
       },
     },
-    gap: {
-      0: {
-        root: {gap: '0'},
-        start: {gap: '0'},
-        center: {gap: '0'},
-        end: {gap: '0'},
-      },
-      0.5: {
-        root: {gap: '0.5'},
-        start: {gap: '0.5'},
-        center: {gap: '0.5'},
-        end: {gap: '0.5'},
-      },
-      1: {
-        root: {gap: '1'},
-        start: {gap: '1'},
-        center: {gap: '1'},
-        end: {gap: '1'},
-      },
-      1.5: {
-        root: {gap: '1.5'},
-        start: {gap: '1.5'},
-        center: {gap: '1.5'},
-        end: {gap: '1.5'},
-      },
-      2: {
-        root: {gap: '2'},
-        start: {gap: '2'},
-        center: {gap: '2'},
-        end: {gap: '2'},
-      },
-      3: {
-        root: {gap: '3'},
-        start: {gap: '3'},
-        center: {gap: '3'},
-        end: {gap: '3'},
-      },
-      4: {
-        root: {gap: '4'},
-        start: {gap: '4'},
-        center: {gap: '4'},
-        end: {gap: '4'},
-      },
-      5: {
-        root: {gap: '5'},
-        start: {gap: '5'},
-        center: {gap: '5'},
-        end: {gap: '5'},
-      },
-      6: {
-        root: {gap: '6'},
-        start: {gap: '6'},
-        center: {gap: '6'},
-        end: {gap: '6'},
-      },
-      8: {
-        root: {gap: '8'},
-        start: {gap: '8'},
-        center: {gap: '8'},
-        end: {gap: '8'},
-      },
-      10: {
-        root: {gap: '10'},
-        start: {gap: '10'},
-        center: {gap: '10'},
-        end: {gap: '10'},
-      },
-    },
+    gap: gapSlotVariants,
     // Marker variants; the layout differences are orientation-dependent, so
     // they live in compoundVariants below.
     hasCenterContent: {true: {}, false: {}},
