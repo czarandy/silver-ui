@@ -27,6 +27,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Spinner} from 'components/Spinner';
@@ -273,7 +274,11 @@ export function NumberInput({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
-  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const fieldset = useFieldset();
+  const effectiveDisabled =
+    isDisabled ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
   const [pendingInput, setPendingInput] = useState<string | null>(null);

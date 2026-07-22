@@ -46,6 +46,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'CheckboxInput',
     'ColorSwatchPicker',
     'Field',
+    'Fieldset',
     'FileInput',
     'InputGroup',
     'MultiSelect',

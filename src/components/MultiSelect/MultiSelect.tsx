@@ -18,6 +18,7 @@ import {
   type InputStatus,
 } from 'components/Field';
 import {inputRecipe} from 'components/Field/inputStyles';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {
@@ -247,7 +248,11 @@ export function MultiSelect({
   value,
 }: MultiSelectProps): React.JSX.Element {
   const inputGroup = useInputGroup();
-  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
+  const fieldset = useFieldset();
+  const isDisabled =
+    isDisabledFromProps ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
   const statusType = status?.type ?? inputGroup?.statusType;
 
