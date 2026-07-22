@@ -254,45 +254,41 @@ export function Toolbar({
     return () => observer.disconnect();
   }, []);
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      hint.onKeyDown(event);
-      if (event.defaultPrevented) {
-        // A nested widget (Tabs, SegmentedControl, an opening Select) already
-        // consumed the key; moving focus again would double-handle it.
-        return;
-      }
-      const target = event.target;
-      if (target instanceof HTMLElement && usesArrowKeys(target)) {
-        return;
-      }
-      handleListKeyDown(event);
-    },
-    [handleListKeyDown, hint],
-  );
+  // Plain functions: `hint` is a fresh object every render, so wrapping these
+  // in useCallback would never actually memoize.
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
+    hint.onKeyDown(event);
+    if (event.defaultPrevented) {
+      // A nested widget (Tabs, SegmentedControl, an opening Select) already
+      // consumed the key; moving focus again would double-handle it.
+      return;
+    }
+    const target = event.target;
+    if (target instanceof HTMLElement && usesArrowKeys(target)) {
+      return;
+    }
+    handleListKeyDown(event);
+  };
 
-  const handleFocus = useCallback(
-    (event: FocusEvent<HTMLDivElement>) => {
-      hint.onFocus(event);
-      const target = event.target;
-      if (!(target instanceof HTMLElement)) {
-        return;
-      }
-      if (target === lastFocusedRef.current) {
-        // The tab stops are already applied for this item; re-focusing it
-        // (clicks, focus returning from a popover) needs no re-scan.
-        return;
-      }
-      const items = getFocusableItems(containerRef.current);
-      if (items.includes(target)) {
-        // The last-focused item stays the tab stop, so tabbing back into the
-        // toolbar returns to where the user left off.
-        lastFocusedRef.current = target;
-        applyRovingTabStops(items, target);
-      }
-    },
-    [hint],
-  );
+  const handleFocus = (event: FocusEvent<HTMLDivElement>): void => {
+    hint.onFocus(event);
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+    if (target === lastFocusedRef.current) {
+      // The tab stops are already applied for this item; re-focusing it
+      // (clicks, focus returning from a popover) needs no re-scan.
+      return;
+    }
+    const items = getFocusableItems(containerRef.current);
+    if (items.includes(target)) {
+      // The last-focused item stays the tab stop, so tabbing back into the
+      // toolbar returns to where the user left off.
+      lastFocusedRef.current = target;
+      applyRovingTabStops(items, target);
+    }
+  };
 
   const hasCenterContent = isNonEmptyReactNode(centerContent);
   const hasStartContent = isNonEmptyReactNode(startContent);

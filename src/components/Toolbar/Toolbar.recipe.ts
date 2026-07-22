@@ -124,10 +124,12 @@ export const toolbarRecipe = sva({
     hasCenterContent: {true: {}, false: {}},
     hasStartContent: {true: {}, false: {}},
     hasEndContent: {true: {}, false: {}},
+    // Dividers use the hairline treatment Divider owns: the
+    // `borderWidths.default` and `colors.border` tokens.
     dividerTop: {
       true: {
         root: {
-          borderTopWidth: '1px',
+          borderTopWidth: 'default',
           borderTopStyle: 'solid',
           borderTopColor: 'border',
         },
@@ -137,7 +139,7 @@ export const toolbarRecipe = sva({
     dividerBottom: {
       true: {
         root: {
-          borderBottomWidth: '1px',
+          borderBottomWidth: 'default',
           borderBottomStyle: 'solid',
           borderBottomColor: 'border',
         },
@@ -147,7 +149,7 @@ export const toolbarRecipe = sva({
     dividerStart: {
       true: {
         root: {
-          borderInlineStartWidth: '1px',
+          borderInlineStartWidth: 'default',
           borderInlineStartStyle: 'solid',
           borderInlineStartColor: 'border',
         },
@@ -157,7 +159,7 @@ export const toolbarRecipe = sva({
     dividerEnd: {
       true: {
         root: {
-          borderInlineEndWidth: '1px',
+          borderInlineEndWidth: 'default',
           borderInlineEndStyle: 'solid',
           borderInlineEndColor: 'border',
         },
@@ -200,18 +202,8 @@ export const toolbarRecipe = sva({
       css: {end: {marginBlockStart: 'auto'}},
     },
   ],
-  defaultVariants: {
-    size: 'md',
-    orientation: 'horizontal',
-    gap: 1,
-    hasCenterContent: false,
-    hasStartContent: false,
-    hasEndContent: false,
-    dividerTop: false,
-    dividerBottom: false,
-    dividerStart: false,
-    dividerEnd: false,
-  },
+  // No defaultVariants: Toolbar.tsx always passes every variant explicitly,
+  // so defaults here would be dead weight to keep in sync with the component.
 });
 
 export type ToolbarVariants = RecipeVariantProps<typeof toolbarRecipe>;
