@@ -1,6 +1,9 @@
-export function isComposingEvent(
-  event: KeyboardEvent | {nativeEvent: KeyboardEvent},
-): boolean {
+export function isComposingEvent(event: Event | {nativeEvent: Event}): boolean {
   const nativeEvent = 'nativeEvent' in event ? event.nativeEvent : event;
-  return nativeEvent.isComposing || Reflect.get(nativeEvent, 'keyCode') === 229;
+  // isComposing lives on both KeyboardEvent and InputEvent; read it
+  // structurally so React change events (nativeEvent typed as Event) work.
+  return (
+    Reflect.get(nativeEvent, 'isComposing') === true ||
+    Reflect.get(nativeEvent, 'keyCode') === 229
+  );
 }

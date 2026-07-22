@@ -5,6 +5,7 @@ import {
   useRef,
   type ChangeEvent,
   type ClipboardEvent,
+  type CompositionEvent,
   type CSSProperties,
   type FocusEvent,
   type KeyboardEvent,
@@ -139,7 +140,8 @@ export type PinInputProps = {
    */
   type?: PinInputType;
   /**
-   * Controlled joined code value.
+   * Controlled joined code value. Characters outside the set accepted by
+   * `type` are ignored.
    */
   value: string;
 } & FieldNecessity;
@@ -147,9 +149,13 @@ export type PinInputProps = {
 const DEFAULT_LENGTH = 6;
 
 function filterCharacters(value: string, type: PinInputType): string {
+  // NFKC folds compatibility characters — full-width digits from CJK
+  // keyboards or SMS messages (１２３) — to their ASCII forms before
+  // filtering, so they count as valid input instead of being discarded.
+  const normalized = value.normalize('NFKC');
   return type === 'numeric'
-    ? value.replace(/[^0-9]/g, '')
-    : value.replace(/[^a-zA-Z0-9]/g, '');
+    ? normalized.replace(/[^0-9]/g, '')
+    : normalized.replace(/[^a-zA-Z0-9]/g, '');
 }
 
 function replaceCharacters(
@@ -220,7 +226,11 @@ export function PinInput({
   const size = inputGroup?.size ?? sizeProp;
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
   const cellsRef = useRef<(HTMLInputElement | null)[]>([]);
-  const displayedValue = value.slice(0, length);
+  // The controlled value is sanitized the same way as user input: characters
+  // outside the accepted set (including lone surrogate halves an astral
+  // character would otherwise split into) are ignored rather than rendered
+  // into cells or submitted through the hidden input.
+  const displayedValue = filterCharacters(value, type).slice(0, length);
   // True while focusCell moves focus, so handleFocus can tell programmatic
   // moves (already targeted correctly, but running against a render that
   // predates the parent echoing onChange) from user focus, which is checked
@@ -325,11 +335,11 @@ export function PinInput({
     wasCompleteRef.current = isComplete;
   };
 
-  const handleChange = (
+  const insert = (
     index: number,
-    event: ChangeEvent<HTMLInputElement>,
+    raw: string,
+    event: ChangeEvent<HTMLInputElement> | null,
   ): void => {
-    const raw = event.target.value;
     const previous = displayedValue[index] ?? '';
     // The cells have no maxLength (it would truncate one-time-code autofill
     // to a single character), so typing in a filled cell whose selection was
@@ -343,12 +353,6 @@ export function PinInput({
         : raw;
     const characters = filterCharacters(inserted, type);
     if (characters === '') {
-      if (raw === '' && index < displayedValue.length) {
-        commit(
-          displayedValue.slice(0, index) + displayedValue.slice(index + 1),
-          event,
-        );
-      }
       return;
     }
 
@@ -360,6 +364,37 @@ export function PinInput({
     );
     commit(nextValue, event);
     focusCell(Math.min(index, displayedValue.length) + characters.length);
+  };
+
+  const handleChange = (
+    index: number,
+    event: ChangeEvent<HTMLInputElement>,
+  ): void => {
+    // Mid-composition text is intermediate: committing it (or letting the
+    // controlled value reset the cell when it filters to nothing) cancels the
+    // IME composition. The final text commits in handleCompositionEnd.
+    if (isComposingEvent(event.nativeEvent)) {
+      return;
+    }
+
+    const raw = event.target.value;
+    if (raw === '') {
+      if (index < displayedValue.length) {
+        commit(
+          displayedValue.slice(0, index) + displayedValue.slice(index + 1),
+          event,
+        );
+      }
+      return;
+    }
+    insert(index, raw, event);
+  };
+
+  const handleCompositionEnd = (
+    index: number,
+    event: CompositionEvent<HTMLInputElement>,
+  ): void => {
+    insert(index, event.currentTarget.value, null);
   };
 
   const handleBackspace = (
@@ -438,6 +473,7 @@ export function PinInput({
           key={index}
           onBlur={handleBlur}
           onChange={event => handleChange(index, event)}
+          onCompositionEnd={event => handleCompositionEnd(index, event)}
           onFocus={event => handleFocus(index, event)}
           onKeyDown={event => handleKeyDown(index, event)}
           onPaste={event => handlePaste(index, event)}

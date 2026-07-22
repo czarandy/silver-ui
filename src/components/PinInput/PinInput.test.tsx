@@ -209,6 +209,73 @@ describe('PinInput', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it('ignores invalid characters in the controlled value and hidden submission', () => {
+    render(
+      <form data-testid="form">
+        <PinInput htmlName="otp" label="Code" onChange={noop} value="1a-234" />
+      </form>,
+    );
+
+    expect(getCells().map(cell => cell.value)).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '',
+      '',
+    ]);
+    expect(
+      Array.from(new FormData(screen.getByTestId('form')).entries()),
+    ).toEqual([['otp', '1234']]);
+  });
+
+  it('drops astral characters instead of rendering lone surrogates', () => {
+    render(<PinInput label="Code" onChange={noop} value={'1\u{1F44D}34'} />);
+
+    expect(getCells().map(cell => cell.value)).toEqual([
+      '1',
+      '3',
+      '4',
+      '',
+      '',
+      '',
+    ]);
+  });
+
+  it('normalizes full-width digits to ASCII on paste', () => {
+    const onChange = vi.fn<PinInputProps['onChange']>();
+    render(<ControlledPinInput label="Code" onChange={onChange} />);
+
+    fireEvent.paste(getCells()[0], {
+      clipboardData: {getData: () => '１２３４５６'},
+    });
+
+    expect(onChange).toHaveBeenCalledExactlyOnceWith('123456', null);
+  });
+
+  it('commits IME text on compositionend instead of during composition', () => {
+    const onChange = vi.fn<PinInputProps['onChange']>();
+    render(
+      <ControlledPinInput
+        label="Code"
+        onChange={onChange}
+        type="alphanumeric"
+      />,
+    );
+    const cells = getCells('Character');
+
+    fireEvent.compositionStart(cells[0]);
+    // Mid-composition text must not commit even when it normalizes to a
+    // valid character; committing re-renders the cell and cancels the IME.
+    fireEvent.input(cells[0], {isComposing: true, target: {value: 'ｋ'}});
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.compositionEnd(cells[0], {target: {value: 'ｋａ'}});
+    expect(onChange).toHaveBeenCalledExactlyOnceWith('ka', null);
+    expect(cells.map(cell => cell.value).slice(0, 2)).toEqual(['k', 'a']);
+    expect(cells[2]).toHaveFocus();
+  });
+
   it('accepts ASCII letters and digits while preserving case in alphanumeric mode', () => {
     const onChange = vi.fn<PinInputProps['onChange']>();
     render(
