@@ -6,7 +6,21 @@ import {describe, expect, it} from 'vitest';
 const here = dirname(fileURLToPath(import.meta.url));
 const componentsDir = resolve(here, 'components');
 const barrelSource = readFileSync(resolve(here, 'index.ts'), 'utf8');
+const internalBarrelSource = readFileSync(
+  resolve(here, 'internal', 'index.ts'),
+  'utf8',
+);
 const readmeSource = readFileSync(resolve(here, '..', 'README.md'), 'utf8');
+
+// Matches one member (`Name` or `type Name`) re-exported from the given
+// component barrel path, without depending on member order inside the export
+// block, so alphabetizing or splitting the statement cannot break the test.
+function barrelExportPattern(componentPath: string, member: string): RegExp {
+  return new RegExp(
+    String.raw`export\s*\{[^}]*\b${member}\b[^}]*\}\s*from\s*'components/${componentPath}'`,
+    's',
+  );
+}
 
 // Components that are exported but intentionally not in the README "Components"
 // list because they are documented elsewhere.
@@ -46,36 +60,26 @@ function valueExports(source: string): string[] {
   return names;
 }
 
-describe('VisuallyHidden public export', () => {
-  it('re-exports the VisuallyHidden value and VisuallyHiddenProps type', () => {
-    // The re-export must come from the public component barrel, not `internal`.
-    expect(barrelSource).toMatch(
-      /export\s*\{[^}]*\bVisuallyHidden\b[^}]*\btype VisuallyHiddenProps\b[^}]*\}\s*from\s*'components\/VisuallyHidden'/s,
-    );
-  });
-
-  it('does not surface VisuallyHidden through the internal barrel', () => {
-    const internalBarrel = readFileSync(
-      resolve(here, 'internal', 'index.ts'),
-      'utf8',
-    );
-    expect(internalBarrel).not.toContain('VisuallyHidden');
-  });
-});
-
-describe('OverflowList public export', () => {
+// Components promoted from `internal` whose public surface (value plus types)
+// must come from the component barrel and stay out of the internal barrel.
+describe.each([
+  {
+    component: 'VisuallyHidden',
+    members: ['VisuallyHidden', 'type VisuallyHiddenProps'],
+  },
+  {
+    component: 'OverflowList',
+    members: ['OverflowList', 'type OverflowItem', 'type OverflowListProps'],
+  },
+])('$component public export', ({component, members}) => {
   it('re-exports the component and its public types', () => {
-    expect(barrelSource).toMatch(
-      /export\s*\{[^}]*\bOverflowList\b[^}]*\btype OverflowItem\b[^}]*\btype OverflowListProps\b[^}]*\}\s*from\s*'components\/OverflowList'/s,
-    );
+    for (const member of members) {
+      expect(barrelSource).toMatch(barrelExportPattern(component, member));
+    }
   });
 
-  it('does not surface OverflowList through the internal barrel', () => {
-    const internalBarrel = readFileSync(
-      resolve(here, 'internal', 'index.ts'),
-      'utf8',
-    );
-    expect(internalBarrel).not.toContain('OverflowList');
+  it('does not surface it through the internal barrel', () => {
+    expect(internalBarrelSource).not.toContain(component);
   });
 });
 
