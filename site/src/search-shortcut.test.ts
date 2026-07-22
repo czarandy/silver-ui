@@ -24,17 +24,17 @@ describe('docs search shortcut', () => {
   const rootRule = ruleBody('site-search button[data-open-modal] > kbd');
   const keyRule = ruleBody('site-search button[data-open-modal] > kbd > kbd');
 
-  it('matches the Kbd small-size geometry', () => {
-    expect(kbdRecipe).toMatch(/root: \{gap: '0\.5'\}/);
+  it('matches the Kbd medium-size geometry', () => {
+    expect(kbdRecipe).toMatch(/root: \{gap: '1'\}/);
     expect(kbdRecipe).toMatch(
-      /key: \{minW: '4', h: '4', px: '0\.5', fontSize: '2xs'\}/,
+      /key: \{minW: '5', h: '5', px: '1', fontSize: 'xs'\}/,
     );
 
-    expect(rootRule).toMatch(/gap:\s*0\.125rem/);
-    expect(keyRule).toMatch(/min-width:\s*var\(--silver-sizes-4\)/);
-    expect(keyRule).toMatch(/height:\s*var\(--silver-sizes-4\)/);
-    expect(keyRule).toMatch(/padding-inline:\s*0\.125rem/);
-    expect(keyRule).toMatch(/font-size:\s*var\(--silver-font-sizes-2xs\)/);
+    expect(rootRule).toMatch(/gap:\s*0\.25rem/);
+    expect(keyRule).toMatch(/min-width:\s*var\(--silver-sizes-5\)/);
+    expect(keyRule).toMatch(/height:\s*var\(--silver-sizes-5\)/);
+    expect(keyRule).toMatch(/padding-inline:\s*0\.25rem/);
+    expect(keyRule).toMatch(/font-size:\s*var\(--silver-font-sizes-xs\)/);
   });
 
   it('matches the Kbd key surface and typography tokens', () => {
