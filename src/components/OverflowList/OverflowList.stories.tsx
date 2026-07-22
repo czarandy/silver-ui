@@ -2,12 +2,16 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Badge} from 'components/Badge';
 import {
   OverflowList,
-  type OverflowListProps,
+  type OverflowItem,
 } from 'components/OverflowList/OverflowList';
 
 const labels = ['Design', 'Engineering', 'Research', 'Operations', 'Support'];
 
-const meta = {
+function overflowBadge(items: OverflowItem[]): React.JSX.Element {
+  return <Badge color="info" label={`+${items.length}`} />;
+}
+
+const meta: Meta<typeof OverflowList> = {
   title: 'Components/OverflowList',
   component: OverflowList,
   args: {
@@ -34,43 +38,54 @@ const meta = {
       },
     },
   },
-} satisfies Meta<OverflowListProps>;
+};
 
 export default meta;
-type Story = StoryObj<OverflowListProps>;
+type Story = StoryObj<typeof meta>;
 
-function Example(args: OverflowListProps): React.JSX.Element {
-  return (
+export const Default: Story = {
+  render: args => (
     <OverflowList
       {...args}
-      overflowRenderer={items => (
-        <Badge color="info" label={`+${items.length}`} />
-      )}
+      overflowRenderer={overflowBadge}
       style={{maxWidth: 360}}>
       {labels.map(label => (
         <Badge key={label} label={label} />
       ))}
     </OverflowList>
-  );
-}
-
-export const Default: Story = {
-  args: {children: null},
-  render: args => <Example {...args} />,
+  ),
 };
 
 export const CollapseFromStart: Story = {
-  args: {children: null, collapseFrom: 'start'},
-  render: args => <Example {...args} />,
+  args: {collapseFrom: 'start'},
+  render: args => (
+    <OverflowList
+      {...args}
+      overflowRenderer={overflowBadge}
+      style={{maxWidth: 360}}>
+      {labels.map(label => (
+        <Badge key={label} label={label} />
+      ))}
+    </OverflowList>
+  ),
 };
 
 export const KeepTwoVisible: Story = {
-  args: {children: null, minVisibleItems: 2},
-  render: args => <Example {...args} />,
+  args: {minVisibleItems: 2},
+  render: args => (
+    <OverflowList
+      {...args}
+      overflowRenderer={overflowBadge}
+      style={{maxWidth: 360}}>
+      {labels.map(label => (
+        <Badge key={label} label={label} />
+      ))}
+    </OverflowList>
+  ),
 };
 
 export const ObserveParent: Story = {
-  args: {behavior: 'observeParent', children: null},
+  args: {behavior: 'observeParent'},
   parameters: {
     docs: {
       description: {
@@ -89,11 +104,7 @@ export const ObserveParent: Story = {
         maxWidth: 420,
       }}>
       <span style={{whiteSpace: 'nowrap'}}>Teams:</span>
-      <OverflowList
-        {...args}
-        overflowRenderer={items => (
-          <Badge color="info" label={`+${items.length}`} />
-        )}>
+      <OverflowList {...args} overflowRenderer={overflowBadge}>
         {labels.map(label => (
           <Badge key={label} label={label} />
         ))}
