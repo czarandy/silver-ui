@@ -2,7 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Home} from 'lucide-react';
 import type {ComponentPropsWithRef, ReactNode, Ref} from 'react';
-import {describe, expect, it, vi} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {LinkProvider} from 'components/Link';
 import {SideNav} from 'components/SideNav/SideNav';
 import {SideNavRenderContext} from 'components/SideNav/SideNavContext';
@@ -10,6 +10,23 @@ import {SideNavHeading} from 'components/SideNav/SideNavHeading';
 import {SideNavItem} from 'components/SideNav/SideNavItem';
 import {SideNavSection} from 'components/SideNav/SideNavSection';
 import {assertNonNull} from 'internal/testHelpers';
+
+function createMatchMedia(matches: boolean) {
+  return vi.fn().mockImplementation((query: string) => ({
+    matches,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
+}
+
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', createMatchMedia(false));
+});
 
 function CustomLink({
   children,
@@ -695,6 +712,143 @@ describe('SideNavHeading', () => {
 });
 
 describe('SideNav collapsed state', () => {
+  it('starts collapsed at the default lg breakpoint', () => {
+    const matchMedia = createMatchMedia(true);
+    vi.stubGlobal('matchMedia', matchMedia);
+
+    render(
+      <SideNav isCollapsible>
+        <SideNavItem href="/home" icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(matchMedia).toHaveBeenCalledExactlyOnceWith('(max-width: 1024px)');
+    expect(screen.getByRole('link', {name: 'Home'})).not.toHaveTextContent(
+      'Home',
+    );
+    expect(
+      screen.getByRole('button', {name: 'Expand sidebar'}),
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    ['sm', 640],
+    ['md', 768],
+  ] as const)(
+    'supports the %s initial collapse breakpoint',
+    (collapseBreakpoint, width) => {
+      const matchMedia = createMatchMedia(true);
+      vi.stubGlobal('matchMedia', matchMedia);
+
+      render(
+        <SideNav collapseBreakpoint={collapseBreakpoint} isCollapsible>
+          <SideNavItem icon={Home} label="Home" />
+        </SideNav>,
+      );
+
+      expect(matchMedia).toHaveBeenCalledWith(`(max-width: ${width}px)`);
+      expect(
+        screen.getByRole('button', {name: 'Expand sidebar'}),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it('starts expanded when responsive collapsing is disabled', () => {
+    const matchMedia = createMatchMedia(true);
+    vi.stubGlobal('matchMedia', matchMedia);
+
+    render(
+      <SideNav collapseBreakpoint="none" isCollapsible>
+        <SideNavItem href="/home" icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(matchMedia).not.toHaveBeenCalled();
+    expect(screen.getByRole('link', {name: 'Home'})).toHaveTextContent('Home');
+    expect(
+      screen.getByRole('button', {name: 'Collapse sidebar'}),
+    ).toBeInTheDocument();
+  });
+
+  it('does not apply responsive collapsing when isCollapsible is false', () => {
+    const matchMedia = createMatchMedia(true);
+    vi.stubGlobal('matchMedia', matchMedia);
+
+    render(
+      <SideNav>
+        <SideNavItem href="/home" icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(matchMedia).not.toHaveBeenCalled();
+    expect(screen.getByRole('link', {name: 'Home'})).toHaveTextContent('Home');
+  });
+
+  it('evaluates the responsive breakpoint only once', () => {
+    const matchMedia = createMatchMedia(true);
+    vi.stubGlobal('matchMedia', matchMedia);
+
+    const {rerender} = render(
+      <SideNav collapseBreakpoint="sm" isCollapsible>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    rerender(
+      <SideNav collapseBreakpoint="md" isCollapsible>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(matchMedia).toHaveBeenCalledExactlyOnceWith('(max-width: 640px)');
+    expect(
+      screen.getByRole('button', {name: 'Expand sidebar'}),
+    ).toBeInTheDocument();
+  });
+
+  it('expands an initially collapsed responsive nav via the built-in toggle', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('matchMedia', createMatchMedia(true));
+
+    render(
+      <SideNav isCollapsible>
+        <SideNavItem href="/home" icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Expand sidebar'}));
+
+    expect(screen.getByRole('link', {name: 'Home'})).toHaveTextContent('Home');
+    expect(
+      screen.getByRole('button', {name: 'Collapse sidebar'}),
+    ).toBeInTheDocument();
+  });
+
+  it('resolves to expanded when isCollapsible is disabled', () => {
+    vi.stubGlobal('matchMedia', createMatchMedia(true));
+
+    const {rerender} = render(
+      <SideNav isCollapsible>
+        <SideNavItem href="/home" icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(
+      screen.getByRole('button', {name: 'Expand sidebar'}),
+    ).toBeInTheDocument();
+
+    rerender(
+      <SideNav>
+        <SideNavItem href="/home" icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    expect(screen.getByRole('link', {name: 'Home'})).toHaveTextContent('Home');
+    expect(
+      screen.queryByRole('button', {name: /sidebar/}),
+    ).not.toBeInTheDocument();
+  });
+
   it('hides label text and shows aria-label when collapsed', async () => {
     const user = userEvent.setup();
     render(

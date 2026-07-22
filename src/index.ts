@@ -440,6 +440,7 @@ export {
   SideNavItem,
   SideNavRenderContext,
   SideNavSection,
+  type SideNavCollapseBreakpoint,
   type SideNavCollapseState,
   type SideNavHeadingProps,
   type SideNavItemProps,
