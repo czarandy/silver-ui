@@ -22,12 +22,6 @@ const styles = {
     display: 'inline-flex',
     gap: '2',
   }),
-  // Without a flex wrapper the Kbd's `vertical-align: bottom` drops it to the
-  // bottom of the inherited line box, misaligning it with the label and check.
-  optionHotkey: css({
-    alignItems: 'center',
-    display: 'inline-flex',
-  }),
 } as const;
 
 function normalizeHotkey(hotkey: string | undefined): string | null {
@@ -125,9 +119,7 @@ function ScheduleViewSelectorControl<View extends ScheduleViewBase>({
                       />
                     ) : null}
                     {hotkey != null ? (
-                      <span aria-hidden="true" className={styles.optionHotkey}>
-                        <Kbd keys={hotkey} size="sm" />
-                      </span>
+                      <Kbd aria-hidden={true} keys={hotkey} size="sm" />
                     ) : null}
                   </span>
                 ) : null

@@ -176,4 +176,16 @@ describe('Kbd', () => {
     expect(root).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
   });
+
+  it('hides the shortcut from assistive technology when aria-hidden is set', () => {
+    render(<Kbd aria-hidden={true} data-testid="kbd" keys="k" />);
+
+    expect(screen.getByTestId('kbd')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('stays exposed to assistive technology by default', () => {
+    render(<Kbd data-testid="kbd" keys="k" />);
+
+    expect(screen.getByTestId('kbd')).not.toHaveAttribute('aria-hidden');
+  });
 });
