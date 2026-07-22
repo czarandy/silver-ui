@@ -55,6 +55,33 @@ export const Collapsible: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
+        collapseBreakpoint="none"
+        header={
+          <SideNavHeading heading="Silver" logo={logo} subheading="Workspace" />
+        }
+        isCollapsible>
+        <SideNavSection title="Main">
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
+          <SideNavItem href="/settings" icon={Settings} label="Settings" />
+        </SideNavSection>
+      </SideNav>
+    </div>
+  ),
+};
+
+export const ResponsiveInitialCollapse: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'At 1024px or narrower, reload the story to see the SideNav start collapsed. The collapse button controls it after mount.',
+      },
+    },
+  },
+  render: () => (
+    <div style={{height: 420}}>
+      <SideNav
         header={
           <SideNavHeading heading="Silver" logo={logo} subheading="Workspace" />
         }

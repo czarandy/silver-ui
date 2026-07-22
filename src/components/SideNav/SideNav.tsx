@@ -1,7 +1,7 @@
 'use client';
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useMemo, useState, useSyncExternalStore} from 'react';
 import {sideNavRecipe} from 'components/SideNav/SideNav.recipe';
 import {
   SideNavCollapseContext,
@@ -9,8 +9,19 @@ import {
 } from 'components/SideNav/SideNavContext';
 import {SideNavCollapseButton} from 'components/SideNav/internal/SideNavCollapseButton';
 import {MobileNav} from 'internal/MobileNav';
+import {getMaxWidthBreakpointQuery} from 'internal/breakpoints';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
+
+export type SideNavCollapseBreakpoint = 'sm' | 'md' | 'lg' | 'none';
+
+function getExpandedServerSnapshot(): boolean {
+  return false;
+}
+
+function subscribeToInitialCollapse(): () => void {
+  return () => {};
+}
 
 export interface SideNavProps {
   /**
@@ -21,6 +32,13 @@ export interface SideNavProps {
    * Additional CSS class names applied to the nav element.
    */
   className?: string;
+  /**
+   * Breakpoint at or below which a collapsible nav starts collapsed. This is
+   * evaluated only when the nav first mounts. Use `none` to always start
+   * expanded.
+   * @default 'lg'
+   */
+  collapseBreakpoint?: SideNavCollapseBreakpoint;
   /**
    * Test ID applied to the nav element.
    */
@@ -63,6 +81,7 @@ export interface SideNavProps {
 export function SideNav({
   children,
   className,
+  collapseBreakpoint = 'lg',
   isCollapsible = false,
   'data-testid': dataTestId,
   footer,
@@ -73,13 +92,37 @@ export function SideNav({
   topContent,
 }: SideNavProps): React.JSX.Element {
   const renderMode = useSideNavRenderMode();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  // Hydrate from an expanded server snapshot, then cache the first browser
+  // match so later viewport changes cannot override the user's toggle state.
+  const [getInitialCollapseSnapshot] = useState(() => {
+    let initialSnapshot: boolean | undefined;
+    return (): boolean => {
+      initialSnapshot ??=
+        isCollapsible &&
+        collapseBreakpoint !== 'none' &&
+        typeof window !== 'undefined' &&
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia(getMaxWidthBreakpointQuery(collapseBreakpoint))
+          .matches;
+      return initialSnapshot;
+    };
+  });
+  const isInitiallyCollapsed = useSyncExternalStore(
+    subscribeToInitialCollapse,
+    getInitialCollapseSnapshot,
+    getExpandedServerSnapshot,
+  );
+  const [userIsCollapsed, setUserIsCollapsed] = useState<boolean>();
+  const resolvedIsCollapsed =
+    isCollapsible && (userIsCollapsed ?? isInitiallyCollapsed);
   const toggle = useCallback(() => {
-    setIsCollapsed(prev => !prev);
-  }, []);
+    if (isCollapsible) {
+      setUserIsCollapsed(current => !(current ?? isInitiallyCollapsed));
+    }
+  }, [isCollapsible, isInitiallyCollapsed]);
   const collapseContext = useMemo(
-    () => ({isCollapsed, isCollapsible, toggle}),
-    [isCollapsed, isCollapsible, toggle],
+    () => ({isCollapsed: resolvedIsCollapsed, isCollapsible, toggle}),
+    [resolvedIsCollapsed, isCollapsible, toggle],
   );
 
   if (renderMode === 'topbar') {
@@ -122,7 +165,7 @@ export function SideNav({
     );
   }
 
-  const classes = sideNavRecipe({isCollapsed});
+  const classes = sideNavRecipe({isCollapsed: resolvedIsCollapsed});
 
   return (
     <SideNavCollapseContext value={collapseContext}>
@@ -133,10 +176,10 @@ export function SideNav({
         ref={ref}
         style={style}>
         {isNonEmptyReactNode(header) ||
-        (!isCollapsed && isNonEmptyReactNode(topContent)) ? (
+        (!resolvedIsCollapsed && isNonEmptyReactNode(topContent)) ? (
           <div className={classes.stickyTop}>
             {header}
-            {!isCollapsed ? topContent : null}
+            {!resolvedIsCollapsed ? topContent : null}
           </div>
         ) : null}
         <div className={classes.scrollable}>{children}</div>

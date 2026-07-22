@@ -19,6 +19,7 @@ import {
   TopNavRenderContext,
 } from 'components/TopNav';
 import {MobileNavToggle} from 'internal/MobileNav';
+import {getMaxWidthBreakpointQuery} from 'internal/breakpoints';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
@@ -91,13 +92,6 @@ export interface AppShellProps {
    */
   variant?: AppShellVariant;
 }
-
-const BREAKPOINT_VALUES: Record<AppShellBreakpoint, number> = {
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  none: 0,
-};
 
 const styles = {
   skipLink: css({
@@ -207,10 +201,7 @@ export function AppShell({
   variant = 'default',
 }: AppShellProps): React.JSX.Element {
   const mainContentId = useId();
-  const breakpointQuery =
-    mobileBreakpoint === 'none'
-      ? '(max-width: 0px)'
-      : `(max-width: ${BREAKPOINT_VALUES[mobileBreakpoint]}px)`;
+  const breakpointQuery = getMaxWidthBreakpointQuery(mobileBreakpoint);
   const isBelowBreakpoint = useMediaQuery(breakpointQuery);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const {ref: topNavPresenceRef, hasContent: hasTopNavContent} =
