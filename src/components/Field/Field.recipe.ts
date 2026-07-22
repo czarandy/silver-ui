@@ -1,14 +1,7 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const fieldRecipe = sva({
-  slots: [
-    'root',
-    'label',
-    'labelIcon',
-    'indicator',
-    'tooltipIcon',
-    'inputWrapper',
-  ],
+  slots: ['root', 'label', 'labelIcon', 'tooltipIcon', 'inputWrapper'],
   base: {
     root: {
       display: 'flex',
@@ -25,10 +18,6 @@ export const fieldRecipe = sva({
     },
     labelIcon: {
       alignSelf: 'center',
-    },
-    indicator: {
-      fontWeight: 'normal',
-      color: 'fg.muted',
     },
     tooltipIcon: {
       display: 'inline-flex',

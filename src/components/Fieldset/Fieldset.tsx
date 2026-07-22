@@ -16,6 +16,7 @@ import {
 } from 'components/Fieldset/FieldsetContext';
 import {VStack} from 'components/Stack';
 import {Text} from 'components/Text';
+import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
@@ -93,7 +94,6 @@ export function Fieldset({
     : undefined;
   const statusId = getStatusMessageID(fieldsetId, status);
   const describedBy = getDescribedBy(ariaDescribedBy, descriptionId, statusId);
-  const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
   const classes = fieldsetRecipe({
     isDisabled: effectiveDisabled,
     statusType: status?.type,
@@ -120,17 +120,11 @@ export function Fieldset({
             <Text as="span" color="inherit" type="label">
               {legend}
             </Text>
-            {statusText != null ? (
-              <Text
-                as="span"
-                className={classes.indicator}
-                color="secondary"
-                size="xs"
-                type="supporting">
-                <span aria-hidden="true"> · </span>
-                {statusText}
-              </Text>
-            ) : null}
+            <NecessityIndicator
+              isOptional={isOptional}
+              isRequired={isRequired}
+              size="xs"
+            />
           </span>
         </legend>
         {isNonEmptyReactNode(description) ? (

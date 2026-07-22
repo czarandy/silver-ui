@@ -1,4 +1,5 @@
 import type {InputStatusType} from 'components/Field';
+import {statusBorderColor} from 'components/Field/inputStyles';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const fieldsetRecipe = sva({
@@ -7,7 +8,6 @@ export const fieldsetRecipe = sva({
     'root',
     'legend',
     'legendContent',
-    'indicator',
     'description',
     'content',
   ],
@@ -39,10 +39,6 @@ export const fieldsetRecipe = sva({
       px: '1',
       color: 'fg',
     },
-    indicator: {
-      flexShrink: 0,
-      fontWeight: 'normal',
-    },
     description: {
       display: 'block',
       mb: '3',
@@ -63,9 +59,9 @@ export const fieldsetRecipe = sva({
       },
     },
     statusType: {
-      error: {root: {borderColor: 'status.error.border'}},
-      success: {root: {borderColor: 'status.success.border'}},
-      warning: {root: {borderColor: 'status.warning.border'}},
+      error: {root: {borderColor: statusBorderColor.error}},
+      success: {root: {borderColor: statusBorderColor.success}},
+      warning: {root: {borderColor: statusBorderColor.warning}},
     } satisfies Record<InputStatusType, object>,
   },
   defaultVariants: {

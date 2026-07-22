@@ -1,16 +1,7 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const checkboxInputRecipe = sva({
-  slots: [
-    'root',
-    'boxWrap',
-    'input',
-    'box',
-    'icon',
-    'label',
-    'indicator',
-    'tooltipIcon',
-  ],
+  slots: ['root', 'boxWrap', 'input', 'box', 'icon', 'label', 'tooltipIcon'],
   base: {
     root: {
       display: 'flex',
@@ -57,10 +48,6 @@ export const checkboxInputRecipe = sva({
     },
     label: {
       cursor: 'pointer',
-    },
-    indicator: {
-      fontWeight: 'normal',
-      color: 'fg.muted',
     },
     tooltipIcon: {
       display: 'inline-flex',
