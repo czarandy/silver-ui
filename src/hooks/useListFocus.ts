@@ -186,24 +186,33 @@ const useListFocus = ({
 
   const handleKeyDown = useCallback(
     (event: ListFocusKeyboardEvent) => {
-      const {getItems, isLooping, isRtl, orientation} = optionsRef.current;
+      const {getItems, isLooping, isRtl, onFocusItem, orientation} =
+        optionsRef.current;
       const move = getMove(event.key, orientation, isRtl);
       if (move == null) {
         return false;
       }
 
+      // One getItems() snapshot serves the whole keypress; getItems is often
+      // a live DOM query, and the DOM cannot change mid-event.
       const items = getItems();
       if (items.length === 0) {
         return false;
       }
 
       event.preventDefault();
-      focusItemAt(
-        getNextIndex(move, getActiveIndex(), items.length, isLooping),
+      const activeIndex = items.findIndex(
+        item => item === document.activeElement,
       );
+      const index = getNextIndex(move, activeIndex, items.length, isLooping);
+      const item = items[index] as HTMLElement | undefined;
+      if (item != null) {
+        item.focus();
+        onFocusItem?.(item, index);
+      }
       return true;
     },
-    [focusItemAt, getActiveIndex, optionsRef],
+    [optionsRef],
   );
 
   return useMemo(

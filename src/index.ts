@@ -180,6 +180,14 @@ export {
   type ButtonGroupProps,
 } from 'components/ButtonGroup';
 export {
+  Toolbar,
+  type ToolbarDividerSide,
+  type ToolbarGap,
+  type ToolbarOrientation,
+  type ToolbarProps,
+  type ToolbarSize,
+} from 'components/Toolbar';
+export {
   SegmentedControl,
   SegmentedControlItem,
   type SegmentedControlItemProps,

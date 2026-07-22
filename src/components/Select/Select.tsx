@@ -26,6 +26,7 @@ import {
   selectTriggerRecipe,
 } from 'components/Select/Select.recipe';
 import {Spinner} from 'components/Spinner';
+import {useAmbientSize} from 'internal/SizeContext';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -206,7 +207,7 @@ export function Select({
   ref,
   renderOption: renderOptionProp,
   searchPlaceholder = 'Search...',
-  size: sizeProp = 'md',
+  size: sizeProp,
   startIcon,
   status,
   style,
@@ -214,11 +215,12 @@ export function Select({
 }: SelectProps): React.JSX.Element {
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
+  const ambientSize = useAmbientSize();
   const effectiveDisabled =
     isDisabled ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const size = inputGroup?.size ?? sizeProp;
+  const size = inputGroup?.size ?? sizeProp ?? ambientSize ?? 'md';
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 
   const selectedValues = useMemo(
