@@ -144,10 +144,16 @@ describe('Tabs', () => {
     );
   });
 
-  it('clips tab backgrounds above the divider', () => {
+  it('clips the hover background above the divider', () => {
     const tabClass = assertNonNull(tabsRecipe({hasDivider: true}).tab);
 
     expect(tabClass.split(' ')).toContain(css({backgroundClip: 'padding-box'}));
+    expect(tabClass.split(' ')).toContain(
+      css({_hover: {backgroundColor: 'bg.subtle'}}),
+    );
+    expect(tabClass.split(' ')).not.toContain(
+      css({_hover: {background: 'bg.subtle'}}),
+    );
   });
 
   it('uses a thick divider and the primary color for the selected underline', () => {
