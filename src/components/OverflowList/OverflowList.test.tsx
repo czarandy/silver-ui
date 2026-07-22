@@ -1,16 +1,15 @@
 import {act, render, screen, within} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {OverflowList, type OverflowItem} from 'components/OverflowList';
-import {overflowListRecipe} from 'components/OverflowList/OverflowList.recipe';
 import {createResizeObserverStub} from 'internal/testHelpers';
 
 let containerWidth = 200;
 const resizeObserver = createResizeObserverStub();
-const indicatorClassNames =
-  overflowListRecipe().measureIndicator?.split(' ') ?? [];
 
 function widthFor(element: HTMLElement): number {
-  if (element.classList.contains('overflow-list-root')) {
+  // The visible row every test renders with data-testid="list" takes the
+  // test-controlled container width.
+  if (element.dataset.testid === 'list') {
     return containerWidth;
   }
 
@@ -19,10 +18,12 @@ function widthFor(element: HTMLElement): number {
     return ownWidth;
   }
 
-  if (
-    indicatorClassNames.some(className => element.classList.contains(className))
-  ) {
-    return 20;
+  // Wrapper elements (like the measure row's indicator wrapper) take the
+  // width their content declares.
+  // eslint-disable-next-line testing-library/no-node-access -- width mock inspects raw DOM structure
+  const inner = element.querySelector('[data-width]');
+  if (inner != null) {
+    return Number(inner.getAttribute('data-width')) || 0;
   }
 
   return 0;
@@ -62,7 +63,6 @@ describe('OverflowList', () => {
     containerWidth = 90;
     render(
       <OverflowList
-        className="overflow-list-root"
         data-testid="list"
         gap={2}
         overflowRenderer={renderOverflow}
@@ -94,7 +94,7 @@ describe('OverflowList', () => {
       (element, pseudo) => {
         if (
           element instanceof HTMLElement &&
-          element.classList.contains('overflow-list-root')
+          element.dataset.testid === 'list'
         ) {
           const stubStyle: Partial<CSSStyleDeclaration> = {
             columnGap: '0px',
@@ -108,7 +108,6 @@ describe('OverflowList', () => {
 
     render(
       <OverflowList
-        className="overflow-list-root"
         data-testid="list"
         overflowRenderer={renderOverflow}
         style={{gap: '16px 0px'}}>
@@ -127,7 +126,6 @@ describe('OverflowList', () => {
     containerWidth = 50;
     render(
       <OverflowList
-        className="overflow-list-root"
         collapseFrom="start"
         data-testid="list"
         overflowRenderer={renderOverflow}>
@@ -147,7 +145,6 @@ describe('OverflowList', () => {
     containerWidth = 20;
     render(
       <OverflowList
-        className="overflow-list-root"
         data-testid="list"
         minVisibleItems={2}
         overflowRenderer={renderOverflow}>
@@ -169,7 +166,6 @@ describe('OverflowList', () => {
         style={{paddingLeft: 10, paddingRight: 10}}>
         <OverflowList
           behavior="observeParent"
-          className="overflow-list-root"
           data-testid="list"
           overflowRenderer={renderOverflow}>
           <Item>Alpha</Item>
@@ -187,10 +183,7 @@ describe('OverflowList', () => {
 
   it('recalculates visible items when the observed element resizes', () => {
     render(
-      <OverflowList
-        className="overflow-list-root"
-        data-testid="list"
-        overflowRenderer={renderOverflow}>
+      <OverflowList data-testid="list" overflowRenderer={renderOverflow}>
         <Item>Alpha</Item>
         <Item>Beta</Item>
         <Item>Gamma</Item>
@@ -216,7 +209,7 @@ describe('OverflowList', () => {
       (element, pseudo) => {
         if (
           element instanceof HTMLElement &&
-          element.classList.contains('overflow-list-root')
+          element.dataset.testid === 'list'
         ) {
           const stubStyle: Partial<CSSStyleDeclaration> = {
             columnGap: element.classList.contains('silver-gap_4')
@@ -230,7 +223,7 @@ describe('OverflowList', () => {
     );
 
     const {rerender} = render(
-      <OverflowList className="overflow-list-root" data-testid="list" gap={4}>
+      <OverflowList data-testid="list" gap={4}>
         <Item>Alpha</Item>
         <Item>Beta</Item>
         <Item>Gamma</Item>
@@ -239,7 +232,7 @@ describe('OverflowList', () => {
     expect(screen.getByTestId('list')).toHaveTextContent(/^AlphaBeta$/);
 
     rerender(
-      <OverflowList className="overflow-list-root" data-testid="list" gap={1}>
+      <OverflowList data-testid="list" gap={1}>
         <Item>Alpha</Item>
         <Item>Beta</Item>
         <Item>Gamma</Item>
@@ -252,7 +245,7 @@ describe('OverflowList', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
     render(
       <OverflowList
-        className="overflow-list-root custom-list"
+        className="custom-list"
         data-testid="list"
         gap={4}
         ref={ref}
@@ -274,7 +267,6 @@ describe('OverflowList', () => {
     render(
       <OverflowList
         aria-label="Selected teams"
-        className="overflow-list-root"
         data-testid="list"
         id="team-list"
         onClick={onClick}>
