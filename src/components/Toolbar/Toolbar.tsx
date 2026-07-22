@@ -14,6 +14,7 @@ import {toolbarRecipe} from 'components/Toolbar/Toolbar.recipe';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {SizeContext, type AmbientSize} from 'internal/SizeContext';
+import {FOCUSABLE_SELECTOR} from 'internal/focusable';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import type {SpacingToken} from 'internal/spacingTokens';
@@ -82,9 +83,6 @@ export interface ToolbarProps {
    */
   style?: CSSProperties;
 }
-
-const FOCUSABLE_SELECTOR =
-  'a[href], button, input, select, textarea, [tabindex]';
 
 /**
  * Focusable toolbar items, in DOM order. Disabled elements are excluded
@@ -226,7 +224,22 @@ export function Toolbar({
       applyRovingTabStops(getFocusableItems(container), lastFocusedRef.current);
     };
     apply();
-    const observer = new MutationObserver(apply);
+    const observer = new MutationObserver(records => {
+      // Mutations confined to a child popover (an open Select re-rendering
+      // its option list on every filter keystroke) cannot change the item
+      // set — getFocusableItems excludes that content anyway.
+      const isRelevant = records.some(record => {
+        const element =
+          record.target instanceof Element
+            ? record.target
+            : record.target.parentElement;
+        const popover = element?.closest('[popover]');
+        return popover == null || !container.contains(popover);
+      });
+      if (isRelevant) {
+        apply();
+      }
+    });
     observer.observe(container, {
       // `tabindex` is observed so that children that manage their own
       // tabindex from React (a Tabs selection change writes `0` on the newly
@@ -263,6 +276,11 @@ export function Toolbar({
       hint.onFocus(event);
       const target = event.target;
       if (!(target instanceof HTMLElement)) {
+        return;
+      }
+      if (target === lastFocusedRef.current) {
+        // The tab stops are already applied for this item; re-focusing it
+        // (clicks, focus returning from a popover) needs no re-scan.
         return;
       }
       const items = getFocusableItems(containerRef.current);

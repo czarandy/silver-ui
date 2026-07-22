@@ -545,6 +545,34 @@ describe('Toolbar', () => {
       );
     });
 
+    it('cascades size to Tabs', () => {
+      render(
+        <>
+          <Toolbar
+            label="Actions"
+            size="sm"
+            startContent={
+              <Tabs label="Sections" onChange={() => {}} value="overview">
+                <Tab
+                  data-testid="ambient-tab"
+                  label="Overview"
+                  value="overview"
+                />
+              </Tabs>
+            }
+          />
+          <Tabs label="Explicit" onChange={() => {}} size="sm" value="overview">
+            <Tab data-testid="explicit-tab" label="Overview" value="overview" />
+          </Tabs>
+        </>,
+      );
+
+      expect(screen.getByTestId('ambient-tab')).toHaveAttribute(
+        'class',
+        screen.getByTestId('explicit-tab').getAttribute('class') ?? '',
+      );
+    });
+
     it('cascades size to TextInput and Select', () => {
       const view = render(
         <Toolbar
