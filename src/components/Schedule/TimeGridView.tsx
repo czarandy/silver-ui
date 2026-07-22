@@ -414,7 +414,9 @@ export function TimeGridView({
                     <span className={styles.dayHeaderContent}>
                       {plainDateFormat(day, {weekday: 'short'})}
                       <span className={dayHeaderClasses.dayHeaderDayNumber}>
-                        {day.day}
+                        <span className={styles.dayHeaderDayNumberText}>
+                          {day.day}
+                        </span>
                       </span>
                     </span>
                   </Heading>

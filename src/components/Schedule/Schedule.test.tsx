@@ -1491,7 +1491,7 @@ describe('Schedule', () => {
     const classes = scheduleTimeGridViewRecipe();
 
     // eslint-disable-next-line testing-library/no-node-access -- verifying the alignment class on the header content wrapper
-    expect(screen.getByText('13').parentElement).toHaveClass(
+    expect(screen.getByText('13').parentElement?.parentElement).toHaveClass(
       classes.dayHeaderContent ?? '',
     );
     expect(classes.dayHeaderContent).toContain('silver-ai_baseline');
@@ -1764,36 +1764,65 @@ describe('Schedule', () => {
     ).toHaveStyle({height: '132px', minHeight: '132px'});
   });
 
-  it('marks and styles the highlighted day in time grid views', async () => {
+  it('optically centers every highlighted day with a uniform numeral shift', () => {
     expect(
-      scheduleTimeGridViewRecipe.raw({isCurrentDay: true}).dayHeaderDayNumber,
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+      }).dayHeaderDayNumber,
     ).toMatchObject({
+      display: 'grid',
       height: '32px',
       marginBottom: '-1px',
       marginTop: '-1px',
-      paddingRight: '1px',
+      placeItems: 'center',
       width: '32px',
     });
-    mockCurrentTime('2026-05-13T09:30:00.000Z');
-
-    render(
-      <Schedule
-        events={[]}
-        highlightDate={instantUTC(2026, 4, 14)}
-        timezoneID="UTC"
-        view={createScheduleWeeklyView({maxHour: 10, minHour: 9})}
-        viewDate={instantUTC(2026, 4, 13)}
-      />,
-    );
-
-    const highlightedHeader = await screen.findByRole('columnheader', {
-      name: 'Thursday, May 14, 2026',
+    const dayNumberStyles = scheduleTimeGridViewRecipe.raw().dayHeaderDayNumber;
+    expect(dayNumberStyles).not.toHaveProperty('paddingBottom');
+    expect(dayNumberStyles).not.toHaveProperty('paddingLeft');
+    expect(dayNumberStyles).not.toHaveProperty('paddingRight');
+    expect(
+      scheduleTimeGridViewRecipe.raw().dayHeaderDayNumberText,
+    ).toMatchObject({
+      lineHeight: 1,
+      transform: 'translateY(-1px)',
     });
-    expect(highlightedHeader).toHaveAttribute('aria-current', 'date');
-    expect(within(highlightedHeader).getByText('14')).toHaveClass(
-      scheduleTimeGridViewRecipe({isCurrentDay: true})
-        .dayHeaderDayNumber as string,
+
+    const dayNumberTextClasses =
+      scheduleTimeGridViewRecipe().dayHeaderDayNumberText ?? '';
+    expect(dayNumberTextClasses).not.toBe('');
+
+    const highlightedDays = Array.from({length: 31}, (_, index) => index + 1);
+    const view = createScheduleDayView({maxHour: 9, minHour: 8});
+    render(
+      <>
+        {highlightedDays.map(day => {
+          const instant = instantUTC(2026, 4, day);
+          return (
+            <Schedule
+              events={[]}
+              highlightDate={instant}
+              key={day}
+              timezoneID="UTC"
+              view={view}
+              viewDate={instant}
+            />
+          );
+        })}
+      </>,
     );
+
+    const highlightedHeaders = screen
+      .getAllByRole('columnheader')
+      .filter(header => header.getAttribute('aria-current') === 'date');
+    expect(highlightedHeaders).toHaveLength(31);
+    const dayNumbers = highlightedHeaders.map((header, index) => {
+      expect(header).toHaveAttribute('aria-current', 'date');
+      return within(header).getByText(String(index + 1));
+    });
+    dayNumbers.forEach(dayNumber => {
+      expect(dayNumber).toHaveClass(dayNumberTextClasses);
+    });
   });
 
   it('renders the current-time line in the active time grid hour', async () => {
