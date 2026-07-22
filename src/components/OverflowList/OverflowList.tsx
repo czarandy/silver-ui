@@ -14,6 +14,7 @@ import {
 import {overflowListRecipe} from 'components/OverflowList/OverflowList.recipe';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
@@ -225,9 +226,8 @@ export function OverflowList({
       isObservingParent && container.parentElement != null
         ? container.parentElement
         : container;
-    const observer = new ResizeObserver(calculate);
-    observer.observe(target);
-    return () => observer.disconnect();
+    observeResize(target, calculate);
+    return () => unobserveResize(target, calculate);
   }, [calculate, isObservingParent]);
 
   const allItems: OverflowItem[] = childArray.map((child, index) => ({
