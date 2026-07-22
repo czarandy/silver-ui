@@ -11,7 +11,7 @@ import {
   createSearchFilterInputConfig,
   type FieldDefinition,
 } from 'components/SearchFilterInput/useSearchFilterInputConfig';
-import {assertNonNull} from 'internal/testHelpers';
+import {assertNonNull, createResizeObserverStub} from 'internal/testHelpers';
 
 const STATUSES: ReadonlyArray<EnumItem> = [
   {label: 'Active', value: 'active'},
@@ -416,11 +416,7 @@ describe('SearchFilterInput', () => {
 
 describe('edit popover focus', () => {
   beforeAll(() => {
-    globalThis.ResizeObserver = class {
-      observe(): void {}
-      unobserve(): void {}
-      disconnect(): void {}
-    };
+    globalThis.ResizeObserver = createResizeObserverStub().ResizeObserverStub;
     // jsdom defaults `[popover]` elements to `display: none` and lacks
     // showPopover/hidePopover. Toggle inline display so opened popover content
     // is visible (and thus queryable/clickable) in tests.
@@ -681,11 +677,7 @@ describe('edit popover focus', () => {
 
 describe('SearchFilterInput interactions', () => {
   beforeAll(() => {
-    globalThis.ResizeObserver = class {
-      observe(): void {}
-      unobserve(): void {}
-      disconnect(): void {}
-    };
+    globalThis.ResizeObserver = createResizeObserverStub().ResizeObserverStub;
     // jsdom defaults `[popover]` elements to `display: none` and lacks
     // showPopover/hidePopover; toggle inline display so opened popover content
     // is queryable/clickable in tests.

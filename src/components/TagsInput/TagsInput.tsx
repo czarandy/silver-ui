@@ -29,10 +29,10 @@ import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
+import {OverflowList} from 'components/OverflowList';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import useAnnounce from 'hooks/useAnnounce';
-import {OverflowList} from 'internal/OverflowList';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
@@ -545,7 +545,7 @@ export function TagsInput<T extends SearchableItem>({
       {isTruncated ? (
         <OverflowList
           behavior="observeParent"
-          gap={4}
+          gap={1}
           overflowRenderer={overflowItems => (
             <span className={classes.overflowText}>
               +{overflowItems.length} more
@@ -679,7 +679,7 @@ export function TagsInput<T extends SearchableItem>({
             ) : null}
             <OverflowList
               behavior="observeParent"
-              gap={4}
+              gap={1}
               overflowRenderer={overflowItems => (
                 <span className={classes.overflowText}>
                   +{overflowItems.length} more

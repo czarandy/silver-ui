@@ -118,6 +118,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Divider** — visual separator between sections
 - **Grid** — responsive equal-width columns with minimum-child-width reflow
 - **Layout** — page shell with header, footer, side panels, and content slots
+- **OverflowList** — shows the items that fit and collapses the rest into a custom overflow indicator
 - **HStack / VStack** — horizontal and vertical flex containers with gap
 
 ### Typography

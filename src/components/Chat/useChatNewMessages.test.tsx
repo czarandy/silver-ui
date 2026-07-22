@@ -1,33 +1,13 @@
 import {act, renderHook} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {useChatNewMessages} from 'components/Chat/useChatNewMessages';
+import {createResizeObserverStub} from 'internal/testHelpers';
 
-type ResizeCallback = (entry: unknown) => void;
-
-const resizeCallbacks = new Map<Element, ResizeCallback>();
-
-class ResizeObserverStub {
-  callback: ResizeCallback;
-
-  constructor(callback: ResizeCallback) {
-    this.callback = callback;
-  }
-
-  observe(element: Element): void {
-    resizeCallbacks.set(element, this.callback);
-  }
-
-  unobserve(element: Element): void {
-    resizeCallbacks.delete(element);
-  }
-
-  disconnect(): void {}
-}
+const resizeObserver = createResizeObserverStub();
 
 function fireResize(element: Element): void {
   act(() => {
-    // sharedResizeObserver's internal callback iterates an entries array.
-    resizeCallbacks.get(element)?.([{target: element}]);
+    resizeObserver.resize(element);
   });
 }
 
@@ -38,11 +18,11 @@ function appendMessage(element: HTMLElement): void {
 }
 
 beforeEach(() => {
-  vi.stubGlobal('ResizeObserver', ResizeObserverStub);
+  vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
 });
 
 afterEach(() => {
-  resizeCallbacks.clear();
+  resizeObserver.reset();
   vi.unstubAllGlobals();
 });
 
@@ -141,10 +121,10 @@ describe('useChatNewMessages', () => {
     );
 
     act(() => result.current.contentRef(content));
-    expect(resizeCallbacks.has(content)).toBe(true);
+    expect(resizeObserver.isObserved(content)).toBe(true);
 
     unmount();
-    expect(resizeCallbacks.has(content)).toBe(false);
+    expect(resizeObserver.isObserved(content)).toBe(false);
   });
 
   it('swaps observation when the content element changes', () => {
@@ -153,10 +133,10 @@ describe('useChatNewMessages', () => {
     const {result} = renderHook(() => useChatNewMessages({isLocked: false}));
 
     act(() => result.current.contentRef(first));
-    expect(resizeCallbacks.has(first)).toBe(true);
+    expect(resizeObserver.isObserved(first)).toBe(true);
 
     act(() => result.current.contentRef(second));
-    expect(resizeCallbacks.has(first)).toBe(false);
-    expect(resizeCallbacks.has(second)).toBe(true);
+    expect(resizeObserver.isObserved(first)).toBe(false);
+    expect(resizeObserver.isObserved(second)).toBe(true);
   });
 });

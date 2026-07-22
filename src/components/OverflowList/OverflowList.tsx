@@ -6,58 +6,81 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type HTMLAttributes,
   type ReactElement,
   type ReactNode,
   type Ref,
 } from 'react';
+import {overflowListRecipe} from 'components/OverflowList/OverflowList.recipe';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
+import type {SpacingToken} from 'internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
-import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 export interface OverflowItem {
+  /**
+   * The original child element.
+   */
   child: ReactElement;
+  /**
+   * The child's zero-based position in the complete list.
+   */
   index: number;
 }
 
-export interface OverflowListProps {
+export interface OverflowListProps extends HTMLAttributes<HTMLDivElement> {
+  /**
+   * Element whose width controls the fit calculation. `observeParent` uses
+   * the parent's content width and is useful when the list shares a flex row
+   * with other content.
+   * @default 'observeSelf'
+   */
   behavior?: 'observeParent' | 'observeSelf';
+  /**
+   * Items to measure and render.
+   */
   children: ReactNode;
+  /**
+   * Additional CSS class names applied to the visible row.
+   */
   className?: string;
+  /**
+   * Side of the list from which items are collapsed.
+   * @default 'end'
+   */
   collapseFrom?: 'end' | 'start';
-  gap?: number;
+  /**
+   * Test ID applied to the visible row. The hidden measurement row uses the
+   * same value with a `-measure` suffix.
+   */
+  'data-testid'?: string;
+  /**
+   * Gap between visible items, on the spacing scale.
+   * @default 0
+   */
+  gap?: SpacingToken;
+  /**
+   * Minimum number of items kept visible even when they exceed the available
+   * width.
+   * @default 0
+   */
   minVisibleItems?: number;
+  /**
+   * Renders the collapsed items, typically as a `+N` indicator. The callback
+   * receives each item's original child and index.
+   */
   overflowRenderer?: (overflowItems: OverflowItem[]) => ReactNode;
+  /**
+   * Ref forwarded to the visible row.
+   */
   ref?: Ref<HTMLDivElement>;
+  /**
+   * Inline styles applied to the visible row.
+   */
   style?: CSSProperties;
 }
-
-const styles = {
-  container: css({
-    display: 'flex',
-    alignItems: 'center',
-    overflow: 'hidden',
-    whiteSpace: 'nowrap',
-    minW: 0,
-  }),
-  fillParent: css({
-    flex: '1 1 0',
-  }),
-  measureContainer: css({
-    position: 'absolute',
-    visibility: 'hidden',
-    h: 0,
-    overflow: 'hidden',
-    display: 'flex',
-    alignItems: 'center',
-    whiteSpace: 'nowrap',
-    pointerEvents: 'none',
-  }),
-  measureIndicator: css({
-    display: 'inline-flex',
-  }),
-} as const;
 
 function getAvailableWidth(
   container: HTMLElement,
@@ -74,18 +97,41 @@ function getAvailableWidth(
   return container.offsetWidth;
 }
 
+function getGapWidth(container: HTMLElement): number {
+  // Only columnGap is the horizontal gap: the `gap` shorthand computes to
+  // "<row-gap> <column-gap>", so parsing it would read the ROW gap whenever
+  // columnGap is a falsy-but-valid '0px'.
+  const containerStyle = window.getComputedStyle(container);
+  return Number.parseFloat(containerStyle.columnGap) || 0;
+}
+
+/**
+ * Renders as many items as fit in one row and collapses the remainder into a
+ * custom overflow indicator.
+ *
+ * To measure natural item widths accurately, `OverflowList` renders every
+ * child in a hidden, inert measurement row, then renders the visible slice
+ * again. Visible child components therefore mount twice, and even collapsed
+ * children mount once for measurement. Avoid using it for hundreds of
+ * expensive items without first virtualizing or reducing them.
+ *
+ * Unrecognized props (`id`, `aria-*`, `data-*`, event handlers, …) are
+ * forwarded to the visible row.
+ */
 export function OverflowList({
   behavior = 'observeSelf',
   children,
   className,
   collapseFrom = 'end',
+  'data-testid': dataTestId,
   gap = 0,
   minVisibleItems = 0,
   overflowRenderer,
   ref,
   style,
+  ...htmlProps
 }: OverflowListProps): React.JSX.Element {
-  // eslint-disable-next-line @eslint-react/no-children-to-array -- matches XDSOverflowList: normalizes children before width measurement
+  // eslint-disable-next-line @eslint-react/no-children-to-array -- normalizes children before width measurement
   const childArray = Children.toArray(children) as ReactElement[];
   const itemCount = childArray.length;
   const isObservingParent = behavior === 'observeParent';
@@ -104,6 +150,7 @@ export function OverflowList({
       getAvailableWidth(container, isObservingParent),
       container.offsetWidth || Number.POSITIVE_INFINITY,
     );
+    const resolvedGap = getGapWidth(container);
     const allChildren = Array.from(measure.children) as HTMLElement[];
     const hasIndicator = allChildren.length > itemCount;
     const measuredItems = hasIndicator
@@ -126,12 +173,12 @@ export function OverflowList({
     let count = 0;
 
     for (const itemWidth of orderedWidths) {
-      const gapWidth = count > 0 ? gap : 0;
+      const gapWidth = count > 0 ? resolvedGap : 0;
       const candidateWidth = totalWidth + itemWidth + gapWidth;
       const isLastItem = count === orderedWidths.length - 1;
       const reservedWidth = isLastItem
         ? 0
-        : indicatorWidth + (count > 0 || indicatorWidth > 0 ? gap : 0);
+        : indicatorWidth + (count > 0 || indicatorWidth > 0 ? resolvedGap : 0);
 
       if (
         candidateWidth + reservedWidth > availableWidth &&
@@ -146,7 +193,7 @@ export function OverflowList({
 
     // eslint-disable-next-line @eslint-react/set-state-in-effect -- visible count is derived from measured DOM widths
     setVisibleCount(Math.max(Math.min(count, itemCount), minVisibleItems));
-  }, [collapseFrom, gap, isObservingParent, itemCount, minVisibleItems]);
+  }, [collapseFrom, isObservingParent, itemCount, minVisibleItems]);
 
   const containerRefCallback = useCallback((element: HTMLDivElement | null) => {
     containerRef.current = element;
@@ -163,8 +210,11 @@ export function OverflowList({
   );
 
   useIsomorphicLayoutEffect(() => {
+    // `gap` changes the recipe class whose computed column-gap `calculate`
+    // reads from the DOM; container size changes are covered by the
+    // ResizeObserver below.
     calculate();
-  }, [calculate]);
+  }, [calculate, gap]);
 
   useIsomorphicLayoutEffect(() => {
     const container = containerRef.current;
@@ -172,13 +222,29 @@ export function OverflowList({
       return;
     }
 
-    const target =
-      isObservingParent && container.parentElement != null
-        ? container.parentElement
-        : container;
-    const observer = new ResizeObserver(calculate);
-    observer.observe(target);
-    return () => observer.disconnect();
+    // Three signals drive re-measurement: the container's own size (also
+    // needed in observeParent mode, where the fillsParent class changes the
+    // container width without resizing the parent); the hidden measure row,
+    // which shrink-wraps its content and so fires when any child or the
+    // indicator changes width (longer labels, fonts loading); and the parent
+    // in observeParent mode.
+    const targets = new Set<Element>([container]);
+    const measure = measureRef.current;
+    if (measure != null) {
+      targets.add(measure);
+    }
+    if (isObservingParent && container.parentElement != null) {
+      targets.add(container.parentElement);
+    }
+
+    for (const target of targets) {
+      observeResize(target, calculate);
+    }
+    return () => {
+      for (const target of targets) {
+        unobserveResize(target, calculate);
+      }
+    };
   }, [calculate, isObservingParent]);
 
   const allItems: OverflowItem[] = childArray.map((child, index) => ({
@@ -195,28 +261,38 @@ export function OverflowList({
       : allItems.slice(0, itemCount - visibleCount);
   const hasOverflow = visibleCount < itemCount;
   const measureIndicator = overflowRenderer?.(allItems);
+  const classes = overflowListRecipe({
+    fillsParent: isObservingParent && hasOverflow,
+    gap,
+  });
 
   return (
     <>
       <div
         aria-hidden="true"
-        className={styles.measureContainer}
+        className={classes.measure}
+        data-testid={dataTestId == null ? undefined : `${dataTestId}-measure`}
         inert
-        ref={measureRefCallback}
-        style={{gap}}>
-        {childArray}
+        ref={measureRefCallback}>
+        {childArray.map(child => (
+          // Each child is measured through its own wrapper so the measure
+          // row always holds exactly one element per React child — children
+          // that render null, text, or fragments would otherwise misalign
+          // the width-to-child mapping.
+          <div className={classes.measureItem} key={child.key}>
+            {child}
+          </div>
+        ))}
         {isNonEmptyReactNode(measureIndicator) ? (
-          <div className={styles.measureIndicator}>{measureIndicator}</div>
+          <div className={classes.measureIndicator}>{measureIndicator}</div>
         ) : null}
       </div>
       <div
-        className={cx(
-          styles.container,
-          isObservingParent && hasOverflow ? styles.fillParent : undefined,
-          className,
-        )}
+        className={cx(classes.root, className)}
+        data-testid={dataTestId}
         ref={mergeRefs(ref, containerRefCallback)}
-        style={{gap, ...style}}>
+        style={style}
+        {...htmlProps}>
         {collapseFrom === 'start' && hasOverflow
           ? overflowRenderer?.(overflowItems)
           : null}
@@ -228,3 +304,5 @@ export function OverflowList({
     </>
   );
 }
+
+OverflowList.displayName = 'OverflowList';
