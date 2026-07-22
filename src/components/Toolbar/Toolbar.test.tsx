@@ -77,6 +77,19 @@ describe('Toolbar', () => {
     expect(ref).toHaveBeenCalledWith(toolbar);
   });
 
+  it('applies the gap class for the given gap value', () => {
+    render(
+      <Toolbar
+        data-testid="toolbar"
+        gap={10}
+        label="Actions"
+        startContent={<Button label="Save" />}
+      />,
+    );
+
+    expect(screen.getByTestId('toolbar')).toHaveClass('silver-gap_10');
+  });
+
   describe('roving tabindex', () => {
     it('makes the first item the only tab stop', () => {
       render(
