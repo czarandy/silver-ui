@@ -1491,7 +1491,7 @@ describe('Schedule', () => {
     const classes = scheduleTimeGridViewRecipe();
 
     // eslint-disable-next-line testing-library/no-node-access -- verifying the alignment class on the header content wrapper
-    expect(screen.getByText('13').parentElement?.parentElement).toHaveClass(
+    expect(screen.getByText('13').parentElement).toHaveClass(
       classes.dayHeaderContent ?? '',
     );
     expect(classes.dayHeaderContent).toContain('silver-ai_baseline');
@@ -1764,33 +1764,49 @@ describe('Schedule', () => {
     ).toHaveStyle({height: '132px', minHeight: '132px'});
   });
 
-  it('optically centers every highlighted day with a uniform numeral shift', () => {
+  it('bottom-pads highlighted days without shifting them off the weekday baseline', () => {
     expect(
       scheduleTimeGridViewRecipe.raw({
         isCurrentDay: true,
       }).dayHeaderDayNumber,
     ).toMatchObject({
-      display: 'grid',
+      display: 'inline-flex',
       height: '32px',
       marginBottom: '-1px',
       marginTop: '-1px',
-      placeItems: 'center',
+      paddingBottom: '1px',
       width: '32px',
     });
     const dayNumberStyles = scheduleTimeGridViewRecipe.raw().dayHeaderDayNumber;
-    expect(dayNumberStyles).not.toHaveProperty('paddingBottom');
-    expect(dayNumberStyles).not.toHaveProperty('paddingLeft');
+    expect(dayNumberStyles).not.toHaveProperty('transform');
     expect(dayNumberStyles).not.toHaveProperty('paddingRight');
     expect(
-      scheduleTimeGridViewRecipe.raw().dayHeaderDayNumberText,
-    ).toMatchObject({
-      lineHeight: 1,
-      transform: 'translateY(-1px)',
-    });
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: false,
+      }).dayHeaderDayNumber,
+    ).not.toHaveProperty('paddingBottom');
+    expect(
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+        isDaySeven: true,
+      }).dayHeaderDayNumber,
+    ).toHaveProperty('paddingLeft', '1px');
+    expect(
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+        isDaySeven: false,
+      }).dayHeaderDayNumber,
+    ).not.toHaveProperty('paddingLeft');
 
-    const dayNumberTextClasses =
-      scheduleTimeGridViewRecipe().dayHeaderDayNumberText ?? '';
-    expect(dayNumberTextClasses).not.toBe('');
+    const highlightedDayClasses =
+      scheduleTimeGridViewRecipe({isCurrentDay: true}).dayHeaderDayNumber ?? '';
+    expect(highlightedDayClasses).not.toBe('');
+    const daySevenClasses =
+      scheduleTimeGridViewRecipe({
+        isCurrentDay: true,
+        isDaySeven: true,
+      }).dayHeaderDayNumber ?? '';
+    expect(daySevenClasses).not.toBe('');
 
     const highlightedDays = Array.from({length: 31}, (_, index) => index + 1);
     const view = createScheduleDayView({maxHour: 9, minHour: 8});
@@ -1821,8 +1837,14 @@ describe('Schedule', () => {
       return within(header).getByText(String(index + 1));
     });
     dayNumbers.forEach(dayNumber => {
-      expect(dayNumber).toHaveClass(dayNumberTextClasses);
+      expect(dayNumber).toHaveClass(highlightedDayClasses);
     });
+    expect(dayNumbers[6]).toHaveClass(daySevenClasses);
+    dayNumbers
+      .filter((_, index) => index !== 6)
+      .forEach(dayNumber => {
+        expect(dayNumber).not.toHaveClass(daySevenClasses);
+      });
   });
 
   it('renders the current-time line in the active time grid hour', async () => {

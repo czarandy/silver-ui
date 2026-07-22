@@ -396,6 +396,7 @@ export function TimeGridView({
               const isCurrentDay = plainDateIsEqual(day, highlightPlainDate);
               const dayHeaderClasses = scheduleTimeGridViewRecipe({
                 isCurrentDay,
+                isDaySeven: day.day === 7,
                 isLastColumn: index === days.length - 1,
               });
               return (
@@ -414,9 +415,7 @@ export function TimeGridView({
                     <span className={styles.dayHeaderContent}>
                       {plainDateFormat(day, {weekday: 'short'})}
                       <span className={dayHeaderClasses.dayHeaderDayNumber}>
-                        <span className={styles.dayHeaderDayNumberText}>
-                          {day.day}
-                        </span>
+                        {day.day}
                       </span>
                     </span>
                   </Heading>
