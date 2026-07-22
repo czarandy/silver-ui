@@ -229,6 +229,75 @@ describe('PinInput', () => {
     ).toEqual(['a', 'B', '9']);
   });
 
+  describe('keyboard navigation', () => {
+    it('exposes a single tab stop so Tab leaves the group', async () => {
+      const user = userEvent.setup();
+      render(
+        <>
+          <ControlledPinInput initialValue="12" label="Code" />
+          <button type="button">after</button>
+        </>,
+      );
+      const cells = getCells();
+
+      expect(cells.map(cell => cell.tabIndex)).toEqual([-1, -1, 0, -1, -1, -1]);
+
+      await user.click(cells[2]);
+      await user.tab();
+
+      expect(screen.getByRole('button', {name: 'after'})).toHaveFocus();
+    });
+
+    it('moves between reachable cells with arrow keys and Home/End', async () => {
+      const user = userEvent.setup();
+      render(<ControlledPinInput initialValue="12" label="Code" />);
+      const cells = getCells();
+
+      await user.click(cells[2]);
+      await user.keyboard('{ArrowLeft}');
+      expect(cells[1]).toHaveFocus();
+
+      await user.keyboard('{Home}');
+      expect(cells[0]).toHaveFocus();
+
+      await user.keyboard('{End}');
+      expect(cells[2]).toHaveFocus();
+
+      // The first empty cell is the last reachable one; focus does not loop.
+      await user.keyboard('{ArrowRight}');
+      expect(cells[2]).toHaveFocus();
+    });
+  });
+
+  it('fires onFocus and onBlur only at the group boundary', async () => {
+    const user = userEvent.setup();
+    const onBlur = vi.fn();
+    const onFocus = vi.fn();
+    render(
+      <>
+        <ControlledPinInput
+          initialValue="12"
+          label="Code"
+          onBlur={onBlur}
+          onFocus={onFocus}
+        />
+        <button type="button">after</button>
+      </>,
+    );
+    const cells = getCells();
+
+    await user.click(cells[0]);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+
+    await user.click(cells[2]);
+    expect(onFocus).toHaveBeenCalledTimes(1);
+    expect(onBlur).not.toHaveBeenCalled();
+
+    await user.tab();
+    expect(screen.getByRole('button', {name: 'after'})).toHaveFocus();
+    expect(onBlur).toHaveBeenCalledTimes(1);
+  });
+
   describe('Backspace', () => {
     it('clears a filled cell in place so retyping corrects that digit', async () => {
       const user = userEvent.setup();
@@ -505,7 +574,11 @@ describe('PinInput', () => {
 
       rerender(<PinInput isRequired label="Code" onChange={noop} value="" />);
       for (const cell of getCells()) {
-        expect(cell).toBeRequired();
+        // Necessity is announced per cell via aria-required only; native
+        // required would anchor constraint-validation bubbles to unnamed
+        // one-character cells while the hidden input submits the value.
+        // eslint-disable-next-line jest-dom-ya/prefer-required -- asserts the native attribute specifically; toBeRequired also matches the aria-required the cell must keep
+        expect(cell).not.toHaveAttribute('required');
         expect(cell).toHaveAttribute('aria-required', 'true');
       }
     });
@@ -527,7 +600,12 @@ describe('PinInput', () => {
       expect(group).toHaveAccessibleDescription(
         'Sent to your phone Incorrect code',
       );
-      expect(group).toHaveAttribute('aria-invalid', 'true');
+      // aria-invalid is unsupported on role=group; the focusable cells carry
+      // it so screen readers announce the error state on focus.
+      expect(group).not.toHaveAttribute('aria-invalid');
+      for (const cell of getCells()) {
+        expect(cell).toHaveAttribute('aria-invalid', 'true');
+      }
       expect(screen.getByLabelText('Digit 1 of 6')).toBeInTheDocument();
       expect(screen.getByRole('alert')).toHaveTextContent('Incorrect code');
     });
@@ -674,6 +752,9 @@ describe('PinInput', () => {
       const pin = screen.getByTestId('pin');
       expect(pin).toHaveClass(getWrapperClassName({status: 'error'}));
       expect(pin).not.toHaveAttribute('aria-invalid');
+      for (const cell of getCells()) {
+        expect(cell).not.toHaveAttribute('aria-invalid');
+      }
       // eslint-disable-next-line testing-library/no-node-access -- a group-inherited status must not add a child icon
       expect(pin.querySelector('svg')).toBeNull();
     });

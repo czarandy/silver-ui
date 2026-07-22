@@ -31,6 +31,7 @@ import {
 import type {IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {pinInputRecipe} from 'components/PinInput/PinInput.recipe';
+import useListFocus from 'hooks/useListFocus';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
@@ -94,6 +95,11 @@ export type PinInputProps = {
    */
   length?: number;
   /**
+   * Called when focus leaves the input's cells. Moving between cells does not
+   * trigger it.
+   */
+  onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  /**
    * Called with the next joined value.
    */
   onChange: (
@@ -104,6 +110,11 @@ export type PinInputProps = {
    * Called when an edit transitions the code from incomplete to complete.
    */
   onComplete?: (value: string) => void;
+  /**
+   * Called when focus enters the input's cells. Moving between cells does not
+   * trigger it.
+   */
+  onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   /**
    * Ref forwarded to the component's outermost element.
    */
@@ -174,8 +185,10 @@ export function PinInput({
   labelIcon,
   labelTooltip,
   length: lengthProp = DEFAULT_LENGTH,
+  onBlur,
   onChange,
   onComplete,
+  onFocus,
   ref,
   size: sizeProp = 'md',
   status,
@@ -216,7 +229,10 @@ export function PinInput({
   // Whether the last committed value was complete; onComplete only fires on
   // a committed incomplete-to-complete transition.
   const wasCompleteRef = useRef(displayedValue.length === length);
-  const autoFocusIndex = Math.min(displayedValue.length, length - 1);
+  // The first empty cell, or the final cell when the code is complete: the
+  // autofocus target and the group's single tab stop (other cells are reached
+  // with the arrow keys, so Tab passes straight through the group).
+  const activeCellIndex = Math.min(displayedValue.length, length - 1);
   // Merge the shared input chrome with this recipe's slot overrides in JS so
   // each property resolves to a single utility class; layering the classes
   // with cx would leave same-property conflicts (gap, paddings, flex,
@@ -246,10 +262,16 @@ export function PinInput({
     isProgrammaticFocusRef.current = false;
   };
 
+  const isCell = (node: unknown): boolean =>
+    cellsRef.current.some(cell => cell != null && cell === node);
+
   const handleFocus = (
     index: number,
     event: FocusEvent<HTMLInputElement>,
   ): void => {
+    if (!isCell(event.relatedTarget)) {
+      onFocus?.(event);
+    }
     // The code fills without gaps, so a cell past the first empty one can
     // never be edited in place; redirect user focus there instead of letting
     // the next keystroke land in a different cell than the caret.
@@ -258,6 +280,33 @@ export function PinInput({
       return;
     }
     event.currentTarget.select();
+  };
+
+  const handleBlur = (event: FocusEvent<HTMLInputElement>): void => {
+    if (!isCell(event.relatedTarget)) {
+      onBlur?.(event);
+    }
+  };
+
+  const {handleKeyDown: handleListKeyDown} = useListFocus({
+    // Only the filled cells and the first empty one are reachable; the
+    // focus-redirect in handleFocus enforces the same boundary for clicks.
+    getItems: () =>
+      cellsRef.current
+        .slice(0, Math.min(displayedValue.length + 1, length))
+        .filter(cell => cell != null),
+    isLooping: false,
+    orientation: 'horizontal',
+  });
+
+  const handleKeyDown = (
+    index: number,
+    event: KeyboardEvent<HTMLInputElement>,
+  ): void => {
+    if (handleListKeyDown(event)) {
+      return;
+    }
+    handleBackspace(index, event);
   };
 
   const commit = (
@@ -362,7 +411,6 @@ export function PinInput({
   const inputWrapper = (
     <div
       aria-describedby={describedBy}
-      aria-invalid={status?.type === 'error' || undefined}
       aria-label={inputGroup != null ? label : undefined}
       aria-labelledby={inputGroup == null ? labelId : undefined}
       className={cx(
@@ -376,26 +424,28 @@ export function PinInput({
       style={inputGroup != null ? style : undefined}>
       {Array.from({length}, (_, index) => (
         <input
+          aria-invalid={status?.type === 'error' || undefined}
           aria-label={`${type === 'numeric' ? 'Digit' : 'Character'} ${index + 1} of ${length}`}
           aria-required={isRequired ?? undefined}
           autoComplete={index === 0 ? 'one-time-code' : 'off'}
-          autoFocus={hasAutoFocus && index === autoFocusIndex}
+          autoFocus={hasAutoFocus && index === activeCellIndex}
           className={cellClassName}
           data-autofocus={
-            hasAutoFocus && index === autoFocusIndex ? true : undefined
+            hasAutoFocus && index === activeCellIndex ? true : undefined
           }
           disabled={effectiveDisabled}
           inputMode={type === 'numeric' ? 'numeric' : 'text'}
           key={index}
+          onBlur={handleBlur}
           onChange={event => handleChange(index, event)}
           onFocus={event => handleFocus(index, event)}
-          onKeyDown={event => handleBackspace(index, event)}
+          onKeyDown={event => handleKeyDown(index, event)}
           onPaste={event => handlePaste(index, event)}
           pattern={type === 'numeric' ? '[0-9]*' : undefined}
           ref={element => {
             cellsRef.current[index] = element;
           }}
-          required={isRequired ?? undefined}
+          tabIndex={index === activeCellIndex ? 0 : -1}
           type={hasMask ? 'password' : 'text'}
           value={displayedValue[index] ?? ''}
         />
