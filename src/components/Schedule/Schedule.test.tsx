@@ -1764,7 +1764,7 @@ describe('Schedule', () => {
     ).toHaveStyle({height: '132px', minHeight: '132px'});
   });
 
-  it('centers every highlighted day with tabular numeral styles', () => {
+  it('optically centers every highlighted day with a uniform numeral shift', () => {
     expect(
       scheduleTimeGridViewRecipe.raw({
         isCurrentDay: true,
@@ -1784,8 +1784,8 @@ describe('Schedule', () => {
     expect(
       scheduleTimeGridViewRecipe.raw().dayHeaderDayNumberText,
     ).toMatchObject({
-      fontVariantNumeric: 'tabular-nums',
       lineHeight: 1,
+      transform: 'translateY(-1px)',
     });
 
     const dayNumberTextClasses =

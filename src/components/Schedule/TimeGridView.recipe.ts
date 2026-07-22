@@ -86,8 +86,8 @@ export const scheduleTimeGridViewRecipe = sva({
       borderRadius: 'full',
     },
     dayHeaderDayNumberText: {
-      fontVariantNumeric: 'tabular-nums',
       lineHeight: 1,
+      transform: 'translateY(-1px)',
     },
     allDayLabel: {
       display: 'flex',
