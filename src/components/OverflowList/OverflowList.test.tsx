@@ -91,7 +91,7 @@ describe('OverflowList', () => {
         data-testid="list"
         gap={2}
         overflowRenderer={renderOverflow}
-        style={{gap: 8}}>
+        style={{columnGap: 8}}>
         <Item>Alpha</Item>
         <Item>Beta</Item>
         <Item>Gamma</Item>
@@ -106,6 +106,46 @@ describe('OverflowList', () => {
     expect(within(root).getByText('+2')).toBeVisible();
     expect(within(root).queryByText('Beta')).not.toBeInTheDocument();
     expect(within(root).queryByText('Gamma')).not.toBeInTheDocument();
+  });
+
+  it('ignores the row gap when the column gap is zero', () => {
+    containerWidth = 90;
+    // Mirror real browser computed values (jsdom does not compute them): with
+    // `gap: 16px 0px`, columnGap resolves to '0px' and the `gap` shorthand
+    // serializes as '<row-gap> <column-gap>'. Parsing the shorthand would
+    // wrongly read the 16px ROW gap as the horizontal gap.
+    const realGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(
+      (element, pseudo) => {
+        if (
+          element instanceof HTMLElement &&
+          element.classList.contains('overflow-list-root')
+        ) {
+          const stubStyle: Partial<CSSStyleDeclaration> = {
+            columnGap: '0px',
+            gap: '16px 0px',
+          };
+          return stubStyle as CSSStyleDeclaration;
+        }
+        return realGetComputedStyle(element, pseudo);
+      },
+    );
+
+    render(
+      <OverflowList
+        className="overflow-list-root"
+        data-testid="list"
+        overflowRenderer={renderOverflow}
+        style={{gap: '16px 0px'}}>
+        <Item>Alpha</Item>
+        <Item>Beta</Item>
+        <Item>Gamma</Item>
+      </OverflowList>,
+    );
+
+    const root = screen.getByTestId('list');
+    expect(root).toHaveTextContent('AlphaBetaGamma');
+    expect(within(root).queryByText(/^\+/)).not.toBeInTheDocument();
   });
 
   it('collapses items from the start', () => {

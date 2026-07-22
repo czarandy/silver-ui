@@ -96,12 +96,11 @@ function getAvailableWidth(
 }
 
 function getGapWidth(container: HTMLElement): number {
+  // Only columnGap is the horizontal gap: the `gap` shorthand computes to
+  // "<row-gap> <column-gap>", so parsing it would read the ROW gap whenever
+  // columnGap is a falsy-but-valid '0px'.
   const containerStyle = window.getComputedStyle(container);
-  return (
-    Number.parseFloat(containerStyle.columnGap) ||
-    Number.parseFloat(containerStyle.gap) ||
-    0
-  );
+  return Number.parseFloat(containerStyle.columnGap) || 0;
 }
 
 /**
