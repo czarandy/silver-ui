@@ -1,4 +1,22 @@
+import {gapVariants, type SpacingToken} from 'internal/spacingTokens';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
+
+// Both rows must share one gap so the hidden measurement row mirrors the
+// visible row; the values come from the shared `gapVariants` map and the
+// `satisfies` clause keeps the keys in lockstep with `SpacingToken`.
+const gapSlotVariants = {
+  0: {measure: gapVariants[0], root: gapVariants[0]},
+  0.5: {measure: gapVariants[0.5], root: gapVariants[0.5]},
+  1: {measure: gapVariants[1], root: gapVariants[1]},
+  1.5: {measure: gapVariants[1.5], root: gapVariants[1.5]},
+  2: {measure: gapVariants[2], root: gapVariants[2]},
+  3: {measure: gapVariants[3], root: gapVariants[3]},
+  4: {measure: gapVariants[4], root: gapVariants[4]},
+  5: {measure: gapVariants[5], root: gapVariants[5]},
+  6: {measure: gapVariants[6], root: gapVariants[6]},
+  8: {measure: gapVariants[8], root: gapVariants[8]},
+  10: {measure: gapVariants[10], root: gapVariants[10]},
+} as const satisfies Record<SpacingToken, unknown>;
 
 export const overflowListRecipe = sva({
   slots: ['root', 'measure', 'measureIndicator'],
@@ -31,19 +49,7 @@ export const overflowListRecipe = sva({
       },
       false: {},
     },
-    gap: {
-      0: {root: {gap: '0'}, measure: {gap: '0'}},
-      0.5: {root: {gap: '0.5'}, measure: {gap: '0.5'}},
-      1: {root: {gap: '1'}, measure: {gap: '1'}},
-      1.5: {root: {gap: '1.5'}, measure: {gap: '1.5'}},
-      2: {root: {gap: '2'}, measure: {gap: '2'}},
-      3: {root: {gap: '3'}, measure: {gap: '3'}},
-      4: {root: {gap: '4'}, measure: {gap: '4'}},
-      5: {root: {gap: '5'}, measure: {gap: '5'}},
-      6: {root: {gap: '6'}, measure: {gap: '6'}},
-      8: {root: {gap: '8'}, measure: {gap: '8'}},
-      10: {root: {gap: '10'}, measure: {gap: '10'}},
-    },
+    gap: gapSlotVariants,
   },
   defaultVariants: {
     fillsParent: false,
