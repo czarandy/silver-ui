@@ -10,7 +10,7 @@ import type {
 import {useChatMessageContext} from 'components/Chat/ChatContext';
 import {chatMessageMetadataRecipe} from 'components/Chat/ChatMessageMetadata.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type ChatMessageStatus =
@@ -76,7 +76,11 @@ export function ChatMessageMetadata({
   const sender = messageContext?.sender ?? 'assistant';
   const statusConfig = status != null ? STATUS_CONFIG[status] : null;
 
-  if (!isReactNode(timestamp) && !isReactNode(footer) && statusConfig == null) {
+  if (
+    !isNonEmptyReactNode(timestamp) &&
+    !isNonEmptyReactNode(footer) &&
+    statusConfig == null
+  ) {
     return null;
   }
 
@@ -89,13 +93,13 @@ export function ChatMessageMetadata({
       data-testid={dataTestId}
       ref={ref}
       style={style}>
-      {isReactNode(timestamp) ? <span>{timestamp}</span> : null}
-      {isReactNode(timestamp) &&
-      (isReactNode(footer) || statusConfig != null) ? (
+      {isNonEmptyReactNode(timestamp) ? <span>{timestamp}</span> : null}
+      {isNonEmptyReactNode(timestamp) &&
+      (isNonEmptyReactNode(footer) || statusConfig != null) ? (
         <span aria-hidden="true">·</span>
       ) : null}
       {footer}
-      {isReactNode(footer) && statusConfig != null ? (
+      {isNonEmptyReactNode(footer) && statusConfig != null ? (
         <span aria-hidden="true">·</span>
       ) : null}
       {statusConfig != null ? (

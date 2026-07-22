@@ -2,7 +2,12 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {List} from 'components/List/List';
+import {listItemRecipe, listRecipe} from 'components/List/List.recipe';
 import {ListItem} from 'components/List/ListItem';
+import {assertNonNull} from 'internal/testHelpers';
+
+const classesOf = (className: string | undefined): string[] =>
+  assertNonNull(className).split(' ');
 
 describe('List', () => {
   it('renders a semantic list with list items', () => {
@@ -96,6 +101,52 @@ describe('List', () => {
     );
 
     expect(screen.getByTestId('list')).toBeInTheDocument();
+  });
+
+  it('tightens item padding for marker lists but not plain lists', () => {
+    const markerClasses = classesOf(listRecipe({hasMarkers: true}).list);
+    const plainClasses = classesOf(listRecipe({hasMarkers: false}).list);
+    const markerOnly = markerClasses.filter(
+      className => !plainClasses.includes(className),
+    );
+    expect(markerOnly.length).toBeGreaterThan(0);
+
+    const {rerender} = render(
+      <List data-testid="list" listStyle="disc">
+        <ListItem label="Item" />
+      </List>,
+    );
+    expect(screen.getByTestId('list')).toHaveClass(...markerClasses);
+
+    rerender(
+      <List data-testid="list">
+        <ListItem label="Item" />
+      </List>,
+    );
+    for (const className of markerOnly) {
+      expect(screen.getByTestId('list')).not.toHaveClass(className);
+    }
+  });
+
+  it('sizes the disc marker container off the label typography', () => {
+    render(
+      <List listStyle="disc">
+        <ListItem data-testid="item" label="Item" />
+      </List>,
+    );
+
+    const item = screen.getByTestId('item');
+    // eslint-disable-next-line testing-library/no-node-access -- the marker is presentational, so there is no query for it
+    const markerContainer = assertNonNull(item.querySelector('span'));
+    expect(markerContainer).toHaveClass(
+      ...classesOf(listItemRecipe().markerContainer),
+    );
+    // The container must carry the label typography and baseline-align, not
+    // derive its geometry from the ambient font: inside an Alert description
+    // the inherited size is `sm` while the label renders `md`, which used to
+    // push the dot off the first line. Baseline anchoring also keeps the dot
+    // seated where the platform font draws its own bullets.
+    expect(markerContainer).toHaveClass('silver-fs_md', 'silver-as_baseline');
   });
 
   it('renders circle markers', () => {

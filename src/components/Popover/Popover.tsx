@@ -9,7 +9,7 @@ import {
   type RefObject,
 } from 'react';
 import {usePopover} from 'components/Popover/usePopover';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
@@ -312,7 +312,7 @@ export function Popover({
     },
   );
 
-  if (anchorRef != null && !isReactNode(children)) {
+  if (anchorRef != null && !isNonEmptyReactNode(children)) {
     return <>{popoverContent}</>;
   }
 

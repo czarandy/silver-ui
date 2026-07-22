@@ -2,6 +2,7 @@ import {readFileSync} from 'node:fs';
 import {dirname, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {describe, expect, it} from 'vitest';
+import {token} from 'styled-system/tokens';
 
 /**
  * The landing page and the docs pages render different headers — one is
@@ -80,15 +81,27 @@ describe('header surface', () => {
   });
 
   it('draws both hairlines from the same border token', () => {
+    // The selector must stay element-qualified (`header.header`): Starlight
+    // also puts class `header` on a layout div inside the bar, and a bare
+    // `.header` width paints a second stray hairline through the header.
     const docsBorder = tokenFor(
       docsCss,
-      /\.header\s*\{[^}]*border-bottom-color:\s*var\((--silver-colors-[\w-]+)\)/,
+      /(?<![\w.])header\.header\s*\{[^}]*border-bottom-color:\s*var\((--silver-colors-[\w-]+)\)/,
     );
+    const docsBorderWidth = tokenFor(
+      docsCss,
+      /(?<![\w.])header\.header\s*\{[^}]*border-bottom-width:\s*var\((--silver-border-widths-[\w-]+)\)/,
+    );
+    // Forbid a selector that STARTS with bare `.header` (it would match both
+    // elements); `header.header > .header` deliberately targets the inner div.
+    expect(stripComments(docsCss)).not.toMatch(/(^|[,}])\s*\.header\s*[{,]/m);
 
     expect(docsBorder).toBe('--silver-colors-border');
     // The landing side gets its hairline from AppShell's `headerDivider`
-    // variant, which resolves the same `border` token through Panda.
+    // variant, which resolves the same color and width tokens through Panda.
     expect(appShellRecipe).toMatch(/borderBlockEndColor:\s*'border'/);
+    expect(docsBorderWidth).toBe('--silver-border-widths-default');
+    expect(appShellRecipe).toMatch(/borderBlockEndWidth:\s*'default'/);
   });
 
   it('stays unlayered so it outranks Starlight’s own layered rules', () => {
@@ -100,18 +113,55 @@ describe('header surface', () => {
 
   it('matches the docs header geometry so the wordmark holds its place', () => {
     // Starlight's nav is 3.5rem tall with 1rem of inline padding, growing to
-    // 4rem / 1.5rem at its 50rem breakpoint. The landing nav tracks both.
+    // 4rem / 1.5rem at its 50rem breakpoint. Its divider is inside that fixed
+    // height; AppShell's divider wraps TopNav, so the landing nav subtracts
+    // the shared width to give both wordmarks the same vertical center.
     expect(landingCss).toMatch(
-      /\.page \.site-nav\s*\{[^}]*min-height:\s*3\.5rem;[^}]*padding:\s*0\.75rem 1rem;/,
+      /\.page \.site-nav\s*\{[^}]*min-height:\s*calc\(3\.5rem - var\(--silver-border-widths-default\)\);[^}]*padding:\s*0\.75rem 1rem;/,
     );
     expect(landingCss).toMatch(
-      /@media \(min-width: 50rem\)\s*\{\s*\.page \.site-nav\s*\{[^}]*min-height:\s*4rem;[^}]*padding-inline:\s*1\.5rem;/,
+      /@media \(min-width: 50rem\)\s*\{\s*\.page \.site-nav\s*\{[^}]*min-height:\s*calc\(4rem - var\(--silver-border-widths-default\)\);[^}]*padding-inline:\s*1\.5rem;/,
     );
   });
 });
 
 describe('header content', () => {
   const toggleRule = /\.theme-toggle\s*\{([^}]*)\}/.exec(docsCss)?.[1] ?? '';
+
+  it('keeps the nav links on the landing line height so text does not jump', () => {
+    // The landing TopNavItem inherits Panda's base 1.5 line height, while the
+    // docs header sits in Starlight's ambient 1.75. Without restating the
+    // token, the docs link boxes grow 4px and the text baseline snaps to a
+    // different device pixel at fractional display scaling, so the links
+    // visibly shift when crossing between the two headers.
+    const linkRule = /\.header-nav-link\s*\{([^}]*)\}/.exec(docsCss)?.[1] ?? '';
+    expect(linkRule).toMatch(
+      /line-height:\s*var\(--silver-line-heights-normal\)/,
+    );
+    // Pin the token to the value Panda's base styles give the landing nav.
+    expect(token('lineHeights.normal')).toBe('1.5');
+  });
+
+  it('sizes the inner header row exactly so zoom cannot re-round it', () => {
+    // Starlight gives its inner layout div `height: 100%`; under fractional
+    // page zoom that percentage resolves against a rounded ancestor box, so
+    // the centered links and toggle land a fraction of a pixel lower than the
+    // landing nav's and snap to a different device pixel. The override states
+    // the same height as an exact calc from the vars Starlight sizes the bar
+    // with, keeping both headers' centering math identical at every zoom.
+    expect(docsCss).toMatch(
+      /header\.header\s*>\s*\.header\s*\{[^}]*height:\s*calc\(\s*var\(--sl-nav-height\)\s*-\s*2\s*\*\s*var\(--sl-nav-pad-y\)\s*-\s*var\(--silver-border-widths-default\)\s*\)/,
+    );
+  });
+
+  it('keeps the toggle a direct flex item like the landing one', () => {
+    // The landing toggle is centered by its nav's `align-items`. The docs
+    // button sits inside the `<silver-theme-toggle>` custom element; without
+    // `display: contents` that wrapper is the flex item and the button rides
+    // a text baseline set by Starlight's 1.75 line strut, a fraction of a
+    // pixel lower than the landing button.
+    expect(docsCss).toMatch(/silver-theme-toggle\s*\{[^}]*display:\s*contents/);
+  });
 
   it('sizes the docs toggle off the same values as the landing TopNavItem', () => {
     // The recipe's icon-only box is `min-height: sizes.8`, `px: '2'`,

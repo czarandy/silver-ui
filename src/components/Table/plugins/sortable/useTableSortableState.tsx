@@ -60,13 +60,17 @@ function defaultCompare<T extends Record<string, unknown>>(
 ): number {
   const left = a[sortKey];
   const right = b[sortKey];
-  if (left == null && right == null) {
+  const leftIsNullishOrNaN =
+    left == null || (typeof left === 'number' && Number.isNaN(left));
+  const rightIsNullishOrNaN =
+    right == null || (typeof right === 'number' && Number.isNaN(right));
+  if (leftIsNullishOrNaN && rightIsNullishOrNaN) {
     return 0;
   }
-  if (left == null) {
+  if (leftIsNullishOrNaN) {
     return 1;
   }
-  if (right == null) {
+  if (rightIsNullishOrNaN) {
     return -1;
   }
   if (typeof left === 'number' && typeof right === 'number') {

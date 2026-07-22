@@ -14,7 +14,7 @@ import {
   type ChatMessageSender,
 } from 'components/Chat/ChatContext';
 import {chatMessageRecipe} from 'components/Chat/ChatMessage.recipe';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export interface ChatMessageProps extends ComponentPropsWithoutRef<'article'> {
@@ -93,8 +93,8 @@ export function ChatMessage({
   const classes = chatMessageRecipe({density, sender});
   const nameId = useId();
   const isSystem = sender === 'system';
-  const hasAvatar = isReactNode(avatar) && !isSystem;
-  const hasName = isReactNode(name) && !isSystem;
+  const hasAvatar = isNonEmptyReactNode(avatar) && !isSystem;
+  const hasName = isNonEmptyReactNode(name) && !isSystem;
 
   return (
     <ChatMessageContext value={contextValue}>
@@ -116,7 +116,9 @@ export function ChatMessage({
             </div>
           ) : null}
           <div className={classes.body}>{children}</div>
-          {isReactNode(metadata) && !isSystem ? <div>{metadata}</div> : null}
+          {isNonEmptyReactNode(metadata) && !isSystem ? (
+            <div>{metadata}</div>
+          ) : null}
         </div>
       </article>
     </ChatMessageContext>

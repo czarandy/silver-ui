@@ -9,7 +9,7 @@ import {
   type LayoutArea,
 } from 'components/Layout/LayoutContext';
 import type {LayoutHeight} from 'components/Layout/types';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
@@ -78,7 +78,7 @@ function AreaProvider({
   area: LayoutArea;
   children?: ReactNode;
 }): React.JSX.Element | null {
-  if (!isReactNode(children)) {
+  if (!isNonEmptyReactNode(children)) {
     return null;
   }
 
@@ -99,8 +99,8 @@ export function Layout({
   start,
   style,
 }: LayoutProps): React.JSX.Element {
-  const hasHeader = isReactNode(header);
-  const hasFooter = isReactNode(footer);
+  const hasHeader = isNonEmptyReactNode(header);
+  const hasFooter = isNonEmptyReactNode(footer);
   const regionsValue = useMemo(
     () => ({hasDividers, hasFooter, hasHeader}),
     [hasDividers, hasFooter, hasHeader],

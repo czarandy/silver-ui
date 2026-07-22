@@ -12,7 +12,7 @@ import {avatarRecipe} from 'components/Avatar/Avatar.recipe';
 import {AvatarSizeContext} from 'components/Avatar/AvatarSizeContext';
 import {useAvatarGroup} from 'components/AvatarGroup/AvatarGroupContext';
 import {Icon} from 'components/Icon';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 const CIRCLE_EDGE_OFFSET_RATIO = (1 - 1 / Math.SQRT2) / 2;
@@ -251,7 +251,7 @@ export function Avatar({
             )}
           </AvatarImage>
         </div>
-        {isReactNode(status) ? (
+        {isNonEmptyReactNode(status) ? (
           <div className={classes.status} style={statusStyle}>
             {status}
           </div>

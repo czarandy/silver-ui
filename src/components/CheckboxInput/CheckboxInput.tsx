@@ -13,15 +13,15 @@ import {
 } from 'react';
 import {checkboxInputRecipe} from 'components/CheckboxInput/CheckboxInput.recipe';
 import type {FieldNecessity, InputStatus} from 'components/Field';
-import {fieldRecipe} from 'components/Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
 import {Spinner} from 'components/Spinner';
-import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import isReactNode from 'internal/isReactNode';
+import {NecessityIndicator} from 'internal/NecessityIndicator';
+import {StatusMessage} from 'internal/StatusMessage';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -171,7 +171,7 @@ export function CheckboxInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(
-    isReactNode(description) ? descriptionId : undefined,
+    isNonEmptyReactNode(description) ? descriptionId : undefined,
     statusMessageID,
   );
   const isIndeterminate = value === 'indeterminate';
@@ -188,8 +188,6 @@ export function CheckboxInput({
       inputRef.current.indeterminate = isIndeterminate;
     }
   }, [isIndeterminate]);
-
-  const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
 
   const control = (
     <span className={classes.boxWrap}>
@@ -254,13 +252,8 @@ export function CheckboxInput({
         <Icon color="secondary" icon={labelIcon} size="sm" />
       ) : null}
       {label}
-      {statusText != null ? (
-        <Text as="span" className={classes.indicator} type="supporting">
-          <span aria-hidden="true"> · </span>
-          {statusText}
-        </Text>
-      ) : null}
-      {isReactNode(labelTooltip) ? (
+      <NecessityIndicator isOptional={isOptional} isRequired={isRequired} />
+      {isNonEmptyReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>
             <Icon icon={Info} size="sm" />
@@ -280,26 +273,14 @@ export function CheckboxInput({
     </label>
   );
 
-  const statusNode =
-    status?.message != null ? (
-      <div
-        aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-        className={
-          fieldRecipe({
-            statusType: status.type,
-            statusVariant: 'detached',
-          }).status
-        }
-        id={statusMessageID}
-        role={status.type === 'error' ? 'alert' : 'status'}>
-        {status.message}
-      </div>
-    ) : null;
+  const statusNode = (
+    <StatusMessage id={statusMessageID} status={status} variant="detached" />
+  );
 
   const item = (
     <Item
       description={
-        isReactNode(description) ? (
+        isNonEmptyReactNode(description) ? (
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }

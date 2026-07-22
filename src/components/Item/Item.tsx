@@ -14,7 +14,7 @@ import {itemRecipe} from 'components/Item/Item.recipe';
 import type {LinkComponent as LinkComponentType} from 'components/Link';
 import {Text} from 'components/Text';
 import {ActionElement} from 'internal/ActionElement';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {useRel} from 'internal/linkAccessibility';
 import {cx} from 'utils/cx';
 
@@ -241,7 +241,7 @@ export function Item({
   });
 
   const inlineEndContent =
-    isReactNode(endContent) && endContentPosition === 'inline' ? (
+    isNonEmptyReactNode(endContent) && endContentPosition === 'inline' ? (
       <span className={classes.endContentInline}>{endContent}</span>
     ) : null;
 
@@ -259,7 +259,7 @@ export function Item({
           {label}
         </Text>
       )}
-      {isReactNode(description) ? (
+      {isNonEmptyReactNode(description) ? (
         <Text
           as="span"
           maxLines={getMaxLines(descriptionLines, description)}
@@ -291,11 +291,11 @@ export function Item({
 
   const innerSlots = (
     <>
-      {isReactNode(startContent) ? (
+      {isNonEmptyReactNode(startContent) ? (
         <span className={classes.startContent}>{startContent}</span>
       ) : null}
       <span className={classes.textContent}>{labelAndDescription}</span>
-      {isReactNode(endContent) && endContentPosition !== 'inline' ? (
+      {isNonEmptyReactNode(endContent) && endContentPosition !== 'inline' ? (
         <span className={classes.endContent}>{endContent}</span>
       ) : null}
     </>
@@ -349,7 +349,7 @@ export function Item({
       style={style}>
       {leadingContent}
       {content}
-      {isReactNode(trailingContent) ? (
+      {isNonEmptyReactNode(trailingContent) ? (
         <span className={classes.trailingContent}>{trailingContent}</span>
       ) : null}
     </Component>

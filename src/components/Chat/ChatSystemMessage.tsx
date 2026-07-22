@@ -6,7 +6,7 @@ import type {
 } from 'react';
 import {chatSystemMessageRecipe} from 'components/Chat/ChatSystemMessage.recipe';
 import {Divider} from 'components/Divider';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type ChatSystemMessageVariant = 'default' | 'divider';
@@ -87,7 +87,7 @@ export function ChatSystemMessage({
       role="status"
       style={style}>
       <span className={classes.content}>
-        {isReactNode(icon) ? (
+        {isNonEmptyReactNode(icon) ? (
           <span className={classes.icon}>{icon}</span>
         ) : null}
         {children}

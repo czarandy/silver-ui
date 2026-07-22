@@ -3,7 +3,7 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Text} from 'components/Text';
 import {timelineRecipe} from 'components/Timeline/Timeline.recipe';
 import {Timestamp, type TimestampFormat} from 'components/Timestamp';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 const classes = timelineRecipe();
@@ -87,7 +87,7 @@ export function Timeline({
           key={item.id}>
           <div aria-hidden="true" className={classes.indicatorColumn}>
             <div className={classes.indicator}>
-              {isReactNode(item.icon) ? (
+              {isNonEmptyReactNode(item.icon) ? (
                 item.icon
               ) : (
                 <span className={classes.dot} data-timeline-dot="" />
@@ -106,7 +106,7 @@ export function Timeline({
             <Text as="span" className={classes.title} type="label">
               {item.title}
             </Text>
-            {isReactNode(item.content) ? (
+            {isNonEmptyReactNode(item.content) ? (
               <div className={classes.body}>{item.content}</div>
             ) : null}
           </div>

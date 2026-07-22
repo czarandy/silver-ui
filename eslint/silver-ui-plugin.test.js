@@ -9,7 +9,8 @@ const noDirectColorTokensRule = plugin.rules['no-direct-color-tokens'];
 const noRedundantBoxSizingRule = plugin.rules['no-redundant-box-sizing'];
 const noRecipeExportsRule = plugin.rules['no-recipe-exports'];
 const noRecipeTypeImportsRule = plugin.rules['no-recipe-type-imports'];
-const preferIsReactNodeRule = plugin.rules['prefer-is-react-node'];
+const preferIsNonEmptyReactNodeRule =
+  plugin.rules['prefer-is-non-empty-react-node'];
 const noUselessFragmentWithCommentRule =
   plugin.rules['no-useless-fragment-with-comment'];
 const noUselessUndefinedPropRule = plugin.rules['no-useless-undefined-prop'];
@@ -617,16 +618,16 @@ tester.run('no-direct-color-tokens', noDirectColorTokensRule, {
   ],
 });
 
-tester.run('prefer-is-react-node', preferIsReactNodeRule, {
+tester.run('prefer-is-non-empty-react-node', preferIsNonEmptyReactNodeRule, {
   valid: [
     {
-      name: 'allows isReactNode checks',
+      name: 'allows isNonEmptyReactNode checks',
       code: `
         import type {ReactNode} from 'react';
-        import isReactNode from '../../internal/isReactNode';
+        import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
         export function Example({children}: {children?: ReactNode}) {
-          return isReactNode(children) ? <div>{children}</div> : null;
+          return isNonEmptyReactNode(children) ? <div>{children}</div> : null;
         }
       `,
       filename: 'src/components/Example/Example.tsx',
@@ -653,21 +654,23 @@ export function Example({children}: {children?: ReactNode}) {
 }
 `,
       output: `import type {ReactNode} from 'react';
-import isReactNode from '../../internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export function Example({children}: {children?: ReactNode}) {
-  return isReactNode(children) ? <div>{children}</div> : null;
+  return isNonEmptyReactNode(children) ? <div>{children}</div> : null;
 }
 `,
       filename: 'src/components/Example/Example.tsx',
       languageOptions: typeAwareLanguageOptions,
-      errors: [{messageId: 'preferIsReactNode', data: {name: 'children'}}],
+      errors: [
+        {messageId: 'preferIsNonEmptyReactNode', data: {name: 'children'}},
+      ],
     },
     {
       name: 'replaces negative ReactNode null checks with negated utility',
       code: `
         import type {ReactNode} from 'react';
-        import isReactNode from '../../internal/isReactNode';
+        import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
         export function Example({children}: {children?: ReactNode}) {
           return children == null ? null : <div>{children}</div>;
@@ -675,15 +678,17 @@ export function Example({children}: {children?: ReactNode}) {
       `,
       output: `
         import type {ReactNode} from 'react';
-        import isReactNode from '../../internal/isReactNode';
+        import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
         export function Example({children}: {children?: ReactNode}) {
-          return !isReactNode(children) ? null : <div>{children}</div>;
+          return !isNonEmptyReactNode(children) ? null : <div>{children}</div>;
         }
       `,
       filename: 'src/components/Example/Example.tsx',
       languageOptions: typeAwareLanguageOptions,
-      errors: [{messageId: 'preferIsReactNode', data: {name: 'children'}}],
+      errors: [
+        {messageId: 'preferIsNonEmptyReactNode', data: {name: 'children'}},
+      ],
     },
     {
       name: 'replaces React.ReactNode strict null checks',
@@ -697,10 +702,10 @@ export function Example({slot}: {slot?: React.ReactNode}) {
 }
 `,
       output: `import type React from 'react';
-import isReactNode from '../../internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export function Example({slot}: {slot?: React.ReactNode}) {
-  if (isReactNode(slot)) {
+  if (isNonEmptyReactNode(slot)) {
     return <div>{slot}</div>;
   }
   return null;
@@ -708,7 +713,7 @@ export function Example({slot}: {slot?: React.ReactNode}) {
 `,
       filename: 'src/components/Example/Example.tsx',
       languageOptions: typeAwareLanguageOptions,
-      errors: [{messageId: 'preferIsReactNode', data: {name: 'slot'}}],
+      errors: [{messageId: 'preferIsNonEmptyReactNode', data: {name: 'slot'}}],
     },
   ],
 });

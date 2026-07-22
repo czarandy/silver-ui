@@ -1,5 +1,15 @@
 import {css, cva, type RecipeVariantProps} from 'styled-system/css';
 
+/**
+ * Border color token per validation status, shared by the input recipe and
+ * the Fieldset border so status colors cannot drift between them.
+ */
+export const statusBorderColor = {
+  warning: 'status.warning.border',
+  error: 'status.error.border',
+  success: 'status.success.border',
+} as const;
+
 export const inputRecipe = cva({
   base: {
     position: 'relative',
@@ -38,30 +48,30 @@ export const inputRecipe = cva({
     },
     status: {
       warning: {
-        borderColor: 'status.warning.border',
+        borderColor: statusBorderColor.warning,
         _hover: {borderColor: 'status.warning.borderHover'},
         _focusWithin: {
-          borderColor: 'status.warning.border',
+          borderColor: statusBorderColor.warning,
           boxShadow: 'focus.warning',
-          _hover: {borderColor: 'status.warning.border'},
+          _hover: {borderColor: statusBorderColor.warning},
         },
       },
       error: {
-        borderColor: 'status.error.border',
+        borderColor: statusBorderColor.error,
         _hover: {borderColor: 'status.error.borderHover'},
         _focusWithin: {
-          borderColor: 'status.error.border',
+          borderColor: statusBorderColor.error,
           boxShadow: 'focus.error',
-          _hover: {borderColor: 'status.error.border'},
+          _hover: {borderColor: statusBorderColor.error},
         },
       },
       success: {
-        borderColor: 'status.success.border',
+        borderColor: statusBorderColor.success,
         _hover: {borderColor: 'status.success.borderHover'},
         _focusWithin: {
-          borderColor: 'status.success.border',
+          borderColor: statusBorderColor.success,
           boxShadow: 'focus.success',
-          _hover: {borderColor: 'status.success.border'},
+          _hover: {borderColor: statusBorderColor.success},
         },
       },
     },

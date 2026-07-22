@@ -6,7 +6,9 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import isReactNode from 'internal/isReactNode';
+import {NecessityIndicator} from 'internal/NecessityIndicator';
+import {StatusMessage} from 'internal/StatusMessage';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type FieldStatusVariant = 'attached' | 'detached';
@@ -159,16 +161,11 @@ export function Field({
 }: FieldProps): React.JSX.Element {
   const resolvedDescriptionID =
     descriptionID ??
-    (isReactNode(description) ? `${inputId}-description` : undefined);
+    (isNonEmptyReactNode(description) ? `${inputId}-description` : undefined);
   const resolvedStatusID =
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
-  const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
-  const classes = fieldRecipe({
-    isDisabled,
-    statusType: status?.type,
-    statusVariant,
-  });
+  const classes = fieldRecipe({isDisabled});
   const labelNode = (
     <LabelComponent
       className={classes.label}
@@ -185,17 +182,12 @@ export function Field({
       <Text as="span" color="inherit" type="label">
         {label}
       </Text>
-      {statusText != null ? (
-        <Text
-          as="span"
-          className={classes.indicator}
-          size="xs"
-          type="supporting">
-          <span aria-hidden="true"> · </span>
-          {statusText}
-        </Text>
-      ) : null}
-      {isReactNode(labelTooltip) ? (
+      <NecessityIndicator
+        isOptional={isOptional}
+        isRequired={isRequired}
+        size="xs"
+      />
+      {isNonEmptyReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>
             <Icon icon={Info} size="sm" />
@@ -204,7 +196,7 @@ export function Field({
       ) : null}
     </LabelComponent>
   );
-  const descriptionNode = isReactNode(description) ? (
+  const descriptionNode = isNonEmptyReactNode(description) ? (
     <Text
       as="span"
       color="secondary"
@@ -213,16 +205,13 @@ export function Field({
       {description}
     </Text>
   ) : null;
-  const statusNode =
-    status?.message != null ? (
-      <div
-        aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-        className={classes.status}
-        id={resolvedStatusID}
-        role={status.type === 'error' ? 'alert' : 'status'}>
-        {status.message}
-      </div>
-    ) : null;
+  const statusNode = (
+    <StatusMessage
+      id={resolvedStatusID}
+      status={status}
+      variant={statusVariant}
+    />
+  );
 
   return (
     <div

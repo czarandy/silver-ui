@@ -29,7 +29,7 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {formatFileSize} from 'internal/formatFileSize';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -258,7 +258,7 @@ export function FileInput({
     validationError == null
       ? statusFromProps
       : {type: 'error' as const, message: validationError};
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

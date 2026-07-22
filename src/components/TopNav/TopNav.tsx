@@ -9,7 +9,7 @@ import {
   useTopNavRenderMode,
 } from 'components/TopNav/TopNavContext';
 import {MobileNav, MobileNavToggle} from 'internal/MobileNav';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 const drawerClasses = topNavRecipe();
@@ -81,7 +81,7 @@ export function TopNav({
   const resolvedStartContent = startContent ?? children;
 
   if (process.env.NODE_ENV !== 'production') {
-    if (isReactNode(startContent) && isReactNode(children)) {
+    if (isNonEmptyReactNode(startContent) && isNonEmptyReactNode(children)) {
       console.warn(
         'TopNav: both `startContent` and `children` were provided. ' +
           '`startContent` takes precedence and `children` is ignored. ' +
@@ -90,11 +90,12 @@ export function TopNav({
     }
   }
 
-  const hasCenterContent = isReactNode(centerContent);
+  const hasCenterContent = isNonEmptyReactNode(centerContent);
   const hasCollapsibleContent =
-    isReactNode(resolvedStartContent) || isReactNode(centerContent);
+    isNonEmptyReactNode(resolvedStartContent) ||
+    isNonEmptyReactNode(centerContent);
   const hasMobileDrawerContent =
-    hasCollapsibleContent || isReactNode(mobileContent);
+    hasCollapsibleContent || isNonEmptyReactNode(mobileContent);
 
   if (renderMode === 'mobile-bar') {
     const classes = topNavRecipe({layout: 'mobile'});
@@ -105,7 +106,7 @@ export function TopNav({
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        {isReactNode(heading) ? (
+        {isNonEmptyReactNode(heading) ? (
           <div className={classes.heading}>{heading}</div>
         ) : null}
         <div className={classes.mobileEnd}>
@@ -117,7 +118,7 @@ export function TopNav({
   }
 
   if (renderMode === 'drawer') {
-    if (!hasCollapsibleContent && !isReactNode(mobileContent)) {
+    if (!hasCollapsibleContent && !isNonEmptyReactNode(mobileContent)) {
       return null;
     }
 
@@ -129,7 +130,7 @@ export function TopNav({
             {centerContent}
           </div>
         ) : null}
-        {hasCollapsibleContent && isReactNode(mobileContent) ? (
+        {hasCollapsibleContent && isNonEmptyReactNode(mobileContent) ? (
           <div className={drawerClasses.drawerDivider}>
             <Divider />
           </div>
@@ -148,10 +149,10 @@ export function TopNav({
       ref={ref}
       style={style}>
       <div className={classes.leftSection}>
-        {isReactNode(heading) ? (
+        {isNonEmptyReactNode(heading) ? (
           <div className={classes.heading}>{heading}</div>
         ) : null}
-        {isReactNode(resolvedStartContent) ? (
+        {isNonEmptyReactNode(resolvedStartContent) ? (
           <div className={classes.startContent}>{resolvedStartContent}</div>
         ) : null}
       </div>
@@ -160,7 +161,7 @@ export function TopNav({
       ) : null}
       {hasCenterContent ? (
         <div className={classes.rightSection}>{endContent}</div>
-      ) : isReactNode(endContent) ? (
+      ) : isNonEmptyReactNode(endContent) ? (
         <div className={classes.endContent}>{endContent}</div>
       ) : null}
     </nav>

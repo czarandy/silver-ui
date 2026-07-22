@@ -30,13 +30,37 @@
  * same `data-theme` attribute Starlight toggles. And Starlight scopes all of
  * its own rules to `@layer starlight.*` while this file is unlayered, so these
  * win the cascade outright — no specificity games needed.
+ *
+ * The selector must be element-qualified: Starlight renders two elements with
+ * class `header` — the fixed `<header>` bar and a layout `<div>` inside it.
+ * A bare `.header` also hands the width to that inner div, whose bottom edge
+ * sits ~13px above the bar's, painting a second stray hairline through the
+ * header.
  */
 :root {
   --sl-color-bg-nav: var(--silver-colors-bg-subtle);
 }
 
-.header {
+header.header {
   border-bottom-color: var(--silver-colors-border);
+  border-bottom-width: var(--silver-border-widths-default);
+}
+
+/*
+ * Starlight's inner layout div fills the bar with `height: 100%`. Under
+ * fractional page zoom Chrome resolves that percentage against a rounded
+ * ancestor size (e.g. 48.75px content becomes a 49px div at 125% zoom), so
+ * everything centered in the div — the nav links and the theme toggle —
+ * lands a fraction of a pixel lower than the landing nav's flex items and
+ * snaps to a different device pixel: the controls visibly jump when crossing
+ * headers. Stating the same height as an exact calc keeps both sides'
+ * centering math identical at every zoom level.
+ */
+header.header > .header {
+  height: calc(
+    var(--sl-nav-height) - 2 * var(--sl-nav-pad-y) -
+      var(--silver-border-widths-default)
+  );
 }
 
 /*
@@ -86,6 +110,43 @@
 }
 
 /*
+ * Search shortcut: Starlight owns the search trigger and swaps Ctrl for ⌘ on
+ * Apple platforms. Keep that behavior, but present each key with Kbd's `md`
+ * recipe instead of Starlight's single shortcut pill. The outer element does
+ * not set `display`, because Starlight uses its responsive utilities to hide
+ * the shortcut below the desktop breakpoint.
+ */
+site-search button[data-open-modal] > kbd {
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  padding-inline: 0;
+  border-radius: 0;
+  background-color: transparent;
+  vertical-align: bottom;
+}
+
+site-search button[data-open-modal] > kbd > kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--silver-sizes-5);
+  height: var(--silver-sizes-5);
+  padding-inline: 0.25rem;
+  border-bottom-color: var(--silver-colors-border);
+  border-bottom-style: solid;
+  border-bottom-width: var(--silver-border-widths-emphasized);
+  border-radius: var(--silver-radii-sm);
+  background-color: var(--silver-colors-bg-subtle);
+  color: var(--silver-colors-fg-muted);
+  font-family: var(--silver-fonts-body);
+  font-size: var(--silver-font-sizes-xs);
+  font-weight: var(--silver-font-weights-medium);
+  line-height: var(--silver-line-heights-none);
+  user-select: none;
+}
+
+/*
  * The links themselves restate topNavItemRecipe's text form — `px: '3'`,
  * `py: '1.5'`, `minH: '8'`, medium weight over `fg.muted`, background-only
  * hover — so they read as the landing page's nav links. Classed rather than
@@ -103,6 +164,15 @@
   font-family: var(--silver-fonts-body);
   font-size: var(--silver-font-sizes-md);
   font-weight: var(--silver-font-weights-medium);
+  /*
+   * The landing TopNavItem inherits Panda's base 1.5 line height; here the
+   * ambient value is Starlight's 1.75, which grows the link box (40px vs
+   * 36px) and lets the text baseline snap to a different device pixel at
+   * fractional display scaling — the links visibly jump ~1-2px when crossing
+   * between the two headers. Restate the shared token like the other
+   * declarations above.
+   */
+  line-height: var(--silver-line-heights-normal);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -126,6 +196,19 @@
  * declarations and let the browser do the arithmetic — and mirror the colors
  * too, `fg.muted` throughout with only the background moving on hover.
  */
+/*
+ * The landing toggle is a direct flex item of its nav, centered by
+ * `align-items`. Here the button sits inside the `<silver-theme-toggle>`
+ * custom element, which would otherwise be the flex item and leave the button
+ * on a text baseline governed by Starlight's 1.75 line strut — a fraction of
+ * a pixel lower than the landing button, which snaps visibly at fractional
+ * display scaling. `display: contents` promotes the button itself to the
+ * flex item, matching the landing geometry.
+ */
+silver-theme-toggle {
+  display: contents;
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;

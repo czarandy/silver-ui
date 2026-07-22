@@ -6,7 +6,7 @@ import {
   layoutRegionRecipe,
 } from 'components/Layout/Layout.recipe';
 import {useLayoutRegions} from 'components/Layout/LayoutContext';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
@@ -93,8 +93,9 @@ export function LayoutFooter({
   const regions = useLayoutRegions();
   const hasDivider = regions?.hasDividers ?? false;
   const rootStyle: CSSProperties = {height, ...style};
-  const isCustom = isReactNode(children);
-  const hasActions = isReactNode(primaryButton) || isReactNode(secondaryButton);
+  const isCustom = isNonEmptyReactNode(children);
+  const hasActions =
+    isNonEmptyReactNode(primaryButton) || isNonEmptyReactNode(secondaryButton);
   const classes = layoutFooterRecipe({hasDivider, isCustom});
 
   return (
@@ -110,7 +111,7 @@ export function LayoutFooter({
           children
         ) : (
           <>
-            {isReactNode(startContent) ? (
+            {isNonEmptyReactNode(startContent) ? (
               <div className={classes.start}>{startContent}</div>
             ) : null}
             {hasActions ? (
