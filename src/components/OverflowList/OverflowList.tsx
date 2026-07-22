@@ -222,12 +222,29 @@ export function OverflowList({
       return;
     }
 
-    const target =
-      isObservingParent && container.parentElement != null
-        ? container.parentElement
-        : container;
-    observeResize(target, calculate);
-    return () => unobserveResize(target, calculate);
+    // Three signals drive re-measurement: the container's own size (also
+    // needed in observeParent mode, where the fillsParent class changes the
+    // container width without resizing the parent); the hidden measure row,
+    // which shrink-wraps its content and so fires when any child or the
+    // indicator changes width (longer labels, fonts loading); and the parent
+    // in observeParent mode.
+    const targets = new Set<Element>([container]);
+    const measure = measureRef.current;
+    if (measure != null) {
+      targets.add(measure);
+    }
+    if (isObservingParent && container.parentElement != null) {
+      targets.add(container.parentElement);
+    }
+
+    for (const target of targets) {
+      observeResize(target, calculate);
+    }
+    return () => {
+      for (const target of targets) {
+        unobserveResize(target, calculate);
+      }
+    };
   }, [calculate, isObservingParent]);
 
   const allItems: OverflowItem[] = childArray.map((child, index) => ({

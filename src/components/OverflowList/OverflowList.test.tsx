@@ -223,6 +223,71 @@ describe('OverflowList', () => {
     expect(root).toHaveTextContent('Alpha+2');
   });
 
+  it('recalculates when the measured content changes size', () => {
+    const {rerender} = render(
+      <OverflowList data-testid="list" overflowRenderer={renderOverflow}>
+        {['Alpha', 'Beta', 'Gamma'].map(label => (
+          <span data-width="30" key={label}>
+            {label}
+          </span>
+        ))}
+      </OverflowList>,
+    );
+    const root = screen.getByTestId('list');
+    const measure = screen.getByTestId('list-measure');
+    expect(resizeObserver.isObserved(measure)).toBe(true);
+    expect(root).toHaveTextContent('AlphaBetaGamma');
+
+    rerender(
+      <OverflowList data-testid="list" overflowRenderer={renderOverflow}>
+        {['Alpha', 'Beta', 'Gamma'].map(label => (
+          <span data-width="90" key={label}>
+            {label}
+          </span>
+        ))}
+      </OverflowList>,
+    );
+    // The item count is unchanged, so only the measure row growing (as in a
+    // browser when labels lengthen or a font loads) reports the change.
+    act(() => {
+      resizeObserver.resize(measure);
+    });
+
+    expect(root).toHaveTextContent('AlphaBeta+1');
+  });
+
+  it('recovers when the container grows after collapsing in observeParent mode', () => {
+    containerWidth = 60;
+    render(
+      <div data-client-width="100" data-testid="parent">
+        <OverflowList
+          behavior="observeParent"
+          data-testid="list"
+          overflowRenderer={renderOverflow}>
+          <Item>Alpha</Item>
+          <Item>Beta</Item>
+          <Item>Gamma</Item>
+        </OverflowList>
+      </div>,
+    );
+
+    // The flex-shrunk container clamps the available width below the
+    // parent's 100px content box.
+    const root = screen.getByTestId('list');
+    expect(root).toHaveTextContent('Alpha+2');
+    expect(resizeObserver.isObserved(root)).toBe(true);
+
+    // Collapsing applies fillsParent (flex: 1 1 0), growing the container
+    // while the parent stays the same size — only the container's own
+    // resize reports the freed space.
+    containerWidth = 100;
+    act(() => {
+      resizeObserver.resize(root);
+    });
+
+    expect(root).toHaveTextContent('AlphaBetaGamma');
+  });
+
   it('re-measures when the gap token changes', () => {
     containerWidth = 100;
     // jsdom does not resolve the recipe's gap class to a computed column-gap,
