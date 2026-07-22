@@ -161,6 +161,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **MultiSelect** — multi-value dropdown selector
 - **NumberInput** — numeric input with increment/decrement
 - **PasswordInput** — text input with show/hide toggle
+- **PinInput** — multi-cell PIN and one-time-code input
 - **RadioGroup** — radio button group
 - **Rating** — star rating input
 - **SearchFilterInput** — search input with structured filter tags
