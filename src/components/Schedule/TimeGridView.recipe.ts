@@ -15,6 +15,7 @@ export const scheduleTimeGridViewRecipe = sva({
     'dayHeader',
     'dayHeaderContent',
     'dayHeaderDayNumber',
+    'dayHeaderDayNumberText',
     'allDayLabel',
     'allDayRow',
     'dayCell',
@@ -76,15 +77,17 @@ export const scheduleTimeGridViewRecipe = sva({
       gap: '1',
     },
     dayHeaderDayNumber: {
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      display: 'grid',
+      placeItems: 'center',
       w: '32px',
       h: '32px',
       mt: '-1px',
       mb: '-1px',
-      lineHeight: '30px',
       borderRadius: 'full',
+    },
+    dayHeaderDayNumberText: {
+      fontVariantNumeric: 'tabular-nums',
+      lineHeight: 1,
     },
     allDayLabel: {
       display: 'flex',
@@ -205,13 +208,8 @@ export const scheduleTimeGridViewRecipe = sva({
         dayHeaderDayNumber: {
           bg: 'primary',
           color: 'fg.onPrimary',
-          pb: '1px',
         },
       },
-      false: {},
-    },
-    isDaySeven: {
-      true: {},
       false: {},
     },
     isLastColumn: {
@@ -230,21 +228,9 @@ export const scheduleTimeGridViewRecipe = sva({
       false: {},
     },
   },
-  compoundVariants: [
-    {
-      isCurrentDay: true,
-      isDaySeven: true,
-      css: {
-        dayHeaderDayNumber: {
-          pl: '1px',
-        },
-      },
-    },
-  ],
   defaultVariants: {
     height: 'auto',
     isCurrentDay: false,
-    isDaySeven: false,
     isLastColumn: false,
     isLastRow: false,
   },
