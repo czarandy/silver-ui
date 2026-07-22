@@ -29,7 +29,7 @@ export const tabsRecipe = sva({
       borderBottomWidth: 'emphasized',
       borderBottomStyle: 'solid',
       borderBottomColor: 'transparent',
-      bg: 'transparent',
+      backgroundColor: 'transparent',
       // Keep hover fills out of the underline area so the divider stays visible.
       backgroundClip: 'padding-box',
       color: 'fg.muted',
@@ -44,7 +44,8 @@ export const tabsRecipe = sva({
       transitionDuration: 'fast',
       transitionTimingFunction: 'default',
       _hover: {
-        bg: 'bg.subtle',
+        // The background shorthand would reset backgroundClip to border-box.
+        backgroundColor: 'bg.subtle',
       },
       _focusVisible: {
         outlineWidth: 'focus',
@@ -108,7 +109,7 @@ export const tabsRecipe = sva({
           color: 'fg.disabled',
           cursor: 'not-allowed',
           _hover: {
-            bg: 'transparent',
+            backgroundColor: 'transparent',
           },
         },
       },
