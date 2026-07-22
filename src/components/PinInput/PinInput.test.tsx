@@ -155,6 +155,51 @@ describe('PinInput', () => {
     expect(cells[3]).toHaveFocus();
   });
 
+  it('accepts one-time-code autofill without truncation', () => {
+    const onComplete = vi.fn();
+    render(<ControlledPinInput label="Code" onComplete={onComplete} />);
+    const cells = getCells();
+
+    // A maxLength would make the browser truncate the inserted SMS code to a
+    // single character before the change event fires.
+    for (const cell of cells) {
+      expect(cell).not.toHaveAttribute('maxlength');
+    }
+
+    fireEvent.change(cells[0], {target: {value: '123456'}});
+
+    expect(cells.map(cell => cell.value)).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+    ]);
+    expect(onComplete).toHaveBeenCalledExactlyOnceWith('123456');
+  });
+
+  it('keeps only the typed character when typing over a filled cell without a selection', () => {
+    const onChange = vi.fn<PinInputProps['onChange']>();
+    render(
+      <ControlledPinInput
+        initialValue="123"
+        label="Code"
+        onChange={onChange}
+      />,
+    );
+    const cells = getCells();
+
+    // Caret sits after the existing character: the browser appends.
+    fireEvent.change(cells[1], {target: {value: '29'}});
+    expect(onChange).toHaveBeenLastCalledWith('193', expect.any(Object));
+    expect(cells[2]).toHaveFocus();
+
+    // Caret sits before the existing character: the browser prepends.
+    fireEvent.change(cells[2], {target: {value: '83'}});
+    expect(onChange).toHaveBeenLastCalledWith('198', expect.any(Object));
+  });
+
   it('rejects non-ASCII digits in numeric mode', () => {
     const onChange = vi.fn<PinInputProps['onChange']>();
     render(<PinInput label="Code" onChange={onChange} value="" />);
@@ -334,6 +379,26 @@ describe('PinInput', () => {
       expect(onChange.mock.invocationCallOrder[0]).toBeLessThan(
         onComplete.mock.invocationCallOrder[0],
       );
+    });
+
+    it('completes once when the parent does not echo onChange synchronously', () => {
+      const onComplete = vi.fn();
+      // A static value simulates a parent that debounces or transitions its
+      // onChange echo: displayedValue stays stale across commits.
+      render(
+        <PinInput
+          label="Code"
+          onChange={noop}
+          onComplete={onComplete}
+          value="12345"
+        />,
+      );
+      const cells = getCells();
+
+      fireEvent.change(cells[5], {target: {value: '6'}});
+      fireEvent.change(cells[5], {target: {value: '7'}});
+
+      expect(onComplete).toHaveBeenCalledExactlyOnceWith('123456');
     });
 
     it('does not complete on mount, an incomplete edit, or complete replacement', () => {

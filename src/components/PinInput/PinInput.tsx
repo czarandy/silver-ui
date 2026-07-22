@@ -213,6 +213,9 @@ export function PinInput({
   // predates the parent echoing onChange) from user focus, which is checked
   // against the displayed value.
   const isProgrammaticFocusRef = useRef(false);
+  // Whether the last committed value was complete; onComplete only fires on
+  // a committed incomplete-to-complete transition.
+  const wasCompleteRef = useRef(displayedValue.length === length);
   const autoFocusIndex = Math.min(displayedValue.length, length - 1);
   // Merge the shared input chrome with this recipe's slot overrides in JS so
   // each property resolves to a single utility class; layering the classes
@@ -262,18 +265,36 @@ export function PinInput({
     event: ChangeEvent<HTMLInputElement> | null,
   ): void => {
     onChange(nextValue, event);
-    if (displayedValue.length < length && nextValue.length === length) {
+    // Completion is tracked against the committed sequence in a ref, not the
+    // displayed value: a controlled parent that echoes onChange asynchronously
+    // (debounce, startTransition) leaves displayedValue stale, which would
+    // re-fire onComplete for every edit of an already complete code.
+    const isComplete = nextValue.length === length;
+    if (isComplete && !wasCompleteRef.current) {
       onComplete?.(nextValue);
     }
+    wasCompleteRef.current = isComplete;
   };
 
   const handleChange = (
     index: number,
     event: ChangeEvent<HTMLInputElement>,
   ): void => {
-    const characters = filterCharacters(event.target.value, type);
+    const raw = event.target.value;
+    const previous = displayedValue[index] ?? '';
+    // The cells have no maxLength (it would truncate one-time-code autofill
+    // to a single character), so typing in a filled cell whose selection was
+    // collapsed yields the previous character plus the typed one; keep only
+    // the typed character.
+    const inserted =
+      previous !== '' && raw.length === 2 && raw.includes(previous)
+        ? raw.startsWith(previous)
+          ? raw.slice(1)
+          : raw.slice(0, 1)
+        : raw;
+    const characters = filterCharacters(inserted, type);
     if (characters === '') {
-      if (event.target.value === '' && index < displayedValue.length) {
+      if (raw === '' && index < displayedValue.length) {
         commit(
           displayedValue.slice(0, index) + displayedValue.slice(index + 1),
           event,
@@ -366,7 +387,6 @@ export function PinInput({
           disabled={effectiveDisabled}
           inputMode={type === 'numeric' ? 'numeric' : 'text'}
           key={index}
-          maxLength={1}
           onChange={event => handleChange(index, event)}
           onFocus={event => handleFocus(index, event)}
           onKeyDown={event => handleBackspace(index, event)}
