@@ -130,7 +130,7 @@ describe('Fieldset', () => {
     expect(group).toHaveAttribute('aria-describedby', summary.id);
   });
 
-  it('renders the status summary as the last child, below the grouped fields', () => {
+  it('renders the status summary detached below the fieldset box', () => {
     render(
       <Fieldset
         legend="Profile"
@@ -142,16 +142,15 @@ describe('Fieldset', () => {
     const group = screen.getByRole('group', {name: 'Profile'});
     const summary = screen.getByRole('alert');
 
-    expect(group).toContainElement(summary);
-    expect(group.lastElementChild).toBe(summary);
-    expect(screen.getByRole('textbox', {name: 'Name'}).parentElement).toBe(
-      summary.previousElementSibling,
-    );
+    expect(group).not.toContainElement(summary);
+    expect(summary.previousElementSibling).toBe(group);
+    expect(summary.parentElement).toBe(group.parentElement);
   });
 
-  it('renders the fieldset as the outermost element so consumer styling covers the summary', () => {
+  it('applies className, style, and hidden to the wrapper so they cover the summary', () => {
     const {container} = render(
       <Fieldset
+        className="custom-fieldset"
         legend="Profile"
         status={{message: 'Fix the highlighted fields.', type: 'error'}}
         style={{maxWidth: 480}}>
@@ -160,8 +159,25 @@ describe('Fieldset', () => {
     );
 
     const group = screen.getByRole('group', {name: 'Profile'});
-    expect(container.firstElementChild).toBe(group);
-    expect(group).toContainElement(screen.getByRole('alert'));
+    const wrapper = assertNonNull(group.parentElement);
+
+    expect(container.firstElementChild).toBe(wrapper);
+    expect(wrapper).toHaveClass('custom-fieldset');
+    expect(wrapper).toHaveStyle({maxWidth: '480px'});
+    expect(wrapper).toContainElement(screen.getByRole('alert'));
+  });
+
+  it('hides the status summary along with the hidden fieldset', () => {
+    render(
+      <Fieldset
+        hidden
+        legend="Profile"
+        status={{message: 'Fix the highlighted fields.', type: 'error'}}>
+        <input aria-label="Name" />
+      </Fieldset>,
+    );
+
+    expect(screen.getByText('Fix the highlighted fields.')).not.toBeVisible();
   });
 
   it.each([
@@ -344,12 +360,13 @@ describe('Fieldset', () => {
     );
 
     const group = screen.getByTestId('fieldset');
+    const wrapper = assertNonNull(group.parentElement);
     expect(group.tagName).toBe('FIELDSET');
     expect(group).toHaveAttribute('form', 'profile-form');
     expect(group).toHaveAttribute('id', 'profile-fields');
     expect(group).toHaveAttribute('name', 'profile');
-    expect(group).toHaveClass('custom-fieldset');
-    expect(group).toHaveStyle({maxWidth: '480px'});
+    expect(wrapper).toHaveClass('custom-fieldset');
+    expect(wrapper).toHaveStyle({maxWidth: '480px'});
     expect(ref).toHaveBeenCalledWith(group);
   });
 

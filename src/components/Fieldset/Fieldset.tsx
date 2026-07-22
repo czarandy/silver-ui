@@ -55,8 +55,8 @@ export type FieldsetProps = NativeFieldsetProps &
      */
     ref?: Ref<HTMLFieldSetElement>;
     /**
-     * Validation summary displayed below the grouped fields. The status is
-     * not propagated to child controls.
+     * Validation summary displayed below the fieldset. The status is not
+     * propagated to child controls.
      */
     status?: InputStatus;
   };
@@ -64,6 +64,10 @@ export type FieldsetProps = NativeFieldsetProps &
 /**
  * Groups separately labeled fields under a native legend with normal vertical
  * layout and disabled cascading to both native and silver-ui controls.
+ *
+ * `className`, `style`, and `hidden` apply to the outer wrapper so they cover
+ * the fieldset and its detached status summary together; the remaining native
+ * props, `data-testid`, and `ref` target the fieldset element.
  */
 export function Fieldset({
   'aria-describedby': ariaDescribedBy,
@@ -72,6 +76,7 @@ export function Fieldset({
   className,
   'data-testid': dataTestId,
   description,
+  hidden,
   isDisabled = false,
   isOptional = false,
   isRequired = false,
@@ -100,48 +105,52 @@ export function Fieldset({
   );
 
   return (
-    <fieldset
-      {...fieldsetProps}
-      aria-describedby={describedBy}
-      aria-invalid={status?.type === 'error' ? true : ariaInvalid}
-      className={cx(classes.root, className)}
-      data-testid={dataTestId}
-      disabled={effectiveDisabled}
-      ref={ref}
+    <div
+      className={cx(classes.wrapper, className)}
+      hidden={hidden}
       style={style}>
-      <legend className={classes.legend}>
-        <span className={classes.legendContent}>
-          <Text as="span" color="inherit" type="label">
-            {legend}
-          </Text>
-          {statusText != null ? (
-            <Text
-              as="span"
-              className={classes.indicator}
-              color="secondary"
-              size="xs"
-              type="supporting">
-              <span aria-hidden="true"> · </span>
-              {statusText}
+      <fieldset
+        {...fieldsetProps}
+        aria-describedby={describedBy}
+        aria-invalid={status?.type === 'error' ? true : ariaInvalid}
+        className={classes.root}
+        data-testid={dataTestId}
+        disabled={effectiveDisabled}
+        ref={ref}>
+        <legend className={classes.legend}>
+          <span className={classes.legendContent}>
+            <Text as="span" color="inherit" type="label">
+              {legend}
             </Text>
-          ) : null}
-        </span>
-      </legend>
-      {isNonEmptyReactNode(description) ? (
-        <Text
-          as="p"
-          className={classes.description}
-          color="secondary"
-          id={descriptionId}
-          type="supporting">
-          {description}
-        </Text>
-      ) : null}
-      <FieldsetContext value={contextValue}>
-        <VStack className={classes.content} gap={4}>
-          {children}
-        </VStack>
-      </FieldsetContext>
+            {statusText != null ? (
+              <Text
+                as="span"
+                className={classes.indicator}
+                color="secondary"
+                size="xs"
+                type="supporting">
+                <span aria-hidden="true"> · </span>
+                {statusText}
+              </Text>
+            ) : null}
+          </span>
+        </legend>
+        {isNonEmptyReactNode(description) ? (
+          <Text
+            as="p"
+            className={classes.description}
+            color="secondary"
+            id={descriptionId}
+            type="supporting">
+            {description}
+          </Text>
+        ) : null}
+        <FieldsetContext value={contextValue}>
+          <VStack className={classes.content} gap={4}>
+            {children}
+          </VStack>
+        </FieldsetContext>
+      </fieldset>
       {status?.message != null ? (
         <div
           aria-live={status.type === 'error' ? 'assertive' : 'polite'}
@@ -156,7 +165,7 @@ export function Fieldset({
           {status.message}
         </div>
       ) : null}
-    </fieldset>
+    </div>
   );
 }
 
