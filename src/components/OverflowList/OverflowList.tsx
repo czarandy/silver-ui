@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type HTMLAttributes,
   type ReactElement,
   type ReactNode,
   type Ref,
@@ -28,7 +29,7 @@ export interface OverflowItem {
   index: number;
 }
 
-export interface OverflowListProps {
+export interface OverflowListProps extends HTMLAttributes<HTMLDivElement> {
   /**
    * Element whose width controls the fit calculation. `observeParent` uses
    * the parent's content width and is useful when the list shares a flex row
@@ -112,6 +113,9 @@ function getGapWidth(container: HTMLElement): number {
  * again. Visible child components therefore mount twice, and even collapsed
  * children mount once for measurement. Avoid using it for hundreds of
  * expensive items without first virtualizing or reducing them.
+ *
+ * Unrecognized props (`id`, `aria-*`, `data-*`, event handlers, …) are
+ * forwarded to the visible row.
  */
 export function OverflowList({
   behavior = 'observeSelf',
@@ -124,6 +128,7 @@ export function OverflowList({
   overflowRenderer,
   ref,
   style,
+  ...htmlProps
 }: OverflowListProps): React.JSX.Element {
   // eslint-disable-next-line @eslint-react/no-children-to-array -- normalizes children before width measurement
   const childArray = Children.toArray(children) as ReactElement[];
@@ -261,7 +266,8 @@ export function OverflowList({
         className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={mergeRefs(ref, containerRefCallback)}
-        style={style}>
+        style={style}
+        {...htmlProps}>
         {collapseFrom === 'start' && hasOverflow
           ? overflowRenderer?.(overflowItems)
           : null}

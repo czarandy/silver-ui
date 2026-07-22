@@ -293,4 +293,28 @@ describe('OverflowList', () => {
     expect(root).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(root);
   });
+
+  it('forwards unrecognized HTML attributes to the visible row', () => {
+    const onClick = vi.fn();
+    render(
+      <OverflowList
+        aria-label="Selected teams"
+        className="overflow-list-root"
+        data-testid="list"
+        id="team-list"
+        onClick={onClick}>
+        <Item>Alpha</Item>
+      </OverflowList>,
+    );
+
+    const root = screen.getByTestId('list');
+    expect(root).toHaveAttribute('aria-label', 'Selected teams');
+    expect(root).toHaveAttribute('id', 'team-list');
+    root.click();
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    const measure = screen.getByTestId('list-measure');
+    expect(measure).not.toHaveAttribute('aria-label');
+    expect(measure).not.toHaveAttribute('id');
+  });
 });
