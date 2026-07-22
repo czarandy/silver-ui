@@ -8,7 +8,6 @@ export const fieldRecipe = sva({
     'indicator',
     'tooltipIcon',
     'inputWrapper',
-    'status',
   ],
   base: {
     root: {
@@ -41,13 +40,6 @@ export const fieldRecipe = sva({
       flexDirection: 'column',
       isolation: 'isolate',
     },
-    status: {
-      fontFamily: 'body',
-      fontSize: 'sm',
-      lineHeight: 'normal',
-      px: '2',
-      py: '1.5',
-    },
   },
   variants: {
     isDisabled: {
@@ -59,30 +51,9 @@ export const fieldRecipe = sva({
       },
       false: {},
     },
-    statusType: {
-      warning: {status: {bg: 'surface.yellow', color: 'surface.yellow.fg'}},
-      error: {status: {bg: 'surface.red', color: 'surface.red.fg'}},
-      success: {status: {bg: 'surface.green', color: 'surface.green.fg'}},
-    },
-    statusVariant: {
-      attached: {
-        status: {
-          mt: '-1',
-          pt: '2.5',
-          borderBottomRadius: 'md',
-        },
-      },
-      detached: {
-        status: {
-          mt: '1',
-          borderRadius: 'md',
-        },
-      },
-    },
   },
   defaultVariants: {
     isDisabled: false,
-    statusVariant: 'attached',
   },
 });
 

@@ -6,6 +6,7 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
@@ -164,11 +165,7 @@ export function Field({
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
   const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
-  const classes = fieldRecipe({
-    isDisabled,
-    statusType: status?.type,
-    statusVariant,
-  });
+  const classes = fieldRecipe({isDisabled});
   const labelNode = (
     <LabelComponent
       className={classes.label}
@@ -213,16 +210,13 @@ export function Field({
       {description}
     </Text>
   ) : null;
-  const statusNode =
-    status?.message != null ? (
-      <div
-        aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-        className={classes.status}
-        id={resolvedStatusID}
-        role={status.type === 'error' ? 'alert' : 'status'}>
-        {status.message}
-      </div>
-    ) : null;
+  const statusNode = (
+    <StatusMessage
+      id={resolvedStatusID}
+      status={status}
+      variant={statusVariant}
+    />
+  );
 
   return (
     <div
