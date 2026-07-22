@@ -14,6 +14,12 @@ export type KbdSize = 'sm' | 'md' | 'lg';
 
 export interface KbdProps {
   /**
+   * Indicates whether the element is exposed to the accessibility API. Set
+   * this when the shortcut is already announced elsewhere, such as by an
+   * `aria-keyshortcuts` attribute on the control it belongs to.
+   */
+  'aria-hidden'?: boolean;
+  /**
    * Additional CSS class names applied to the root element.
    */
   className?: string;
@@ -106,6 +112,7 @@ function getKeyLabel(key: string, isMac: boolean): string {
  * Displays keyboard shortcuts as styled key badges.
  */
 export function Kbd({
+  'aria-hidden': ariaHidden,
   className,
   'data-testid': dataTestId,
   keys,
@@ -138,6 +145,7 @@ export function Kbd({
 
   return (
     <kbd
+      aria-hidden={ariaHidden}
       aria-label={ariaLabel}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
