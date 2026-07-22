@@ -83,7 +83,6 @@ export const scheduleTimeGridViewRecipe = sva({
       h: '32px',
       mt: '-1px',
       mb: '-1px',
-      pr: '1px',
       lineHeight: '30px',
       borderRadius: 'full',
     },
@@ -206,8 +205,13 @@ export const scheduleTimeGridViewRecipe = sva({
         dayHeaderDayNumber: {
           bg: 'primary',
           color: 'fg.onPrimary',
+          pb: '1px',
         },
       },
+      false: {},
+    },
+    isDaySeven: {
+      true: {},
       false: {},
     },
     isLastColumn: {
@@ -226,9 +230,21 @@ export const scheduleTimeGridViewRecipe = sva({
       false: {},
     },
   },
+  compoundVariants: [
+    {
+      isCurrentDay: true,
+      isDaySeven: true,
+      css: {
+        dayHeaderDayNumber: {
+          pl: '1px',
+        },
+      },
+    },
+  ],
   defaultVariants: {
     height: 'auto',
     isCurrentDay: false,
+    isDaySeven: false,
     isLastColumn: false,
     isLastRow: false,
   },

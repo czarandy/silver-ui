@@ -18,6 +18,7 @@ import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {ActionElement} from 'internal/ActionElement';
+import {useAmbientSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
 import {cx} from 'utils/cx';
@@ -251,7 +252,8 @@ export function Button({
   value,
 }: ButtonProps): JSX.Element {
   const buttonGroup = useButtonGroup();
-  const size = sizeProp ?? buttonGroup?.size ?? 'md';
+  const ambientSize = useAmbientSize();
+  const size = sizeProp ?? buttonGroup?.size ?? ambientSize ?? 'md';
   const buttonDisabled =
     isDisabled || buttonGroup?.isDisabled === true || isLoading;
   // Icon-only buttons have no visible text, so default their tooltip to the

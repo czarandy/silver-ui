@@ -1,5 +1,9 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
+// The hairline treatment is the `borderWidths.default` and `colors.border`
+// tokens. Recipes that draw their own dividers (Toolbar) reference the same
+// tokens, so a change to the divider look lands everywhere at once.
+
 export const dividerRecipe = sva({
   slots: ['root', 'line', 'label'],
   base: {
@@ -21,12 +25,12 @@ export const dividerRecipe = sva({
     orientation: {
       horizontal: {
         root: {display: 'flex', w: '100%'},
-        line: {h: '1px'},
+        line: {h: 'token(borderWidths.default)'},
         label: {px: '3'},
       },
       vertical: {
         root: {display: 'inline-flex', flexDirection: 'column', h: '100%'},
-        line: {w: '1px'},
+        line: {w: 'token(borderWidths.default)'},
         label: {py: '3'},
       },
     },

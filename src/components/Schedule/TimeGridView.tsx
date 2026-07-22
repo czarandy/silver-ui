@@ -396,6 +396,7 @@ export function TimeGridView({
               const isCurrentDay = plainDateIsEqual(day, highlightPlainDate);
               const dayHeaderClasses = scheduleTimeGridViewRecipe({
                 isCurrentDay,
+                isDaySeven: day.day === 7,
                 isLastColumn: index === days.length - 1,
               });
               return (

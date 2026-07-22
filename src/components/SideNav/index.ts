@@ -1,4 +1,8 @@
-export {SideNav, type SideNavProps} from 'components/SideNav/SideNav';
+export {
+  SideNav,
+  type SideNavCollapseBreakpoint,
+  type SideNavProps,
+} from 'components/SideNav/SideNav';
 export {
   SideNavHeading,
   type SideNavHeadingProps,

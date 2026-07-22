@@ -1,7 +1,22 @@
-import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
-import {beforeAll, beforeEach, describe, expect, it, vi} from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import {
   createStaticSearchSource,
   type SearchableItem,
@@ -10,7 +25,11 @@ import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {TagsInput} from 'components/TagsInput/TagsInput';
-import {createResizeObserverStub} from 'internal/testHelpers';
+import {
+  assertNonNull,
+  createResizeObserverStub,
+  stubTokenizedGapComputedStyle,
+} from 'internal/testHelpers';
 
 const items: SearchableItem[] = [
   {id: 'ada', label: 'Ada Lovelace'},
@@ -414,22 +433,101 @@ describe('TagsInput', () => {
     expect(call[1].type).toBe('create');
   });
 
-  it('truncates tags when tagOverflowBehavior is unfocusedInline and unfocused', () => {
-    render(
-      <TagsInput
-        data-testid="tags"
-        label="Team"
-        onChange={() => {}}
-        searchSource={createStaticSearchSource(items)}
-        tagOverflowBehavior="unfocusedInline"
-        value={[items[0], items[1], items[2]]}
-      />,
-    );
+  describe('unfocusedInline truncation measurement', () => {
+    const TAG_WIDTH = 60;
+    const INDICATOR_WIDTH = 40;
+    // Chosen so the real 4px token gap (gap={1}) decides the outcome: two
+    // 60px tags plus the reserved 40px indicator need 160px at gap 0 (fits)
+    // but 168px at 4px gaps (overflows) — a shim resolving gap to 0 would
+    // wrongly keep two tags visible.
+    const WRAPPER_WIDTH = 164;
 
-    expect(screen.getAllByText('Ada Lovelace').length).toBeGreaterThanOrEqual(
-      1,
-    );
-    expect(screen.getByRole('combobox', {name: 'Team'})).toBeInTheDocument();
+    // A tag token's text is exactly its label (the remove button is
+    // icon-only), so exact text equality identifies the measured wrappers
+    // without touching real layout.
+    function truncationWidthFor(element: HTMLElement): number {
+      const text = element.textContent;
+      if (/^\+\d+ more$/.test(text)) {
+        return INDICATOR_WIDTH;
+      }
+      if (items.some(item => text === item.label)) {
+        return TAG_WIDTH;
+      }
+      return 0;
+    }
+
+    beforeEach(() => {
+      stubTokenizedGapComputedStyle();
+      vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(
+        function (this: HTMLElement) {
+          return truncationWidthFor(this);
+        },
+      );
+      vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(
+        function (this: HTMLElement) {
+          return this.dataset.testid === 'tags' ? WRAPPER_WIDTH : 0;
+        },
+      );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    function renderTruncated(): void {
+      render(
+        <TagsInput
+          data-testid="tags"
+          label="Team"
+          onChange={() => {}}
+          searchSource={createStaticSearchSource(items)}
+          tagOverflowBehavior="unfocusedInline"
+          value={[items[0], items[1], items[2]]}
+        />,
+      );
+    }
+
+    // The OverflowList inside TagsInput has no test id; its visible row is
+    // the sibling after the inert measurement row.
+    function getVisibleRow(): HTMLElement {
+      const wrapper = screen.getByTestId('tags');
+      // eslint-disable-next-line testing-library/no-node-access -- locate OverflowList's rows structurally; they carry no test ids
+      const measureRow = assertNonNull(wrapper.querySelector('[inert]'));
+      // eslint-disable-next-line testing-library/no-node-access -- see above
+      return assertNonNull(measureRow.nextElementSibling) as HTMLElement;
+    }
+
+    it('collapses tags that exceed the wrapper width into "+N more"', () => {
+      renderTruncated();
+
+      // 164px wrapper, 60px tags, 4px token gap (gap={1}), 40px indicator:
+      // one tag fits alongside the reserved indicator, two collapse.
+      const visibleRow = getVisibleRow();
+      expect(within(visibleRow).getByText('Ada Lovelace')).toBeInTheDocument();
+      expect(within(visibleRow).getByText('+2 more')).toBeInTheDocument();
+      expect(
+        within(visibleRow).queryByText('Grace Hopper'),
+      ).not.toBeInTheDocument();
+      expect(
+        within(visibleRow).queryByText('Katherine Johnson'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('expands the collapsed tags on focus', async () => {
+      const user = userEvent.setup();
+      renderTruncated();
+
+      expect(within(getVisibleRow()).getByText('+2 more')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('combobox', {name: 'Team'}));
+
+      // Focus leaves truncation mode entirely: every tag renders once and
+      // no overflow indicator remains.
+      expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+      expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
+      expect(screen.getByText('Katherine Johnson')).toBeInTheDocument();
+      expect(screen.queryByText(/^\+\d+ more$/)).not.toBeInTheDocument();
+    });
   });
 
   it('opens popover when clicking the wrapper area', async () => {
@@ -455,27 +553,6 @@ describe('TagsInput', () => {
 
     const input = screen.getByRole('combobox', {name: 'Team'});
     expect(input).toHaveAttribute('aria-expanded', 'true');
-  });
-
-  it('expands tags on focus when tagOverflowBehavior is unfocusedInline', async () => {
-    const user = userEvent.setup();
-
-    render(
-      <TagsInput
-        data-testid="tags"
-        label="Team"
-        onChange={() => {}}
-        searchSource={createStaticSearchSource(items)}
-        tagOverflowBehavior="unfocusedInline"
-        value={[items[0], items[1], items[2]]}
-      />,
-    );
-
-    await user.click(screen.getByRole('combobox', {name: 'Team'}));
-
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
-    expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
-    expect(screen.getByText('Katherine Johnson')).toBeInTheDocument();
   });
 
   it('renders a top-layer popover for tagOverflowBehavior unfocusedLayer', () => {

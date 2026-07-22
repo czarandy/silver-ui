@@ -1764,36 +1764,87 @@ describe('Schedule', () => {
     ).toHaveStyle({height: '132px', minHeight: '132px'});
   });
 
-  it('marks and styles the highlighted day in time grid views', async () => {
+  it('bottom-pads highlighted days without shifting them off the weekday baseline', () => {
     expect(
-      scheduleTimeGridViewRecipe.raw({isCurrentDay: true}).dayHeaderDayNumber,
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+      }).dayHeaderDayNumber,
     ).toMatchObject({
+      display: 'inline-flex',
       height: '32px',
       marginBottom: '-1px',
       marginTop: '-1px',
-      paddingRight: '1px',
+      paddingBottom: '1px',
       width: '32px',
     });
-    mockCurrentTime('2026-05-13T09:30:00.000Z');
+    const dayNumberStyles = scheduleTimeGridViewRecipe.raw().dayHeaderDayNumber;
+    expect(dayNumberStyles).not.toHaveProperty('transform');
+    expect(dayNumberStyles).not.toHaveProperty('paddingRight');
+    expect(
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: false,
+      }).dayHeaderDayNumber,
+    ).not.toHaveProperty('paddingBottom');
+    expect(
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+        isDaySeven: true,
+      }).dayHeaderDayNumber,
+    ).toHaveProperty('paddingLeft', '1px');
+    expect(
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+        isDaySeven: false,
+      }).dayHeaderDayNumber,
+    ).not.toHaveProperty('paddingLeft');
 
+    const highlightedDayClasses =
+      scheduleTimeGridViewRecipe({isCurrentDay: true}).dayHeaderDayNumber ?? '';
+    expect(highlightedDayClasses).not.toBe('');
+    const daySevenClasses =
+      scheduleTimeGridViewRecipe({
+        isCurrentDay: true,
+        isDaySeven: true,
+      }).dayHeaderDayNumber ?? '';
+    expect(daySevenClasses).not.toBe('');
+
+    const highlightedDays = Array.from({length: 31}, (_, index) => index + 1);
+    const view = createScheduleDayView({maxHour: 9, minHour: 8});
     render(
-      <Schedule
-        events={[]}
-        highlightDate={instantUTC(2026, 4, 14)}
-        timezoneID="UTC"
-        view={createScheduleWeeklyView({maxHour: 10, minHour: 9})}
-        viewDate={instantUTC(2026, 4, 13)}
-      />,
+      <>
+        {highlightedDays.map(day => {
+          const instant = instantUTC(2026, 4, day);
+          return (
+            <Schedule
+              events={[]}
+              highlightDate={instant}
+              key={day}
+              timezoneID="UTC"
+              view={view}
+              viewDate={instant}
+            />
+          );
+        })}
+      </>,
     );
 
-    const highlightedHeader = await screen.findByRole('columnheader', {
-      name: 'Thursday, May 14, 2026',
+    const highlightedHeaders = screen
+      .getAllByRole('columnheader')
+      .filter(header => header.getAttribute('aria-current') === 'date');
+    expect(highlightedHeaders).toHaveLength(31);
+    const dayNumbers = highlightedHeaders.map((header, index) => {
+      expect(header).toHaveAttribute('aria-current', 'date');
+      return within(header).getByText(String(index + 1));
     });
-    expect(highlightedHeader).toHaveAttribute('aria-current', 'date');
-    expect(within(highlightedHeader).getByText('14')).toHaveClass(
-      scheduleTimeGridViewRecipe({isCurrentDay: true})
-        .dayHeaderDayNumber as string,
-    );
+    dayNumbers.forEach(dayNumber => {
+      expect(dayNumber).toHaveClass(highlightedDayClasses);
+    });
+    expect(dayNumbers[6]).toHaveClass(daySevenClasses);
+    dayNumbers
+      .filter((_, index) => index !== 6)
+      .forEach(dayNumber => {
+        expect(dayNumber).not.toHaveClass(daySevenClasses);
+      });
   });
 
   it('renders the current-time line in the active time grid hour', async () => {

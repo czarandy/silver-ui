@@ -1,5 +1,6 @@
 import {defineConfig, defineRecipe} from '@pandacss/dev';
 import {generateColorScale} from './scripts/generate-color-scale';
+import {gapVariants} from './src/internal/spacingTokens';
 
 const gray = {
   ...generateColorScale('#6a7b8c'),
@@ -33,6 +34,18 @@ export default defineConfig({
   prefix: 'silver',
   include: ['./src/**/*.{ts,tsx}', './.storybook/**/*.{ts,tsx}'],
   exclude: [],
+  staticCss: {
+    css: [
+      {
+        // Recipes share the `gapVariants` map imported from
+        // internal/spacingTokens, and Panda's static extraction does not
+        // follow cross-file imports — without this, the gap rules only exist
+        // while some other file happens to use the same value inline. Force
+        // every spacing-scale gap utility so the shared map always resolves.
+        properties: {gap: Object.values(gapVariants).map(({gap}) => gap)},
+      },
+    ],
+  },
   outdir: 'styled-system',
   outExtension: 'js',
   jsxFramework: 'react',

@@ -1,4 +1,9 @@
+'use client';
+
 import {expect, vi, type Mock} from 'vitest';
+import {gapVariants} from 'internal/spacingTokens';
+import {css} from 'styled-system/css';
+import {token} from 'styled-system/tokens';
 
 /**
  * Asserts a value is neither null nor undefined, then returns it narrowed to
@@ -192,4 +197,66 @@ export function createResizeObserverStub(): ResizeObserverStubControls {
       entry.callback([resizeEntry as ResizeObserverEntry], entry.observer);
     },
   };
+}
+
+// jsdom's default root font size; jsdom never resolves rem itself.
+const ROOT_FONT_SIZE_PX = 16;
+
+/**
+ * Makes Panda's tokenized gap classes resolve in jsdom.
+ *
+ * jsdom drops `@layer` blocks and never resolves `var()`, so gap recipe
+ * variants (e.g. `silver-gap_2`) produce no computed `column-gap` in tests
+ * even though they do in browsers — a width-mocked measurement test would
+ * silently compute with gap 0 and diverge from production. This patches
+ * `window.getComputedStyle` so an element carrying a gap utility class
+ * reports the real spacing-token value in pixels. The class-name-to-pixel map
+ * is derived from the design system at runtime (`css()` for class names,
+ * `token()` for values), so it cannot drift from the theme. Values coming
+ * from the element itself (inline styles) still win, matching the cascade.
+ *
+ * Installed with `vi.spyOn`; restored by `vi.restoreAllMocks()`.
+ */
+export function stubTokenizedGapComputedStyle(): void {
+  const gapPixelsByClassName = new Map<string, string>();
+  for (const step of Object.keys(
+    gapVariants,
+  ) as `${keyof typeof gapVariants}`[]) {
+    const rem = Number.parseFloat(token(`spacing.${step}`));
+    gapPixelsByClassName.set(css({gap: step}), `${rem * ROOT_FONT_SIZE_PX}px`);
+  }
+
+  const originalGetComputedStyle = window.getComputedStyle.bind(window);
+  vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+    const computed = originalGetComputedStyle(element, pseudo);
+    if (!(element instanceof HTMLElement)) {
+      return computed;
+    }
+
+    let tokenGap: string | undefined;
+    for (const className of element.classList) {
+      tokenGap = gapPixelsByClassName.get(className);
+      if (tokenGap != null) {
+        break;
+      }
+    }
+    if (tokenGap == null) {
+      return computed;
+    }
+
+    const resolvedGap = tokenGap;
+    return new Proxy(computed, {
+      // eslint-disable-next-line @typescript-eslint/promise-function-async -- proxy trap forwarding synchronous CSSOM values; the unknown return is never a promise
+      get(target, property): unknown {
+        if (property === 'columnGap' || property === 'rowGap') {
+          const ownValue: unknown = Reflect.get(target, property);
+          return ownValue === '' || ownValue === 'normal'
+            ? resolvedGap
+            : ownValue;
+        }
+        const value: unknown = Reflect.get(target, property);
+        return typeof value === 'function' ? value.bind(target) : value;
+      },
+    });
+  });
 }

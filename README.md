@@ -148,6 +148,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **SegmentedControl** — mutually exclusive option selector
 - **SplitButton** — primary action paired with a dropdown menu of related actions
 - **ToggleButton** — button with pressed/unpressed state
+- **Toolbar** — slotted action bar with roving-tabindex keyboard navigation and size cascading
 
 ### Forms
 

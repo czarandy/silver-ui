@@ -1,9 +1,7 @@
 'use client';
 
 import {useCallback, useEffect, useRef} from 'react';
-
-const FOCUSABLE_SELECTOR =
-  'button:not([disabled]), a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])';
+import {TABBABLE_SELECTOR} from 'internal/focusable';
 
 export interface UseFocusTrapOptions {
   isActive: boolean;
@@ -15,9 +13,7 @@ export interface UseFocusTrapReturn<T extends HTMLElement = HTMLElement> {
 }
 
 function getFocusableElements(container: HTMLElement): HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-  );
+  return Array.from(container.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR));
 }
 
 function focusFirstDescendant(container: HTMLElement): void {
