@@ -6,6 +6,7 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
@@ -164,7 +165,6 @@ export function Field({
   const resolvedStatusID =
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
-  const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
   const classes = fieldRecipe({isDisabled});
   const labelNode = (
     <LabelComponent
@@ -182,16 +182,11 @@ export function Field({
       <Text as="span" color="inherit" type="label">
         {label}
       </Text>
-      {statusText != null ? (
-        <Text
-          as="span"
-          className={classes.indicator}
-          size="xs"
-          type="supporting">
-          <span aria-hidden="true"> · </span>
-          {statusText}
-        </Text>
-      ) : null}
+      <NecessityIndicator
+        isOptional={isOptional}
+        isRequired={isRequired}
+        size="xs"
+      />
       {isNonEmptyReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>

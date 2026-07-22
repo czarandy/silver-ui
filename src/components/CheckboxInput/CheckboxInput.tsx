@@ -17,9 +17,9 @@ import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
 import {Spinner} from 'components/Spinner';
-import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
@@ -189,8 +189,6 @@ export function CheckboxInput({
     }
   }, [isIndeterminate]);
 
-  const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
-
   const control = (
     <span className={classes.boxWrap}>
       <input
@@ -254,12 +252,7 @@ export function CheckboxInput({
         <Icon color="secondary" icon={labelIcon} size="sm" />
       ) : null}
       {label}
-      {statusText != null ? (
-        <Text as="span" className={classes.indicator} type="supporting">
-          <span aria-hidden="true"> · </span>
-          {statusText}
-        </Text>
-      ) : null}
+      <NecessityIndicator isOptional={isOptional} isRequired={isRequired} />
       {isNonEmptyReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>
