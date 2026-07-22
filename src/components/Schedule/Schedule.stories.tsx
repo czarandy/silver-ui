@@ -276,13 +276,10 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const fillHeightStoryContainer = css({h: '600px'});
-const highlightedDayNumberComparison = css({
+const highlightedDayNumberGrid = css({
   display: 'grid',
-  gap: '6',
-  gridTemplateColumns: {
-    base: 'minmax(0, 1fr)',
-    lg: 'repeat(2, minmax(0, 1fr))',
-  },
+  gap: '4',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
 });
 const highlightedDayNumberExample = css({display: 'grid', gap: '2'});
 
@@ -1267,42 +1264,35 @@ export const HighlightDate: Story = {
 
 export const HighlightedDayNumbers: Story = {
   render: () => {
-    const singleDigitDay = Temporal.Instant.from(
-      '2026-05-05T12:00:00Z',
-    ).epochMilliseconds;
-    const doubleDigitDay = Temporal.Instant.from(
-      '2026-05-14T12:00:00Z',
-    ).epochMilliseconds;
+    const highlightedDays = Array.from({length: 31}, (_, index) =>
+      Temporal.PlainDate.from({
+        day: index + 1,
+        month: 5,
+        year: 2026,
+      }).toZonedDateTime('UTC'),
+    );
     const view = createScheduleDayView({maxHour: 9, minHour: 8});
 
     return (
-      <div className={highlightedDayNumberComparison}>
-        <div className={highlightedDayNumberExample}>
-          <Text as="p" weight="bold">
-            Single-digit day (5)
-          </Text>
-          <Schedule
-            events={[]}
-            highlightDate={singleDigitDay}
-            plugins={[]}
-            timezoneID="UTC"
-            view={view}
-            viewDate={singleDigitDay}
-          />
-        </div>
-        <div className={highlightedDayNumberExample}>
-          <Text as="p" weight="bold">
-            Double-digit day (14)
-          </Text>
-          <Schedule
-            events={[]}
-            highlightDate={doubleDigitDay}
-            plugins={[]}
-            timezoneID="UTC"
-            view={view}
-            viewDate={doubleDigitDay}
-          />
-        </div>
+      <div className={highlightedDayNumberGrid}>
+        {highlightedDays.map(day => {
+          const instant = day.epochMilliseconds;
+          return (
+            <div className={highlightedDayNumberExample} key={day.toString()}>
+              <Text as="p" weight="bold">
+                Day {day.day}
+              </Text>
+              <Schedule
+                events={[]}
+                highlightDate={instant}
+                plugins={[]}
+                timezoneID="UTC"
+                view={view}
+                viewDate={instant}
+              />
+            </div>
+          );
+        })}
       </div>
     );
   },

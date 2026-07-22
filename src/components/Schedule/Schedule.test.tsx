@@ -1764,7 +1764,7 @@ describe('Schedule', () => {
     ).toHaveStyle({height: '132px', minHeight: '132px'});
   });
 
-  it('pads only highlighted single-digit days in time grid views', async () => {
+  it('bottom-pads only highlighted single-digit days in time grid views', () => {
     expect(
       scheduleTimeGridViewRecipe.raw({
         isCurrentDay: true,
@@ -1774,15 +1774,21 @@ describe('Schedule', () => {
       height: '32px',
       marginBottom: '-1px',
       marginTop: '-1px',
-      paddingRight: '1px',
+      paddingBottom: '1px',
       width: '32px',
     });
     expect(
       scheduleTimeGridViewRecipe.raw({
         isCurrentDay: true,
-        isSingleDigitDay: false,
+        isSingleDigitDay: true,
       }).dayHeaderDayNumber,
     ).not.toHaveProperty('paddingRight');
+    expect(
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+        isSingleDigitDay: false,
+      }).dayHeaderDayNumber,
+    ).not.toHaveProperty('paddingBottom');
 
     const singleDigitClasses = (
       scheduleTimeGridViewRecipe({
@@ -1801,44 +1807,40 @@ describe('Schedule', () => {
     );
     expect(paddingClass).toBeDefined();
 
-    const view = createScheduleWeeklyView({
-      maxHour: 10,
-      minHour: 9,
-      weekStartsOn: 1,
-    });
-    const {rerender} = render(
-      <Schedule
-        events={[]}
-        highlightDate={instantUTC(2026, 4, 5)}
-        timezoneID="UTC"
-        view={view}
-        viewDate={instantUTC(2026, 4, 5)}
-      />,
+    const highlightedDays = Array.from({length: 31}, (_, index) => index + 1);
+    const view = createScheduleDayView({maxHour: 9, minHour: 8});
+    render(
+      <>
+        {highlightedDays.map(day => {
+          const instant = instantUTC(2026, 4, day);
+          return (
+            <Schedule
+              events={[]}
+              highlightDate={instant}
+              key={day}
+              timezoneID="UTC"
+              view={view}
+              viewDate={instant}
+            />
+          );
+        })}
+      </>,
     );
 
-    const singleDigitHeader = await screen.findByRole('columnheader', {
-      name: 'Tuesday, May 5, 2026',
+    const highlightedHeaders = screen
+      .getAllByRole('columnheader')
+      .filter(header => header.getAttribute('aria-current') === 'date');
+    expect(highlightedHeaders).toHaveLength(31);
+    const dayNumbers = highlightedHeaders.map((header, index) => {
+      expect(header).toHaveAttribute('aria-current', 'date');
+      return within(header).getByText(String(index + 1));
     });
-    expect(singleDigitHeader).toHaveAttribute('aria-current', 'date');
-    expect(within(singleDigitHeader).getByText('5')).toHaveClass(paddingClass!);
-
-    rerender(
-      <Schedule
-        events={[]}
-        highlightDate={instantUTC(2026, 4, 10)}
-        timezoneID="UTC"
-        view={view}
-        viewDate={instantUTC(2026, 4, 5)}
-      />,
-    );
-
-    const doubleDigitHeader = await screen.findByRole('columnheader', {
-      name: 'Sunday, May 10, 2026',
+    dayNumbers.slice(0, 9).forEach(dayNumber => {
+      expect(dayNumber).toHaveClass(paddingClass!);
     });
-    expect(doubleDigitHeader).toHaveAttribute('aria-current', 'date');
-    expect(within(doubleDigitHeader).getByText('10')).not.toHaveClass(
-      paddingClass!,
-    );
+    dayNumbers.slice(9).forEach(dayNumber => {
+      expect(dayNumber).not.toHaveClass(paddingClass!);
+    });
   });
 
   it('renders the current-time line in the active time grid hour', async () => {

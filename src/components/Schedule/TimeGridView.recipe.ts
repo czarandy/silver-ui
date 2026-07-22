@@ -235,7 +235,7 @@ export const scheduleTimeGridViewRecipe = sva({
       isSingleDigitDay: true,
       css: {
         dayHeaderDayNumber: {
-          pr: '1px',
+          pb: '1px',
         },
       },
     },
