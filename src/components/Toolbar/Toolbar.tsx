@@ -219,6 +219,11 @@ export function Toolbar({
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       hint.onKeyDown(event);
+      if (event.defaultPrevented) {
+        // A nested widget (Tabs, SegmentedControl, an opening Select) already
+        // consumed the key; moving focus again would double-handle it.
+        return;
+      }
       const target = event.target;
       if (target instanceof HTMLElement && usesArrowKeys(target)) {
         return;

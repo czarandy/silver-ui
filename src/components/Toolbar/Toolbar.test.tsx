@@ -1,5 +1,6 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {useState} from 'react';
 import {
   afterAll,
   beforeAll,
@@ -16,6 +17,7 @@ import {
   SegmentedControlItem,
 } from 'components/SegmentedControl';
 import {Select} from 'components/Select';
+import {Tab, Tabs} from 'components/Tabs';
 import {TextInput} from 'components/TextInput';
 import {Toolbar} from 'components/Toolbar/Toolbar';
 import {assertNonNull, createPopoverFocusShim} from 'internal/testHelpers';
@@ -279,6 +281,58 @@ describe('Toolbar', () => {
       await user.keyboard('{ArrowRight}{ArrowLeft}{Home}{End}');
 
       expect(screen.getByRole('textbox', {name: 'Search'})).toHaveFocus();
+    });
+
+    it('moves one step when a nested Tabs handles the arrow key', async () => {
+      function TabsToolbar(): React.JSX.Element {
+        const [tab, setTab] = useState('overview');
+        return (
+          <Toolbar
+            endContent={<Button label="Save" />}
+            label="Actions"
+            startContent={
+              <Tabs label="Sections" onChange={setTab} value={tab}>
+                <Tab label="Overview" value="overview" />
+                <Tab label="Analytics" value="analytics" />
+                <Tab label="Settings" value="settings" />
+              </Tabs>
+            }
+          />
+        );
+      }
+      const user = userEvent.setup();
+      render(<TabsToolbar />);
+
+      screen.getByRole('tab', {name: 'Overview'}).focus();
+      await user.keyboard('{ArrowRight}');
+
+      // Tabs consumed the key and moved to the next tab; the toolbar must not
+      // move focus a second step (to Settings or the Save button).
+      expect(screen.getByRole('tab', {name: 'Analytics'})).toHaveFocus();
+      expect(screen.getByRole('tab', {name: 'Analytics'})).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+    });
+
+    it('does not move focus when a child prevented the arrow key default', async () => {
+      const user = userEvent.setup();
+      render(
+        <Toolbar
+          endContent={<Button label="Save" />}
+          label="Actions"
+          startContent={
+            <button onKeyDown={event => event.preventDefault()} type="button">
+              Widget
+            </button>
+          }
+        />,
+      );
+
+      screen.getByRole('button', {name: 'Widget'}).focus();
+      await user.keyboard('{ArrowRight}');
+
+      expect(screen.getByRole('button', {name: 'Widget'})).toHaveFocus();
     });
   });
 
