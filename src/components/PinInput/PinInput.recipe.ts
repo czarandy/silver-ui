@@ -10,17 +10,17 @@ export const pinInputRecipe = sva({
       display: 'inline-flex',
       w: 'fit-content',
       maxW: 'full',
-      gap: 0,
-      // Longhand resets so they contest the same properties as inputRecipe's
-      // paddingInlineStart/End utilities; a `p: 0` shorthand always loses to
-      // those longhands regardless of emission order.
-      paddingInlineStart: '0',
-      paddingInlineEnd: '0',
-      paddingBlock: '0',
+      // The `!` overrides beat inputRecipe's gap: '2' and inline paddings by
+      // importance. Same-specificity utility conflicts resolve by stylesheet
+      // emission order, which varies between Panda builds (Storybook, docs
+      // site, consuming apps), so plain declarations here are not reliable.
+      gap: '0!',
+      paddingInline: '0!',
       overflow: 'hidden',
     },
     cell: {
-      flex: '0 0 auto',
+      // Beats inputStyles.control's flex: 1 regardless of emission order.
+      flex: '0 0 auto!',
       alignSelf: 'stretch',
       borderInlineStartWidth: 'default',
       borderInlineStartStyle: 'solid',
@@ -43,14 +43,17 @@ export const pinInputRecipe = sva({
   },
   variants: {
     size: {
+      // The fontSize `!` overrides beat inputStyles.control's unconditional
+      // fontSize: 'md'; without them the sm/lg cell text silently renders at
+      // md whenever the fs_md utility is emitted later in the stylesheet.
       sm: {
-        cell: {w: '7', fontSize: 'sm'},
+        cell: {w: '7', fontSize: 'sm!'},
       },
       md: {
-        cell: {w: '9', fontSize: 'md'},
+        cell: {w: '9', fontSize: 'md!'},
       },
       lg: {
-        cell: {w: '11', fontSize: 'lg'},
+        cell: {w: '11', fontSize: 'lg!'},
       },
     },
   },
