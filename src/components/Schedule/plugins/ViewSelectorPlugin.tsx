@@ -110,11 +110,6 @@ function ScheduleViewSelectorControl<View extends ScheduleViewBase>({
               endContent={
                 hotkey != null || isSelected ? (
                   <span className={styles.optionEndContent}>
-                    {hotkey != null ? (
-                      <span aria-hidden="true">
-                        <Kbd keys={hotkey} size="sm" />
-                      </span>
-                    ) : null}
                     {isSelected ? (
                       <Icon
                         color="primary"
@@ -122,6 +117,11 @@ function ScheduleViewSelectorControl<View extends ScheduleViewBase>({
                         icon={Check}
                         size="sm"
                       />
+                    ) : null}
+                    {hotkey != null ? (
+                      <span aria-hidden="true">
+                        <Kbd keys={hotkey} size="sm" />
+                      </span>
                     ) : null}
                   </span>
                 ) : null

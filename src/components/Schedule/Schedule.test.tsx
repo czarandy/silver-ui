@@ -3222,6 +3222,17 @@ describe('Schedule', () => {
       ),
     ).not.toBeInTheDocument();
 
+    // The check renders before the shortcut so hotkeys stay right-aligned
+    // across selected and unselected items.
+    const selectedCheck = within(selectedItem).getByTestId(
+      'schedule-view-selector-selected-icon',
+    );
+    const selectedHotkey = within(selectedItem).getByLabelText('D');
+    expect(
+      selectedCheck.compareDocumentPosition(selectedHotkey) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
     fireEvent.click(unselectedItem);
     expect(onChangeView).toHaveBeenCalledWith(monthView);
   });
