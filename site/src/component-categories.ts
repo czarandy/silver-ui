@@ -39,6 +39,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'SegmentedControl',
     'SplitButton',
     'ToggleButton',
+    'Toolbar',
   ],
   Forms: [
     'AutocompleteInput',

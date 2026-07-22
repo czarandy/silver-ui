@@ -28,6 +28,7 @@ import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Spinner} from 'components/Spinner';
+import {useAmbientSize} from 'internal/SizeContext';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
@@ -166,7 +167,7 @@ export function TextInput({
   onBlur,
   onFocus,
   type = 'text',
-  size: sizeProp = 'md',
+  size: sizeProp,
   placeholder,
   description,
   endContent,
@@ -197,11 +198,12 @@ export function TextInput({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
+  const ambientSize = useAmbientSize();
   const effectiveDisabled =
     isDisabled ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const size = inputGroup?.size ?? sizeProp;
+  const size = inputGroup?.size ?? sizeProp ?? ambientSize ?? 'md';
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 
   const inputWrapper = (
