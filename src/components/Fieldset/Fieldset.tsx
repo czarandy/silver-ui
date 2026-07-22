@@ -8,7 +8,6 @@ import {
   type Ref,
 } from 'react';
 import type {FieldNecessity, InputStatus} from 'components/Field';
-import {fieldRecipe} from 'components/Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {fieldsetRecipe} from 'components/Fieldset/Fieldset.recipe';
 import {
@@ -17,6 +16,7 @@ import {
 } from 'components/Fieldset/FieldsetContext';
 import {VStack} from 'components/Stack';
 import {Text} from 'components/Text';
+import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
@@ -149,20 +149,7 @@ export function Fieldset({
           </VStack>
         </FieldsetContext>
       </fieldset>
-      {status?.message != null ? (
-        <div
-          aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-          className={
-            fieldRecipe({
-              statusType: status.type,
-              statusVariant: 'detached',
-            }).status
-          }
-          id={statusId}
-          role={status.type === 'error' ? 'alert' : 'status'}>
-          {status.message}
-        </div>
-      ) : null}
+      <StatusMessage id={statusId} status={status} variant="detached" />
     </div>
   );
 }

@@ -13,7 +13,6 @@ import {
 } from 'react';
 import {checkboxInputRecipe} from 'components/CheckboxInput/CheckboxInput.recipe';
 import type {FieldNecessity, InputStatus} from 'components/Field';
-import {fieldRecipe} from 'components/Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
@@ -21,6 +20,7 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
@@ -280,21 +280,9 @@ export function CheckboxInput({
     </label>
   );
 
-  const statusNode =
-    status?.message != null ? (
-      <div
-        aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-        className={
-          fieldRecipe({
-            statusType: status.type,
-            statusVariant: 'detached',
-          }).status
-        }
-        id={statusMessageID}
-        role={status.type === 'error' ? 'alert' : 'status'}>
-        {status.message}
-      </div>
-    ) : null;
+  const statusNode = (
+    <StatusMessage id={statusMessageID} status={status} variant="detached" />
+  );
 
   const item = (
     <Item
