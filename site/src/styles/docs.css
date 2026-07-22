@@ -110,6 +110,43 @@ header.header > .header {
 }
 
 /*
+ * Search shortcut: Starlight owns the search trigger and swaps Ctrl for ⌘ on
+ * Apple platforms. Keep that behavior, but present each key with Kbd's `md`
+ * recipe instead of Starlight's single shortcut pill. The outer element does
+ * not set `display`, because Starlight uses its responsive utilities to hide
+ * the shortcut below the desktop breakpoint.
+ */
+site-search button[data-open-modal] > kbd {
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  padding-inline: 0;
+  border-radius: 0;
+  background-color: transparent;
+  vertical-align: bottom;
+}
+
+site-search button[data-open-modal] > kbd > kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--silver-sizes-5);
+  height: var(--silver-sizes-5);
+  padding-inline: 0.25rem;
+  border-bottom-color: var(--silver-colors-border);
+  border-bottom-style: solid;
+  border-bottom-width: var(--silver-border-widths-emphasized);
+  border-radius: var(--silver-radii-sm);
+  background-color: var(--silver-colors-bg-subtle);
+  color: var(--silver-colors-fg-muted);
+  font-family: var(--silver-fonts-body);
+  font-size: var(--silver-font-sizes-xs);
+  font-weight: var(--silver-font-weights-medium);
+  line-height: var(--silver-line-heights-none);
+  user-select: none;
+}
+
+/*
  * The links themselves restate topNavItemRecipe's text form — `px: '3'`,
  * `py: '1.5'`, `minH: '8'`, medium weight over `fg.muted`, background-only
  * hover — so they read as the landing page's nav links. Classed rather than
