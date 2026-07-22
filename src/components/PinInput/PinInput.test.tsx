@@ -481,6 +481,7 @@ describe('PinInput', () => {
       // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- verifying Field-root prop placement
       const field = container.querySelector('.custom-field');
       expect(field).toHaveStyle({maxWidth: '300px'});
+      expect(field).toHaveClass(css(pinInputRecipe.raw({size: 'md'}).root));
       expect(field).toContainElement(wrapper);
       expect(wrapper).not.toHaveClass('custom-field');
       expect(ref).toHaveBeenCalledWith(field);

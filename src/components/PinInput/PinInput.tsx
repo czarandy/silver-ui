@@ -372,7 +372,7 @@ export function PinInput({
 
   return (
     <Field
-      className={className}
+      className={cx(css(slots.root), className)}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}

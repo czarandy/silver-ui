@@ -4,8 +4,16 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
  * Multi-cell layout layered on top of Field's shared input chrome.
  */
 export const pinInputRecipe = sva({
-  slots: ['wrapper', 'cell', 'statusIcon'],
+  slots: ['root', 'wrapper', 'cell', 'statusIcon'],
   base: {
+    // Applied to the Field root: the cells give the control an intrinsic
+    // width, so the field (label, description, status message) locks to the
+    // cell row's width instead of spreading to the container. min-content
+    // resolves to the cell row because the cells cannot shrink, while longer
+    // text children wrap at that width.
+    root: {
+      w: 'min-content',
+    },
     wrapper: {
       display: 'inline-flex',
       w: 'fit-content',
