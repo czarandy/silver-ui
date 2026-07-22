@@ -68,3 +68,36 @@ export const KeepTwoVisible: Story = {
   args: {children: null, minVisibleItems: 2},
   render: args => <Example {...args} />,
 };
+
+export const ObserveParent: Story = {
+  args: {behavior: 'observeParent', children: null},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `behavior="observeParent"` the fit calculation tracks the parent’s content width, ' +
+          'so the list can share a flex row with other content and take the space that remains.',
+      },
+    },
+  },
+  render: args => (
+    <div
+      style={{
+        alignItems: 'center',
+        display: 'flex',
+        gap: 12,
+        maxWidth: 420,
+      }}>
+      <span style={{whiteSpace: 'nowrap'}}>Teams:</span>
+      <OverflowList
+        {...args}
+        overflowRenderer={items => (
+          <Badge color="info" label={`+${items.length}`} />
+        )}>
+        {labels.map(label => (
+          <Badge key={label} label={label} />
+        ))}
+      </OverflowList>
+    </div>
+  ),
+};
