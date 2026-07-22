@@ -148,7 +148,7 @@ describe('PinInput', () => {
   });
 
   describe('Backspace', () => {
-    it('clears a filled cell and retreats', async () => {
+    it('clears a filled cell in place so retyping corrects that digit', async () => {
       const user = userEvent.setup();
       const onChange = vi.fn<PinInputProps['onChange']>();
       render(
@@ -164,7 +164,16 @@ describe('PinInput', () => {
       await user.keyboard('{Backspace}');
 
       expect(onChange).toHaveBeenCalledWith('12', null);
-      expect(cells[1]).toHaveFocus();
+      expect(cells[2]).toHaveFocus();
+
+      await user.keyboard('9');
+
+      expect(onChange).toHaveBeenLastCalledWith('129', expect.any(Object));
+      expect(cells.map(cell => cell.value).slice(0, 3)).toEqual([
+        '1',
+        '2',
+        '9',
+      ]);
     });
 
     it('clears the previous cell when the current cell is empty', async () => {

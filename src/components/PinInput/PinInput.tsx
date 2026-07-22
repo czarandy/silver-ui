@@ -27,7 +27,7 @@ import type {IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {pinInputRecipe} from 'components/PinInput/PinInput.recipe';
 import {isComposingEvent} from 'internal/isComposingEvent';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type PinInputType = 'numeric' | 'alphanumeric';
@@ -191,7 +191,7 @@ export function PinInput({
       : DEFAULT_LENGTH;
   const inputId = useId();
   const labelId = `${inputId}-label`;
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
@@ -253,17 +253,18 @@ export function PinInput({
     }
 
     event.preventDefault();
-    const deleteIndex =
-      index < displayedValue.length ? index : Math.max(0, index - 1);
-    const nextValue =
-      deleteIndex < displayedValue.length
-        ? displayedValue.slice(0, deleteIndex) +
-          displayedValue.slice(deleteIndex + 1)
-        : displayedValue;
-    if (nextValue !== displayedValue) {
-      commit(nextValue, null);
+    // A filled cell clears in place so the user can retype it; only an empty
+    // cell retreats to delete the previous character.
+    const isFilled = index < displayedValue.length;
+    const deleteIndex = isFilled ? index : index - 1;
+    if (deleteIndex >= 0 && deleteIndex < displayedValue.length) {
+      commit(
+        displayedValue.slice(0, deleteIndex) +
+          displayedValue.slice(deleteIndex + 1),
+        null,
+      );
     }
-    focusCell(Math.max(0, index - 1));
+    focusCell(isFilled ? index : Math.max(0, index - 1));
   };
 
   const handlePaste = (

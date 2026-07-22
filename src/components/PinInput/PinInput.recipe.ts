@@ -11,7 +11,12 @@ export const pinInputRecipe = sva({
       w: 'fit-content',
       maxW: 'full',
       gap: 0,
-      p: 0,
+      // Longhand resets so they contest the same properties as inputRecipe's
+      // paddingInlineStart/End utilities; a `p: 0` shorthand always loses to
+      // those longhands regardless of emission order.
+      paddingInlineStart: '0',
+      paddingInlineEnd: '0',
+      paddingBlock: '0',
       overflow: 'hidden',
     },
     cell: {
