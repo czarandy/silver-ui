@@ -71,7 +71,6 @@ export type FieldsetProps = NativeFieldsetProps &
  */
 export function Fieldset({
   'aria-describedby': ariaDescribedBy,
-  'aria-invalid': ariaInvalid,
   children,
   className,
   'data-testid': dataTestId,
@@ -112,7 +111,6 @@ export function Fieldset({
       <fieldset
         {...fieldsetProps}
         aria-describedby={describedBy}
-        aria-invalid={status?.type === 'error' ? true : ariaInvalid}
         className={classes.root}
         data-testid={dataTestId}
         disabled={effectiveDisabled}

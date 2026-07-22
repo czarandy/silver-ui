@@ -125,7 +125,8 @@ describe('Fieldset', () => {
     const group = screen.getByRole('group', {name: 'Profile'});
     const summary = screen.getByRole('alert');
 
-    expect(group).toHaveAttribute('aria-invalid', 'true');
+    // aria-invalid is not an allowed attribute for role=group
+    expect(group).not.toHaveAttribute('aria-invalid');
     expect(summary).toHaveAttribute('aria-live', 'assertive');
     expect(group).toHaveAttribute('aria-describedby', summary.id);
   });

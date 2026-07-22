@@ -175,7 +175,6 @@ export function CheckboxGroup({
       style={style}>
       <div
         aria-describedby={describedBy}
-        aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
         className={checkboxGroupRecipe({orientation})}
         id={inputId}
