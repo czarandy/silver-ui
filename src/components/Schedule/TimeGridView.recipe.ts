@@ -83,7 +83,6 @@ export const scheduleTimeGridViewRecipe = sva({
       h: '32px',
       mt: '-1px',
       mb: '-1px',
-      pr: '1px',
       lineHeight: '30px',
       borderRadius: 'full',
     },
@@ -225,12 +224,28 @@ export const scheduleTimeGridViewRecipe = sva({
       },
       false: {},
     },
+    isSingleDigitDay: {
+      true: {},
+      false: {},
+    },
   },
+  compoundVariants: [
+    {
+      isCurrentDay: true,
+      isSingleDigitDay: true,
+      css: {
+        dayHeaderDayNumber: {
+          pr: '1px',
+        },
+      },
+    },
+  ],
   defaultVariants: {
     height: 'auto',
     isCurrentDay: false,
     isLastColumn: false,
     isLastRow: false,
+    isSingleDigitDay: false,
   },
 });
 

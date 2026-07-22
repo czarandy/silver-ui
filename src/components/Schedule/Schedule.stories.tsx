@@ -276,6 +276,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const fillHeightStoryContainer = css({h: '600px'});
+const highlightedDayNumberComparison = css({
+  display: 'grid',
+  gap: '6',
+  gridTemplateColumns: {
+    base: 'minmax(0, 1fr)',
+    lg: 'repeat(2, minmax(0, 1fr))',
+  },
+});
+const highlightedDayNumberExample = css({display: 'grid', gap: '2'});
 
 function ResizableEventsStory(): React.JSX.Element {
   const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
@@ -1254,6 +1263,49 @@ export const HighlightDate: Story = {
       viewDate={dayInstant(0)}
     />
   ),
+};
+
+export const HighlightedDayNumbers: Story = {
+  render: () => {
+    const singleDigitDay = Temporal.Instant.from(
+      '2026-05-05T12:00:00Z',
+    ).epochMilliseconds;
+    const doubleDigitDay = Temporal.Instant.from(
+      '2026-05-14T12:00:00Z',
+    ).epochMilliseconds;
+    const view = createScheduleDayView({maxHour: 9, minHour: 8});
+
+    return (
+      <div className={highlightedDayNumberComparison}>
+        <div className={highlightedDayNumberExample}>
+          <Text as="p" weight="bold">
+            Single-digit day (5)
+          </Text>
+          <Schedule
+            events={[]}
+            highlightDate={singleDigitDay}
+            plugins={[]}
+            timezoneID="UTC"
+            view={view}
+            viewDate={singleDigitDay}
+          />
+        </div>
+        <div className={highlightedDayNumberExample}>
+          <Text as="p" weight="bold">
+            Double-digit day (14)
+          </Text>
+          <Schedule
+            events={[]}
+            highlightDate={doubleDigitDay}
+            plugins={[]}
+            timezoneID="UTC"
+            view={view}
+            viewDate={doubleDigitDay}
+          />
+        </div>
+      </div>
+    );
+  },
 };
 
 export const FiveWeekMonth: Story = {

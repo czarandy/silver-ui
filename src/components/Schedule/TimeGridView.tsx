@@ -397,6 +397,7 @@ export function TimeGridView({
               const dayHeaderClasses = scheduleTimeGridViewRecipe({
                 isCurrentDay,
                 isLastColumn: index === days.length - 1,
+                isSingleDigitDay: day.day < 10,
               });
               return (
                 <div

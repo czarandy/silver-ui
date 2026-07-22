@@ -1764,9 +1764,12 @@ describe('Schedule', () => {
     ).toHaveStyle({height: '132px', minHeight: '132px'});
   });
 
-  it('marks and styles the highlighted day in time grid views', async () => {
+  it('pads only highlighted single-digit days in time grid views', async () => {
     expect(
-      scheduleTimeGridViewRecipe.raw({isCurrentDay: true}).dayHeaderDayNumber,
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+        isSingleDigitDay: true,
+      }).dayHeaderDayNumber,
     ).toMatchObject({
       height: '32px',
       marginBottom: '-1px',
@@ -1774,25 +1777,67 @@ describe('Schedule', () => {
       paddingRight: '1px',
       width: '32px',
     });
-    mockCurrentTime('2026-05-13T09:30:00.000Z');
+    expect(
+      scheduleTimeGridViewRecipe.raw({
+        isCurrentDay: true,
+        isSingleDigitDay: false,
+      }).dayHeaderDayNumber,
+    ).not.toHaveProperty('paddingRight');
 
-    render(
+    const singleDigitClasses = (
+      scheduleTimeGridViewRecipe({
+        isCurrentDay: true,
+        isSingleDigitDay: true,
+      }).dayHeaderDayNumber ?? ''
+    ).split(' ');
+    const doubleDigitClasses = (
+      scheduleTimeGridViewRecipe({
+        isCurrentDay: true,
+        isSingleDigitDay: false,
+      }).dayHeaderDayNumber ?? ''
+    ).split(' ');
+    const paddingClass = singleDigitClasses.find(
+      className => !doubleDigitClasses.includes(className),
+    );
+    expect(paddingClass).toBeDefined();
+
+    const view = createScheduleWeeklyView({
+      maxHour: 10,
+      minHour: 9,
+      weekStartsOn: 1,
+    });
+    const {rerender} = render(
       <Schedule
         events={[]}
-        highlightDate={instantUTC(2026, 4, 14)}
+        highlightDate={instantUTC(2026, 4, 5)}
         timezoneID="UTC"
-        view={createScheduleWeeklyView({maxHour: 10, minHour: 9})}
-        viewDate={instantUTC(2026, 4, 13)}
+        view={view}
+        viewDate={instantUTC(2026, 4, 5)}
       />,
     );
 
-    const highlightedHeader = await screen.findByRole('columnheader', {
-      name: 'Thursday, May 14, 2026',
+    const singleDigitHeader = await screen.findByRole('columnheader', {
+      name: 'Tuesday, May 5, 2026',
     });
-    expect(highlightedHeader).toHaveAttribute('aria-current', 'date');
-    expect(within(highlightedHeader).getByText('14')).toHaveClass(
-      scheduleTimeGridViewRecipe({isCurrentDay: true})
-        .dayHeaderDayNumber as string,
+    expect(singleDigitHeader).toHaveAttribute('aria-current', 'date');
+    expect(within(singleDigitHeader).getByText('5')).toHaveClass(paddingClass!);
+
+    rerender(
+      <Schedule
+        events={[]}
+        highlightDate={instantUTC(2026, 4, 10)}
+        timezoneID="UTC"
+        view={view}
+        viewDate={instantUTC(2026, 4, 5)}
+      />,
+    );
+
+    const doubleDigitHeader = await screen.findByRole('columnheader', {
+      name: 'Sunday, May 10, 2026',
+    });
+    expect(doubleDigitHeader).toHaveAttribute('aria-current', 'date');
+    expect(within(doubleDigitHeader).getByText('10')).not.toHaveClass(
+      paddingClass!,
     );
   });
 
