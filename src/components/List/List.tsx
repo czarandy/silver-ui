@@ -83,7 +83,11 @@ export function List({
     [hasDividers, listStyle],
   );
 
-  const classes = listRecipe({hasDividers, hasCounter});
+  const classes = listRecipe({
+    hasDividers,
+    hasCounter,
+    hasMarkers: listStyle !== 'none',
+  });
 
   const listElement = (
     <Component

@@ -28,10 +28,18 @@ export const listRecipe = sva({
     hasCounter: {
       true: {list: {counterReset: 'silver-list'}},
     },
+    // Marker lists (disc/circle/decimal) read as prose bullets, not as rows
+    // of controls, so they drop most of Item's tap-target padding. The child
+    // selector outranks Item's own atomic `py` class, which the recipes
+    // would otherwise race on stylesheet order.
+    hasMarkers: {
+      true: {list: {'& > li': {py: '0.5'}}},
+    },
   },
   defaultVariants: {
     hasDividers: false,
     hasCounter: false,
+    hasMarkers: false,
   },
 });
 
@@ -41,14 +49,20 @@ export const listItemRecipe = sva({
   slots: ['item', 'markerContainer', 'dot', 'circle', 'number'],
   base: {
     item: {},
+    // The container is exactly one label line tall (the label Text is md with
+    // a 1.5 line height) with the glyph centered inside, and it pins to the
+    // top of the item. Sizing must not lean on the ambient font: inside e.g.
+    // an Alert description the inherited size is `sm`, which would place the
+    // marker off the label's first-line center.
     markerContainer: {
-      alignSelf: 'baseline',
+      alignSelf: 'flex-start',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
       w: '4',
-      mt: `calc((1em * 1.5 - ${markerSize}) / 2)`,
+      fontSize: 'md',
+      h: 'calc(1em * 1.5)',
     },
     dot: {
       w: markerSize,
