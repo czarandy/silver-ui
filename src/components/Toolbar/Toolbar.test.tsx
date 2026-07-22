@@ -315,6 +315,149 @@ describe('Toolbar', () => {
       );
     });
 
+    it('does not make a composite child wrapper the tab stop', async () => {
+      const user = userEvent.setup();
+      render(
+        <Toolbar
+          endContent={<Button label="Save" />}
+          label="Actions"
+          startContent={
+            <Tabs label="Sections" onChange={() => {}} value="overview">
+              <Tab label="Overview" value="overview" />
+              <Tab label="Analytics" value="analytics" />
+            </Tabs>
+          }
+        />,
+      );
+
+      // The tablist container is focusable (tabIndex={-1}) but is not a
+      // toolbar item; its tabs are.
+      expect(screen.getByRole('tablist', {name: 'Sections'})).toHaveAttribute(
+        'tabindex',
+        '-1',
+      );
+
+      await user.tab();
+      expect(screen.getByRole('tab', {name: 'Overview'})).toHaveFocus();
+    });
+
+    it('manages items when the toolbar itself is inside a popover', async () => {
+      const user = userEvent.setup();
+      render(
+        // jsdom's UA stylesheet hides closed popovers; the inline display
+        // keeps the content queryable while the `[popover]` ancestor stays.
+        <div popover="manual" style={{display: 'block'}}>
+          <Toolbar
+            label="Actions"
+            startContent={
+              <>
+                <Button label="One" />
+                <Button label="Two" />
+              </>
+            }
+          />
+        </div>,
+      );
+
+      expect(screen.getByRole('button', {name: 'One'})).toHaveAttribute(
+        'tabindex',
+        '0',
+      );
+      expect(screen.getByRole('button', {name: 'Two'})).toHaveAttribute(
+        'tabindex',
+        '-1',
+      );
+
+      screen.getByRole('button', {name: 'One'}).focus();
+      await user.keyboard('{ArrowRight}');
+      expect(screen.getByRole('button', {name: 'Two'})).toHaveFocus();
+    });
+
+    it('still excludes items inside a child popover', async () => {
+      const user = userEvent.setup();
+      render(
+        <Toolbar
+          label="Actions"
+          startContent={
+            <>
+              <Button label="One" />
+              <div popover="auto">
+                <button type="button">Inside popover</button>
+              </div>
+              <Button label="Two" />
+            </>
+          }
+        />,
+      );
+
+      screen.getByRole('button', {name: 'One'}).focus();
+      await user.keyboard('{ArrowRight}');
+
+      expect(screen.getByRole('button', {name: 'Two'})).toHaveFocus();
+    });
+
+    it('keeps a single tab stop when a nested Tabs selection changes programmatically', async () => {
+      function TabsToolbar({value}: {value: string}): React.JSX.Element {
+        return (
+          <Toolbar
+            endContent={<Button label="Save" />}
+            label="Actions"
+            startContent={
+              <Tabs label="Sections" onChange={() => {}} value={value}>
+                <Tab label="Overview" value="overview" />
+                <Tab label="Analytics" value="analytics" />
+              </Tabs>
+            }
+          />
+        );
+      }
+      const view = render(<TabsToolbar value="overview" />);
+
+      screen.getByRole('button', {name: 'Save'}).focus();
+      expect(screen.getByRole('button', {name: 'Save'})).toHaveAttribute(
+        'tabindex',
+        '0',
+      );
+
+      // A selection change makes React write tabIndex={0} on the newly
+      // selected tab; the toolbar must reconcile it back to a single stop.
+      view.rerender(<TabsToolbar value="analytics" />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('tab', {name: 'Analytics'})).toHaveAttribute(
+          'tabindex',
+          '-1',
+        );
+      });
+      expect(screen.getByRole('button', {name: 'Save'})).toHaveAttribute(
+        'tabindex',
+        '0',
+      );
+    });
+
+    it('skips aria-disabled items', async () => {
+      const user = userEvent.setup();
+      render(
+        <Toolbar
+          label="Actions"
+          startContent={
+            <>
+              <Button label="One" />
+              <button aria-disabled="true" type="button">
+                Blocked
+              </button>
+              <Button label="Two" />
+            </>
+          }
+        />,
+      );
+
+      screen.getByRole('button', {name: 'One'}).focus();
+      await user.keyboard('{ArrowRight}');
+
+      expect(screen.getByRole('button', {name: 'Two'})).toHaveFocus();
+    });
+
     it('does not move focus when a child prevented the arrow key default', async () => {
       const user = userEvent.setup();
       render(
@@ -454,6 +597,31 @@ describe('Toolbar', () => {
       fireEvent.focus(screen.getByRole('button', {name: 'Save'}));
 
       expect(shim.showPopover).not.toHaveBeenCalled();
+    });
+
+    it('shows a single hint when a nested composite mounts its own', () => {
+      shim.setFocusVisible(true);
+      const view = render(
+        <Toolbar
+          endContent={<Button label="Save" />}
+          label="Actions"
+          startContent={
+            <Tabs label="Sections" onChange={() => {}} value="overview">
+              <Tab label="Overview" value="overview" />
+              <Tab label="Analytics" value="analytics" />
+            </Tabs>
+          }
+        />,
+      );
+
+      // One focus event reaches both the Tabs hint and the Toolbar hint.
+      fireEvent.focus(screen.getByRole('tab', {name: 'Overview'}));
+
+      const hintLayers = Array.from(
+        // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the hint is aria-hidden, so it cannot be reached by role or text
+        view.container.querySelectorAll<HTMLElement>('[popover="manual"]'),
+      );
+      expect(hintLayers.filter(shim.isPopoverOpen)).toHaveLength(1);
     });
   });
 });

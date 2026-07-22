@@ -87,9 +87,13 @@ const FOCUSABLE_SELECTOR =
   'a[href], button, input, select, textarea, [tabindex]';
 
 /**
- * Focusable toolbar items, in DOM order. Disabled elements are excluded (they
- * cannot receive focus), as is anything inside a child's popover (an open
- * DropdownMenu's items are not toolbar items).
+ * Focusable toolbar items, in DOM order. Disabled elements are excluded
+ * whether disablement is native (`:disabled`) or ARIA (`aria-disabled`, used
+ * by controls that stay focusable while disabled), as is anything inside a
+ * child's popover (an open DropdownMenu's items are not toolbar items — but
+ * a popover *around* the whole toolbar does not disqualify anything). A
+ * focusable element that wraps other items (a tablist or radiogroup
+ * container) is not itself an item; its controls are.
  */
 function getFocusableItems(
   container: HTMLElement | null,
@@ -97,11 +101,21 @@ function getFocusableItems(
   if (container == null) {
     return [];
   }
-  return Array.from(
+  const candidates = Array.from(
     container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-  ).filter(
+  ).filter(element => {
+    if (
+      element.matches(':disabled') ||
+      element.getAttribute('aria-disabled') === 'true'
+    ) {
+      return false;
+    }
+    const popover = element.closest('[popover]');
+    return popover == null || !container.contains(popover);
+  });
+  return candidates.filter(
     element =>
-      !element.matches(':disabled') && element.closest('[popover]') == null,
+      !candidates.some(other => other !== element && element.contains(other)),
   );
 }
 
@@ -116,7 +130,14 @@ function applyRovingTabStops(
   const tabStop =
     activeItem != null && items.includes(activeItem) ? activeItem : items[0];
   for (const item of items) {
-    item.tabIndex = item === tabStop ? 0 : -1;
+    const tabIndex = item === tabStop ? 0 : -1;
+    // Only write on change (comparing the attribute, since the `tabIndex`
+    // property reads `0` for natively focusable elements even with no
+    // attribute): the MutationObserver watches `tabindex`, and unconditional
+    // writes would re-trigger it forever.
+    if (item.getAttribute('tabindex') !== String(tabIndex)) {
+      item.tabIndex = tabIndex;
+    }
   }
 }
 
@@ -207,8 +228,12 @@ export function Toolbar({
     apply();
     const observer = new MutationObserver(apply);
     observer.observe(container, {
-      // `tabindex` is deliberately not observed — `apply` writes it.
-      attributeFilter: ['aria-disabled', 'disabled', 'href'],
+      // `tabindex` is observed so that children that manage their own
+      // tabindex from React (a Tabs selection change writes `0` on the newly
+      // selected tab) cannot leave the toolbar with two tab stops. `apply`
+      // itself only writes `tabindex` on change, so re-applying settles
+      // instead of looping.
+      attributeFilter: ['aria-disabled', 'disabled', 'href', 'tabindex'],
       attributes: true,
       childList: true,
       subtree: true,

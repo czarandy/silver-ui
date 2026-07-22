@@ -78,6 +78,35 @@ const HINT_KEYS: Record<KeyboardHintOrientation, ReadonlyArray<string>> = {
 const HINT_OFFSET = 8;
 
 /**
+ * At most one hint is visible across all instances. Nested hinted containers
+ * (a Tabs inside a Toolbar) both see the same bubbled focus event; without
+ * this, each would show its own copy of the hint stacked on the same control.
+ * The instance showing last dismisses the one before it.
+ */
+let visibleHint: {dismiss: () => void; token: object} | null = null;
+
+/**
+ * Makes `token`'s hint the visible one, dismissing another instance's hint if
+ * it is showing.
+ */
+function claimVisibleHint(token: object, dismiss: () => void): void {
+  if (visibleHint != null && visibleHint.token !== token) {
+    visibleHint.dismiss();
+  }
+  visibleHint = {dismiss, token};
+}
+
+/**
+ * Forgets `token`'s claim, if it still holds one. Called on dismiss and on
+ * unmount so a stale instance's `dismiss` is never invoked later.
+ */
+function releaseVisibleHint(token: object): void {
+  if (visibleHint?.token === token) {
+    visibleHint = null;
+  }
+}
+
+/**
  * Shows an ephemeral "← → to navigate" hint the first time a roving-tabindex
  * widget receives keyboard focus, teaching sighted keyboard users that arrow
  * keys move within the group. Tab lands on a single item and the arrow keys are
@@ -110,6 +139,7 @@ const useKeyboardHint = ({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDismissedRef = useRef(false);
   const isVisibleRef = useRef(false);
+  const tokenRef = useRef<object>({});
 
   const clearDismissTimeout = useCallback(() => {
     if (timeoutRef.current != null) {
@@ -128,9 +158,16 @@ const useKeyboardHint = ({
     clearDismissTimeout();
     layer.hide();
     layer.ref(null);
+    releaseVisibleHint(tokenRef.current);
   }, [clearDismissTimeout, layer]);
 
-  useEffect(() => clearDismissTimeout, [clearDismissTimeout]);
+  useEffect(() => {
+    const token = tokenRef.current;
+    return () => {
+      clearDismissTimeout();
+      releaseVisibleHint(token);
+    };
+  }, [clearDismissTimeout]);
 
   const onFocus = useCallback(
     (event: FocusEvent<HTMLElement>) => {
@@ -150,6 +187,7 @@ const useKeyboardHint = ({
         return;
       }
 
+      claimVisibleHint(tokenRef.current, dismiss);
       layer.ref(event.target);
       layer.show();
       isVisibleRef.current = true;
