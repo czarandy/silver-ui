@@ -14,7 +14,7 @@ import {
 } from 'components/Chat/ChatContext';
 import {chatMessageListRecipe} from 'components/Chat/ChatMessageList.recipe';
 import {Spinner} from 'components/Spinner';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
 import useLatest from 'internal/useLatest';
 import {cx} from 'utils/cx';
@@ -131,7 +131,7 @@ export function ChatMessageList({
   const contextValue = useMemo(() => ({density}), [density]);
   const classes = chatMessageListRecipe({density, gap});
   const hasChildren =
-    isReactNode(children) &&
+    isNonEmptyReactNode(children) &&
     children !== false &&
     !(Array.isArray(children) && children.length === 0);
 
@@ -157,7 +157,7 @@ export function ChatMessageList({
           <div aria-hidden="true" className={classes.spacer} />
           {hasChildren ? (
             children
-          ) : isReactNode(emptyState) ? (
+          ) : isNonEmptyReactNode(emptyState) ? (
             <div className={classes.emptyState}>{emptyState}</div>
           ) : null}
         </div>

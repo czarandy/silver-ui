@@ -28,6 +28,14 @@ const meta = {
   title: 'Components/InputGroup',
   component: InputGroup,
   args: {label: 'Website', size: 'md'},
+  parameters: {
+    docs: {
+      description: {
+        component:
+          'Use `InputGroup` when controls and addons make up one visually connected input row. Use `Fieldset` for separate fields that share a conceptual section, need a native legend, or need native disabled cascading. Use `Field` for one labeled control.',
+      },
+    },
+  },
 } satisfies Meta<InputGroupProps>;
 
 export default meta;

@@ -17,7 +17,7 @@ import {Button} from 'components/Button';
 import {lightboxRecipe} from 'components/Lightbox/Lightbox.recipe';
 import {LayerContext} from 'internal/LayerContext';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
@@ -354,7 +354,7 @@ export function Lightbox({
                   />
                 )}
               </div>
-              {isReactNode(currentItem.caption) ? (
+              {isNonEmptyReactNode(currentItem.caption) ? (
                 <div className={classes.caption}>{currentItem.caption}</div>
               ) : null}
             </div>

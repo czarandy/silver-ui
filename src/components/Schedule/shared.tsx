@@ -27,7 +27,7 @@ import type {
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
   DATE_FORMAT_MONTH_YEAR,
   DATE_FORMAT_WITH_WEEKDAY,
@@ -311,13 +311,13 @@ export function useScheduleEventPopover(
   const content = useMemo((): ReactNode => {
     for (const plugin of plugins) {
       const node = plugin.renderEventPopover?.(event, controls);
-      if (isReactNode(node)) {
+      if (isNonEmptyReactNode(node)) {
         return node;
       }
     }
     return null;
   }, [controls, event, plugins]);
-  if (!isReactNode(content)) {
+  if (!isNonEmptyReactNode(content)) {
     return {};
   }
   return {

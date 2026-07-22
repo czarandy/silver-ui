@@ -97,7 +97,7 @@ describe('CheckboxGroup', () => {
     expect(screen.getByRole('checkbox', {name: 'SMS'})).toBeDisabled();
   });
 
-  it('sets aria-invalid and renders error message', () => {
+  it('renders the error message without aria-invalid on the group', () => {
     render(
       <CheckboxGroup
         label="Notification channels"
@@ -108,8 +108,9 @@ describe('CheckboxGroup', () => {
       </CheckboxGroup>,
     );
 
+    // aria-invalid is not an allowed attribute for role=group
     const group = screen.getByRole('group');
-    expect(group).toHaveAttribute('aria-invalid', 'true');
+    expect(group).not.toHaveAttribute('aria-invalid');
     expect(screen.getByText('Selection required')).toBeInTheDocument();
   });
 

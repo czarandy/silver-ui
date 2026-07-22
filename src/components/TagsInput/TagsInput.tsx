@@ -26,13 +26,14 @@ import {
 } from 'components/Field';
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {OverflowList} from 'components/OverflowList';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import useAnnounce from 'hooks/useAnnounce';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
 import {useLayer} from 'internal/useLayer';
@@ -317,12 +318,16 @@ export function TagsInput<T extends SearchableItem>({
   value,
 }: TagsInputProps<T>): React.JSX.Element {
   const inputGroup = useInputGroup();
-  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
+  const fieldset = useFieldset();
+  const isDisabled =
+    isDisabledFromProps ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
   const statusType = status?.type ?? inputGroup?.statusType;
 
   const inputId = useId();
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
@@ -617,7 +622,7 @@ export function TagsInput<T extends SearchableItem>({
         size={size}
         value={null}
       />
-      {isReactNode(endContent) ? (
+      {isNonEmptyReactNode(endContent) ? (
         <span className={classes.endContent}>{endContent}</span>
       ) : null}
       {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (

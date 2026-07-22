@@ -116,6 +116,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Card** — rounded container surface for grouping content
 - **Center** — centers content horizontally, vertically, or both
 - **Divider** — visual separator between sections
+- **Grid** — responsive equal-width columns with minimum-child-width reflow
 - **Layout** — page shell with header, footer, side panels, and content slots
 - **OverflowList** — shows the items that fit and collapses the rest into a custom overflow indicator
 - **HStack / VStack** — horizontal and vertical flex containers with gap
@@ -155,8 +156,9 @@ mode details, scoped theming examples, and per-instance overrides.
 - **CheckboxInput** — checkbox with label and description
 - **ColorSwatchPicker** — swatch picker for the named theme palette
 - **Field** — form field wrapper with label, description, and validation
+- **Fieldset** — native legend container for normally stacked, related fields
 - **FileInput** — file upload with drag-and-drop support
-- **InputGroup** — groups related form inputs with shared label
+- **InputGroup** — combines controls and addons into one connected input row
 - **MultiSelect** — multi-value dropdown selector
 - **NumberInput** — numeric input with increment/decrement
 - **PasswordInput** — text input with show/hide toggle
@@ -190,6 +192,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Item** — generic list item with icon, label, and description
 - **List** — ordered or unordered list with dividers
 - **MetadataList** — key-value metadata display
+- **Stat** — prominent label/value summary with optional change, context, and icon
 - **Table** — data table with sorting, filtering, and column resize plugins
 - **Tag** — removable label for categories or filters
 - **Thumbnail** — image preview with fallback and remove action

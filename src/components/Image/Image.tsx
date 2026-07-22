@@ -10,7 +10,7 @@ import type {
 import {Icon} from 'components/Icon';
 import {imageRecipe} from 'components/Image/Image.recipe';
 import {Skeleton} from 'components/Skeleton';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import useImageLoadState from 'internal/useImageLoadState';
 import {cx} from 'utils/cx';
 
@@ -161,7 +161,7 @@ export function Image({
       ) : null}
       {status === 'error' ? (
         <div className={classes.fallback}>
-          {isReactNode(fallback) ? (
+          {isNonEmptyReactNode(fallback) ? (
             fallback
           ) : (
             <Icon aria-label={alt || undefined} icon={ImageIcon} size="lg" />

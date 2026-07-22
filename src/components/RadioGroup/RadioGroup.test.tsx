@@ -151,6 +151,21 @@ describe('RadioGroup', () => {
     );
   });
 
+  it('treats an empty-string item description as absent', () => {
+    render(
+      <RadioGroup
+        label="Notification preference"
+        onChange={() => {}}
+        value="email">
+        <RadioGroupItem description="" label="Email" value="email" />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByRole('radio', {name: 'Email'})).not.toHaveAttribute(
+      'aria-describedby',
+    );
+  });
+
   it('throws when RadioGroupItem is used outside RadioGroup', () => {
     expect(() =>
       render(<RadioGroupItem label="Orphan" value="orphan" />),

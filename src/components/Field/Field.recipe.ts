@@ -1,15 +1,7 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const fieldRecipe = sva({
-  slots: [
-    'root',
-    'label',
-    'labelIcon',
-    'indicator',
-    'tooltipIcon',
-    'inputWrapper',
-    'status',
-  ],
+  slots: ['root', 'label', 'labelIcon', 'tooltipIcon', 'inputWrapper'],
   base: {
     root: {
       display: 'flex',
@@ -27,10 +19,6 @@ export const fieldRecipe = sva({
     labelIcon: {
       alignSelf: 'center',
     },
-    indicator: {
-      fontWeight: 'normal',
-      color: 'fg.muted',
-    },
     tooltipIcon: {
       display: 'inline-flex',
       alignSelf: 'center',
@@ -40,13 +28,6 @@ export const fieldRecipe = sva({
       display: 'flex',
       flexDirection: 'column',
       isolation: 'isolate',
-    },
-    status: {
-      fontFamily: 'body',
-      fontSize: 'sm',
-      lineHeight: 'normal',
-      px: '2',
-      py: '1.5',
     },
   },
   variants: {
@@ -59,30 +40,9 @@ export const fieldRecipe = sva({
       },
       false: {},
     },
-    statusType: {
-      warning: {status: {bg: 'surface.yellow', color: 'surface.yellow.fg'}},
-      error: {status: {bg: 'surface.red', color: 'surface.red.fg'}},
-      success: {status: {bg: 'surface.green', color: 'surface.green.fg'}},
-    },
-    statusVariant: {
-      attached: {
-        status: {
-          mt: '-1',
-          pt: '2.5',
-          borderBottomRadius: 'md',
-        },
-      },
-      detached: {
-        status: {
-          mt: '1',
-          borderRadius: 'md',
-        },
-      },
-    },
   },
   defaultVariants: {
     isDisabled: false,
-    statusVariant: 'attached',
   },
 });
 

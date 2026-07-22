@@ -11,7 +11,7 @@ import {
   type Ref,
 } from 'react';
 import {overflowListRecipe} from 'components/OverflowList/OverflowList.recipe';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
@@ -251,7 +251,7 @@ export function OverflowList({
         inert
         ref={measureRefCallback}>
         {childArray}
-        {isReactNode(measureIndicator) ? (
+        {isNonEmptyReactNode(measureIndicator) ? (
           <div className={classes.measureIndicator}>{measureIndicator}</div>
         ) : null}
       </div>

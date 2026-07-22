@@ -36,7 +36,7 @@ import type {
 } from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
@@ -210,7 +210,7 @@ function TimeGridEvent({
         });
         // The plugins array is stable, ordered config that is never reordered,
         // so the index is a safe key for the appended content nodes.
-        return isReactNode(content) ? (
+        return isNonEmptyReactNode(content) ? (
           // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
           <Fragment key={index}>{content}</Fragment>
         ) : null;
@@ -570,7 +570,7 @@ export function TimeGridView({
                         minHour: normalizedMinHour,
                         timezoneID,
                       });
-                      return isReactNode(content) ? (
+                      return isNonEmptyReactNode(content) ? (
                         // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
                         <Fragment key={pluginIndex}>{content}</Fragment>
                       ) : null;

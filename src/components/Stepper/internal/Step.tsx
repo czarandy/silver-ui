@@ -6,7 +6,7 @@ import {Icon} from 'components/Icon';
 import type {StepperOrientation} from 'components/Stepper/Stepper';
 import {stepRecipe} from 'components/Stepper/internal/Step.recipe';
 import {Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export type StepState =
   'active' | 'completed' | 'disabled' | 'error' | 'upcoming';
@@ -146,7 +146,7 @@ export function Step({
         </div>
         <div className={classes.content}>
           {labelNode}
-          {isReactNode(content) ? (
+          {isNonEmptyReactNode(content) ? (
             <div className={classes.childrenContent}>{content}</div>
           ) : null}
         </div>

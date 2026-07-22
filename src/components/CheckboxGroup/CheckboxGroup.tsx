@@ -21,7 +21,7 @@ import {
   type InputStatus,
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export type {CheckboxGroupOrientation} from 'components/CheckboxGroup/CheckboxGroupContext';
 
@@ -122,7 +122,7 @@ export function CheckboxGroup({
 }: CheckboxGroupProps): React.JSX.Element {
   const inputId = useId();
   const labelId = `${inputId}-label`;
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
@@ -175,7 +175,6 @@ export function CheckboxGroup({
       style={style}>
       <div
         aria-describedby={describedBy}
-        aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
         className={checkboxGroupRecipe({orientation})}
         id={inputId}

@@ -20,7 +20,7 @@ import {
 import type {DropdownMenuOption} from 'components/DropdownMenu/types';
 import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -134,12 +134,12 @@ export function DropdownMenu({
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   if (process.env.NODE_ENV !== 'production') {
-    if (items != null && isReactNode(children)) {
+    if (items != null && isNonEmptyReactNode(children)) {
       throw new Error(
         'DropdownMenu: pass either `items` or `children`, not both.',
       );
     }
-    if (items == null && !isReactNode(children)) {
+    if (items == null && !isNonEmptyReactNode(children)) {
       throw new Error('DropdownMenu: provide either `items` or `children`.');
     }
   }

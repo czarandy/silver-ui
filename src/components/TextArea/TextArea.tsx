@@ -25,7 +25,7 @@ import {
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -190,7 +190,7 @@ export function TextArea({
   ref,
 }: TextAreaProps): React.JSX.Element {
   const inputId = useId();
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

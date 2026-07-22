@@ -193,6 +193,17 @@ function ControlledStory(args: React.ComponentProps<typeof Tabs>) {
   );
 }
 
+function PackageManagersStory(args: React.ComponentProps<typeof Tabs>) {
+  const [value, setValue] = useState('yarn');
+  return (
+    <Tabs {...args} hasDivider onChange={setValue} value={value}>
+      <Tab label="npm" value="npm" />
+      <Tab label="pnpm" value="pnpm" />
+      <Tab label="yarn" value="yarn" />
+    </Tabs>
+  );
+}
+
 function WithPanelsStory(args: React.ComponentProps<typeof Tabs>) {
   const [value, setValue] = useState('overview');
   return (
@@ -232,6 +243,11 @@ function WithPanelsStory(args: React.ComponentProps<typeof Tabs>) {
 export const Default: Story = {
   render: args => <TabsStory {...args} />,
 };
+
+export const ActiveHighlight: Story = {
+  render: args => <PackageManagersStory {...args} />,
+};
+
 export const Fill: Story = {
   args: {layout: 'fill'},
   render: args => <TabsStory {...args} />,

@@ -189,6 +189,10 @@ export const alertRecipe = sva({
       },
       section: {},
     },
+    endContentAlignment: {
+      center: {endArea: {alignSelf: 'center'}},
+      start: {},
+    },
     // Squares off the header's bottom corners while the body is revealed; the
     // compound variant rounds them back when there is no expanded content.
     hasContent: {
@@ -214,6 +218,7 @@ export const alertRecipe = sva({
   ],
   defaultVariants: {
     container: 'card',
+    endContentAlignment: 'start',
     hasContent: false,
     isCentered: false,
     isExpanded: false,

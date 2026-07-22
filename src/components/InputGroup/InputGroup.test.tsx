@@ -1,11 +1,11 @@
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
-import {fieldRecipe} from 'components/Field/Field.recipe';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {NumberInput} from 'components/NumberInput';
 import {TextInput} from 'components/TextInput';
+import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 
 describe('InputGroup', () => {
   it('renders a labeled group with addon text and an input', () => {
@@ -53,12 +53,12 @@ describe('InputGroup', () => {
     );
 
     const status = screen.getByRole('alert');
-    const attachedField = fieldRecipe({
+    const attachedStatus = statusMessageRecipe({
       statusType: 'error',
-      statusVariant: 'attached',
+      variant: 'attached',
     });
     expect(status).toHaveTextContent('Price is required');
-    expect(status).toHaveClass(attachedField.status ?? '');
+    expect(status).toHaveClass(attachedStatus);
     const group = screen.getByRole('group', {name: 'Price'});
     expect(group).toHaveAttribute('aria-describedby');
   });
@@ -74,11 +74,11 @@ describe('InputGroup', () => {
       </InputGroup>,
     );
 
-    const detachedField = fieldRecipe({
+    const detachedStatus = statusMessageRecipe({
       statusType: 'error',
-      statusVariant: 'detached',
+      variant: 'detached',
     });
-    expect(screen.getByRole('alert')).toHaveClass(detachedField.status ?? '');
+    expect(screen.getByRole('alert')).toHaveClass(detachedStatus);
   });
 
   it('applies data-testid, className, style, and ref', () => {

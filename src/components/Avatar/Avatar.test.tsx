@@ -23,6 +23,20 @@ describe('Avatar', () => {
     expect(screen.getByText('AL')).toHaveClass('silver-pb_1px');
   });
 
+  it('increases initials bottom padding at 96px and larger', () => {
+    render(
+      <>
+        <Avatar name="Ada Lovelace" size={72} />
+        <Avatar name="Grace Hopper" size={96} />
+        <Avatar name="Katherine Johnson" size="large" />
+      </>,
+    );
+
+    expect(screen.getByText('AL')).toHaveClass('silver-pb_1px');
+    expect(screen.getByText('GH')).toHaveClass('silver-pb_2px');
+    expect(screen.getByText('KJ')).toHaveClass('silver-pb_2px');
+  });
+
   it('uses alt as the accessible name when provided', () => {
     render(<Avatar alt="Profile photo" name="Ada Lovelace" />);
 
