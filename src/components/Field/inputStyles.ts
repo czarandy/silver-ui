@@ -91,27 +91,34 @@ export const inputRecipe = cva({
 
 export type InputVariants = RecipeVariantProps<typeof inputRecipe>;
 
+/**
+ * Raw control styles so composite inputs (e.g. PinInput's cells) can merge
+ * overrides deterministically with `css(inputControlStyles, ...)` instead of
+ * relying on stylesheet emission order between conflicting utilities.
+ */
+export const inputControlStyles = css.raw({
+  display: 'block',
+  flex: 1,
+  minW: 0,
+  borderWidth: 0,
+  borderStyle: 'none',
+  p: 0,
+  fontFamily: 'body',
+  fontSize: 'md',
+  lineHeight: 'normal',
+  color: 'fg',
+  bg: 'transparent',
+  outline: 'none',
+  _placeholder: {
+    color: 'fg.muted',
+  },
+  _disabled: {
+    cursor: 'not-allowed',
+  },
+});
+
 export const inputStyles = {
-  control: css({
-    display: 'block',
-    flex: 1,
-    minW: 0,
-    borderWidth: 0,
-    borderStyle: 'none',
-    p: 0,
-    fontFamily: 'body',
-    fontSize: 'md',
-    lineHeight: 'normal',
-    color: 'fg',
-    bg: 'transparent',
-    outline: 'none',
-    _placeholder: {
-      color: 'fg.muted',
-    },
-    _disabled: {
-      cursor: 'not-allowed',
-    },
-  }),
+  control: css(inputControlStyles),
   iconSlot: css({
     display: 'inline-flex',
     alignItems: 'center',

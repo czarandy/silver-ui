@@ -4,13 +4,24 @@ import {LockKeyhole} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {getNecessity} from 'components/Field';
-import {inputRecipe} from 'components/Field/inputStyles';
+import {inputRecipe, type InputVariants} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {PinInput, type PinInputProps} from 'components/PinInput/PinInput';
 import {pinInputRecipe} from 'components/PinInput/PinInput.recipe';
+import {css} from 'styled-system/css';
 
 const noop = () => {};
+
+// Mirrors the css() merge PinInput uses for its wrapper: the recipe's slot
+// overrides replace the conflicting inputRecipe utilities, so the raw
+// inputRecipe class list is not a subset of the rendered classes.
+function getWrapperClassName(variants: InputVariants = {}): string {
+  return css(
+    inputRecipe.raw(variants),
+    pinInputRecipe.raw({size: variants.size ?? 'md'}).wrapper,
+  );
+}
 
 function getCells(label = 'Digit'): HTMLInputElement[] {
   return screen.getAllByLabelText(new RegExp(`^${label} \\d+ of \\d+$`));
@@ -488,7 +499,9 @@ describe('PinInput', () => {
           />,
         );
 
-        expect(screen.getByTestId('pin')).toHaveClass(inputRecipe({size}));
+        expect(screen.getByTestId('pin')).toHaveClass(
+          getWrapperClassName({size}),
+        );
         expect(getCells()[0]).toHaveClass(pinInputRecipe({size}).cell ?? '');
       },
     );
@@ -506,7 +519,7 @@ describe('PinInput', () => {
       );
 
       expect(screen.getByTestId('pin')).toHaveClass(
-        inputRecipe({isDisabled: true, status: 'warning'}),
+        getWrapperClassName({isDisabled: true, status: 'warning'}),
       );
     });
   });
@@ -546,7 +559,9 @@ describe('PinInput', () => {
         </InputGroup>,
       );
 
-      expect(screen.getByTestId('pin')).toHaveClass(inputRecipe({size: 'lg'}));
+      expect(screen.getByTestId('pin')).toHaveClass(
+        getWrapperClassName({size: 'lg', isDisabled: true}),
+      );
       expect(getCells()[0]).toHaveClass(
         pinInputRecipe({size: 'lg'}).cell ?? '',
       );
@@ -565,7 +580,7 @@ describe('PinInput', () => {
       );
 
       const pin = screen.getByTestId('pin');
-      expect(pin).toHaveClass(inputRecipe({status: 'error'}));
+      expect(pin).toHaveClass(getWrapperClassName({status: 'error'}));
       expect(pin).not.toHaveAttribute('aria-invalid');
       // eslint-disable-next-line testing-library/no-node-access -- a group-inherited status must not add a child icon
       expect(pin.querySelector('svg')).toBeNull();
@@ -588,7 +603,7 @@ describe('PinInput', () => {
 
       const pin = screen.getByRole('group', {name: 'Code'});
       expect(pin).toHaveClass('custom-wrapper');
-      expect(pin).toHaveClass(inputRecipe({size: 'md'}));
+      expect(pin).toHaveClass(getWrapperClassName({size: 'md'}));
       expect(pin).toHaveStyle({maxWidth: '250px'});
       expect(ref).toHaveBeenCalledWith(pin);
     });

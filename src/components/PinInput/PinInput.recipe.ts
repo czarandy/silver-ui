@@ -10,17 +10,18 @@ export const pinInputRecipe = sva({
       display: 'inline-flex',
       w: 'fit-content',
       maxW: 'full',
-      // The `!` overrides beat inputRecipe's gap: '2' and inline paddings by
-      // importance. Same-specificity utility conflicts resolve by stylesheet
-      // emission order, which varies between Panda builds (Storybook, docs
-      // site, consuming apps), so plain declarations here are not reliable.
-      gap: '0!',
-      paddingInline: '0!',
+      // Overrides of inputRecipe values (gap: '2', inline paddings) must use
+      // the exact same property keys: PinInput merges this slot into
+      // inputRecipe.raw() with css(), which resolves same-key conflicts in JS
+      // rather than leaving two utilities to race in the cascade.
+      gap: '0',
+      paddingInlineStart: '0',
+      paddingInlineEnd: '0',
       overflow: 'hidden',
     },
     cell: {
-      // Beats inputStyles.control's flex: 1 regardless of emission order.
-      flex: '0 0 auto!',
+      // Overrides inputControlStyles' flex: 1 via the same css() merge.
+      flex: '0 0 auto',
       alignSelf: 'stretch',
       borderInlineStartWidth: 'default',
       borderInlineStartStyle: 'solid',
@@ -43,17 +44,17 @@ export const pinInputRecipe = sva({
   },
   variants: {
     size: {
-      // The fontSize `!` overrides beat inputStyles.control's unconditional
-      // fontSize: 'md'; without them the sm/lg cell text silently renders at
-      // md whenever the fs_md utility is emitted later in the stylesheet.
+      // fontSize overrides inputControlStyles' unconditional 'md' through the
+      // css() merge in PinInput; as a bare class it would silently lose to
+      // fs_md whenever that utility is emitted later in the stylesheet.
       sm: {
-        cell: {w: '7', fontSize: 'sm!'},
+        cell: {w: '7', fontSize: 'sm'},
       },
       md: {
-        cell: {w: '9', fontSize: 'md!'},
+        cell: {w: '9', fontSize: 'md'},
       },
       lg: {
-        cell: {w: '11', fontSize: 'lg!'},
+        cell: {w: '11', fontSize: 'lg'},
       },
     },
   },

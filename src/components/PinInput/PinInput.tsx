@@ -17,7 +17,11 @@ import {
   type InputSize,
   type InputStatus,
 } from 'components/Field';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  inputControlStyles,
+  inputRecipe,
+  inputStyles,
+} from 'components/Field/inputStyles';
 import {
   getDescribedBy,
   getStatusIcon,
@@ -28,6 +32,7 @@ import {useInputGroup} from 'components/InputGroup';
 import {pinInputRecipe} from 'components/PinInput/PinInput.recipe';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 export type PinInputType = 'numeric' | 'alphanumeric';
@@ -203,7 +208,22 @@ export function PinInput({
   const cellsRef = useRef<(HTMLInputElement | null)[]>([]);
   const displayedValue = value.slice(0, length);
   const autoFocusIndex = Math.min(displayedValue.length, length - 1);
-  const classes = pinInputRecipe({size});
+  // Merge the shared input chrome with this recipe's slot overrides in JS so
+  // each property resolves to a single utility class; layering the classes
+  // with cx would leave same-property conflicts (gap, paddings, flex,
+  // fontSize) to be decided by stylesheet emission order, which varies
+  // between Panda builds.
+  const slots = pinInputRecipe.raw({size});
+  const wrapperClassName = css(
+    inputRecipe.raw({
+      size,
+      status: effectiveStatusType,
+      isDisabled: effectiveDisabled,
+    }),
+    slots.wrapper,
+  );
+  const cellClassName = css(inputControlStyles, slots.cell);
+  const statusIconClassName = cx(inputStyles.iconSlot, css(slots.statusIcon));
 
   const focusCell = (index: number): void => {
     cellsRef.current[Math.max(0, Math.min(index, length - 1))]?.focus();
@@ -297,12 +317,7 @@ export function PinInput({
       aria-label={inputGroup != null ? label : undefined}
       aria-labelledby={inputGroup == null ? labelId : undefined}
       className={cx(
-        inputRecipe({
-          size,
-          status: effectiveStatusType,
-          isDisabled: effectiveDisabled,
-        }),
-        classes.wrapper,
+        wrapperClassName,
         inputGroup != null ? className : undefined,
       )}
       data-testid={dataTestId}
@@ -316,7 +331,7 @@ export function PinInput({
           aria-required={isRequired ?? undefined}
           autoComplete={index === 0 ? 'one-time-code' : 'off'}
           autoFocus={hasAutoFocus && index === autoFocusIndex}
-          className={cx(inputStyles.control, classes.cell)}
+          className={cellClassName}
           data-autofocus={
             hasAutoFocus && index === autoFocusIndex ? true : undefined
           }
@@ -344,7 +359,7 @@ export function PinInput({
         value={displayedValue}
       />
       {status != null ? (
-        <span className={cx(inputStyles.iconSlot, classes.statusIcon)}>
+        <span className={statusIconClassName}>
           {getStatusIcon(status.type)}
         </span>
       ) : null}
