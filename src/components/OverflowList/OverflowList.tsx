@@ -204,8 +204,11 @@ export function OverflowList({
   );
 
   useIsomorphicLayoutEffect(() => {
+    // `gap` changes the recipe class whose computed column-gap `calculate`
+    // reads from the DOM; container size changes are covered by the
+    // ResizeObserver below.
     calculate();
-  }, [calculate, className, gap, style]);
+  }, [calculate, gap]);
 
   useIsomorphicLayoutEffect(() => {
     const container = containerRef.current;

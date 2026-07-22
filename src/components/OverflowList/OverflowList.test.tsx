@@ -232,6 +232,47 @@ describe('OverflowList', () => {
     expect(root).toHaveTextContent('Alpha+2');
   });
 
+  it('re-measures when the gap token changes', () => {
+    containerWidth = 100;
+    // jsdom does not resolve the recipe's gap class to a computed column-gap,
+    // so map the emitted class to the pixel value a browser would compute.
+    const realGetComputedStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(
+      (element, pseudo) => {
+        if (
+          element instanceof HTMLElement &&
+          element.classList.contains('overflow-list-root')
+        ) {
+          const stubStyle: Partial<CSSStyleDeclaration> = {
+            columnGap: element.classList.contains('silver-gap_4')
+              ? '16px'
+              : '4px',
+          };
+          return stubStyle as CSSStyleDeclaration;
+        }
+        return realGetComputedStyle(element, pseudo);
+      },
+    );
+
+    const {rerender} = render(
+      <OverflowList className="overflow-list-root" data-testid="list" gap={4}>
+        <Item>Alpha</Item>
+        <Item>Beta</Item>
+        <Item>Gamma</Item>
+      </OverflowList>,
+    );
+    expect(screen.getByTestId('list')).toHaveTextContent(/^AlphaBeta$/);
+
+    rerender(
+      <OverflowList className="overflow-list-root" data-testid="list" gap={1}>
+        <Item>Alpha</Item>
+        <Item>Beta</Item>
+        <Item>Gamma</Item>
+      </OverflowList>,
+    );
+    expect(screen.getByTestId('list')).toHaveTextContent('AlphaBetaGamma');
+  });
+
   it('applies tokenized gap styling and forwards className, style, and ref', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
     render(
