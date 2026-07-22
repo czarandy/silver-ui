@@ -5,7 +5,7 @@ import {useId} from 'react';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {Text} from 'components/Text';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -87,7 +87,7 @@ export function SideNavSection({
           </Text>
         ) : null}
       </span>
-      {isReactNode(endContent) ? (
+      {isNonEmptyReactNode(endContent) ? (
         <span className={styles.endContent}>{endContent}</span>
       ) : null}
     </div>

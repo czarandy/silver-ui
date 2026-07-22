@@ -36,6 +36,18 @@ export default defineConfig({
   outdir: 'styled-system',
   outExtension: 'js',
   jsxFramework: 'react',
+  patterns: {
+    extend: {
+      // Panda claims any JSX tag named after a built-in pattern, so silver-ui's
+      // own <Grid> would otherwise be extracted as the built-in grid pattern —
+      // emitting dead CSS, and malformed CSS for non-token minChildWidth
+      // values. Neutralize the pattern; nothing imports styled-system/patterns.
+      grid: {
+        properties: {},
+        transform: () => ({}),
+      },
+    },
+  },
   cssVarRoot: ':where(:root, :host)',
   conditions: {
     extend: {

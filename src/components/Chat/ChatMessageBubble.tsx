@@ -8,7 +8,7 @@ import type {
 } from 'react';
 import {useChatMessageContext} from 'components/Chat/ChatContext';
 import {chatMessageBubbleRecipe} from 'components/Chat/ChatMessageBubble.recipe';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type ChatMessageBubbleVariant = 'filled' | 'ghost';
@@ -83,7 +83,7 @@ export function ChatMessageBubble({
 
   return (
     <>
-      {isReactNode(name) ? (
+      {isNonEmptyReactNode(name) ? (
         <div className={classes.nameRow} data-chat-name="">
           {name}
         </div>
@@ -96,7 +96,7 @@ export function ChatMessageBubble({
         style={style}>
         {children}
       </div>
-      {isReactNode(metadata) ? (
+      {isNonEmptyReactNode(metadata) ? (
         <div className={classes.metadataRow}>{metadata}</div>
       ) : null}
     </>

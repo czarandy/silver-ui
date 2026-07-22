@@ -2,7 +2,7 @@
 
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {dividerRecipe} from 'components/Divider/Divider.recipe';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type DividerOrientation = 'horizontal' | 'vertical';
@@ -92,7 +92,7 @@ export function Divider({
     <div
       aria-label={ariaLabel}
       aria-labelledby={
-        isReactNode(label) && ariaLabel == null ? labelId : undefined
+        isNonEmptyReactNode(label) && ariaLabel == null ? labelId : undefined
       }
       aria-orientation={orientation}
       className={cx(classes.root, className)}
@@ -101,7 +101,7 @@ export function Divider({
       role="separator"
       style={{...dimensionStyle, ...style}}>
       <div className={classes.line} />
-      {isReactNode(label) ? (
+      {isNonEmptyReactNode(label) ? (
         <>
           <div className={classes.label} id={labelId}>
             {label}

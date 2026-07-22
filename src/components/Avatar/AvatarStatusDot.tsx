@@ -2,7 +2,7 @@
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useAvatarSize} from 'components/Avatar/AvatarSizeContext';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -109,10 +109,10 @@ export function AvatarStatusDot({
 }: AvatarStatusDotProps): React.JSX.Element {
   const avatarSize = useAvatarSize();
   const {borderWidth, dotSize, iconSize} = resolveStatusDotSize(avatarSize);
-  const hasVisibleIcon = isReactNode(icon) && iconSize > 0;
+  const hasVisibleIcon = isNonEmptyReactNode(icon) && iconSize > 0;
 
   if (process.env.NODE_ENV !== 'production') {
-    if (isReactNode(icon) && iconSize === 0) {
+    if (isNonEmptyReactNode(icon) && iconSize === 0) {
       console.warn(
         'AvatarStatusDot: `icon` is not visible at avatar sizes 36px or ' +
           'smaller. Use a larger avatar size or remove the `icon` prop.',

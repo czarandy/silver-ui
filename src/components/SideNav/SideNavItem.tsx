@@ -10,7 +10,7 @@ import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {sideNavItemRecipe} from 'components/SideNav/SideNavItem.recipe';
 import {ActionElement} from 'internal/ActionElement';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export interface SideNavItemProps {
@@ -107,7 +107,7 @@ export function SideNavItem({
   const [isExpanded, setIsExpanded] = useState(isDefaultExpanded);
   const childrenId = useId();
 
-  const hasChildren = isReactNode(children);
+  const hasChildren = isNonEmptyReactNode(children);
   const isExpandable = hasChildren && isItemCollapsible;
   const hasPrimaryAction = href != null || onClick != null;
 
@@ -174,7 +174,7 @@ export function SideNavItem({
     </span>
   ) : null;
 
-  const childrenContainer = isReactNode(children) ? (
+  const childrenContainer = isNonEmptyReactNode(children) ? (
     <div className={classes.childrenContainer} id={childrenId} role="group">
       <div className={classes.childrenInner}>{children}</div>
     </div>

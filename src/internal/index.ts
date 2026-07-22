@@ -1,1 +1,1 @@
-export {default as isReactNode} from 'internal/isReactNode';
+export {default as isNonEmptyReactNode} from 'internal/isNonEmptyReactNode';

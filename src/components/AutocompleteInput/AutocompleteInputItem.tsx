@@ -4,7 +4,7 @@ import {autocompleteItemRecipe} from 'components/AutocompleteInput/AutocompleteI
 import type {SearchableItem} from 'components/AutocompleteInput/types';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 /**
@@ -70,7 +70,7 @@ export type AutocompleteInputItemProps =
 export function AutocompleteInputItem(
   props: AutocompleteInputItemProps,
 ): React.JSX.Element {
-  if (isReactNode(props.item.element)) {
+  if (isNonEmptyReactNode(props.item.element)) {
     return <>{props.item.element}</>;
   }
 
@@ -102,7 +102,7 @@ export function AutocompleteInputItem(
         <Text as="span" color="inherit" type="label">
           {item.label}
         </Text>
-        {isReactNode(description) ? (
+        {isNonEmptyReactNode(description) ? (
           <Text as="span" color="secondary" type="supporting">
             {description}
           </Text>

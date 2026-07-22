@@ -6,7 +6,7 @@ import type {LinkComponent} from 'components/Link';
 import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {useTabsContext} from 'components/Tabs/TabsContext';
 import {ActionElement} from 'internal/ActionElement';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export interface TabProps {
@@ -115,7 +115,7 @@ export function Tab({
           {label}
         </span>
       </span>
-      {isReactNode(endContent) ? (
+      {isNonEmptyReactNode(endContent) ? (
         <span className={classes.endContent}>{endContent}</span>
       ) : null}
     </>

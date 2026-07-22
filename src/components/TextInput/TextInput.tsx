@@ -28,7 +28,7 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Spinner} from 'components/Spinner';
 import {isComposingEvent} from 'internal/isComposingEvent';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type TextInputType = 'email' | 'password' | 'tel' | 'text';
@@ -189,7 +189,7 @@ export function TextInput({
   ref,
 }: TextInputProps): React.JSX.Element {
   const inputId = useId();
-  const descriptionID = isReactNode(description)
+  const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);

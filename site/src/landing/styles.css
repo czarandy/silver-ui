@@ -47,19 +47,22 @@ body {
  *
  * The geometry mirrors Starlight's nav too — 3.5rem tall, 4rem from 50rem up,
  * with 1rem/1.5rem of inline padding — so the wordmark and the dark mode
- * toggle keep their positions across a navigation instead of shifting. This
- * replaces TopNav's own 0.5rem padding; `.page` qualifies the selector so it
- * outranks the recipe's utility class regardless of stylesheet order.
+ * toggle keep their positions across a navigation instead of shifting.
+ * Starlight includes its bottom divider inside that height, while AppShell
+ * puts the divider on the TopNav's parent, so subtract the shared divider
+ * width here to keep both the total height and centered content identical.
+ * This replaces TopNav's own 0.5rem padding; `.page` qualifies the selector
+ * so it outranks the recipe's utility class regardless of stylesheet order.
  */
 .page .site-nav {
   background: var(--silver-colors-bg-subtle);
-  min-height: 3.5rem;
+  min-height: calc(3.5rem - var(--silver-border-widths-default));
   padding: 0.75rem 1rem;
 }
 
 @media (min-width: 50rem) {
   .page .site-nav {
-    min-height: 4rem;
+    min-height: calc(4rem - var(--silver-border-widths-default));
     padding-inline: 1.5rem;
   }
 }

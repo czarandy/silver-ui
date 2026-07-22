@@ -200,6 +200,46 @@ function localComponentDefinitions(
   return definitions;
 }
 
+/**
+ * Local aliases of library imports (`import {Grid as SilverGrid} from
+ * 'components/…'`), mapped alias → exported name. Stories rename imports to
+ * dodge Panda's built-in-pattern JSX extraction, but snippets must show the
+ * public name.
+ */
+function libraryImportAliases(source: ts.SourceFile): Map<string, string> {
+  const aliases = new Map<string, string>();
+  for (const statement of source.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !ts.isStringLiteral(statement.moduleSpecifier) ||
+      !statement.moduleSpecifier.text.startsWith('components/')
+    ) {
+      continue;
+    }
+    const bindings = statement.importClause?.namedBindings;
+    if (bindings == null || !ts.isNamedImports(bindings)) {
+      continue;
+    }
+    for (const element of bindings.elements) {
+      if (!element.isTypeOnly && element.propertyName != null) {
+        aliases.set(element.name.text, element.propertyName.text);
+      }
+    }
+  }
+  return aliases;
+}
+
+function canonicalizeAliases(
+  text: string,
+  aliases: ReadonlyMap<string, string>,
+): string {
+  let result = text;
+  for (const [alias, name] of aliases) {
+    result = result.replace(new RegExp(`\\b${alias}\\b`, 'g'), name);
+  }
+  return result;
+}
+
 function importedLibraryHooks(source: ts.SourceFile): Set<string> {
   const hooks = new Set<string>();
   for (const statement of source.statements) {
@@ -227,6 +267,7 @@ function referencesLibraryApi(
   node: ts.Node,
   publicComponentNames: ReadonlySet<string>,
   libraryHooks: ReadonlySet<string>,
+  aliases: ReadonlyMap<string, string>,
 ): boolean {
   let found = false;
   function visit(child: ts.Node): void {
@@ -234,7 +275,10 @@ function referencesLibraryApi(
       return;
     }
     const tagName = jsxTagName(child);
-    if (tagName != null && publicComponentNames.has(tagName)) {
+    if (
+      tagName != null &&
+      publicComponentNames.has(aliases.get(tagName) ?? tagName)
+    ) {
       found = true;
       return;
     }
@@ -264,6 +308,7 @@ function usefulRenderSnippet(
 ): string | undefined {
   const rendered = snippetNode(render);
   const libraryHooks = importedLibraryHooks(source);
+  const aliases = libraryImportAliases(source);
   const definitions = localComponentDefinitions(source);
   const expanded: ts.Node[] = [];
   const seen = new Set<string>();
@@ -271,10 +316,13 @@ function usefulRenderSnippet(
     rendered,
     publicComponentNames,
     libraryHooks,
+    aliases,
   );
 
   function expand(node: ts.Node): void {
-    if (referencesLibraryApi(node, publicComponentNames, libraryHooks)) {
+    if (
+      referencesLibraryApi(node, publicComponentNames, libraryHooks, aliases)
+    ) {
       hasLibraryApi = true;
     }
     for (const name of referencedComponents(node)) {
@@ -370,6 +418,7 @@ export function extractStoriesSource(
     ts.ScriptKind.TSX,
   );
 
+  const aliases = libraryImportAliases(source);
   let componentIdentifier = componentName;
   let metaArgs: ts.Expression | undefined;
   const stories: StoryDoc[] = [];
@@ -397,7 +446,8 @@ export function extractStoriesSource(
       if (declaration.name.text === 'meta') {
         const component = objectProperty(initializer, 'component');
         if (component != null) {
-          componentIdentifier = unwrapComponentExpression(component).getText();
+          const componentText = unwrapComponentExpression(component).getText();
+          componentIdentifier = aliases.get(componentText) ?? componentText;
         }
         metaArgs = objectProperty(initializer, 'args');
         continue;
@@ -429,7 +479,7 @@ export function extractStoriesSource(
       stories.push({
         exportName,
         displayName: displayNameOf(exportName, initializer),
-        snippet,
+        snippet: canonicalizeAliases(snippet, aliases),
       });
     }
   }

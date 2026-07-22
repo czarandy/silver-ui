@@ -3,6 +3,7 @@ import {Rocket} from 'lucide-react';
 import {Alert} from 'components/Alert/Alert';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
+import {List, ListItem} from 'components/List';
 import {Text} from 'components/Text';
 
 const meta = {
@@ -44,11 +45,11 @@ export const BlockDescription: Story = {
     title: 'Before you continue',
     status: 'warning',
     description: (
-      <ul style={{margin: 0, paddingInlineStart: '1.25rem'}}>
-        <li>Back up your data before proceeding.</li>
-        <li>Ensure all team members are notified.</li>
-        <li>This action cannot be undone.</li>
-      </ul>
+      <List listStyle="disc">
+        <ListItem label="Back up your data before proceeding." />
+        <ListItem label="Ensure all team members are notified." />
+        <ListItem label="This action cannot be undone." />
+      </List>
     ),
   },
 };
@@ -94,6 +95,17 @@ export const WithEndContent: Story = {
     title: 'New version available',
     status: 'info',
     endContent: <Button label="Update now" size="sm" variant="ghost" />,
+  },
+};
+
+export const CenteredEndContent: Story = {
+  args: {
+    title: 'Your trial ends in 3 days',
+    description:
+      'Choose a plan now to keep your workspace and team access active after the trial ends.',
+    status: 'warning',
+    endContentAlignment: 'center',
+    endContent: <Button label="Upgrade plan" size="sm" variant="primary" />,
   },
 };
 

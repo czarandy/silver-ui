@@ -363,6 +363,13 @@ export {
 } from 'components/Card';
 export {Center, type CenterAxis, type CenterProps} from 'components/Center';
 export {
+  Grid,
+  type GridColumns,
+  type GridGap,
+  type GridProps,
+  type GridResponsiveColumns,
+} from 'components/Grid';
+export {
   HStack,
   VStack,
   type HStackProps,
@@ -757,6 +764,7 @@ export {
   type MetadataListLabelPosition,
   type MetadataListProps,
 } from 'components/MetadataList';
+export {Stat, type StatChangeSentiment, type StatProps} from 'components/Stat';
 export {
   RadioGroup,
   RadioGroupItem,

@@ -9,7 +9,7 @@ import {
 } from 'react';
 import {listRecipe} from 'components/List/List.recipe';
 import {ListContext, type ListStyle} from 'components/List/ListContext';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type {ListStyle};
@@ -87,7 +87,7 @@ export function List({
 
   const listElement = (
     <Component
-      aria-labelledby={isReactNode(header) ? headerId : undefined}
+      aria-labelledby={isNonEmptyReactNode(header) ? headerId : undefined}
       className={cx(classes.list, className)}
       data-testid={dataTestId}
       ref={ref as Ref<HTMLUListElement & HTMLOListElement>}
@@ -100,7 +100,7 @@ export function List({
 
   return (
     <ListContext value={contextValue}>
-      {!isReactNode(header) ? (
+      {!isNonEmptyReactNode(header) ? (
         listElement
       ) : (
         <div className={classes.root}>

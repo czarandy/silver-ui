@@ -116,6 +116,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Card** — rounded container surface for grouping content
 - **Center** — centers content horizontally, vertically, or both
 - **Divider** — visual separator between sections
+- **Grid** — responsive equal-width columns with minimum-child-width reflow
 - **Layout** — page shell with header, footer, side panels, and content slots
 - **HStack / VStack** — horizontal and vertical flex containers with gap
 
@@ -190,6 +191,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Item** — generic list item with icon, label, and description
 - **List** — ordered or unordered list with dividers
 - **MetadataList** — key-value metadata display
+- **Stat** — prominent label/value summary with optional change, context, and icon
 - **Table** — data table with sorting, filtering, and column resize plugins
 - **Tag** — removable label for categories or filters
 - **Thumbnail** — image preview with fallback and remove action

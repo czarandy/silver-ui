@@ -6,7 +6,7 @@ import {useLinkComponent} from 'components/Link';
 import type {LinkComponent} from 'components/Link';
 import {Text} from 'components/Text';
 import {topNavHeadingRecipe} from 'components/TopNav/TopNavHeading.recipe';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 const classes = topNavHeadingRecipe();
@@ -58,7 +58,9 @@ export function TopNavHeading({
       ref={ref as Ref<HTMLAnchorElement & HTMLDivElement>}
       style={style}
       to={Element === 'a' ? undefined : resolvedHref}>
-      {isReactNode(logo) ? <span className={classes.logo}>{logo}</span> : null}
+      {isNonEmptyReactNode(logo) ? (
+        <span className={classes.logo}>{logo}</span>
+      ) : null}
       <span className={classes.text}>
         {superheading != null ? (
           <Text color="secondary" type="supporting">
@@ -76,7 +78,7 @@ export function TopNavHeading({
           </Text>
         ) : null}
       </span>
-      {isReactNode(headerEndContent) ? (
+      {isNonEmptyReactNode(headerEndContent) ? (
         <span className={classes.endContent}>{headerEndContent}</span>
       ) : null}
     </Element>

@@ -6,7 +6,7 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type FieldStatusVariant = 'attached' | 'detached';
@@ -159,7 +159,7 @@ export function Field({
 }: FieldProps): React.JSX.Element {
   const resolvedDescriptionID =
     descriptionID ??
-    (isReactNode(description) ? `${inputId}-description` : undefined);
+    (isNonEmptyReactNode(description) ? `${inputId}-description` : undefined);
   const resolvedStatusID =
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
@@ -195,7 +195,7 @@ export function Field({
           {statusText}
         </Text>
       ) : null}
-      {isReactNode(labelTooltip) ? (
+      {isNonEmptyReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>
             <Icon icon={Info} size="sm" />
@@ -204,7 +204,7 @@ export function Field({
       ) : null}
     </LabelComponent>
   );
-  const descriptionNode = isReactNode(description) ? (
+  const descriptionNode = isNonEmptyReactNode(description) ? (
     <Text
       as="span"
       color="secondary"

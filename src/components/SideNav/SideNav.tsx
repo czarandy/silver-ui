@@ -9,7 +9,7 @@ import {
 } from 'components/SideNav/SideNavContext';
 import {SideNavCollapseButton} from 'components/SideNav/internal/SideNavCollapseButton';
 import {MobileNav} from 'internal/MobileNav';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export interface SideNavProps {
@@ -132,20 +132,23 @@ export function SideNav({
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        {isReactNode(header) || (!isCollapsed && isReactNode(topContent)) ? (
+        {isNonEmptyReactNode(header) ||
+        (!isCollapsed && isNonEmptyReactNode(topContent)) ? (
           <div className={classes.stickyTop}>
             {header}
             {!isCollapsed ? topContent : null}
           </div>
         ) : null}
         <div className={classes.scrollable}>{children}</div>
-        {isReactNode(footer) || isReactNode(footerIcons) || isCollapsible ? (
+        {isNonEmptyReactNode(footer) ||
+        isNonEmptyReactNode(footerIcons) ||
+        isCollapsible ? (
           <div className={classes.stickyBottom}>
             {footer}
-            {isCollapsible || isReactNode(footerIcons) ? (
+            {isCollapsible || isNonEmptyReactNode(footerIcons) ? (
               <div className={classes.footerRow}>
                 {isCollapsible ? <SideNavCollapseButton /> : null}
-                {isReactNode(footerIcons) ? (
+                {isNonEmptyReactNode(footerIcons) ? (
                   <div className={classes.footerIcons}>{footerIcons}</div>
                 ) : null}
               </div>

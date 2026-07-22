@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
@@ -205,7 +205,7 @@ export function OverflowList({
         ref={measureRefCallback}
         style={{gap}}>
         {childArray}
-        {isReactNode(measureIndicator) ? (
+        {isNonEmptyReactNode(measureIndicator) ? (
           <div className={styles.measureIndicator}>{measureIndicator}</div>
         ) : null}
       </div>

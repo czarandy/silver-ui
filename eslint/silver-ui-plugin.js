@@ -1,4 +1,3 @@
-import path from 'node:path';
 import eslintReact from '@eslint-react/eslint-plugin';
 
 /**
@@ -9,7 +8,7 @@ import eslintReact from '@eslint-react/eslint-plugin';
  * - silver-ui/boolean-prop-naming: Boolean props must start with is or has
  * - silver-ui/no-direct-color-tokens: Source must use semantic color tokens instead of primitive color tokens
  * - silver-ui/exhaustive-deps: React exhaustive deps with silver-ui stable hook support
- * - silver-ui/prefer-is-react-node: ReactNode null checks must use isReactNode
+ * - silver-ui/prefer-is-non-empty-react-node: ReactNode null checks must use isNonEmptyReactNode
  * - silver-ui/no-recipe-type-imports: Public types must not depend on Panda recipe modules
  * - silver-ui/prefer-hoisted-recipes: Zero-argument recipe calls must be hoisted to module scope
  */
@@ -596,42 +595,29 @@ function isReactNodeType(type, checker) {
   return false;
 }
 
-function getImportSource(filename) {
-  const normalized = filename.replaceAll('\\', '/');
-  const srcRoot = normalized.includes('/src/')
-    ? normalized.slice(0, normalized.lastIndexOf('/src/') + '/src'.length)
-    : normalized.startsWith('src/')
-      ? 'src'
-      : null;
-
-  if (srcRoot == null) {
-    return '../../internal/isReactNode';
-  }
-
-  const fromDirectory = path.posix.dirname(normalized);
-  const target = `${srcRoot}/internal/isReactNode`;
-  const relativePath = path.posix.relative(fromDirectory, target);
-
-  return relativePath.startsWith('.') ? relativePath : `./${relativePath}`;
+function getImportSource() {
+  // The 'internal/*' alias is the import style no-restricted-imports enforces,
+  // so the fix must insert it rather than a relative path.
+  return 'internal/isNonEmptyReactNode';
 }
 
-function hasIsReactNodeImport(program) {
+function hasIsNonEmptyReactNodeImport(program) {
   return program.body.some(
     node =>
       node.type === 'ImportDeclaration' &&
       node.specifiers.some(
         specifier =>
           specifier.type === 'ImportDefaultSpecifier' &&
-          specifier.local.name === 'isReactNode',
+          specifier.local.name === 'isNonEmptyReactNode',
       ),
   );
 }
 
-function hasIsReactNodeBinding(program) {
+function hasIsNonEmptyReactNodeBinding(program) {
   return program.body.some(node => {
     if (
       node.type === 'FunctionDeclaration' &&
-      node.id?.name === 'isReactNode'
+      node.id?.name === 'isNonEmptyReactNode'
     ) {
       return true;
     }
@@ -643,7 +629,7 @@ function hasIsReactNodeBinding(program) {
     return node.declarations.some(
       declaration =>
         declaration.id.type === 'Identifier' &&
-        declaration.id.name === 'isReactNode',
+        declaration.id.name === 'isNonEmptyReactNode',
     );
   });
 }
@@ -657,10 +643,7 @@ function getImportFix(fixer, context, program, shouldAddImport) {
   const imports = program.body.filter(
     node => node.type === 'ImportDeclaration',
   );
-  const importSource = getImportSource(
-    context.filename || context.getFilename(),
-  );
-  const importText = `import isReactNode from '${importSource}';\n`;
+  const importText = `import isNonEmptyReactNode from '${getImportSource()}';\n`;
 
   if (imports.length === 0) {
     return [fixer.insertTextBeforeRange([0, 0], importText)];
@@ -682,24 +665,26 @@ function getImportFix(fixer, context, program, shouldAddImport) {
   ];
 }
 
-const preferIsReactNode = {
+const preferIsNonEmptyReactNode = {
   meta: {
     type: 'suggestion',
     docs: {
       description:
-        'Require isReactNode for ReactNode null checks so boolean values are excluded from JSX rendering branches',
+        'Require isNonEmptyReactNode for ReactNode null checks so boolean and empty-string values are excluded from JSX rendering branches',
     },
     fixable: 'code',
     messages: {
-      preferIsReactNode:
-        'Use isReactNode({{name}}) instead of comparing a ReactNode value to null.',
+      preferIsNonEmptyReactNode:
+        'Use isNonEmptyReactNode({{name}}) instead of comparing a ReactNode value to null.',
     },
     schema: [],
   },
   create(context) {
     const filename = context.filename || context.getFilename();
     if (
-      /src\/internal\/isReactNode\.ts$/.test(filename.replaceAll('\\', '/'))
+      /src\/internal\/isNonEmptyReactNode\.ts$/.test(
+        filename.replaceAll('\\', '/'),
+      )
     ) {
       return {};
     }
@@ -711,8 +696,8 @@ const preferIsReactNode = {
     return {
       Program(node) {
         programNode = node;
-        const alreadyImported = hasIsReactNodeImport(node);
-        canAddImport = alreadyImported || !hasIsReactNodeBinding(node);
+        const alreadyImported = hasIsNonEmptyReactNodeImport(node);
+        canAddImport = alreadyImported || !hasIsNonEmptyReactNodeBinding(node);
         needsImport = !alreadyImported && canAddImport;
       },
       BinaryExpression(node) {
@@ -735,13 +720,13 @@ const preferIsReactNode = {
         const isPositiveCheck =
           node.operator === '!=' || node.operator === '!==';
         const replacement = isPositiveCheck
-          ? `isReactNode(${comparedText})`
-          : `!isReactNode(${comparedText})`;
+          ? `isNonEmptyReactNode(${comparedText})`
+          : `!isNonEmptyReactNode(${comparedText})`;
         const shouldAddImport = needsImport && canAddImport;
 
         context.report({
           node,
-          messageId: 'preferIsReactNode',
+          messageId: 'preferIsNonEmptyReactNode',
           data: {name: comparedText},
           fix(fixer) {
             const fixes = [fixer.replaceText(node, replacement)];
@@ -1351,7 +1336,7 @@ const plugin = {
     'no-useless-fragment-with-comment': noUselessFragmentWithComment,
     'no-useless-undefined-prop': noUselessUndefinedProp,
     'prefer-hoisted-recipes': preferHoistedRecipes,
-    'prefer-is-react-node': preferIsReactNode,
+    'prefer-is-non-empty-react-node': preferIsNonEmptyReactNode,
     'require-component-props': requireComponentProps,
   },
 };

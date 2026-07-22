@@ -493,6 +493,53 @@ describe('Table plugins', () => {
     expect(ageHeader).toHaveAttribute('aria-sort', 'descending');
   });
 
+  it('sorts NaN values after valid numbers without disrupting their order', () => {
+    const sortData = [
+      {id: '1', name: 'Alice', score: 10},
+      {id: '2', name: 'Bob', score: Number.NaN},
+      {id: '3', name: 'Carol', score: 5},
+      {id: '4', name: 'Dave', score: 20},
+    ];
+
+    const {result} = renderHook(() =>
+      useTableSortableState({
+        data: sortData,
+        sort: [{direction: 'ascending', sortKey: 'score'}],
+      }),
+    );
+
+    expect(result.current.sortedData.map(row => row.name)).toEqual([
+      'Carol',
+      'Alice',
+      'Dave',
+      'Bob',
+    ]);
+  });
+
+  it('applies multi-sort tiebreakers to rows with NaN values', () => {
+    const sortData = [
+      {id: '1', name: 'Charlie', score: Number.NaN},
+      {id: '2', name: 'Alice', score: Number.NaN},
+      {id: '3', name: 'Bob', score: 5},
+    ];
+
+    const {result} = renderHook(() =>
+      useTableSortableState({
+        data: sortData,
+        sort: [
+          {direction: 'ascending', sortKey: 'score'},
+          {direction: 'ascending', sortKey: 'name'},
+        ],
+      }),
+    );
+
+    expect(result.current.sortedData.map(row => row.name)).toEqual([
+      'Bob',
+      'Alice',
+      'Charlie',
+    ]);
+  });
+
   it('dims inactive sort icons and marks active sort icons distinctly', () => {
     function SortableTable() {
       const sortPlugin = useTableSortable<PersonRow>({
@@ -621,6 +668,49 @@ describe('Table plugins', () => {
 
     await user.click(screen.getByLabelText('Select all rows'));
     expect(screen.getByLabelText('Selected count')).toHaveTextContent('2');
+  });
+
+  it('keeps select all unchecked when filtering hides every selected row', async () => {
+    const user = userEvent.setup();
+
+    function FilterableSelectableTable() {
+      const [visibleData, setVisibleData] = useState(data);
+      const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
+      const selection = useTableSelectionState({
+        data: visibleData,
+        idKey: 'id',
+        selectedKeys,
+        setSelectedKeys,
+      });
+      const selectionPlugin = useTableSelection(selection.selectionConfig);
+      return (
+        <>
+          <button onClick={() => setVisibleData([])} type="button">
+            Hide all rows
+          </button>
+          <output aria-label="Selected count">{selectedKeys.size}</output>
+          <Table
+            columns={columns}
+            data={visibleData}
+            idKey="id"
+            plugins={{selectionPlugin}}
+          />
+        </>
+      );
+    }
+
+    render(<FilterableSelectableTable />);
+    await user.click(screen.getAllByLabelText('Select row')[0]);
+    await user.click(screen.getByRole('button', {name: 'Hide all rows'}));
+
+    const selectAll = screen.getByLabelText('Select all rows');
+    expect(screen.getByText('No data')).toBeInTheDocument();
+    expect(selectAll).not.toBeChecked();
+    expect(screen.getByLabelText('Selected count')).toHaveTextContent('1');
+
+    await user.click(selectAll);
+    expect(selectAll).not.toBeChecked();
+    expect(screen.getByLabelText('Selected count')).toHaveTextContent('1');
   });
 
   it('applies selected row styling with a token-safe class', () => {
