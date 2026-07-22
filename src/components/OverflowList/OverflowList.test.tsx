@@ -1,7 +1,10 @@
 import {act, render, screen, within} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {OverflowList, type OverflowItem} from 'components/OverflowList';
-import {createResizeObserverStub} from 'internal/testHelpers';
+import {
+  createResizeObserverStub,
+  stubTokenizedGapComputedStyle,
+} from 'internal/testHelpers';
 
 let containerWidth = 200;
 const resizeObserver = createResizeObserverStub();
@@ -44,6 +47,7 @@ function NullItem(): React.JSX.Element | null {
 beforeEach(() => {
   containerWidth = 200;
   vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
+  stubTokenizedGapComputedStyle();
   vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(
     function (this: HTMLElement) {
       return widthFor(this);
@@ -65,12 +69,13 @@ afterEach(() => {
 describe('OverflowList', () => {
   it('measures all items in an inert mirror and reserves room for the overflow indicator', () => {
     containerWidth = 90;
+    // gap={2} resolves to the real spacing.2 token (8px) through
+    // stubTokenizedGapComputedStyle — no inline style needed.
     render(
       <OverflowList
         data-testid="list"
         gap={2}
-        overflowRenderer={renderOverflow}
-        style={{columnGap: 8}}>
+        overflowRenderer={renderOverflow}>
         <Item>Alpha</Item>
         <Item>Beta</Item>
         <Item>Gamma</Item>
@@ -85,6 +90,25 @@ describe('OverflowList', () => {
     expect(within(root).getByText('+2')).toBeVisible();
     expect(within(root).queryByText('Beta')).not.toBeInTheDocument();
     expect(within(root).queryByText('Gamma')).not.toBeInTheDocument();
+  });
+
+  it('lets an inline column-gap win over the tokenized gap class', () => {
+    containerWidth = 90;
+    render(
+      <OverflowList
+        data-testid="list"
+        gap={2}
+        overflowRenderer={renderOverflow}
+        style={{columnGap: 0}}>
+        <Item>Alpha</Item>
+        <Item>Beta</Item>
+        <Item>Gamma</Item>
+      </OverflowList>,
+    );
+
+    // With the token's 8px the row would collapse to Alpha+2 (see above);
+    // the inline 0 must win, as in the real cascade.
+    expect(screen.getByTestId('list')).toHaveTextContent('AlphaBetaGamma');
   });
 
   it('ignores the row gap when the column gap is zero', () => {
@@ -290,26 +314,8 @@ describe('OverflowList', () => {
 
   it('re-measures when the gap token changes', () => {
     containerWidth = 100;
-    // jsdom does not resolve the recipe's gap class to a computed column-gap,
-    // so map the emitted class to the pixel value a browser would compute.
-    const realGetComputedStyle = window.getComputedStyle.bind(window);
-    vi.spyOn(window, 'getComputedStyle').mockImplementation(
-      (element, pseudo) => {
-        if (
-          element instanceof HTMLElement &&
-          element.dataset.testid === 'list'
-        ) {
-          const stubStyle: Partial<CSSStyleDeclaration> = {
-            columnGap: element.classList.contains('silver-gap_4')
-              ? '16px'
-              : '4px',
-          };
-          return stubStyle as CSSStyleDeclaration;
-        }
-        return realGetComputedStyle(element, pseudo);
-      },
-    );
-
+    // stubTokenizedGapComputedStyle resolves gap={4} to 16px and gap={1} to
+    // 4px from the real spacing tokens.
     const {rerender} = render(
       <OverflowList data-testid="list" gap={4}>
         <Item>Alpha</Item>
