@@ -579,7 +579,13 @@ export {
   type InputStatus,
   type InputStatusType,
 } from 'components/Field';
-export {Fieldset, type FieldsetProps} from 'components/Fieldset';
+export {
+  Fieldset,
+  FieldsetContext,
+  useFieldset,
+  type FieldsetContextValue,
+  type FieldsetProps,
+} from 'components/Fieldset';
 export {
   COLOR_NAMES,
   ColorSwatchPicker,

@@ -26,6 +26,7 @@ import {
 } from 'components/Field';
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Tag} from 'components/Tag';
@@ -222,7 +223,11 @@ export function AutocompleteInput<T extends SearchableItem>({
   value,
 }: AutocompleteInputProps<T>): React.JSX.Element {
   const inputGroup = useInputGroup();
-  const isDisabled = isDisabledFromProps || inputGroup?.isDisabled === true;
+  const fieldset = useFieldset();
+  const isDisabled =
+    isDisabledFromProps ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
   const statusType = status?.type ?? inputGroup?.statusType;
 

@@ -17,6 +17,7 @@ import {
   type InputStatus,
 } from 'components/Field';
 import {inputRecipe} from 'components/Field/inputStyles';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Popover} from 'components/Popover';
@@ -212,7 +213,11 @@ export function Select({
   value,
 }: SelectProps): React.JSX.Element {
   const inputGroup = useInputGroup();
-  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const fieldset = useFieldset();
+  const effectiveDisabled =
+    isDisabled ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
   const size = inputGroup?.size ?? sizeProp;
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 

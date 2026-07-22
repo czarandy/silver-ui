@@ -1,11 +1,14 @@
 /* eslint-disable testing-library/no-node-access -- direct-child legend and stack markup are part of the component contract */
 
 import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {Field} from 'components/Field';
 import {Fieldset} from 'components/Fieldset/Fieldset';
 import {fieldsetRecipe} from 'components/Fieldset/Fieldset.recipe';
+import {MultiSelect} from 'components/MultiSelect';
 import {stackRecipe} from 'components/Stack/internal/Stack.recipe';
+import {TextInput} from 'components/TextInput';
 import {assertNonNull} from 'internal/testHelpers';
 
 describe('Fieldset', () => {
@@ -84,6 +87,18 @@ describe('Fieldset', () => {
     );
   });
 
+  it('treats an empty-string description as absent', () => {
+    render(
+      <Fieldset description="" legend="Profile">
+        <input aria-label="Name" />
+      </Fieldset>,
+    );
+
+    const group = screen.getByRole('group', {name: 'Profile'});
+    expect(group).not.toHaveAttribute('aria-describedby');
+    expect(group.querySelector('p')).toBeNull();
+  });
+
   it('retains valid falsy description content', () => {
     render(
       <Fieldset description={0} legend="Attempts">
@@ -115,7 +130,7 @@ describe('Fieldset', () => {
     expect(group).toHaveAttribute('aria-describedby', summary.id);
   });
 
-  it('renders the status summary below the fieldset instead of inside it', () => {
+  it('renders the status summary as the last child, below the grouped fields', () => {
     render(
       <Fieldset
         legend="Profile"
@@ -127,9 +142,26 @@ describe('Fieldset', () => {
     const group = screen.getByRole('group', {name: 'Profile'});
     const summary = screen.getByRole('alert');
 
-    expect(group).not.toContainElement(summary);
-    expect(summary.previousElementSibling).toBe(group);
-    expect(summary.parentElement).toBe(group.parentElement);
+    expect(group).toContainElement(summary);
+    expect(group.lastElementChild).toBe(summary);
+    expect(screen.getByRole('textbox', {name: 'Name'}).parentElement).toBe(
+      summary.previousElementSibling,
+    );
+  });
+
+  it('renders the fieldset as the outermost element so consumer styling covers the summary', () => {
+    const {container} = render(
+      <Fieldset
+        legend="Profile"
+        status={{message: 'Fix the highlighted fields.', type: 'error'}}
+        style={{maxWidth: 480}}>
+        <input aria-label="Name" />
+      </Fieldset>,
+    );
+
+    const group = screen.getByRole('group', {name: 'Profile'});
+    expect(container.firstElementChild).toBe(group);
+    expect(group).toContainElement(screen.getByRole('alert'));
   });
 
   it.each([
@@ -161,6 +193,19 @@ describe('Fieldset', () => {
     );
 
     expect(screen.getByText('Optional')).toHaveClass('silver-fs_xs');
+  });
+
+  it('renders the indicator and description with muted text color', () => {
+    render(
+      <Fieldset description="Used for delivery." isOptional legend="Profile">
+        <input aria-label="Name" />
+      </Fieldset>,
+    );
+
+    const mutedColorClass =
+      'silver-c_var(--silver-text-color-muted,_var(--silver-colors-fg-muted))';
+    expect(screen.getByText('Optional')).toHaveClass(mutedColorClass);
+    expect(screen.getByText('Used for delivery.')).toHaveClass(mutedColorClass);
   });
 
   it('renders the required legend indicator consistently with Field', () => {
@@ -200,6 +245,60 @@ describe('Fieldset', () => {
     expect(screen.getByRole('combobox', {name: 'Role'})).toBeDisabled();
     expect(screen.getByRole('textbox', {name: 'Notes'})).toBeDisabled();
     expect(screen.getByRole('button', {name: 'Save'})).toBeDisabled();
+  });
+
+  it('cascades disabled to silver-ui inputs through context', () => {
+    render(
+      <Fieldset isDisabled legend="Profile">
+        <TextInput label="Name" onChange={() => {}} value="" />
+        <MultiSelect
+          label="Columns"
+          onChange={() => {}}
+          options={['Name', 'Email']}
+          value={[]}
+        />
+      </Fieldset>,
+    );
+
+    expect(screen.getByRole('textbox', {name: 'Name'})).toBeDisabled();
+    expect(screen.getByRole('combobox', {name: 'Columns'})).toBeDisabled();
+  });
+
+  it('does not open a select listbox inside a disabled fieldset', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Fieldset isDisabled legend="Profile">
+        <MultiSelect
+          label="Columns"
+          onChange={() => {}}
+          options={['Name', 'Email']}
+          value={[]}
+        />
+      </Fieldset>,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('cascades disabled through nested fieldsets', () => {
+    render(
+      <Fieldset isDisabled legend="Outer">
+        <Fieldset legend="Inner">
+          <MultiSelect
+            label="Columns"
+            onChange={() => {}}
+            options={['Name', 'Email']}
+            value={[]}
+          />
+        </Fieldset>
+      </Fieldset>,
+    );
+
+    expect(screen.getByRole('group', {name: 'Inner'})).toBeDisabled();
+    expect(screen.getByRole('combobox', {name: 'Columns'})).toBeDisabled();
   });
 
   it('does not emit disabled in the enabled state', () => {

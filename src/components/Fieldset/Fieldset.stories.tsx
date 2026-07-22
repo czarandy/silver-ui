@@ -1,6 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {Fieldset, type FieldsetProps} from 'components/Fieldset/Fieldset';
+import {MultiSelect} from 'components/MultiSelect';
 import {VStack} from 'components/Stack';
 import {TextInput} from 'components/TextInput';
 
@@ -115,13 +116,19 @@ export const Disabled: Story = {
     docs: {
       description: {
         story:
-          'The child inputs do not receive `isDisabled`; the native fieldset attribute disables them.',
+          'The child inputs do not receive `isDisabled`; the native fieldset attribute disables native controls and context cascades the state to silver-ui inputs such as `MultiSelect`.',
       },
     },
   },
   render: args => (
     <Fieldset {...args}>
       <ProfileFields />
+      <MultiSelect
+        label="Notification channels"
+        onChange={() => {}}
+        options={['Email', 'SMS', 'Push']}
+        value={['Email']}
+      />
     </Fieldset>
   ),
 };

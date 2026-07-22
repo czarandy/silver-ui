@@ -2,6 +2,7 @@
 
 import {
   useId,
+  useMemo,
   type FieldsetHTMLAttributes,
   type ReactNode,
   type Ref,
@@ -10,9 +11,13 @@ import type {FieldNecessity, InputStatus} from 'components/Field';
 import {fieldRecipe} from 'components/Field/Field.recipe';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
 import {fieldsetRecipe} from 'components/Fieldset/Fieldset.recipe';
+import {
+  FieldsetContext,
+  useFieldset,
+} from 'components/Fieldset/FieldsetContext';
 import {VStack} from 'components/Stack';
 import {Text} from 'components/Text';
-import isReactNode from 'internal/isReactNode';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 type NativeFieldsetProps = Omit<
@@ -35,7 +40,9 @@ export type FieldsetProps = NativeFieldsetProps &
      */
     description?: ReactNode;
     /**
-     * Whether native form controls in the fieldset are disabled.
+     * Whether form controls in the fieldset are disabled. Native controls are
+     * disabled through the fieldset element; silver-ui inputs also receive the
+     * state through context.
      * @default false
      */
     isDisabled?: boolean;
@@ -56,7 +63,7 @@ export type FieldsetProps = NativeFieldsetProps &
 
 /**
  * Groups separately labeled fields under a native legend with normal vertical
- * layout and optional native disabled cascading.
+ * layout and disabled cascading to both native and silver-ui controls.
  */
 export function Fieldset({
   'aria-describedby': ariaDescribedBy,
@@ -75,74 +82,81 @@ export function Fieldset({
   ...fieldsetProps
 }: FieldsetProps): React.JSX.Element {
   const fieldsetId = useId();
-  const descriptionId = isReactNode(description)
+  const parentFieldset = useFieldset();
+  const effectiveDisabled = isDisabled || parentFieldset?.isDisabled === true;
+  const descriptionId = isNonEmptyReactNode(description)
     ? `${fieldsetId}-description`
     : undefined;
   const statusId = getStatusMessageID(fieldsetId, status);
   const describedBy = getDescribedBy(ariaDescribedBy, descriptionId, statusId);
   const statusText = isOptional ? 'Optional' : isRequired ? 'Required' : null;
   const classes = fieldsetRecipe({
-    isDisabled,
+    isDisabled: effectiveDisabled,
     statusType: status?.type,
   });
-  const statusClass = fieldRecipe({
-    statusType: status?.type,
-    statusVariant: 'detached',
-  }).status;
+  const contextValue = useMemo(
+    () => ({isDisabled: effectiveDisabled}),
+    [effectiveDisabled],
+  );
 
   return (
-    <div className={classes.wrapper}>
-      <fieldset
-        {...fieldsetProps}
-        aria-describedby={describedBy}
-        aria-invalid={status?.type === 'error' ? true : ariaInvalid}
-        className={cx(classes.root, className)}
-        data-testid={dataTestId}
-        disabled={isDisabled}
-        ref={ref}
-        style={style}>
-        <legend className={classes.legend}>
-          <span className={classes.legendContent}>
-            <Text as="span" color="inherit" type="label">
-              {legend}
-            </Text>
-            {statusText != null ? (
-              <Text
-                as="span"
-                className={classes.indicator}
-                color="inherit"
-                size="xs"
-                type="supporting">
-                <span aria-hidden="true"> · </span>
-                {statusText}
-              </Text>
-            ) : null}
-          </span>
-        </legend>
-        {isReactNode(description) ? (
-          <Text
-            as="p"
-            className={classes.description}
-            color="inherit"
-            id={descriptionId}
-            type="supporting">
-            {description}
+    <fieldset
+      {...fieldsetProps}
+      aria-describedby={describedBy}
+      aria-invalid={status?.type === 'error' ? true : ariaInvalid}
+      className={cx(classes.root, className)}
+      data-testid={dataTestId}
+      disabled={effectiveDisabled}
+      ref={ref}
+      style={style}>
+      <legend className={classes.legend}>
+        <span className={classes.legendContent}>
+          <Text as="span" color="inherit" type="label">
+            {legend}
           </Text>
-        ) : null}
+          {statusText != null ? (
+            <Text
+              as="span"
+              className={classes.indicator}
+              color="secondary"
+              size="xs"
+              type="supporting">
+              <span aria-hidden="true"> · </span>
+              {statusText}
+            </Text>
+          ) : null}
+        </span>
+      </legend>
+      {isNonEmptyReactNode(description) ? (
+        <Text
+          as="p"
+          className={classes.description}
+          color="secondary"
+          id={descriptionId}
+          type="supporting">
+          {description}
+        </Text>
+      ) : null}
+      <FieldsetContext value={contextValue}>
         <VStack className={classes.content} gap={4}>
           {children}
         </VStack>
-      </fieldset>
+      </FieldsetContext>
       {status?.message != null ? (
         <div
           aria-live={status.type === 'error' ? 'assertive' : 'polite'}
-          className={statusClass}
+          className={
+            fieldRecipe({
+              statusType: status.type,
+              statusVariant: 'detached',
+            }).status
+          }
           id={statusId}
           role={status.type === 'error' ? 'alert' : 'status'}>
           {status.message}
         </div>
       ) : null}
-    </div>
+    </fieldset>
   );
 }
 
