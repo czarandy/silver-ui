@@ -10,6 +10,7 @@ import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {TagsInput} from 'components/TagsInput/TagsInput';
+import {createResizeObserverStub} from 'internal/testHelpers';
 
 const items: SearchableItem[] = [
   {id: 'ada', label: 'Ada Lovelace'},
@@ -32,11 +33,7 @@ async function tick(): Promise<void> {
 }
 
 beforeAll(() => {
-  globalThis.ResizeObserver = class {
-    observe(): void {}
-    unobserve(): void {}
-    disconnect(): void {}
-  };
+  globalThis.ResizeObserver = createResizeObserverStub().ResizeObserverStub;
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
     configurable: true,
     value: showPopover,

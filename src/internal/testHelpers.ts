@@ -121,3 +121,75 @@ export function createPopoverFocusShim(): PopoverFocusShim {
     },
   };
 }
+
+export interface ResizeObserverStubControls {
+  /**
+   * Whether an observer is currently observing `element`.
+   */
+  isObserved: (element: Element) => boolean;
+  /**
+   * Forgets every observed element. Call from `afterEach`.
+   */
+  reset: () => void;
+  /**
+   * Invokes the callback observing `element` with a single entry for it.
+   * Wrap in `act()` when the callback updates React state.
+   */
+  resize: (element: Element) => void;
+  /**
+   * Constructor standing in for the global, e.g.
+   * `vi.stubGlobal('ResizeObserver', stub.ResizeObserverStub)`.
+   */
+  ResizeObserverStub: new (callback: ResizeObserverCallback) => ResizeObserver;
+}
+
+/**
+ * Creates a `ResizeObserver` replacement for jsdom, which lacks the API.
+ * Install the returned class as the global, then drive size changes from the
+ * test with `resize`. One callback is tracked per element, matching how
+ * components and `internal/sharedResizeObserver` observe.
+ */
+export function createResizeObserverStub(): ResizeObserverStubControls {
+  const observed = new Map<
+    Element,
+    {callback: ResizeObserverCallback; observer: ResizeObserver}
+  >();
+
+  class ResizeObserverStub implements ResizeObserver {
+    readonly callback: ResizeObserverCallback;
+
+    constructor(callback: ResizeObserverCallback) {
+      this.callback = callback;
+    }
+
+    disconnect(): void {
+      for (const [element, entry] of observed) {
+        if (entry.observer === this) {
+          observed.delete(element);
+        }
+      }
+    }
+
+    observe(element: Element): void {
+      observed.set(element, {callback: this.callback, observer: this});
+    }
+
+    unobserve(element: Element): void {
+      observed.delete(element);
+    }
+  }
+
+  return {
+    ResizeObserverStub,
+    isObserved: element => observed.has(element),
+    reset: () => observed.clear(),
+    resize: element => {
+      const entry = observed.get(element);
+      if (entry == null) {
+        return;
+      }
+      const resizeEntry: Partial<ResizeObserverEntry> = {target: element};
+      entry.callback([resizeEntry as ResizeObserverEntry], entry.observer);
+    },
+  };
+}

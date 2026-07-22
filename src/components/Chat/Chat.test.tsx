@@ -6,35 +6,16 @@ import {ChatLayout} from 'components/Chat/ChatLayout';
 import {ChatMessage} from 'components/Chat/ChatMessage';
 import {ChatMessageList} from 'components/Chat/ChatMessageList';
 import {ChatScrollButton} from 'components/Chat/ChatScrollButton';
+import {createResizeObserverStub} from 'internal/testHelpers';
 
-type ResizeCallback = (entries: {target: Element}[]) => void;
-
-const resizeCallbacks = new Map<Element, ResizeCallback>();
-
-class ResizeObserverStub {
-  callback: ResizeCallback;
-
-  constructor(callback: ResizeCallback) {
-    this.callback = callback;
-  }
-
-  observe(element: Element): void {
-    resizeCallbacks.set(element, this.callback);
-  }
-
-  unobserve(element: Element): void {
-    resizeCallbacks.delete(element);
-  }
-
-  disconnect(): void {}
-}
+const resizeObserver = createResizeObserverStub();
 
 beforeEach(() => {
-  vi.stubGlobal('ResizeObserver', ResizeObserverStub);
+  vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
 });
 
 afterEach(() => {
-  resizeCallbacks.clear();
+  resizeObserver.reset();
   vi.unstubAllGlobals();
 });
 
@@ -69,7 +50,7 @@ describe('ChatLayout', () => {
       configurable: true,
       value: 400,
     });
-    resizeCallbacks.get(layout)?.([{target: layout}]);
+    resizeObserver.resize(layout);
     await waitFor(() =>
       expect(layout).toHaveAttribute('data-density', 'compact'),
     );
@@ -78,7 +59,7 @@ describe('ChatLayout', () => {
       configurable: true,
       value: 1000,
     });
-    resizeCallbacks.get(layout)?.([{target: layout}]);
+    resizeObserver.resize(layout);
     await waitFor(() =>
       expect(layout).toHaveAttribute('data-density', 'spacious'),
     );
@@ -103,7 +84,7 @@ describe('ChatLayout', () => {
       configurable: true,
       value: 400,
     });
-    resizeCallbacks.get(layout)?.([{target: layout}]);
+    resizeObserver.resize(layout);
 
     await waitFor(() =>
       expect(composerBody?.className).not.toBe(balancedClasses),
@@ -135,7 +116,7 @@ describe('ChatLayout', () => {
       configurable: true,
       value: 400,
     });
-    resizeCallbacks.get(layout)?.([{target: layout}]);
+    resizeObserver.resize(layout);
     await waitFor(() =>
       expect(layout).toHaveAttribute('data-density', 'compact'),
     );
@@ -193,7 +174,7 @@ describe('ChatLayout', () => {
       configurable: true,
       value: 120,
     });
-    resizeCallbacks.get(dock)?.([{target: dock}]);
+    resizeObserver.resize(dock);
 
     // The fixed dock is out of the external container's flow, so the
     // message area must pad by the measured dock height.

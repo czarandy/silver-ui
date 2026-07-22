@@ -2,37 +2,12 @@ import {act, render, screen, within} from '@testing-library/react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {OverflowList, type OverflowItem} from 'components/OverflowList';
 import {overflowListRecipe} from 'components/OverflowList/OverflowList.recipe';
+import {createResizeObserverStub} from 'internal/testHelpers';
 
 let containerWidth = 200;
-const resizeCallbacks = new Map<Element, () => void>();
+const resizeObserver = createResizeObserverStub();
 const indicatorClassNames =
   overflowListRecipe().measureIndicator?.split(' ') ?? [];
-
-class ResizeObserverStub implements ResizeObserver {
-  readonly callback: ResizeObserverCallback;
-  readonly targets = new Set<Element>();
-
-  constructor(callback: ResizeObserverCallback) {
-    this.callback = callback;
-  }
-
-  disconnect(): void {
-    for (const target of this.targets) {
-      resizeCallbacks.delete(target);
-    }
-    this.targets.clear();
-  }
-
-  observe(target: Element): void {
-    this.targets.add(target);
-    resizeCallbacks.set(target, () => this.callback([], this));
-  }
-
-  unobserve(target: Element): void {
-    this.targets.delete(target);
-    resizeCallbacks.delete(target);
-  }
-}
 
 function widthFor(element: HTMLElement): number {
   if (element.classList.contains('overflow-list-root')) {
@@ -63,7 +38,7 @@ function renderOverflow(overflowItems: OverflowItem[]): React.JSX.Element {
 
 beforeEach(() => {
   containerWidth = 200;
-  vi.stubGlobal('ResizeObserver', ResizeObserverStub);
+  vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
   vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(
     function (this: HTMLElement) {
       return widthFor(this);
@@ -77,7 +52,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  resizeCallbacks.clear();
+  resizeObserver.reset();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
@@ -206,7 +181,7 @@ describe('OverflowList', () => {
 
     const parent = screen.getByTestId('parent');
     const root = screen.getByTestId('list');
-    expect(resizeCallbacks.has(parent)).toBe(true);
+    expect(resizeObserver.isObserved(parent)).toBe(true);
     expect(root).toHaveTextContent('AlphaBeta+1');
   });
 
@@ -226,7 +201,7 @@ describe('OverflowList', () => {
 
     containerWidth = 50;
     act(() => {
-      resizeCallbacks.get(root)?.();
+      resizeObserver.resize(root);
     });
 
     expect(root).toHaveTextContent('Alpha+2');
