@@ -117,6 +117,32 @@ describe('PinInput', () => {
     expect(cells[2]).toHaveFocus();
   });
 
+  it('redirects focus from a cell past the first empty one', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn<PinInputProps['onChange']>();
+    render(
+      <ControlledPinInput initialValue="12" label="Code" onChange={onChange} />,
+    );
+    const cells = getCells();
+
+    await user.click(cells[5]);
+    expect(cells[2]).toHaveFocus();
+
+    await user.keyboard('3');
+    expect(onChange).toHaveBeenCalledWith('123', expect.any(Object));
+  });
+
+  it('keeps focus on a clicked cell when the code is complete', async () => {
+    const user = userEvent.setup();
+    render(
+      <ControlledPinInput initialValue="123456" label="Code" onChange={noop} />,
+    );
+    const cells = getCells();
+
+    await user.click(cells[5]);
+    expect(cells[5]).toHaveFocus();
+  });
+
   it('distributes a multi-character native change', () => {
     const onChange = vi.fn<PinInputProps['onChange']>();
     render(<ControlledPinInput label="Code" onChange={onChange} />);

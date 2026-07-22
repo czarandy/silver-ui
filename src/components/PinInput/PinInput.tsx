@@ -6,6 +6,7 @@ import {
   type ChangeEvent,
   type ClipboardEvent,
   type CSSProperties,
+  type FocusEvent,
   type KeyboardEvent,
   type ReactNode,
   type Ref,
@@ -207,6 +208,11 @@ export function PinInput({
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
   const cellsRef = useRef<(HTMLInputElement | null)[]>([]);
   const displayedValue = value.slice(0, length);
+  // True while focusCell moves focus, so handleFocus can tell programmatic
+  // moves (already targeted correctly, but running against a render that
+  // predates the parent echoing onChange) from user focus, which is checked
+  // against the displayed value.
+  const isProgrammaticFocusRef = useRef(false);
   const autoFocusIndex = Math.min(displayedValue.length, length - 1);
   // Merge the shared input chrome with this recipe's slot overrides in JS so
   // each property resolves to a single utility class; layering the classes
@@ -226,7 +232,29 @@ export function PinInput({
   const statusIconClassName = cx(inputStyles.iconSlot, css(slots.statusIcon));
 
   const focusCell = (index: number): void => {
-    cellsRef.current[Math.max(0, Math.min(index, length - 1))]?.focus();
+    const cell = cellsRef.current[Math.max(0, Math.min(index, length - 1))];
+    if (cell == null) {
+      return;
+    }
+    // focus() dispatches the focus event synchronously, so the flag wraps
+    // just this call.
+    isProgrammaticFocusRef.current = true;
+    cell.focus();
+    isProgrammaticFocusRef.current = false;
+  };
+
+  const handleFocus = (
+    index: number,
+    event: FocusEvent<HTMLInputElement>,
+  ): void => {
+    // The code fills without gaps, so a cell past the first empty one can
+    // never be edited in place; redirect user focus there instead of letting
+    // the next keystroke land in a different cell than the caret.
+    if (!isProgrammaticFocusRef.current && index > displayedValue.length) {
+      focusCell(displayedValue.length);
+      return;
+    }
+    event.currentTarget.select();
   };
 
   const commit = (
@@ -340,7 +368,7 @@ export function PinInput({
           key={index}
           maxLength={1}
           onChange={event => handleChange(index, event)}
-          onFocus={event => event.currentTarget.select()}
+          onFocus={event => handleFocus(index, event)}
           onKeyDown={event => handleBackspace(index, event)}
           onPaste={event => handlePaste(index, event)}
           pattern={type === 'numeric' ? '[0-9]*' : undefined}
