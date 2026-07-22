@@ -204,6 +204,7 @@ export function Avatar({
     color: resolveAvatarColor(color, name, showInitials),
     hasInitials: showInitials,
     isGrouped: avatarGroup != null,
+    isLarge: numericSize >= 96,
   });
   const accessibleName = alt ?? (showInitials ? name : undefined) ?? 'Avatar';
   const contentStyle = {

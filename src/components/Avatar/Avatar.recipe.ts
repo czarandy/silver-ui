@@ -39,11 +39,11 @@ export const avatarRecipe = sva({
   },
   variants: {
     hasInitials: {
-      true: {
-        fallback: {
-          paddingBottom: '1px',
-        },
-      },
+      true: {},
+      false: {},
+    },
+    isLarge: {
+      true: {},
       false: {},
     },
     color: {
@@ -105,8 +105,21 @@ export const avatarRecipe = sva({
       false: {},
     },
   },
+  compoundVariants: [
+    {
+      hasInitials: true,
+      isLarge: false,
+      css: {fallback: {paddingBottom: '1px'}},
+    },
+    {
+      hasInitials: true,
+      isLarge: true,
+      css: {fallback: {paddingBottom: '2px'}},
+    },
+  ],
   defaultVariants: {
     hasInitials: false,
+    isLarge: false,
     color: 'gray',
     isGrouped: false,
   },
