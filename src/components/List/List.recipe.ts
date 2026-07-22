@@ -33,7 +33,7 @@ export const listRecipe = sva({
     // selector outranks Item's own atomic `py` class, which the recipes
     // would otherwise race on stylesheet order.
     hasMarkers: {
-      true: {list: {'& > li': {py: '0.5'}}},
+      true: {list: {gap: 0, '& > li': {py: '0.5'}}},
     },
   },
   defaultVariants: {
@@ -49,26 +49,34 @@ export const listItemRecipe = sva({
   slots: ['item', 'markerContainer', 'dot', 'circle', 'number'],
   base: {
     item: {},
-    // The container is exactly one label line tall (the label Text is md with
-    // a 1.5 line height) with the glyph centered inside, and it pins to the
-    // top of the item. Sizing must not lean on the ambient font: inside e.g.
-    // an Alert description the inherited size is `sm`, which would place the
-    // marker off the label's first-line center.
+    // Anchor the glyph to the label's first-line BASELINE, the way native
+    // `::marker` bullets work. A zero-width-space strut with the label's own
+    // typography (md, 1.5) gives the container a real text baseline; the
+    // container baseline-aligns with the label and the glyph sits a fixed
+    // distance above that baseline. Centering on the line box instead reads
+    // wrong on platforms whose fonts seat ink low in the line (Segoe UI), and
+    // any sizing from the ambient font breaks inside e.g. an Alert
+    // description, where the inherited size is `sm`.
     markerContainer: {
-      alignSelf: 'flex-start',
+      alignSelf: 'baseline',
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'baseline',
       justifyContent: 'center',
       flexShrink: 0,
       w: '4',
       fontSize: 'md',
-      h: 'calc(1em * 1.5)',
+      lineHeight: '1.5',
+      _before: {content: '"\\200B"'},
     },
+    // Bottom edge on the baseline, nudged so the glyph centers 0.35em above
+    // it — matching where fonts draw their own bullet glyphs (calibrated
+    // against Chromium's native `::marker` rendering of the same text).
     dot: {
       w: markerSize,
       h: markerSize,
       borderRadius: 'full',
-      bg: 'fg',
+      bg: 'currentcolor',
+      transform: `translateY(calc(${markerSize} / 2 - 0.35em))`,
     },
     circle: {
       w: markerSize,
@@ -76,13 +84,14 @@ export const listItemRecipe = sva({
       borderRadius: 'full',
       borderWidth: 'default',
       borderStyle: 'solid',
-      borderColor: 'fg',
+      borderColor: 'currentcolor',
       bg: 'transparent',
+      transform: `translateY(calc(${markerSize} / 2 - 0.35em))`,
     },
     number: {
       alignSelf: 'baseline',
       flexShrink: 0,
-      color: 'fg',
+      color: 'inherit',
       fontFamily: 'body',
       fontSize: 'md',
       lineHeight: '1.5',

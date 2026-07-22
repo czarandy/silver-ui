@@ -141,10 +141,12 @@ describe('List', () => {
     expect(markerContainer).toHaveClass(
       ...classesOf(listItemRecipe().markerContainer),
     );
-    // The container must not derive its height from the ambient font: inside
-    // an Alert description the inherited size is `sm` while the label renders
-    // `md`, which used to push the dot off the first line's center.
-    expect(markerContainer).toHaveClass('silver-fs_md', 'silver-as_flex-start');
+    // The container must carry the label typography and baseline-align, not
+    // derive its geometry from the ambient font: inside an Alert description
+    // the inherited size is `sm` while the label renders `md`, which used to
+    // push the dot off the first line. Baseline anchoring also keeps the dot
+    // seated where the platform font draws its own bullets.
+    expect(markerContainer).toHaveClass('silver-fs_md', 'silver-as_baseline');
   });
 
   it('renders circle markers', () => {
