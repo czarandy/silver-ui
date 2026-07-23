@@ -627,6 +627,7 @@ export function TagsInput<T extends SearchableItem>({
       ) : null}
       {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
         <Button
+          className={inputStyles.clearButton}
           icon={X}
           isIconOnly
           label={`Clear ${label}`}

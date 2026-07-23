@@ -378,6 +378,11 @@ export function NumberInput({
       {units != null ? <span className={styles.units}>{units}</span> : null}
       {hasClear === true && value != null && !effectiveDisabled ? (
         <Button
+          className={
+            !isNonEmptyReactNode(endContent) && !isLoading && status == null
+              ? inputStyles.clearButton
+              : undefined
+          }
           icon={X}
           isIconOnly
           label={`Clear ${label}`}

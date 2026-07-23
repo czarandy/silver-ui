@@ -265,6 +265,9 @@ export function TimeInput({
         />
         {hasClear && value != null && !isDisabled ? (
           <Button
+            className={
+              !isLoading && status == null ? inputStyles.clearButton : undefined
+            }
             icon={X}
             isIconOnly
             label={`Clear ${label}`}

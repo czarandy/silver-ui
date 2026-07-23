@@ -10,7 +10,7 @@ import {
   type SearchableItem,
   type SearchSource,
 } from 'components/AutocompleteInput/types';
-import {inputRecipe} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {assertNonNull} from 'internal/testHelpers';
@@ -119,7 +119,11 @@ describe('AutocompleteInput', () => {
       />,
     );
 
-    await user.click(screen.getByRole('button', {name: 'Clear Assignee'}));
+    const clearButton = screen.getByRole('button', {
+      name: 'Clear Assignee',
+    });
+    expect(clearButton).toHaveClass(inputStyles.clearButton);
+    await user.click(clearButton);
 
     expect(onChange).toHaveBeenCalledWith(null);
   });

@@ -21,7 +21,7 @@ import {
   createStaticSearchSource,
   type SearchableItem,
 } from 'components/AutocompleteInput';
-import {inputRecipe} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {TagsInput} from 'components/TagsInput/TagsInput';
@@ -294,7 +294,9 @@ describe('TagsInput', () => {
       />,
     );
 
-    await user.click(screen.getByRole('button', {name: 'Clear Team'}));
+    const clearButton = screen.getByRole('button', {name: 'Clear Team'});
+    expect(clearButton).toHaveClass(inputStyles.clearButton);
+    await user.click(clearButton);
 
     expect(onChange).toHaveBeenCalledWith([], {
       items: selected,

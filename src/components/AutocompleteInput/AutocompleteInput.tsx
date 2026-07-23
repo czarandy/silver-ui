@@ -341,6 +341,7 @@ export function AutocompleteInput<T extends SearchableItem>({
       />
       {hasClear && value != null && !isDisabled ? (
         <Button
+          className={inputStyles.clearButton}
           icon={X}
           isIconOnly
           label={`Clear ${label}`}

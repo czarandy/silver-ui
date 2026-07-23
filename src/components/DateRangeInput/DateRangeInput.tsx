@@ -274,6 +274,7 @@ export function DateRangeInput({
         />
         {hasClear && value != null && !isDisabled && !isLoading ? (
           <Button
+            className={status == null ? inputStyles.clearButton : undefined}
             icon={X}
             isIconOnly
             label={`Clear ${label}`}

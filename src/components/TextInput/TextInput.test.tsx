@@ -2,7 +2,7 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
-import {inputRecipe} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {TextInput} from 'components/TextInput/TextInput';
 
@@ -29,8 +29,26 @@ describe('TextInput', () => {
 
     render(<TextInput hasClear label="Name" onChange={onChange} value="Ada" />);
 
-    await user.click(screen.getByRole('button', {name: 'Clear Name'}));
+    const clearButton = screen.getByRole('button', {name: 'Clear Name'});
+    expect(clearButton).toHaveClass(inputStyles.clearButton);
+    await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith('', null);
+  });
+
+  it('does not offset a clear button when end content follows it', () => {
+    render(
+      <TextInput
+        endContent={<span>Suffix</span>}
+        hasClear
+        label="Name"
+        onChange={noop}
+        value="Ada"
+      />,
+    );
+
+    expect(screen.getByRole('button', {name: 'Clear Name'})).not.toHaveClass(
+      inputStyles.clearButton,
+    );
   });
 
   it('renders a disabled input', () => {

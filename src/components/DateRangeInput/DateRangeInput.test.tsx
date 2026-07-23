@@ -2,6 +2,7 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {DateRangeInput} from 'components/DateRangeInput/DateRangeInput';
+import {inputStyles} from 'components/Field/inputStyles';
 import {plainDateCreate} from 'internal/plainDate';
 
 beforeAll(() => {
@@ -42,7 +43,9 @@ describe('DateRangeInput', () => {
     expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
       'May 10, 2026 - May 12, 2026',
     );
-    await user.click(screen.getByRole('button', {name: 'Clear Window'}));
+    const clearButton = screen.getByRole('button', {name: 'Clear Window'});
+    expect(clearButton).toHaveClass(inputStyles.clearButton);
+    await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith(null);
   });
 

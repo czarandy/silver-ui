@@ -2,6 +2,7 @@ import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
+import {inputStyles} from 'components/Field/inputStyles';
 import {TimeInput} from 'components/TimeInput/TimeInput';
 import {assertNonNull} from 'internal/testHelpers';
 
@@ -91,6 +92,7 @@ describe('TimeInput', () => {
 
     const clearButton = screen.getByRole('button', {name: 'Clear Time'});
     expect(clearButton).toBeInTheDocument();
+    expect(clearButton).toHaveClass(inputStyles.clearButton);
 
     await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith(null);

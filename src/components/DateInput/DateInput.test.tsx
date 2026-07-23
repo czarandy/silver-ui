@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {DateInput, type PlainDate} from 'components/DateInput/DateInput';
+import {inputStyles} from 'components/Field/inputStyles';
 import {
   DATE_FORMAT_LONG,
   plainDateCreate,
@@ -79,7 +80,9 @@ describe('DateInput', () => {
     expect(screen.getByRole('combobox', {name: 'Due date'})).toHaveValue(
       'May 21, 2026',
     );
-    await user.click(screen.getByRole('button', {name: 'Clear Due date'}));
+    const clearButton = screen.getByRole('button', {name: 'Clear Due date'});
+    expect(clearButton).toHaveClass(inputStyles.clearButton);
+    await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith(null);
   });
 

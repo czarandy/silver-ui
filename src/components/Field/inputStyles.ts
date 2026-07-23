@@ -18,7 +18,7 @@ export const inputRecipe = cva({
     alignItems: 'center',
     gap: '2',
     paddingInlineStart: '3',
-    paddingInlineEnd: '1',
+    paddingInlineEnd: '3',
     borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border.emphasized',
@@ -118,6 +118,9 @@ export const inputControlStyles = css.raw({
 });
 
 export const inputStyles = {
+  clearButton: css({
+    marginInlineEnd: '-2',
+  }),
   control: css(inputControlStyles),
   iconSlot: css({
     display: 'inline-flex',

@@ -254,6 +254,11 @@ export function TextInput({
       />
       {hasClear && value !== '' && !effectiveDisabled ? (
         <Button
+          className={
+            !isNonEmptyReactNode(endContent) && !isLoading && status == null
+              ? inputStyles.clearButton
+              : undefined
+          }
           icon={X}
           isIconOnly
           label={`Clear ${label}`}
