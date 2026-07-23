@@ -50,8 +50,8 @@ export interface ScheduleMonthlyViewOptions {
    */
   monthRowHeight?: number | 'auto';
   /**
-   * Number of weeks to display in the monthly grid.
-   * @default 6
+   * Fixed number of weeks to display in the monthly grid. When omitted, the
+   * view displays the complete weeks needed to contain the month.
    */
   weekCount?: number;
   /**
@@ -87,26 +87,48 @@ function setStartOfWeek(date: PlainDate, weekStartsOn: DayOfWeek): PlainDate {
   return date.add({days: -daysSinceWeekStart});
 }
 
-function getMonthDays(
-  date: PlainDate,
-  weekCount: number,
+function getVisibleMonthDateRange(
+  month: PlainDate,
   weekStartsOn: DayOfWeek,
+  weekCount?: number,
+): [PlainDate, PlainDate] {
+  const firstVisibleDay = setStartOfWeek(month.with({day: 1}), weekStartsOn);
+  const firstDayAfterLastWeek =
+    weekCount == null
+      ? setStartOfWeek(month.with({day: month.daysInMonth}), weekStartsOn).add({
+          days: 7,
+        })
+      : firstVisibleDay.add({days: weekCount * 7});
+  return [firstVisibleDay, firstDayAfterLastWeek];
+}
+
+function getMonthDays(
+  month: PlainDate,
+  weekStartsOn: DayOfWeek,
+  weekCount?: number,
 ): PlainDate[] {
-  const firstOfMonth = date.with({day: 1});
-  const firstVisibleDay = setStartOfWeek(firstOfMonth, weekStartsOn);
-  return Array.from({length: weekCount * 7}, (_, index) =>
-    firstVisibleDay.add({days: index}),
+  const [firstVisibleDay, firstDayAfterLastWeek] = getVisibleMonthDateRange(
+    month,
+    weekStartsOn,
+    weekCount,
+  );
+  return Array.from(
+    {length: firstVisibleDay.until(firstDayAfterLastWeek).days},
+    (_, index) => firstVisibleDay.add({days: index}),
   );
 }
 
 function getVisibleMonthRange(
   date: ScheduleZonedInstant,
   month: PlainDate,
-  weekCount: number,
   weekStartsOn: DayOfWeek,
+  weekCount?: number,
 ): ScheduleZonedInstantRange {
-  const firstVisible = setStartOfWeek(month.with({day: 1}), weekStartsOn);
-  const end = firstVisible.add({days: weekCount * 7});
+  const [firstVisible, end] = getVisibleMonthDateRange(
+    month,
+    weekStartsOn,
+    weekCount,
+  );
   const currentDate = date.toPlainDate();
   return [
     date.startOfDay().addDays(currentDate.until(firstVisible).days),
@@ -502,9 +524,9 @@ function ScheduleMonthlyView({
     ),
   );
   const weekStartsOn = options.weekStartsOn ?? 0;
-  const weekCount = options.weekCount ?? 6;
+  const weekCount = options.weekCount;
   const days = useMemo(
-    () => getMonthDays(month, weekCount, weekStartsOn),
+    () => getMonthDays(month, weekStartsOn, weekCount),
     [month, weekCount, weekStartsOn],
   );
   // The event bucketing/stacking below is O(events) and reruns only when the
@@ -726,20 +748,20 @@ function ScheduleMonthlyView({
  */
 export function createScheduleMonthlyView({
   monthRowHeight = DEFAULT_MONTH_ROW_HEIGHT,
-  weekCount = 6,
+  weekCount,
   weekStartsOn = 0,
 }: ScheduleMonthlyViewOptions = {}): ScheduleView<ScheduleMonthlyViewOptions> {
   return {
     component: ScheduleMonthlyView,
     getDateRange: date => {
       const month = date.toPlainDate();
-      return getVisibleMonthRange(date, month, weekCount, weekStartsOn);
+      return getVisibleMonthRange(date, month, weekStartsOn, weekCount);
     },
     getNextDateRange: date => {
       const nextMonth = date.toPlainDate().with({day: 1}).add({months: 1});
       return {
         label: 'Next month',
-        range: getVisibleMonthRange(date, nextMonth, weekCount, weekStartsOn),
+        range: getVisibleMonthRange(date, nextMonth, weekStartsOn, weekCount),
       };
     },
     getPreviousDateRange: date => {
@@ -752,8 +774,8 @@ export function createScheduleMonthlyView({
         range: getVisibleMonthRange(
           date,
           previousMonth,
-          weekCount,
           weekStartsOn,
+          weekCount,
         ),
       };
     },

@@ -1298,9 +1298,20 @@ export const HighlightedDayNumbers: Story = {
   },
 };
 
-export const FiveWeekMonth: Story = {
+export const AutomaticMonthRows: Story = {
   render: () => (
-    <ScheduleStory view={createScheduleMonthlyView({weekCount: 5})} />
+    <ScheduleStory
+      highlightDate={
+        Temporal.PlainDate.from('2025-07-15').toZonedDateTime('UTC')
+          .epochMilliseconds
+      }
+      timezoneID="UTC"
+      view={createScheduleMonthlyView()}
+      viewDate={
+        Temporal.PlainDate.from('2025-07-15').toZonedDateTime('UTC')
+          .epochMilliseconds
+      }
+    />
   ),
 };
 
