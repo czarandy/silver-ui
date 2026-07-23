@@ -178,7 +178,7 @@ export function SideNav({
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        {isCollapsible ? (
+        {isCollapsible && !resolvedIsCollapsed ? (
           <div className={classes.collapseButton}>
             <SideNavCollapseButton />
           </div>
@@ -194,6 +194,11 @@ export function SideNav({
           </div>
         ) : null}
         <div className={classes.scrollable}>{children}</div>
+        {isCollapsible && resolvedIsCollapsed ? (
+          <div className={classes.collapsedCollapseButton}>
+            <SideNavCollapseButton />
+          </div>
+        ) : null}
         {isNonEmptyReactNode(footer) || isNonEmptyReactNode(footerIcons) ? (
           <div className={classes.stickyBottom}>
             {footer}

@@ -56,7 +56,7 @@ export const Collapsible: Story = {
     docs: {
       description: {
         story:
-          'The collapse control stays attached to the top trailing edge of the SideNav in both expanded and collapsed states.',
+          'The collapse control sits inside the top-right of the SideNav while expanded, then moves to the bottom of the navigation content when collapsed.',
       },
     },
   },
@@ -109,7 +109,7 @@ export const CollapsibleWithFooter: Story = {
     docs: {
       description: {
         story:
-          'Footer actions remain grouped at the bottom while the collapse control stays beside the navigation header.',
+          'Footer actions remain grouped at the bottom. When collapsed, the expand control sits directly above the footer divider.',
       },
     },
   },

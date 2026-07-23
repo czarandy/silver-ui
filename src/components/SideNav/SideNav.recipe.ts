@@ -8,6 +8,7 @@ export const sideNavRecipe = sva({
     'scrollable',
     'stickyBottom',
     'collapseButton',
+    'collapsedCollapseButton',
     'footerRow',
     'footerIcons',
     'topbarIcons',
@@ -20,7 +21,7 @@ export const sideNavRecipe = sva({
       h: '100%',
       w: '260px',
       bg: 'inherit',
-      overflow: 'visible',
+      overflow: 'hidden',
     },
     stickyTop: {
       display: 'flex',
@@ -52,13 +53,16 @@ export const sideNavRecipe = sva({
     collapseButton: {
       position: 'absolute',
       insetBlockStart: '2.5',
-      insetInlineEnd: 0,
+      insetInlineEnd: '2',
       zIndex: 1,
       display: 'flex',
-      transform: 'translateX(50%)',
-      _rtl: {
-        transform: 'translateX(-50%)',
-      },
+    },
+    collapsedCollapseButton: {
+      display: 'flex',
+      justifyContent: 'center',
+      flexShrink: 0,
+      mt: 'auto',
+      p: '2',
     },
     footerRow: {
       display: 'flex',
@@ -99,6 +103,9 @@ export const sideNavRecipe = sva({
           alignItems: 'center',
           ms: '0',
         },
+        stickyBottom: {
+          mt: 0,
+        },
       },
       false: {},
     },
@@ -129,7 +136,7 @@ export const sideNavRecipe = sva({
       isCollapsible: true,
       css: {
         headerArea: {
-          pe: '2',
+          pe: '9',
         },
       },
     },

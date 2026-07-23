@@ -140,6 +140,26 @@ describe('SideNav', () => {
     ).toBeInTheDocument();
   });
 
+  it('moves the expand control above the footer when collapsed', async () => {
+    const user = userEvent.setup();
+    render(
+      <SideNav
+        footer={<span data-testid="footer-content">Footer</span>}
+        isCollapsible>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Collapse sidebar'}));
+
+    const footer = screen.getByTestId('footer-content');
+    const expandButton = screen.getByRole('button', {name: 'Expand sidebar'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the collapsed control's placement relative to the internal footer wrapper
+    expect(footer.parentElement?.previousElementSibling).toContainElement(
+      expandButton,
+    );
+  });
+
   it('renders the footer row alongside the footer when footerIcons are given', () => {
     render(
       <SideNav
@@ -978,6 +998,10 @@ describe('SideNav collapsed state', () => {
       'silver-bdr_full',
       'silver-bx-sh_sm',
     );
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the position class on the internal collapse-control wrapper
+    const control = collapseButton.parentElement?.parentElement;
+    expect(control).toHaveClass('silver-inset-e_2');
+    expect(control).not.toHaveClass('silver-trf_translateX(50%)');
   });
 
   it('mirrors the built-in collapse and expand panel icons in RTL', async () => {

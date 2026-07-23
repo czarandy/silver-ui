@@ -144,15 +144,12 @@ const styles = {
   }),
   sideNavSticky: css({
     flexShrink: 0,
-    overflow: 'visible',
+    overflow: 'clip',
     position: 'sticky',
     top: 'var(--appshell-header-height, 0px)',
     h: 'calc(100dvh - var(--appshell-header-height, 0px))',
     display: 'flex',
     flexDirection: 'column',
-  }),
-  sideNavPanel: css({
-    overflow: 'visible',
   }),
   elevatedWrapper: css({
     position: 'relative',
@@ -325,10 +322,7 @@ export function AppShell({
       </header>
     ) : undefined;
   const sideNavPanel = showSideNavInline ? (
-    <LayoutPanel
-      className={styles.sideNavPanel}
-      isScrollable={isFill}
-      padding={0}>
+    <LayoutPanel isScrollable={isFill} padding={0}>
       <div className={styles.slotContents} ref={sideNavPresenceRef}>
         {sideNav}
       </div>
