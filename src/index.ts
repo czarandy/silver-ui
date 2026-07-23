@@ -442,6 +442,7 @@ export {
   SideNavSection,
   type SideNavCollapseBreakpoint,
   type SideNavCollapseState,
+  type SideNavFooter,
   type SideNavHeadingProps,
   type SideNavItemProps,
   type SideNavProps,

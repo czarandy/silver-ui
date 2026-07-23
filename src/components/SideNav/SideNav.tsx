@@ -15,6 +15,17 @@ import {cx} from 'utils/cx';
 
 export type SideNavCollapseBreakpoint = 'sm' | 'md' | 'lg' | 'none';
 
+export interface SideNavFooter {
+  /**
+   * Actions rendered at the outside edge of the footer.
+   */
+  actions?: ReactNode;
+  /**
+   * Primary footer content, such as an account avatar or workspace switcher.
+   */
+  content?: ReactNode;
+}
+
 function getExpandedServerSnapshot(): boolean {
   return false;
 }
@@ -44,13 +55,9 @@ export interface SideNavProps {
    */
   'data-testid'?: string;
   /**
-   * Content rendered in the sticky bottom section.
+   * Content and actions rendered in the sticky bottom section.
    */
-  footer?: ReactNode;
-  /**
-   * Icon actions rendered alongside the footer.
-   */
-  footerIcons?: ReactNode;
+  footer?: SideNavFooter;
   /**
    * Content rendered at the top of the nav (e.g. a logo or title).
    */
@@ -85,7 +92,6 @@ export function SideNav({
   isCollapsible = false,
   'data-testid': dataTestId,
   footer,
-  footerIcons,
   header,
   ref,
   style,
@@ -135,7 +141,12 @@ export function SideNav({
         ref={ref as Ref<HTMLDivElement>}
         style={style}>
         {header}
-        <div className={classes.topbarIcons}>{footerIcons}</div>
+        {footer ? (
+          <div className={classes.topbarFooter}>
+            {footer.content}
+            {footer.actions}
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -148,8 +159,8 @@ export function SideNav({
         ref={ref as Ref<HTMLDialogElement>}>
         {topContent}
         {children}
-        {footer}
-        {footerIcons}
+        {footer?.content}
+        {footer?.actions}
       </MobileNav>
     );
   }
@@ -159,16 +170,26 @@ export function SideNav({
       <>
         {topContent}
         {children}
-        {footer}
-        {footerIcons}
+        {footer?.content}
+        {footer?.actions}
       </>
     );
   }
 
-  const classes = sideNavRecipe({
-    isCollapsed: resolvedIsCollapsed,
-    isCollapsible,
-  });
+  const classes = sideNavRecipe({isCollapsed: resolvedIsCollapsed});
+  const footerContent = footer?.content;
+  const footerActions = footer?.actions;
+  const footerContentNode = isNonEmptyReactNode(footerContent) ? (
+    <div className={classes.footerContent}>{footerContent}</div>
+  ) : null;
+  const footerCollapseNode = isCollapsible ? (
+    <div className={classes.footerCollapseButton}>
+      <SideNavCollapseButton />
+    </div>
+  ) : null;
+  const footerActionsNode = isNonEmptyReactNode(footerActions) ? (
+    <div className={classes.footerActions}>{footerActions}</div>
+  ) : null;
 
   return (
     <SideNavCollapseContext value={collapseContext}>
@@ -178,35 +199,33 @@ export function SideNav({
         data-testid={dataTestId}
         ref={ref}
         style={style}>
-        {isCollapsible && !resolvedIsCollapsed ? (
-          <div className={classes.collapseButton}>
-            <SideNavCollapseButton />
-          </div>
-        ) : null}
         {isNonEmptyReactNode(header) ||
-        (!resolvedIsCollapsed && isNonEmptyReactNode(topContent)) ||
-        isCollapsible ? (
+        (!resolvedIsCollapsed && isNonEmptyReactNode(topContent)) ? (
           <div className={classes.stickyTop}>
-            {isNonEmptyReactNode(header) || isCollapsible ? (
+            {isNonEmptyReactNode(header) ? (
               <div className={classes.headerArea}>{header}</div>
             ) : null}
             {!resolvedIsCollapsed ? topContent : null}
           </div>
         ) : null}
         <div className={classes.scrollable}>{children}</div>
-        {isCollapsible && resolvedIsCollapsed ? (
-          <div className={classes.collapsedCollapseButton}>
-            <SideNavCollapseButton />
-          </div>
-        ) : null}
-        {isNonEmptyReactNode(footer) || isNonEmptyReactNode(footerIcons) ? (
+        {footerContentNode || footerActionsNode || isCollapsible ? (
           <div className={classes.stickyBottom}>
-            {footer}
-            {isNonEmptyReactNode(footerIcons) ? (
-              <div className={classes.footerRow}>
-                <div className={classes.footerIcons}>{footerIcons}</div>
-              </div>
-            ) : null}
+            <div className={classes.footerRow}>
+              {resolvedIsCollapsed ? (
+                <>
+                  {footerCollapseNode}
+                  {footerActionsNode}
+                  {footerContentNode}
+                </>
+              ) : (
+                <>
+                  {footerContentNode}
+                  {footerCollapseNode}
+                  {footerActionsNode}
+                </>
+              )}
+            </div>
           </div>
         ) : null}
       </nav>
