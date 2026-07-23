@@ -338,6 +338,10 @@ export const WithPanels: Story = {
   render: args => <WithPanelsStory {...args} />,
 };
 
+/**
+ * Horizontal arrow keys follow visual direction: Left moves focus left and
+ * Right moves it right, reversing DOM-order navigation under RTL.
+ */
 export const RTL: Story = {
   render: args => (
     <div dir="rtl">

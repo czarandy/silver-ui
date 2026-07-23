@@ -169,6 +169,37 @@ describe('useListFocus', () => {
     expect(focusedName()).toBe('Two');
   });
 
+  it('detects an inherited right-to-left direction from the event target', async () => {
+    const user = userEvent.setup();
+    render(
+      <div dir="rtl">
+        <List orientation="horizontal" />
+      </div>,
+    );
+
+    screen.getByRole('button', {name: 'Two'}).focus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(focusedName()).toBe('Three');
+
+    await user.keyboard('{ArrowRight}');
+    expect(focusedName()).toBe('Two');
+  });
+
+  it('honors an explicit direction override', async () => {
+    const user = userEvent.setup();
+    render(
+      <div dir="rtl">
+        <List isRtl={false} orientation="horizontal" />
+      </div>,
+    );
+
+    screen.getByRole('button', {name: 'Two'}).focus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(focusedName()).toBe('Three');
+  });
+
   it('skips items that getItems excludes', async () => {
     const user = userEvent.setup();
     render(<List items={['One', 'Skip', 'Three']} />);

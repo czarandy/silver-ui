@@ -152,6 +152,32 @@ describe('ColorSwatchPicker', () => {
     expect(screen.getByRole('radio', {name: 'Red'})).toHaveFocus();
   });
 
+  it('follows visual arrow direction in an RTL layout', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <div dir="rtl">
+        <ColorSwatchPicker
+          colors={['red', 'blue', 'green']}
+          label="Office color"
+          onChange={onChange}
+          value="blue"
+        />
+      </div>,
+    );
+
+    screen.getByRole('radio', {name: 'Blue'}).focus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByRole('radio', {name: 'Green'})).toHaveFocus();
+    expect(onChange).toHaveBeenLastCalledWith('green');
+
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('radio', {name: 'Blue'})).toHaveFocus();
+    expect(onChange).toHaveBeenCalledExactlyOnceWith('green');
+  });
+
   it('supports reverse navigation plus Home and End', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

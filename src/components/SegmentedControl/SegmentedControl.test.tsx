@@ -160,6 +160,30 @@ describe('SegmentedControl', () => {
     expect(screen.getByRole('radio', {name: 'Table'})).toHaveFocus();
   });
 
+  it('follows visual arrow direction in an RTL layout', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <div dir="rtl">
+        <SegmentedControl label="View mode" onChange={onChange} value="list">
+          <SegmentedControlItem label="Grid" value="grid" />
+          <SegmentedControlItem label="List" value="list" />
+          <SegmentedControlItem label="Table" value="table" />
+        </SegmentedControl>
+      </div>,
+    );
+
+    screen.getByRole('radio', {name: 'List'}).focus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByRole('radio', {name: 'Table'})).toHaveFocus();
+    expect(onChange).toHaveBeenLastCalledWith('table');
+
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('radio', {name: 'List'})).toHaveFocus();
+    expect(onChange).toHaveBeenLastCalledWith('list');
+  });
+
   it('supports Home and End keyboard navigation', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
