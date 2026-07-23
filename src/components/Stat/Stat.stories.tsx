@@ -46,6 +46,14 @@ export const WithChange: Story = {
   },
 };
 
+export const WithProportionalNumbers: Story = {
+  args: {
+    hasTabularNumbers: false,
+    label: 'P90 CI time',
+    value: '12m 11s',
+  },
+};
+
 export const InvertedChange: Story = {
   args: {
     change: -3.4,
