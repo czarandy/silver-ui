@@ -9,9 +9,6 @@ import {cx} from 'utils/cx';
 const mirrorInRtl = css({
   _rtl: {transform: 'scaleX(-1)'},
 });
-const button = css({
-  borderRadius: 'full',
-});
 
 function CollapseIcon({className, ...props}: LucideProps): React.JSX.Element {
   return <PanelLeftClose {...props} className={cx(mirrorInRtl, className)} />;
@@ -36,7 +33,6 @@ export function SideNavCollapseButton(): React.JSX.Element | null {
 
   return (
     <Button
-      className={button}
       icon={isCollapsed ? ExpandIcon : CollapseIcon}
       isIconOnly
       label={tooltipLabel}

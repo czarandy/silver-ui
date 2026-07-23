@@ -56,12 +56,6 @@ export const sideNavRecipe = sva({
       zIndex: 1,
       display: 'flex',
       transform: 'translateX(50%)',
-      bg: 'bg',
-      borderWidth: 'default',
-      borderStyle: 'solid',
-      borderColor: 'border',
-      borderRadius: 'full',
-      boxShadow: 'sm',
       _rtl: {
         transform: 'translateX(-50%)',
       },

@@ -967,9 +967,17 @@ describe('SideNav collapsed state', () => {
       </SideNav>,
     );
 
-    expect(
-      screen.getByRole('button', {name: 'Collapse sidebar'}),
-    ).toBeInTheDocument();
+    const collapseButton = screen.getByRole('button', {
+      name: 'Collapse sidebar',
+    });
+    expect(collapseButton).toHaveClass(
+      'silver-bg_transparent',
+      'silver-bdr_component.sm',
+    );
+    expect(collapseButton).not.toHaveClass(
+      'silver-bdr_full',
+      'silver-bx-sh_sm',
+    );
   });
 
   it('mirrors the built-in collapse and expand panel icons in RTL', async () => {
