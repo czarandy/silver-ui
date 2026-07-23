@@ -4,14 +4,18 @@ export const sideNavRecipe = sva({
   slots: [
     'root',
     'stickyTop',
+    'headerArea',
     'scrollable',
     'stickyBottom',
     'footerRow',
-    'footerIcons',
-    'topbarIcons',
+    'footerContent',
+    'footerCollapseButton',
+    'footerActions',
+    'topbarFooter',
   ],
   base: {
     root: {
+      position: 'relative',
       display: 'flex',
       flexDirection: 'column',
       h: '100%',
@@ -26,6 +30,9 @@ export const sideNavRecipe = sva({
       p: '2',
       gap: '2',
     },
+    headerArea: {
+      minW: 0,
+    },
     scrollable: {
       flex: 1,
       overflowY: 'auto',
@@ -38,7 +45,6 @@ export const sideNavRecipe = sva({
       flexShrink: 0,
       mt: 'auto',
       p: '2',
-      gap: '2',
       borderBlockStartWidth: 'default',
       borderBlockStartStyle: 'solid',
       borderBlockStartColor: 'border',
@@ -47,14 +53,24 @@ export const sideNavRecipe = sva({
       display: 'flex',
       alignItems: 'center',
       gap: '1',
+      w: '100%',
     },
-    footerIcons: {
+    footerContent: {
+      display: 'flex',
+      alignItems: 'center',
+      flex: 1,
+      minW: 0,
+    },
+    footerCollapseButton: {
+      display: 'flex',
+      ms: 'auto',
+    },
+    footerActions: {
       display: 'flex',
       alignItems: 'center',
       gap: '1',
-      ms: 'auto',
     },
-    topbarIcons: {
+    topbarFooter: {
       display: 'flex',
       alignItems: 'center',
       gap: '1',
@@ -65,7 +81,7 @@ export const sideNavRecipe = sva({
     isCollapsed: {
       true: {
         root: {
-          w: '12',
+          w: '14',
         },
         scrollable: {
           flex: 'none',
@@ -74,13 +90,18 @@ export const sideNavRecipe = sva({
           alignItems: 'center',
         },
         footerRow: {
-          flexDirection: 'column-reverse',
-          alignItems: 'center',
-        },
-        footerIcons: {
           flexDirection: 'column',
           alignItems: 'center',
-          ms: '0',
+        },
+        footerContent: {
+          flex: 'none',
+        },
+        footerCollapseButton: {
+          ms: 0,
+        },
+        footerActions: {
+          flexDirection: 'column',
+          alignItems: 'center',
         },
       },
       false: {},

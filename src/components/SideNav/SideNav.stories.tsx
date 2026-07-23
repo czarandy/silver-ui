@@ -9,6 +9,7 @@ import {
   HelpCircle,
   Home,
   Inbox,
+  MessageSquare,
   Plus,
   Search,
   Settings,
@@ -52,6 +53,14 @@ export const Basic: Story = {
 };
 
 export const Collapsible: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The collapse control stays in the footer: trailing while expanded and bottom-anchored when collapsed.',
+      },
+    },
+  },
   render: () => (
     <div style={{height: 420}}>
       <SideNav
@@ -97,27 +106,39 @@ export const ResponsiveInitialCollapse: Story = {
 };
 
 export const CollapsibleWithFooter: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The inline footer keeps the avatar first and lower-priority collapse control inside the other actions. When collapsed, it becomes a bottom-anchored stack ordered collapse, actions, then avatar.',
+      },
+    },
+  },
   render: () => (
     <div style={{height: 420}}>
       <SideNav
-        footerIcons={
-          <>
-            <Button
-              icon={Bell}
-              isIconOnly
-              label="Notifications"
-              size="sm"
-              variant="ghost"
-            />
-            <Button
-              icon={HelpCircle}
-              isIconOnly
-              label="Help"
-              size="sm"
-              variant="ghost"
-            />
-          </>
-        }
+        collapseBreakpoint="none"
+        footer={{
+          actions: (
+            <>
+              <Button
+                icon={MessageSquare}
+                isIconOnly
+                label="Messages"
+                size="sm"
+                variant="ghost"
+              />
+              <Button
+                icon={Bell}
+                isIconOnly
+                label="Notifications"
+                size="sm"
+                variant="ghost"
+              />
+            </>
+          ),
+          content: <Avatar name="Ada Lovelace" size="small" />,
+        }}
         header={
           <SideNavHeading heading="Silver" logo={logo} subheading="Workspace" />
         }
@@ -136,25 +157,27 @@ export const WithFooter: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
-        footer={<Avatar name="Ada Lovelace" size="small" />}
-        footerIcons={
-          <>
-            <Button
-              icon={Bell}
-              isIconOnly
-              label="Notifications"
-              size="sm"
-              variant="ghost"
-            />
-            <Button
-              icon={HelpCircle}
-              isIconOnly
-              label="Help"
-              size="sm"
-              variant="ghost"
-            />
-          </>
-        }
+        footer={{
+          actions: (
+            <>
+              <Button
+                icon={Bell}
+                isIconOnly
+                label="Notifications"
+                size="sm"
+                variant="ghost"
+              />
+              <Button
+                icon={HelpCircle}
+                isIconOnly
+                label="Help"
+                size="sm"
+                variant="ghost"
+              />
+            </>
+          ),
+          content: <Avatar name="Ada Lovelace" size="small" />,
+        }}
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Main">
           <SideNavItem href="/" icon={Home} isSelected label="Home" />
@@ -169,7 +192,9 @@ export const FooterOnly: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
-        footer={<Avatar name="Ada Lovelace" size="small" />}
+        footer={{
+          content: <Avatar name="Ada Lovelace" size="small" />,
+        }}
         header={<SideNavHeading heading="Silver" logo={logo} />}>
         <SideNavSection title="Main">
           <SideNavItem href="/" icon={Home} isSelected label="Home" />
@@ -365,7 +390,9 @@ export const Scrollable: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
-        footer={<SideNavItem icon={Settings} label="Settings" />}
+        footer={{
+          content: <SideNavItem icon={Settings} label="Settings" />,
+        }}
         header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
         <SideNavSection title="Pages">
           {Array.from({length: 20}, (_, i) => (

@@ -1,15 +1,22 @@
 'use client';
 
+import {PanelLeftClose, PanelLeftOpen, type LucideProps} from 'lucide-react';
 import {Button} from 'components/Button';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
-import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
-const styles = {
-  expanded: css({
-    ms: '-2',
-  }),
-};
+const mirrorInRtl = css({
+  _rtl: {transform: 'scaleX(-1)'},
+});
+
+function CollapseIcon({className, ...props}: LucideProps): React.JSX.Element {
+  return <PanelLeftClose {...props} className={cx(mirrorInRtl, className)} />;
+}
+
+function ExpandIcon({className, ...props}: LucideProps): React.JSX.Element {
+  return <PanelLeftOpen {...props} className={cx(mirrorInRtl, className)} />;
+}
 
 /**
  * Toggle button for collapsing and expanding the SideNav.
@@ -26,8 +33,7 @@ export function SideNavCollapseButton(): React.JSX.Element | null {
 
   return (
     <Button
-      className={isCollapsed ? undefined : styles.expanded}
-      icon={isCollapsed ? LogicalChevronEnd : LogicalChevronStart}
+      icon={isCollapsed ? ExpandIcon : CollapseIcon}
       isIconOnly
       label={tooltipLabel}
       onClick={toggle}

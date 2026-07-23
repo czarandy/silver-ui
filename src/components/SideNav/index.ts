@@ -1,6 +1,7 @@
 export {
   SideNav,
   type SideNavCollapseBreakpoint,
+  type SideNavFooter,
   type SideNavProps,
 } from 'components/SideNav/SideNav';
 export {

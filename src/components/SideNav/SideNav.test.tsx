@@ -9,7 +9,6 @@ import {SideNavRenderContext} from 'components/SideNav/SideNavContext';
 import {SideNavHeading} from 'components/SideNav/SideNavHeading';
 import {SideNavItem} from 'components/SideNav/SideNavItem';
 import {SideNavSection} from 'components/SideNav/SideNavSection';
-import {assertNonNull} from 'internal/testHelpers';
 
 function createMatchMedia(matches: boolean) {
   return vi.fn().mockImplementation((query: string) => ({
@@ -58,10 +57,15 @@ function ToBasedRouterLink({
   );
 }
 
-// The sticky bottom wrapper carries no role or testid, so reach it through the
-// footer element it wraps.
-function countStickyBottomChildren(footer: HTMLElement): number {
-  return assertNonNull(footer.parentElement).childElementCount;
+function areElementsInDocumentOrder(elements: HTMLElement[]): boolean {
+  return elements
+    .slice(0, -1)
+    .every(
+      (element, index) =>
+        (element.compareDocumentPosition(elements[index + 1]) &
+          Node.DOCUMENT_POSITION_FOLLOWING) !==
+        0,
+    );
 }
 
 describe('SideNav', () => {
@@ -96,63 +100,90 @@ describe('SideNav', () => {
     );
   });
 
-  it('renders footer and footerIcons', () => {
+  it('renders footer content and actions', () => {
     render(
       <SideNav
-        footer={<span data-testid="footer-content">Footer</span>}
-        footerIcons={<span data-testid="footer-icons">Icons</span>}>
+        footer={{
+          actions: <span data-testid="footer-actions">Actions</span>,
+          content: <span data-testid="footer-content">Footer</span>,
+        }}>
         <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
     expect(screen.getByTestId('footer-content')).toBeInTheDocument();
-    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-actions')).toBeInTheDocument();
   });
 
-  it('omits the footer row when there is nothing to put in it', () => {
+  it('renders a footer with content only', () => {
     render(
-      <SideNav footer={<span data-testid="footer-content">Footer</span>}>
+      <SideNav
+        footer={{
+          content: <span data-testid="footer-content">Footer</span>,
+        }}>
         <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
-    // An empty footer row would still be a flex item of the sticky bottom, so
-    // its gap would reserve dead space below the footer and push it off-center.
-    expect(
-      countStickyBottomChildren(screen.getByTestId('footer-content')),
-    ).toBe(1);
+    expect(screen.getByTestId('footer-content')).toBeInTheDocument();
+    expect(screen.queryByTestId('footer-actions')).not.toBeInTheDocument();
   });
 
-  it('renders the footer row alongside the footer when collapsible', () => {
+  it('renders the footer collapse control between content and actions', () => {
     render(
       <SideNav
-        footer={<span data-testid="footer-content">Footer</span>}
+        footer={{
+          actions: <span data-testid="footer-actions">Actions</span>,
+          content: <span data-testid="footer-content">Avatar</span>,
+        }}
         isCollapsible>
         <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
     expect(
-      countStickyBottomChildren(screen.getByTestId('footer-content')),
-    ).toBe(2);
-    expect(
-      screen.getByRole('button', {name: 'Collapse sidebar'}),
-    ).toBeInTheDocument();
+      areElementsInDocumentOrder([
+        screen.getByTestId('footer-content'),
+        screen.getByRole('button', {name: 'Collapse sidebar'}),
+        screen.getByTestId('footer-actions'),
+      ]),
+    ).toBe(true);
   });
 
-  it('renders the footer row alongside the footer when footerIcons are given', () => {
+  it('stacks the collapse control and actions above footer content when collapsed', async () => {
+    const user = userEvent.setup();
     render(
       <SideNav
-        footer={<span data-testid="footer-content">Footer</span>}
-        footerIcons={<span data-testid="footer-icons">Icons</span>}>
+        footer={{
+          actions: <span data-testid="footer-actions">Actions</span>,
+          content: <span data-testid="footer-content">Avatar</span>,
+        }}
+        isCollapsible>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Collapse sidebar'}));
+
+    expect(
+      areElementsInDocumentOrder([
+        screen.getByRole('button', {name: 'Expand sidebar'}),
+        screen.getByTestId('footer-actions'),
+        screen.getByTestId('footer-content'),
+      ]),
+    ).toBe(true);
+  });
+
+  it('renders a footer collapse control without footer content', () => {
+    render(
+      <SideNav isCollapsible>
         <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
     expect(
-      countStickyBottomChildren(screen.getByTestId('footer-content')),
-    ).toBe(2);
-    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+      screen.getAllByRole('button', {name: 'Collapse sidebar'}),
+    ).toHaveLength(1);
   });
 
   it('renders topContent below the header', () => {
@@ -193,7 +224,10 @@ describe('SideNav render modes', () => {
       <SideNavRenderContext value="topbar">
         <SideNav
           data-testid="side-nav"
-          footerIcons={<span data-testid="footer-icons">Icons</span>}
+          footer={{
+            actions: <span data-testid="footer-actions">Actions</span>,
+            content: <span data-testid="footer-content">Footer</span>,
+          }}
           header={<span data-testid="topbar-header">Brand</span>}
           ref={ref}>
           <SideNavItem href="/home" icon={Home} label="Home" />
@@ -201,12 +235,13 @@ describe('SideNav render modes', () => {
       </SideNavRenderContext>,
     );
 
-    // Topbar renders a plain div with only the header and footer icons; it is
+    // Topbar renders a plain div with only the header and footer; it is
     // not a navigation landmark and omits the scrollable item list.
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
     expect(screen.getByTestId('side-nav').tagName).toBe('DIV');
     expect(screen.getByTestId('topbar-header')).toBeInTheDocument();
-    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-content')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-actions')).toBeInTheDocument();
     expect(screen.queryByRole('link', {name: 'Home'})).not.toBeInTheDocument();
     expect(ref).toHaveBeenCalledWith(screen.getByTestId('side-nav'));
   });
@@ -217,8 +252,10 @@ describe('SideNav render modes', () => {
       <SideNavRenderContext value="drawer">
         <SideNav
           data-testid="side-nav"
-          footer={<span data-testid="footer-content">Footer</span>}
-          footerIcons={<span data-testid="footer-icons">Icons</span>}
+          footer={{
+            actions: <span data-testid="footer-actions">Actions</span>,
+            content: <span data-testid="footer-content">Footer</span>,
+          }}
           header={<span data-testid="drawer-header">Brand</span>}
           ref={ref}
           topContent={<span data-testid="top-content">Search</span>}>
@@ -240,7 +277,7 @@ describe('SideNav render modes', () => {
     expect(screen.getByTestId('top-content')).toBeInTheDocument();
     expect(screen.getByTestId('home-item')).toBeInTheDocument();
     expect(screen.getByTestId('footer-content')).toBeInTheDocument();
-    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-actions')).toBeInTheDocument();
     // ref is forwarded to the underlying drawer dialog.
     expect(ref).toHaveBeenCalledWith(screen.getByTestId('side-nav'));
   });
@@ -249,8 +286,10 @@ describe('SideNav render modes', () => {
     render(
       <SideNavRenderContext value="drawer-content">
         <SideNav
-          footer={<span data-testid="footer-content">Footer</span>}
-          footerIcons={<span data-testid="footer-icons">Icons</span>}
+          footer={{
+            actions: <span data-testid="footer-actions">Actions</span>,
+            content: <span data-testid="footer-content">Footer</span>,
+          }}
           topContent={<span data-testid="top-content">Search</span>}>
           <SideNavItem
             data-testid="home-item"
@@ -269,7 +308,7 @@ describe('SideNav render modes', () => {
     expect(screen.getByTestId('top-content')).toBeInTheDocument();
     expect(screen.getByTestId('home-item')).toBeInTheDocument();
     expect(screen.getByTestId('footer-content')).toBeInTheDocument();
-    expect(screen.getByTestId('footer-icons')).toBeInTheDocument();
+    expect(screen.getByTestId('footer-actions')).toBeInTheDocument();
   });
 });
 
@@ -960,19 +999,31 @@ describe('SideNav collapsed state', () => {
     expect(link).toHaveAttribute('aria-label', 'Silver');
   });
 
-  it('renders built-in collapse button when isCollapsible', () => {
+  it('renders the built-in collapse button as a footer action', () => {
     render(
       <SideNav isCollapsible>
         <SideNavItem icon={Home} label="Home" />
       </SideNav>,
     );
 
-    expect(
-      screen.getByRole('button', {name: 'Collapse sidebar'}),
-    ).toBeInTheDocument();
+    const collapseButton = screen.getByRole('button', {
+      name: 'Collapse sidebar',
+    });
+    expect(collapseButton).toHaveClass(
+      'silver-bg_transparent',
+      'silver-bdr_component.sm',
+    );
+    expect(collapseButton).not.toHaveClass(
+      'silver-bdr_full',
+      'silver-bx-sh_sm',
+    );
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the layout class on the internal collapse-control wrapper
+    const control = collapseButton.parentElement?.parentElement;
+    expect(control).toHaveClass('silver-d_flex', 'silver-ms_auto');
+    expect(control).not.toHaveClass('silver-pos_absolute');
   });
 
-  it('mirrors the built-in collapse and expand chevrons in RTL', async () => {
+  it('mirrors the built-in collapse and expand panel icons in RTL', async () => {
     const user = userEvent.setup();
     render(
       <div dir="rtl">
@@ -987,7 +1038,7 @@ describe('SideNav collapsed state', () => {
     });
     // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
     expect(collapseButton.querySelector('svg')).toHaveClass(
-      'lucide-chevron-left',
+      'lucide-panel-left-close',
       'rtl:silver-trf_scaleX(-1)',
     );
 
@@ -996,7 +1047,7 @@ describe('SideNav collapsed state', () => {
     const expandButton = screen.getByRole('button', {name: 'Expand sidebar'});
     // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
     expect(expandButton.querySelector('svg')).toHaveClass(
-      'lucide-chevron-right',
+      'lucide-panel-left-open',
       'rtl:silver-trf_scaleX(-1)',
     );
   });

@@ -174,12 +174,14 @@ export const OnNav: Story = {
       className={css({bg: 'bg.subtle'})}
       style={{width: 260, height: 320, padding: 12}}>
       <SideNav
-        footer={
-          <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
-            <Avatar name="Ada Lovelace" size="small" />
-            <span>Ada Lovelace</span>
-          </div>
-        }>
+        footer={{
+          content: (
+            <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+              <Avatar name="Ada Lovelace" size="small" />
+              <span>Ada Lovelace</span>
+            </div>
+          ),
+        }}>
         <SideNavItem href="/home" icon={Home} label="Home" />
         <SideNavItem href="/settings" icon={Settings} label="Settings" />
       </SideNav>
