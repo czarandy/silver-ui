@@ -239,6 +239,21 @@ describe('AppShell', () => {
     ).toBeInTheDocument();
   });
 
+  it('allows inline side nav controls to extend past the panel edge', () => {
+    vi.stubGlobal('matchMedia', createMatchMedia(false));
+
+    render(
+      <AppShell sideNav={sideNav} topNav={topNav}>
+        <div>Content</div>
+      </AppShell>,
+    );
+
+    const nav = screen.getByRole('navigation', {name: 'Side navigation'});
+    // eslint-disable-next-line testing-library/no-node-access -- the LayoutPanel is an internal AppShell wrapper with no accessible role
+    const panel = nav.parentElement?.parentElement;
+    expect(panel).toHaveClass('silver-ov_visible');
+  });
+
   it('opens the drawer when the toggle is clicked', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('matchMedia', createMatchMedia(true));

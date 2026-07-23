@@ -123,7 +123,7 @@ describe('SideNav', () => {
     ).toBe(1);
   });
 
-  it('renders the footer row alongside the footer when collapsible', () => {
+  it('keeps the collapse control out of the footer', () => {
     render(
       <SideNav
         footer={<span data-testid="footer-content">Footer</span>}
@@ -134,7 +134,7 @@ describe('SideNav', () => {
 
     expect(
       countStickyBottomChildren(screen.getByTestId('footer-content')),
-    ).toBe(2);
+    ).toBe(1);
     expect(
       screen.getByRole('button', {name: 'Collapse sidebar'}),
     ).toBeInTheDocument();
@@ -972,7 +972,7 @@ describe('SideNav collapsed state', () => {
     ).toBeInTheDocument();
   });
 
-  it('mirrors the built-in collapse and expand chevrons in RTL', async () => {
+  it('mirrors the built-in collapse and expand panel icons in RTL', async () => {
     const user = userEvent.setup();
     render(
       <div dir="rtl">
@@ -987,7 +987,7 @@ describe('SideNav collapsed state', () => {
     });
     // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
     expect(collapseButton.querySelector('svg')).toHaveClass(
-      'lucide-chevron-left',
+      'lucide-panel-left-close',
       'rtl:silver-trf_scaleX(-1)',
     );
 
@@ -996,7 +996,7 @@ describe('SideNav collapsed state', () => {
     const expandButton = screen.getByRole('button', {name: 'Expand sidebar'});
     // eslint-disable-next-line testing-library/no-node-access -- verifying the directional class on the rendered icon
     expect(expandButton.querySelector('svg')).toHaveClass(
-      'lucide-chevron-right',
+      'lucide-panel-left-open',
       'rtl:silver-trf_scaleX(-1)',
     );
   });

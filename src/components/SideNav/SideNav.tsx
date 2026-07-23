@@ -165,7 +165,10 @@ export function SideNav({
     );
   }
 
-  const classes = sideNavRecipe({isCollapsed: resolvedIsCollapsed});
+  const classes = sideNavRecipe({
+    isCollapsed: resolvedIsCollapsed,
+    isCollapsible,
+  });
 
   return (
     <SideNavCollapseContext value={collapseContext}>
@@ -175,25 +178,28 @@ export function SideNav({
         data-testid={dataTestId}
         ref={ref}
         style={style}>
+        {isCollapsible ? (
+          <div className={classes.collapseButton}>
+            <SideNavCollapseButton />
+          </div>
+        ) : null}
         {isNonEmptyReactNode(header) ||
-        (!resolvedIsCollapsed && isNonEmptyReactNode(topContent)) ? (
+        (!resolvedIsCollapsed && isNonEmptyReactNode(topContent)) ||
+        isCollapsible ? (
           <div className={classes.stickyTop}>
-            {header}
+            {isNonEmptyReactNode(header) || isCollapsible ? (
+              <div className={classes.headerArea}>{header}</div>
+            ) : null}
             {!resolvedIsCollapsed ? topContent : null}
           </div>
         ) : null}
         <div className={classes.scrollable}>{children}</div>
-        {isNonEmptyReactNode(footer) ||
-        isNonEmptyReactNode(footerIcons) ||
-        isCollapsible ? (
+        {isNonEmptyReactNode(footer) || isNonEmptyReactNode(footerIcons) ? (
           <div className={classes.stickyBottom}>
             {footer}
-            {isCollapsible || isNonEmptyReactNode(footerIcons) ? (
+            {isNonEmptyReactNode(footerIcons) ? (
               <div className={classes.footerRow}>
-                {isCollapsible ? <SideNavCollapseButton /> : null}
-                {isNonEmptyReactNode(footerIcons) ? (
-                  <div className={classes.footerIcons}>{footerIcons}</div>
-                ) : null}
+                <div className={classes.footerIcons}>{footerIcons}</div>
               </div>
             ) : null}
           </div>

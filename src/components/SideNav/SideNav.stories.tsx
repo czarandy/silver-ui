@@ -52,6 +52,14 @@ export const Basic: Story = {
 };
 
 export const Collapsible: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The collapse control stays attached to the top trailing edge of the SideNav in both expanded and collapsed states.',
+      },
+    },
+  },
   render: () => (
     <div style={{height: 420}}>
       <SideNav
@@ -97,6 +105,14 @@ export const ResponsiveInitialCollapse: Story = {
 };
 
 export const CollapsibleWithFooter: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Footer actions remain grouped at the bottom while the collapse control stays beside the navigation header.',
+      },
+    },
+  },
   render: () => (
     <div style={{height: 420}}>
       <SideNav
