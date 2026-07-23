@@ -1,7 +1,10 @@
+import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
 import {selectOptionItemRecipe} from 'components/Select/Select.recipe';
+import {Tooltip} from 'components/Tooltip';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 const classes = selectOptionItemRecipe();
@@ -32,6 +35,10 @@ export interface SelectOptionProps {
    */
   label: ReactNode;
   /**
+   * Tooltip content shown next to the label.
+   */
+  labelTooltip?: ReactNode;
+  /**
    * Ref forwarded to the layout root.
    */
   ref?: Ref<HTMLSpanElement>;
@@ -51,16 +58,26 @@ export function SelectOption({
   endContent,
   icon,
   label,
+  labelTooltip,
   ref,
   style,
 }: SelectOptionProps): React.JSX.Element {
+  const tooltip = isNonEmptyReactNode(labelTooltip) ? (
+    <Tooltip content={labelTooltip}>
+      <span className={classes.tooltipIcon}>
+        <Icon icon={Info} size="sm" />
+      </span>
+    </Tooltip>
+  ) : null;
+
   return (
     <Item
       as="span"
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       description={description}
-      endContent={endContent}
+      endContent={tooltip ?? endContent}
+      endContentPosition={tooltip != null ? 'inline' : undefined}
       label={label}
       ref={ref}
       startContent={
@@ -71,6 +88,7 @@ export function SelectOption({
         ) : null
       }
       style={style}
+      trailingContent={tooltip != null ? endContent : undefined}
     />
   );
 }

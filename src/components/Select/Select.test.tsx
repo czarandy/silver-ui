@@ -631,7 +631,7 @@ describe('Select', () => {
 });
 
 describe('SelectOption', () => {
-  it('renders label, description, icon, end content, and passthrough props', () => {
+  it('renders label, label tooltip, description, icon, end content, and passthrough props', () => {
     const ref = vi.fn();
     const {container} = render(
       <SelectOption
@@ -641,6 +641,7 @@ describe('SelectOption', () => {
         endContent={<span>Admin</span>}
         icon={User}
         label="Ada Lovelace"
+        labelTooltip="The first computer programmer"
         ref={ref}
         style={{color: 'red'}}
       />,
@@ -650,11 +651,21 @@ describe('SelectOption', () => {
     expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
     expect(screen.getByText('Engineer')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'The first computer programmer',
+    );
     expect(option).toHaveClass('custom-option');
     expect(option).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(option);
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- lucide icons are decorative SVGs
     expect(container.querySelector('.lucide-user')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- lucide icons are decorative SVGs
+    const infoIcon = container.querySelector<SVGElement>('.lucide-info');
+    expect(infoIcon).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- verifies that the tooltip icon is inline with the option label
+    expect(screen.getByText('Ada Lovelace').parentElement).toContainElement(
+      infoIcon,
+    );
   });
 
   describe('inside an InputGroup', () => {
