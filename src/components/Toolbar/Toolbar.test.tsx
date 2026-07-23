@@ -150,6 +150,32 @@ describe('Toolbar', () => {
       expect(screen.getByRole('button', {name: 'Three'})).toHaveFocus();
     });
 
+    it('follows visual arrow direction in an RTL layout', async () => {
+      const user = userEvent.setup();
+      render(
+        <div dir="rtl">
+          <Toolbar
+            label="Actions"
+            startContent={
+              <>
+                <Button label="One" />
+                <Button label="Two" />
+                <Button label="Three" />
+              </>
+            }
+          />
+        </div>,
+      );
+
+      screen.getByRole('button', {name: 'Two'}).focus();
+
+      await user.keyboard('{ArrowLeft}');
+      expect(screen.getByRole('button', {name: 'Three'})).toHaveFocus();
+
+      await user.keyboard('{ArrowRight}');
+      expect(screen.getByRole('button', {name: 'Two'})).toHaveFocus();
+    });
+
     it('jumps to either end with Home and End', async () => {
       const user = userEvent.setup();
       render(

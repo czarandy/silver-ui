@@ -14,6 +14,7 @@ export type ListFocusOrientation = 'both' | 'horizontal' | 'vertical';
  * synthetic keyboard event and the native DOM one satisfy it.
  */
 export interface ListFocusKeyboardEvent {
+  currentTarget?: EventTarget | null;
   key: string;
   preventDefault: () => void;
 }
@@ -31,8 +32,8 @@ export interface UseListFocusOptions {
   isLooping?: boolean;
   /**
    * Whether the list is laid out right-to-left, which swaps the meaning of
-   * `ArrowLeft` and `ArrowRight`.
-   * @default false
+   * `ArrowLeft` and `ArrowRight`. When omitted, the direction is read from the
+   * element handling the keyboard event.
    */
   isRtl?: boolean;
   /**
@@ -118,6 +119,12 @@ function getNextIndex(
   }
 }
 
+function isRtlEventTarget(target: EventTarget | null | undefined): boolean {
+  return (
+    target instanceof Element && getComputedStyle(target).direction === 'rtl'
+  );
+}
+
 /**
  * Roving-tabindex keyboard navigation over a list of DOM elements: arrow keys
  * move focus along the list, `Home`/`End` jump to either end, and focus wraps
@@ -145,7 +152,7 @@ function getNextIndex(
 const useListFocus = ({
   getItems,
   isLooping = true,
-  isRtl = false,
+  isRtl,
   onFocusItem,
   orientation = 'vertical',
 }: UseListFocusOptions): UseListFocusResult => {
@@ -188,7 +195,11 @@ const useListFocus = ({
     (event: ListFocusKeyboardEvent) => {
       const {getItems, isLooping, isRtl, onFocusItem, orientation} =
         optionsRef.current;
-      const move = getMove(event.key, orientation, isRtl);
+      const move = getMove(
+        event.key,
+        orientation,
+        isRtl ?? isRtlEventTarget(event.currentTarget),
+      );
       if (move == null) {
         return false;
       }

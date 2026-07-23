@@ -307,6 +307,36 @@ describe('Tabs', () => {
     expect(onChange).toHaveBeenLastCalledWith('overview');
   });
 
+  it('follows visual arrow direction for tabs and TabMenu in RTL', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <div dir="rtl">
+        <Tabs onChange={onChange} value="activity">
+          <Tab label="Overview" value="overview" />
+          <Tab label="Activity" value="activity" />
+          <TabMenu
+            label="More"
+            options={[
+              {label: 'Analytics', value: 'analytics'},
+              {label: 'Reports', value: 'reports'},
+            ]}
+          />
+        </Tabs>
+      </div>,
+    );
+
+    screen.getByRole('tab', {name: 'Activity'}).focus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.getByRole('tab', {name: /More/})).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByRole('tab', {name: 'Activity'})).toHaveFocus();
+    expect(onChange).toHaveBeenLastCalledWith('activity');
+  });
+
   it('prevents selecting disabled tabs and skips them during keyboard navigation', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
