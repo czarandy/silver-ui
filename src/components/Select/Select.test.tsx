@@ -7,6 +7,7 @@ import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {Select} from 'components/Select/Select';
+import {selectOptionItemRecipe} from 'components/Select/Select.recipe';
 import {SelectOption} from 'components/Select/SelectOption';
 import {assertNonNull} from 'internal/testHelpers';
 
@@ -632,6 +633,7 @@ describe('Select', () => {
 
 describe('SelectOption', () => {
   it('renders label, label tooltip, description, icon, end content, and passthrough props', () => {
+    const classes = selectOptionItemRecipe();
     const ref = vi.fn();
     const {container} = render(
       <SelectOption
@@ -655,6 +657,9 @@ describe('SelectOption', () => {
       'The first computer programmer',
     );
     expect(option).toHaveClass('custom-option');
+    expect(option).toHaveClass(classes.root ?? '');
+    expect(classes.root).toContain('silver-px_0');
+    expect(classes.root).toContain('silver-py_0');
     expect(option).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(option);
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- lucide icons are decorative SVGs
