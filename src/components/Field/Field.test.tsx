@@ -3,7 +3,7 @@ import {Mail} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {Field, getNecessity} from 'components/Field/Field';
 import {fieldRecipe} from 'components/Field/Field.recipe';
-import {inputRecipe} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {assertNonNull} from 'internal/testHelpers';
 import {token} from 'styled-system/tokens';
 
@@ -138,6 +138,14 @@ describe('Field', () => {
       expect(token('shadows.focus.error')).toMatch(/^inset /);
       expect(token('shadows.focus.warning')).toMatch(/^inset /);
       expect(token('shadows.focus.success')).toMatch(/^inset /);
+    });
+  });
+
+  describe('input inline spacing', () => {
+    it('uses 12px inline padding and offsets terminal clear buttons by 8px', () => {
+      expect(inputRecipe()).toContain('silver-ps_3');
+      expect(inputRecipe()).toContain('silver-pe_3');
+      expect(inputStyles.clearButton).toContain('silver-me_-2');
     });
   });
 

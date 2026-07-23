@@ -2,6 +2,7 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
+import {inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {NumberInput} from 'components/NumberInput/NumberInput';
 
@@ -47,7 +48,9 @@ describe('NumberInput', () => {
       <NumberInput hasClear label="Count" onChange={onChange} value={4} />,
     );
 
-    await user.click(screen.getByRole('button', {name: 'Clear Count'}));
+    const clearButton = screen.getByRole('button', {name: 'Clear Count'});
+    expect(clearButton).toHaveClass(inputStyles.clearButton);
+    await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
