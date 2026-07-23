@@ -156,14 +156,20 @@ export type SelectTriggerVariants = RecipeVariantProps<
 >;
 
 export const selectOptionItemRecipe = sva({
-  slots: ['root', 'icon'],
+  slots: ['root', 'icon', 'tooltipIcon'],
   base: {
     root: {
       display: 'flex',
       minW: 0,
-      p: 0,
+      px: 0,
+      py: 0,
     },
     icon: {
+      display: 'inline-flex',
+      flexShrink: 0,
+      color: 'fg.muted',
+    },
+    tooltipIcon: {
       display: 'inline-flex',
       flexShrink: 0,
       color: 'fg.muted',

@@ -113,6 +113,23 @@ function CustomOptionsStory(args: React.ComponentProps<typeof Select>) {
   );
 }
 
+function OptionLabelTooltipsStory(args: React.ComponentProps<typeof Select>) {
+  const [value, setValue] = useState<string | null>('ada');
+  return (
+    <Select
+      {...args}
+      onChange={setValue}
+      renderOption={option => (
+        <SelectOption
+          label={option.label ?? option.value}
+          labelTooltip={`More information about ${option.label ?? option.value}`}
+        />
+      )}
+      value={value}
+    />
+  );
+}
+
 export const Default: Story = {
   parameters: {
     docs: {
@@ -132,6 +149,10 @@ export const Searchable: Story = {
 
 export const CustomOptions: Story = {
   render: (args: SelectProps) => <CustomOptionsStory {...args} />,
+};
+
+export const OptionLabelTooltips: Story = {
+  render: (args: SelectProps) => <OptionLabelTooltipsStory {...args} />,
 };
 
 export const Disabled: Story = {
