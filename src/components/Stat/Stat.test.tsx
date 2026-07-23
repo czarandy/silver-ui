@@ -48,6 +48,24 @@ describe('Stat', () => {
     expect(value).toHaveClass('silver-fv-num_tabular-nums');
   });
 
+  it('can disable tabular numbers for the value and change', () => {
+    render(
+      <Stat
+        change={12.5}
+        hasTabularNumbers={false}
+        label="P90 CI time"
+        value="12m 11s"
+      />,
+    );
+
+    expect(screen.getByText('12m 11s')).not.toHaveClass(
+      'silver-fv-num_tabular-nums',
+    );
+    expect(screen.getByText('12.5% increased')).not.toHaveClass(
+      'silver-fv-num_tabular-nums',
+    );
+  });
+
   it('keeps the value on one line', () => {
     render(<Stat label="Revenue" value="$1.2 million" />);
 

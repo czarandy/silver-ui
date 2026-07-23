@@ -79,6 +79,12 @@ export interface StatProps extends Omit<
    */
   formatChange?: (change: number) => string;
   /**
+   * Whether to use tabular (monospaced) number figures for the value and
+   * change.
+   * @default true
+   */
+  hasTabularNumbers?: boolean;
+  /**
    * Optional decorative icon rendered beside the statistic.
    */
   icon?: IconComponent;
@@ -112,6 +118,7 @@ export function Stat({
   decreaseLabel = 'decreased',
   description,
   formatChange = formatChangeAsPercent,
+  hasTabularNumbers = true,
   icon,
   increaseLabel = 'increased',
   label,
@@ -157,7 +164,7 @@ export function Stat({
           <Text
             className={classes.value}
             display="block"
-            hasTabularNumbers
+            hasTabularNumbers={hasTabularNumbers}
             type="display-2">
             {value}
           </Text>
@@ -168,7 +175,10 @@ export function Stat({
                 icon={changeIconByDirection[changeDirection]}
                 size="sm"
               />
-              <Text color="inherit" hasTabularNumbers type="supporting">
+              <Text
+                color="inherit"
+                hasTabularNumbers={hasTabularNumbers}
+                type="supporting">
                 {formatChange(change)} {changeLabelByDirection[changeDirection]}
               </Text>
             </span>
