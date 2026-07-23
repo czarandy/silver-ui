@@ -10,6 +10,7 @@ import {
   type RefCallback,
 } from 'react';
 import {LayerContext} from 'internal/LayerContext';
+import {SizeContext} from 'internal/SizeContext';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {layerReset} from 'styled-system/recipes';
 import {cx} from 'utils/cx';
@@ -315,7 +316,9 @@ export function useLayer({
 
       return (
         <div {...layerProps}>
-          <LayerContext value={layerContextValue}>{children}</LayerContext>
+          <LayerContext value={layerContextValue}>
+            <SizeContext value={null}>{children}</SizeContext>
+          </LayerContext>
         </div>
       );
     },

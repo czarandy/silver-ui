@@ -7,6 +7,7 @@ import {Drawer} from 'components/Drawer/Drawer';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
 import {useDrawer} from 'components/Drawer/useDrawer';
 import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
+import {SizeContext} from 'internal/SizeContext';
 
 beforeAll(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
@@ -59,6 +60,20 @@ function pressAndRelease(
 }
 
 describe('Drawer', () => {
+  it('starts a new size cascade for its content', () => {
+    render(
+      <SizeContext value="lg">
+        <Drawer isOpen label="Navigation" onOpenChange={() => {}}>
+          <Button label="Save" />
+        </Drawer>
+      </SizeContext>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveClass(
+      'silver-h_component.md',
+    );
+  });
+
   it('opens and renders drawer content', () => {
     render(
       <Drawer isOpen label="Navigation" onOpenChange={() => {}}>

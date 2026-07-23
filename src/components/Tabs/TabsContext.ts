@@ -1,8 +1,9 @@
 'use client';
 
 import {createContext, use} from 'react';
+import type {ComponentSize} from 'internal/SizeContext';
 
-export type TabsSize = 'lg' | 'md' | 'sm';
+export type TabsSize = ComponentSize;
 export type TabsLayout = 'fill' | 'hug';
 
 export interface TabsContextValue {

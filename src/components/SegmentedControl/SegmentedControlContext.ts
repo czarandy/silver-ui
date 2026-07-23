@@ -1,9 +1,10 @@
 'use client';
 
 import {createContext, use} from 'react';
+import type {ComponentSize} from 'internal/SizeContext';
 
 export type SegmentedControlLayout = 'fill' | 'hug';
-export type SegmentedControlSize = 'lg' | 'md' | 'sm';
+export type SegmentedControlSize = ComponentSize;
 
 export interface SegmentedControlContextValue {
   isDisabled: boolean;

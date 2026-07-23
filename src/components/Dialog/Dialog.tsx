@@ -12,6 +12,7 @@ import {
 import {dialogRecipe} from 'components/Dialog/Dialog.recipe';
 import {DialogContext} from 'components/Dialog/DialogContext';
 import {LayerContext} from 'internal/LayerContext';
+import {SizeContext} from 'internal/SizeContext';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
@@ -214,9 +215,11 @@ export function Dialog({
         ...style,
       }}>
       <LayerContext value={layerContextValue}>
-        <DialogContext value={dialogContextValue}>
-          <div className={classes.inner}>{children}</div>
-        </DialogContext>
+        <SizeContext value={null}>
+          <DialogContext value={dialogContextValue}>
+            <div className={classes.inner}>{children}</div>
+          </DialogContext>
+        </SizeContext>
       </LayerContext>
     </dialog>
   );

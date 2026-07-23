@@ -25,6 +25,7 @@ import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {TagsInput} from 'components/TagsInput/TagsInput';
+import {SizeContext} from 'internal/SizeContext';
 import {
   assertNonNull,
   createResizeObserverStub,
@@ -69,6 +70,22 @@ beforeEach(() => {
 });
 
 describe('TagsInput', () => {
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <TagsInput
+          data-testid="tags"
+          label="People"
+          onChange={() => {}}
+          searchSource={createStaticSearchSource(items)}
+          value={[]}
+        />
+      </SizeContext>,
+    );
+
+    expect(screen.getByTestId('tags')).toHaveClass(inputRecipe({size: 'lg'}));
+  });
+
   it('submits each selected item ID with htmlName', () => {
     render(
       <form data-testid="form">

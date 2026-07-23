@@ -24,7 +24,7 @@ import {
 } from 'components/SegmentedControl/SegmentedControlItem';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
-import {useAmbientSize} from 'internal/SizeContext';
+import {useResolvedSize} from 'internal/SizeContext';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -111,8 +111,7 @@ export function SegmentedControl<TValue extends string = string>({
   style,
   value,
 }: SegmentedControlProps<TValue>): React.JSX.Element {
-  const ambientSize = useAmbientSize();
-  const size = sizeProp ?? ambientSize ?? 'md';
+  const size = useResolvedSize(sizeProp);
   const containerRef = useRef<HTMLDivElement>(null);
   const handleChange = useCallback(
     (nextValue: string) => {

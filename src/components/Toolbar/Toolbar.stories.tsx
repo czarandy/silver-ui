@@ -15,14 +15,20 @@ import {useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import {Card} from 'components/Card';
+import {InputGroup} from 'components/InputGroup';
+import {NumberInput} from 'components/NumberInput';
+import {Pagination} from 'components/Pagination';
+import {Popover} from 'components/Popover';
 import {
   SegmentedControl,
   SegmentedControlItem,
 } from 'components/SegmentedControl';
 import {Select} from 'components/Select';
+import {SplitButton} from 'components/SplitButton';
 import {Tab, Tabs} from 'components/Tabs';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
+import {ToggleButton} from 'components/ToggleButton';
 import {Toolbar} from 'components/Toolbar/Toolbar';
 import {css} from 'styled-system/css';
 
@@ -140,6 +146,90 @@ export const Sizes: Story = {
       </div>
     );
   },
+};
+
+/**
+ * Compound controls participate in the same cascade. InputGroup keeps its
+ * children coordinated, while standalone controls use the Toolbar size as
+ * their default.
+ */
+export const SizeCascadeConsumers: Story = {
+  render: function Render() {
+    const [quantity, setQuantity] = useState<number | null>(1);
+    const [page, setPage] = useState(1);
+    return (
+      <Toolbar
+        label="Order controls"
+        size="sm"
+        startContent={
+          <>
+            <InputGroup isLabelHidden label="Order details">
+              <NumberInput
+                isLabelHidden
+                label="Quantity"
+                onChange={setQuantity}
+                value={quantity}
+              />
+              <Select
+                isLabelHidden
+                label="Unit"
+                onChange={() => {}}
+                options={['Each', 'Case']}
+                value="Each"
+              />
+            </InputGroup>
+            <ToggleButton isSelected label="Pinned" />
+            <SplitButton
+              items={[{label: 'Save as template'}]}
+              label="Save"
+              variant="primary"
+            />
+            <Pagination onChange={setPage} page={page} totalPages={3} />
+          </>
+        }
+      />
+    );
+  },
+};
+
+/**
+ * A nested Toolbar inherits the outer size. Opening the Popover shows the
+ * boundary rule: controls on the new surface restart at the md default.
+ */
+export const SizeCascadeBoundaries: Story = {
+  render: () => (
+    <Toolbar
+      endContent={
+        <Popover
+          content={
+            <TextInput
+              isLabelHidden
+              label="Overlay search"
+              onChange={() => {}}
+              placeholder="Defaults to md"
+              value=""
+            />
+          }
+          label="Overlay controls"
+          padding={3}>
+          <Button label="Open md overlay" variant="secondary" />
+        </Popover>
+      }
+      label="Outer toolbar"
+      size="lg"
+      startContent={
+        <Toolbar
+          label="Nested toolbar"
+          startContent={
+            <>
+              <Button label="Inherited action" />
+              <ToggleButton label="Inherited toggle" />
+            </>
+          }
+        />
+      }
+    />
+  ),
 };
 
 /**

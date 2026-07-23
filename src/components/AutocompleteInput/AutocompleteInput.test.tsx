@@ -13,6 +13,7 @@ import {
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
+import {SizeContext} from 'internal/SizeContext';
 import {assertNonNull} from 'internal/testHelpers';
 
 const items: SearchableItem[] = [
@@ -41,6 +42,24 @@ afterEach(() => {
 });
 
 describe('AutocompleteInput', () => {
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <AutocompleteInput
+          data-testid="autocomplete"
+          label="Person"
+          onChange={() => {}}
+          searchSource={createStaticSearchSource(items)}
+          value={null}
+        />
+      </SizeContext>,
+    );
+
+    expect(screen.getByTestId('autocomplete')).toHaveClass(
+      inputRecipe({size: 'lg'}),
+    );
+  });
+
   it('selects a searched item', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

@@ -17,6 +17,7 @@ import {
 } from 'components/Field';
 import {inputGroupRecipe} from 'components/InputGroup/InputGroup.recipe';
 import {InputGroupContext} from 'components/InputGroup/InputGroupContext';
+import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
@@ -60,8 +61,8 @@ export type InputGroupProps = {
    */
   ref?: Ref<HTMLDivElement>;
   /**
-   * Visual size applied to the group.
-   * @default 'md'
+   * Visual size applied to the group and its children.
+   * @default The enclosing Toolbar size, otherwise 'md'
    */
   size?: InputSize;
   /**
@@ -90,7 +91,7 @@ export function InputGroup({
   isLabelHidden = false,
   isOptional,
   isRequired,
-  size = 'md',
+  size: sizeProp,
   status,
   statusVariant = 'attached',
   labelTooltip,
@@ -99,6 +100,7 @@ export function InputGroup({
   style,
   ref,
 }: InputGroupProps): React.JSX.Element {
+  const size = useResolvedSize(sizeProp);
   const inputId = useId();
   const labelId = `${inputId}-label`;
   const descriptionID = isNonEmptyReactNode(description)

@@ -6,6 +6,7 @@ import {Button} from 'components/Button';
 import type {ButtonSize} from 'components/Button';
 import {Text} from 'components/Text';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
+import {useResolvedSize} from 'internal/SizeContext';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -175,12 +176,13 @@ export function Pagination({
   pageSize: pageSizeFromProps = 10,
   ref,
   siblingCount: siblingCountFromProps = 1,
-  size = 'md',
+  size: sizeProp,
   style,
   totalItems,
   totalPages: totalPagesProp,
   variant = 'pages',
 }: PaginationProps): React.JSX.Element | null {
+  const size = useResolvedSize(sizeProp);
   const siblingCount = Math.max(0, siblingCountFromProps);
   const pageSize = Math.max(1, pageSizeFromProps);
   const computedTotalPages =

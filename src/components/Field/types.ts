@@ -1,3 +1,5 @@
+import type {ComponentSize} from 'internal/SizeContext';
+
 export type InputStatusType = 'warning' | 'error' | 'success';
 
 export interface InputStatus {
@@ -11,4 +13,4 @@ export interface InputStatus {
   type: InputStatusType;
 }
 
-export type InputSize = 'sm' | 'md' | 'lg';
+export type InputSize = ComponentSize;

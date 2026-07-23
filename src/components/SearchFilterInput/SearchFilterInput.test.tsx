@@ -1,6 +1,7 @@
 import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {inputRecipe} from 'components/Field/inputStyles';
 import {SearchFilterInput} from 'components/SearchFilterInput/SearchFilterInput';
 import {formatFilterValue} from 'components/SearchFilterInput/formatFilterValue';
 import type {
@@ -11,6 +12,7 @@ import {
   createSearchFilterInputConfig,
   type FieldDefinition,
 } from 'components/SearchFilterInput/useSearchFilterInputConfig';
+import {SizeContext} from 'internal/SizeContext';
 import {assertNonNull, createResizeObserverStub} from 'internal/testHelpers';
 
 const STATUSES: ReadonlyArray<EnumItem> = [
@@ -59,6 +61,23 @@ const emptyOperatorConfig = {
 } as const satisfies SearchFilterInputConfig;
 
 describe('SearchFilterInput', () => {
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <SearchFilterInput
+          config={config}
+          data-testid="filter-input"
+          filters={[]}
+          onChange={() => {}}
+        />
+      </SizeContext>,
+    );
+
+    expect(screen.getByTestId('filter-input')).toHaveClass(
+      inputRecipe({size: 'lg'}),
+    );
+  });
+
   it('renders with no filters', () => {
     render(
       <SearchFilterInput config={config} filters={[]} onChange={() => {}} />,

@@ -8,6 +8,7 @@ import {Spinner} from 'components/Spinner';
 import {toggleButtonRecipe} from 'components/ToggleButton/ToggleButton.recipe';
 import {useToggleButtonGroup} from 'components/ToggleButton/ToggleButtonGroup';
 import {Tooltip} from 'components/Tooltip';
+import {useResolvedSize} from 'internal/SizeContext';
 import {cx} from 'utils/cx';
 
 export interface ToggleButtonProps {
@@ -115,7 +116,7 @@ export function ToggleButton({
     group != null && value != null
       ? group.selectedValues.has(value)
       : isSelectedProp;
-  const size = sizeProp ?? group?.size ?? 'md';
+  const size = useResolvedSize(sizeProp, group?.size);
   const isDisabled = isDisabledProp || group?.isDisabled === true;
   const resolvedIcon = isSelected && selectedIcon != null ? selectedIcon : icon;
   const classes = toggleButtonRecipe({isSelected});

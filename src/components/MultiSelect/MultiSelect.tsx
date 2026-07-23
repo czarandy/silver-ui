@@ -28,6 +28,7 @@ import {
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
+import {useResolvedSize} from 'internal/SizeContext';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -240,7 +241,7 @@ export function MultiSelect({
   ref,
   searchPlaceholder = 'Search...',
   selectAllLabel = 'Select all',
-  size: sizeProp = 'md',
+  size: sizeProp,
   startIcon,
   status,
   style,
@@ -253,7 +254,7 @@ export function MultiSelect({
     isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const size = inputGroup?.size ?? sizeProp;
+  const size = useResolvedSize(inputGroup?.size, sizeProp);
   const statusType = status?.type ?? inputGroup?.statusType;
 
   const selectedValues = useMemo(() => new Set(value), [value]);

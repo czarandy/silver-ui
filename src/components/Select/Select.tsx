@@ -26,7 +26,7 @@ import {
   selectTriggerRecipe,
 } from 'components/Select/Select.recipe';
 import {Spinner} from 'components/Spinner';
-import {useAmbientSize} from 'internal/SizeContext';
+import {useResolvedSize} from 'internal/SizeContext';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -215,12 +215,11 @@ export function Select({
 }: SelectProps): React.JSX.Element {
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
-  const ambientSize = useAmbientSize();
   const effectiveDisabled =
     isDisabled ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const size = inputGroup?.size ?? sizeProp ?? ambientSize ?? 'md';
+  const size = useResolvedSize(inputGroup?.size, sizeProp);
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 
   const selectedValues = useMemo(

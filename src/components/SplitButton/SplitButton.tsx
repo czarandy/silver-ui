@@ -6,6 +6,7 @@ import {Button, type ButtonProps, type ButtonSize} from 'components/Button';
 import {ButtonGroup} from 'components/ButtonGroup';
 import {DropdownMenu, type DropdownMenuOption} from 'components/DropdownMenu';
 import type {IconComponent} from 'components/Icon';
+import {useResolvedSize} from 'internal/SizeContext';
 
 /**
  * A directly-clickable primary action paired with an attached chevron toggle
@@ -108,11 +109,13 @@ export function SplitButton({
   onClick,
   onOpenChange,
   ref,
-  size = 'md',
+  size: sizeProp,
   startContent,
   style,
   variant = 'secondary',
 }: SplitButtonProps): React.JSX.Element {
+  const size = useResolvedSize(sizeProp);
+
   return (
     <ButtonGroup
       className={className}
