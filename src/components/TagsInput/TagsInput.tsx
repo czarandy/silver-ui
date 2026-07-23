@@ -33,6 +33,7 @@ import {OverflowList} from 'components/OverflowList';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import useAnnounce from 'hooks/useAnnounce';
+import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
@@ -310,7 +311,7 @@ export function TagsInput<T extends SearchableItem>({
   renderItem,
   renderTag,
   searchSource,
-  size: sizeProp = 'md',
+  size: sizeProp,
   startIcon,
   status,
   style,
@@ -323,7 +324,7 @@ export function TagsInput<T extends SearchableItem>({
     isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const size = inputGroup?.size ?? sizeProp;
+  const size = useResolvedSize(inputGroup?.size, sizeProp);
   const statusType = status?.type ?? inputGroup?.statusType;
 
   const inputId = useId();

@@ -5,11 +5,24 @@ import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {ToggleButton} from 'components/ToggleButton/ToggleButton';
 import {ToggleButtonGroup} from 'components/ToggleButton/ToggleButtonGroup';
+import {SizeContext} from 'internal/SizeContext';
 
 describe('ToggleButton', () => {
   it('renders label as visible text', () => {
     render(<ToggleButton label="Bold" />);
     expect(screen.getByRole('button', {name: 'Bold'})).toBeInTheDocument();
+  });
+
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <ToggleButton label="Bold" />
+      </SizeContext>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Bold'})).toHaveClass(
+      'silver-h_component.lg',
+    );
   });
 
   it('sets aria-pressed from isSelected', () => {

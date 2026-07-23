@@ -31,6 +31,7 @@ import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Spinner} from 'components/Spinner';
+import {useResolvedSize} from 'internal/SizeContext';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
@@ -236,7 +237,7 @@ export function NumberInput({
   label,
   value,
   onChange,
-  size: sizeProp = 'md',
+  size: sizeProp,
   description,
   endContent,
   isLabelHidden = false,
@@ -279,7 +280,7 @@ export function NumberInput({
     isDisabled ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const size = inputGroup?.size ?? sizeProp;
+  const size = useResolvedSize(inputGroup?.size, sizeProp);
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
   const [pendingInput, setPendingInput] = useState<string | null>(null);
   const displayValue = useMemo(() => {

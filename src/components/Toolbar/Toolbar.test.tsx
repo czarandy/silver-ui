@@ -547,6 +547,45 @@ describe('Toolbar', () => {
       );
     });
 
+    it('cascades size through a nested Toolbar', () => {
+      render(
+        <Toolbar
+          label="Outer actions"
+          size="lg"
+          startContent={
+            <Toolbar
+              label="Inner actions"
+              startContent={<Button label="Save" />}
+            />
+          }
+        />,
+      );
+
+      expect(screen.getByRole('button', {name: 'Save'})).toHaveClass(
+        'silver-h_component.lg',
+      );
+    });
+
+    it('lets a nested Toolbar start a new size cascade', () => {
+      render(
+        <Toolbar
+          label="Outer actions"
+          size="lg"
+          startContent={
+            <Toolbar
+              label="Inner actions"
+              size="sm"
+              startContent={<Button label="Save" />}
+            />
+          }
+        />,
+      );
+
+      expect(screen.getByRole('button', {name: 'Save'})).toHaveClass(
+        'silver-h_component.sm',
+      );
+    });
+
     it('cascades size through ButtonGroup', () => {
       render(
         <Toolbar

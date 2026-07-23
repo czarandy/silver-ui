@@ -3,8 +3,21 @@ import userEvent from '@testing-library/user-event';
 import type React from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Pagination} from 'components/Pagination/Pagination';
+import {SizeContext} from 'internal/SizeContext';
 
 describe('Pagination', () => {
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <Pagination onChange={() => {}} page={1} totalPages={2} />
+      </SizeContext>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Go to next page'})).toHaveClass(
+      'silver-h_component.lg',
+    );
+  });
+
   it('renders a navigation landmark', () => {
     render(<Pagination onChange={() => {}} page={1} totalPages={5} />);
     expect(

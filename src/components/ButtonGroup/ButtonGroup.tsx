@@ -8,7 +8,7 @@ import {
   ButtonGroupContext,
   type ButtonGroupOrientation,
 } from 'components/ButtonGroup/ButtonGroupContext';
-import {useAmbientSize} from 'internal/SizeContext';
+import {useResolvedSize} from 'internal/SizeContext';
 import {cx} from 'utils/cx';
 
 /**
@@ -69,8 +69,7 @@ export function ButtonGroup({
   size: sizeProp,
   style,
 }: ButtonGroupProps): React.JSX.Element {
-  const ambientSize = useAmbientSize();
-  const size = sizeProp ?? ambientSize ?? 'md';
+  const size = useResolvedSize(sizeProp);
   const contextValue = useMemo(
     () => ({isDisabled, orientation, size}),
     [isDisabled, orientation, size],

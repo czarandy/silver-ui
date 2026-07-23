@@ -11,6 +11,7 @@ import {Button} from 'components/Button';
 import {Dialog} from 'components/Dialog/Dialog';
 import {useDialog} from 'components/Dialog/useDialog';
 import {LayoutHeader} from 'components/Layout';
+import {SizeContext} from 'internal/SizeContext';
 
 beforeAll(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
@@ -59,6 +60,20 @@ function pressAndRelease(
 }
 
 describe('Dialog', () => {
+  it('starts a new size cascade for its content', () => {
+    render(
+      <SizeContext value="lg">
+        <Dialog isOpen label="Preferences" onOpenChange={() => {}}>
+          <Button label="Save" />
+        </Dialog>
+      </SizeContext>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveClass(
+      'silver-h_component.md',
+    );
+  });
+
   it('opens and renders dialog content', () => {
     render(
       <Dialog isOpen label="Preferences" onOpenChange={() => {}}>

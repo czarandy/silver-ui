@@ -37,9 +37,11 @@ import {
   type TagsInputOverflowBehavior,
 } from 'components/TagsInput';
 import {Text} from 'components/Text';
+import type {ComponentSize} from 'internal/SizeContext';
+import {useResolvedSize} from 'internal/SizeContext';
 import {css} from 'styled-system/css';
 
-export type SearchFilterInputSize = 'sm' | 'md' | 'lg';
+export type SearchFilterInputSize = ComponentSize;
 
 export interface SearchFilterInputProps {
   /**
@@ -228,13 +230,14 @@ export function SearchFilterInput({
   popoverSaveButtonLabel = 'Apply',
   ref,
   resultCount,
-  size = 'md',
+  size: sizeProp,
   startIcon,
   status,
   style,
   tagOverflowBehavior,
   timezoneID,
 }: SearchFilterInputProps): React.JSX.Element {
+  const size = useResolvedSize(sizeProp);
   const config = useInternalSearchFilterInputConfig(configFromProps);
   const searchSource = useSearchFilterInputSource(config);
   const tagsInputRef = useRef<TagsInputHandle>(null);

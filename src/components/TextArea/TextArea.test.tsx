@@ -2,13 +2,27 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {MessageSquare, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
+import {inputRecipe} from 'components/Field/inputStyles';
 import {TextArea} from 'components/TextArea/TextArea';
+import {SizeContext} from 'internal/SizeContext';
 
 function MessageIcon(props: LucideProps): React.JSX.Element {
   return <MessageSquare {...props} data-testid="message-icon" />;
 }
 
 describe('TextArea', () => {
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <TextArea label="Notes" onChange={() => {}} value="" />
+      </SizeContext>,
+    );
+
+    const textarea = screen.getByRole('textbox', {name: 'Notes'});
+    // eslint-disable-next-line testing-library/no-node-access -- the size recipe is applied to the textarea wrapper
+    expect(textarea.parentElement).toHaveClass(inputRecipe({size: 'lg'}));
+  });
+
   it('calls onChange and renders a character counter', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

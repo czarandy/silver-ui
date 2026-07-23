@@ -4,6 +4,7 @@ import {Copy} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {DropdownMenuItem} from 'components/DropdownMenu';
 import {SplitButton} from 'components/SplitButton/SplitButton';
+import {SizeContext} from 'internal/SizeContext';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -29,6 +30,21 @@ describe('SplitButton', () => {
     expect(
       screen.getByRole('button', {name: 'More actions'}),
     ).toBeInTheDocument();
+  });
+
+  it('inherits the ambient size for both buttons', () => {
+    render(
+      <SizeContext value="lg">
+        <SplitButton items={[{label: 'Save a copy'}]} label="Save" />
+      </SizeContext>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveClass(
+      'silver-h_component.lg',
+    );
+    expect(screen.getByRole('button', {name: 'More actions'})).toHaveClass(
+      'silver-h_component.lg',
+    );
   });
 
   it('fires the primary action without opening the menu', async () => {

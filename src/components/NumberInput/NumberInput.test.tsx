@@ -2,9 +2,10 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {inputStyles} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {NumberInput} from 'components/NumberInput/NumberInput';
+import {SizeContext} from 'internal/SizeContext';
 
 function ControlledClearableNumberInput({
   initialValue,
@@ -29,6 +30,18 @@ function ControlledClearableNumberInput({
 }
 
 describe('NumberInput', () => {
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <NumberInput label="Count" onChange={() => {}} value={1} />
+      </SizeContext>,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    // eslint-disable-next-line testing-library/no-node-access -- the size recipe is applied to the input wrapper
+    expect(input.parentElement).toHaveClass(inputRecipe({size: 'lg'}));
+  });
+
   it('calls onChange with valid numbers', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

@@ -17,7 +17,7 @@ import {
 } from 'components/Tabs/TabsContext';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
-import {useAmbientSize} from 'internal/SizeContext';
+import {useResolvedSize} from 'internal/SizeContext';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
@@ -93,8 +93,7 @@ export function Tabs({
   style,
   value,
 }: TabsProps): React.JSX.Element {
-  const ambientSize = useAmbientSize();
-  const size = sizeProp ?? ambientSize ?? 'md';
+  const size = useResolvedSize(sizeProp);
   const contextValue = useMemo(
     () => ({layout, onChange, size, value}),
     [layout, onChange, size, value],

@@ -5,6 +5,7 @@ import {InputGroup} from 'components/InputGroup/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {NumberInput} from 'components/NumberInput';
 import {TextInput} from 'components/TextInput';
+import {SizeContext} from 'internal/SizeContext';
 import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 
 describe('InputGroup', () => {
@@ -204,5 +205,25 @@ describe('InputGroup', () => {
     // The group's `lg` size must win over the child's own `sm` prop.
     expect(wrapper).toHaveClass(inputRecipe({size: 'lg'}));
     expect(wrapper).not.toHaveClass(inputRecipe({size: 'sm'}));
+  });
+
+  it('inherits ambient size and still overrides a child size prop', () => {
+    render(
+      <SizeContext value="sm">
+        <InputGroup label="Website">
+          <TextInput
+            isLabelHidden
+            label="URL"
+            onChange={() => {}}
+            size="lg"
+            value=""
+          />
+        </InputGroup>
+      </SizeContext>,
+    );
+
+    const input = screen.getByRole('textbox', {name: 'URL'});
+    // eslint-disable-next-line testing-library/no-node-access -- the size recipe is applied to the input wrapper
+    expect(input.parentElement).toHaveClass(inputRecipe({size: 'sm'}));
   });
 });

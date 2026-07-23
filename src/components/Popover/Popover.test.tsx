@@ -4,6 +4,7 @@ import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover/Popover';
+import {SizeContext} from 'internal/SizeContext';
 import {assertNonNull} from 'internal/testHelpers';
 import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 import {token} from 'styled-system/tokens';
@@ -58,6 +59,39 @@ afterAll(() => {
 });
 
 describe('Popover', () => {
+  it('starts a new size cascade for its content', () => {
+    render(
+      <SizeContext value="lg">
+        <Popover
+          content={
+            <>
+              <Button label="Default overlay action" />
+              <Button label="Small overlay action" size="sm" />
+            </>
+          }
+          label="Actions">
+          <Button label="Open" />
+        </Popover>
+      </SizeContext>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Open'})).toHaveClass(
+      'silver-h_component.lg',
+    );
+    expect(
+      screen.getByRole('button', {
+        hidden: true,
+        name: 'Default overlay action',
+      }),
+    ).toHaveClass('silver-h_component.md');
+    expect(
+      screen.getByRole('button', {
+        hidden: true,
+        name: 'Small overlay action',
+      }),
+    ).toHaveClass('silver-h_component.sm');
+  });
+
   it.each(positionAreaCases)(
     'maps placement=%s and alignment=%s to %s under dir=%s',
     (placement, alignment, expectedPositionArea, direction) => {

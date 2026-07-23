@@ -7,6 +7,7 @@ import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {MultiSelect} from 'components/MultiSelect/MultiSelect';
 import {SelectOption} from 'components/Select';
+import {SizeContext} from 'internal/SizeContext';
 import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {
@@ -25,6 +26,23 @@ beforeAll(() => {
 });
 
 describe('MultiSelect', () => {
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <MultiSelect
+          label="Columns"
+          onChange={() => {}}
+          options={['Name', 'Email']}
+          value={[]}
+        />
+      </SizeContext>,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    // eslint-disable-next-line testing-library/no-node-access -- the size recipe is applied to the trigger wrapper
+    expect(trigger.parentElement).toHaveClass(inputRecipe({size: 'lg'}));
+  });
+
   it('submits each selected value with htmlName', () => {
     render(
       <form data-testid="form">

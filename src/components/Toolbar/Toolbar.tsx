@@ -13,14 +13,18 @@ import {
 import {toolbarRecipe} from 'components/Toolbar/Toolbar.recipe';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
-import {SizeContext, type AmbientSize} from 'internal/SizeContext';
+import {
+  SizeContext,
+  type ComponentSize,
+  useResolvedSize,
+} from 'internal/SizeContext';
 import {FOCUSABLE_SELECTOR} from 'internal/focusable';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
-export type ToolbarSize = AmbientSize;
+export type ToolbarSize = ComponentSize;
 export type ToolbarOrientation = 'horizontal' | 'vertical';
 export type ToolbarDividerSide = 'bottom' | 'end' | 'start' | 'top';
 export type ToolbarGap = SpacingToken;
@@ -68,10 +72,13 @@ export interface ToolbarProps {
    */
   ref?: Ref<HTMLDivElement>;
   /**
-   * Toolbar size. Children with a `size` prop (Button, ButtonGroup,
-   * SegmentedControl, Select, Tabs, TextInput) inherit it as their default,
-   * so one `size` here keeps every control in the bar matching.
-   * @default 'md'
+   * Toolbar size. Supported sizeable children inherit it as their default,
+   * including nested Toolbars; Button, ButtonGroup, SplitButton, and
+   * ToggleButton; InputGroup, TextInput, NumberInput, Select, MultiSelect,
+   * AutocompleteInput, TagsInput, TextArea, and SearchFilterInput; plus
+   * SegmentedControl, Tabs, and Pagination. Floating layers, Dialogs, and
+   * Drawers start a new size cascade.
+   * @default The enclosing Toolbar size, otherwise 'md'
    */
   size?: ToolbarSize;
   /**
@@ -171,9 +178,9 @@ function usesArrowKeys(element: HTMLElement): boolean {
  *
  * Renders a `role="toolbar"` container with roving-tabindex keyboard
  * navigation: the whole bar is one tab stop, and the arrow keys move between
- * the controls inside it. The toolbar's `size` cascades to sizeable children
- * (Button, ButtonGroup, SegmentedControl, Select, Tabs, TextInput) as their
- * default, so the bar's controls stay visually coordinated.
+ * the controls inside it. The toolbar's `size` cascades through supported
+ * sizeable children and nested Toolbars so the bar's controls stay visually
+ * coordinated. A floating layer, Dialog, or Drawer starts a new cascade.
  *
  * Use it for contextual actions within a content area — above a table, as a
  * card header with actions, or in a panel — not for app-wide navigation
@@ -189,10 +196,11 @@ export function Toolbar({
   label,
   orientation = 'horizontal',
   ref,
-  size = 'md',
+  size: sizeProp,
   startContent,
   style,
 }: ToolbarProps): React.JSX.Element {
+  const size = useResolvedSize(sizeProp);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
 

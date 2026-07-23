@@ -23,6 +23,7 @@ import type {
   SearchableItem,
   SearchSource,
 } from 'components/AutocompleteInput/types';
+import type {InputSize} from 'components/Field';
 import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
@@ -148,7 +149,7 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    * Visual size.
    * @default 'md'
    */
-  size?: 'sm' | 'md' | 'lg';
+  size?: InputSize;
   /**
    * Inline styles applied to the input.
    */

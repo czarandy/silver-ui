@@ -25,6 +25,7 @@ import {
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
+import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -165,7 +166,7 @@ export function TextArea({
   value,
   onChange,
   rows = 3,
-  size = 'md',
+  size: sizeProp,
   description,
   isLabelHidden = false,
   isOptional,
@@ -189,6 +190,7 @@ export function TextArea({
   style,
   ref,
 }: TextAreaProps): React.JSX.Element {
+  const size = useResolvedSize(sizeProp);
   const inputId = useId();
   const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`

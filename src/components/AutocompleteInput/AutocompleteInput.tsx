@@ -30,6 +30,7 @@ import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Tag} from 'components/Tag';
+import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
@@ -216,7 +217,7 @@ export function AutocompleteInput<T extends SearchableItem>({
   ref,
   renderItem,
   searchSource,
-  size: sizeProp = 'md',
+  size: sizeProp,
   startIcon,
   status,
   style,
@@ -228,7 +229,7 @@ export function AutocompleteInput<T extends SearchableItem>({
     isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const size = inputGroup?.size ?? sizeProp;
+  const size = useResolvedSize(inputGroup?.size, sizeProp);
   const statusType = status?.type ?? inputGroup?.statusType;
 
   const inputId = useId();

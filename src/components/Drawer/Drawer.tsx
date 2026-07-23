@@ -5,6 +5,7 @@ import {useEffect, useId, useMemo, useRef} from 'react';
 import {DialogContext} from 'components/Dialog/DialogContext';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
 import {LayerContext} from 'internal/LayerContext';
+import {SizeContext} from 'internal/SizeContext';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
@@ -179,9 +180,11 @@ export function Drawer({
       ref={mergeRefs(ref, dialogRef)}
       style={{...sizeStyle, ...style}}>
       <LayerContext value={layerContextValue}>
-        <DialogContext value={dialogContextValue}>
-          <div className={classes.inner}>{children}</div>
-        </DialogContext>
+        <SizeContext value={null}>
+          <DialogContext value={dialogContextValue}>
+            <div className={classes.inner}>{children}</div>
+          </DialogContext>
+        </SizeContext>
       </LayerContext>
     </dialog>
   );
