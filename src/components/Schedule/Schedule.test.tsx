@@ -1143,6 +1143,73 @@ describe('Schedule', () => {
     ).toHaveAttribute('aria-current', 'date');
   });
 
+  it.each([
+    {
+      firstDay: 'Sunday, February 1, 2026',
+      lastDay: 'Saturday, February 28, 2026',
+      monthIndex: 1,
+      title: 'February 2026',
+      weekCount: 4,
+      year: 2026,
+    },
+    {
+      firstDay: 'Sunday, June 29, 2025',
+      lastDay: 'Saturday, August 2, 2025',
+      monthIndex: 6,
+      title: 'July 2025',
+      weekCount: 5,
+      year: 2025,
+    },
+    {
+      firstDay: 'Sunday, April 26, 2026',
+      lastDay: 'Saturday, June 6, 2026',
+      monthIndex: 4,
+      title: 'May 2026',
+      weekCount: 6,
+      year: 2026,
+    },
+  ])(
+    'automatically renders $weekCount complete weeks for $title',
+    ({firstDay, lastDay, monthIndex, title, weekCount, year}) => {
+      render(
+        <Schedule
+          events={[]}
+          timezoneID="UTC"
+          view={createScheduleMonthlyView()}
+          viewDate={instantUTC(year, monthIndex, 15)}
+        />,
+      );
+
+      const grid = screen.getByRole('grid', {name: title});
+      expect(within(grid).getAllByRole('gridcell')).toHaveLength(weekCount * 7);
+      expect(
+        within(grid).getByRole('gridcell', {name: firstDay}),
+      ).toBeInTheDocument();
+      expect(
+        within(grid).getByRole('gridcell', {name: lastDay}),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it('honors an explicit fixed month week count', () => {
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView({weekCount: 6})}
+        viewDate={instantUTC(2025, 6, 15)}
+      />,
+    );
+
+    const grid = screen.getByRole('grid', {name: 'July 2025'});
+    expect(within(grid).getAllByRole('gridcell')).toHaveLength(42);
+    expect(
+      within(grid).getByRole('gridcell', {
+        name: 'Saturday, August 9, 2025',
+      }),
+    ).toBeInTheDocument();
+  });
+
   it('nudges only two-digit today numbers to stay centered in the circle', () => {
     // The 1px end margin visually centers a tabular two-digit number inside the
     // today circle; single-digit numbers already center cleanly without it.
@@ -1210,6 +1277,56 @@ describe('Schedule', () => {
     expect(
       screen.queryByRole('gridcell', {name: /Sunday, April 26, 2026/}),
     ).not.toBeInTheDocument();
+    expect(screen.getAllByRole('gridcell')).toHaveLength(35);
+    expect(
+      screen.queryByRole('gridcell', {name: /Monday, June 1, 2026/}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('uses automatic month ranges for event loading and pagination', async () => {
+    const loader = vi.fn(async () => {
+      await Promise.resolve();
+      return [] as CalendarEvent[];
+    });
+    const view = createScheduleMonthlyView();
+
+    function Fixture(): React.JSX.Element {
+      const [viewDate, setViewDate] = useState(() => instantUTC(2025, 6, 15));
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange: setViewDate,
+      });
+      return (
+        <Schedule
+          events={loader}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={view}
+          viewDate={viewDate}
+        />
+      );
+    }
+
+    render(<Fixture />);
+
+    await waitFor(() => expect(loader).toHaveBeenCalledTimes(1));
+    expect(loader).toHaveBeenNthCalledWith(
+      1,
+      instantUTC(2025, 5, 29),
+      instantUTC(2025, 7, 3),
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Next month'}));
+    expect(screen.getByRole('grid', {name: 'August 2025'})).toBeInTheDocument();
+    await waitFor(() => expect(loader).toHaveBeenCalledTimes(2));
+    expect(loader).toHaveBeenNthCalledWith(
+      2,
+      instantUTC(2025, 6, 27),
+      instantUTC(2025, 8, 7),
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Previous month'}));
+    expect(screen.getByRole('grid', {name: 'July 2025'})).toBeInTheDocument();
+    expect(loader).toHaveBeenCalledTimes(2);
   });
 
   it('visually spans multi-day events in month view', () => {
