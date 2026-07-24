@@ -46,6 +46,8 @@ export const WithDescription: Story = {
   },
 };
 
+export const NoPadding: Story = {args: {padding: 0}};
+
 export const WithLinkInLabel: Story = {
   args: {
     label: (

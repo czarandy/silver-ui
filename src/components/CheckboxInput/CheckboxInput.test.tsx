@@ -159,6 +159,23 @@ describe('CheckboxInput', () => {
     expect(screen.getByRole('checkbox', {name: 'Accept'})).toHaveClass('peer');
   });
 
+  it('applies custom padding to the checkbox row', () => {
+    render(
+      <CheckboxInput
+        label="Accept"
+        onChange={() => {}}
+        padding={0}
+        value={false}
+      />,
+    );
+
+    // The padding belongs to Item's presentational wrapper, which deliberately
+    // has no accessible role or consumer-facing test ID.
+    // eslint-disable-next-line testing-library/no-node-access
+    const item = screen.getByRole('checkbox', {name: 'Accept'}).closest('div');
+    expect(item).toHaveClass('silver-p_0');
+  });
+
   it('forwards ref to the input element', () => {
     const ref = vi.fn<(el: HTMLInputElement | null) => void>();
 
