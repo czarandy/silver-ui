@@ -94,6 +94,11 @@ export const tableRecipe = sva({
           'tbody > tr:last-child > &': {
             borderBottomWidth: 0,
           },
+          'tfoot > tr:first-child > &': {
+            borderTopWidth: 'default',
+            borderTopStyle: 'solid',
+            borderTopColor: 'border',
+          },
         },
       },
       columns: {
@@ -121,6 +126,11 @@ export const tableRecipe = sva({
           borderBottomColor: 'border',
           'tbody > tr:last-child > &': {
             borderBottomWidth: 0,
+          },
+          'tfoot > tr:first-child > &': {
+            borderTopWidth: 'default',
+            borderTopStyle: 'solid',
+            borderTopColor: 'border',
           },
           borderInlineEndWidth: 'default',
           borderInlineEndStyle: 'solid',

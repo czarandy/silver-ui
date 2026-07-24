@@ -246,12 +246,30 @@ function DividersStory() {
   return (
     <div style={{display: 'grid', gap: 24}}>
       {variants.map(variant => (
-        <Table
-          columns={columns}
-          data={data.slice(0, 2)}
-          dividers={variant}
-          key={variant}
-        />
+        <Table dividers={variant} key={variant} label={`${variant} dividers`}>
+          <TableHeader>
+            <TableRow>
+              <TableHeaderCell>Source</TableHeaderCell>
+              <TableHeaderCell>Cost</TableHeaderCell>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell>Compute</TableCell>
+              <TableCell>$18.00</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Storage</TableCell>
+              <TableCell>$6.00</TableCell>
+            </TableRow>
+          </TableBody>
+          <TableFooter>
+            <TableRow>
+              <TableCell>Total</TableCell>
+              <TableCell>$24.00</TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
       ))}
     </div>
   );
