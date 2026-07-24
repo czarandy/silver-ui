@@ -363,6 +363,34 @@ function SelectionStory() {
   );
 }
 
+function SelectionMinimumWidthStory() {
+  const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
+  const selection = useTableSelectionState({
+    data,
+    idKey: 'id',
+    selectedKeys,
+    setSelectedKeys,
+  });
+  const selectionPlugin = useTableSelection(selection.selectionConfig);
+  return (
+    <div style={{maxWidth: '100%', width: '560px'}}>
+      <Table
+        columns={[
+          {header: 'Task', key: 'task'},
+          {header: 'Owner', key: 'owner'},
+          {header: 'Status', key: 'status'},
+          {align: 'end', header: 'Budget', key: 'budget'},
+          {header: 'Due', key: 'due'},
+        ]}
+        data={data}
+        idKey="id"
+        plugins={{selectionPlugin}}
+        style={{minWidth: '760px'}}
+      />
+    </div>
+  );
+}
+
 function PaginationStory() {
   const [page, setPage] = useState(1);
   const pageSize = 2;
@@ -680,12 +708,77 @@ export const ChildrenMode: Story = {
   ),
 };
 
+/**
+ * Inline sizing remains on the table when using primitive children. When the
+ * table is wider than its container, the built-in scroll region exposes every
+ * column instead of compressing or clipping its content.
+ */
+export const ChildrenModeMinimumWidth: Story = {
+  name: 'Children mode / Minimum width',
+  render: () => (
+    <div style={{maxWidth: '100%', width: '560px'}}>
+      <Table
+        label="Release readiness"
+        style={{minWidth: '760px'}}
+        verticalAlign="top">
+        <TableHeader>
+          <TableRow>
+            <TableHeaderCell style={{width: '150px'}}>
+              Workstream
+            </TableHeaderCell>
+            <TableHeaderCell style={{width: '130px'}}>Owner</TableHeaderCell>
+            <TableHeaderCell style={{width: '170px'}}>Status</TableHeaderCell>
+            <TableHeaderCell style={{width: '310px'}}>
+              Next step
+            </TableHeaderCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Documentation</TableCell>
+            <TableCell>Alex Morgan</TableCell>
+            <TableCell>
+              <Badge color="success" label="Ready for review" size="lg" />
+            </TableCell>
+            <TableCell>
+              Publish the migration guide and confirm that every example uses
+              the stable API.
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Accessibility</TableCell>
+            <TableCell>Sam Rivera</TableCell>
+            <TableCell>
+              <Badge color="warning" label="Follow-up needed" size="lg" />
+            </TableCell>
+            <TableCell>
+              Recheck keyboard navigation at compact viewport sizes before the
+              release candidate is tagged.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  ),
+};
+
 export const Sortable: Story = {
   render: () => <SortableStory />,
 };
 
 export const Selection: Story = {
   render: () => <SelectionStory />,
+};
+
+/**
+ * A consumer minimum width also holds when a plugin injects its own
+ * fixed-width column: the effective floor is the larger of the consumer and
+ * derived minimums, so the selection checkbox column cannot collapse the
+ * table below the consumer's value.
+ */
+export const SelectionMinimumWidth: Story = {
+  name: 'Selection / Minimum width',
+  render: () => <SelectionMinimumWidthStory />,
 };
 
 export const Pagination: Story = {
