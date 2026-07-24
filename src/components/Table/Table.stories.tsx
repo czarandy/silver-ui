@@ -345,6 +345,34 @@ function SelectionStory() {
   );
 }
 
+function SelectionMinimumWidthStory() {
+  const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
+  const selection = useTableSelectionState({
+    data,
+    idKey: 'id',
+    selectedKeys,
+    setSelectedKeys,
+  });
+  const selectionPlugin = useTableSelection(selection.selectionConfig);
+  return (
+    <div style={{maxWidth: '100%', width: '560px'}}>
+      <Table
+        columns={[
+          {header: 'Task', key: 'task'},
+          {header: 'Owner', key: 'owner'},
+          {header: 'Status', key: 'status'},
+          {align: 'end', header: 'Budget', key: 'budget'},
+          {header: 'Due', key: 'due'},
+        ]}
+        data={data}
+        idKey="id"
+        plugins={{selectionPlugin}}
+        style={{minWidth: '760px'}}
+      />
+    </div>
+  );
+}
+
 function PaginationStory() {
   const [page, setPage] = useState(1);
   const pageSize = 2;
@@ -722,6 +750,17 @@ export const Sortable: Story = {
 
 export const Selection: Story = {
   render: () => <SelectionStory />,
+};
+
+/**
+ * A consumer minimum width also holds when a plugin injects its own
+ * fixed-width column: the effective floor is the larger of the consumer and
+ * derived minimums, so the selection checkbox column cannot collapse the
+ * table below the consumer's value.
+ */
+export const SelectionMinimumWidth: Story = {
+  name: 'Selection / Minimum width',
+  render: () => <SelectionMinimumWidthStory />,
 };
 
 export const Pagination: Story = {

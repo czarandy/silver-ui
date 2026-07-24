@@ -21,6 +21,7 @@ import {
   defaultCellRenderer,
   generateColumns,
   resolveColumnWidths,
+  resolveTableMinWidth,
 } from 'components/Table/columnUtils';
 import type {
   BodyCellRenderProps,
@@ -305,19 +306,23 @@ function TableInner<T extends Record<string, unknown>>({
     [density, dividers, hasHover, isStriped, textOverflow, verticalAlign],
   );
 
-  const classes = tableRecipe({isAutoLayout: isNonEmptyReactNode(children)});
+  const hasChildren = isNonEmptyReactNode(children);
+  const classes = tableRecipe({isAutoLayout: hasChildren});
   const RowComponent = TableRow as React.ComponentType<TableRowComponentProps>;
   const CellComponent =
     TableCell as React.ComponentType<TableCellComponentProps>;
   const HeaderCellComponent = TableHeaderCell;
 
-  const baseColumns =
-    columnsProp ?? (data == null ? [] : generateColumns(data));
-  const transformedColumns = applyPlugins(
-    plugins,
-    plugin => plugin.transformColumns,
-    baseColumns,
-  );
+  // Children mode renders the provided primitives as-is: `columns`/`data` are
+  // documented as ignored, so no columns — inferred or plugin-injected — take
+  // part in table sizing.
+  const transformedColumns = hasChildren
+    ? []
+    : applyPlugins(
+        plugins,
+        plugin => plugin.transformColumns,
+        columnsProp ?? (data == null ? [] : generateColumns(data)),
+      );
   // Keep `columns` referentially stable while its contents are unchanged so the
   // memoized data rows (which compare `columns` by identity) skip re-rendering
   // when an upstream value rebuilds the array each render.
@@ -425,12 +430,16 @@ function TableInner<T extends Record<string, unknown>>({
     } satisfies HeaderRowRenderProps,
   );
 
-  const tableStyle = {
+  const consumerTableStyle = {
     ...style,
     ...tableRenderProps.htmlProps.style,
-    ...(widths.tableMinWidth > 0
-      ? {minWidth: `${widths.tableMinWidth}px`}
-      : {}),
+  };
+  const tableStyle = {
+    ...consumerTableStyle,
+    minWidth: resolveTableMinWidth(
+      widths.tableMinWidth,
+      consumerTableStyle.minWidth,
+    ),
   };
   const hasData = data != null && data.length > 0;
   const hasColumns = columns.length > 0;

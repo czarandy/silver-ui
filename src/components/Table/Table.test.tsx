@@ -23,6 +23,7 @@ import {
   pixel,
   proportional,
   resolveColumnWidths,
+  resolveTableMinWidth,
 } from 'components/Table/columnUtils';
 import {useTableColumnResize} from 'components/Table/plugins/columnResize';
 import {
@@ -300,21 +301,23 @@ describe('Table', () => {
     }
   });
 
+  const manualTableChildren = (
+    <>
+      <thead>
+        <tr>
+          <th>Manual</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Content</td>
+        </tr>
+      </tbody>
+    </>
+  );
+
   it('supports children mode primitives', () => {
-    render(
-      <Table>
-        <thead>
-          <tr>
-            <th>Manual</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Content</td>
-          </tr>
-        </tbody>
-      </Table>,
-    );
+    render(<Table>{manualTableChildren}</Table>);
 
     expect(
       screen.getByRole('columnheader', {name: 'Manual'}),
@@ -323,24 +326,19 @@ describe('Table', () => {
   });
 
   it('preserves a consumer min-width in children mode', () => {
+    render(<Table style={{minWidth: '720px'}}>{manualTableChildren}</Table>);
+
+    expect(screen.getByRole('table')).toHaveStyle({minWidth: '720px'});
+  });
+
+  it('ignores data-derived column minimums in children mode', () => {
     render(
-      <Table data-testid="manual-table" style={{minWidth: '720px'}}>
-        <thead>
-          <tr>
-            <th>Manual</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Content</td>
-          </tr>
-        </tbody>
+      <Table data={data} style={{minWidth: '760px'}}>
+        {manualTableChildren}
       </Table>,
     );
 
-    expect(screen.getByTestId('manual-table')).toHaveStyle({
-      minWidth: '720px',
-    });
+    expect(screen.getByRole('table')).toHaveStyle({minWidth: '760px'});
   });
 
   it('preserves a tableProps min-width when columns do not resolve one', () => {
@@ -348,17 +346,16 @@ describe('Table', () => {
       <Table
         columns={[{header: 'Name', key: 'name'}]}
         data={data}
-        data-testid="unstyled-columns-table"
         tableProps={{style: {minWidth: '680px'}}}
       />,
     );
 
-    expect(screen.getByTestId('unstyled-columns-table')).toHaveStyle({
-      minWidth: '680px',
-    });
+    expect(screen.getByRole('table')).toHaveStyle({minWidth: '680px'});
   });
 
-  it('keeps a resolved column min-width authoritative', () => {
+  // jsdom evaluates the emitted `max()` expression, so the assertions below
+  // see `calc(<larger operand>)` rather than the raw `max(a, b)` string.
+  it('keeps a resolved column min-width above a smaller consumer value', () => {
     render(
       <Table
         columns={[
@@ -366,14 +363,52 @@ describe('Table', () => {
           {header: 'Role', key: 'role', width: pixel(180)},
         ]}
         data={data}
-        data-testid="sized-columns-table"
-        style={{minWidth: '1px'}}
+        style={{minWidth: '200px'}}
       />,
     );
 
-    expect(screen.getByTestId('sized-columns-table')).toHaveStyle({
-      minWidth: '340px',
-    });
+    expect(screen.getByRole('table')).toHaveStyle({minWidth: 'calc(340px)'});
+  });
+
+  it('preserves a consumer min-width larger than the resolved column minimum', () => {
+    render(
+      <Table
+        columns={[
+          {header: 'Name', key: 'name', width: pixel(160)},
+          {header: 'Role', key: 'role', width: pixel(180)},
+        ]}
+        data={data}
+        style={{minWidth: '900px'}}
+      />,
+    );
+
+    expect(screen.getByRole('table')).toHaveStyle({minWidth: 'calc(900px)'});
+  });
+
+  it('keeps a consumer min-width when the selection plugin injects a fixed-width column', () => {
+    function SelectableMinWidthTable() {
+      const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
+      const selection = useTableSelectionState({
+        data,
+        idKey: 'id',
+        selectedKeys,
+        setSelectedKeys,
+      });
+      const selectionPlugin = useTableSelection(selection.selectionConfig);
+      return (
+        <Table
+          columns={[{header: 'Name', key: 'name'}]}
+          data={data}
+          idKey="id"
+          plugins={{selectionPlugin}}
+          tableProps={{style: {minWidth: '680px'}}}
+        />
+      );
+    }
+
+    render(<SelectableMinWidthTable />);
+
+    expect(screen.getByRole('table')).toHaveStyle({minWidth: 'calc(680px)'});
   });
 });
 
@@ -1675,6 +1710,18 @@ describe('Table utilities', () => {
       minWidth: '120px',
       width: `${(1 / 3) * 100}%`,
     });
+  });
+
+  it('reconciles derived and consumer table minimum widths', () => {
+    expect(resolveTableMinWidth(0, undefined)).toBeUndefined();
+    expect(resolveTableMinWidth(0, '680px')).toBe('680px');
+    expect(resolveTableMinWidth(340, undefined)).toBe('340px');
+    expect(resolveTableMinWidth(340, '200px')).toBe('max(340px, 200px)');
+    expect(resolveTableMinWidth(340, '900px')).toBe('max(340px, 900px)');
+    expect(resolveTableMinWidth(340, 900)).toBe('max(340px, 900px)');
+    expect(resolveTableMinWidth(340, '50vw')).toBe('max(340px, 50vw)');
+    // Keyword values cannot appear inside max(); the derived floor wins.
+    expect(resolveTableMinWidth(340, 'min-content')).toBe('340px');
   });
 
   it('renders supported primitive and temporal cell values by default', () => {

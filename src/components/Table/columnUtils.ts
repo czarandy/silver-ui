@@ -93,6 +93,48 @@ export function resolveColumnWidths<T extends Record<string, unknown>>(
   };
 }
 
+// Keyword min-widths are invalid inside `max()`, and there is no way to
+// compare them to a pixel floor, so the derived minimum wins for them.
+const KEYWORD_MIN_WIDTHS = new Set([
+  'auto',
+  'fit-content',
+  'inherit',
+  'initial',
+  'max-content',
+  'min-content',
+  'revert',
+  'revert-layer',
+  'stretch',
+  'unset',
+]);
+
+/**
+ * Reconciles the minimum width derived from resolved columns with a
+ * consumer-supplied `min-width`. Neither side silently wins: when both are
+ * present, the effective floor is the larger of the two via CSS `max()`.
+ */
+export function resolveTableMinWidth(
+  tableMinWidth: number,
+  consumerMinWidth: CSSProperties['minWidth'],
+): CSSProperties['minWidth'] {
+  if (tableMinWidth <= 0) {
+    return consumerMinWidth;
+  }
+  const derived = `${tableMinWidth}px`;
+  if (
+    consumerMinWidth == null ||
+    (typeof consumerMinWidth === 'string' &&
+      KEYWORD_MIN_WIDTHS.has(consumerMinWidth))
+  ) {
+    return derived;
+  }
+  const consumer =
+    typeof consumerMinWidth === 'number'
+      ? `${consumerMinWidth}px`
+      : consumerMinWidth;
+  return `max(${derived}, ${consumer})`;
+}
+
 export function capitalize(value: string): string {
   return value.length === 0
     ? value
