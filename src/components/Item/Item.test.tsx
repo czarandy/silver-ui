@@ -211,6 +211,10 @@ describe('Item', () => {
       'class',
       screen.getByTestId('default').getAttribute('class') ?? '',
     );
+    expect(screen.getByTestId('selected')).toHaveClass('silver-bg_bg.subtle');
+    expect(screen.getByTestId('selected')).not.toHaveClass(
+      'silver-bg_bg.selected',
+    );
   });
 
   it('applies highlighted styling', () => {
