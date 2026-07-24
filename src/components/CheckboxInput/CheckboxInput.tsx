@@ -106,7 +106,7 @@ export type CheckboxInputProps = {
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   /**
    * Inner padding around the checkbox row.
-   * @default 2
+   * @default 0
    */
   padding?: SpacingToken;
   /**
@@ -166,7 +166,7 @@ export function CheckboxInput({
   startContent,
   onFocus,
   onBlur,
-  padding = 2,
+  padding = 0,
   className,
   'data-testid': dataTestId,
   style,
