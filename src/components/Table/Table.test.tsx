@@ -71,6 +71,8 @@ const hoverBgClass = 'hover:[@media_(hover:_hover)]:silver-bg_bg.hover';
 const hoverSubtleBgClass = 'hover:[@media_(hover:_hover)]:silver-bg_bg.subtle';
 const lastBodyRowDividerResetClass =
   '[tbody_>_tr:last-child_>_&]:silver-bd-b-w_0';
+const firstFooterRowDividerClass =
+  '[tfoot_>_tr:first-child_>_&]:silver-bd-t-w_default';
 const maxWidthZeroClass = 'silver-max-w_0';
 const overflowHiddenClass = 'silver-ov_hidden';
 const overflowWrapAnywhereClass = 'silver-ov-wrap_anywhere';
@@ -348,6 +350,66 @@ describe('TableFooter', () => {
     expect(footer).toHaveClass('custom-footer');
     expect(footer).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(screen.getByRole('cell', {name: 'Total'})).toBeInTheDocument();
+  });
+
+  it('adds a top divider to the first footer row for row and grid dividers', () => {
+    const renderTable = (dividers: 'grid' | 'rows') => (
+      <Table dividers={dividers}>
+        <TableBody>
+          <TableRow>
+            <TableCell>Line item</TableCell>
+          </TableRow>
+        </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell>Subtotal</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Total</TableCell>
+          </TableRow>
+        </TableFooter>
+      </Table>
+    );
+    const {rerender} = render(renderTable('rows'));
+
+    const expectFooterDivider = () => {
+      const subtotalCell = screen.getByRole('cell', {name: 'Subtotal'});
+      const totalCell = screen.getByRole('cell', {name: 'Total'});
+
+      expect(subtotalCell).toHaveClass(firstFooterRowDividerClass);
+      expect(subtotalCell.matches('tfoot > tr:first-child > td')).toBe(true);
+      expect(totalCell).toHaveClass(firstFooterRowDividerClass);
+      expect(totalCell.matches('tfoot > tr:first-child > td')).toBe(false);
+    };
+
+    expectFooterDivider();
+
+    rerender(renderTable('grid'));
+
+    expectFooterDivider();
+  });
+
+  it('does not add a footer row divider for column or no dividers', () => {
+    const renderTable = (dividers: 'columns' | 'none') => (
+      <Table dividers={dividers}>
+        <TableFooter>
+          <TableRow>
+            <TableCell>Total</TableCell>
+          </TableRow>
+        </TableFooter>
+      </Table>
+    );
+    const {rerender} = render(renderTable('columns'));
+
+    expect(screen.getByRole('cell', {name: 'Total'})).not.toHaveClass(
+      firstFooterRowDividerClass,
+    );
+
+    rerender(renderTable('none'));
+
+    expect(screen.getByRole('cell', {name: 'Total'})).not.toHaveClass(
+      firstFooterRowDividerClass,
+    );
   });
 });
 
