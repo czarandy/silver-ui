@@ -162,9 +162,16 @@ describe('CodeBlock', () => {
     expect(writeText).toHaveBeenCalledWith('copy me');
     expect(onCopy).toHaveBeenCalledOnce();
     expect(screen.getByRole('button', {name: 'Copied'})).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen
+          .getAllByRole('status')
+          .some(region => region.textContent === 'Copied'),
+      ).toBe(true);
+    });
   });
 
-  it('keeps the copy state unchanged when clipboard writing fails', async () => {
+  it('announces an error when clipboard writing fails', async () => {
     const writeText = vi.fn().mockRejectedValue(new Error('Denied'));
     const onCopy = vi.fn();
     Object.defineProperty(navigator, 'clipboard', {
@@ -181,6 +188,9 @@ describe('CodeBlock', () => {
     });
     expect(onCopy).not.toHaveBeenCalled();
     expect(screen.getByRole('button', {name: 'Copy code'})).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Copy failed');
+    });
   });
 
   it('resets copied state after two seconds', async () => {

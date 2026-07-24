@@ -1,18 +1,9 @@
 'use client';
 
-import {Check, Copy} from 'lucide-react';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type CSSProperties,
-  type Ref,
-} from 'react';
-import {Button} from 'components/Button';
+import {useMemo, type CSSProperties, type Ref} from 'react';
 import {Card} from 'components/Card';
 import {codeBlockRecipe} from 'components/CodeBlock/CodeBlock.recipe';
+import {CopyButton} from 'components/CopyButton';
 import {Divider} from 'components/Divider';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {token} from 'styled-system/tokens';
@@ -156,8 +147,6 @@ export function CodeBlock({
   title,
   width = 'fit-content',
 }: CodeBlockProps): React.JSX.Element {
-  const [copied, setCopied] = useState(false);
-  const copiedResetTimeoutRef = useRef<number | null>(null);
   const lines = useMemo(() => getLineEntries(code), [code]);
   const highlightLineKey = highlightLines?.join(',');
   const highlightedLines = useMemo(
@@ -177,31 +166,6 @@ export function CodeBlock({
     isWrapped,
     hasFloatingCopy: !showHeader && hasCopyButton,
   });
-
-  useEffect(() => {
-    return () => {
-      if (copiedResetTimeoutRef.current != null) {
-        window.clearTimeout(copiedResetTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      onCopy?.();
-      if (copiedResetTimeoutRef.current != null) {
-        window.clearTimeout(copiedResetTimeoutRef.current);
-      }
-      copiedResetTimeoutRef.current = window.setTimeout(() => {
-        setCopied(false);
-        copiedResetTimeoutRef.current = null;
-      }, 2000);
-    } catch {
-      // Clipboard failures leave the copied state unchanged.
-    }
-  }, [code, onCopy]);
 
   const paddingToken = token(`spacing.${padding}`);
   const codeStyle: CSSProperties = {
@@ -232,17 +196,12 @@ export function CodeBlock({
     tabIndex: 0,
   } as const;
 
-  const copyLabel = copied ? 'Copied' : 'Copy code';
   const copyButton = hasCopyButton ? (
-    <Button
-      icon={copied ? Check : Copy}
-      isIconOnly
-      label={copyLabel}
-      onClick={() => {
-        void handleCopy();
-      }}
+    <CopyButton
+      copyLabel="Copy code"
+      onCopy={onCopy}
       size="sm"
-      tooltip={copyLabel}
+      value={code}
       variant="ghost"
     />
   ) : null;

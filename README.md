@@ -143,6 +143,7 @@ mode details, scoped theming examples, and per-instance overrides.
 
 - **Button** — versatile action element supporting links, loading states, and icon-only mode
 - **ButtonGroup** — connected group of related buttons
+- **CopyButton** — clipboard action with copied-state feedback and accessible announcements
 - **ContextMenu** — right-click context menu
 - **DropdownMenu** — button-triggered dropdown menu
 - **SegmentedControl** — mutually exclusive option selector

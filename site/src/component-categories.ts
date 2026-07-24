@@ -35,6 +35,7 @@ export const componentCategories: Record<string, readonly string[]> = {
   'Buttons & Actions': [
     'Button',
     'ButtonGroup',
+    'CopyButton',
     'ContextMenu',
     'DropdownMenu',
     'SegmentedControl',
