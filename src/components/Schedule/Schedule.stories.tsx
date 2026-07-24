@@ -276,6 +276,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const fillHeightStoryContainer = css({h: '600px'});
+const paginationHotkeysStoryContainer = css({display: 'grid', gap: '4'});
 const highlightedDayNumberGrid = css({
   display: 'grid',
   gap: '4',
@@ -601,6 +602,33 @@ export const Week: Story = {
       view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
     />
   ),
+};
+
+export const PaginationHotkeys: Story = {
+  render: () => {
+    const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
+    const paginationPlugin = useSchedulePaginationPlugin({
+      hasHotkeys: true,
+      onViewDateChange: setViewDate,
+    });
+
+    return (
+      <div className={paginationHotkeysStoryContainer}>
+        <Text as="p" color="secondary" type="supporting">
+          Use the left and right arrow keys to move between weeks.
+        </Text>
+        <Schedule
+          categories={categories}
+          events={weekEvents}
+          highlightDate={defaultHighlightDate}
+          plugins={[paginationPlugin]}
+          timezoneID={localTimezoneID}
+          view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+          viewDate={viewDate}
+        />
+      </div>
+    );
+  },
 };
 
 export const ResizableEvents: Story = {

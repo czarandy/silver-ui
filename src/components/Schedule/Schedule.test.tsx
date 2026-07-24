@@ -2128,6 +2128,137 @@ describe('Schedule', () => {
     );
   });
 
+  it.each([
+    {
+      nextDate: instantUTC(2026, 4, 14, 15, 6),
+      previousDate: instantUTC(2026, 4, 12, 15, 6),
+      range: 'day',
+      view: createScheduleDayView(),
+    },
+    {
+      nextDate: instantUTC(2026, 4, 20, 15, 6),
+      previousDate: instantUTC(2026, 4, 6, 15, 6),
+      range: 'week',
+      view: createScheduleWeeklyView(),
+    },
+    {
+      nextDate: instantUTC(2026, 5, 17, 15, 6),
+      previousDate: instantUTC(2026, 3, 15, 15, 6),
+      range: 'month',
+      view: createScheduleMonthlyView(),
+    },
+  ])(
+    'navigates to the previous and next $range with optional arrow hotkeys',
+    ({nextDate, previousDate, view}) => {
+      const onViewDateChange = vi.fn();
+
+      function Fixture(): React.JSX.Element {
+        const paginationPlugin = useSchedulePaginationPlugin({
+          hasHotkeys: true,
+          onViewDateChange,
+        });
+        return (
+          <Schedule
+            events={[]}
+            plugins={[paginationPlugin]}
+            timezoneID="UTC"
+            view={view}
+            viewDate={instantUTC(2026, 4, 13, 15, 6)}
+          />
+        );
+      }
+
+      render(<Fixture />);
+
+      const previousButton = screen.getByRole('button', {name: /^Previous/});
+      const nextButton = screen.getByRole('button', {name: /^Next/});
+      expect(previousButton).toHaveAttribute('aria-keyshortcuts', 'ArrowLeft');
+      expect(nextButton).toHaveAttribute('aria-keyshortcuts', 'ArrowRight');
+
+      const previousEvent = createEvent.keyDown(document, {
+        key: 'ArrowLeft',
+      });
+      fireEvent(document, previousEvent);
+      expect(previousEvent.defaultPrevented).toBe(true);
+      expect(onViewDateChange).toHaveBeenLastCalledWith(previousDate);
+
+      const nextEvent = createEvent.keyDown(document, {key: 'ArrowRight'});
+      fireEvent(document, nextEvent);
+      expect(nextEvent.defaultPrevented).toBe(true);
+      expect(onViewDateChange).toHaveBeenLastCalledWith(nextDate);
+    },
+  );
+
+  it('leaves arrow hotkeys disabled by default', () => {
+    const onViewDateChange = vi.fn();
+
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange,
+      });
+      return (
+        <Schedule
+          events={[]}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={createScheduleDayView()}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    render(<Fixture />);
+
+    expect(
+      screen.getByRole('button', {name: 'Previous day'}),
+    ).not.toHaveAttribute('aria-keyshortcuts');
+    expect(screen.getByRole('button', {name: 'Next day'})).not.toHaveAttribute(
+      'aria-keyshortcuts',
+    );
+    fireEvent.keyDown(document, {key: 'ArrowLeft'});
+    fireEvent.keyDown(document, {key: 'ArrowRight'});
+    expect(onViewDateChange).not.toHaveBeenCalled();
+  });
+
+  it('does not navigate with arrow hotkeys from editable or handled events', () => {
+    const onViewDateChange = vi.fn();
+
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        hasHotkeys: true,
+        onViewDateChange,
+      });
+      return (
+        <>
+          <input aria-label="Event title" />
+          <Schedule
+            events={[]}
+            plugins={[paginationPlugin]}
+            timezoneID="UTC"
+            view={createScheduleDayView()}
+            viewDate={instantUTC(2026, 4, 13)}
+          />
+        </>
+      );
+    }
+
+    render(<Fixture />);
+
+    fireEvent.keyDown(screen.getByRole('textbox', {name: 'Event title'}), {
+      key: 'ArrowLeft',
+    });
+    fireEvent.keyDown(document, {key: 'ArrowRight', repeat: true});
+    const handledEvent = new KeyboardEvent('keydown', {
+      bubbles: true,
+      cancelable: true,
+      key: 'ArrowLeft',
+    });
+    handledEvent.preventDefault();
+    document.dispatchEvent(handledEvent);
+
+    expect(onViewDateChange).not.toHaveBeenCalled();
+  });
+
   it('navigates monthly view across February and varying month lengths', () => {
     function Fixture(): React.JSX.Element {
       const [viewDate, setViewDate] = useState(() => instantUTC(2026, 1, 15));
