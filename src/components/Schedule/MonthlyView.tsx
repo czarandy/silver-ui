@@ -61,8 +61,6 @@ export interface ScheduleMonthlyViewOptions {
   weekStartsOn?: DayOfWeek;
 }
 
-const styles = scheduleMonthlyViewRecipe();
-
 type MonthGridStyle = CSSProperties & {'--schedule-month-row-height': string};
 
 const weekdays = [
@@ -513,6 +511,7 @@ function ScheduleMonthlyView({
   // (e.g. the per-minute current-time tick).
   const month = useMemo(() => viewDate.toPlainDate(), [viewDate]);
   const title = formatMonthTitle(month);
+  const styles = scheduleMonthlyViewRecipe({height});
   const isAutoRowHeight = options.monthRowHeight === 'auto';
   // In auto mode the default height is the minimum each row may shrink to.
   const minMonthRowHeight = Math.max(
@@ -596,10 +595,16 @@ function ScheduleMonthlyView({
       // Auto mode pins explicit per-week tracks on both the cell grid and the
       // event overlay so their absolute positions stay aligned.
       ...(autoRowHeights != null && {
-        gridTemplateRows: autoRowHeights.map(height => `${height}px`).join(' '),
+        gridTemplateRows: autoRowHeights
+          .map(rowHeight =>
+            height === 'fill'
+              ? `minmax(${rowHeight}px, 1fr)`
+              : `${rowHeight}px`,
+          )
+          .join(' '),
       }),
     }),
-    [autoRowHeights, minMonthRowHeight],
+    [autoRowHeights, height, minMonthRowHeight],
   );
   const scheduleClasses = scheduleRecipe({height});
 
@@ -622,7 +627,9 @@ function ScheduleMonthlyView({
             </Heading>
           </div>
         ))}
-        <div className={styles.monthSurface}>
+        <div
+          className={styles.monthSurface}
+          data-testid="schedule-month-surface">
           <div
             className={styles.monthCellGrid}
             data-testid="schedule-month-grid"
@@ -685,7 +692,10 @@ function ScheduleMonthlyView({
               );
             })}
           </div>
-          <div className={styles.monthEventOverlay} style={monthGridStyle}>
+          <div
+            className={styles.monthEventOverlay}
+            data-testid="schedule-month-event-overlay"
+            style={monthGridStyle}>
             {visibleEventSegments.map(segment => (
               <div
                 // The overlay is decorative when pills are static, but becomes

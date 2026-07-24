@@ -1210,6 +1210,38 @@ describe('Schedule', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps the weekday header compact and stretches automatic month rows at fill height', () => {
+    render(
+      <Schedule
+        events={[]}
+        height="fill"
+        timezoneID="UTC"
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2025, 6, 15)}
+      />,
+    );
+
+    const grid = screen.getByRole('grid', {name: 'July 2025'});
+    const monthCellGrid = screen.getByTestId('schedule-month-grid');
+    const monthSurface = screen.getByTestId('schedule-month-surface');
+    const monthEventOverlay = screen.getByTestId(
+      'schedule-month-event-overlay',
+    );
+    const fillClasses = scheduleMonthlyViewRecipe({height: 'fill'});
+
+    expect(within(grid).getAllByRole('gridcell')).toHaveLength(35);
+    expect(grid).toHaveClass(...(fillClasses.grid?.split(' ') ?? []));
+    expect(monthSurface).toHaveClass(
+      ...(fillClasses.monthSurface?.split(' ') ?? []),
+    );
+    expect(monthCellGrid).toHaveClass(
+      ...(fillClasses.monthCellGrid?.split(' ') ?? []),
+    );
+    expect(monthEventOverlay).toHaveClass(
+      ...(fillClasses.monthEventOverlay?.split(' ') ?? []),
+    );
+  });
+
   it('nudges only two-digit today numbers to stay centered in the circle', () => {
     // The 1px end margin visually centers a tabular two-digit number inside the
     // today circle; single-digit numbers already center cleanly without it.
@@ -1508,6 +1540,33 @@ describe('Schedule', () => {
     // stacked events (levels 0-5) need 30 + 5*22 + 20 + 4 = 164px.
     const cellGrid = screen.getByTestId('schedule-month-grid');
     expect(cellGrid.style.gridTemplateRows).toContain('164px');
+  });
+
+  it('stretches auto-height month rows from their event-dependent minimums at fill height', () => {
+    const overflowEvents = Array.from({length: 6}, (_, index) =>
+      createEventFromISO({
+        category: 'Planning',
+        end: '2026-05-13',
+        id: `fill-auto-month-${index + 1}`,
+        start: '2026-05-13',
+        title: `Fill auto month ${index + 1}`,
+      }),
+    );
+
+    render(
+      <Schedule
+        categories={categories}
+        events={overflowEvents}
+        height="fill"
+        timezoneID="UTC"
+        view={createScheduleMonthlyView({monthRowHeight: 'auto'})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByTestId('schedule-month-grid').style.gridTemplateRows,
+    ).toContain('minmax(164px, 1fr)');
   });
 
   it('includes month events in each covered day cell label', () => {
