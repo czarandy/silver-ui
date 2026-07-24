@@ -121,7 +121,7 @@ export const itemRecipe = sva({
       false: {},
     },
     isSelected: {
-      true: {root: {bg: 'bg.selected'}},
+      true: {root: {bg: 'bg.subtle'}},
       false: {},
     },
     // The disabled wrapper dims everything inside it via opacity (which

@@ -120,19 +120,10 @@ export const listItemRecipe = sva({
         },
       },
     },
-    isSelected: {
-      true: {
-        item: {
-          bg: 'bg.hover',
-        },
-      },
-      false: {},
-    },
   },
   defaultVariants: {
     hasCounter: false,
     hasDividers: false,
-    isSelected: false,
   },
 });
 
