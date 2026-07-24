@@ -129,7 +129,7 @@ export function ListItem({
   const listStyle = context?.listStyle ?? 'none';
   const hasCounter = listStyle === 'decimal';
   const hasMarkers = listStyle !== 'none';
-  const classes = listItemRecipe({hasCounter, hasDividers});
+  const classes = listItemRecipe({hasCounter, hasDividers, isSelected});
 
   return (
     <Item
@@ -140,7 +140,6 @@ export function ListItem({
       endContent={endContent}
       href={href}
       isDisabled={isDisabled}
-      isSelected={isSelected}
       label={label}
       leadingContent={
         hasMarkers ? (
