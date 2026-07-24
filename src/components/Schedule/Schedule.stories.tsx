@@ -28,6 +28,7 @@ import type {
   Instant,
   ScheduleCategory,
   ScheduleEventSource,
+  ScheduleHeight,
   SchedulePlugin,
   ScheduleView,
 } from 'components/Schedule/types';
@@ -277,6 +278,7 @@ type Story = StoryObj<typeof meta>;
 
 const fillHeightStoryContainer = css({h: '600px'});
 const paginationHotkeysStoryContainer = css({display: 'grid', gap: '4'});
+const automaticMonthRowsFillHeightContainer = css({h: '800px'});
 const highlightedDayNumberGrid = css({
   display: 'grid',
   gap: '4',
@@ -477,6 +479,7 @@ function MovableEventsStory(): React.JSX.Element {
 function ScheduleStory({
   categories: storyCategories = categories,
   events: storyEvents = events,
+  height,
   highlightDate = defaultHighlightDate,
   plugins,
   timezoneID = localTimezoneID,
@@ -485,6 +488,7 @@ function ScheduleStory({
 }: {
   categories?: ReadonlyArray<ScheduleCategory>;
   events?: ScheduleEventSource;
+  height?: ScheduleHeight;
   highlightDate?: Instant;
   plugins?: SchedulePlugin[];
   timezoneID?: string;
@@ -499,6 +503,7 @@ function ScheduleStory({
     <Schedule
       categories={storyCategories}
       events={storyEvents}
+      height={height}
       highlightDate={highlightDate}
       plugins={plugins ?? [paginationPlugin]}
       timezoneID={timezoneID}
@@ -1327,20 +1332,23 @@ export const HighlightedDayNumbers: Story = {
 };
 
 export const AutomaticMonthRows: Story = {
-  render: () => (
-    <ScheduleStory
-      highlightDate={
-        Temporal.PlainDate.from('2025-07-15').toZonedDateTime('UTC')
-          .epochMilliseconds
-      }
-      timezoneID="UTC"
-      view={createScheduleMonthlyView()}
-      viewDate={
-        Temporal.PlainDate.from('2025-07-15').toZonedDateTime('UTC')
-          .epochMilliseconds
-      }
-    />
-  ),
+  render: () => {
+    const viewDate =
+      Temporal.PlainDate.from('2025-07-15').toZonedDateTime(
+        'UTC',
+      ).epochMilliseconds;
+    return (
+      <div className={automaticMonthRowsFillHeightContainer}>
+        <ScheduleStory
+          height="fill"
+          highlightDate={viewDate}
+          timezoneID="UTC"
+          view={createScheduleMonthlyView()}
+          viewDate={viewDate}
+        />
+      </div>
+    );
+  },
 };
 
 // A single very busy day plus a multi-day span, to show how `monthRowHeight:

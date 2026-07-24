@@ -118,6 +118,24 @@ export const scheduleMonthlyViewRecipe = sva({
     },
   },
   variants: {
+    height: {
+      auto: {},
+      fill: {
+        grid: {
+          gridTemplateRows: 'auto minmax(0, 1fr)',
+        },
+        monthSurface: {
+          minH: 0,
+        },
+        monthCellGrid: {
+          h: 'full',
+          gridAutoRows: 'minmax(var(--schedule-month-row-height), 1fr)',
+        },
+        monthEventOverlay: {
+          gridAutoRows: 'minmax(var(--schedule-month-row-height), 1fr)',
+        },
+      },
+    },
     isLastColumn: {
       true: {cell: {borderInlineEndWidth: 0}},
       false: {},
@@ -163,6 +181,7 @@ export const scheduleMonthlyViewRecipe = sva({
     },
   ],
   defaultVariants: {
+    height: 'auto',
     isLastColumn: false,
     isLastRow: false,
     isOtherMonth: false,
