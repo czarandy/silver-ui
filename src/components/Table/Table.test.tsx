@@ -321,6 +321,60 @@ describe('Table', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('cell', {name: 'Content'})).toBeInTheDocument();
   });
+
+  it('preserves a consumer min-width in children mode', () => {
+    render(
+      <Table data-testid="manual-table" style={{minWidth: '720px'}}>
+        <thead>
+          <tr>
+            <th>Manual</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Content</td>
+          </tr>
+        </tbody>
+      </Table>,
+    );
+
+    expect(screen.getByTestId('manual-table')).toHaveStyle({
+      minWidth: '720px',
+    });
+  });
+
+  it('preserves a tableProps min-width when columns do not resolve one', () => {
+    render(
+      <Table
+        columns={[{header: 'Name', key: 'name'}]}
+        data={data}
+        data-testid="unstyled-columns-table"
+        tableProps={{style: {minWidth: '680px'}}}
+      />,
+    );
+
+    expect(screen.getByTestId('unstyled-columns-table')).toHaveStyle({
+      minWidth: '680px',
+    });
+  });
+
+  it('keeps a resolved column min-width authoritative', () => {
+    render(
+      <Table
+        columns={[
+          {header: 'Name', key: 'name', width: pixel(160)},
+          {header: 'Role', key: 'role', width: pixel(180)},
+        ]}
+        data={data}
+        data-testid="sized-columns-table"
+        style={{minWidth: '1px'}}
+      />,
+    );
+
+    expect(screen.getByTestId('sized-columns-table')).toHaveStyle({
+      minWidth: '340px',
+    });
+  });
 });
 
 describe('TableFooter', () => {

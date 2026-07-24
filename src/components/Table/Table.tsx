@@ -428,8 +428,9 @@ function TableInner<T extends Record<string, unknown>>({
   const tableStyle = {
     ...style,
     ...tableRenderProps.htmlProps.style,
-    minWidth:
-      widths.tableMinWidth > 0 ? `${widths.tableMinWidth}px` : undefined,
+    ...(widths.tableMinWidth > 0
+      ? {minWidth: `${widths.tableMinWidth}px`}
+      : {}),
   };
   const hasData = data != null && data.length > 0;
   const hasColumns = columns.length > 0;

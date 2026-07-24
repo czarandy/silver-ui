@@ -662,6 +662,60 @@ export const ChildrenMode: Story = {
   ),
 };
 
+/**
+ * Inline sizing remains on the table when using primitive children. When the
+ * table is wider than its container, the built-in scroll region exposes every
+ * column instead of compressing or clipping its content.
+ */
+export const ChildrenModeMinimumWidth: Story = {
+  name: 'Children mode / Minimum width',
+  render: () => (
+    <div style={{maxWidth: '100%', width: '560px'}}>
+      <Table
+        label="Release readiness"
+        style={{minWidth: '760px'}}
+        verticalAlign="top">
+        <TableHeader>
+          <TableRow>
+            <TableHeaderCell style={{width: '150px'}}>
+              Workstream
+            </TableHeaderCell>
+            <TableHeaderCell style={{width: '130px'}}>Owner</TableHeaderCell>
+            <TableHeaderCell style={{width: '170px'}}>Status</TableHeaderCell>
+            <TableHeaderCell style={{width: '310px'}}>
+              Next step
+            </TableHeaderCell>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          <TableRow>
+            <TableCell>Documentation</TableCell>
+            <TableCell>Alex Morgan</TableCell>
+            <TableCell>
+              <Badge color="success" label="Ready for review" size="lg" />
+            </TableCell>
+            <TableCell>
+              Publish the migration guide and confirm that every example uses
+              the stable API.
+            </TableCell>
+          </TableRow>
+          <TableRow>
+            <TableCell>Accessibility</TableCell>
+            <TableCell>Sam Rivera</TableCell>
+            <TableCell>
+              <Badge color="warning" label="Follow-up needed" size="lg" />
+            </TableCell>
+            <TableCell>
+              Recheck keyboard navigation at compact viewport sizes before the
+              release candidate is tagged.
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  ),
+};
+
 export const Sortable: Story = {
   render: () => <SortableStory />,
 };
