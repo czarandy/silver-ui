@@ -11,17 +11,25 @@ import type {
   SchedulePluginPosition,
   ScheduleZonedInstantRange,
 } from 'components/Schedule/types';
+import useHotkey from 'hooks/useHotkey';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import {nowEpochMilliseconds} from 'internal/time';
 
 export interface SchedulePaginationPluginOptions {
+  /**
+   * Whether ArrowLeft and ArrowRight navigate to the previous and next range.
+   * @default false
+   */
+  hasHotkeys?: boolean;
   onViewDateChange: (date: Instant) => void;
   position?: SchedulePluginPosition;
 }
 
 function SchedulePaginationControls({
+  hasHotkeys,
   onViewDateChange,
 }: {
+  hasHotkeys: boolean;
   onViewDateChange: (date: Instant) => void;
 }): React.JSX.Element {
   const {view, viewDate} = useScheduleContext();
@@ -54,10 +62,33 @@ function SchedulePaginationControls({
   const onNextDate = useCallback(() => {
     shiftToRange(nextDateRange.range);
   }, [nextDateRange, shiftToRange]);
+  useHotkey(
+    'left',
+    event => {
+      if (event.defaultPrevented || event.repeat) {
+        return;
+      }
+      event.preventDefault();
+      onPreviousDate();
+    },
+    {isEnabled: hasHotkeys},
+  );
+  useHotkey(
+    'right',
+    event => {
+      if (event.defaultPrevented || event.repeat) {
+        return;
+      }
+      event.preventDefault();
+      onNextDate();
+    },
+    {isEnabled: hasHotkeys},
+  );
 
   return (
     <ButtonGroup label="Schedule pagination">
       <Button
+        aria-keyshortcuts={hasHotkeys ? 'ArrowLeft' : undefined}
         icon={LogicalChevronStart}
         isIconOnly
         label={previousDateRange.label}
@@ -65,6 +96,7 @@ function SchedulePaginationControls({
       />
       <Button label="Today" onClick={onToday} />
       <Button
+        aria-keyshortcuts={hasHotkeys ? 'ArrowRight' : undefined}
         icon={LogicalChevronEnd}
         isIconOnly
         label={nextDateRange.label}
@@ -75,6 +107,7 @@ function SchedulePaginationControls({
 }
 
 function createSchedulePaginationPlugin({
+  hasHotkeys = false,
   onViewDateChange,
   position = 'start',
 }: SchedulePaginationPluginOptions): SchedulePlugin {
@@ -85,7 +118,10 @@ function createSchedulePaginationPlugin({
       endContent: ReactNode,
     ): ScheduleHeaderContent {
       const controls = (
-        <SchedulePaginationControls onViewDateChange={onViewDateChange} />
+        <SchedulePaginationControls
+          hasHotkeys={hasHotkeys}
+          onViewDateChange={onViewDateChange}
+        />
       );
       return position === 'start'
         ? {
@@ -113,11 +149,17 @@ function createSchedulePaginationPlugin({
 }
 
 export function useSchedulePaginationPlugin({
+  hasHotkeys = false,
   onViewDateChange,
   position = 'start',
 }: SchedulePaginationPluginOptions): SchedulePlugin {
   return useMemo(
-    () => createSchedulePaginationPlugin({onViewDateChange, position}),
-    [onViewDateChange, position],
+    () =>
+      createSchedulePaginationPlugin({
+        hasHotkeys,
+        onViewDateChange,
+        position,
+      }),
+    [hasHotkeys, onViewDateChange, position],
   );
 }
