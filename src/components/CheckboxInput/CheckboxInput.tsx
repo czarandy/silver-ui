@@ -23,6 +23,7 @@ import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
 export type CheckboxInputSize = 'sm' | 'md' | 'lg';
@@ -104,6 +105,11 @@ export type CheckboxInputProps = {
    */
   onFocus?: (event: FocusEvent<HTMLInputElement>) => void;
   /**
+   * Inner padding around the checkbox row.
+   * @default 2
+   */
+  padding?: SpacingToken;
+  /**
    * Ref forwarded to the input element.
    */
   ref?: Ref<HTMLInputElement>;
@@ -160,6 +166,7 @@ export function CheckboxInput({
   startContent,
   onFocus,
   onBlur,
+  padding = 2,
   className,
   'data-testid': dataTestId,
   style,
@@ -289,6 +296,7 @@ export function CheckboxInput({
       isDisabled={isDisabled}
       label={labelNode}
       leadingContent={control}
+      padding={padding}
       startContent={startContent}
       width={width}
     />

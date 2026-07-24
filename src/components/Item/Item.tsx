@@ -16,6 +16,7 @@ import {Text} from 'components/Text';
 import {ActionElement} from 'internal/ActionElement';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {useRel} from 'internal/linkAccessibility';
+import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
 const SELECTABLE_ROLES = new Set([
@@ -111,6 +112,11 @@ export interface ItemProps {
    * button. When set with href, also fires on link clicks.
    */
   onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Inner padding step.
+   * @default 2
+   */
+  padding?: SpacingToken;
   /**
    * Ref forwarded to the root element.
    */
@@ -208,6 +214,7 @@ export function Item({
   leadingContent,
   linkComponent,
   onClick,
+  padding = 2,
   ref,
   rel,
   role,
@@ -231,6 +238,7 @@ export function Item({
     interactiveRef.current = node;
   }, []);
   const classes = itemRecipe({
+    padding,
     align,
     width,
     isInteractive,

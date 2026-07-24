@@ -241,6 +241,18 @@ describe('Item', () => {
     );
   });
 
+  it('defaults to padding 2', () => {
+    render(<Item data-testid="item" label="Default padding" />);
+
+    expect(screen.getByTestId('item')).toHaveClass('silver-p_2');
+  });
+
+  it('applies custom padding', () => {
+    render(<Item data-testid="item" label="No padding" padding={0} />);
+
+    expect(screen.getByTestId('item')).toHaveClass('silver-p_0');
+  });
+
   it('passes explicit truncation line counts to text content', () => {
     render(
       <Item

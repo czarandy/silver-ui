@@ -1,4 +1,19 @@
+import type {SpacingToken} from 'internal/spacingTokens';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
+
+const paddingVariants = {
+  0: {root: {p: '0'}},
+  0.5: {root: {p: '0.5'}},
+  1: {root: {p: '1'}},
+  1.5: {root: {p: '1.5'}},
+  2: {root: {p: '2'}},
+  3: {root: {p: '3'}},
+  4: {root: {p: '4'}},
+  5: {root: {p: '5'}},
+  6: {root: {p: '6'}},
+  8: {root: {p: '8'}},
+  10: {root: {p: '10'}},
+} as const satisfies Record<SpacingToken, {root: {p: string}}>;
 
 export const itemRecipe = sva({
   slots: [
@@ -18,8 +33,6 @@ export const itemRecipe = sva({
       display: 'flex',
       alignItems: 'center',
       gap: '2',
-      px: '2',
-      py: '2',
       textAlign: 'start',
       borderRadius: 'md',
     },
@@ -75,6 +88,7 @@ export const itemRecipe = sva({
     },
   },
   variants: {
+    padding: paddingVariants,
     align: {
       center: {},
       start: {root: {alignItems: 'flex-start'}},
@@ -140,6 +154,7 @@ export const itemRecipe = sva({
     },
   ],
   defaultVariants: {
+    padding: 2,
     align: 'center',
     width: 'full',
     isInteractive: false,
