@@ -9,6 +9,7 @@ export const statRecipe = sva({
     'value',
     'change',
     'description',
+    'tooltipIcon',
   ],
   base: {
     root: {
@@ -42,6 +43,11 @@ export const statRecipe = sva({
     },
     description: {
       overflowWrap: 'break-word',
+    },
+    tooltipIcon: {
+      display: 'inline-flex',
+      alignSelf: 'center',
+      color: 'fg.muted',
     },
   },
   variants: {

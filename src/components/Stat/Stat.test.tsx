@@ -19,6 +19,42 @@ describe('Stat', () => {
     expect(screen.getByText('$1.2M')).toBeInTheDocument();
   });
 
+  it('renders a label tooltip beside the label', () => {
+    const {container} = render(
+      <Stat
+        label="Cloud Build cost"
+        labelTooltip={<span>Uses Cloud Build default-pool list prices.</span>}
+        value="$42.18"
+      />,
+    );
+
+    const label = assertNonNull(
+      screen.getByText('Cloud Build cost').closest('dt'),
+    );
+    const infoIcon = assertNonNull(container.querySelector('.lucide-info'));
+    const trigger = assertNonNull(infoIcon.parentElement);
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+
+    expect(label).toContainElement(trigger);
+    expect(infoIcon).toHaveAttribute('aria-hidden', 'true');
+    expect(trigger).toHaveClass(...classesOf(statRecipe().tooltipIcon));
+    expect(trigger).toHaveAttribute('aria-describedby', tooltip.id);
+    expect(tooltip).toHaveTextContent(
+      'Uses Cloud Build default-pool list prices.',
+    );
+  });
+
+  it('does not emit a label tooltip for empty content', () => {
+    const {container} = render(
+      <Stat label="Revenue" labelTooltip="" value="$1.2M" />,
+    );
+
+    expect(container.querySelector('.lucide-info')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('tooltip', {hidden: true}),
+    ).not.toBeInTheDocument();
+  });
+
   it('uses a direct definition term and description pair', () => {
     render(<Stat label="Revenue" value="$1.2M" />);
 
@@ -290,6 +326,7 @@ describe('Stat', () => {
         description="Reporting period"
         icon={CircleDollarSign}
         label="Revenue"
+        labelTooltip="Calculated after refunds"
         value="$1.2M"
       />,
     );
@@ -298,6 +335,9 @@ describe('Stat', () => {
     const definition = assertNonNull(root.querySelector('dl'));
     const label = assertNonNull(definition.querySelector('dt'));
     const details = assertNonNull(definition.querySelector('dd'));
+    const tooltipIcon = assertNonNull(
+      assertNonNull(container.querySelector('.lucide-info')).parentElement,
+    );
 
     expect(root).toHaveClass(...classesOf(classes.root));
     expect(definition).toHaveClass(...classesOf(classes.definition));
@@ -307,5 +347,6 @@ describe('Stat', () => {
     expect(screen.getByText('Reporting period')).toHaveClass(
       ...classesOf(classes.description),
     );
+    expect(tooltipIcon).toHaveClass(...classesOf(classes.tooltipIcon));
   });
 });

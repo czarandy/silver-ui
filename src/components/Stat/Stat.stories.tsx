@@ -40,6 +40,15 @@ export const WithIcon: Story = {
   },
 };
 
+export const WithLabelTooltip: Story = {
+  args: {
+    label: 'Cloud Build cost',
+    labelTooltip:
+      'Uses Cloud Build default-pool list prices and execution time. Shared free tier may reduce this value; logging, storage, and network are excluded.',
+    value: '$42.18',
+  },
+};
+
 export const WithChange: Story = {
   args: {
     change: 12.5,
