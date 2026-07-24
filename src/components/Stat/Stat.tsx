@@ -1,8 +1,9 @@
-import {Minus, TrendingDown, TrendingUp} from 'lucide-react';
+import {Info, Minus, TrendingDown, TrendingUp} from 'lucide-react';
 import type {ComponentPropsWithRef, ReactNode} from 'react';
 import {Icon, type IconComponent} from 'components/Icon';
 import {statRecipe} from 'components/Stat/Stat.recipe';
 import {Text} from 'components/Text';
+import {Tooltip} from 'components/Tooltip';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
@@ -97,6 +98,10 @@ export interface StatProps extends Omit<
    */
   label: ReactNode;
   /**
+   * Tooltip content shown next to the label.
+   */
+  labelTooltip?: ReactNode;
+  /**
    * Label rendered after the formatted change when it is zero.
    */
   unchangedLabel?: string;
@@ -122,6 +127,7 @@ export function Stat({
   icon,
   increaseLabel = 'increased',
   label,
+  labelTooltip,
   ref,
   style,
   unchangedLabel = 'unchanged',
@@ -159,6 +165,16 @@ export function Stat({
           <Text color="secondary" type="label">
             {label}
           </Text>
+          {isNonEmptyReactNode(labelTooltip) ? (
+            <Tooltip content={labelTooltip}>
+              <button
+                aria-label="More information about this statistic"
+                className={classes.tooltipIcon}
+                type="button">
+                <Icon icon={Info} size="sm" />
+              </button>
+            </Tooltip>
+          ) : null}
         </dt>
         <dd className={classes.details}>
           <Text
