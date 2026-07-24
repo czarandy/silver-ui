@@ -167,12 +167,9 @@ export function Stat({
           </Text>
           {isNonEmptyReactNode(labelTooltip) ? (
             <Tooltip content={labelTooltip}>
-              <button
-                aria-label="More information about this statistic"
-                className={classes.tooltipIcon}
-                type="button">
+              <span className={classes.tooltipIcon}>
                 <Icon icon={Info} size="sm" />
-              </button>
+              </span>
             </Tooltip>
           ) : null}
         </dt>
