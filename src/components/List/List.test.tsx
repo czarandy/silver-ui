@@ -58,7 +58,8 @@ describe('List', () => {
       </List>,
     );
 
-    expect(screen.getByTestId('item')).toHaveClass('silver-bg_bg.selected');
+    expect(screen.getByTestId('item')).toHaveClass('silver-bg_bg.hover');
+    expect(screen.getByTestId('item')).not.toHaveClass('silver-bg_bg.selected');
     expect(screen.getByText('Supporting text')).toBeInTheDocument();
     expect(screen.getByTestId('start')).toBeInTheDocument();
     expect(screen.getByTestId('end')).toBeInTheDocument();
