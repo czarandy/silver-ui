@@ -196,13 +196,31 @@ export const Sizes: Story = {
   render: () => {
     const [smFilters, setSmFilters] = useState<
       ReadonlyArray<SearchFilterInputFilter>
-    >([]);
+    >([
+      {
+        field: 'name',
+        operator: 'contains',
+        value: {type: 'string', value: 'Alice'},
+      },
+    ]);
     const [mdFilters, setMdFilters] = useState<
       ReadonlyArray<SearchFilterInputFilter>
-    >([]);
+    >([
+      {
+        field: 'name',
+        operator: 'contains',
+        value: {type: 'string', value: 'Alice'},
+      },
+    ]);
     const [lgFilters, setLgFilters] = useState<
       ReadonlyArray<SearchFilterInputFilter>
-    >([]);
+    >([
+      {
+        field: 'name',
+        operator: 'contains',
+        value: {type: 'string', value: 'Alice'},
+      },
+    ]);
     const {config} = useSearchFilterInputConfig(basicFields);
 
     return (

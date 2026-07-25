@@ -12,6 +12,7 @@ import {
   createSearchFilterInputConfig,
   type FieldDefinition,
 } from 'components/SearchFilterInput/useSearchFilterInputConfig';
+import {tagRecipe} from 'components/Tag/Tag.recipe';
 import {SizeContext} from 'internal/SizeContext';
 import {assertNonNull, createResizeObserverStub} from 'internal/testHelpers';
 
@@ -77,6 +78,34 @@ describe('SearchFilterInput', () => {
       inputRecipe({size: 'lg'}),
     );
   });
+
+  it.each([
+    ['sm', 'sm'],
+    ['md', 'sm'],
+    ['lg', 'md'],
+  ] as const)(
+    'renders a %s filter input with a %s tag so one token does not increase its height',
+    (inputSize, tagSize) => {
+      render(
+        <SearchFilterInput
+          config={config}
+          filters={[
+            {
+              field: 'name',
+              operator: 'contains',
+              value: {type: 'string', value: 'John'},
+            },
+          ]}
+          onChange={() => {}}
+          size={inputSize}
+        />,
+      );
+
+      const tag = screen.getByRole('group', {name: 'Name contains'});
+      const classes = tagRecipe({size: tagSize});
+      expect(tag).toHaveClass(assertNonNull(classes.root));
+    },
+  );
 
   it('renders with no filters', () => {
     render(
