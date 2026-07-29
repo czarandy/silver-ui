@@ -47,6 +47,8 @@ export const checkboxInputRecipe = sva({
       mt: '1px',
     },
     label: {
+      display: 'inline-flex',
+      alignItems: 'center',
       cursor: 'pointer',
     },
     tooltipIcon: {

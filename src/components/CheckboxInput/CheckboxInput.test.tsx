@@ -49,7 +49,7 @@ describe('CheckboxInput', () => {
     ).toBeInTheDocument();
   });
 
-  it('keeps a disabled label tooltip hoverable and spaced from the label', () => {
+  it('keeps a disabled label tooltip centered, hoverable, and spaced', () => {
     const {container} = render(
       <CheckboxInput
         isDisabled
@@ -59,8 +59,13 @@ describe('CheckboxInput', () => {
         value={false}
       />,
     );
-    const classes = checkboxInputRecipe();
+    const classes = checkboxInputRecipe({isDisabled: true});
 
+    expect(screen.getByText('Accept')).toHaveClass(
+      classes.label ?? '',
+      css({display: 'inline-flex'}),
+      css({alignItems: 'center'}),
+    );
     expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
       'Why this is required',
     );
