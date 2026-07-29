@@ -44,7 +44,7 @@ export const linkRecipe = cva({
       '4xl': {fontSize: '4xl'},
       '5xl': {fontSize: '5xl'},
       '6xl': {fontSize: '6xl'},
-      inherit: {fontSize: 'inherit'},
+      inherit: {fontSize: 'inherit', lineHeight: 'inherit'},
     },
     color: {
       primary: {
@@ -82,7 +82,7 @@ export const linkRecipe = cva({
   },
   defaultVariants: {
     color: 'active',
-    size: 'md',
+    size: 'inherit',
     hasUnderline: false,
   },
 });

@@ -189,6 +189,22 @@ export const InlineWithText: Story = {
   ),
 };
 
+export const InheritsSurroundingTextSize: Story = {
+  render: () => (
+    <>
+      <Text as="p" display="block" type="large">
+        Large text with a <Link href="/docs">matching link</Link>.
+      </Text>
+      <Text as="p" display="block">
+        Body text with a <Link href="/docs">matching link</Link>.
+      </Text>
+      <Text as="p" display="block" type="supporting">
+        Supporting text with a <Link href="/docs">matching link</Link>.
+      </Text>
+    </>
+  ),
+};
+
 export const WithOnClick: Story = {
   args: {
     children: 'Log click',
