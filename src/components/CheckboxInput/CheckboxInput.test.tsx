@@ -2,6 +2,8 @@ import {createEvent, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {CheckboxInput} from 'components/CheckboxInput/CheckboxInput';
+import {checkboxInputRecipe} from 'components/CheckboxInput/CheckboxInput.recipe';
+import {css} from 'styled-system/css';
 
 describe('CheckboxInput', () => {
   it('calls onChange with checked state', async () => {
@@ -45,6 +47,30 @@ describe('CheckboxInput', () => {
     expect(
       screen.getByRole('checkbox', {name: 'Accept the terms'}),
     ).toBeInTheDocument();
+  });
+
+  it('keeps a disabled label tooltip hoverable and spaced from the label', () => {
+    const {container} = render(
+      <CheckboxInput
+        isDisabled
+        label="Accept"
+        labelTooltip="Why this is required"
+        onChange={() => {}}
+        value={false}
+      />,
+    );
+    const classes = checkboxInputRecipe();
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Why this is required',
+    );
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the decorative icon is intentionally hidden from the accessibility tree
+    const tooltipIcon = container.querySelector('.lucide-info')?.parentElement;
+    expect(tooltipIcon).toHaveClass(classes.tooltipIcon ?? '');
+    expect(tooltipIcon).toHaveClass(
+      css({marginInlineStart: '1'}),
+      css({pointerEvents: 'auto'}),
+    );
   });
 
   it('disables the input when isDisabled is true', () => {

@@ -51,6 +51,8 @@ export const checkboxInputRecipe = sva({
     },
     tooltipIcon: {
       display: 'inline-flex',
+      marginInlineStart: '1',
+      pointerEvents: 'auto',
       color: 'fg.muted',
     },
   },

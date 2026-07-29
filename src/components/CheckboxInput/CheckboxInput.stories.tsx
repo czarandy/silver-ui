@@ -46,6 +46,21 @@ export const WithDescription: Story = {
   },
 };
 
+export const WithLabelTooltip: Story = {
+  args: {
+    label: 'Accept terms',
+    labelTooltip: 'You must accept the terms before continuing.',
+  },
+};
+
+export const DisabledWithLabelTooltip: Story = {
+  args: {
+    isDisabled: true,
+    label: 'Accept terms',
+    labelTooltip: 'You must accept the terms before continuing.',
+  },
+};
+
 export const WithPadding: Story = {args: {padding: 2}};
 
 export const WithLinkInLabel: Story = {
