@@ -8,6 +8,7 @@ import {
 } from 'components/CheckboxInput/CheckboxInput';
 import {Icon} from 'components/Icon';
 import {Link} from 'components/Link';
+import {css} from 'styled-system/css';
 
 function CheckboxStory(args: CheckboxInputProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);
@@ -44,6 +45,24 @@ export const WithDescription: Story = {
     label: 'Subscribe to newsletter',
     description: 'Receive weekly product updates and announcements.',
   },
+};
+
+export const WithLabelTooltip: Story = {
+  args: {
+    label: 'Accept terms',
+    labelTooltip: 'You must accept the terms before continuing.',
+  },
+  render: (args: CheckboxInputProps) => (
+    <div
+      className={css({
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4',
+      })}>
+      <CheckboxStory {...args} isDisabled={false} />
+      <CheckboxStory {...args} isDisabled />
+    </div>
+  ),
 };
 
 export const WithPadding: Story = {args: {padding: 2}};
