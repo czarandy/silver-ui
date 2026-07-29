@@ -124,7 +124,7 @@ export interface LinkProps {
    */
   rel?: string;
   /**
-   * Font size variant. Default is `md`.
+   * Font size variant. Default is `inherit`, so the link matches surrounding text.
    */
   size?: TextSize;
   /**

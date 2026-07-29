@@ -162,6 +162,14 @@ describe('Link', () => {
     ).toBeInTheDocument();
   });
 
+  it('defaults size to inherit so links match surrounding text', () => {
+    render(<Link href="/test">Default Size</Link>);
+
+    const link = screen.getByRole('link', {name: 'Default Size'});
+    expect(link).toHaveClass('silver-fs_inherit', 'silver-lh_inherit');
+    expect(link).not.toHaveClass('silver-lh_normal');
+  });
+
   it('renders size variants', () => {
     const {rerender} = render(
       <Link href="/test" size="sm">
@@ -192,6 +200,14 @@ describe('Link', () => {
     expect(
       screen.getByRole('link', {name: 'Inherit Size'}),
     ).toBeInTheDocument();
+
+    rerender(
+      <Link href="/test" size="md">
+        Medium
+      </Link>,
+    );
+    const medium = screen.getByRole('link', {name: 'Medium'});
+    expect(medium).toHaveClass('silver-fs_md', 'silver-lh_normal');
   });
 
   it('supports disabled links', async () => {
