@@ -16,6 +16,10 @@ import {pixel, proportional} from 'components/Table/columnUtils';
 import {useTableColumnResize} from 'components/Table/plugins/columnResize';
 import {useTableColumnSettings} from 'components/Table/plugins/columnSettings';
 import {
+  useTableRowExpansion,
+  useTableRowExpansionState,
+} from 'components/Table/plugins/expansion';
+import {
   useTableFiltering,
   useTableFilterState,
   type TableFilterState,
@@ -44,6 +48,7 @@ interface TaskRow extends Record<string, unknown> {
   priority: 'High' | 'Low' | 'Medium';
   progress: string;
   status: 'Blocked' | 'Done' | 'In progress' | 'Ready';
+  subtasks?: TaskRow[];
   task: string;
 }
 
@@ -209,6 +214,110 @@ const filterColumns: TableColumn<TaskRow>[] = [
   {...columns[2], filter: 'status'},
   columns[3],
   columns[4],
+];
+
+interface FileRow extends Record<string, unknown> {
+  children?: FileRow[];
+  id: string;
+  kind: 'file' | 'folder';
+  modified: string;
+  name: string;
+  size: string;
+}
+
+const fileTree: FileRow[] = [
+  {
+    children: [
+      {
+        children: [
+          {
+            id: 'src/components/Button.tsx',
+            kind: 'file',
+            modified: 'Jun 18',
+            name: 'Button.tsx',
+            size: '4.2 KB',
+          },
+          {
+            id: 'src/components/Table.tsx',
+            kind: 'file',
+            modified: 'Jun 20',
+            name: 'Table.tsx',
+            size: '12.8 KB',
+          },
+        ],
+        id: 'src/components',
+        kind: 'folder',
+        modified: 'Jun 20',
+        name: 'components',
+        size: '—',
+      },
+      {
+        children: [
+          {
+            id: 'src/utils/format.ts',
+            kind: 'file',
+            modified: 'Jun 17',
+            name: 'format.ts',
+            size: '1.3 KB',
+          },
+        ],
+        id: 'src/utils',
+        kind: 'folder',
+        modified: 'Jun 17',
+        name: 'utils',
+        size: '—',
+      },
+      {
+        id: 'src/index.ts',
+        kind: 'file',
+        modified: 'Jun 20',
+        name: 'index.ts',
+        size: '0.4 KB',
+      },
+    ],
+    id: 'src',
+    kind: 'folder',
+    modified: 'Jun 20',
+    name: 'src',
+    size: '—',
+  },
+  {
+    children: [
+      {
+        id: 'public/favicon.ico',
+        kind: 'file',
+        modified: 'May 20',
+        name: 'favicon.ico',
+        size: '15 KB',
+      },
+    ],
+    id: 'public',
+    kind: 'folder',
+    modified: 'Jun 1',
+    name: 'public',
+    size: '—',
+  },
+  {
+    id: 'package.json',
+    kind: 'file',
+    modified: 'Jun 22',
+    name: 'package.json',
+    size: '1.8 KB',
+  },
+  {
+    id: 'README.md',
+    kind: 'file',
+    modified: 'Jun 1',
+    name: 'README.md',
+    size: '0.6 KB',
+  },
+];
+
+const fileColumns: TableColumn<FileRow>[] = [
+  {header: 'Name', key: 'name', width: proportional(2)},
+  {header: 'Kind', key: 'kind', width: pixel(90)},
+  {header: 'Size', key: 'size', width: pixel(90)},
+  {header: 'Modified', key: 'modified', width: pixel(110)},
 ];
 
 const meta = {
@@ -391,6 +500,51 @@ function SelectionMinimumWidthStory() {
   );
 }
 
+function RowExpansionStory() {
+  const expansion = useTableRowExpansionState<FileRow>({
+    data: fileTree,
+    defaultExpandedKeys: ['src'],
+    getChildren: item => item.children,
+    getRowKey: item => item.id,
+  });
+  const expansionPlugin = useTableRowExpansion<FileRow>({
+    ...expansion.expansionConfig,
+    hasExpandAllToggle: true,
+  });
+  return (
+    <Table
+      columns={fileColumns}
+      data={expansion.data}
+      hasHover
+      idKey="id"
+      plugins={{expansion: expansionPlugin}}
+    />
+  );
+}
+
+function RowExpansionRowClickStory() {
+  const expansion = useTableRowExpansionState<FileRow>({
+    data: fileTree,
+    getChildren: item => item.children,
+    getRowKey: item => item.id,
+  });
+  const expansionPlugin = useTableRowExpansion<FileRow>({
+    ...expansion.expansionConfig,
+    getExpanderLabel: (item, isExpanded) =>
+      isExpanded ? `Collapse ${item.name}` : `Expand ${item.name}`,
+    hasRowClickExpansion: true,
+  });
+  return (
+    <Table
+      columns={fileColumns}
+      data={expansion.data}
+      hasHover
+      idKey="id"
+      plugins={{expansion: expansionPlugin}}
+    />
+  );
+}
+
 function PaginationStory() {
   const [page, setPage] = useState(1);
   const pageSize = 2;
@@ -517,23 +671,87 @@ function InlineFilteringStory() {
   return <FilteredTable variant="inline" />;
 }
 
+const combinedTaskTree: TaskRow[] = data.map(row => {
+  if (row.id === 'design') {
+    return {
+      ...row,
+      subtasks: [
+        {
+          budget: 4200,
+          due: 'Jun 10',
+          id: 'design/annotations',
+          notes: 'Annotate the final screens with decision links.',
+          owner: 'Ada Lovelace',
+          priority: 'High',
+          progress: '90%',
+          status: 'In progress',
+          task: 'Annotate screens',
+        },
+        {
+          budget: 2600,
+          due: 'Jun 11',
+          id: 'design/handoff',
+          notes: 'Package decisions and open follow-up items.',
+          owner: 'Ada Lovelace',
+          priority: 'Medium',
+          progress: '40%',
+          status: 'Ready',
+          task: 'Handoff package',
+        },
+      ],
+    };
+  }
+  if (row.id === 'qa') {
+    return {
+      ...row,
+      subtasks: [
+        {
+          budget: 3800,
+          due: 'Jun 19',
+          id: 'qa/browsers',
+          notes: 'Verify the release checklist across browsers.',
+          owner: 'Katherine Johnson',
+          priority: 'High',
+          progress: '10%',
+          status: 'Blocked',
+          task: 'Cross-browser pass',
+        },
+      ],
+    };
+  }
+  return row;
+});
+
 function CombinedPluginsStory() {
   const [page, setPage] = useState(1);
   const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
   const {filters, onFilterChange} = useTableFilterState();
-  const filteredRows = useMemo(() => filterData(data, filters), [filters]);
+  // Composition order: filter and sort operate on the root rows of the tree,
+  // expansion flattens the visible rows, and pagination slices the flattened
+  // output last (paginating before flattening would orphan child rows).
+  const filteredRows = useMemo(
+    () => filterData(combinedTaskTree, filters),
+    [filters],
+  );
   const sortable = useTableSortableState<TaskRow, string>({
     data: filteredRows,
     defaultSort: [{direction: 'ascending', sortKey: 'due'}],
   });
-  const selection = useTableSelectionState({
+  const expansion = useTableRowExpansionState<TaskRow>({
     data: sortable.sortedData,
+    defaultExpandedKeys: ['design'],
+    getChildren: item => item.subtasks,
+    getRowKey: item => item.id,
+  });
+  const selection = useTableSelectionState({
+    data: expansion.data,
     idKey: 'id',
     selectedKeys,
     setSelectedKeys,
   });
   const pageSize = 3;
   const sortPlugin = useTableSortable<TaskRow>(sortable.sortConfig);
+  const expansionPlugin = useTableRowExpansion(expansion.expansionConfig);
   const selectionPlugin = useTableSelection(selection.selectionConfig);
   const filteringPlugin = useTableFiltering<TaskRow>({
     filters,
@@ -545,15 +763,21 @@ function CombinedPluginsStory() {
     onPageChange: setPage,
     page,
     pageSize,
-    totalItems: sortable.sortedData.length,
+    totalItems: expansion.data.length,
     variant: 'compact',
   });
   return (
     <Table
       columns={filterColumns}
-      data={paginateData(sortable.sortedData, {page, pageSize})}
+      data={paginateData(expansion.data, {page, pageSize})}
       idKey="id"
-      plugins={{selectionPlugin, sortPlugin, filteringPlugin, paginationPlugin}}
+      plugins={{
+        expansionPlugin,
+        selectionPlugin,
+        sortPlugin,
+        filteringPlugin,
+        paginationPlugin,
+      }}
     />
   );
 }
@@ -779,6 +1003,26 @@ export const Selection: Story = {
 export const SelectionMinimumWidth: Story = {
   name: 'Selection / Minimum width',
   render: () => <SelectionMinimumWidthStory />,
+};
+
+/**
+ * Hierarchical rows: `useTableRowExpansionState` flattens the currently
+ * visible tree (its `data` result is what the Table renders) and
+ * `useTableRowExpansion` adds the chevron control column, depth indentation
+ * on the first content column, and the optional expand-all header toggle.
+ */
+export const RowExpansion: Story = {
+  render: () => <RowExpansionStory />,
+};
+
+/**
+ * With `hasRowClickExpansion`, clicking anywhere on an expandable row toggles
+ * it (interactive content inside the row is ignored). `getExpanderLabel`
+ * customizes each chevron's accessible name.
+ */
+export const RowExpansionRowClick: Story = {
+  name: 'Row Expansion / Row click',
+  render: () => <RowExpansionRowClickStory />,
 };
 
 export const Pagination: Story = {

@@ -21,6 +21,7 @@ export {
 export {TableRow, type TableRowProps} from 'components/Table/TableRow';
 export * from 'components/Table/plugins/columnResize';
 export * from 'components/Table/plugins/columnSettings';
+export * from 'components/Table/plugins/expansion';
 export * from 'components/Table/plugins/filtering';
 export * from 'components/Table/plugins/pagination';
 export * from 'components/Table/plugins/selection';
