@@ -1,3 +1,4 @@
+import {inheritanceReset} from 'internal/inheritanceReset';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const drawerRecipe = sva({
@@ -13,6 +14,7 @@ export const drawerRecipe = sva({
       boxShadow: 'xl',
       flexDirection: 'column',
       overscrollBehavior: 'contain',
+      ...inheritanceReset,
       // Individual translate property (not the transform shorthand), so the
       // steady open state authors nothing and the inline `size` style never
       // collides with the slide.

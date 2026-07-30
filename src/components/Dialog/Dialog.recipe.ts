@@ -1,3 +1,4 @@
+import {inheritanceReset} from 'internal/inheritanceReset';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const dialogRecipe = sva({
@@ -15,7 +16,7 @@ export const dialogRecipe = sva({
       boxShadow: 'xl',
       flexDirection: 'column',
       overscrollBehavior: 'contain',
-      whiteSpace: 'normal',
+      ...inheritanceReset,
       // Individual opacity/scale properties (not the transform shorthand), so
       // the steady open state authors nothing and cannot create a containing
       // block; browsers without individual-transform support skip the motion.

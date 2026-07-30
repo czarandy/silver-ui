@@ -103,6 +103,20 @@ describe('Dialog', () => {
     );
   });
 
+  it('resets text alignment inherited from its DOM ancestry', () => {
+    render(
+      <div style={{textAlign: 'center'}}>
+        <Dialog isOpen onOpenChange={() => {}}>
+          <LayoutHeader title="New Secure Message" />
+        </Dialog>
+      </div>,
+    );
+
+    expect(
+      screen.getByRole('dialog', {name: 'New Secure Message'}),
+    ).toHaveClass('silver-ta_start');
+  });
+
   it('closes the native dialog when isOpen is false', () => {
     render(
       <Dialog

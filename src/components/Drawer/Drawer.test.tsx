@@ -87,6 +87,20 @@ describe('Drawer', () => {
     expect(screen.getByText('Drawer content')).toBeInTheDocument();
   });
 
+  it('resets text properties inherited from its DOM ancestry', () => {
+    render(
+      <div style={{textAlign: 'center', whiteSpace: 'nowrap'}}>
+        <Drawer isOpen label="Navigation" onOpenChange={() => {}}>
+          Drawer content
+        </Drawer>
+      </div>,
+    );
+
+    const drawer = screen.getByRole('dialog', {name: 'Navigation'});
+    expect(drawer).toHaveClass('silver-ta_start');
+    expect(drawer).toHaveClass('silver-white-space_normal');
+  });
+
   it('fills its inner surface so a Layout footer stays at the bottom', () => {
     const {inner} = drawerRecipe({state: 'open', placement: 'end'});
 
