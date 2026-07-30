@@ -91,7 +91,9 @@ export const WithLayout: Story = {
     size: 360,
   },
   render: args => {
-    const [isOpen, setIsOpen] = useState(true);
+    // Must start closed: docs pages render this story as a live demo, and a
+    // drawer that opens on mount covers the whole page via showModal().
+    const [isOpen, setIsOpen] = useState(false);
 
     return (
       <>
