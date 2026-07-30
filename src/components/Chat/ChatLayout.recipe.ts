@@ -6,6 +6,7 @@ export const chatLayoutRecipe = sva({
     'messageArea',
     'emptyState',
     'dockContainer',
+    'scrollButtonContainer',
     'blurLayer',
     'dock',
     'dockInner',
@@ -38,6 +39,15 @@ export const chatLayoutRecipe = sva({
       zIndex: 0,
       isolation: 'isolate',
       pointerEvents: 'none',
+    },
+    scrollButtonContainer: {
+      // Floats above the dock so the (usually hidden) scroll button never
+      // reserves flow height between the last message and the composer.
+      position: 'absolute',
+      bottom: '100%',
+      left: 0,
+      right: 0,
+      zIndex: 1,
     },
     blurLayer: {
       position: 'absolute',
