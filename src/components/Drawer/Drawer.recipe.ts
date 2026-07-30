@@ -1,3 +1,4 @@
+import {inheritanceReset} from 'internal/inheritanceReset';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const drawerRecipe = sva({
@@ -13,8 +14,7 @@ export const drawerRecipe = sva({
       boxShadow: 'xl',
       flexDirection: 'column',
       overscrollBehavior: 'contain',
-      // Reset default properties to prevent inheritance leak
-      textAlign: 'start',
+      ...inheritanceReset,
       _backdrop: {
         bg: 'overlay.scrim',
         backdropFilter: 'blur(2px)',

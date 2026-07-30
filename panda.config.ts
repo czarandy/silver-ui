@@ -1,5 +1,6 @@
 import {defineConfig, defineRecipe} from '@pandacss/dev';
 import {generateColorScale} from './scripts/generate-color-scale';
+import {inheritanceReset} from './src/internal/inheritanceReset';
 import {gapVariants} from './src/internal/spacingTokens';
 
 const gray = {
@@ -87,6 +88,7 @@ export default defineConfig({
             borderColor: 'transparent',
             overflow: 'visible',
             bg: 'transparent',
+            ...inheritanceReset,
           },
         }),
       },
