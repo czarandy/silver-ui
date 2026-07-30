@@ -131,19 +131,23 @@ export function ChatLayout({
     return () => unobserveResize(root);
   }, []);
 
-  // With an external scroll container the dock is position: fixed and out of
-  // that container's flow, so the message area must reserve the dock's
-  // measured height or the final messages hide underneath it.
+  // The message area must account for the dock's measured height in both
+  // modes. Self-scrolling: the sticky dock stays in flow after the
+  // full-height message area, so its height must come out of the area's
+  // minimum or a short history gains a dock-height scroll range that lets
+  // the last message slide underneath the composer. External container: the
+  // dock is position: fixed and out of that container's flow, so the area
+  // must instead pad by the dock height or the final messages hide under it.
   useEffect(() => {
     const dock = dockContainerRef.current;
-    if (isSelfScrolling || dock == null) {
+    if (dock == null) {
       return;
     }
     observeResize(dock, () => {
       setDockInset(dock.offsetHeight);
     });
     return () => unobserveResize(dock);
-  }, [isSelfScrolling]);
+  }, []);
 
   const classes = chatLayoutRecipe({density, isSelfScrolling});
   const showEmpty = !hasVisibleContent(children);
@@ -169,7 +173,11 @@ export function ChatLayout({
         style={style}>
         <div
           className={classes.messageArea}
-          style={isSelfScrolling ? undefined : {paddingBlockEnd: dockInset}}>
+          style={
+            isSelfScrolling
+              ? {minHeight: `calc(100% - ${dockInset}px)`}
+              : {paddingBlockEnd: dockInset}
+          }>
           {showEmpty && isNonEmptyReactNode(emptyState) ? (
             <div className={classes.emptyState}>{emptyState}</div>
           ) : (
@@ -177,7 +185,9 @@ export function ChatLayout({
           )}
         </div>
         <div className={classes.dockContainer} ref={dockContainerRef}>
-          {scrollButton === undefined ? defaultScrollButton : scrollButton}
+          <div className={classes.scrollButtonContainer}>
+            {scrollButton === undefined ? defaultScrollButton : scrollButton}
+          </div>
           <div className={classes.blurLayer} />
           <div className={classes.dock}>
             <div className={classes.dockInner}>{composer}</div>
