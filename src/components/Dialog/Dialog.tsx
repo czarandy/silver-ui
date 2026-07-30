@@ -1,7 +1,6 @@
 /* eslint-disable jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions */
 'use client';
 import {
-  useEffect,
   useId,
   useMemo,
   useRef,
@@ -18,7 +17,9 @@ import {
   type DismissBehavior,
 } from 'internal/dismissBehavior';
 import {mergeRefs} from 'internal/mergeRefs';
+import {DURATION_FAST_MS} from 'internal/motion';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
+import {useDialogExit} from 'internal/useDialogExit';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useScrollLock} from 'internal/useScrollLock';
 import {cx} from 'utils/cx';
@@ -147,30 +148,30 @@ export function Dialog({
     [onOpenChange, titleId],
   );
   const layerContextValue = escapeDismiss.layerContextValue;
-  const classes = dialogRecipe({isOpen, variant});
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog == null) {
-      return;
-    }
-
-    if (isOpen) {
-      if (!dialog.open) {
-        dialog.showModal();
+  const {isClosing} = useDialogExit({
+    dialogRef,
+    exitDurationMs: DURATION_FAST_MS,
+    isOpen,
+    // Override the dialog's default initial focus when an autofocus target is
+    // present. Focus restoration on close is left to the native <dialog>,
+    // which restores focus to the element that was focused before
+    // showModal() — avoiding races with external focus management.
+    onAfterEnter: () => {
+      const dialog = dialogRef.current;
+      if (dialog == null) {
+        return;
       }
-      // Override the dialog's default initial focus when an autofocus target is
-      // present. Focus restoration on close is left to the native <dialog>,
-      // which restores focus to the element that was focused before
-      // showModal() — avoiding races with external focus management.
       const autofocusTarget =
         dialog.querySelector<HTMLElement>('[data-autofocus="true"]') ??
         dialog.querySelector<HTMLElement>('[data-dialog-autofocus="true"]');
       autofocusTarget?.focus();
-    } else if (dialog.open) {
-      dialog.close();
-    }
-  }, [isOpen]);
+    },
+  });
+  const classes = dialogRecipe({
+    state: isOpen ? 'open' : isClosing ? 'closing' : 'closed',
+    variant,
+  });
 
   useScrollLock(isOpen);
 

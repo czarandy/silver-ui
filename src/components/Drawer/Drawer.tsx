@@ -1,7 +1,7 @@
 'use client';
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useEffect, useId, useMemo, useRef} from 'react';
+import {useId, useMemo, useRef} from 'react';
 import {DialogContext} from 'components/Dialog/DialogContext';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
 import {LayerContext} from 'internal/LayerContext';
@@ -11,7 +11,9 @@ import {
   type DismissBehavior,
 } from 'internal/dismissBehavior';
 import {mergeRefs} from 'internal/mergeRefs';
+import {DURATION_NORMAL_MS} from 'internal/motion';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
+import {useDialogExit} from 'internal/useDialogExit';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useScrollLock} from 'internal/useScrollLock';
 import {cx} from 'utils/cx';
@@ -127,16 +129,17 @@ export function Drawer({
   );
   const layerContextValue = escapeDismiss.layerContextValue;
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (dialog == null) {
-      return;
-    }
-
-    if (isOpen) {
+  const {isClosing} = useDialogExit({
+    dialogRef,
+    exitDurationMs: DURATION_NORMAL_MS,
+    isOpen,
+    onBeforeEnter: () => {
       triggerRef.current = document.activeElement as HTMLElement | null;
-      if (!dialog.open) {
-        dialog.showModal();
+    },
+    onAfterEnter: () => {
+      const dialog = dialogRef.current;
+      if (dialog == null) {
+        return;
       }
       const autofocusTarget =
         dialog.querySelector<HTMLElement>(
@@ -144,18 +147,23 @@ export function Drawer({
         ) ??
         dialog.querySelector<HTMLElement>('[data-dialog-autofocus="true"]');
       autofocusTarget?.focus();
-    } else if (dialog.open) {
-      dialog.close();
+    },
+    // Runs after the deferred close(): while the modal drawer is open the
+    // rest of the document is inert and focus() would silently fail.
+    onAfterExit: () => {
       triggerRef.current?.focus();
       triggerRef.current = null;
-    }
-  }, [isOpen]);
+    },
+  });
 
   useScrollLock(isOpen);
 
   const effectiveSize = size ?? DEFAULT_SIZES[placement];
   const sizeStyle = getSizeStyle(placement, effectiveSize);
-  const classes = drawerRecipe({isOpen, placement});
+  const classes = drawerRecipe({
+    state: isOpen ? 'open' : isClosing ? 'closing' : 'closed',
+    placement,
+  });
 
   return (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- native dialog backdrop clicks close the drawer
