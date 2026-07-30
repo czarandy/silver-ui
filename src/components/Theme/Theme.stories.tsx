@@ -1,13 +1,9 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Bell, Home, Inbox, Search, Settings} from 'lucide-react';
+import {Bell, Search} from 'lucide-react';
 import {Alert} from 'components/Alert';
 import {Badge, type BadgeColor} from 'components/Badge';
 import {Button} from 'components/Button';
 import {Card} from 'components/Card';
-import {SideNav} from 'components/SideNav/SideNav';
-import {SideNavHeading} from 'components/SideNav/SideNavHeading';
-import {SideNavItem} from 'components/SideNav/SideNavItem';
-import {SideNavSection} from 'components/SideNav/SideNavSection';
 import {HStack, VStack} from 'components/Stack';
 import {Switch} from 'components/Switch';
 import {Text} from 'components/Text';
@@ -161,35 +157,6 @@ export const NeutralTheme: Story = {
       <ThemePreview>
         <ComponentPreview previewBadgeColor="neutral" />
       </ThemePreview>
-    </Theme>
-  ),
-};
-
-/**
- * The neutral preset keeps `bgHover` one step darker than `bgSubtle`, so the
- * SideNav selected/hover highlight stays visible on subtle surfaces like the
- * AppShell navigation area.
- */
-export const NeutralThemeSideNav: Story = {
-  render: () => (
-    <Theme themes={neutralTheme.themes}>
-      <div
-        style={{
-          background: 'var(--silver-colors-bg-subtle)',
-          borderRadius: 'var(--silver-radii-component-lg)',
-          height: 420,
-          maxWidth: 280,
-          padding: 12,
-        }}>
-        <SideNav
-          header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
-          <SideNavSection title="Main">
-            <SideNavItem href="/" icon={Home} isSelected label="Home" />
-            <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
-            <SideNavItem href="/settings" icon={Settings} label="Settings" />
-          </SideNavSection>
-        </SideNav>
-      </div>
     </Theme>
   ),
 };
