@@ -282,6 +282,69 @@ describe('theme preset color contrast (WCAG AA, normal text)', () => {
   );
 });
 
+// ---------------------------------------------------------------------------
+// Hover-highlight visibility. SideNav, Menu, and Table rows highlight with
+// `bg.hover` while sitting on `bg` or `bg.subtle` surfaces (the AppShell nav
+// uses `bg.subtle`), so the hover fill must be distinguishable from both.
+// Added when the neutral preset shipped a light-mode bgHover (#f5f5f5) that
+// was *lighter* than the #f1f1f1 bgSubtle surface, making the SideNav
+// selected/hover highlight invisible.
+// ---------------------------------------------------------------------------
+
+// Far below AA (this is a surface-vs-surface wash, not text), but enough that
+// the highlight reads at a glance. The broken neutral pairing was 1.04:1;
+// the tightest intentional pairing (material light) is 1.13:1.
+const HOVER_MIN_RATIO = 1.1;
+
+const HOVER_SURFACES = ['{colors.bg}', '{colors.bg.subtle}'] as const;
+
+interface HoverCase {
+  appearance: Appearance;
+  hoverHex: string;
+  preset: string;
+  surface: string;
+  surfaceHex: string;
+}
+
+const HOVER_CASES: HoverCase[] = [
+  // The default theme, straight from panda.config.ts.
+  ...MODES.flatMap(mode =>
+    HOVER_SURFACES.map<HoverCase>(surface => ({
+      appearance: mode === '_dark' ? 'dark' : 'light',
+      hoverHex: resolve('{colors.bg.hover}', mode),
+      preset: 'default',
+      surface,
+      surfaceHex: resolve(surface, mode),
+    })),
+  ),
+  // Every bundled preset, override-first with default fallback.
+  ...Object.entries(themePresets).flatMap(([presetId, preset]) =>
+    MODES.flatMap(mode => {
+      const appearance: Appearance = mode === '_dark' ? 'dark' : 'light';
+      return HOVER_SURFACES.map(surface => ({
+        appearance,
+        hoverHex: effective(preset, appearance, '{colors.bg.hover}', mode),
+        preset: presetId,
+        surface,
+        surfaceHex: effective(preset, appearance, surface, mode),
+      }));
+    }),
+  ),
+].filter(c => isOpaqueHex(c.hoverHex) && isOpaqueHex(c.surfaceHex));
+
+describe('hover highlight visibility (bg.hover vs surfaces)', () => {
+  it.each(HOVER_CASES)(
+    '$preset · bg.hover vs $surface in $appearance mode',
+    ({hoverHex, preset, surface, surfaceHex}) => {
+      const ratio = contrastRatio(hoverHex, surfaceHex);
+      expect(
+        ratio,
+        `${preset} bg.hover (${hoverHex}) on ${surface} (${surfaceHex}) is ${ratio.toFixed(3)}:1`,
+      ).toBeGreaterThanOrEqual(HOVER_MIN_RATIO);
+    },
+  );
+});
+
 describe('theme preset canonical exceptions (faithful to source palette)', () => {
   it.each(EXEMPT_CASES)(
     '$preset · $name stays canonical in $appearance mode',
