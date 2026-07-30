@@ -185,7 +185,9 @@ export function ChatLayout({
           )}
         </div>
         <div className={classes.dockContainer} ref={dockContainerRef}>
-          {scrollButton === undefined ? defaultScrollButton : scrollButton}
+          <div className={classes.scrollButtonContainer}>
+            {scrollButton === undefined ? defaultScrollButton : scrollButton}
+          </div>
           <div className={classes.blurLayer} />
           <div className={classes.dock}>
             <div className={classes.dockInner}>{composer}</div>

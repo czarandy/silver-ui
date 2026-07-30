@@ -160,6 +160,18 @@ describe('ChatLayout', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('floats the scroll button in its own container above the dock', () => {
+    renderLayout();
+
+    const layout = screen.getByTestId('layout');
+    const button = screen.getByRole('button', {name: 'Scroll to bottom'});
+    // The floating container is the dock container's first child; it keeps
+    // the button out of flow so it reserves no height above the composer.
+    // eslint-disable-next-line testing-library/no-node-access -- structural slots without roles
+    const scrollButtonContainer = layout.lastElementChild?.firstElementChild;
+    expect(scrollButtonContainer).toContainElement(button);
+  });
+
   it('reserves the measured dock height with an external scroll container', async () => {
     const external = document.createElement('div');
     document.body.append(external);
