@@ -139,7 +139,10 @@ export const neutralTheme: ThemePreset = {
     light: {
       colors: {
         bg: '#ffffff',
-        bgHover: '#f5f5f5',
+        // One step darker than `bgSubtle` (like shadcn's neutral accent) so
+        // hover/selected highlights stay visible on subtle surfaces such as
+        // the AppShell side nav.
+        bgHover: '#e5e5e5',
         bgSelected: '#f1f1f1',
         bgSubtle: '#f1f1f1',
         border: '#ebebeb',
