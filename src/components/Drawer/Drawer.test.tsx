@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -88,7 +88,7 @@ describe('Drawer', () => {
   });
 
   it('fills its inner surface so a Layout footer stays at the bottom', () => {
-    const {inner} = drawerRecipe({isOpen: true, placement: 'end'});
+    const {inner} = drawerRecipe({state: 'open', placement: 'end'});
 
     expect(inner).toContain('silver-h_100%');
   });
@@ -777,5 +777,171 @@ describe('useDrawer', () => {
     expect(screen.getByRole('dialog', {name: 'Menu'})).toHaveStyle({
       height: '40vh',
     });
+  });
+});
+
+function UnmountFixture({
+  hasDrawer,
+  isOpen,
+}: {
+  hasDrawer: boolean;
+  isOpen: boolean;
+}): React.JSX.Element {
+  return (
+    <>
+      <button type="button">Trigger</button>
+      {hasDrawer ? (
+        <Drawer
+          data-testid="drawer"
+          isOpen={isOpen}
+          label="Nav"
+          onOpenChange={() => {}}>
+          <button data-autofocus="true" type="button">
+            Inside
+          </button>
+        </Drawer>
+      ) : null}
+    </>
+  );
+}
+
+describe('Drawer exit animation', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  function renderDrawer(isOpen: boolean) {
+    return <UnmountFixture hasDrawer isOpen={isOpen} />;
+  }
+
+  it('slides out before closing, then restores focus to the trigger', () => {
+    vi.useFakeTimers();
+    const {rerender} = render(renderDrawer(false));
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    act(() => {
+      trigger.focus();
+    });
+
+    rerender(renderDrawer(true));
+    expect(screen.getByRole('button', {name: 'Inside'})).toHaveFocus();
+
+    rerender(renderDrawer(false));
+    // The exit transition is still playing: the drawer stays open and focus
+    // has not yet returned to the trigger.
+    expect(screen.getByTestId('drawer')).toHaveAttribute('open');
+    expect(trigger).not.toHaveFocus();
+
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(screen.getByTestId('drawer')).not.toHaveAttribute('open');
+    expect(trigger).toHaveFocus();
+  });
+
+  it('cancels the deferred close when reopened mid-exit', () => {
+    vi.useFakeTimers();
+    const closeSpy = vi.spyOn(HTMLDialogElement.prototype, 'close');
+    const {rerender} = render(renderDrawer(true));
+
+    rerender(renderDrawer(false));
+    rerender(renderDrawer(true));
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(closeSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId('drawer')).toHaveAttribute('open');
+  });
+
+  it('closes almost immediately under reduced motion', () => {
+    vi.useFakeTimers();
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: vi.fn().mockReturnValue({
+        addEventListener: vi.fn(),
+        matches: true,
+        media: '(prefers-reduced-motion: reduce)',
+        removeEventListener: vi.fn(),
+      }),
+    });
+
+    const {rerender} = render(renderDrawer(true));
+    rerender(renderDrawer(false));
+    expect(screen.getByTestId('drawer')).toHaveAttribute('open');
+
+    act(() => {
+      vi.advanceTimersByTime(20);
+    });
+    expect(screen.getByTestId('drawer')).not.toHaveAttribute('open');
+
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('restores focus to the trigger when unmounted mid-exit', () => {
+    vi.useFakeTimers();
+
+    const {rerender} = render(<UnmountFixture hasDrawer isOpen={false} />);
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    act(() => {
+      trigger.focus();
+    });
+
+    rerender(<UnmountFixture hasDrawer isOpen />);
+    rerender(<UnmountFixture hasDrawer isOpen={false} />);
+    // Unmount only the drawer mid-exit; the trigger stays in the document.
+    rerender(<UnmountFixture hasDrawer={false} isOpen={false} />);
+
+    expect(trigger).toHaveFocus();
+    expect(document.body).not.toHaveStyle({overflow: 'hidden'});
+  });
+});
+
+describe('drawerRecipe animation atoms', () => {
+  function rootAtoms(
+    state: 'open' | 'closing' | 'closed',
+    placement: 'start' | 'end' | 'top' | 'bottom',
+  ): string[] {
+    return (drawerRecipe({state, placement}).root ?? '').split(' ');
+  }
+
+  it('slides from the placement edge with an RTL-aware offset', () => {
+    const endAtoms = rootAtoms('open', 'end');
+    expect(endAtoms).toContain(
+      '[@starting-style]:silver-translate_var(--drawer-hidden-translate)',
+    );
+    expect(endAtoms).toContain('silver---drawer-hidden-translate_100%_0');
+    expect(endAtoms).toContain('rtl:silver---drawer-hidden-translate_-100%_0');
+    expect(endAtoms).toContain('backdrop:[@starting-style]:silver-op_0');
+    expect(endAtoms).toContain(
+      '[@media_(prefers-reduced-motion:_reduce)]:silver-trs-dur_0.01s',
+    );
+
+    const startAtoms = rootAtoms('open', 'start');
+    expect(startAtoms).toContain('silver---drawer-hidden-translate_-100%_0');
+    expect(startAtoms).toContain('rtl:silver---drawer-hidden-translate_100%_0');
+
+    expect(rootAtoms('open', 'top')).toContain(
+      'silver---drawer-hidden-translate_0_-100%',
+    );
+    expect(rootAtoms('open', 'bottom')).toContain(
+      'silver---drawer-hidden-translate_0_100%',
+    );
+  });
+
+  it('keeps layout only under [open] while closing and moves off-edge', () => {
+    const atoms = rootAtoms('closing', 'end');
+
+    expect(atoms).toContain('[&[open]]:silver-d_flex');
+    expect(atoms).not.toContain('silver-d_flex');
+    expect(atoms).toContain('silver-translate_var(--drawer-hidden-translate)');
+    expect(atoms).toContain('backdrop:silver-op_0');
+  });
+
+  it('authors no display when closed so the UA default hides the drawer', () => {
+    const atoms = rootAtoms('closed', 'end');
+
+    expect(atoms).not.toContain('silver-d_flex');
+    expect(atoms).not.toContain('[&[open]]:silver-d_flex');
   });
 });

@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -6,9 +7,10 @@ import {
   within,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {Dialog} from 'components/Dialog/Dialog';
+import {dialogRecipe} from 'components/Dialog/Dialog.recipe';
 import {useDialog} from 'components/Dialog/useDialog';
 import {LayoutHeader} from 'components/Layout';
 import {SizeContext} from 'internal/SizeContext';
@@ -626,5 +628,126 @@ describe('LayoutHeader in Dialog', () => {
 
     expect(screen.getByTestId('start')).toBeInTheDocument();
     expect(screen.getByTestId('end')).toBeInTheDocument();
+  });
+});
+
+describe('Dialog exit animation', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  function renderDialog(isOpen: boolean) {
+    return (
+      <Dialog
+        data-testid="dialog"
+        isOpen={isOpen}
+        label="Preferences"
+        onOpenChange={() => {}}>
+        Content
+      </Dialog>
+    );
+  }
+
+  it('keeps the dialog open while the exit transition plays, then closes', () => {
+    vi.useFakeTimers();
+    const {rerender} = render(renderDialog(true));
+    expect(screen.getByTestId('dialog')).toHaveAttribute('open');
+
+    rerender(renderDialog(false));
+    expect(screen.getByTestId('dialog')).toHaveAttribute('open');
+
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(screen.getByTestId('dialog')).not.toHaveAttribute('open');
+  });
+
+  it('cancels the deferred close when reopened mid-exit', () => {
+    vi.useFakeTimers();
+    const closeSpy = vi.spyOn(HTMLDialogElement.prototype, 'close');
+    const {rerender} = render(renderDialog(true));
+
+    rerender(renderDialog(false));
+    rerender(renderDialog(true));
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(closeSpy).not.toHaveBeenCalled();
+    expect(screen.getByTestId('dialog')).toHaveAttribute('open');
+  });
+
+  it('closes almost immediately under reduced motion', () => {
+    vi.useFakeTimers();
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: vi.fn().mockReturnValue({
+        addEventListener: vi.fn(),
+        matches: true,
+        media: '(prefers-reduced-motion: reduce)',
+        removeEventListener: vi.fn(),
+      }),
+    });
+
+    const {rerender} = render(renderDialog(true));
+    rerender(renderDialog(false));
+    expect(screen.getByTestId('dialog')).toHaveAttribute('open');
+
+    act(() => {
+      vi.advanceTimersByTime(20);
+    });
+    expect(screen.getByTestId('dialog')).not.toHaveAttribute('open');
+
+    Reflect.deleteProperty(window, 'matchMedia');
+  });
+
+  it('closes the native dialog when unmounted mid-exit', () => {
+    vi.useFakeTimers();
+    const closeSpy = vi.spyOn(HTMLDialogElement.prototype, 'close');
+    const {rerender, unmount} = render(renderDialog(true));
+
+    rerender(renderDialog(false));
+    unmount();
+
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(closeSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('dialogRecipe animation atoms', () => {
+  function rootAtoms(state: 'open' | 'closing' | 'closed'): string[] {
+    return (dialogRecipe({state}).root ?? '').split(' ');
+  }
+
+  it('animates entry with @starting-style and honors reduced motion', () => {
+    const atoms = rootAtoms('open');
+
+    expect(atoms).toContain('silver-trs-dur_fast');
+    expect(atoms).toContain('[@starting-style]:silver-op_0');
+    expect(atoms).toContain('[@starting-style]:silver-scale_0.97');
+    expect(atoms).toContain('backdrop:[@starting-style]:silver-op_0');
+    expect(atoms).toContain(
+      '[@media_(prefers-reduced-motion:_reduce)]:silver-trs-dur_0.01s',
+    );
+  });
+
+  it('keeps layout only under [open] while closing', () => {
+    const atoms = rootAtoms('closing');
+
+    expect(atoms).toContain('[&[open]]:silver-d_flex');
+    expect(atoms).not.toContain('silver-d_flex');
+    expect(atoms).toContain('silver-op_0');
+    expect(atoms).toContain('backdrop:silver-op_0');
+  });
+
+  it('authors no display when closed so the UA default hides the dialog', () => {
+    const atoms = rootAtoms('closed');
+
+    expect(atoms).not.toContain('silver-d_flex');
+    expect(atoms).not.toContain('[&[open]]:silver-d_flex');
   });
 });

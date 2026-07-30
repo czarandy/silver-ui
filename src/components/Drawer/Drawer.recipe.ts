@@ -13,9 +13,24 @@ export const drawerRecipe = sva({
       boxShadow: 'xl',
       flexDirection: 'column',
       overscrollBehavior: 'contain',
+      // Individual translate property (not the transform shorthand), so the
+      // steady open state authors nothing and the inline `size` style never
+      // collides with the slide.
+      transitionProperty: 'translate',
+      transitionDuration: 'normal',
+      transitionTimingFunction: 'default',
+      '@media (prefers-reduced-motion: reduce)': {
+        transitionDuration: '0.01s',
+      },
       _backdrop: {
         bg: 'overlay.scrim',
         backdropFilter: 'blur(2px)',
+        transitionProperty: 'opacity',
+        transitionDuration: 'normal',
+        transitionTimingFunction: 'default',
+        '@media (prefers-reduced-motion: reduce)': {
+          transitionDuration: '0.01s',
+        },
       },
       _focusVisible: {
         outline: 'none',
@@ -31,14 +46,43 @@ export const drawerRecipe = sva({
     },
   },
   variants: {
-    // When closed, the native <dialog> UA style (display: none) applies; opening
-    // switches on the flex column layout.
-    isOpen: {
-      true: {root: {display: 'flex'}},
-      false: {},
+    // open: rendered, sliding in from the placement edge via @starting-style.
+    // closing: the drawer still has [open] while the deferred close() waits
+    // for the slide-out; display stays flex only under [open] so a closed
+    // drawer can never be pinned visible (see useKeyboardHint.recipe.ts).
+    // closed: author nothing; the native <dialog> UA style (display: none)
+    // applies.
+    state: {
+      open: {
+        root: {
+          display: 'flex',
+          '@starting-style': {
+            translate: 'var(--drawer-hidden-translate)',
+          },
+          _backdrop: {
+            opacity: 1,
+            '@starting-style': {
+              opacity: 0,
+            },
+          },
+        },
+      },
+      closing: {
+        root: {
+          '&[open]': {display: 'flex'},
+          translate: 'var(--drawer-hidden-translate)',
+          _backdrop: {
+            opacity: 0,
+          },
+        },
+      },
+      closed: {},
     },
     // Set both logical edges directly instead of aligning an `inset: 0`
     // dialog with auto margins, which a host application's reset can flatten.
+    // Each placement also defines its off-screen translate; percentages
+    // resolve against the drawer's own size, so any `size` value slides fully
+    // off-edge.
     placement: {
       start: {
         root: {
@@ -51,6 +95,10 @@ export const drawerRecipe = sva({
           borderInlineEndWidth: 'default',
           borderInlineEndStyle: 'solid',
           borderInlineEndColor: 'border',
+          '--drawer-hidden-translate': '-100% 0',
+          _rtl: {
+            '--drawer-hidden-translate': '100% 0',
+          },
         },
       },
       end: {
@@ -64,6 +112,10 @@ export const drawerRecipe = sva({
           borderInlineStartWidth: 'default',
           borderInlineStartStyle: 'solid',
           borderInlineStartColor: 'border',
+          '--drawer-hidden-translate': '100% 0',
+          _rtl: {
+            '--drawer-hidden-translate': '-100% 0',
+          },
         },
       },
       top: {
@@ -77,6 +129,7 @@ export const drawerRecipe = sva({
           borderBlockEndWidth: 'default',
           borderBlockEndStyle: 'solid',
           borderBlockEndColor: 'border',
+          '--drawer-hidden-translate': '0 -100%',
         },
       },
       bottom: {
@@ -90,12 +143,13 @@ export const drawerRecipe = sva({
           borderBlockStartWidth: 'default',
           borderBlockStartStyle: 'solid',
           borderBlockStartColor: 'border',
+          '--drawer-hidden-translate': '0 100%',
         },
       },
     },
   },
   defaultVariants: {
-    isOpen: false,
+    state: 'closed',
     placement: 'end',
   },
 });

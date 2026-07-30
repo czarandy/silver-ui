@@ -116,8 +116,13 @@ const placements: {
 
 export const PlacementVariants: Story = {
   render: () => {
-    const [placement, setPlacement] = useState<DrawerPlacement | null>(null);
-    const activePlacement = placement ?? 'end';
+    // Placement is kept when the drawer closes so the exit animation slides
+    // out of the same edge the drawer came from.
+    const [placement, setPlacement] = useState<DrawerPlacement>('end');
+    const [isOpen, setIsOpen] = useState(false);
+    const activeLabel =
+      placements.find(option => option.placement === placement)?.label ??
+      'Right';
 
     return (
       <>
@@ -126,22 +131,21 @@ export const PlacementVariants: Story = {
             <Button
               key={option.placement}
               label={option.label}
-              onClick={() => setPlacement(option.placement)}
+              onClick={() => {
+                setPlacement(option.placement);
+                setIsOpen(true);
+              }}
             />
           ))}
         </div>
         <Drawer
-          isOpen={placement != null}
-          label={`${placements.find(option => option.placement === placement)?.label ?? 'Right'} drawer`}
-          onOpenChange={nextOpen => {
-            if (!nextOpen) {
-              setPlacement(null);
-            }
-          }}
-          placement={activePlacement}>
+          isOpen={isOpen}
+          label={`${activeLabel} drawer`}
+          onOpenChange={setIsOpen}
+          placement={placement}>
           <DrawerContent
-            onClose={() => setPlacement(null)}
-            title={`${placements.find(option => option.placement === activePlacement)?.label ?? 'Right'} drawer`}
+            onClose={() => setIsOpen(false)}
+            title={`${activeLabel} drawer`}
           />
         </Drawer>
       </>
