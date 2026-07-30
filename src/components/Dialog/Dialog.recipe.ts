@@ -15,11 +15,8 @@ export const dialogRecipe = sva({
       boxShadow: 'xl',
       flexDirection: 'column',
       overscrollBehavior: 'contain',
+      // Reset default properties to prevent inheritance leak
       whiteSpace: 'normal',
-      // The dialog stays a DOM descendant of the subtree that renders it, and
-      // top-layer display does not sever CSS inheritance, so without a reset a
-      // centered ancestor (e.g. an EmptyState action slot) centers the
-      // dialog's text.
       textAlign: 'start',
       _backdrop: {
         bg: 'overlay.scrim',
