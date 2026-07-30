@@ -6,6 +6,7 @@ import type {TablePlugin} from 'components/Table/types';
 const CANONICAL_PLUGIN_ORDER = [
   'columnSettings',
   'sort',
+  'expansion',
   'selection',
   'filtering',
   'columnResize',

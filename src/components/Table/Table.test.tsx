@@ -1,5 +1,6 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {
+  act,
   fireEvent,
   render,
   renderHook,
@@ -30,6 +31,10 @@ import {
   useTableColumnSettings,
   useTableColumnSettingsState,
 } from 'components/Table/plugins/columnSettings';
+import {
+  useTableRowExpansion,
+  useTableRowExpansionState,
+} from 'components/Table/plugins/expansion';
 import {
   toSearchFilters,
   useTableFiltering,
@@ -541,6 +546,7 @@ describe('Table plugins', () => {
   it('orders named first-party plugin records canonically', () => {
     const columnSettingsPlugin: TablePlugin<PersonRow> = {};
     const sortPlugin: TablePlugin<PersonRow> = {};
+    const expansionPlugin: TablePlugin<PersonRow> = {};
     const selectionPlugin: TablePlugin<PersonRow> = {};
     const filteringPlugin: TablePlugin<PersonRow> = {};
     const columnResizePlugin: TablePlugin<PersonRow> = {};
@@ -552,6 +558,7 @@ describe('Table plugins', () => {
         selection: selectionPlugin,
         columnResize: columnResizePlugin,
         sort: sortPlugin,
+        expansion: expansionPlugin,
         filtering: filteringPlugin,
         columnSettings: columnSettingsPlugin,
       }),
@@ -560,6 +567,7 @@ describe('Table plugins', () => {
     expect(result.current).toEqual([
       columnSettingsPlugin,
       sortPlugin,
+      expansionPlugin,
       selectionPlugin,
       filteringPlugin,
       columnResizePlugin,
@@ -1113,6 +1121,392 @@ describe('Table plugins', () => {
 
     await user.click(screen.getAllByLabelText('Select row')[0]);
     expect(screen.getByLabelText('Selected count')).toHaveTextContent('1');
+  });
+
+  interface TreeRow extends Record<string, unknown> {
+    id: string;
+    name: string;
+    size: string;
+    subRows?: TreeRow[];
+  }
+
+  const treeData: TreeRow[] = [
+    {
+      subRows: [
+        {id: 'docs/report', name: 'Report.pdf', size: '2 MB'},
+        {
+          subRows: [{id: 'docs/archive/old', name: 'Old.txt', size: '1 KB'}],
+          id: 'docs/archive',
+          name: 'Archive',
+          size: '—',
+        },
+      ],
+      id: 'docs',
+      name: 'Documents',
+      size: '—',
+    },
+    {
+      subRows: [{id: 'images/logo', name: 'Logo.png', size: '30 KB'}],
+      id: 'images',
+      name: 'Images',
+      size: '—',
+    },
+    {id: 'readme', name: 'Readme.md', size: '4 KB'},
+  ];
+
+  const treeColumns: TableColumn<TreeRow>[] = [
+    {key: 'name', header: 'Name'},
+    {key: 'size', header: 'Size'},
+  ];
+
+  function ExpandableTable({
+    defaultExpandedKeys,
+    getExpandAllLabel,
+    getExpanderLabel,
+    hasExpandAllToggle,
+    hasRowClickExpansion,
+    onExpandedKeysChange,
+  }: {
+    defaultExpandedKeys?: Iterable<string>;
+    getExpandAllLabel?: (isAllExpanded: boolean | 'indeterminate') => string;
+    getExpanderLabel?: (item: TreeRow, isExpanded: boolean) => string;
+    hasExpandAllToggle?: boolean;
+    hasRowClickExpansion?: boolean;
+    onExpandedKeysChange?: (keys: ReadonlySet<string>) => void;
+  }) {
+    const expansion = useTableRowExpansionState<TreeRow>({
+      data: treeData,
+      defaultExpandedKeys,
+      getChildren: item => item.subRows,
+      getRowKey: item => item.id,
+      onExpandedKeysChange,
+    });
+    const expansionPlugin = useTableRowExpansion<TreeRow>({
+      ...expansion.expansionConfig,
+      getExpandAllLabel,
+      getExpanderLabel,
+      hasExpandAllToggle,
+      hasRowClickExpansion,
+    });
+    return (
+      <Table
+        columns={treeColumns}
+        data={expansion.data}
+        idKey="id"
+        plugins={{expansion: expansionPlugin}}
+      />
+    );
+  }
+
+  it('renders expander chevrons only for expandable rows', () => {
+    render(<ExpandableTable />);
+
+    expect(screen.getAllByRole('button', {name: 'Expand row'})).toHaveLength(2);
+    expect(screen.queryByText('Report.pdf')).not.toBeInTheDocument();
+    const readmeRow = screen
+      .getAllByRole('row')
+      .find(
+        row => within(row).queryByRole('cell', {name: 'Readme.md'}) != null,
+      );
+    expect(readmeRow).toBeDefined();
+    expect(
+      within(readmeRow as HTMLElement).queryByRole('button'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('expands and collapses child rows from the chevron', async () => {
+    const user = userEvent.setup();
+    render(<ExpandableTable />);
+
+    await user.click(screen.getAllByRole('button', {name: 'Expand row'})[0]);
+    expect(screen.getByRole('cell', {name: 'Report.pdf'})).toBeInTheDocument();
+
+    const collapseButton = screen.getByRole('button', {name: 'Collapse row'});
+    expect(collapseButton).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(collapseButton);
+    expect(screen.queryByText('Report.pdf')).not.toBeInTheDocument();
+  });
+
+  it('indents child rows by depth with inline chevrons and spacers', () => {
+    render(<ExpandableTable defaultExpandedKeys={['docs', 'docs/archive']} />);
+
+    // The expanded depth-1 row shows its chevron inline in the name column,
+    // not in the expansion control column.
+    const archiveRow = screen
+      .getAllByRole('row')
+      .find(row => within(row).queryByRole('cell', {name: /Archive/}) != null);
+    expect(archiveRow).toBeDefined();
+    const archiveButtons = within(archiveRow as HTMLElement).getAllByRole(
+      'button',
+    );
+    expect(archiveButtons).toHaveLength(1);
+    expect(archiveButtons[0]).toHaveAccessibleName('Collapse row');
+    const archiveNameCell = within(archiveRow as HTMLElement).getByRole(
+      'cell',
+      {name: /Archive/},
+    );
+    expect(
+      within(archiveNameCell).getByRole('button', {name: 'Collapse row'}),
+    ).toBeInTheDocument();
+
+    // Depth-1 leaf rows keep alignment with a spacer instead of a chevron.
+    const reportRow = screen
+      .getAllByRole('row')
+      .find(
+        row => within(row).queryByRole('cell', {name: /Report.pdf/}) != null,
+      );
+    expect(
+      within(reportRow as HTMLElement).queryByRole('button'),
+    ).not.toBeInTheDocument();
+
+    // Depth-2 rows indent by one step via the CSS variable; getByText
+    // resolves to the indented cell wrapper that holds the text.
+    const oldWrapper = screen.getByText('Old.txt');
+    expect(oldWrapper.style.getPropertyValue('--table-expansion-indent')).toBe(
+      '1',
+    );
+    const reportWrapper = screen.getByText('Report.pdf');
+    expect(
+      reportWrapper.style.getPropertyValue('--table-expansion-indent'),
+    ).toBe('0');
+  });
+
+  it('supports controlled expanded keys with onExpandedKeysChange', async () => {
+    const user = userEvent.setup();
+    const onExpandedKeysChange = vi.fn();
+
+    function ControlledExpandableTable() {
+      const [expandedKeys, setExpandedKeys] = useState<ReadonlySet<string>>(
+        () => new Set(),
+      );
+      const expansion = useTableRowExpansionState<TreeRow>({
+        data: treeData,
+        expandedKeys,
+        getChildren: item => item.subRows,
+        getRowKey: item => item.id,
+        onExpandedKeysChange: keys => {
+          onExpandedKeysChange(keys);
+          setExpandedKeys(keys);
+        },
+      });
+      const expansionPlugin = useTableRowExpansion(expansion.expansionConfig);
+      return (
+        <>
+          <output aria-label="Expanded keys">
+            {[...expandedKeys].join(',')}
+          </output>
+          <Table
+            columns={treeColumns}
+            data={expansion.data}
+            idKey="id"
+            plugins={{expansion: expansionPlugin}}
+          />
+        </>
+      );
+    }
+
+    render(<ControlledExpandableTable />);
+    await user.click(screen.getAllByRole('button', {name: 'Expand row'})[0]);
+
+    expect(onExpandedKeysChange).toHaveBeenCalledWith(new Set(['docs']));
+    expect(screen.getByLabelText('Expanded keys')).toHaveTextContent('docs');
+    expect(screen.getByText('Report.pdf')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', {name: 'Collapse row'}));
+    expect(onExpandedKeysChange).toHaveBeenLastCalledWith(new Set());
+    expect(screen.queryByText('Report.pdf')).not.toBeInTheDocument();
+  });
+
+  it('toggles every expandable row from the expand-all header control', async () => {
+    const user = userEvent.setup();
+    render(<ExpandableTable hasExpandAllToggle />);
+
+    await user.click(screen.getByRole('button', {name: 'Expand all rows'}));
+    expect(screen.getByText('Report.pdf')).toBeInTheDocument();
+    expect(screen.getByText('Old.txt')).toBeInTheDocument();
+    expect(screen.getByText('Logo.png')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', {name: 'Collapse all rows'}));
+    expect(screen.queryByText('Report.pdf')).not.toBeInTheDocument();
+    expect(screen.queryByText('Logo.png')).not.toBeInTheDocument();
+  });
+
+  it('uses consumer-provided expander labels', () => {
+    render(
+      <ExpandableTable
+        getExpandAllLabel={() => 'Toggle every row'}
+        getExpanderLabel={(item, isExpanded) =>
+          `${isExpanded ? 'Hide' : 'Show'} ${item.name} children`
+        }
+        hasExpandAllToggle
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', {name: 'Show Documents children'}),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {name: 'Show Images children'}),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {name: 'Toggle every row'}),
+    ).toBeInTheDocument();
+  });
+
+  it('expands a row by clicking it when hasRowClickExpansion is set', async () => {
+    const user = userEvent.setup();
+    const onExpandedKeysChange = vi.fn();
+    render(
+      <ExpandableTable
+        hasRowClickExpansion
+        onExpandedKeysChange={onExpandedKeysChange}
+      />,
+    );
+
+    const findRow = (name: string) =>
+      screen
+        .getAllByRole('row')
+        .find(row => within(row).queryByRole('cell', {name}) != null);
+
+    const docsRow = findRow('Documents');
+    expect(docsRow).toBeDefined();
+    expect((docsRow as HTMLElement).className).toContain('cursor_pointer');
+
+    await user.click(
+      within(docsRow as HTMLElement).getByRole('cell', {name: 'Documents'}),
+    );
+    expect(onExpandedKeysChange).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Report.pdf')).toBeInTheDocument();
+
+    // The chevron stops propagation, so a chevron click toggles exactly once.
+    await user.click(
+      within(docsRow as HTMLElement).getByRole('button', {
+        name: 'Collapse row',
+      }),
+    );
+    expect(onExpandedKeysChange).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText('Report.pdf')).not.toBeInTheDocument();
+
+    // Leaf rows are not clickable.
+    const readmeRow = findRow('Readme.md');
+    expect((readmeRow as HTMLElement).className).not.toContain(
+      'cursor_pointer',
+    );
+    await user.click(
+      within(readmeRow as HTMLElement).getByRole('cell', {name: 'Readme.md'}),
+    );
+    expect(onExpandedKeysChange).toHaveBeenCalledTimes(2);
+  });
+
+  it('updates expansion without re-rendering unaffected row content', async () => {
+    const user = userEvent.setup();
+    const renderName = vi.fn((row: TreeRow) => row.name);
+    // The expandable root comes last so expanding it appends child rows
+    // without shifting any other row's index.
+    const appendOnlyTree: TreeRow[] = [
+      {id: 'readme', name: 'Readme.md', size: '4 KB'},
+      {
+        subRows: [{id: 'images/logo', name: 'Logo.png', size: '30 KB'}],
+        id: 'images',
+        name: 'Images',
+        size: '—',
+      },
+    ];
+    const trackedColumns: TableColumn<TreeRow>[] = [
+      {key: 'name', header: 'Name', renderCell: renderName},
+      {key: 'size', header: 'Size'},
+    ];
+
+    function MemoizedExpandableTable() {
+      const expansion = useTableRowExpansionState<TreeRow>({
+        data: appendOnlyTree,
+        getChildren: item => item.subRows,
+        getRowKey: item => item.id,
+      });
+      const expansionPlugin = useTableRowExpansion(expansion.expansionConfig);
+      const plugins = useMemo(
+        () => ({expansion: expansionPlugin}),
+        [expansionPlugin],
+      );
+      return (
+        <Table
+          columns={trackedColumns}
+          data={expansion.data}
+          idKey="id"
+          plugins={plugins}
+        />
+      );
+    }
+
+    render(<MemoizedExpandableTable />);
+    expect(renderName).toHaveBeenCalledTimes(2);
+
+    await user.click(screen.getByRole('button', {name: 'Expand row'}));
+
+    // Only the newly-inserted child row rendered its content.
+    expect(renderName).toHaveBeenCalledTimes(3);
+    expect(screen.getByText('Logo.png')).toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Collapse row'})).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+  });
+
+  it('renders the selection column before the expansion column', () => {
+    function SelectionExpansionTable() {
+      const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
+      const expansion = useTableRowExpansionState<TreeRow>({
+        data: treeData,
+        getChildren: item => item.subRows,
+        getRowKey: item => item.id,
+      });
+      const selection = useTableSelectionState({
+        data: expansion.data,
+        idKey: 'id',
+        selectedKeys,
+        setSelectedKeys,
+      });
+      const expansionPlugin = useTableRowExpansion<TreeRow>({
+        ...expansion.expansionConfig,
+        hasExpandAllToggle: true,
+      });
+      const selectionPlugin = useTableSelection(selection.selectionConfig);
+      return (
+        <Table
+          columns={treeColumns}
+          data={expansion.data}
+          idKey="id"
+          plugins={{
+            selection: selectionPlugin,
+            expansion: expansionPlugin,
+          }}
+        />
+      );
+    }
+
+    render(<SelectionExpansionTable />);
+
+    const headers = screen.getAllByRole('columnheader');
+    expect(
+      within(headers[0]).getByLabelText('Select all rows'),
+    ).toBeInTheDocument();
+    expect(
+      within(headers[1]).getByRole('button', {name: 'Expand all rows'}),
+    ).toBeInTheDocument();
+
+    const docsRow = screen
+      .getAllByRole('row')
+      .find(
+        row => within(row).queryByRole('cell', {name: 'Documents'}) != null,
+      );
+    const docsCells = within(docsRow as HTMLElement).getAllByRole('cell');
+    expect(
+      within(docsCells[0]).getByLabelText('Select row'),
+    ).toBeInTheDocument();
+    expect(
+      within(docsCells[1]).getByRole('button', {name: 'Expand row'}),
+    ).toBeInTheDocument();
   });
 
   it('applies filtering and column resize after canonical column transforms', () => {
@@ -2068,6 +2462,315 @@ describe('Table state hooks', () => {
     expect(screen.getByLabelText('Active columns')).toHaveTextContent(
       'name,age,role',
     );
+  });
+
+  interface ExpansionTreeRow extends Record<string, unknown> {
+    id: string;
+    name: string;
+    subRows?: ExpansionTreeRow[];
+  }
+
+  const expansionTree: ExpansionTreeRow[] = [
+    {
+      subRows: [
+        {id: 'docs/report', name: 'Report.pdf'},
+        {
+          subRows: [{id: 'docs/archive/old', name: 'Old.txt'}],
+          id: 'docs/archive',
+          name: 'Archive',
+        },
+      ],
+      id: 'docs',
+      name: 'Documents',
+    },
+    {
+      subRows: [{id: 'images/logo', name: 'Logo.png'}],
+      id: 'images',
+      name: 'Images',
+    },
+    {id: 'readme', name: 'Readme.md'},
+  ];
+
+  const getExpansionChildren = (item: ExpansionTreeRow) => item.subRows;
+  const getExpansionRowKey = (item: ExpansionTreeRow) => item.id;
+
+  it('flattens the visible tree depth-first and reports row depth', () => {
+    const {result} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: expansionTree,
+        defaultExpandedKeys: ['docs'],
+        getChildren: getExpansionChildren,
+        getRowKey: getExpansionRowKey,
+      }),
+    );
+
+    expect(result.current.data.map(row => row.id)).toEqual([
+      'docs',
+      'docs/report',
+      'docs/archive',
+      'images',
+      'readme',
+    ]);
+    const {getDepth} = result.current.expansionConfig;
+    expect(getDepth(result.current.data[0])).toBe(0);
+    expect(getDepth(result.current.data[1])).toBe(1);
+    expect(getDepth(result.current.data[3])).toBe(0);
+  });
+
+  it('manages uncontrolled expansion with defaultExpandedKeys', () => {
+    const onExpandedKeysChange = vi.fn();
+    const {result} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: expansionTree,
+        defaultExpandedKeys: ['docs'],
+        getChildren: getExpansionChildren,
+        getRowKey: getExpansionRowKey,
+        onExpandedKeysChange,
+      }),
+    );
+
+    expect(result.current.expandedKeys).toEqual(new Set(['docs']));
+
+    act(() => {
+      result.current.onToggleRow('docs');
+    });
+    expect(result.current.data.map(row => row.id)).toEqual([
+      'docs',
+      'images',
+      'readme',
+    ]);
+    expect(onExpandedKeysChange).toHaveBeenCalledWith(new Set());
+
+    act(() => {
+      result.current.onToggleRow('images');
+    });
+    expect(result.current.expandedKeys).toEqual(new Set(['images']));
+    expect(onExpandedKeysChange).toHaveBeenLastCalledWith(new Set(['images']));
+  });
+
+  it('computes isAllExpanded across expandable rows', () => {
+    const onExpandedKeysChange = vi.fn();
+    const {result, rerender} = renderHook(
+      ({expandedKeys}: {expandedKeys: ReadonlySet<string>}) =>
+        useTableRowExpansionState<ExpansionTreeRow>({
+          data: expansionTree,
+          expandedKeys,
+          getChildren: getExpansionChildren,
+          getRowKey: getExpansionRowKey,
+          onExpandedKeysChange,
+        }),
+      {initialProps: {expandedKeys: new Set<string>()}},
+    );
+
+    expect(result.current.isAllExpanded).toBe(false);
+
+    rerender({expandedKeys: new Set(['docs'])});
+    expect(result.current.isAllExpanded).toBe('indeterminate');
+
+    rerender({expandedKeys: new Set(['docs', 'docs/archive', 'images'])});
+    expect(result.current.isAllExpanded).toBe(true);
+
+    result.current.onToggleExpandAll(false);
+    expect(onExpandedKeysChange).toHaveBeenLastCalledWith(new Set());
+    result.current.onToggleExpandAll(true);
+    expect(onExpandedKeysChange).toHaveBeenLastCalledWith(
+      new Set(['docs', 'docs/archive', 'images']),
+    );
+
+    const {result: leafOnlyResult} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: [{id: 'leaf', name: 'Leaf'}],
+        getChildren: getExpansionChildren,
+        getRowKey: getExpansionRowKey,
+      }),
+    );
+    expect(leafOnlyResult.current.isAllExpanded).toBe(false);
+  });
+
+  it('terminates on a self-referential row and flattens each key once', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const self: ExpansionTreeRow = {
+      subRows: [],
+      id: 'cycle-self',
+      name: 'Self',
+    };
+    const leaf: ExpansionTreeRow = {id: 'cycle-self-leaf', name: 'Leaf'};
+    self.subRows?.push(self, leaf);
+
+    const {result} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: [self],
+        expandedKeys: new Set(['cycle-self']),
+        getChildren: getExpansionChildren,
+        getRowKey: getExpansionRowKey,
+      }),
+    );
+
+    expect(result.current.data.map(row => row.id)).toEqual([
+      'cycle-self',
+      'cycle-self-leaf',
+    ]);
+    const {getDepth} = result.current.expansionConfig;
+    expect(getDepth(self)).toBe(0);
+    expect(getDepth(leaf)).toBe(1);
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('cycle-self'));
+    warnSpy.mockRestore();
+  });
+
+  it('terminates on a cycle through the ancestor chain', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const root: ExpansionTreeRow = {
+      subRows: [],
+      id: 'cycle-root',
+      name: 'Root',
+    };
+    const child: ExpansionTreeRow = {
+      subRows: [],
+      id: 'cycle-child',
+      name: 'Child',
+    };
+    const grand: ExpansionTreeRow = {
+      subRows: [],
+      id: 'cycle-grand',
+      name: 'Grand',
+    };
+    root.subRows?.push(child);
+    child.subRows?.push(grand);
+    grand.subRows?.push(root);
+
+    const {result} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: [root],
+        expandedKeys: new Set(['cycle-root', 'cycle-child', 'cycle-grand']),
+        getChildren: getExpansionChildren,
+        getRowKey: getExpansionRowKey,
+      }),
+    );
+
+    expect(result.current.data.map(row => row.id)).toEqual([
+      'cycle-root',
+      'cycle-child',
+      'cycle-grand',
+    ]);
+    const {getDepth} = result.current.expansionConfig;
+    expect(getDepth(root)).toBe(0);
+    expect(getDepth(child)).toBe(1);
+    expect(getDepth(grand)).toBe(2);
+    expect(result.current.isAllExpanded).toBe(true);
+    warnSpy.mockRestore();
+  });
+
+  it('collects expandable keys on cyclic data for expand-all', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const root: ExpansionTreeRow = {
+      subRows: [],
+      id: 'loop-root',
+      name: 'Root',
+    };
+    const child: ExpansionTreeRow = {
+      subRows: [],
+      id: 'loop-child',
+      name: 'Child',
+    };
+    const grand: ExpansionTreeRow = {
+      subRows: [],
+      id: 'loop-grand',
+      name: 'Grand',
+    };
+    root.subRows?.push(child);
+    child.subRows?.push(grand);
+    grand.subRows?.push(root);
+    const onExpandedKeysChange = vi.fn();
+
+    const {result} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: [root],
+        expandedKeys: new Set<string>(),
+        getChildren: getExpansionChildren,
+        getRowKey: getExpansionRowKey,
+        onExpandedKeysChange,
+      }),
+    );
+
+    expect(result.current.data.map(row => row.id)).toEqual(['loop-root']);
+
+    result.current.onToggleExpandAll(true);
+    expect(onExpandedKeysChange).toHaveBeenCalledWith(
+      new Set(['loop-root', 'loop-child', 'loop-grand']),
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('flattens a shared child under each expanded parent', () => {
+    const leaf: ExpansionTreeRow = {id: 'dag-leaf', name: 'Leaf'};
+    const shared: ExpansionTreeRow = {
+      subRows: [leaf],
+      id: 'dag-shared',
+      name: 'Shared',
+    };
+    const parentOne: ExpansionTreeRow = {
+      subRows: [shared],
+      id: 'dag-p1',
+      name: 'Parent 1',
+    };
+    const parentTwo: ExpansionTreeRow = {
+      subRows: [shared],
+      id: 'dag-p2',
+      name: 'Parent 2',
+    };
+
+    const {result} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: [parentOne, parentTwo],
+        expandedKeys: new Set(['dag-p1', 'dag-p2', 'dag-shared']),
+        getChildren: getExpansionChildren,
+        getRowKey: getExpansionRowKey,
+      }),
+    );
+
+    // A shared (DAG) child is not a cycle: it flattens under each expanded
+    // parent because it is never on its own ancestor path.
+    expect(result.current.data.map(row => row.id)).toEqual([
+      'dag-p1',
+      'dag-shared',
+      'dag-leaf',
+      'dag-p2',
+      'dag-shared',
+      'dag-leaf',
+    ]);
+  });
+
+  it('respects getIsItemExpandable for lazy and locked rows', () => {
+    const onExpandedKeysChange = vi.fn();
+    const lazyTree: ExpansionTreeRow[] = [
+      {id: 'lazy', name: 'Lazy'},
+      {
+        subRows: [{id: 'locked/child', name: 'Hidden'}],
+        id: 'locked',
+        name: 'Locked',
+      },
+    ];
+
+    const {result} = renderHook(() =>
+      useTableRowExpansionState<ExpansionTreeRow>({
+        data: lazyTree,
+        expandedKeys: new Set<string>(),
+        getChildren: getExpansionChildren,
+        getIsItemExpandable: item => item.id === 'lazy',
+        getRowKey: getExpansionRowKey,
+        onExpandedKeysChange,
+      }),
+    );
+
+    expect(result.current.expansionConfig.getIsRowExpandable(lazyTree[0])).toBe(
+      true,
+    );
+    expect(result.current.expansionConfig.getIsRowExpandable(lazyTree[1])).toBe(
+      false,
+    );
+
+    result.current.onToggleExpandAll(true);
+    expect(onExpandedKeysChange).toHaveBeenCalledWith(new Set(['lazy']));
   });
 });
 
