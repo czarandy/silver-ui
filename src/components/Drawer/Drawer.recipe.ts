@@ -13,6 +13,11 @@ export const drawerRecipe = sva({
       boxShadow: 'xl',
       flexDirection: 'column',
       overscrollBehavior: 'contain',
+      // The drawer stays a DOM descendant of the subtree that renders it, and
+      // top-layer display does not sever CSS inheritance, so without a reset a
+      // centered ancestor (e.g. an EmptyState action slot) centers the
+      // drawer's text.
+      textAlign: 'start',
       _backdrop: {
         bg: 'overlay.scrim',
         backdropFilter: 'blur(2px)',
