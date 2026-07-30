@@ -186,6 +186,32 @@ describe('ChatLayout', () => {
     );
   });
 
+  it('excludes the measured dock height from the message area minimum when self-scrolling', async () => {
+    renderLayout();
+
+    const layout = screen.getByTestId('layout');
+    // The dock and message area are structural slots without roles, so they
+    // are located relative to the layout root.
+    // eslint-disable-next-line testing-library/no-node-access -- see above
+    const dock = layout.lastElementChild as HTMLElement;
+    Object.defineProperty(dock, 'offsetHeight', {
+      configurable: true,
+      value: 120,
+    });
+    resizeObserver.resize(dock);
+
+    // The sticky dock stays in flow after the message area, so its height
+    // must come out of the area's 100% minimum or a short history gains a
+    // dock-height scroll range that lets the last message slide underneath
+    // the composer.
+    await waitFor(() =>
+      // eslint-disable-next-line testing-library/no-node-access -- see above
+      expect(layout.firstElementChild).toHaveStyle({
+        minHeight: 'calc(100% - 120px)',
+      }),
+    );
+  });
+
   it('applies className, style, and ref to the root', () => {
     const ref = vi.fn<(element: HTMLDivElement | null) => void>();
 
