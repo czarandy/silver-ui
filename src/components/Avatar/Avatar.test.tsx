@@ -37,6 +37,27 @@ describe('Avatar', () => {
     expect(screen.getByText('KJ')).toHaveClass('silver-pb_2px');
   });
 
+  it('adds top padding to the content at exactly 24px', () => {
+    render(
+      <>
+        <Avatar data-testid="numeric-24" name="Ada Lovelace" size={24} />
+        <Avatar data-testid="xsmall" name="Grace Hopper" size="xsmall" />
+        <Avatar data-testid="numeric-20" name="Katherine Johnson" size={20} />
+        <Avatar data-testid="numeric-32" name="Alan Turing" size={32} />
+      </>,
+    );
+
+    const getContent = (testId: string): Element => {
+      // eslint-disable-next-line testing-library/no-node-access -- content is an intentionally private, presentational element
+      return assertNonNull(screen.getByTestId(testId).firstElementChild);
+    };
+
+    expect(getContent('numeric-24')).toHaveClass('silver-pt_1px');
+    expect(getContent('xsmall')).toHaveClass('silver-pt_1px');
+    expect(getContent('numeric-20')).not.toHaveClass('silver-pt_1px');
+    expect(getContent('numeric-32')).not.toHaveClass('silver-pt_1px');
+  });
+
   it('uses alt as the accessible name when provided', () => {
     render(<Avatar alt="Profile photo" name="Ada Lovelace" />);
 
