@@ -213,6 +213,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Progress** — determinate progress bar
 - **Skeleton** — loading placeholder with pulse animation
 - **Spinner** — indeterminate loading indicator
+- **StatusDot** — compact unlabelled presence indicator dot (Badge is the labelled equivalent)
 - **Toast** — temporary notification popup
 
 ### Overlays

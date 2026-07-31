@@ -124,10 +124,9 @@ describe('Avatar', () => {
       />,
     );
 
-    expect(screen.getByTestId('status')).toHaveStyle({
-      height: '20px',
-      width: '20px',
-    });
+    expect(screen.getByTestId('status')).toHaveClass(
+      'silver---status-dot-size_20px',
+    );
     expect(screen.getByTestId('check')).toBeInTheDocument();
   });
 

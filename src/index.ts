@@ -502,6 +502,12 @@ export {
 export {Spinner, type SpinnerProps} from 'components/Spinner';
 export {SplitButton, type SplitButtonProps} from 'components/SplitButton';
 export {
+  StatusDot,
+  type StatusDotProps,
+  type StatusDotSize,
+  type StatusDotVariant,
+} from 'components/StatusDot';
+export {
   Skeleton,
   type SkeletonProps,
   type SkeletonRadius,
