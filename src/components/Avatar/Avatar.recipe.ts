@@ -46,6 +46,12 @@ export const avatarRecipe = sva({
       true: {},
       false: {},
     },
+    is24Px: {
+      true: {
+        content: {paddingTop: '1px'},
+      },
+      false: {},
+    },
     color: {
       red: {
         content: {bg: 'surface.red', color: 'surface.red.fg'},
@@ -119,6 +125,7 @@ export const avatarRecipe = sva({
   ],
   defaultVariants: {
     hasInitials: false,
+    is24Px: false,
     isLarge: false,
     color: 'gray',
     isGrouped: false,

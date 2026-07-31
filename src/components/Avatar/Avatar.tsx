@@ -203,6 +203,7 @@ export function Avatar({
   const classes = avatarRecipe({
     color: resolveAvatarColor(color, name, showInitials),
     hasInitials: showInitials,
+    is24Px: numericSize === 24,
     isGrouped: avatarGroup != null,
     isLarge: numericSize >= 96,
   });
