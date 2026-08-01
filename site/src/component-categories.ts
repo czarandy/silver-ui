@@ -98,6 +98,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'Progress',
     'Skeleton',
     'Spinner',
+    'StatusDot',
     'Toast',
   ],
   Overlays: [

@@ -37,10 +37,9 @@ describe('AvatarGroup', () => {
       </AvatarGroup>,
     );
 
-    expect(screen.getByTestId('status')).toHaveStyle({
-      height: '20px',
-      width: '20px',
-    });
+    expect(screen.getByTestId('status')).toHaveClass(
+      'silver---status-dot-size_20px',
+    );
   });
 
   it('renders overflow as a static indicator', () => {
