@@ -42,6 +42,19 @@ export const avatarRecipe = sva({
       true: {},
       false: {},
     },
+    hasTooltip: {
+      true: {
+        root: {
+          _focusVisible: {
+            outlineWidth: 'focus',
+            outlineStyle: 'solid',
+            outlineColor: 'primary',
+            outlineOffset: 'focusOffset',
+          },
+        },
+      },
+      false: {},
+    },
     isLarge: {
       true: {},
       false: {},
@@ -125,6 +138,7 @@ export const avatarRecipe = sva({
   ],
   defaultVariants: {
     hasInitials: false,
+    hasTooltip: false,
     is24Px: false,
     isLarge: false,
     color: 'gray',

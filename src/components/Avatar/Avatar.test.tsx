@@ -1,10 +1,25 @@
-import {fireEvent, render, screen} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Check} from 'lucide-react';
-import {describe, expect, it, vi} from 'vitest';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import {Avatar} from 'components/Avatar/Avatar';
 import {AvatarStatusDot} from 'components/Avatar/AvatarStatusDot';
-import {assertNonNull} from 'internal/testHelpers';
+import {AvatarGroup} from 'components/AvatarGroup';
+import {assertNonNull, createPopoverFocusShim} from 'internal/testHelpers';
+
+const shim = createPopoverFocusShim();
+
+beforeAll(shim.install);
+afterAll(shim.uninstall);
+beforeEach(shim.reset);
 
 describe('Avatar', () => {
   it('renders initials from the provided name', () => {
@@ -257,5 +272,128 @@ describe('Avatar', () => {
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('icon'));
 
     warnSpy.mockRestore();
+  });
+
+  describe('hasTooltip', () => {
+    it('renders no tooltip by default', () => {
+      render(<Avatar data-testid="avatar" name="Ada Lovelace" />);
+
+      expect(
+        screen.queryByRole('tooltip', {hidden: true}),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('avatar')).not.toHaveAttribute('tabindex');
+      expect(screen.getByTestId('avatar')).not.toHaveAttribute(
+        'aria-describedby',
+      );
+    });
+
+    it('describes the avatar with a tooltip holding the name', () => {
+      render(<Avatar data-testid="avatar" hasTooltip name="Ada Lovelace" />);
+
+      const tooltip = screen.getByRole('tooltip', {hidden: true});
+      expect(tooltip).toHaveTextContent('Ada Lovelace');
+      expect(screen.getByTestId('avatar')).toHaveAttribute(
+        'aria-describedby',
+        tooltip.getAttribute('id'),
+      );
+    });
+
+    it('shows the tooltip on hover', async () => {
+      render(<Avatar data-testid="avatar" hasTooltip name="Ada Lovelace" />);
+
+      const avatar = screen.getByTestId('avatar');
+      const tooltip = screen.getByRole('tooltip', {hidden: true});
+      fireEvent.mouseEnter(avatar);
+
+      await waitFor(() => {
+        expect(shim.isPopoverOpen(tooltip)).toBe(true);
+      });
+
+      fireEvent.mouseLeave(avatar);
+
+      await waitFor(() => {
+        expect(shim.isPopoverOpen(tooltip)).toBe(false);
+      });
+    });
+
+    it('makes the avatar focusable and opens the tooltip on keyboard focus', async () => {
+      const user = userEvent.setup();
+
+      render(<Avatar data-testid="avatar" hasTooltip name="Ada Lovelace" />);
+
+      const avatar = screen.getByTestId('avatar');
+      expect(avatar).toHaveAttribute('tabindex', '0');
+
+      await user.tab();
+      expect(avatar).toHaveFocus();
+
+      await waitFor(() => {
+        expect(
+          shim.isPopoverOpen(screen.getByRole('tooltip', {hidden: true})),
+        ).toBe(true);
+      });
+    });
+
+    it('ignores pointer focus that is not focus-visible', () => {
+      shim.setFocusVisible(false);
+
+      render(<Avatar data-testid="avatar" hasTooltip name="Ada Lovelace" />);
+
+      fireEvent.focusIn(screen.getByTestId('avatar'));
+
+      expect(
+        shim.isPopoverOpen(screen.getByRole('tooltip', {hidden: true})),
+      ).toBe(false);
+    });
+
+    it.each([
+      ['no name', undefined],
+      ['a whitespace-only name', '   '],
+    ])('ignores hasTooltip with %s', (_label, name) => {
+      render(<Avatar data-testid="avatar" hasTooltip name={name} />);
+
+      expect(
+        screen.queryByRole('tooltip', {hidden: true}),
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('avatar')).not.toHaveAttribute('tabindex');
+    });
+
+    it('keeps a consumer tabIndex and aria-describedby', () => {
+      render(
+        <Avatar
+          aria-describedby="external-help"
+          data-testid="avatar"
+          hasTooltip
+          name="Ada Lovelace"
+          tabIndex={-1}
+        />,
+      );
+
+      const avatar = screen.getByTestId('avatar');
+      const tooltipId = screen
+        .getByRole('tooltip', {hidden: true})
+        .getAttribute('id');
+      expect(avatar).toHaveAttribute('tabindex', '-1');
+      expect(avatar).toHaveAttribute(
+        'aria-describedby',
+        `external-help ${tooltipId}`,
+      );
+    });
+
+    it('keeps grouped avatars as siblings so the overlap selector still matches', () => {
+      render(
+        <AvatarGroup>
+          <Avatar data-testid="first" hasTooltip name="Ada Lovelace" />
+          <Avatar data-testid="second" hasTooltip name="Grace Hopper" />
+        </AvatarGroup>,
+      );
+
+      const first = screen.getByTestId('first');
+      const second = screen.getByTestId('second');
+      expect(first.matches(':first-child')).toBe(true);
+      expect(second.matches(':not(:first-child)')).toBe(true);
+      // eslint-disable-next-line testing-library/no-node-access -- the overlap margin depends on avatars being direct children of the group
+      expect(first.parentElement).toBe(second.parentElement);
+    });
   });
 });

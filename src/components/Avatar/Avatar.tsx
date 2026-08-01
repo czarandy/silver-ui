@@ -12,7 +12,9 @@ import {avatarRecipe} from 'components/Avatar/Avatar.recipe';
 import {AvatarSizeContext} from 'components/Avatar/AvatarSizeContext';
 import {useAvatarGroup} from 'components/AvatarGroup/AvatarGroupContext';
 import {Icon} from 'components/Icon';
+import {useTooltip} from 'components/Tooltip/useTooltip';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 const CIRCLE_EDGE_OFFSET_RATIO = (1 - 1 / Math.SQRT2) / 2;
@@ -136,6 +138,13 @@ export interface AvatarProps extends Omit<
    */
   fallbackSrc?: string;
   /**
+   * Shows `name` in a tooltip on hover and keyboard focus. Enabling it makes
+   * the avatar focusable, so the tooltip is reachable without a pointer.
+   * Ignored when there is no `name`.
+   * @default false
+   */
+  hasTooltip?: boolean;
+  /**
    * User name used as fallback accessible text and initials.
    */
   name?: string;
@@ -180,16 +189,19 @@ function getInitials(name: string): string {
 
 export function Avatar({
   alt,
+  'aria-describedby': ariaDescribedBy,
   className,
   color,
   'data-testid': dataTestId,
   fallbackSrc,
+  hasTooltip = false,
   name,
   ref,
   size = 'small',
   src,
   style,
   status,
+  tabIndex,
   ...rest
 }: AvatarProps): React.JSX.Element {
   const avatarGroup = useAvatarGroup();
@@ -200,14 +212,31 @@ export function Avatar({
   );
   const initials = name != null ? getInitials(name) : '';
   const showInitials = initials !== '';
+  // Gated on the same "name has real content" test as the accessible name, so
+  // a whitespace-only name never opens an empty tooltip.
+  const isTooltipEnabled = hasTooltip && showInitials;
+  const tooltip = useTooltip({isEnabled: isTooltipEnabled});
+  // `tooltip.ref` both anchors the layer and binds the hover/focus listeners.
+  // It is only attached when the tooltip is enabled so a plain Avatar keeps a
+  // clean root element. Anchoring the root directly (rather than wrapping in
+  // `Tooltip`) also keeps the avatar a direct child of AvatarGroup, which its
+  // `:not(:first-child)` overlap margin depends on.
+  const rootRef = useMemo(
+    () => (isTooltipEnabled ? mergeRefs(ref, tooltip.ref) : ref),
+    [isTooltipEnabled, ref, tooltip.ref],
+  );
   const classes = avatarRecipe({
     color: resolveAvatarColor(color, name, showInitials),
     hasInitials: showInitials,
+    hasTooltip: isTooltipEnabled,
     is24Px: numericSize === 24,
     isGrouped: avatarGroup != null,
     isLarge: numericSize >= 96,
   });
   const accessibleName = alt ?? (showInitials ? name : undefined) ?? 'Avatar';
+  const describedBy = isTooltipEnabled
+    ? [ariaDescribedBy, tooltip.describedBy].filter(Boolean).join(' ')
+    : ariaDescribedBy;
   const contentStyle = {
     width: numericSize,
     height: numericSize,
@@ -225,12 +254,14 @@ export function Avatar({
     <AvatarSizeContext value={numericSize}>
       <div
         {...rest}
+        aria-describedby={describedBy}
         aria-label={accessibleName}
         className={cx(classes.root, className)}
         data-testid={dataTestId}
-        ref={ref}
+        ref={rootRef}
         role="img"
-        style={style}>
+        style={style}
+        tabIndex={tabIndex ?? (isTooltipEnabled ? 0 : undefined)}>
         <div className={classes.content} style={contentStyle}>
           <AvatarImage
             classes={classes}
@@ -259,6 +290,7 @@ export function Avatar({
           </div>
         ) : null}
       </div>
+      {isTooltipEnabled ? tooltip.renderTooltip(name) : null}
     </AvatarSizeContext>
   );
 }

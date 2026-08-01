@@ -52,6 +52,27 @@ export const ClickableOverflow: Story = {
   ),
 };
 
+export const WithTooltips: Story = {
+  render: args => (
+    <AvatarGroup {...args}>
+      <Avatar
+        alt="Ada Lovelace"
+        hasTooltip
+        name="Ada Lovelace"
+        src="https://i.pravatar.cc/256?img=47"
+      />
+      <Avatar
+        alt="Grace Hopper"
+        hasTooltip
+        name="Grace Hopper"
+        src="https://i.pravatar.cc/256?img=32"
+      />
+      <Avatar hasTooltip name="Katherine Johnson" />
+      <AvatarGroupOverflow count={4} />
+    </AvatarGroup>
+  ),
+};
+
 export const Sizes: Story = {
   render: () => (
     <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>

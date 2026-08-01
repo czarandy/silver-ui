@@ -84,6 +84,22 @@ export const WithStatus: Story = {
   ),
 };
 
+export const WithTooltip: Story = {
+  render: () => (
+    <div style={{display: 'flex', alignItems: 'center', gap: 16}}>
+      <Avatar hasTooltip name="Ada Lovelace" size="medium" />
+      <Avatar
+        alt="Grace Hopper"
+        hasTooltip
+        name="Grace Hopper"
+        size="medium"
+        src="https://i.pravatar.cc/256?img=32"
+      />
+      <Avatar hasTooltip name="Katherine Johnson" size="medium" />
+    </div>
+  ),
+};
+
 export const FallbackSrc: Story = {
   args: {
     src: 'https://broken.example.com/missing.png',
