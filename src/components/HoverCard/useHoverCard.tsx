@@ -29,6 +29,12 @@ export interface UseHoverCardOptions {
   focusTrigger?: HoverCardFocusTrigger;
   hideDelay?: number;
   isEnabled?: boolean;
+  /**
+   * Accessible name for the hover card surface, applied as `aria-label`. When
+   * provided the surface uses `role="dialog"`; without a name it falls back to
+   * `role="group"` so screen readers are not given an unnamed dialog.
+   */
+  label?: string;
   onHide?: () => void;
   onShow?: () => void;
   placement?: LayerPlacement;
@@ -69,6 +75,7 @@ export function useHoverCard({
   hideDelay = 200,
   focusTrigger = 'auto',
   isEnabled = true,
+  label,
   onShow,
   onHide,
 }: UseHoverCardOptions = {}): UseHoverCardReturn {
@@ -125,6 +132,11 @@ export function useHoverCard({
   const renderHoverCard = useCallback(
     (children: ReactNode, props?: ContextRenderProps): ReactNode => {
       const renderPlacement = props?.placement ?? placement;
+      // `dialog` is only honest when the surface has an accessible name;
+      // otherwise it lands in a screen reader's dialog list as an unnamed
+      // entry. The trigger's `aria-describedby` still announces the content,
+      // so an unnamed surface is exposed as a plain `group`.
+      const ariaLabel = props?.['aria-label'] ?? label;
 
       return layer.render(
         // eslint-disable-next-line jsx-a11y-x/no-static-element-interactions
@@ -153,12 +165,13 @@ export function useHoverCard({
         {
           placement: renderPlacement,
           alignment: props?.alignment ?? alignment,
+          'aria-label': ariaLabel,
           className: cx(
             styles.container,
             layerPlacementGapRecipe({placement: renderPlacement}),
             props?.className,
           ),
-          role: props?.role ?? 'dialog',
+          role: props?.role ?? (ariaLabel != null ? 'dialog' : 'group'),
           style: props?.style,
         },
       );
@@ -168,6 +181,7 @@ export function useHoverCard({
       clearTimeouts,
       handleContentBlur,
       hoverLayer,
+      label,
       layer,
       placement,
       scheduleHide,

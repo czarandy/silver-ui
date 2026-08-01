@@ -24,6 +24,7 @@ const meta: Meta<typeof HoverCard> = {
       options: ['auto', 'always', 'never'],
     },
     isEnabled: {control: 'boolean'},
+    label: {control: 'text'},
   },
 };
 
@@ -195,6 +196,27 @@ export const HoverIndication: Story = {
         Auto (text triggers only)
       </HoverCard>
     </div>
+  ),
+};
+
+export const Labelled: Story = {
+  render: args => (
+    <VStack gap={4} style={{alignItems: 'start'}}>
+      <Text as="p" color="secondary">
+        Without a label the surface is exposed as a plain group; with one it
+        becomes a named dialog that screen reader users can find in the dialog
+        list.
+      </Text>
+      <HoverCard {...args} content={previewContent}>
+        Unlabelled (role=&quot;group&quot;)
+      </HoverCard>
+      <HoverCard
+        {...args}
+        content={previewContent}
+        label="Account health details">
+        Labelled (role=&quot;dialog&quot;)
+      </HoverCard>
+    </VStack>
   ),
 };
 
