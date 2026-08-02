@@ -50,7 +50,7 @@ export interface TimestampProps {
    */
   hasTooltip?: boolean;
   /**
-   * Whether to append the timezone abbreviation to absolute (non-system)
+   * Whether to append the timezone abbreviation to absolute (non-ISO)
    * formats.
    * @default false
    */

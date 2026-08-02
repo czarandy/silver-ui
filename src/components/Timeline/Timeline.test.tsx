@@ -23,7 +23,7 @@ const items: TimelineItemConfig[] = [
 
 describe('Timeline', () => {
   it('renders a semantic ordered list without a navigation landmark', () => {
-    render(<Timeline items={items} timestampFormat="systemDateTime" />);
+    render(<Timeline items={items} timestampFormat="isoDateTime" />);
 
     const list = screen.getByRole('list');
     expect(list.tagName).toBe('OL');
@@ -35,7 +35,7 @@ describe('Timeline', () => {
     render(
       <Timeline
         items={[items[2], items[0], items[1]]}
-        timestampFormat="systemDateTime"
+        timestampFormat="isoDateTime"
       />,
     );
 
@@ -65,7 +65,7 @@ describe('Timeline', () => {
             content: 0,
           },
         ]}
-        timestampFormat="systemDateTime"
+        timestampFormat="isoDateTime"
       />,
     );
 
@@ -85,7 +85,7 @@ describe('Timeline', () => {
   });
 
   it('forwards timestampFormat to every Timestamp', () => {
-    render(<Timeline items={items} timestampFormat="systemDateTime" />);
+    render(<Timeline items={items} timestampFormat="isoDateTime" />);
 
     expect(screen.getByText('2026-07-15 16:30:00')).toBeInTheDocument();
     expect(screen.getByText('2026-07-16 09:45:00')).toBeInTheDocument();
@@ -94,7 +94,7 @@ describe('Timeline', () => {
 
   it('renders default dots for entries without custom icons', () => {
     const {container} = render(
-      <Timeline items={items} timestampFormat="systemDateTime" />,
+      <Timeline items={items} timestampFormat="isoDateTime" />,
     );
 
     expect(container.querySelectorAll('[data-timeline-dot]')).toHaveLength(3);
@@ -111,7 +111,7 @@ describe('Timeline', () => {
             icon: <span data-testid="custom-icon">I</span>,
           },
         ]}
-        timestampFormat="systemDateTime"
+        timestampFormat="isoDateTime"
       />,
     );
 
@@ -124,7 +124,7 @@ describe('Timeline', () => {
 
   it('connects every entry except the last', () => {
     const {container} = render(
-      <Timeline items={items} timestampFormat="systemDateTime" />,
+      <Timeline items={items} timestampFormat="isoDateTime" />,
     );
 
     expect(
@@ -153,7 +153,7 @@ describe('Timeline', () => {
         items={items}
         ref={ref}
         style={{maxWidth: 480}}
-        timestampFormat="systemDateTime"
+        timestampFormat="isoDateTime"
       />,
     );
 
@@ -173,7 +173,7 @@ describe('Timeline', () => {
             'data-testid': 'timeline-item',
           },
         ]}
-        timestampFormat="systemDateTime"
+        timestampFormat="isoDateTime"
       />,
     );
 
@@ -181,7 +181,7 @@ describe('Timeline', () => {
   });
 
   it('does not add wizard or interactive semantics to entries', () => {
-    render(<Timeline items={items} timestampFormat="systemDateTime" />);
+    render(<Timeline items={items} timestampFormat="isoDateTime" />);
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     for (const item of screen.getAllByRole('listitem')) {

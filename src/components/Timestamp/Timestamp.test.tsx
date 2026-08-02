@@ -67,22 +67,22 @@ describe('Timestamp.utils', () => {
   });
 
   describe('formatAbsolute', () => {
-    it('renders system formats as fixed ISO-like strings', () => {
-      expect(formatAbsolute(REFERENCE, 'systemDate', 'UTC', false)).toBe(
+    it('renders ISO formats as fixed ISO-like strings', () => {
+      expect(formatAbsolute(REFERENCE, 'isoDate', 'UTC', false)).toBe(
         '2025-03-21',
       );
-      expect(formatAbsolute(REFERENCE, 'systemTime', 'UTC', false)).toBe(
+      expect(formatAbsolute(REFERENCE, 'isoTime', 'UTC', false)).toBe(
         '14:51:53',
       );
-      expect(formatAbsolute(REFERENCE, 'systemDateTime', 'UTC', false)).toBe(
+      expect(formatAbsolute(REFERENCE, 'isoDateTime', 'UTC', false)).toBe(
         '2025-03-21 14:51:53',
       );
     });
 
-    it('honors the display timezone for system formats', () => {
+    it('honors the display timezone for ISO formats', () => {
       // 14:51 UTC is 10:51 in New York (EDT, UTC-4) on this date.
       expect(
-        formatAbsolute(REFERENCE, 'systemTime', 'America/New_York', false),
+        formatAbsolute(REFERENCE, 'isoTime', 'America/New_York', false),
       ).toBe('10:51:53');
     });
 
@@ -150,7 +150,7 @@ describe('Timestamp', () => {
     render(
       <Timestamp
         data-testid="ts"
-        format="systemDateTime"
+        format="isoDateTime"
         value={REFERENCE.toZonedDateTimeISO('UTC')}
       />,
     );

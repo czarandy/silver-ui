@@ -27,6 +27,17 @@ export const DATE_FORMAT_SHORT_WITH_YEAR: Intl.DateTimeFormatOptions = {
   year: 'numeric',
 };
 
+/**
+ * How a committed date is displayed. Named presets cover the common cases;
+ * pass a function for full control over the displayed string.
+ *
+ * - `'long'` — full month name, e.g. "January 15, 2026"
+ * - `'short'` — abbreviated month name, e.g. "Jan 15, 2026"
+ * - `'iso'` — ISO 8601, e.g. "2026-01-15"
+ */
+export type DateFormat =
+  'iso' | 'long' | 'short' | ((date: PlainDate) => string);
+
 export function getDaysInMonth(year: number, month: number): number {
   return Temporal.PlainDate.from({year, month, day: 1}).daysInMonth;
 }
@@ -127,4 +138,24 @@ export function plainDateFormat(
   options: Intl.DateTimeFormatOptions,
 ): string {
   return date.toLocaleString(undefined, options);
+}
+
+/**
+ * Formats a date using a named preset or a caller-supplied function.
+ */
+export function plainDateFormatWith(
+  date: PlainDate,
+  format: DateFormat,
+): string {
+  if (typeof format === 'function') {
+    return format(date);
+  }
+  switch (format) {
+    case 'iso':
+      return date.toString();
+    case 'short':
+      return plainDateFormat(date, DATE_FORMAT_SHORT_WITH_YEAR);
+    case 'long':
+      return plainDateFormat(date, DATE_FORMAT_LONG);
+  }
 }

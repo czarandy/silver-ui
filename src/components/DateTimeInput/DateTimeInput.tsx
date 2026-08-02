@@ -19,7 +19,11 @@ import {
 } from 'components/Field';
 import type {IconComponent} from 'components/Icon';
 import {TimeInput, type PlainTime} from 'components/TimeInput';
-import {plainDateIsEqual, type PlainDate} from 'internal/plainDate';
+import {
+  plainDateIsEqual,
+  type DateFormat,
+  type PlainDate,
+} from 'internal/plainDate';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -42,6 +46,13 @@ export type DateTimeInputProps = {
    * Supporting text rendered below the label.
    */
   description?: ReactNode;
+  /**
+   * How the committed date is displayed in the date field. Accepts a named
+   * preset — `'long'` ("January 15, 2026"), `'short'` ("Jan 15, 2026"), or
+   * `'iso'` ("2026-01-15") — or a function receiving the selected date.
+   * @default 'long'
+   */
+  format?: DateFormat;
   /**
    * Whether to show the seconds field in the time input.
    * @default false
@@ -166,6 +177,7 @@ export function DateTimeInput({
   min,
   max,
   getIsDateDisabled,
+  format = 'long',
   hasSeconds = false,
   size = 'md',
   description,
@@ -233,6 +245,7 @@ export function DateTimeInput({
         data-testid={dataTestId}
         style={style}>
         <DateInput
+          format={format}
           getIsDateDisabled={getIsDateDisabled}
           htmlId={fieldId}
           isDisabled={isDisabled}

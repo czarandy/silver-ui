@@ -2,7 +2,11 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
-import {DateInput, type PlainDate} from 'components/DateInput/DateInput';
+import {
+  DateInput,
+  type DateFormat,
+  type PlainDate,
+} from 'components/DateInput/DateInput';
 import {inputStyles} from 'components/Field/inputStyles';
 import {
   DATE_FORMAT_LONG,
@@ -33,6 +37,7 @@ afterAll(() => {
  * behave the way they do for a real controlled consumer.
  */
 function ControlledDateInput({
+  format,
   getIsDateDisabled,
   initialValue,
   label = 'Due date',
@@ -40,6 +45,7 @@ function ControlledDateInput({
   min,
   onChange,
 }: {
+  format?: DateFormat;
   getIsDateDisabled?: (date: PlainDate) => boolean;
   initialValue?: PlainDate;
   label?: string;
@@ -50,6 +56,7 @@ function ControlledDateInput({
   const [value, setValue] = useState<PlainDate | null>(initialValue ?? null);
   return (
     <DateInput
+      format={format}
       getIsDateDisabled={getIsDateDisabled}
       label={label}
       max={max}
@@ -262,6 +269,102 @@ describe('DateInput', () => {
     expect(root).toBeInTheDocument();
     expect(root).toHaveStyle({marginBottom: '8px'});
     expect(root).toHaveTextContent('Due date');
+  });
+
+  describe('format', () => {
+    const january = plainDateCreate(2026, 1, 15);
+
+    it.each([
+      ['long' as const, 'January 15, 2026'],
+      ['short' as const, 'Jan 15, 2026'],
+      ['iso' as const, '2026-01-15'],
+    ])('renders the %s preset', (format, expected) => {
+      render(
+        <DateInput
+          format={format}
+          label="Due date"
+          onChange={() => {}}
+          value={january}
+        />,
+      );
+
+      expect(screen.getByRole('combobox', {name: 'Due date'})).toHaveValue(
+        expected,
+      );
+    });
+
+    it('defaults to the long preset', () => {
+      render(
+        <DateInput label="Due date" onChange={() => {}} value={january} />,
+      );
+
+      expect(screen.getByRole('combobox', {name: 'Due date'})).toHaveValue(
+        'January 15, 2026',
+      );
+    });
+
+    it('honors a formatting function', () => {
+      render(
+        <DateInput
+          format={date => `${date.day}/${date.month}/${date.year}`}
+          label="Due date"
+          onChange={() => {}}
+          value={january}
+        />,
+      );
+
+      expect(screen.getByRole('combobox', {name: 'Due date'})).toHaveValue(
+        '15/1/2026',
+      );
+    });
+
+    it('shows the typed text while editing, then reformats on blur', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <ControlledDateInput
+          format="short"
+          initialValue={january}
+          onChange={onChange}
+        />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Due date'});
+      expect(input).toHaveValue('Jan 15, 2026');
+
+      await user.clear(input);
+      await user.type(input, '2026-02-03');
+      expect(input).toHaveValue('2026-02-03');
+
+      fireEvent.blur(input);
+
+      expect(onChange).toHaveBeenLastCalledWith(plainDateCreate(2026, 2, 3));
+      expect(input).toHaveValue('Feb 3, 2026');
+    });
+
+    it('re-parses a value displayed in the short preset', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <ControlledDateInput
+          format="short"
+          initialValue={january}
+          onChange={onChange}
+        />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Due date'});
+      const displayed = (input as HTMLInputElement).value;
+
+      await user.clear(input);
+      await user.type(input, displayed);
+      fireEvent.blur(input);
+
+      expect(input).toHaveValue(displayed);
+      expect(onChange).toHaveBeenLastCalledWith(january);
+    });
   });
 
   describe('keyboard interaction', () => {

@@ -775,7 +775,11 @@ export {
   type CheckboxGroupProps,
   type CheckboxGroupSize,
 } from 'components/CheckboxGroup';
-export {DateInput, type DateInputProps} from 'components/DateInput';
+export {
+  DateInput,
+  type DateFormat,
+  type DateInputProps,
+} from 'components/DateInput';
 export {
   TimeInput,
   type PlainTime,

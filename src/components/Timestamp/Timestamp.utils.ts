@@ -10,9 +10,9 @@ export type TimestampFormat =
   | 'date'
   | 'time'
   | 'dateTime'
-  | 'systemDate'
-  | 'systemTime'
-  | 'systemDateTime';
+  | 'isoDate'
+  | 'isoTime'
+  | 'isoDateTime';
 
 /**
  * An absolute format — every `TimestampFormat` except the ones whose output
@@ -23,7 +23,7 @@ type AbsoluteFormat = Exclude<TimestampFormat, 'auto' | 'relative'>;
 /**
  * The fixed, locale-independent formats.
  */
-type SystemFormat = 'systemDate' | 'systemTime' | 'systemDateTime';
+type IsoFormat = 'isoDate' | 'isoTime' | 'isoDateTime';
 
 interface ResolvedInstant {
   /**
@@ -31,7 +31,7 @@ interface ResolvedInstant {
    */
   instant: Temporal.Instant;
   /**
-   * Timezone used for absolute/system formatting. Taken from a
+   * Timezone used for absolute/ISO formatting. Taken from a
    * `ZonedDateTime` value when provided, otherwise the browser's zone.
    */
   timeZone: string;
@@ -72,20 +72,20 @@ const LOCALE_OPTIONS: Record<AbsoluteFormat, Intl.DateTimeFormatOptions> = {
     hour: 'numeric',
     minute: '2-digit',
   },
-  // System formats are handled separately (see `formatSystem`).
-  systemDate: {},
-  systemTime: {},
-  systemDateTime: {},
+  // ISO formats are handled separately (see `formatIso`).
+  isoDate: {},
+  isoTime: {},
+  isoDateTime: {},
 };
 
-const SYSTEM_FORMATS: ReadonlySet<AbsoluteFormat> = new Set<SystemFormat>([
-  'systemDate',
-  'systemTime',
-  'systemDateTime',
+const ISO_FORMATS: ReadonlySet<AbsoluteFormat> = new Set<IsoFormat>([
+  'isoDate',
+  'isoTime',
+  'isoDateTime',
 ]);
 
-function isSystemFormat(format: AbsoluteFormat): format is SystemFormat {
-  return SYSTEM_FORMATS.has(format);
+function isIsoFormat(format: AbsoluteFormat): format is IsoFormat {
+  return ISO_FORMATS.has(format);
 }
 
 function pad2(value: number): string {
@@ -96,27 +96,27 @@ function pad2(value: number): string {
  * Fixed, locale-independent formats (`YYYY-MM-DD`, `HH:mm:ss`) derived from the
  * wall-clock fields in the display timezone.
  */
-function formatSystem(
+function formatIso(
   instant: Temporal.Instant,
-  format: SystemFormat,
+  format: IsoFormat,
   timeZone: string,
 ): string {
   const zdt = instant.toZonedDateTimeISO(timeZone);
   const date = `${zdt.year}-${pad2(zdt.month)}-${pad2(zdt.day)}`;
   const time = `${pad2(zdt.hour)}:${pad2(zdt.minute)}:${pad2(zdt.second)}`;
   switch (format) {
-    case 'systemDate':
+    case 'isoDate':
       return date;
-    case 'systemTime':
+    case 'isoTime':
       return time;
-    case 'systemDateTime':
+    case 'isoDateTime':
       return `${date} ${time}`;
   }
 }
 
 /**
  * Renders an absolute format. Locale formats use `Intl.DateTimeFormat` (via
- * `Instant.toLocaleString`); system formats use fixed ISO-like strings.
+ * `Instant.toLocaleString`); ISO formats use fixed, locale-independent strings.
  * `isTimezoneShown` appends the timezone abbreviation to locale formats.
  */
 export function formatAbsolute(
@@ -125,8 +125,8 @@ export function formatAbsolute(
   timeZone: string,
   isTimezoneShown: boolean,
 ): string {
-  if (isSystemFormat(format)) {
-    return formatSystem(instant, format, timeZone);
+  if (isIsoFormat(format)) {
+    return formatIso(instant, format, timeZone);
   }
   const options: Intl.DateTimeFormatOptions = {
     ...LOCALE_OPTIONS[format],

@@ -49,6 +49,52 @@ describe('DateRangeInput', () => {
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
+  it('formats both ends of the range with the format prop', () => {
+    const januaryRange = {
+      start: plainDateCreate(2026, 1, 5),
+      end: plainDateCreate(2026, 1, 12),
+    };
+
+    const {rerender} = render(
+      <DateRangeInput
+        format="long"
+        label="Window"
+        onChange={() => {}}
+        value={januaryRange}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
+      'January 5, 2026 - January 12, 2026',
+    );
+
+    rerender(
+      <DateRangeInput
+        format="iso"
+        label="Window"
+        onChange={() => {}}
+        value={januaryRange}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
+      '2026-01-05 - 2026-01-12',
+    );
+
+    rerender(
+      <DateRangeInput
+        format={date => String(date.day)}
+        label="Window"
+        onChange={() => {}}
+        value={januaryRange}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
+      '5 - 12',
+    );
+  });
+
   it('renders placeholder when value is undefined', () => {
     render(<DateRangeInput label="Window" onChange={() => {}} value={null} />);
 
