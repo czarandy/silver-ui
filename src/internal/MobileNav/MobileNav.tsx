@@ -7,6 +7,7 @@ import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
 import {Button} from 'components/Button';
 import {mobileNavRecipe} from 'internal/MobileNav/MobileNav.recipe';
 import {mergeRefs} from 'internal/mergeRefs';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {useScrollLock} from 'internal/useScrollLock';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -55,18 +56,14 @@ export interface MobileNavProps {
    */
   side?: MobileNavSide;
   /**
-   * Maximum drawer width.
+   * Maximum drawer width. Numbers are pixels, strings are used as-is.
    * @default 320
    */
-  size?: number | string;
+  size?: SizeValue;
   /**
    * Inline styles applied to the dialog element.
    */
   style?: CSSProperties;
-}
-
-function formatSize(value: number | string): string {
-  return typeof value === 'number' ? `${value}px` : value;
 }
 
 const CLOSE_BUTTON_SELECTOR = '[aria-label="Close navigation"]';
@@ -174,7 +171,7 @@ export function MobileNav({
 
   useScrollLock(isOpen);
 
-  const formattedSize = formatSize(size);
+  const formattedSize = toPixelSize(size);
 
   return (
     <dialog

@@ -1,6 +1,13 @@
 export type SizeValue = number | string;
 
 /**
+ * A `SizeValue` extended with the `'full'` keyword, which fills the container.
+ * Structurally identical to `SizeValue`, but named so props that support the
+ * full-width mode document it in their signature.
+ */
+export type WidthValue = SizeValue | 'full';
+
+/**
  * Converts numeric sizes to `px` lengths and validates string sizes. A
  * unit-less numeric string (e.g. `"220"`) is not a valid CSS length and would
  * silently disable whatever declaration it lands in, so it is converted to
@@ -37,4 +44,17 @@ export function toPixelSize(
     return `${numeric}px`;
   }
   return value;
+}
+
+/**
+ * Resolves a width that additionally accepts the `'full'` keyword. `'full'`
+ * fills the container (`100%`); every other value follows `toPixelSize`.
+ */
+export function toWidthSize(
+  value: WidthValue | undefined,
+): string | number | undefined {
+  if (value === 'full') {
+    return '100%';
+  }
+  return toPixelSize(value);
 }

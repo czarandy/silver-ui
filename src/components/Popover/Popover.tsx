@@ -12,6 +12,7 @@ import {usePopover} from 'components/Popover/usePopover';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 import {css} from 'styled-system/css';
@@ -124,9 +125,9 @@ export interface PopoverProps {
    */
   style?: CSSProperties;
   /**
-   * Width of the popover content.
+   * Width of the popover content. Numbers are pixels, strings are used as-is.
    */
-  width?: number | string;
+  width?: SizeValue;
 }
 
 const BUTTON_SELECTOR = 'button, [role="button"]';
@@ -284,10 +285,7 @@ export function Popover({
     }
   }, [isControlled, isOpen, popover]);
 
-  const widthStyle =
-    width == null
-      ? undefined
-      : {width: typeof width === 'number' ? `${width}px` : width};
+  const widthStyle = width == null ? undefined : {width: toPixelSize(width)};
 
   const paddingStyle =
     padding != null && padding !== 0

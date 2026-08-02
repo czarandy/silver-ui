@@ -16,6 +16,7 @@ import {
   LayoutHeader,
 } from 'components/Layout';
 import {Text} from 'components/Text';
+import type {SizeValue} from 'internal/toPixelSize';
 
 export type AlertDialogActionVariant = 'destructive' | 'primary';
 
@@ -76,10 +77,10 @@ export interface AlertDialogProps {
    */
   title: string;
   /**
-   * Dialog width. Numbers are treated as pixels.
+   * Dialog width. Numbers are pixels, strings are used as-is.
    * @default 400
    */
-  width?: number | string;
+  width?: SizeValue;
 }
 
 /**

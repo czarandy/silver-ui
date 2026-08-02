@@ -18,6 +18,7 @@ import {
 } from 'internal/dismissBehavior';
 import {mergeRefs} from 'internal/mergeRefs';
 import {DURATION_FAST_MS} from 'internal/motion';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
 import {useDialogExit} from 'internal/useDialogExit';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
@@ -28,11 +29,14 @@ export type DialogVariant = 'fullscreen' | 'standard';
 export type DialogRole = 'alertdialog' | 'dialog';
 export type DialogDismissBehavior = DismissBehavior;
 
+/**
+ * Fixed positioning offsets. Numbers are pixels, strings are used as-is.
+ */
 export interface DialogPosition {
-  bottom?: number | string;
-  left?: number | string;
-  right?: number | string;
-  top?: number | string;
+  bottom?: SizeValue;
+  left?: SizeValue;
+  right?: SizeValue;
+  top?: SizeValue;
 }
 
 export interface DialogProps {
@@ -68,10 +72,10 @@ export interface DialogProps {
    */
   label?: string;
   /**
-   * Maximum height of the dialog. Numbers are treated as pixels.
+   * Maximum height of the dialog. Numbers are pixels, strings are used as-is.
    * @default '75vh'
    */
-  maxHeight?: number | string;
+  maxHeight?: SizeValue;
   /**
    * Called when the dialog requests an open-state change.
    */
@@ -99,14 +103,10 @@ export interface DialogProps {
    */
   variant?: DialogVariant;
   /**
-   * Dialog width. Numbers are treated as pixels.
+   * Dialog width. Numbers are pixels, strings are used as-is.
    * @default 400
    */
-  width?: number | string;
-}
-
-function formatSize(value: number | string): string {
-  return typeof value === 'number' ? `${value}px` : value;
+  width?: SizeValue;
 }
 
 /**
@@ -178,12 +178,11 @@ export function Dialog({
   const positionStyle =
     position != null && !isFullscreen
       ? {
-          bottom:
-            position.bottom == null ? 'auto' : formatSize(position.bottom),
-          left: position.left == null ? 'auto' : formatSize(position.left),
+          bottom: toPixelSize(position.bottom) ?? 'auto',
+          left: toPixelSize(position.left) ?? 'auto',
           margin: 0,
-          right: position.right == null ? 'auto' : formatSize(position.right),
-          top: position.top == null ? 'auto' : formatSize(position.top),
+          right: toPixelSize(position.right) ?? 'auto',
+          top: toPixelSize(position.top) ?? 'auto',
         }
       : undefined;
 
@@ -210,8 +209,8 @@ export function Dialog({
       ref={mergeRefs(ref, dialogRef)}
       role={role === 'dialog' ? undefined : role}
       style={{
-        width: isFullscreen ? undefined : formatSize(width),
-        maxHeight: isFullscreen ? undefined : formatSize(maxHeight),
+        width: isFullscreen ? undefined : toPixelSize(width),
+        maxHeight: isFullscreen ? undefined : toPixelSize(maxHeight),
         ...positionStyle,
         ...style,
       }}>

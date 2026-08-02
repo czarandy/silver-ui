@@ -12,6 +12,7 @@ import {useLayoutRegions} from 'components/Layout/LayoutContext';
 import {Heading, Text, type HeadingLevel} from 'components/Text';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 /**
@@ -47,9 +48,9 @@ export interface LayoutHeaderProps {
    */
   endContent?: ReactNode;
   /**
-   * Fixed height for the header.
+   * Fixed height for the header. Numbers are pixels, strings are used as-is.
    */
-  height?: number | string;
+  height?: SizeValue;
   /**
    * Accessible label for the header landmark.
    */
@@ -113,7 +114,7 @@ export function LayoutHeader({
   const regions = useLayoutRegions();
   const dialogContext = useDialogContext();
   const hasDivider = regions?.hasDividers ?? false;
-  const rootStyle: CSSProperties = {height, ...style};
+  const rootStyle: CSSProperties = {height: toPixelSize(height), ...style};
   const classes = layoutHeaderRecipe({align, hasDivider});
 
   const closeButton =

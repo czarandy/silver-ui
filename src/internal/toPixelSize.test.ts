@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from 'vitest';
-import {toPixelSize} from 'internal/toPixelSize';
+import {toPixelSize, toWidthSize} from 'internal/toPixelSize';
 
 describe('toPixelSize', () => {
   it('converts numbers to pixel lengths', () => {
@@ -45,5 +45,26 @@ describe('toPixelSize', () => {
     expect(warn).toHaveBeenCalledWith(
       'silver-ui: ignoring non-finite size Infinity.',
     );
+  });
+});
+
+describe('toWidthSize', () => {
+  it("resolves 'full' to 100%", () => {
+    expect(toWidthSize('full')).toBe('100%');
+  });
+
+  it('defers every other value to toPixelSize', () => {
+    expect(toWidthSize(220)).toBe('220px');
+    expect(toWidthSize('18rem')).toBe('18rem');
+    expect(toWidthSize('auto')).toBe('auto');
+    expect(toWidthSize(undefined)).toBeUndefined();
+  });
+
+  it('warns on unit-less numeric strings like toPixelSize', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    warn.mockClear();
+
+    expect(toWidthSize('220')).toBe('220px');
+    expect(warn).toHaveBeenCalledOnce();
   });
 });

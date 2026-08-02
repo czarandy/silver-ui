@@ -1,10 +1,20 @@
+/* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Inbox, Plus, RefreshCw, Settings} from 'lucide-react';
 import {useState} from 'react';
 import {Button} from 'components/Button/Button';
+import {Dialog} from 'components/Dialog';
 import {Icon} from 'components/Icon';
+import {
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+} from 'components/Layout';
 import {SegmentedControl} from 'components/SegmentedControl/SegmentedControl';
 import {SegmentedControlItem} from 'components/SegmentedControl/SegmentedControlItem';
+import {VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import {css} from 'styled-system/css';
 
@@ -24,6 +34,7 @@ const meta = {
     isLoading: {control: 'boolean'},
     isIconOnly: {control: 'boolean'},
     label: {control: 'text'},
+    width: {control: 'text'},
   },
   args: {
     label: 'Button',
@@ -230,6 +241,64 @@ export const OnSolid: Story = {
       <Button icon={Plus} label="Add item" variant="onSolid" />
     </div>
   ),
+};
+
+export const Width: Story = {
+  render: () => (
+    <VStack align="start" gap={3} width={320}>
+      <Button label="Intrinsic width" />
+      <Button label="240 pixels" variant="secondary" width={240} />
+      <Button label="18rem" variant="secondary" width="18rem" />
+      <Button label="Fills the container" variant="primary" width="full" />
+    </VStack>
+  ),
+};
+
+export const FullWidthInDialog: Story = {
+  render: () => {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+      <>
+        <Button label="Open dialog" onClick={() => setIsOpen(true)} />
+        <Dialog
+          isOpen={isOpen}
+          label="Confirm upgrade"
+          onOpenChange={setIsOpen}
+          width={360}>
+          <Layout
+            content={
+              <LayoutContent>
+                <Text as="p" color="secondary">
+                  Stacked calls to action fill the footer without a wrapper
+                  element.
+                </Text>
+              </LayoutContent>
+            }
+            footer={
+              <LayoutFooter>
+                <VStack gap={2} width="full">
+                  <Button
+                    label="Upgrade plan"
+                    onClick={() => setIsOpen(false)}
+                    variant="primary"
+                    width="full"
+                  />
+                  <Button
+                    label="Not now"
+                    onClick={() => setIsOpen(false)}
+                    variant="ghost"
+                    width="full"
+                  />
+                </VStack>
+              </LayoutFooter>
+            }
+            header={<LayoutHeader title="Confirm upgrade" />}
+          />
+        </Dialog>
+      </>
+    );
+  },
 };
 
 export const IconOnlyLoading: Story = {

@@ -21,6 +21,7 @@ import {ActionElement} from 'internal/ActionElement';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
+import {toWidthSize, type WidthValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 export type {ButtonSize} from 'components/Button/Button.types';
@@ -186,6 +187,11 @@ interface ButtonBaseProps {
    * Visual style variant.
    */
   variant?: ButtonVariant;
+  /**
+   * Button width. Numbers are pixels, strings are used as-is, `'full'` fills
+   * the container.
+   */
+  width?: WidthValue;
 }
 
 export type ButtonProps =
@@ -250,6 +256,7 @@ export function Button({
   form,
   name,
   value,
+  width,
 }: ButtonProps): JSX.Element {
   const buttonGroup = useButtonGroup();
   const size = useResolvedSize(sizeProp, buttonGroup?.size);
@@ -357,6 +364,9 @@ export function Button({
   );
 
   const rootClassName = cx(classes.root, className);
+  // Consumer `style` still wins, matching the layout primitives.
+  const rootStyle: CSSProperties | undefined =
+    width == null ? style : {width: toWidthSize(width), ...style};
 
   const element = (
     <ActionElement
@@ -378,7 +388,7 @@ export function Button({
       onKeyDown={renderAsLink ? handleLinkKeyDown : handleButtonKeyDown}
       ref={ref}
       rel={renderAsLink ? linkRel : undefined}
-      style={style}
+      style={rootStyle}
       target={renderAsLink ? target : undefined}
       type={type}
       value={value}>

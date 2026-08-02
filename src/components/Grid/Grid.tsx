@@ -35,7 +35,7 @@ interface GridMinChildWidthProps {
   columns?: never;
   /**
    * Minimum child width used to automatically fit as many columns as possible.
-   * Numbers are treated as pixels.
+   * Numbers are pixels, strings are used as-is.
    */
   minChildWidth?: SizeValue;
 }

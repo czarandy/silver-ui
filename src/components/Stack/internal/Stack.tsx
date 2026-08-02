@@ -53,7 +53,7 @@ export interface StackProps extends HTMLAttributes<HTMLElement> {
    */
   hAlign?: StackAlignment;
   /**
-   * Fixed height. Numbers are treated as pixels.
+   * Fixed height. Numbers are pixels, strings are used as-is.
    */
   height?: SizeValue;
   /**
@@ -69,7 +69,7 @@ export interface StackProps extends HTMLAttributes<HTMLElement> {
    */
   vAlign?: StackAlignment;
   /**
-   * Fixed width. Numbers are treated as pixels.
+   * Fixed width. Numbers are pixels, strings are used as-is.
    */
   width?: SizeValue;
   /**

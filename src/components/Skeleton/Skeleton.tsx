@@ -1,5 +1,6 @@
 import type {CSSProperties, Ref} from 'react';
 import {skeletonRecipe} from 'components/Skeleton/Skeleton.recipe';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 export type SkeletonRadius = 0 | 1 | 2 | 3 | 4 | 'none' | 'rounded';
@@ -19,10 +20,10 @@ export interface SkeletonProps {
    */
   'data-testid'?: string;
   /**
-   * Skeleton height. Numbers are treated as pixels.
+   * Skeleton height. Numbers are pixels, strings are used as-is.
    * @default '100%'
    */
-  height?: number | string;
+  height?: SizeValue;
   /**
    * Border radius token.
    * @default 3
@@ -43,18 +44,14 @@ export interface SkeletonProps {
    */
   style?: CSSProperties;
   /**
-   * Skeleton width. Numbers are treated as pixels.
+   * Skeleton width. Numbers are pixels, strings are used as-is.
    * @default '100%'
    */
-  width?: number | string;
+  width?: SizeValue;
 }
 
 const delayTime = 1000;
 const staggerTime = 100;
-
-function formatSize(value: number | string): string {
-  return typeof value === 'number' ? `${value}px` : value;
-}
 
 /**
  * A pulsing placeholder used while content is loading.
@@ -84,8 +81,8 @@ export function Skeleton({
       role="status"
       style={{
         ...style,
-        width: formatSize(width),
-        height: formatSize(height),
+        width: toPixelSize(width),
+        height: toPixelSize(height),
         animationDelay: `${delayTime + staggerTime * clampedIndex}ms`,
       }}
     />
