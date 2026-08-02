@@ -58,6 +58,14 @@ export interface HoverCardProps {
    */
   isEnabled?: boolean;
   /**
+   * Accessible name for the hover card surface, applied as `aria-label`. When
+   * provided the surface is exposed as `role="dialog"`; without it the surface
+   * is exposed as `role="group"` so that assistive technology is not given an
+   * unnamed dialog. The trigger keeps its `aria-describedby` link to the
+   * surface either way.
+   */
+  label?: string;
+  /**
    * Position relative to the trigger.
    * @default 'above'
    */
@@ -85,6 +93,7 @@ export function HoverCard({
   focusTrigger = 'auto',
   isEnabled = true,
   hoverIndication = 'auto',
+  label,
   className,
   style,
   ref,
@@ -96,6 +105,7 @@ export function HoverCard({
     focusTrigger,
     hideDelay,
     isEnabled,
+    label,
     placement,
   });
 

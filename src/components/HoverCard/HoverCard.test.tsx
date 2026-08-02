@@ -157,18 +157,47 @@ describe('HoverCard', () => {
     expect(trigger).toHaveStyle({color: 'rgb(255, 0, 0)'});
   });
 
-  it('defaults the hover card layer to role="dialog"', () => {
+  it('defaults an unlabelled hover card layer to role="group"', () => {
     render(<HoverCard content="Details">Hover target</HoverCard>);
 
-    expect(screen.getByRole('dialog', {hidden: true})).toHaveTextContent(
-      'Details',
+    const hoverCard = screen.getByRole('group', {hidden: true});
+    expect(hoverCard).toHaveTextContent('Details');
+    expect(hoverCard).not.toHaveAttribute('aria-label');
+    expect(
+      screen.queryByRole('dialog', {hidden: true}),
+    ).not.toBeInTheDocument();
+  });
+
+  it('exposes a labelled hover card layer as a named dialog', () => {
+    render(
+      <HoverCard content="Details" label="Account health">
+        Hover target
+      </HoverCard>,
+    );
+
+    const hoverCard = screen.getByRole('dialog', {hidden: true});
+    expect(hoverCard).toHaveAttribute('aria-label', 'Account health');
+    expect(hoverCard).toHaveTextContent('Details');
+  });
+
+  it('describes the trigger with the layer regardless of label', () => {
+    render(
+      <HoverCard content="Details" label="Account health">
+        Hover target
+      </HoverCard>,
+    );
+
+    const trigger = screen.getByText('Hover target');
+    expect(trigger).toHaveAttribute(
+      'aria-describedby',
+      screen.getByRole('dialog', {hidden: true}).id,
     );
   });
 
   it('keeps the surface background above the layer reset', () => {
     render(<HoverCard content="Details">Hover target</HoverCard>);
 
-    const hoverCard = screen.getByRole('dialog', {hidden: true});
+    const hoverCard = screen.getByRole('group', {hidden: true});
     expect(hoverCard).toHaveClass('silver-layer-reset', 'silver-bg_bg');
     expect(hoverCard).not.toHaveClass('silver-bg_transparent');
   });
@@ -180,7 +209,7 @@ describe('HoverCard', () => {
       </HoverCard>,
     );
 
-    expect(screen.getByRole('dialog', {hidden: true})).toHaveStyle({
+    expect(screen.getByRole('group', {hidden: true})).toHaveStyle({
       positionArea: 'block-end',
     });
   });
@@ -192,7 +221,7 @@ describe('HoverCard', () => {
       </HoverCard>,
     );
 
-    const hoverCard = screen.getByRole('dialog', {hidden: true});
+    const hoverCard = screen.getByRole('group', {hidden: true});
     const positionArea = hoverCard.style.positionArea;
     expect(positionArea).toBe('block-start span-inline-end');
   });
@@ -211,13 +240,13 @@ describe('HoverCard', () => {
         </div>,
       );
 
-      expect(screen.getByRole('dialog', {hidden: true})).toHaveClass(
+      expect(screen.getByRole('group', {hidden: true})).toHaveClass(
         expectedClassName,
       );
     },
   );
 
-  it('allows an explicit role to override the dialog default', () => {
+  it('allows an explicit role to override the default', () => {
     function CustomRoleHoverCard(): React.JSX.Element {
       const hoverCard = useHoverCard();
       return (
@@ -236,8 +265,30 @@ describe('HoverCard', () => {
     expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
       'Details',
     );
-    expect(
-      screen.queryByRole('dialog', {hidden: true}),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('group', {hidden: true})).not.toBeInTheDocument();
+  });
+
+  it('lets a render-prop aria-label name the layer and win over the option', () => {
+    function LabelledHoverCard(): React.JSX.Element {
+      const hoverCard = useHoverCard({label: 'Option label'});
+      return (
+        <HoverLayerTrigger
+          describedBy={hoverCard.describedBy}
+          isNonTextWrapperPropsForwarded={false}
+          layer={hoverCard.renderHoverCard('Details', {
+            'aria-label': 'Render label',
+          })}
+          triggerRef={hoverCard.ref}>
+          Hover target
+        </HoverLayerTrigger>
+      );
+    }
+
+    render(<LabelledHoverCard />);
+
+    expect(screen.getByRole('dialog', {hidden: true})).toHaveAttribute(
+      'aria-label',
+      'Render label',
+    );
   });
 });

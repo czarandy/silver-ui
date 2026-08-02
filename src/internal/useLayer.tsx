@@ -33,6 +33,11 @@ export interface ContextRenderProps {
    */
   'aria-hidden'?: boolean;
   /**
+   * Accessible name for the layer element. Roles such as `dialog` are required
+   * to have a name, so supply this whenever the layer is given one.
+   */
+  'aria-label'?: string;
+  /**
    * Additional class name merged onto the layer element.
    */
   className?: string;
@@ -308,6 +313,7 @@ export function useLayer({
         ref: popoverRefCallback,
         id,
         'aria-hidden': props?.['aria-hidden'],
+        'aria-label': props?.['aria-label'],
         role: props?.role,
         popover: isDismissable ? 'auto' : 'manual',
         className: cx(layerReset(), props?.className),
