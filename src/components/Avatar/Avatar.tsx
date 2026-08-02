@@ -216,14 +216,9 @@ export function Avatar({
   // a whitespace-only name never opens an empty tooltip.
   const isTooltipEnabled = hasTooltip && showInitials;
   const tooltip = useTooltip({isEnabled: isTooltipEnabled});
-  // `tooltip.ref` both anchors the layer and binds the hover/focus listeners.
-  // It is only attached when the tooltip is enabled so a plain Avatar keeps a
-  // clean root element. Anchoring the root directly (rather than wrapping in
-  // `Tooltip`) also keeps the avatar a direct child of AvatarGroup, which its
-  // `:not(:first-child)` overlap margin depends on.
   const rootRef = useMemo(
-    () => (isTooltipEnabled ? mergeRefs(ref, tooltip.ref) : ref),
-    [isTooltipEnabled, ref, tooltip.ref],
+    () => mergeRefs(ref, tooltip.ref),
+    [ref, tooltip.ref],
   );
   const classes = avatarRecipe({
     color: resolveAvatarColor(color, name, showInitials),
