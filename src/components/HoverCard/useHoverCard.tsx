@@ -132,10 +132,6 @@ export function useHoverCard({
   const renderHoverCard = useCallback(
     (children: ReactNode, props?: ContextRenderProps): ReactNode => {
       const renderPlacement = props?.placement ?? placement;
-      // `dialog` is only honest when the surface has an accessible name;
-      // otherwise it lands in a screen reader's dialog list as an unnamed
-      // entry. The trigger's `aria-describedby` still announces the content,
-      // so an unnamed surface is exposed as a plain `group`.
       const ariaLabel = props?.['aria-label'] ?? label;
 
       return layer.render(
