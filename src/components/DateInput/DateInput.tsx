@@ -34,16 +34,16 @@ import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {parseDateInput} from 'internal/parseDateInput';
 import {
-  DATE_FORMAT_LONG,
-  plainDateFormat,
+  plainDateFormatWith,
   plainDateIsAfter,
   plainDateIsBefore,
+  type DateFormat,
   type PlainDate,
 } from 'internal/plainDate';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
-export type {PlainDate} from 'internal/plainDate';
+export type {DateFormat, PlainDate} from 'internal/plainDate';
 
 const styles = {
   wrapper: css({ps: '1', gap: '1'}),
@@ -62,6 +62,14 @@ export type DateInputProps = {
    * Supporting text rendered below the label.
    */
   description?: ReactNode;
+  /**
+   * How the committed date is displayed. Accepts a named preset — `'long'`
+   * ("January 15, 2026"), `'short'` ("Jan 15, 2026"), or `'iso'`
+   * ("2026-01-15") — or a function receiving the selected date. Typed input is
+   * always parsed with the same flexible rules regardless of this prop.
+   * @default 'long'
+   */
+  format?: DateFormat;
   /**
    * Returns true for dates that should be disabled.
    */
@@ -143,8 +151,11 @@ export type DateInputProps = {
   value: PlainDate | null;
 } & FieldNecessity;
 
-function formatDate(value: PlainDate | null | undefined): string {
-  return value == null ? '' : plainDateFormat(value, DATE_FORMAT_LONG);
+function formatDate(
+  value: PlainDate | null | undefined,
+  format: DateFormat,
+): string {
+  return value == null ? '' : plainDateFormatWith(value, format);
 }
 
 function isDateAllowed(
@@ -178,6 +189,7 @@ export function DateInput({
   min,
   max,
   getIsDateDisabled,
+  format = 'long',
   placeholder = 'e.g. May 21, 2026',
   size = 'md',
   description,
@@ -210,7 +222,7 @@ export function DateInput({
   const [isOpen, setIsOpen] = useState(false);
   const [pendingInput, setPendingInput] = useState<string | null>(null);
 
-  const displayValue = pendingInput ?? formatDate(value);
+  const displayValue = pendingInput ?? formatDate(value, format);
 
   const necessity = getNecessity(isOptional, isRequired);
 

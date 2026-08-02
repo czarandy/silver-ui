@@ -165,6 +165,55 @@ export const Sizes: Story = {
   },
 };
 
+export const Formats: Story = {
+  render: () => {
+    const [long, setLong] = useState<PlainDate | null>(() =>
+      plainDateCreate(2026, 1, 15),
+    );
+    const [short, setShort] = useState<PlainDate | null>(() =>
+      plainDateCreate(2026, 1, 15),
+    );
+    const [iso, setIso] = useState<PlainDate | null>(() =>
+      plainDateCreate(2026, 1, 15),
+    );
+    const [custom, setCustom] = useState<PlainDate | null>(() =>
+      plainDateCreate(2026, 1, 15),
+    );
+    return (
+      <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+        <DateInput
+          description="January 15, 2026"
+          format="long"
+          label="Long (default)"
+          onChange={setLong}
+          value={long}
+        />
+        <DateInput
+          description="Jan 15, 2026"
+          format="short"
+          label="Short"
+          onChange={setShort}
+          value={short}
+        />
+        <DateInput
+          description="2026-01-15"
+          format="iso"
+          label="ISO"
+          onChange={setIso}
+          value={iso}
+        />
+        <DateInput
+          description="Any function of the selected date"
+          format={date => `${date.month}/${date.day}/${date.year}`}
+          label="Custom function"
+          onChange={setCustom}
+          value={custom}
+        />
+      </div>
+    );
+  },
+};
+
 export const WithLabelTooltip: Story = {
   args: {labelTooltip: 'The date by which this task should be completed.'},
   render: (args: DateInputProps) => {

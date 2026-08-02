@@ -140,3 +140,38 @@ export const Sizes: Story = {
     );
   },
 };
+
+const januaryRange: DateRange = {
+  start: plainDateCreate(2026, 1, 5),
+  end: plainDateCreate(2026, 1, 12),
+};
+
+export const Formats: Story = {
+  render: () => {
+    const [long, setLong] = useState<DateRange | null>(() => januaryRange);
+    const [short, setShort] = useState<DateRange | null>(() => januaryRange);
+    const [iso, setIso] = useState<DateRange | null>(() => januaryRange);
+    return (
+      <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+        <DateRangeInput
+          format="long"
+          label="Long"
+          onChange={setLong}
+          value={long}
+        />
+        <DateRangeInput
+          format="short"
+          label="Short (default)"
+          onChange={setShort}
+          value={short}
+        />
+        <DateRangeInput
+          format="iso"
+          label="ISO"
+          onChange={setIso}
+          value={iso}
+        />
+      </div>
+    );
+  },
+};

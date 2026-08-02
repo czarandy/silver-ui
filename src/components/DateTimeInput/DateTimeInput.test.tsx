@@ -37,6 +37,29 @@ describe('DateTimeInput', () => {
     });
   });
 
+  it('passes the format prop through to the date field', () => {
+    const value = Temporal.PlainDateTime.from('2026-01-15T09:00');
+
+    const {rerender} = render(
+      <DateTimeInput label="Meeting" onChange={() => {}} value={value} />,
+    );
+
+    expect(screen.getByLabelText('Meeting date')).toHaveValue(
+      'January 15, 2026',
+    );
+
+    rerender(
+      <DateTimeInput
+        format="iso"
+        label="Meeting"
+        onChange={() => {}}
+        value={value}
+      />,
+    );
+
+    expect(screen.getByLabelText('Meeting date')).toHaveValue('2026-01-15');
+  });
+
   it('updates the time portion', () => {
     const onChange = vi.fn();
 

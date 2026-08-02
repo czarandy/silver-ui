@@ -32,8 +32,8 @@ import {Spinner} from 'components/Spinner';
 import type {DateRange} from 'internal/dateTypes';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
-  DATE_FORMAT_SHORT_WITH_YEAR,
-  plainDateFormat,
+  plainDateFormatWith,
+  type DateFormat,
   type PlainDate,
 } from 'internal/plainDate';
 import {css} from 'styled-system/css';
@@ -62,6 +62,13 @@ export type DateRangeInputProps = {
    * Supporting text rendered below the label.
    */
   description?: ReactNode;
+  /**
+   * How each end of the committed range is displayed. Accepts a named preset —
+   * `'long'` ("January 15, 2026"), `'short'` ("Jan 15, 2026"), or `'iso'`
+   * ("2026-01-15") — or a function receiving the date.
+   * @default 'short'
+   */
+  format?: DateFormat;
   /**
    * Whether to show a clear button when a value is selected.
    * @default false
@@ -138,11 +145,14 @@ export type DateRangeInputProps = {
   value: DateRange | null;
 } & FieldNecessity;
 
-function formatRange(value: DateRange | null | undefined): string {
+function formatRange(
+  value: DateRange | null | undefined,
+  format: DateFormat,
+): string {
   if (value == null) {
     return '';
   }
-  return `${plainDateFormat(value.start, DATE_FORMAT_SHORT_WITH_YEAR)} - ${plainDateFormat(value.end, DATE_FORMAT_SHORT_WITH_YEAR)}`;
+  return `${plainDateFormatWith(value.start, format)} - ${plainDateFormatWith(value.end, format)}`;
 }
 
 /**
@@ -155,6 +165,7 @@ export function DateRangeInput({
   min,
   max,
   getIsDateDisabled,
+  format = 'short',
   numberOfMonths = 2,
   placeholder = 'Select a date range',
   size = 'md',
@@ -181,7 +192,10 @@ export function DateRangeInput({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const [isOpen, setIsOpen] = useState(false);
-  const displayValue = useMemo(() => formatRange(value), [value]);
+  const displayValue = useMemo(
+    () => formatRange(value, format),
+    [format, value],
+  );
 
   const necessity = getNecessity(isOptional, isRequired);
 

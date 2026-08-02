@@ -21,9 +21,9 @@ const meta: Meta<typeof Timestamp> = {
         'date',
         'time',
         'dateTime',
-        'systemDate',
-        'systemTime',
-        'systemDateTime',
+        'isoDate',
+        'isoTime',
+        'isoDateTime',
       ],
     },
     hasTooltip: {control: 'boolean'},
@@ -41,9 +41,9 @@ const formats = [
   'date',
   'time',
   'dateTime',
-  'systemDate',
-  'systemTime',
-  'systemDateTime',
+  'isoDate',
+  'isoTime',
+  'isoDateTime',
 ] as const;
 
 export const AllFormats: Story = {
