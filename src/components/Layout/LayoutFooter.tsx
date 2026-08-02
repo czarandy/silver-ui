@@ -8,6 +8,7 @@ import {
 import {useLayoutRegions} from 'components/Layout/LayoutContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 interface LayoutFooterBaseProps {
@@ -20,9 +21,9 @@ interface LayoutFooterBaseProps {
    */
   'data-testid'?: string;
   /**
-   * Fixed height for the footer.
+   * Fixed height for the footer. Numbers are pixels, strings are used as-is.
    */
-  height?: number | string;
+  height?: SizeValue;
   /**
    * Accessible label for the footer landmark.
    */
@@ -92,7 +93,7 @@ export function LayoutFooter({
 }: LayoutFooterProps): React.JSX.Element {
   const regions = useLayoutRegions();
   const hasDivider = regions?.hasDividers ?? false;
-  const rootStyle: CSSProperties = {height, ...style};
+  const rootStyle: CSSProperties = {height: toPixelSize(height), ...style};
   const isCustom = isNonEmptyReactNode(children);
   const hasActions =
     isNonEmptyReactNode(primaryButton) || isNonEmptyReactNode(secondaryButton);

@@ -473,4 +473,22 @@ describe('Item', () => {
     expect(link).toHaveAttribute('data-to');
     expect(link).not.toHaveAttribute('data-provider');
   });
+
+  it('fills its container by default', () => {
+    render(<Item data-testid="item" label="Row" />);
+
+    expect(screen.getByTestId('item')).toHaveStyle({width: '100%'});
+  });
+
+  it("still accepts the legacy 'auto' width", () => {
+    render(<Item data-testid="item" label="Row" width="auto" />);
+
+    expect(screen.getByTestId('item')).toHaveStyle({width: 'auto'});
+  });
+
+  it('accepts an explicit width', () => {
+    render(<Item data-testid="item" label="Row" width={280} />);
+
+    expect(screen.getByTestId('item')).toHaveStyle({width: '280px'});
+  });
 });

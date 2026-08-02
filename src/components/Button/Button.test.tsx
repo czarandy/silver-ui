@@ -538,4 +538,65 @@ describe('Button', () => {
     expect(link).toHaveAttribute('aria-describedby', 'help-text');
     expect(link).toHaveAttribute('aria-expanded', 'false');
   });
+
+  it('sets no width by default', () => {
+    render(<Button label="Save" />);
+
+    expect(screen.getByRole('button', {name: 'Save'})).not.toHaveAttribute(
+      'style',
+    );
+  });
+
+  it('resolves a numeric width to pixels', () => {
+    render(<Button label="Save" width={240} />);
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveStyle({
+      width: '240px',
+    });
+  });
+
+  it('uses string widths as-is', () => {
+    render(<Button label="Save" width="18rem" />);
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveStyle({
+      width: '18rem',
+    });
+  });
+
+  it("fills the container for width='full'", () => {
+    render(<Button label="Save" width="full" />);
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveStyle({
+      width: '100%',
+    });
+  });
+
+  it('applies width to link buttons too', () => {
+    render(<Button href="/settings" label="Settings" width="full" />);
+
+    expect(screen.getByRole('link', {name: 'Settings'})).toHaveStyle({
+      width: '100%',
+    });
+  });
+
+  it('lets consumer style override width', () => {
+    render(<Button label="Save" style={{width: '10px'}} width="full" />);
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveStyle({
+      width: '10px',
+    });
+  });
+
+  it('warns on a unit-less numeric width string', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    render(<Button label="Save" width="240" />);
+
+    expect(screen.getByRole('button', {name: 'Save'})).toHaveStyle({
+      width: '240px',
+    });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('has no unit'));
+
+    warn.mockRestore();
+  });
 });

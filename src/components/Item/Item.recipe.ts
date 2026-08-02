@@ -93,10 +93,6 @@ export const itemRecipe = sva({
       center: {},
       start: {root: {alignItems: 'flex-start'}},
     },
-    width: {
-      full: {root: {w: 'full'}},
-      auto: {},
-    },
     isInteractive: {
       true: {
         root: {
@@ -156,7 +152,6 @@ export const itemRecipe = sva({
   defaultVariants: {
     padding: 2,
     align: 'center',
-    width: 'full',
     isInteractive: false,
     isHighlighted: false,
     isSelected: false,

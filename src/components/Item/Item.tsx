@@ -17,6 +17,7 @@ import {ActionElement} from 'internal/ActionElement';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {useRel} from 'internal/linkAccessibility';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {toWidthSize, type WidthValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 const SELECTABLE_ROLES = new Set([
@@ -147,10 +148,11 @@ export interface ItemProps {
    */
   trailingContent?: ReactNode;
   /**
-   * Width of the root element.
+   * Width of the root element. Numbers are pixels, strings are used as-is,
+   * `'full'` fills the container.
    * @default 'full'
    */
-  width?: 'full' | 'auto';
+  width?: WidthValue;
 }
 
 // Native and ARIA interactive elements that own their own click, plus anything
@@ -240,13 +242,15 @@ export function Item({
   const classes = itemRecipe({
     padding,
     align,
-    width,
     isInteractive,
     isHighlighted,
     isSelected,
     isDisabled,
     hasParentRole,
   });
+
+  // Consumer `style` still wins, matching the layout primitives.
+  const rootStyle: CSSProperties = {width: toWidthSize(width), ...style};
 
   const inlineEndContent =
     isNonEmptyReactNode(endContent) && endContentPosition === 'inline' ? (
@@ -354,7 +358,7 @@ export function Item({
       }
       ref={ref as Ref<never>}
       role={role}
-      style={style}>
+      style={rootStyle}>
       {leadingContent}
       {content}
       {isNonEmptyReactNode(trailingContent) ? (

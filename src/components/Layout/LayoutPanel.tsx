@@ -7,6 +7,7 @@ import {
 } from 'components/Layout/Layout.recipe';
 import {useLayoutArea, useLayoutRegions} from 'components/Layout/LayoutContext';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 /**
@@ -31,9 +32,9 @@ export interface LayoutPanelProps extends ComponentPropsWithRef<'div'> {
    */
   padding?: SpacingToken;
   /**
-   * Fixed width for the panel.
+   * Fixed width for the panel. Numbers are pixels, strings are used as-is.
    */
-  width?: number | string;
+  width?: SizeValue;
 }
 
 /**
@@ -71,7 +72,7 @@ export function LayoutPanel({
       data-testid={dataTestId}
       ref={ref}
       role={role ?? (label != null ? 'region' : undefined)}
-      style={{width, ...style}}>
+      style={{width: toPixelSize(width), ...style}}>
       {children}
     </div>
   );

@@ -24,6 +24,7 @@ import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import type {SpacingToken} from 'internal/spacingTokens';
+import type {WidthValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 export type CheckboxInputSize = 'sm' | 'md' | 'lg';
@@ -135,10 +136,11 @@ export type CheckboxInputProps = {
    */
   value: CheckboxInputValue;
   /**
-   * Width of the checkbox item.
+   * Width of the checkbox item. Numbers are pixels, strings are used as-is,
+   * `'full'` fills the container.
    * @default 'full'
    */
-  width?: 'auto' | 'full';
+  width?: WidthValue;
 } & FieldNecessity;
 
 /**

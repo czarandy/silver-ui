@@ -6,6 +6,7 @@ import {codeBlockRecipe} from 'components/CodeBlock/CodeBlock.recipe';
 import {CopyButton} from 'components/CopyButton';
 import {Divider} from 'components/Divider';
 import type {SpacingToken} from 'internal/spacingTokens';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {token} from 'styled-system/tokens';
 import {cx} from 'utils/cx';
 
@@ -56,9 +57,10 @@ export interface CodeBlockProps {
    */
   label?: string;
   /**
-   * Maximum scrollable body height. Numbers are treated as pixels.
+   * Maximum scrollable body height. Numbers are pixels, strings are used
+   * as-is.
    */
-  maxHeight?: number | string;
+  maxHeight?: SizeValue;
   /**
    * Called after code is successfully copied.
    */
@@ -86,10 +88,10 @@ export interface CodeBlockProps {
    */
   title?: string;
   /**
-   * Width of the code block. Accepts any CSS width value.
+   * Width of the code block. Numbers are pixels, strings are used as-is.
    * @default 'fit-content'
    */
-  width?: string;
+  width?: SizeValue;
 }
 
 function getLines(code: string): string[] {
@@ -176,18 +178,13 @@ export function CodeBlock({
   const rootStyle: CSSProperties = isInline
     ? {...style}
     : {
-        width,
+        width: toPixelSize(width),
         minWidth: width === 'fit-content' ? 'min(100%, 400px)' : undefined,
         maxWidth: width === 'fit-content' ? '100%' : undefined,
         ...style,
       };
   const scrollStyle: CSSProperties | undefined =
-    maxHeight == null
-      ? undefined
-      : {
-          maxHeight:
-            typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
-        };
+    maxHeight == null ? undefined : {maxHeight: toPixelSize(maxHeight)};
   // `role="group"` rather than `"region"`: a named region is a landmark, and a
   // page of code blocks would publish one per block (axe: landmark-unique).
   const scrollRegionProps = {

@@ -3,6 +3,7 @@
 import {useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {dividerRecipe} from 'components/Divider/Divider.recipe';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 export type DividerOrientation = 'horizontal' | 'vertical';
@@ -26,10 +27,10 @@ export interface DividerProps {
    */
   'data-testid'?: string;
   /**
-   * Length of a vertical divider. Numbers are treated as pixels. Ignored for
-   * horizontal dividers, which size to their container width.
+   * Length of a vertical divider. Numbers are pixels, strings are used as-is.
+   * Ignored for horizontal dividers, which size to their container width.
    */
-  height?: number | string;
+  height?: SizeValue;
   /**
    * Whether the divider should escape container padding.
    */
@@ -55,14 +56,11 @@ export interface DividerProps {
    */
   variant?: DividerVariant;
   /**
-   * Length of a horizontal divider. Numbers are treated as pixels. Ignored for
-   * vertical dividers, which size to their container height.
+   * Length of a horizontal divider. Numbers are pixels, strings are used
+   * as-is. Ignored for vertical dividers, which size to their container
+   * height.
    */
-  width?: number | string;
-}
-
-function formatSize(value: number | string): string {
-  return typeof value === 'number' ? `${value}px` : value;
+  width?: SizeValue;
 }
 
 export function Divider({
@@ -84,8 +82,8 @@ export function Divider({
   // Only the along-axis length applies: width for horizontal, height for
   // vertical. Consumer `style` still wins via the spread below.
   const dimensionStyle: CSSProperties = {
-    width: isHorizontal && width != null ? formatSize(width) : undefined,
-    height: !isHorizontal && height != null ? formatSize(height) : undefined,
+    width: isHorizontal ? toPixelSize(width) : undefined,
+    height: !isHorizontal ? toPixelSize(height) : undefined,
   };
 
   return (

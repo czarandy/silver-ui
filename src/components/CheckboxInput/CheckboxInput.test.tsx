@@ -229,4 +229,42 @@ describe('CheckboxInput', () => {
 
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLInputElement));
   });
+
+  it('fills its container by default', () => {
+    render(<CheckboxInput label="Accept" onChange={() => {}} value={false} />);
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const item = screen.getByRole('checkbox', {name: 'Accept'}).closest('div');
+    expect(item).toHaveStyle({width: '100%'});
+  });
+
+  it("still accepts the legacy 'auto' width", () => {
+    render(
+      <CheckboxInput
+        label="Accept"
+        onChange={() => {}}
+        value={false}
+        width="auto"
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const item = screen.getByRole('checkbox', {name: 'Accept'}).closest('div');
+    expect(item).toHaveStyle({width: 'auto'});
+  });
+
+  it('accepts an explicit width', () => {
+    render(
+      <CheckboxInput
+        label="Accept"
+        onChange={() => {}}
+        value={false}
+        width="18rem"
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const item = screen.getByRole('checkbox', {name: 'Accept'}).closest('div');
+    expect(item).toHaveStyle({width: '18rem'});
+  });
 });

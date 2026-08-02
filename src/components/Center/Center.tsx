@@ -19,7 +19,7 @@ export interface CenterProps extends HTMLAttributes<HTMLDivElement> {
    */
   'data-testid'?: string;
   /**
-   * Fixed height. Numbers are treated as pixels.
+   * Fixed height. Numbers are pixels, strings are used as-is.
    */
   height?: SizeValue;
   /**
@@ -31,7 +31,7 @@ export interface CenterProps extends HTMLAttributes<HTMLDivElement> {
    */
   ref?: Ref<HTMLDivElement>;
   /**
-   * Fixed width. Numbers are treated as pixels.
+   * Fixed width. Numbers are pixels, strings are used as-is.
    */
   width?: SizeValue;
 }

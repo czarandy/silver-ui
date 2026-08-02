@@ -12,6 +12,7 @@ import {
 } from 'internal/dismissBehavior';
 import {mergeRefs} from 'internal/mergeRefs';
 import {DURATION_NORMAL_MS} from 'internal/motion';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
 import {useDialogExit} from 'internal/useDialogExit';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
@@ -62,20 +63,17 @@ export interface DrawerProps {
    */
   ref?: Ref<HTMLDialogElement>;
   /**
-   * Width (start/end) or height (top/bottom) of the drawer.
+   * Width (start/end) or height (top/bottom) of the drawer. Numbers are
+   * pixels, strings are used as-is.
    */
-  size?: number | string;
+  size?: SizeValue;
   /**
    * Inline styles applied to the drawer.
    */
   style?: CSSProperties;
 }
 
-function formatSize(value: number | string): string {
-  return typeof value === 'number' ? `${value}px` : value;
-}
-
-const DEFAULT_SIZES: Record<DrawerPlacement, number | string> = {
+const DEFAULT_SIZES: Record<DrawerPlacement, SizeValue> = {
   start: 320,
   end: 320,
   top: '40vh',
@@ -84,9 +82,9 @@ const DEFAULT_SIZES: Record<DrawerPlacement, number | string> = {
 
 function getSizeStyle(
   placement: DrawerPlacement,
-  size: number | string,
+  size: SizeValue,
 ): CSSProperties {
-  const formatted = formatSize(size);
+  const formatted = toPixelSize(size);
   if (placement === 'start' || placement === 'end') {
     return {width: formatted, maxWidth: '100dvw'};
   }
