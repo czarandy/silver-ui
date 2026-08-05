@@ -27,6 +27,47 @@ describe('CheckboxInput', () => {
     );
   });
 
+  it('keeps the checked glyph nudge off the indeterminate mark', () => {
+    // The lucide Check glyph needs a 1px nudge to look centered; the Minus bar
+    // is already centered, so inheriting the nudge pushes it below the box's
+    // center line.
+    const nudge = css({mt: '1px'});
+    const {container, rerender} = render(
+      <CheckboxInput label="Mixed" onChange={() => {}} value />,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the mark is intentionally hidden from the accessibility tree
+    expect(container.querySelector('.lucide-check')).toHaveClass(nudge);
+
+    rerender(
+      <CheckboxInput label="Mixed" onChange={() => {}} value="indeterminate" />,
+    );
+
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the mark is intentionally hidden from the accessibility tree
+    expect(container.querySelector('.lucide-minus')).not.toHaveClass(nudge);
+  });
+
+  it('fills the box for both the checked and indeterminate marks', () => {
+    const filled = css({bg: 'primary'});
+    const {container, rerender} = render(
+      <CheckboxInput label="Mixed" onChange={() => {}} value />,
+    );
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the box is intentionally hidden from the accessibility tree
+    const box = (): Element | null => container.querySelector('[aria-hidden]');
+
+    expect(box()).toHaveClass(filled);
+
+    rerender(
+      <CheckboxInput label="Mixed" onChange={() => {}} value="indeterminate" />,
+    );
+
+    expect(box()).toHaveClass(filled);
+
+    rerender(<CheckboxInput label="Mixed" onChange={() => {}} value={false} />);
+
+    expect(box()).not.toHaveClass(filled);
+  });
+
   it('renders React nodes in the label', () => {
     render(
       <CheckboxInput
