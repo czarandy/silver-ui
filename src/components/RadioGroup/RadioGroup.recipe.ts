@@ -11,13 +11,13 @@ export const radioGroupRecipe = cva({
     orientation: {
       vertical: {
         flexDirection: 'column',
-        gap: '0.5',
+        gap: '2',
       },
       horizontal: {
         flexDirection: 'row',
         flexWrap: 'wrap',
         columnGap: '4',
-        rowGap: '0',
+        rowGap: '2',
       },
     },
   },
@@ -77,24 +77,31 @@ export const radioGroupItemRecipe = sva({
       borderRadius: 'full',
       bg: 'fg.onPrimary',
     },
+    // Matches CheckboxInput's label so both controls produce the same line box
+    // and their rows end up the same height in a mixed form.
     label: {
+      display: 'inline-flex',
+      alignItems: 'center',
       cursor: 'pointer',
     },
   },
   variants: {
+    // `controlWrap` is sized to the radio itself — no extra ring of space — so
+    // the circle sits flush with the row edge exactly like the checkbox box,
+    // and the focus ring hugs the same geometry.
     size: {
       sm: {
-        controlWrap: {w: '5', h: '5'},
+        controlWrap: {w: '4.5', h: '4.5'},
         radio: {w: '4.5', h: '4.5'},
         dot: {w: '2', h: '2'},
       },
       md: {
-        controlWrap: {w: '6', h: '6'},
+        controlWrap: {w: '5.5', h: '5.5'},
         radio: {w: '5.5', h: '5.5'},
         dot: {w: '2.5', h: '2.5'},
       },
       lg: {
-        controlWrap: {w: '7', h: '7'},
+        controlWrap: {w: '6.5', h: '6.5'},
         radio: {w: '6.5', h: '6.5'},
         dot: {w: '3', h: '3'},
       },
