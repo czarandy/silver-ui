@@ -195,7 +195,7 @@ describe('CheckboxGroup', () => {
     expect(ref).toHaveBeenCalledWith(root);
   });
 
-  it('does not add gaps between horizontal checkbox items', () => {
+  it('spaces horizontal checkbox items with the shared group gaps', () => {
     render(
       <CheckboxGroup
         label="Notification channels"
@@ -206,7 +206,20 @@ describe('CheckboxGroup', () => {
       </CheckboxGroup>,
     );
 
-    expect(screen.getByRole('group')).toHaveClass('silver-cg_0', 'silver-rg_0');
+    expect(screen.getByRole('group')).toHaveClass('silver-cg_4', 'silver-rg_2');
+  });
+
+  it('spaces vertical checkbox items with the shared group gap', () => {
+    render(
+      <CheckboxGroup
+        label="Notification channels"
+        onChange={() => {}}
+        value={['email']}>
+        <CheckboxGroupItem label="Email" value="email" />
+      </CheckboxGroup>,
+    );
+
+    expect(screen.getByRole('group')).toHaveClass('silver-gap_2');
   });
 
   it('renders startContent on a checkbox item', () => {

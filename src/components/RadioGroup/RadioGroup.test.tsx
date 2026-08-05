@@ -2,8 +2,19 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
+import {CheckboxInput} from 'components/CheckboxInput';
 import {RadioGroup} from 'components/RadioGroup/RadioGroup';
 import {RadioGroupItem} from 'components/RadioGroup/RadioGroupItem';
+
+/**
+ * Panda emits width and height as atomic classes, so comparing them is how two
+ * controls are checked for occupying the same box.
+ */
+function boxSizeClasses(element: Element | null): string[] {
+  return Array.from(element?.classList ?? [])
+    .filter(name => /^silver-[wh]_/.test(name))
+    .sort();
+}
 
 describe('RadioGroup', () => {
   it('submits the selected value with htmlName', () => {
@@ -244,4 +255,86 @@ describe('RadioGroup', () => {
 
     expect(screen.getByTestId('end-badge')).toBeInTheDocument();
   });
+
+  it('spaces vertical radio items with the shared group gap', () => {
+    render(
+      <RadioGroup
+        label="Notification preference"
+        onChange={() => {}}
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByRole('radiogroup')).toHaveClass('silver-gap_2');
+  });
+
+  it('spaces horizontal radio items with the shared group gaps', () => {
+    render(
+      <RadioGroup
+        label="Notification preference"
+        onChange={() => {}}
+        orientation="horizontal"
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByRole('radiogroup')).toHaveClass(
+      'silver-cg_4',
+      'silver-rg_2',
+    );
+  });
+
+  it('renders radio rows without padding so the control sits on the leading edge', () => {
+    render(
+      <RadioGroup
+        label="Notification preference"
+        onChange={() => {}}
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+      </RadioGroup>,
+    );
+
+    // The row is the presentational `Item` wrapper, which has no role or
+    // consumer-facing test ID of its own.
+    // eslint-disable-next-line testing-library/no-node-access -- verifying the presentational Item wrapper
+    const row = screen.getByRole('radio', {name: 'Email'}).closest('div');
+    expect(row).toHaveClass('silver-p_0');
+  });
+
+  describe.each(['sm', 'md', 'lg'] as const)(
+    'size %s alignment with CheckboxInput',
+    size => {
+      it('gives the radio control the same box as the checkbox control', () => {
+        render(
+          <>
+            <CheckboxInput
+              label="Accept"
+              onChange={() => {}}
+              size={size}
+              value={false}
+            />
+            <RadioGroup
+              label="Notification preference"
+              onChange={() => {}}
+              size={size}
+              value="email">
+              <RadioGroupItem label="Email" value="email" />
+            </RadioGroup>
+          </>,
+        );
+
+        // The wrappers are what `Item` lays out, so a size difference between
+        // them offsets every label in a form that mixes the two controls.
+        /* eslint-disable testing-library/no-node-access -- the control wrappers are presentational */
+        const checkboxBox = screen.getByRole('checkbox').nextElementSibling;
+        const radioWrap = screen.getByRole('radio').parentElement;
+        /* eslint-enable testing-library/no-node-access */
+
+        expect(boxSizeClasses(radioWrap)).toEqual(boxSizeClasses(checkboxBox));
+        expect(boxSizeClasses(radioWrap)).not.toHaveLength(0);
+      });
+    },
+  );
 });

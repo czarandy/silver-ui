@@ -116,6 +116,10 @@ export function RadioGroupItem({
         </label>
       }
       leadingContent={control}
+      // Zero, like `CheckboxInput`, so the radio lines up with the leading edge
+      // of other form controls stacked above and below it. Row spacing comes
+      // from the group's gap instead.
+      padding={0}
       ref={ref}
       startContent={startContent}
       style={style}
