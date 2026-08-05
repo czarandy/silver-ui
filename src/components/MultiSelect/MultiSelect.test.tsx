@@ -513,6 +513,55 @@ describe('MultiSelect', () => {
     expect(onChange).toHaveBeenCalledWith(['status']);
   });
 
+  it('hides sections and their dividers when the query filters out every option in them', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MultiSelect
+        hasSearch
+        label="Columns"
+        onChange={() => {}}
+        options={[
+          {
+            title: 'Visible',
+            type: 'section',
+            options: [
+              {label: 'Name', value: 'name'},
+              {label: 'Email', value: 'email'},
+            ],
+          },
+          {type: 'divider'},
+          {
+            title: 'Metadata',
+            type: 'section',
+            options: [{label: 'Status', value: 'status'}],
+          },
+        ]}
+        value={[]}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Columns'}));
+    const search = screen.getByLabelText('Search Columns');
+
+    // Only the Metadata group matches, so its header stays and the Visible
+    // header -- along with the divider that used to separate them -- goes away.
+    await user.type(search, 'status');
+    expect(screen.queryByText('Visible')).not.toBeInTheDocument();
+    expect(screen.getByText('Metadata')).toBeInTheDocument();
+    expect(screen.getByText('Status')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('separator', {hidden: true}),
+    ).not.toBeInTheDocument();
+
+    // Nothing matches, so no orphaned headers are left behind.
+    await user.clear(search);
+    await user.type(search, 'zzz');
+    expect(screen.queryByText('Visible')).not.toBeInTheDocument();
+    expect(screen.queryByText('Metadata')).not.toBeInTheDocument();
+    expect(screen.queryAllByRole('group', {hidden: true})).toHaveLength(0);
+  });
+
   it('renders multiple dividers without duplicate key warnings', async () => {
     const user = userEvent.setup();
     const consoleError = vi

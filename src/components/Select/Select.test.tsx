@@ -451,6 +451,99 @@ describe('Select', () => {
     expect(onChange).toHaveBeenCalledWith('katherine');
   });
 
+  it('hides sections and their dividers when the query filters out every option in them', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Select
+        hasSearch
+        label="Person"
+        onChange={() => {}}
+        options={[
+          {
+            title: 'Engineering',
+            type: 'section',
+            options: [
+              {label: 'Ada Lovelace', value: 'ada'},
+              {label: 'Grace Hopper', value: 'grace'},
+            ],
+          },
+          {type: 'divider'},
+          {
+            title: 'Science',
+            type: 'section',
+            options: [{label: 'Katherine Johnson', value: 'katherine'}],
+          },
+        ]}
+        value={null}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Person'}));
+    const search = screen.getByRole('searchbox', {
+      hidden: true,
+      name: 'Search Person',
+    });
+
+    // Only the Science group matches, so its header stays and the Engineering
+    // header -- along with the divider that used to separate them -- goes away.
+    await user.type(search, 'katherine');
+    expect(screen.queryByText('Engineering')).not.toBeInTheDocument();
+    expect(screen.getByText('Science')).toBeInTheDocument();
+    expect(screen.getByText('Katherine Johnson')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('separator', {hidden: true}),
+    ).not.toBeInTheDocument();
+
+    // Nothing matches, so no orphaned headers are left behind.
+    await user.clear(search);
+    await user.type(search, 'zzz');
+    expect(screen.queryByText('Engineering')).not.toBeInTheDocument();
+    expect(screen.queryByText('Science')).not.toBeInTheDocument();
+    expect(screen.queryAllByRole('group', {hidden: true})).toHaveLength(0);
+    expect(screen.queryAllByRole('option', {hidden: true})).toHaveLength(0);
+  });
+
+  it('drops dividers left dangling by the query', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Select
+        hasSearch
+        label="Fruit"
+        onChange={() => {}}
+        options={[
+          'Apple',
+          {type: 'divider'},
+          'Banana',
+          {type: 'divider'},
+          'Cherry',
+        ]}
+        value={null}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
+    const search = screen.getByRole('searchbox', {
+      hidden: true,
+      name: 'Search Fruit',
+    });
+
+    // Apple and Cherry survive, so the two dividers that surrounded Banana
+    // collapse into the single one that still separates them.
+    await user.type(search, 'e');
+    expect(screen.getAllByRole('option', {hidden: true})).toHaveLength(2);
+    expect(screen.getAllByRole('separator', {hidden: true})).toHaveLength(1);
+
+    // A single surviving option needs no divider on either side of it.
+    await user.clear(search);
+    await user.type(search, 'banana');
+    expect(screen.getAllByRole('option', {hidden: true})).toHaveLength(1);
+    expect(
+      screen.queryByRole('separator', {hidden: true}),
+    ).not.toBeInTheDocument();
+  });
+
   it('renders multiple dividers without duplicate key warnings', async () => {
     const user = userEvent.setup();
     const consoleError = vi
