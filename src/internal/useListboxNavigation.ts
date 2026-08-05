@@ -8,7 +8,7 @@ import {
   type KeyboardEvent,
   type SetStateAction,
 } from 'react';
-import {isComposingEvent} from 'internal/isComposingEvent';
+import {resolveListboxKeyAction} from 'internal/listboxKeyboard';
 import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 
 export type ListboxNavigationOption = {
@@ -79,24 +79,31 @@ export function useListboxNavigation({
     [getOptionId],
   );
 
-  const getInitialHighlight = useCallback(
-    (direction: 'first' | 'last' = 'first'): string | null => {
+  const getEdgeHighlight = useCallback(
+    (edge: 'first' | 'last'): string | null => {
       if (enabledOptions.length === 0) {
         return null;
       }
 
-      const selectedEnabledOption = enabledOptions.find(option =>
-        selectedValues?.has(option.value),
-      );
-      if (selectedEnabledOption != null) {
-        return selectedEnabledOption.value;
-      }
-
-      return direction === 'last'
+      return edge === 'last'
         ? enabledOptions[enabledOptions.length - 1].value
         : enabledOptions[0].value;
     },
-    [enabledOptions, selectedValues],
+    [enabledOptions],
+  );
+
+  // Opening the listbox lands on the current selection when there is one, so
+  // the user starts from where they left off. Explicit first/last jumps go
+  // through `getEdgeHighlight` instead -- they mean the edge, not the
+  // selection.
+  const getInitialHighlight = useCallback(
+    (edge: 'first' | 'last'): string | null => {
+      const selectedEnabledOption = enabledOptions.find(option =>
+        selectedValues?.has(option.value),
+      );
+      return selectedEnabledOption?.value ?? getEdgeHighlight(edge);
+    },
+    [enabledOptions, getEdgeHighlight, selectedValues],
   );
 
   const getNextHighlight = useCallback(
@@ -126,57 +133,47 @@ export function useListboxNavigation({
         return;
       }
 
-      if (isComposingEvent(event)) {
+      const action = resolveListboxKeyAction(event, {isOpen});
+      if (action == null) {
         return;
       }
 
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-        event.preventDefault();
-        if (!isOpen) {
+      switch (action.type) {
+        case 'open': {
+          event.preventDefault();
           onOpenChange(true);
-          setStoredHighlightedValue(
-            getInitialHighlight(event.key === 'ArrowUp' ? 'last' : 'first'),
-          );
+          setStoredHighlightedValue(getInitialHighlight(action.edge));
           return;
         }
-
-        const nextValue = getNextHighlight(
-          highlightedValue,
-          event.key === 'ArrowDown' ? 1 : -1,
-        );
-        setStoredHighlightedValue(nextValue);
-        scrollHighlightIntoView(nextValue);
-        return;
-      }
-
-      if (event.key === 'Home' && isOpen) {
-        event.preventDefault();
-        const nextValue = getInitialHighlight('first');
-        setStoredHighlightedValue(nextValue);
-        scrollHighlightIntoView(nextValue);
-        return;
-      }
-
-      if (event.key === 'End' && isOpen) {
-        event.preventDefault();
-        const nextValue = getInitialHighlight('last');
-        setStoredHighlightedValue(nextValue);
-        scrollHighlightIntoView(nextValue);
-        return;
-      }
-
-      if (event.key === 'Enter' && isOpen && highlightedValue != null) {
-        event.preventDefault();
-        onCommit(highlightedValue);
-        if (shouldClearOnCommit) {
-          setStoredHighlightedValue(null);
+        case 'move': {
+          event.preventDefault();
+          const nextValue = getNextHighlight(highlightedValue, action.step);
+          setStoredHighlightedValue(nextValue);
+          scrollHighlightIntoView(nextValue);
+          return;
         }
-        return;
+        case 'jump': {
+          event.preventDefault();
+          const nextValue = getEdgeHighlight(action.edge);
+          setStoredHighlightedValue(nextValue);
+          scrollHighlightIntoView(nextValue);
+          return;
+        }
+        case 'commit': {
+          if (highlightedValue == null) {
+            return;
+          }
+          event.preventDefault();
+          onCommit(highlightedValue);
+          if (shouldClearOnCommit) {
+            setStoredHighlightedValue(null);
+          }
+          return;
+        }
       }
-
-      return;
     },
     [
+      getEdgeHighlight,
       getInitialHighlight,
       getNextHighlight,
       highlightedValue,

@@ -28,7 +28,7 @@ import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
-import {isComposingEvent} from 'internal/isComposingEvent';
+import {resolveListboxKeyAction} from 'internal/listboxKeyboard';
 import {mergeRefs} from 'internal/mergeRefs';
 import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 import {css} from 'styled-system/css';
@@ -482,47 +482,62 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
             return;
           }
 
-          if (isComposingEvent(event)) {
+          const action = resolveListboxKeyAction(event, {isOpen});
+          if (action == null) {
             return;
           }
 
-          if (event.key === 'ArrowDown') {
-            event.preventDefault();
-            if (!isOpen) {
+          // Keep the highlighted result visible as the user moves through an
+          // overflowing list.
+          const highlightIndex = (index: number): void => {
+            setHighlightedIndex(index);
+            scrollOptionIntoView(`${listboxId}-option-${index}`);
+          };
+          const edgeIndex = (edge: 'first' | 'last'): number =>
+            edge === 'last' ? results.length - 1 : 0;
+
+          switch (action.type) {
+            case 'open': {
+              event.preventDefault();
               if (results.length > 0) {
                 showMenu();
+                highlightIndex(edgeIndex(action.edge));
               } else if (hasEntriesOnFocus) {
                 void runSearch('', 'bootstrap');
               }
               return;
             }
-            if (results.length === 0) {
-              setHighlightedIndex(-1);
+            case 'move': {
+              event.preventDefault();
+              if (results.length === 0) {
+                setHighlightedIndex(-1);
+                return;
+              }
+              highlightIndex(
+                highlightedIndex < 0
+                  ? edgeIndex(action.step === 1 ? 'first' : 'last')
+                  : (highlightedIndex + action.step + results.length) %
+                      results.length,
+              );
               return;
             }
-            const nextIndex = (highlightedIndex + 1) % results.length;
-            setHighlightedIndex(nextIndex);
-            // Keep the highlighted result visible as the user arrows through
-            // an overflowing list.
-            scrollOptionIntoView(`${listboxId}-option-${nextIndex}`);
-          } else if (event.key === 'ArrowUp') {
-            event.preventDefault();
-            if (results.length === 0) {
-              setHighlightedIndex(-1);
+            case 'jump': {
+              event.preventDefault();
+              if (results.length === 0) {
+                setHighlightedIndex(-1);
+                return;
+              }
+              highlightIndex(edgeIndex(action.edge));
               return;
             }
-            const nextIndex =
-              (highlightedIndex - 1 + results.length) % results.length;
-            setHighlightedIndex(nextIndex);
-            scrollOptionIntoView(`${listboxId}-option-${nextIndex}`);
-          } else if (
-            event.key === 'Enter' &&
-            isOpen &&
-            highlightedIndex >= 0 &&
-            highlightedIndex < results.length
-          ) {
-            event.preventDefault();
-            selectItem(results[highlightedIndex]);
+            case 'commit': {
+              if (highlightedIndex < 0 || highlightedIndex >= results.length) {
+                return;
+              }
+              event.preventDefault();
+              selectItem(results[highlightedIndex]);
+              return;
+            }
           }
         }}
         placeholder={placeholder}

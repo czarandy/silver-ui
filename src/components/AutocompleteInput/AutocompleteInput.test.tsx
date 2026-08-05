@@ -292,6 +292,50 @@ describe('AutocompleteInput', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  it('jumps results with PageUp and PageDown while Home and End keep the caret', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSearchSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'a');
+
+    const highlightedId = input.getAttribute('aria-activedescendant');
+    expect(
+      screen.getByRole('option', {hidden: true, name: /Ada Lovelace/}),
+    ).toHaveAttribute('id', highlightedId);
+
+    await user.keyboard('{Home}');
+    expect(input).toHaveProperty('selectionStart', 0);
+    expect(input).toHaveAttribute('aria-activedescendant', highlightedId);
+
+    await user.keyboard('{End}');
+    expect(input).toHaveProperty('selectionStart', 1);
+    expect(input).toHaveAttribute('aria-activedescendant', highlightedId);
+
+    await user.keyboard('{PageDown}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: /Katherine Johnson/}),
+    ).toHaveAttribute('id', input.getAttribute('aria-activedescendant'));
+
+    await user.keyboard('{PageUp}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: /Ada Lovelace/}),
+    ).toHaveAttribute('id', input.getAttribute('aria-activedescendant'));
+
+    await user.keyboard('{Enter}');
+    expect(onChange).toHaveBeenCalledWith(items[0]);
+  });
+
   it('does not select or close results while composing', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

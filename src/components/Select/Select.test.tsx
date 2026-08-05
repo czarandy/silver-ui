@@ -367,6 +367,51 @@ describe('Select', () => {
     ).toHaveAttribute('id', search.getAttribute('aria-activedescendant'));
   });
 
+  it('leaves Home and End to the search caret and jumps with PageUp and PageDown', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Select
+        hasSearch
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Apricot', 'Grape', 'Cherry']}
+        value={null}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
+
+    const search = screen.getByLabelText('Search Fruit');
+    await user.type(search, 'ap');
+    await user.keyboard('{ArrowDown}');
+
+    const highlightedId = search.getAttribute('aria-activedescendant');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Apple'}),
+    ).toHaveAttribute('id', highlightedId);
+
+    // Home and End stay with the text caret while the search field has focus.
+    await user.keyboard('{Home}');
+    expect(search).toHaveProperty('selectionStart', 0);
+    expect(search).toHaveAttribute('aria-activedescendant', highlightedId);
+
+    await user.keyboard('{End}');
+    expect(search).toHaveProperty('selectionStart', 'ap'.length);
+    expect(search).toHaveAttribute('aria-activedescendant', highlightedId);
+
+    // PageUp/PageDown are the jumps the listbox owns everywhere.
+    await user.keyboard('{PageDown}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Grape'}),
+    ).toHaveAttribute('id', search.getAttribute('aria-activedescendant'));
+
+    await user.keyboard('{PageUp}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Apple'}),
+    ).toHaveAttribute('id', search.getAttribute('aria-activedescendant'));
+  });
+
   it('does not open when disabled', async () => {
     const user = userEvent.setup();
 
