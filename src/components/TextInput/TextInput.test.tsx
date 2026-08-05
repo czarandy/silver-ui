@@ -5,6 +5,7 @@ import {describe, expect, it, vi} from 'vitest';
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {TextInput} from 'components/TextInput/TextInput';
+import {assertNonNull} from 'internal/testHelpers';
 
 function SearchIcon(props: LucideProps): React.JSX.Element {
   return <Search {...props} data-testid="search-icon" />;
@@ -55,6 +56,20 @@ describe('TextInput', () => {
     render(<TextInput isDisabled label="Name" onChange={noop} value="" />);
 
     expect(screen.getByRole('textbox', {name: 'Name'})).toBeDisabled();
+  });
+
+  // Regression: the wrapper is a plain <div>, so hovering a disabled input
+  // still matched the recipe's `:hover` rule and darkened its border.
+  it('drops the hover border affordance while disabled', () => {
+    render(<TextInput isDisabled label="Name" onChange={noop} value="" />);
+
+    const wrapper = assertNonNull(
+      // eslint-disable-next-line testing-library/no-node-access
+      screen.getByRole('textbox', {name: 'Name'}).parentElement,
+    );
+
+    expect(wrapper).toHaveClass('hover:silver-bd-c_border.emphasized');
+    expect(wrapper).not.toHaveClass('hover:silver-bd-c_fg.muted');
   });
 
   it('sets aria-invalid when status is error', () => {

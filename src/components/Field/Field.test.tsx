@@ -3,7 +3,11 @@ import {Mail} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {Field, getNecessity} from 'components/Field/Field';
 import {fieldRecipe} from 'components/Field/Field.recipe';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {
+  inputRecipe,
+  inputStyles,
+  statusBorderColor,
+} from 'components/Field/inputStyles';
 import {assertNonNull} from 'internal/testHelpers';
 import {token} from 'styled-system/tokens';
 
@@ -166,6 +170,41 @@ describe('Field', () => {
       'keeps the %s status border when a focused input is hovered',
       (status, expectedClass) => {
         expect(inputRecipe({status})).toContain(expectedClass);
+      },
+    );
+  });
+
+  describe('disabled hover', () => {
+    // Returns the recipe's one plain `:hover` border-color utility, so the
+    // assertions below cannot be satisfied by the `:focus-within:hover`
+    // classes that share the same token suffix.
+    function hoverBorderClass(className: string): string | undefined {
+      return className
+        .split(' ')
+        .find(name => name.startsWith('hover:silver-bd-c_'));
+    }
+
+    // Regression: the wrapper is a plain <div>, so `:hover` matches even when
+    // the control inside is disabled. Hovering used to darken the border and
+    // falsely signal interactivity.
+    it('keeps the resting border when a disabled input is hovered', () => {
+      expect(hoverBorderClass(inputRecipe())).toBe(
+        'hover:silver-bd-c_fg.muted',
+      );
+      expect(hoverBorderClass(inputRecipe({isDisabled: true}))).toBe(
+        'hover:silver-bd-c_border.emphasized',
+      );
+    });
+
+    it.each(['error', 'warning', 'success'] as const)(
+      'keeps the %s status border when a disabled input is hovered',
+      status => {
+        expect(hoverBorderClass(inputRecipe({status}))).toBe(
+          `hover:silver-bd-c_status.${status}.borderHover`,
+        );
+        expect(hoverBorderClass(inputRecipe({isDisabled: true, status}))).toBe(
+          `hover:silver-bd-c_${statusBorderColor[status]}`,
+        );
       },
     );
   });
