@@ -574,6 +574,7 @@ export function Slider({
                 content={displayValue(currentValue)}
                 delay={0}
                 focusTrigger="always"
+                isHiddenOnPress={false}
                 key={thumbKey}
                 placement={isHorizontal ? 'above' : 'start'}>
                 {thumb}

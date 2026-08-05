@@ -62,6 +62,13 @@ export interface TooltipProps {
    */
   isEnabled?: boolean;
   /**
+   * Whether pressing or clicking the trigger dismisses the tooltip.
+   * Set to `false` for triggers that remain engaged while pressed,
+   * such as a drag handle.
+   * @default true
+   */
+  isHiddenOnPress?: boolean;
+  /**
    * Preferred placement of the tooltip relative to the anchor.
    * @default 'above'
    */
@@ -92,6 +99,7 @@ export function Tooltip({
   hideDelay = 0,
   focusTrigger = 'auto',
   isEnabled = true,
+  isHiddenOnPress = true,
   hoverIndication = 'auto',
   className,
   'data-testid': dataTestId,
@@ -105,6 +113,7 @@ export function Tooltip({
     hideDelay,
     focusTrigger,
     isEnabled,
+    isHiddenOnPress,
   });
 
   return (

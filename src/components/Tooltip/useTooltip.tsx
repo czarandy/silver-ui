@@ -29,6 +29,7 @@ export interface UseTooltipOptions {
   focusTrigger?: TooltipFocusTrigger;
   hideDelay?: number;
   isEnabled?: boolean;
+  isHiddenOnPress?: boolean;
   onHide?: () => void;
   onShow?: () => void;
   placement?: LayerPlacement;
@@ -99,6 +100,7 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     hideDelay = 0,
     focusTrigger = 'auto',
     isEnabled = true,
+    isHiddenOnPress = true,
     onShow,
     onHide,
   } = options;
@@ -108,6 +110,7 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     focusTrigger,
     hideDelay,
     isEnabled,
+    isHiddenOnPress,
     onFocusIn: event => {
       const target = event.target as HTMLElement;
       return target.matches(':focus-visible');

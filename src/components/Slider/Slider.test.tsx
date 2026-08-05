@@ -1,4 +1,4 @@
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -437,6 +437,29 @@ describe('Slider', () => {
     expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
       '50%',
     );
+  });
+
+  it('keeps the tooltip visible while the thumb is pressed', async () => {
+    render(
+      <Slider
+        formatValue={value => `${value}%`}
+        label="Volume"
+        onChange={noop}
+        value={50}
+      />,
+    );
+
+    const thumb = screen.getByRole('slider');
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+
+    fireEvent.mouseEnter(thumb);
+    await waitFor(() => {
+      expect(popoverOpenState.get(tooltip)).toBe(true);
+    });
+
+    fireEvent.pointerDown(thumb, {clientX: 100, clientY: 10, pointerId: 1});
+
+    expect(popoverOpenState.get(tooltip)).toBe(true);
   });
 
   it('commits the pending value on pointer cancel', () => {

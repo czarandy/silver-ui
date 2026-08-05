@@ -25,6 +25,7 @@ const meta: Meta<typeof Tooltip> = {
       options: ['auto', 'always', 'never'],
     },
     isEnabled: {control: 'boolean'},
+    isHiddenOnPress: {control: 'boolean'},
     hoverIndication: {
       control: {type: 'select'},
       options: ['auto', 'always', 'never'],
