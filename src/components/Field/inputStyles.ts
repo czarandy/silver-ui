@@ -79,10 +79,34 @@ export const inputRecipe = cva({
       true: {
         cursor: 'not-allowed',
         opacity: 0.55,
+        // The wrapper is a plain <div>, so `:hover` keeps matching even though
+        // the control inside it is disabled. Re-assert the resting border to
+        // cancel the base hover affordance; the status compound variants below
+        // do the same for their own resting colors.
+        _hover: {
+          borderColor: 'border.emphasized',
+        },
       },
       false: {},
     },
   },
+  compoundVariants: [
+    {
+      status: 'warning',
+      isDisabled: true,
+      css: {_hover: {borderColor: statusBorderColor.warning}},
+    },
+    {
+      status: 'error',
+      isDisabled: true,
+      css: {_hover: {borderColor: statusBorderColor.error}},
+    },
+    {
+      status: 'success',
+      isDisabled: true,
+      css: {_hover: {borderColor: statusBorderColor.success}},
+    },
+  ],
   defaultVariants: {
     size: 'md',
     isDisabled: false,
