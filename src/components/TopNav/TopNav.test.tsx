@@ -183,6 +183,25 @@ describe('TopNavItem', () => {
     expect(link).toHaveAttribute('tabindex', '-1');
   });
 
+  it('drops the href, target, and rel of a disabled item', () => {
+    render(
+      <TopNav label="Nav">
+        <TopNavItem
+          href="/admin"
+          isDisabled
+          label="Admin"
+          rel="nofollow"
+          target="_blank"
+        />
+      </TopNav>,
+    );
+
+    const link = screen.getByRole('link', {name: /Admin/});
+    expect(link).not.toHaveAttribute('href');
+    expect(link).not.toHaveAttribute('target');
+    expect(link).not.toHaveAttribute('rel');
+  });
+
   it('prevents navigation when disabled', () => {
     render(
       <TopNav label="Nav">

@@ -150,15 +150,15 @@ export function TopNavItem({
       as={as}
       className={className_}
       data-testid={dataTestId}
-      href={href}
+      href={isDisabled ? undefined : href}
       isDisabled={href == null ? isDisabled : undefined}
       isLink={href != null}
       onClick={handleClick}
       ref={ref}
-      rel={href != null ? linkRel : undefined}
+      rel={href != null && !isDisabled ? linkRel : undefined}
       style={style}
       tabIndex={href != null && isDisabled ? -1 : undefined}
-      target={href != null ? target : undefined}>
+      target={href != null && !isDisabled ? target : undefined}>
       {content}
       {opensInNewTab && !isIconOnly ? (
         <>
