@@ -94,6 +94,31 @@ describe('HoverCard', () => {
     });
   });
 
+  it('stays open when the trigger is pressed', async () => {
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <HoverCard content="Details" delay={0} hideDelay={0}>
+        <Button label="Hover" />
+      </HoverCard>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Hover'});
+    fireEvent.mouseEnter(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+
+    // Unlike Tooltip, a hover card holds interactive content, so pressing the
+    // trigger must not dismiss it.
+    fireEvent.pointerDown(trigger);
+    fireEvent.click(trigger);
+
+    expect(hidePopoverMock).not.toHaveBeenCalled();
+  });
+
   it('does not open when isEnabled is false', async () => {
     showPopoverMock.mockClear();
 

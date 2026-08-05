@@ -19,6 +19,7 @@ export interface UseHoverLayerOptions {
   focusTrigger?: HoverLayerFocusTrigger;
   hideDelay?: number;
   isEnabled?: boolean;
+  isHiddenOnPress?: boolean;
   onFocusIn?: (event: FocusEvent) => boolean;
   onFocusOut?: (event: FocusEvent) => boolean;
   onHide?: () => void;
@@ -68,6 +69,7 @@ export function useHoverLayer({
   focusTrigger = 'auto',
   hideDelay = 0,
   isEnabled = true,
+  isHiddenOnPress = false,
   onFocusIn,
   onFocusOut,
   onHide,
@@ -132,6 +134,11 @@ export function useHoverLayer({
     scheduleHide();
   }, [scheduleHide]);
 
+  const handlePress = useCallback(() => {
+    clearTimeouts();
+    layer.hide();
+  }, [clearTimeouts, layer]);
+
   const handleFocusIn = useCallback(
     (event: FocusEvent) => {
       if (!isEnabled || onFocusIn?.(event) === false) {
@@ -170,6 +177,7 @@ export function useHoverLayer({
     keyDown: handleKeyDown,
     mouseEnter: handleMouseEnter,
     mouseLeave: handleMouseLeave,
+    press: handlePress,
   });
 
   const stableMouseEnter = useCallback(() => {
@@ -187,6 +195,9 @@ export function useHoverLayer({
   const stableKeyDown = useCallback((event: Event) => {
     handlersRef.current.keyDown(event as KeyboardEvent);
   }, []);
+  const stablePress = useCallback(() => {
+    handlersRef.current.press();
+  }, []);
 
   const hasTriggerEscape = onTriggerEscape != null;
 
@@ -198,6 +209,8 @@ export function useHoverLayer({
         triggerRef.current.removeEventListener('focusin', stableFocusIn);
         triggerRef.current.removeEventListener('focusout', stableFocusOut);
         triggerRef.current.removeEventListener('keydown', stableKeyDown);
+        triggerRef.current.removeEventListener('pointerdown', stablePress);
+        triggerRef.current.removeEventListener('click', stablePress);
       }
 
       if (element != null) {
@@ -216,6 +229,13 @@ export function useHoverLayer({
         if (hasTriggerEscape) {
           element.addEventListener('keydown', stableKeyDown);
         }
+
+        // `pointerdown` covers mouse/touch presses, where neither `mouseleave`
+        // nor `focusout` fires; `click` also covers keyboard activation.
+        if (isHiddenOnPress) {
+          element.addEventListener('pointerdown', stablePress);
+          element.addEventListener('click', stablePress);
+        }
       }
 
       triggerRef.current = element;
@@ -223,11 +243,13 @@ export function useHoverLayer({
     [
       focusTrigger,
       hasTriggerEscape,
+      isHiddenOnPress,
       stableFocusIn,
       stableFocusOut,
       stableKeyDown,
       stableMouseEnter,
       stableMouseLeave,
+      stablePress,
     ],
   );
 

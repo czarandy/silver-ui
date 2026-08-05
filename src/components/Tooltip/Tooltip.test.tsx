@@ -95,6 +95,135 @@ describe('Tooltip', () => {
     });
   });
 
+  it('dismisses tooltip when the trigger is pressed', async () => {
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    fireEvent.mouseEnter(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+
+    // The pointer stays over the trigger and focus lands on it, so neither
+    // mouseleave nor focusout fires.
+    fireEvent.pointerDown(trigger);
+
+    await waitFor(() => {
+      expect(hidePopoverMock).toHaveBeenCalled();
+    });
+    expect(
+      shim.isPopoverOpen(screen.getByRole('tooltip', {hidden: true})),
+    ).toBe(false);
+  });
+
+  it('dismisses tooltip when the trigger is activated by keyboard', async () => {
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    fireEvent.focusIn(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalled();
+    });
+
+    // Enter/Space on a focused button dispatches a click without a pointerdown.
+    fireEvent.click(trigger);
+
+    await waitFor(() => {
+      expect(hidePopoverMock).toHaveBeenCalled();
+    });
+  });
+
+  it('cancels a pending tooltip when the trigger is pressed', () => {
+    vi.useFakeTimers();
+    showPopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={200}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    fireEvent.mouseEnter(trigger);
+    fireEvent.pointerDown(trigger);
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(showPopoverMock).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
+  it('re-shows the tooltip on the next hover after a press', async () => {
+    showPopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    fireEvent.mouseEnter(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalledTimes(1);
+    });
+
+    fireEvent.pointerDown(trigger);
+    fireEvent.mouseLeave(trigger);
+    fireEvent.mouseEnter(trigger);
+
+    await waitFor(() => {
+      expect(showPopoverMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('keeps the tooltip open on press when isHiddenOnPress is false', () => {
+    vi.useFakeTimers();
+    showPopoverMock.mockClear();
+    hidePopoverMock.mockClear();
+
+    render(
+      <Tooltip content="Tooltip text" delay={0} isHiddenOnPress={false}>
+        <button type="button">Trigger</button>
+      </Tooltip>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Trigger'});
+    fireEvent.mouseEnter(trigger);
+
+    act(() => {
+      vi.advanceTimersByTime(0);
+    });
+    expect(showPopoverMock).toHaveBeenCalled();
+
+    fireEvent.pointerDown(trigger);
+    fireEvent.click(trigger);
+
+    expect(hidePopoverMock).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
+  });
+
   it('dismisses tooltip on Escape key', async () => {
     showPopoverMock.mockClear();
     hidePopoverMock.mockClear();
