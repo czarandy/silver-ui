@@ -90,9 +90,6 @@ export const alertRecipe = sva({
       flexDirection: 'column',
       minW: 0,
     },
-    // `content` carries `flex: 1`, so it already pushes this area to the end of
-    // the header — the inline-start margin is a fixed gutter rather than an
-    // `auto` push, keeping the end content clear of a long title or description.
     endArea: {
       display: 'flex',
       alignItems: 'center',
