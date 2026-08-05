@@ -95,7 +95,7 @@ export const alertRecipe = sva({
       alignItems: 'center',
       flexShrink: 0,
       gap: '2',
-      ms: 'auto',
+      ms: '4',
     },
     // The body stays mounted so child state and the `aria-controls` target are
     // preserved; it is collapsed with a `grid-template-rows` 1fr -> 0fr
