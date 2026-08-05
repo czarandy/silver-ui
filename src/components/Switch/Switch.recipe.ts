@@ -67,8 +67,6 @@ export const switchRecipe = sva({
       display: 'inline-flex',
       alignItems: 'center',
       flexShrink: 0,
-      w: '10',
-      h: '6',
       borderRadius: 'full',
       isolation: 'isolate',
       '&:has(input:focus-visible)': {
@@ -99,8 +97,6 @@ export const switchRecipe = sva({
     track: {
       display: 'flex',
       alignItems: 'center',
-      w: '10',
-      h: '6',
       p: '1',
       borderRadius: 'full',
       bg: 'track.emphasized',
@@ -116,8 +112,6 @@ export const switchRecipe = sva({
       display: 'inline-flex',
       alignItems: 'center',
       justifyContent: 'center',
-      w: '4',
-      h: '4',
       borderRadius: 'full',
       bg: 'bg',
       color: 'primary',
@@ -131,6 +125,42 @@ export const switchRecipe = sva({
     },
   },
   variants: {
+    // Track heights match the RadioGroup control sizes (20/24/28px) so a
+    // switch lines up with a checkbox or radio of the same size. The track
+    // keeps a constant 4px inset, which makes the thumb `height - 8px` and
+    // its travel `width - height`.
+    size: {
+      sm: {
+        control: {w: '8', h: '5'},
+        track: {w: '8', h: '5'},
+        thumb: {
+          w: '3',
+          h: '3',
+          '--switch-thumb-travel': '12px',
+          '& [data-switch-spinner]': {'--spinner-size': '12px'},
+        },
+      },
+      md: {
+        control: {w: '10', h: '6'},
+        track: {w: '10', h: '6'},
+        thumb: {
+          w: '4',
+          h: '4',
+          '--switch-thumb-travel': '16px',
+          '& [data-switch-spinner]': {'--spinner-size': '16px'},
+        },
+      },
+      lg: {
+        control: {w: '12', h: '7'},
+        track: {w: '12', h: '7'},
+        thumb: {
+          w: '5',
+          h: '5',
+          '--switch-thumb-travel': '20px',
+          '& [data-switch-spinner]': {'--spinner-size': '20px'},
+        },
+      },
+    },
     labelSpacing: {
       default: {},
       spread: {
@@ -141,7 +171,7 @@ export const switchRecipe = sva({
     isSelected: {
       true: {
         track: {bg: 'primary'},
-        thumb: {transform: 'translateX(16px)'},
+        thumb: {transform: 'translateX(var(--switch-thumb-travel))'},
       },
       false: {},
     },
@@ -160,6 +190,7 @@ export const switchRecipe = sva({
     },
   },
   defaultVariants: {
+    size: 'md',
     labelSpacing: 'default',
     isSelected: false,
     isDisabled: false,

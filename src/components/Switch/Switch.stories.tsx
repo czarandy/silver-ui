@@ -1,8 +1,15 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, ShieldCheck} from 'lucide-react';
 import {useState} from 'react';
-import {VStack} from 'components/Stack';
-import {Switch, type SwitchProps} from 'components/Switch/Switch';
+import {CheckboxInput} from 'components/CheckboxInput';
+import {RadioGroup} from 'components/RadioGroup';
+import {RadioGroupItem} from 'components/RadioGroup/RadioGroupItem';
+import {HStack, VStack} from 'components/Stack';
+import {
+  Switch,
+  type SwitchProps,
+  type SwitchSize,
+} from 'components/Switch/Switch';
 
 const meta = {
   title: 'Components/Switch',
@@ -64,6 +71,70 @@ export const States: Story = {
     </VStack>
   ),
 };
+const SIZES: SwitchSize[] = ['sm', 'md', 'lg'];
+
+export const Sizes: Story = {
+  render: () => (
+    <VStack gap={4}>
+      {SIZES.map(size => (
+        <HStack align="center" gap={4} key={size}>
+          <Switch
+            isSelected={false}
+            label={`Off (${size})`}
+            onChange={() => {}}
+            size={size}
+          />
+          <Switch
+            isSelected
+            label={`On (${size})`}
+            onChange={() => {}}
+            size={size}
+          />
+          <Switch
+            isLoading
+            isSelected
+            label={`Loading (${size})`}
+            onChange={() => {}}
+            size={size}
+          />
+        </HStack>
+      ))}
+    </VStack>
+  ),
+};
+
+export const SizeAlignment: Story = {
+  render: () => (
+    <VStack gap={6}>
+      {SIZES.map(size => (
+        <HStack align="center" gap={6} key={size}>
+          <Switch
+            isSelected
+            label={`Switch ${size}`}
+            onChange={() => {}}
+            size={size}
+          />
+          <CheckboxInput
+            label={`Checkbox ${size}`}
+            onChange={() => {}}
+            size={size}
+            value
+            width="auto"
+          />
+          <RadioGroup
+            isLabelHidden
+            label={`Radio ${size}`}
+            onChange={() => {}}
+            size={size}
+            value="on">
+            <RadioGroupItem label={`Radio ${size}`} value="on" />
+          </RadioGroup>
+        </HStack>
+      ))}
+    </VStack>
+  ),
+};
+
 export const Error: Story = {
   args: {status: {message: 'This setting is required.', type: 'error'}},
   render: (args: SwitchProps) => <SwitchStory {...args} />,

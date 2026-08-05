@@ -17,11 +17,13 @@ import {switchRecipe} from 'components/Switch/Switch.recipe';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import {useResolvedSize, type ComponentSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type SwitchLabelPosition = 'end' | 'start';
 export type SwitchLabelSpacing = 'default' | 'spread';
+export type SwitchSize = ComponentSize;
 
 export type SwitchProps = {
   /**
@@ -98,6 +100,11 @@ export type SwitchProps = {
    */
   ref?: Ref<HTMLInputElement>;
   /**
+   * Visual size of the switch. Defaults to the ambient size when unset.
+   * @default 'md'
+   */
+  size?: SwitchSize;
+  /**
    * Validation status displayed below the switch.
    */
   status?: InputStatus;
@@ -129,10 +136,12 @@ export function Switch({
   onChange,
   onFocus,
   ref,
+  size: sizeProp,
   status,
   style,
   isSelected,
 }: SwitchProps): React.JSX.Element {
+  const size = useResolvedSize(sizeProp);
   const inputId = useId();
   const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
@@ -145,6 +154,7 @@ export function Switch({
       ? 'Required'
       : null;
   const classes = switchRecipe({
+    size,
     labelSpacing,
     isSelected,
     isDisabled,
@@ -176,7 +186,12 @@ export function Switch({
         data-selected={isSelected ? 'true' : undefined}
         data-switch-track="">
         <span className={classes.thumb}>
-          {isLoading ? <Spinner size="sm" /> : null}
+          {isLoading ? (
+            // The thumb scales the spinner down to its own diameter through
+            // `--spinner-size`; the marker attribute is what the recipe's
+            // per-size rule targets.
+            <Spinner data-switch-spinner="" size="sm" />
+          ) : null}
         </span>
       </span>
       {isLoading ? (
