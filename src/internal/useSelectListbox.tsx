@@ -310,44 +310,61 @@ export function renderSelectListboxOptions<
   renderOption,
   sectionHeadingClassName,
 }: RenderSelectListboxOptionsConfig<TOption>): ReactNode[] {
-  const optionNodes: ReactNode[] = [];
+  // `renderOption` returns null for options filtered out by the current query,
+  // so entries are collected with their visibility first and the dividers are
+  // resolved afterwards -- a divider only earns its place between two entries
+  // that survived the filter.
+  const entries: {isDivider: boolean; node: ReactNode}[] = [];
   let dividerCount = 0;
   let sectionCount = 0;
 
+  const pushOption = (option: string | TOption): void => {
+    const node = renderOption(normalizeSelectListboxOption<TOption>(option));
+    if (isNonEmptyReactNode(node)) {
+      entries.push({isDivider: false, node});
+    }
+  };
+
   for (const option of options) {
-    if (typeof option === 'string') {
-      optionNodes.push(
-        renderOption(normalizeSelectListboxOption<TOption>(option)),
-      );
-    } else if ('type' in option) {
-      if (option.type === 'divider') {
-        dividerCount += 1;
-        optionNodes.push(
+    if (typeof option === 'string' || !('type' in option)) {
+      pushOption(option);
+    } else if (option.type === 'divider') {
+      dividerCount += 1;
+      entries.push({
+        isDivider: true,
+        node: (
           <div
             className={dividerClassName}
             key={`divider-${dividerCount}`}
             role="separator"
-          />,
-        );
-      } else {
-        const sectionKey =
-          option.title ??
-          option.options.map(sectionOption => sectionOption.value).join('|');
-        sectionCount += 1;
-        const sectionHeadingId =
-          option.title == null
-            ? undefined
-            : `${inputId}-section-${sectionKey.replace(
-                /[^a-zA-Z0-9_-]/g,
-                '-',
-              )}-${sectionCount}`;
-        const sectionOptionNodes: ReactNode[] = [];
-        for (const sectionOption of option.options) {
-          sectionOptionNodes.push(
-            renderOption(normalizeSelectListboxOption<TOption>(sectionOption)),
-          );
-        }
-        optionNodes.push(
+          />
+        ),
+      });
+    } else {
+      const sectionKey =
+        option.title ??
+        option.options.map(sectionOption => sectionOption.value).join('|');
+      // Counted even when the section is dropped so that keys stay stable as
+      // the query changes.
+      sectionCount += 1;
+      const sectionHeadingId =
+        option.title == null
+          ? undefined
+          : `${inputId}-section-${sectionKey.replace(
+              /[^a-zA-Z0-9_-]/g,
+              '-',
+            )}-${sectionCount}`;
+      const sectionOptionNodes = option.options
+        .map((sectionOption): ReactNode =>
+          renderOption(normalizeSelectListboxOption<TOption>(sectionOption)),
+        )
+        .filter(isNonEmptyReactNode);
+      if (sectionOptionNodes.length === 0) {
+        continue;
+      }
+      entries.push({
+        isDivider: false,
+        node: (
           <div
             aria-labelledby={sectionHeadingId}
             key={`section-${sectionKey}-${sectionCount}`}
@@ -358,14 +375,28 @@ export function renderSelectListboxOptions<
               </div>
             ) : null}
             {sectionOptionNodes}
-          </div>,
-        );
-      }
-    } else {
-      optionNodes.push(
-        renderOption(normalizeSelectListboxOption<TOption>(option)),
-      );
+          </div>
+        ),
+      });
     }
+  }
+
+  const optionNodes: ReactNode[] = [];
+  let pendingDivider: ReactNode = null;
+  for (const entry of entries) {
+    if (entry.isDivider) {
+      // Nothing rendered yet means a leading divider; otherwise hold it until
+      // something follows. Overwriting collapses runs of adjacent dividers.
+      if (optionNodes.length > 0) {
+        pendingDivider = entry.node;
+      }
+      continue;
+    }
+    if (isNonEmptyReactNode(pendingDivider)) {
+      optionNodes.push(pendingDivider);
+      pendingDivider = null;
+    }
+    optionNodes.push(entry.node);
   }
 
   return optionNodes;
