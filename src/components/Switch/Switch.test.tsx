@@ -4,9 +4,30 @@ import {ShieldCheck, type LucideProps} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Switch} from 'components/Switch/Switch';
+import {SizeContext} from 'internal/SizeContext';
 
 function LabelIcon(props: LucideProps): React.JSX.Element {
   return <ShieldCheck {...props} data-testid="label-icon" />;
+}
+
+function getControl(testId: string): HTMLElement {
+  const control =
+    // eslint-disable-next-line testing-library/no-node-access -- geometry classes live on the control wrapper around the input.
+    screen.getByTestId(testId).parentElement;
+  if (control == null) {
+    throw new Error(`No control wrapper for ${testId}`);
+  }
+  return control;
+}
+
+function getThumb(testId: string): HTMLElement {
+  const thumb =
+    // eslint-disable-next-line testing-library/no-node-access -- the thumb is decorative and has no accessible role.
+    getControl(testId).querySelector<HTMLElement>('[data-switch-track] > span');
+  if (thumb == null) {
+    throw new Error(`No thumb for ${testId}`);
+  }
+  return thumb;
 }
 
 describe('Switch', () => {
@@ -340,6 +361,103 @@ describe('Switch', () => {
 
     await user.click(screen.getByRole('switch', {name: 'Notifications'}));
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['sm' as const, 'silver-w_8', 'silver-h_5', 12],
+    ['md' as const, 'silver-w_10', 'silver-h_6', 16],
+    ['lg' as const, 'silver-w_12', 'silver-h_7', 20],
+  ])(
+    'sizes the control and thumb travel for size %s',
+    (size, widthClass, heightClass, travel) => {
+      render(
+        <Switch
+          data-testid="sized"
+          isSelected
+          label="Notifications"
+          onChange={() => {}}
+          size={size}
+        />,
+      );
+
+      const control = getControl('sized');
+      expect(control).toHaveClass(widthClass);
+      expect(control).toHaveClass(heightClass);
+      expect(getThumb('sized')).toHaveClass(
+        `silver---switch-thumb-travel_${travel}px`,
+      );
+    },
+  );
+
+  it('defaults to the medium size', () => {
+    render(
+      <Switch
+        data-testid="default-size"
+        isSelected={false}
+        label="Notifications"
+        onChange={() => {}}
+      />,
+    );
+
+    const control = getControl('default-size');
+    expect(control).toHaveClass('silver-w_10');
+    expect(control).toHaveClass('silver-h_6');
+  });
+
+  it('inherits the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <Switch
+          data-testid="ambient"
+          isSelected={false}
+          label="Notifications"
+          onChange={() => {}}
+        />
+      </SizeContext>,
+    );
+
+    const control = getControl('ambient');
+    expect(control).toHaveClass('silver-w_12');
+    expect(control).toHaveClass('silver-h_7');
+  });
+
+  it('prefers an explicit size over the ambient size', () => {
+    render(
+      <SizeContext value="lg">
+        <Switch
+          data-testid="override"
+          isSelected={false}
+          label="Notifications"
+          onChange={() => {}}
+          size="sm"
+        />
+      </SizeContext>,
+    );
+
+    const control = getControl('override');
+    expect(control).toHaveClass('silver-w_8');
+    expect(control).toHaveClass('silver-h_5');
+  });
+
+  it('scales the loading spinner to the thumb', () => {
+    render(
+      <Switch
+        data-testid="loading"
+        isLoading
+        isSelected
+        label="Notifications"
+        onChange={() => {}}
+        size="sm"
+      />,
+    );
+
+    expect(getThumb('loading')).toHaveClass(
+      '[&_[data-switch-spinner]]:silver---spinner-size_12px',
+    );
+    expect(
+      // eslint-disable-next-line testing-library/no-node-access -- the spinner is decorative markup inside the thumb.
+      getThumb('loading').querySelector('[data-switch-spinner]'),
+    ).toBeInTheDocument();
   });
 
   it('forwards ref to the input', () => {
