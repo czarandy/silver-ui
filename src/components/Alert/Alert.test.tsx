@@ -117,6 +117,22 @@ describe('Alert', () => {
     expect(screen.getByRole('button', {name: 'Action'})).toBeInTheDocument();
   });
 
+  // The header's own `gap` left the end content nearly touching a long title,
+  // so the end area carries a fixed inline-start gutter of its own.
+  it('gutters endContent away from the header text', () => {
+    render(
+      <Alert
+        endContent={<button type="button">Action</button>}
+        status="info"
+        title="With end content"
+      />,
+    );
+
+    const action = screen.getByRole('button', {name: 'Action'});
+    // eslint-disable-next-line testing-library/no-node-access -- the end-area slot has no semantic role of its own
+    expect(action.parentElement).toHaveClass('silver-ms_4');
+  });
+
   it('centers endContent within the header when requested', () => {
     render(
       <Alert
