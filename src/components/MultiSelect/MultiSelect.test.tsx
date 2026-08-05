@@ -264,6 +264,44 @@ describe('MultiSelect', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('jumps to an edge with Home, End, and PageUp/PageDown past the selection', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MultiSelect
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email', 'Role']}
+        value={['Email']}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    trigger.focus();
+
+    // Opening lands on the selection so the user resumes where they left off.
+    await user.keyboard('{ArrowDown}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Email'}),
+    ).toHaveAttribute('id', trigger.getAttribute('aria-activedescendant'));
+
+    // An explicit jump means the edge of the list, not the selection.
+    await user.keyboard('{Home}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Name'}),
+    ).toHaveAttribute('id', trigger.getAttribute('aria-activedescendant'));
+
+    await user.keyboard('{PageDown}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Role'}),
+    ).toHaveAttribute('id', trigger.getAttribute('aria-activedescendant'));
+
+    await user.keyboard('{PageUp}');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Name'}),
+    ).toHaveAttribute('id', trigger.getAttribute('aria-activedescendant'));
+  });
+
   it('ignores navigation and commit keys while composing', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
