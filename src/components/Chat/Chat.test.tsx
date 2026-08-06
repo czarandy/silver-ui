@@ -242,6 +242,24 @@ describe('ChatLayout', () => {
     expect(layout).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
+
+  it('forwards the curated passthrough props to the root', () => {
+    render(
+      <>
+        <span id="chat-label">Support chat</span>
+        <ChatLayout
+          aria-labelledby="chat-label"
+          composer={null}
+          data-testid="layout"
+          id="chat"
+        />
+      </>,
+    );
+
+    const layout = screen.getByTestId('layout');
+    expect(layout).toHaveAttribute('id', 'chat');
+    expect(layout).toHaveAttribute('aria-labelledby', 'chat-label');
+  });
 });
 
 describe('ChatScrollButton', () => {

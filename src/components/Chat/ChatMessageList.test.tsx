@@ -182,4 +182,40 @@ describe('ChatMessageList', () => {
     expect(list).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
+
+  it('forwards the curated passthrough props', () => {
+    render(
+      <>
+        <span id="list-label">Conversation</span>
+        <ChatMessageList
+          aria-labelledby="list-label"
+          data-testid="list"
+          id="log">
+          <ChatMessage sender="user">Hi</ChatMessage>
+        </ChatMessageList>
+      </>,
+    );
+
+    const list = screen.getByTestId('list');
+    expect(list).toHaveAttribute('id', 'log');
+    expect(list).toHaveAttribute('aria-labelledby', 'list-label');
+  });
+
+  it('defaults aria-live to polite and allows turning it off', () => {
+    const {rerender} = render(
+      <ChatMessageList data-testid="list">
+        <ChatMessage sender="user">Hi</ChatMessage>
+      </ChatMessageList>,
+    );
+
+    expect(screen.getByTestId('list')).toHaveAttribute('aria-live', 'polite');
+
+    rerender(
+      <ChatMessageList aria-live="off" data-testid="list">
+        <ChatMessage sender="user">Hi</ChatMessage>
+      </ChatMessageList>,
+    );
+
+    expect(screen.getByTestId('list')).toHaveAttribute('aria-live', 'off');
+  });
 });

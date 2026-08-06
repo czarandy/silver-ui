@@ -1,15 +1,10 @@
 'use client';
 
-import type {
-  ComponentPropsWithoutRef,
-  CSSProperties,
-  ReactNode,
-  Ref,
-  RefObject,
-} from 'react';
+import type {CSSProperties, ReactNode, Ref, RefObject} from 'react';
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {ChatLayoutContext, type ChatDensity} from 'components/Chat/ChatContext';
 import {chatLayoutRecipe} from 'components/Chat/ChatLayout.recipe';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {ChatScrollButton} from 'components/Chat/ChatScrollButton';
 import {useChatNewMessages} from 'components/Chat/useChatNewMessages';
 import {useChatStreamScroll} from 'components/Chat/useChatStreamScroll';
@@ -35,7 +30,7 @@ function hasVisibleContent(children: ReactNode): boolean {
   return !(Array.isArray(children) && children.length === 0);
 }
 
-export interface ChatLayoutProps extends ComponentPropsWithoutRef<'div'> {
+export interface ChatLayoutProps extends ChatPassthroughProps {
   /**
    * Message content — typically a ChatMessageList. Flows naturally and
    * scrolls behind the composer dock.
@@ -96,7 +91,7 @@ export function ChatLayout({
   scrollButton,
   scrollRef: externalScrollRef,
   style,
-  ...rest
+  ...passthrough
 }: ChatLayoutProps): React.JSX.Element {
   const rootRef = useRef<HTMLDivElement>(null);
   const dockContainerRef = useRef<HTMLDivElement>(null);
@@ -165,7 +160,7 @@ export function ChatLayout({
   return (
     <ChatLayoutContext value={layoutContext}>
       <div
-        {...rest}
+        {...passthrough}
         className={cx(classes.root, className)}
         data-density={density}
         data-testid={dataTestId}

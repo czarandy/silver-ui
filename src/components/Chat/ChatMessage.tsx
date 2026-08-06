@@ -1,11 +1,6 @@
 'use client';
 
-import type {
-  ComponentPropsWithoutRef,
-  CSSProperties,
-  ReactNode,
-  Ref,
-} from 'react';
+import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useId, useMemo} from 'react';
 import {
   ChatMessageContext,
@@ -14,10 +9,11 @@ import {
   type ChatMessageSender,
 } from 'components/Chat/ChatContext';
 import {chatMessageRecipe} from 'components/Chat/ChatMessage.recipe';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
-export interface ChatMessageProps extends ComponentPropsWithoutRef<'article'> {
+export interface ChatMessageProps extends ChatPassthroughProps {
   /**
    * Avatar rendered beside the message. Ignored for `system` messages.
    */
@@ -75,6 +71,8 @@ export interface ChatMessageProps extends ComponentPropsWithoutRef<'article'> {
  * name, and metadata around the message content.
  */
 export function ChatMessage({
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
   avatar,
   children,
   className,
@@ -85,7 +83,7 @@ export function ChatMessage({
   ref,
   sender,
   style,
-  ...rest
+  ...passthrough
 }: ChatMessageProps): React.JSX.Element {
   const listContext = useChatListContext();
   const density = densityProp ?? listContext?.density ?? 'balanced';
@@ -99,9 +97,11 @@ export function ChatMessage({
   return (
     <ChatMessageContext value={contextValue}>
       <article
-        {...rest}
-        aria-label={hasName ? undefined : `Message from ${sender}`}
-        aria-labelledby={hasName ? nameId : undefined}
+        {...passthrough}
+        aria-label={
+          ariaLabel ?? (hasName ? undefined : `Message from ${sender}`)
+        }
+        aria-labelledby={ariaLabelledby ?? (hasName ? nameId : undefined)}
         className={cx(classes.root, className)}
         data-chat-message=""
         data-sender={sender}

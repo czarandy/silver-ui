@@ -2,10 +2,13 @@
 
 import type {
   ChangeEvent,
-  ComponentPropsWithoutRef,
+  ClipboardEventHandler,
   CSSProperties,
+  FocusEventHandler,
   KeyboardEvent,
+  KeyboardEventHandler,
   Ref,
+  TextareaHTMLAttributes,
 } from 'react';
 import {useRef, useState} from 'react';
 import {chatComposerInputRecipe} from 'components/Chat/ChatComposerInput.recipe';
@@ -14,6 +17,7 @@ import {
   DEFAULT_LINE_HEIGHT,
 } from 'components/Chat/ChatComposerInput.utils';
 import {useChatComposerContext} from 'components/Chat/ChatContext';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import {mergeRefs} from 'internal/mergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
@@ -21,10 +25,11 @@ import {cx} from 'utils/cx';
 
 const rootClass = chatComposerInputRecipe();
 
-export interface ChatComposerInputProps extends Omit<
-  ComponentPropsWithoutRef<'textarea'>,
-  'onChange' | 'value'
-> {
+export interface ChatComposerInputProps extends ChatPassthroughProps {
+  /**
+   * HTML `autocomplete` attribute for the textarea.
+   */
+  autoComplete?: string;
   /**
    * Additional CSS class names applied to the textarea.
    */
@@ -34,11 +39,19 @@ export interface ChatComposerInputProps extends Omit<
    */
   'data-testid'?: string;
   /**
+   * Action label shown on the virtual keyboard's enter key.
+   */
+  enterKeyHint?: TextareaHTMLAttributes<HTMLTextAreaElement>['enterKeyHint'];
+  /**
    * Whether the input is disabled. Defaults to the surrounding ChatComposer
    * state.
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Maximum number of characters the user can type.
+   */
+  maxLength?: number;
   /**
    * Maximum number of lines the input grows to before scrolling.
    * @default 8
@@ -50,10 +63,32 @@ export interface ChatComposerInputProps extends Omit<
    */
   minRows?: number;
   /**
+   * HTML `name` attribute for form submission.
+   */
+  name?: string;
+  /**
+   * Blur event handler for the textarea.
+   */
+  onBlur?: FocusEventHandler<HTMLTextAreaElement>;
+  /**
    * Called when the value changes. Defaults to the surrounding ChatComposer
    * state.
    */
   onChange?: (value: string) => void;
+  /**
+   * Focus event handler for the textarea.
+   */
+  onFocus?: FocusEventHandler<HTMLTextAreaElement>;
+  /**
+   * Keyboard event handler for the textarea, called before the built-in
+   * Enter-to-submit handling. Call `preventDefault()` to suppress it.
+   */
+  onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement>;
+  /**
+   * Paste event handler for the textarea — use to intercept pasted files or
+   * rich content.
+   */
+  onPaste?: ClipboardEventHandler<HTMLTextAreaElement>;
   /**
    * Called with the trimmed value when the user presses Enter. Defaults to
    * submitting the surrounding ChatComposer.
@@ -97,7 +132,7 @@ export function ChatComposerInput({
   ref,
   style,
   value,
-  ...rest
+  ...passthrough
 }: ChatComposerInputProps): React.JSX.Element {
   const composer = useChatComposerContext();
   const [internalValue, setInternalValue] = useState('');
@@ -150,7 +185,7 @@ export function ChatComposerInput({
 
   return (
     <textarea
-      {...rest}
+      {...passthrough}
       className={cx(rootClass, className)}
       data-testid={dataTestId}
       disabled={currentDisabled}

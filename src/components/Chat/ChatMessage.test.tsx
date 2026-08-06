@@ -107,6 +107,72 @@ describe('ChatMessage', () => {
     expect(message).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLElement));
   });
+
+  it('forwards the curated passthrough props', () => {
+    render(
+      <>
+        <span id="msg-desc">Sent from the web client</span>
+        <ChatMessage
+          aria-describedby="msg-desc"
+          data-testid="message"
+          id="msg-1"
+          sender="user">
+          Hi
+        </ChatMessage>
+      </>,
+    );
+
+    const message = screen.getByTestId('message');
+    expect(message).toHaveAttribute('id', 'msg-1');
+    expect(message).toHaveAttribute('aria-describedby', 'msg-desc');
+  });
+
+  it('lets a consumer label override the generated one', () => {
+    const {rerender} = render(
+      <ChatMessage data-testid="message" sender="user">
+        Hi
+      </ChatMessage>,
+    );
+
+    expect(screen.getByTestId('message')).toHaveAttribute(
+      'aria-label',
+      'Message from user',
+    );
+
+    rerender(
+      <ChatMessage
+        aria-label="Your greeting"
+        data-testid="message"
+        sender="user">
+        Hi
+      </ChatMessage>,
+    );
+
+    expect(screen.getByTestId('message')).toHaveAttribute(
+      'aria-label',
+      'Your greeting',
+    );
+  });
+
+  it('lets a consumer aria-labelledby override the generated name id', () => {
+    render(
+      <>
+        <span id="sender-label">Ada</span>
+        <ChatMessage
+          aria-labelledby="sender-label"
+          data-testid="message"
+          name="Ada Lovelace"
+          sender="assistant">
+          Hi
+        </ChatMessage>
+      </>,
+    );
+
+    expect(screen.getByTestId('message')).toHaveAttribute(
+      'aria-labelledby',
+      'sender-label',
+    );
+  });
 });
 
 describe('ChatMessageBubble', () => {
@@ -210,6 +276,20 @@ describe('ChatMessageBubble', () => {
     expect(bubble).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
+
+  it('forwards the curated passthrough props', () => {
+    render(
+      <ChatMessage sender="user">
+        <ChatMessageBubble aria-label="Greeting" data-testid="bubble" id="b1">
+          Hi
+        </ChatMessageBubble>
+      </ChatMessage>,
+    );
+
+    const bubble = screen.getByTestId('bubble');
+    expect(bubble).toHaveAttribute('id', 'b1');
+    expect(bubble).toHaveAttribute('aria-label', 'Greeting');
+  });
 });
 
 describe('ChatMessageMetadata', () => {
@@ -260,6 +340,21 @@ describe('ChatMessageMetadata', () => {
       screen.getByTestId('metadata').className,
       {exact: true},
     );
+  });
+
+  it('forwards the curated passthrough props', () => {
+    render(
+      <ChatMessageMetadata
+        aria-label="Message details"
+        data-testid="metadata"
+        id="meta-1"
+        timestamp="1:00"
+      />,
+    );
+
+    const metadata = screen.getByTestId('metadata');
+    expect(metadata).toHaveAttribute('id', 'meta-1');
+    expect(metadata).toHaveAttribute('aria-label', 'Message details');
   });
 });
 
@@ -324,5 +419,35 @@ describe('ChatSystemMessage', () => {
     expect(message).toHaveClass('custom-system');
     expect(message).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+
+  it('forwards the curated passthrough props in both variants', () => {
+    const {rerender} = render(
+      <ChatSystemMessage aria-label="Notice" data-testid="system" id="sys-1">
+        Conversation started
+      </ChatSystemMessage>,
+    );
+
+    expect(screen.getByTestId('system')).toHaveAttribute('id', 'sys-1');
+    expect(screen.getByTestId('system')).toHaveAttribute(
+      'aria-label',
+      'Notice',
+    );
+
+    rerender(
+      <ChatSystemMessage
+        aria-label="Notice"
+        data-testid="system"
+        id="sys-1"
+        variant="divider">
+        Today
+      </ChatSystemMessage>,
+    );
+
+    expect(screen.getByTestId('system')).toHaveAttribute('id', 'sys-1');
+    expect(screen.getByTestId('system')).toHaveAttribute(
+      'aria-label',
+      'Notice',
+    );
   });
 });
