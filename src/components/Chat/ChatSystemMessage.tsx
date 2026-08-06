@@ -1,9 +1,5 @@
-import type {
-  ComponentPropsWithoutRef,
-  CSSProperties,
-  ReactNode,
-  Ref,
-} from 'react';
+import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {chatSystemMessageRecipe} from 'components/Chat/ChatSystemMessage.recipe';
 import {Divider} from 'components/Divider';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
@@ -11,7 +7,7 @@ import {cx} from 'utils/cx';
 
 export type ChatSystemMessageVariant = 'default' | 'divider';
 
-export interface ChatSystemMessageProps extends ComponentPropsWithoutRef<'div'> {
+export interface ChatSystemMessageProps extends ChatPassthroughProps {
   /**
    * System message content — text or any ReactNode.
    */
@@ -56,14 +52,14 @@ export function ChatSystemMessage({
   ref,
   style,
   variant = 'default',
-  ...rest
+  ...passthrough
 }: ChatSystemMessageProps): React.JSX.Element {
   const classes = chatSystemMessageRecipe({variant});
 
   if (variant === 'divider') {
     return (
       <div
-        {...rest}
+        {...passthrough}
         className={cx(classes.dividerWrap, className)}
         data-chat-message=""
         data-sender="system"
@@ -78,7 +74,7 @@ export function ChatSystemMessage({
 
   return (
     <div
-      {...rest}
+      {...passthrough}
       className={cx(classes.root, className)}
       data-chat-message=""
       data-sender="system"

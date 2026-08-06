@@ -1,13 +1,7 @@
 'use client';
 
 import {CircleAlert, TriangleAlert} from 'lucide-react';
-import type {
-  ComponentPropsWithoutRef,
-  CSSProperties,
-  MouseEvent,
-  ReactNode,
-  Ref,
-} from 'react';
+import type {CSSProperties, MouseEvent, ReactNode, Ref} from 'react';
 import {useCallback, useMemo, useRef, useState} from 'react';
 import {chatComposerRecipe} from 'components/Chat/ChatComposer.recipe';
 import {ChatComposerInput} from 'components/Chat/ChatComposerInput';
@@ -16,6 +10,7 @@ import {
   useChatLayoutContext,
   type ChatDensity,
 } from 'components/Chat/ChatContext';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {ChatSendButton} from 'components/Chat/ChatSendButton';
 import {Icon} from 'components/Icon';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
@@ -32,10 +27,7 @@ export interface ChatComposerStatus {
   type: 'error' | 'warning';
 }
 
-export interface ChatComposerProps extends Omit<
-  ComponentPropsWithoutRef<'div'>,
-  'children' | 'onChange' | 'onSubmit'
-> {
+export interface ChatComposerProps extends ChatPassthroughProps {
   /**
    * Additional CSS class names applied to the root element.
    */
@@ -153,7 +145,7 @@ export function ChatComposer({
   statusPosition = 'bottom',
   style,
   value: controlledValue,
-  ...rest
+  ...passthrough
 }: ChatComposerProps): React.JSX.Element {
   const layoutContext = useChatLayoutContext();
   const density = densityProp ?? layoutContext?.density ?? 'balanced';
@@ -241,7 +233,7 @@ export function ChatComposer({
   return (
     <ChatComposerContext value={composerContext}>
       <div
-        {...rest}
+        {...passthrough}
         className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={ref}

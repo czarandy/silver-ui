@@ -35,6 +35,7 @@ export {
   type ChatMessageProps,
   type ChatMessageSender,
   type ChatMessageStatus,
+  type ChatPassthroughProps,
   type ChatScrollButtonProps,
   type ChatSendButtonProps,
   type ChatSystemMessageProps,

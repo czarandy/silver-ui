@@ -1,13 +1,9 @@
 'use client';
 
-import type {
-  ComponentPropsWithoutRef,
-  CSSProperties,
-  ReactNode,
-  Ref,
-} from 'react';
+import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useChatMessageContext} from 'components/Chat/ChatContext';
 import {chatMessageBubbleRecipe} from 'components/Chat/ChatMessageBubble.recipe';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
@@ -15,7 +11,7 @@ export type ChatMessageBubbleVariant = 'filled' | 'ghost';
 
 export type ChatMessageBubbleGroup = 'first' | 'last' | 'middle';
 
-export interface ChatMessageBubbleProps extends ComponentPropsWithoutRef<'div'> {
+export interface ChatMessageBubbleProps extends ChatPassthroughProps {
   /**
    * Bubble content — text or any ReactNode.
    */
@@ -74,7 +70,7 @@ export function ChatMessageBubble({
   ref,
   style,
   variant = 'filled',
-  ...rest
+  ...passthrough
 }: ChatMessageBubbleProps): React.JSX.Element {
   const messageContext = useChatMessageContext();
   const sender = messageContext?.sender ?? 'assistant';
@@ -89,7 +85,7 @@ export function ChatMessageBubble({
         </div>
       ) : null}
       <div
-        {...rest}
+        {...passthrough}
         className={cx(classes.bubble, className)}
         data-testid={dataTestId}
         ref={ref}

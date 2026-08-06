@@ -230,6 +230,24 @@ describe('ChatComposer', () => {
     expect(composer).toHaveStyle({color: 'rgb(255, 0, 0)'});
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
+
+  it('forwards the curated passthrough props to the root', () => {
+    render(
+      <>
+        <span id="composer-label">Message</span>
+        <ChatComposer
+          aria-labelledby="composer-label"
+          data-testid="composer"
+          id="composer"
+          onSubmit={vi.fn()}
+        />
+      </>,
+    );
+
+    const composer = screen.getByTestId('composer');
+    expect(composer).toHaveAttribute('id', 'composer');
+    expect(composer).toHaveAttribute('aria-labelledby', 'composer-label');
+  });
 });
 
 describe('ChatComposerInput', () => {
@@ -265,6 +283,52 @@ describe('ChatComposerInput', () => {
     await user.keyboard('{Enter}');
 
     expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('forwards the curated textarea props', async () => {
+    const user = userEvent.setup();
+    const onBlur = vi.fn();
+    const onFocus = vi.fn();
+    render(
+      <>
+        <span id="input-hint">Enter sends</span>
+        <ChatComposerInput
+          aria-describedby="input-hint"
+          data-testid="input"
+          enterKeyHint="send"
+          id="composer-input"
+          maxLength={100}
+          name="message"
+          onBlur={onBlur}
+          onFocus={onFocus}
+        />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+
+    const input = screen.getByTestId('input');
+    expect(input).toHaveAttribute('id', 'composer-input');
+    expect(input).toHaveAttribute('name', 'message');
+    expect(input).toHaveAttribute('aria-describedby', 'input-hint');
+    expect(input).toHaveAttribute('enterkeyhint', 'send');
+    expect(input).toHaveAttribute('maxlength', '100');
+
+    await user.click(input);
+    expect(onFocus).toHaveBeenCalledOnce();
+
+    await user.click(screen.getByRole('button', {name: 'Elsewhere'}));
+    expect(onBlur).toHaveBeenCalledOnce();
+  });
+
+  it('forwards onPaste so consumers can intercept pasted content', async () => {
+    const user = userEvent.setup();
+    const onPaste = vi.fn();
+    render(<ChatComposerInput data-testid="input" onPaste={onPaste} />);
+
+    await user.click(screen.getByTestId('input'));
+    await user.paste('pasted text');
+
+    expect(onPaste).toHaveBeenCalledOnce();
   });
 });
 

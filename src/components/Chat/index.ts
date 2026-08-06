@@ -32,6 +32,7 @@ export {
   type ChatMessageMetadataProps,
   type ChatMessageStatus,
 } from 'components/Chat/ChatMessageMetadata';
+export {type ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 export {
   ChatScrollButton,
   type ChatScrollButtonProps,

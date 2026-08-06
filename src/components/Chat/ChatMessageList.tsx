@@ -1,11 +1,6 @@
 'use client';
 
-import type {
-  ComponentPropsWithoutRef,
-  CSSProperties,
-  ReactNode,
-  Ref,
-} from 'react';
+import type {AriaAttributes, CSSProperties, ReactNode, Ref} from 'react';
 import {useEffect, useMemo, useRef, useTransition} from 'react';
 import {
   ChatListContext,
@@ -13,13 +8,20 @@ import {
   type ChatDensity,
 } from 'components/Chat/ChatContext';
 import {chatMessageListRecipe} from 'components/Chat/ChatMessageList.recipe';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {Spinner} from 'components/Spinner';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {SpacingToken} from 'internal/spacingTokens';
 import useLatest from 'internal/useLatest';
 import {cx} from 'utils/cx';
 
-export interface ChatMessageListProps extends ComponentPropsWithoutRef<'div'> {
+export interface ChatMessageListProps extends ChatPassthroughProps {
+  /**
+   * How assistive technologies announce messages appended to the log. Set to
+   * `off` for a static transcript that should not be announced.
+   * @default 'polite'
+   */
+  'aria-live'?: AriaAttributes['aria-live'];
   /**
    * Message elements — typically ChatMessage components, optionally mixed
    * with ChatSystemMessage separators.
@@ -70,6 +72,7 @@ export interface ChatMessageListProps extends ComponentPropsWithoutRef<'div'> {
  * load-older-messages support. Auto-scroll is owned by ChatLayout.
  */
 export function ChatMessageList({
+  'aria-live': ariaLive = 'polite',
   children,
   className,
   'data-testid': dataTestId,
@@ -79,7 +82,7 @@ export function ChatMessageList({
   ref,
   scrollToTopAction,
   style,
-  ...rest
+  ...passthrough
 }: ChatMessageListProps): React.JSX.Element {
   const layoutContext = useChatLayoutContext();
   const density = densityProp ?? layoutContext?.density ?? 'balanced';
@@ -138,8 +141,8 @@ export function ChatMessageList({
   return (
     <ChatListContext value={contextValue}>
       <div
-        {...rest}
-        aria-live="polite"
+        {...passthrough}
+        aria-live={ariaLive}
         className={cx(classes.root, className)}
         data-testid={dataTestId}
         ref={ref}

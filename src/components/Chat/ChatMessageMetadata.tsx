@@ -1,14 +1,10 @@
 'use client';
 
 import {Check, CheckCheck, CircleAlert, Clock} from 'lucide-react';
-import type {
-  ComponentPropsWithoutRef,
-  CSSProperties,
-  ReactNode,
-  Ref,
-} from 'react';
+import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useChatMessageContext} from 'components/Chat/ChatContext';
 import {chatMessageMetadataRecipe} from 'components/Chat/ChatMessageMetadata.recipe';
+import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {Icon, type IconComponent} from 'components/Icon';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
@@ -27,7 +23,7 @@ const STATUS_CONFIG: Record<
   sent: {icon: Check, label: 'Sent'},
 };
 
-export interface ChatMessageMetadataProps extends ComponentPropsWithoutRef<'div'> {
+export interface ChatMessageMetadataProps extends ChatPassthroughProps {
   /**
    * Additional CSS class names applied to the root element.
    */
@@ -70,7 +66,7 @@ export function ChatMessageMetadata({
   status,
   style,
   timestamp,
-  ...rest
+  ...passthrough
 }: ChatMessageMetadataProps): React.JSX.Element | null {
   const messageContext = useChatMessageContext();
   const sender = messageContext?.sender ?? 'assistant';
@@ -88,7 +84,7 @@ export function ChatMessageMetadata({
 
   return (
     <div
-      {...rest}
+      {...passthrough}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
