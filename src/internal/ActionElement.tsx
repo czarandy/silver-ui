@@ -4,6 +4,7 @@
 import type {
   AriaAttributes,
   CSSProperties,
+  FocusEventHandler,
   KeyboardEventHandler,
   MouseEventHandler,
   ReactNode,
@@ -40,6 +41,7 @@ export interface ActionElementProps {
   isLink?: boolean;
   name?: string;
   onClick?: MouseEventHandler<HTMLElement>;
+  onFocus?: FocusEventHandler<HTMLElement>;
   onKeyDown?: KeyboardEventHandler<HTMLElement>;
   ref?: Ref<HTMLElement>;
   rel?: string;

@@ -119,4 +119,27 @@ describe('SplitButton', () => {
       'silver-h_component.lg',
     );
   });
+
+  it('forwards the shared button passthrough props to the primary action', () => {
+    render(
+      <>
+        <span id="save-hint">Saves the document</span>
+        <SplitButton
+          aria-describedby="save-hint"
+          aria-keyshortcuts="Meta+S"
+          id="save"
+          items={[{label: 'Save a copy'}]}
+          label="Save"
+        />
+      </>,
+    );
+
+    const primary = screen.getByRole('button', {name: 'Save'});
+    expect(primary).toHaveAttribute('id', 'save');
+    expect(primary).toHaveAttribute('aria-describedby', 'save-hint');
+    expect(primary).toHaveAttribute('aria-keyshortcuts', 'Meta+S');
+    expect(
+      screen.getByRole('button', {name: 'More actions'}),
+    ).not.toHaveAttribute('id');
+  });
 });

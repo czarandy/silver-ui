@@ -2,6 +2,7 @@
 
 import type {
   CSSProperties,
+  FocusEventHandler,
   JSX,
   KeyboardEvent,
   MouseEvent,
@@ -114,6 +115,10 @@ interface ButtonBaseProps {
    */
   href?: string;
   /**
+   * HTML `id` attribute applied to the root element.
+   */
+  id?: string;
+  /**
    * Whether the button is disabled. Prevents interaction and applies disabled
    * styling.
    */
@@ -136,6 +141,10 @@ interface ButtonBaseProps {
    * Click event handler.
    */
   onClick?: MouseEventHandler<HTMLElement>;
+  /**
+   * Focus event handler for the root element.
+   */
+  onFocus?: FocusEventHandler<HTMLElement>;
   /**
    * Keyboard event handler for the root element.
    */
@@ -218,6 +227,25 @@ export type ButtonProps =
       isIconOnly?: false;
     });
 
+/**
+ * The identity, description, and interaction props every button-like component
+ * in the library forwards to the button it renders.
+ */
+export type ButtonPassthroughProps = Pick<
+  ButtonProps,
+  | 'aria-controls'
+  | 'aria-describedby'
+  | 'aria-details'
+  | 'aria-expanded'
+  | 'aria-haspopup'
+  | 'aria-keyshortcuts'
+  | 'aria-labelledby'
+  | 'form'
+  | 'id'
+  | 'onFocus'
+  | 'onKeyDown'
+>;
+
 export function Button({
   label,
   'aria-controls': ariaControls,
@@ -252,8 +280,10 @@ export function Button({
   startContent,
   tooltip,
   onClick,
+  onFocus,
   onKeyDown,
   form,
+  id,
   name,
   value,
   width,
@@ -379,12 +409,14 @@ export function Button({
       data-testid={dataTestId}
       form={form}
       href={renderAsLink ? href : undefined}
+      id={id}
       isDisabled={
         !renderAsLink && !useAriaDisabled ? buttonDisabled : undefined
       }
       isLink={renderAsLink}
       name={name}
       onClick={renderAsLink ? handleLinkClick : handleButtonClick}
+      onFocus={onFocus}
       onKeyDown={renderAsLink ? handleLinkKeyDown : handleButtonKeyDown}
       ref={ref}
       rel={renderAsLink ? linkRel : undefined}

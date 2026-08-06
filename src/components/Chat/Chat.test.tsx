@@ -288,4 +288,29 @@ describe('ChatScrollButton', () => {
       screen.getByTestId('scroll-button').firstElementChild?.className,
     ).not.toBe(hiddenPill);
   });
+
+  it('forwards the shared button passthrough props to the button', () => {
+    render(
+      <>
+        <span id="scroll-hint">Jump to the latest message</span>
+        <ChatScrollButton
+          aria-describedby="scroll-hint"
+          aria-keyshortcuts="Meta+ArrowDown"
+          id="scroll-to-bottom"
+          isVisible
+          onClick={() => {}}
+        />
+      </>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Scroll to bottom'});
+    expect(button).toHaveAttribute('id', 'scroll-to-bottom');
+    // The icon-only tooltip appends its own id, so the consumer's survives
+    // alongside it rather than replacing it.
+    expect(button).toHaveAttribute(
+      'aria-describedby',
+      expect.stringContaining('scroll-hint'),
+    );
+    expect(button).toHaveAttribute('aria-keyshortcuts', 'Meta+ArrowDown');
+  });
 });

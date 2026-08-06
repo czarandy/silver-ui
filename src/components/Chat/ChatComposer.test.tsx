@@ -312,4 +312,41 @@ describe('ChatSendButton', () => {
     expect(onSend).toHaveBeenCalledOnce();
     expect(contextSubmit).not.toHaveBeenCalled();
   });
+
+  it('forwards the shared button passthrough props', async () => {
+    const user = userEvent.setup();
+    const onFocus = vi.fn();
+    const onKeyDown = vi.fn();
+    render(
+      <>
+        <span id="send-hint">Press to send</span>
+        <ChatSendButton
+          aria-describedby="send-hint"
+          aria-keyshortcuts="Meta+Enter"
+          form="composer-form"
+          id="send"
+          isDisabled={false}
+          onFocus={onFocus}
+          onKeyDown={onKeyDown}
+        />
+      </>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Send'});
+    expect(button).toHaveAttribute('id', 'send');
+    // The icon-only tooltip appends its own id, so the consumer's survives
+    // alongside it rather than replacing it.
+    expect(button).toHaveAttribute(
+      'aria-describedby',
+      expect.stringContaining('send-hint'),
+    );
+    expect(button).toHaveAttribute('aria-keyshortcuts', 'Meta+Enter');
+    expect(button).toHaveAttribute('form', 'composer-form');
+
+    await user.click(button);
+    expect(onFocus).toHaveBeenCalledOnce();
+
+    await user.keyboard('a');
+    expect(onKeyDown).toHaveBeenCalledOnce();
+  });
 });

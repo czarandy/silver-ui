@@ -1,4 +1,9 @@
-export {Button, type ButtonProps, type ButtonSize} from 'components/Button';
+export {
+  Button,
+  type ButtonPassthroughProps,
+  type ButtonProps,
+  type ButtonSize,
+} from 'components/Button';
 export {CopyButton, type CopyButtonProps} from 'components/CopyButton';
 export {
   ChatComposer,

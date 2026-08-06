@@ -599,4 +599,27 @@ describe('Button', () => {
 
     warn.mockRestore();
   });
+
+  it('applies id and fires onFocus on both the button and the link', async () => {
+    const user = userEvent.setup();
+    const onFocus = vi.fn();
+    const {rerender} = render(
+      <Button id="save" label="Save" onFocus={onFocus} />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Save'});
+    expect(button).toHaveAttribute('id', 'save');
+
+    await user.tab();
+    expect(button).toHaveFocus();
+    expect(onFocus).toHaveBeenCalledOnce();
+
+    rerender(<Button href="/save" id="save" label="Save" onFocus={onFocus} />);
+
+    const link = screen.getByRole('link', {name: 'Save'});
+    expect(link).toHaveAttribute('id', 'save');
+
+    link.focus();
+    expect(onFocus).toHaveBeenCalledTimes(2);
+  });
 });

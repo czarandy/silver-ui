@@ -2,19 +2,26 @@
 
 import {Check, Copy} from 'lucide-react';
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {Button, type ButtonProps} from 'components/Button';
+import {
+  Button,
+  type ButtonPassthroughProps,
+  type ButtonProps,
+} from 'components/Button';
 import useAnnounce from 'hooks/useAnnounce';
 
-export interface CopyButtonProps extends Pick<
-  ButtonProps,
-  | 'className'
-  | 'data-testid'
-  | 'isDisabled'
-  | 'ref'
-  | 'size'
-  | 'style'
-  | 'variant'
-> {
+export interface CopyButtonProps
+  extends
+    ButtonPassthroughProps,
+    Pick<
+      ButtonProps,
+      | 'className'
+      | 'data-testid'
+      | 'isDisabled'
+      | 'ref'
+      | 'size'
+      | 'style'
+      | 'variant'
+    > {
   /**
    * Label and tooltip shown after a successful copy.
    * @default 'Copied'
@@ -67,6 +74,7 @@ export function CopyButton({
   style,
   value,
   variant = 'ghost',
+  ...passthrough
 }: CopyButtonProps): React.JSX.Element {
   const [isCopied, setIsCopied] = useState(false);
   const resetTimeoutRef = useRef<number | null>(null);
@@ -121,6 +129,7 @@ export function CopyButton({
   return (
     <>
       <Button
+        {...passthrough}
         className={className}
         data-testid={dataTestId}
         icon={isCopied ? Check : Copy}

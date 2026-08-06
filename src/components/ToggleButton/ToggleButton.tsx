@@ -1,7 +1,7 @@
 'use client';
 
 import type {CSSProperties, MouseEvent, Ref} from 'react';
-import type {ButtonSize} from 'components/Button';
+import type {ButtonPassthroughProps, ButtonSize} from 'components/Button';
 import {buttonRecipe} from 'components/Button/Button.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
@@ -11,7 +11,7 @@ import {Tooltip} from 'components/Tooltip';
 import {useResolvedSize} from 'internal/SizeContext';
 import {cx} from 'utils/cx';
 
-export interface ToggleButtonProps {
+export interface ToggleButtonProps extends ButtonPassthroughProps {
   /**
    * Additional CSS class names applied to the button root.
    */
@@ -101,6 +101,7 @@ export function ToggleButton({
   style,
   tooltip,
   value,
+  ...passthrough
 }: ToggleButtonProps): React.JSX.Element {
   const group = useToggleButtonGroup();
 
@@ -137,6 +138,7 @@ export function ToggleButton({
 
   const button = (
     <button
+      {...passthrough}
       aria-busy={isLoading || undefined}
       aria-label={isIconOnly || isLoading ? label : undefined}
       aria-pressed={isSelected}
