@@ -53,19 +53,21 @@ describe('Kbd', () => {
     expect(screen.getByText('K')).toBeInTheDocument();
   });
 
-  it('sets aria-label with readable key names for a single key', () => {
+  it('exposes a readable accessible name for a single key', () => {
     render(<Kbd keys="enter" />);
 
-    expect(screen.getByLabelText('Enter')).toBeInTheDocument();
+    expect(screen.getByRole('img', {name: 'Enter'})).toBeInTheDocument();
   });
 
-  it('sets aria-label with readable key names for a multi-key shortcut', () => {
+  it('exposes a readable accessible name for a multi-key shortcut', () => {
     render(<Kbd keys="ctrl+shift+k" />);
 
-    expect(screen.getByLabelText('Control+Shift+K')).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', {name: 'Control+Shift+K'}),
+    ).toBeInTheDocument();
   });
 
-  it('sets aria-label with Command for mod on Mac', () => {
+  it('exposes Command in the accessible name for mod on Mac', () => {
     Object.defineProperty(navigator, 'platform', {
       configurable: true,
       value: 'MacIntel',
@@ -73,13 +75,13 @@ describe('Kbd', () => {
 
     render(<Kbd keys="mod+k" />);
 
-    expect(screen.getByLabelText('Command+K')).toBeInTheDocument();
+    expect(screen.getByRole('img', {name: 'Command+K'})).toBeInTheDocument();
   });
 
-  it('sets aria-label with Control for mod on non-Mac', () => {
+  it('exposes Control in the accessible name for mod on non-Mac', () => {
     render(<Kbd keys="mod+k" />);
 
-    expect(screen.getByLabelText('Control+K')).toBeInTheDocument();
+    expect(screen.getByRole('img', {name: 'Control+K'})).toBeInTheDocument();
   });
 
   it('renders the plus key via the "plus" keyword', () => {
@@ -87,7 +89,7 @@ describe('Kbd', () => {
 
     expect(screen.getByText('⇧')).toBeInTheDocument();
     expect(screen.getByText('+')).toBeInTheDocument();
-    expect(screen.getByLabelText('Shift+Plus')).toBeInTheDocument();
+    expect(screen.getByRole('img', {name: 'Shift+Plus'})).toBeInTheDocument();
   });
 
   it('throws in development when keys resolve to empty', () => {
@@ -155,7 +157,7 @@ describe('Kbd', () => {
     render(<Kbd keys="mod" />);
 
     expect(screen.getByText('Ctrl')).toBeInTheDocument();
-    expect(screen.getByLabelText('Control')).toBeInTheDocument();
+    expect(screen.getByRole('img', {name: 'Control'})).toBeInTheDocument();
   });
 
   it('forwards className, style, data-testid, and ref', () => {
@@ -181,11 +183,21 @@ describe('Kbd', () => {
     render(<Kbd aria-hidden={true} data-testid="kbd" keys="k" />);
 
     expect(screen.getByTestId('kbd')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
   });
 
   it('stays exposed to assistive technology by default', () => {
     render(<Kbd data-testid="kbd" keys="k" />);
 
     expect(screen.getByTestId('kbd')).not.toHaveAttribute('aria-hidden');
+    expect(screen.getByRole('img', {name: 'K'})).toBeInTheDocument();
+  });
+
+  it('exposes the root as a single image so the glyphs are not announced', () => {
+    render(<Kbd data-testid="kbd" keys="mod+shift+p" />);
+
+    const root = screen.getByTestId('kbd');
+    expect(root).toHaveAttribute('role', 'img');
+    expect(screen.getAllByRole('img')).toHaveLength(1);
   });
 });
