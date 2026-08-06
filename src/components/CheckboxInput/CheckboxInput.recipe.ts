@@ -1,5 +1,8 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
+// Both marked states paint the same filled box; only the glyph inside differs.
+const markedBox = {bg: 'primary', borderColor: 'primary'};
+
 export const checkboxInputRecipe = sva({
   slots: ['root', 'boxWrap', 'input', 'box', 'icon', 'label', 'tooltipIcon'],
   base: {
@@ -44,7 +47,6 @@ export const checkboxInputRecipe = sva({
     icon: {
       w: '70%',
       h: '70%',
-      mt: '1px',
     },
     label: {
       display: 'inline-flex',
@@ -64,9 +66,16 @@ export const checkboxInputRecipe = sva({
       md: {box: {w: '5.5', h: '5.5'}},
       lg: {box: {w: '6.5', h: '6.5'}},
     },
-    isChecked: {
-      true: {box: {bg: 'primary', borderColor: 'primary'}},
-      false: {},
+    mark: {
+      none: {},
+      // The lucide Check glyph's stroke sits above the middle of its viewBox,
+      // so the checked mark needs an optical nudge down to read as centered.
+      // The nudge belongs to this glyph alone — the spacing scale bottoms out
+      // at 0.5 (2px), so there is no token for it.
+      check: {box: markedBox, icon: {mt: '1px'}},
+      // The Minus bar is already on the viewBox's center line; nudging it
+      // would push it off the box's center instead of onto it.
+      indeterminate: {box: markedBox},
     },
     isDisabled: {
       true: {
@@ -78,7 +87,7 @@ export const checkboxInputRecipe = sva({
   },
   defaultVariants: {
     size: 'md',
-    isChecked: false,
+    mark: 'none',
     isDisabled: false,
   },
 });

@@ -188,7 +188,7 @@ export function CheckboxInput({
   const isCheckedOrIndeterminate = isChecked || isIndeterminate;
   const classes = checkboxInputRecipe({
     size,
-    isChecked: isCheckedOrIndeterminate,
+    mark: isIndeterminate ? 'indeterminate' : isChecked ? 'check' : 'none',
     isDisabled,
   });
 
