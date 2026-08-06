@@ -2,7 +2,7 @@
 
 import {ArrowUp, Square} from 'lucide-react';
 import type {CSSProperties, Ref} from 'react';
-import {Button} from 'components/Button';
+import {Button, type ButtonPassthroughProps} from 'components/Button';
 import {useChatComposerContext} from 'components/Chat/ChatContext';
 import type {IconComponent} from 'components/Icon';
 import {css} from 'styled-system/css';
@@ -13,7 +13,7 @@ const sendButtonStyle = css({
   flexShrink: 0,
 });
 
-export interface ChatSendButtonProps {
+export interface ChatSendButtonProps extends ButtonPassthroughProps {
   /**
    * Additional CSS class names applied to the button.
    */
@@ -85,6 +85,7 @@ export function ChatSendButton({
   size = 'md',
   stopIcon = Square,
   style,
+  ...passthrough
 }: ChatSendButtonProps): React.JSX.Element {
   const composer = useChatComposerContext();
   const showStop = isStopShown ?? composer?.isStopShown ?? false;
@@ -92,6 +93,7 @@ export function ChatSendButton({
 
   return (
     <Button
+      {...passthrough}
       className={cx(sendButtonStyle, className)}
       data-testid={dataTestId}
       icon={showStop ? stopIcon : sendIcon}

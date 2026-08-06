@@ -1,15 +1,12 @@
 'use client';
 
 import {ChevronDown} from 'lucide-react';
-import type {ComponentPropsWithoutRef, CSSProperties, Ref} from 'react';
-import {Button} from 'components/Button';
+import type {CSSProperties, Ref} from 'react';
+import {Button, type ButtonPassthroughProps} from 'components/Button';
 import {chatScrollButtonRecipe} from 'components/Chat/ChatScrollButton.recipe';
 import {cx} from 'utils/cx';
 
-export interface ChatScrollButtonProps extends Omit<
-  ComponentPropsWithoutRef<'div'>,
-  'onClick'
-> {
+export interface ChatScrollButtonProps extends ButtonPassthroughProps {
   /**
    * Additional CSS class names applied to the root element.
    */
@@ -54,7 +51,7 @@ export function ChatScrollButton({
   onClick,
   ref,
   style,
-  ...rest
+  ...passthrough
 }: ChatScrollButtonProps): React.JSX.Element {
   const classes = chatScrollButtonRecipe({
     isExpanded: label != null,
@@ -63,13 +60,13 @@ export function ChatScrollButton({
 
   return (
     <div
-      {...rest}
       className={cx(classes.wrapper, className)}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
       <div className={classes.pill}>
         <Button
+          {...passthrough}
           className={classes.button}
           icon={ChevronDown}
           isIconOnly={label == null}

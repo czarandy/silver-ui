@@ -249,4 +249,29 @@ describe('CopyButton', () => {
     await user.click(copyButton);
     expect(writeText).not.toHaveBeenCalled();
   });
+
+  it('forwards the shared button passthrough props', () => {
+    render(
+      <>
+        <span id="copy-hint">Copies the snippet</span>
+        <CopyButton
+          aria-describedby="copy-hint"
+          aria-keyshortcuts="Meta+C"
+          data-testid="copy-button"
+          id="copy"
+          value="copy me"
+        />
+      </>,
+    );
+
+    const copyButton = screen.getByTestId('copy-button');
+    expect(copyButton).toHaveAttribute('id', 'copy');
+    // The icon-only tooltip appends its own id, so the consumer's survives
+    // alongside it rather than replacing it.
+    expect(copyButton).toHaveAttribute(
+      'aria-describedby',
+      expect.stringContaining('copy-hint'),
+    );
+    expect(copyButton).toHaveAttribute('aria-keyshortcuts', 'Meta+C');
+  });
 });

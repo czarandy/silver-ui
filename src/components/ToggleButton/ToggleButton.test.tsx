@@ -408,4 +408,26 @@ describe('ToggleButtonGroup', () => {
     expect(screen.getByTestId('btn-a')).toHaveClass('silver-h_component.sm');
     expect(screen.getByTestId('btn-b')).toHaveClass('silver-h_component.lg');
   });
+
+  it('forwards the shared button passthrough props', () => {
+    render(
+      <>
+        <span id="bold-hint">Bolds the selection</span>
+        <ToggleButton
+          aria-describedby="bold-hint"
+          aria-keyshortcuts="Meta+B"
+          data-testid="bold"
+          id="bold"
+          label="Bold"
+        />
+      </>,
+    );
+
+    const button = screen.getByTestId('bold');
+    expect(button).toHaveAttribute('id', 'bold');
+    expect(button).toHaveAttribute('aria-describedby', 'bold-hint');
+    expect(button).toHaveAttribute('aria-keyshortcuts', 'Meta+B');
+    // The component still owns the toggle contract it sets itself.
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+  });
 });

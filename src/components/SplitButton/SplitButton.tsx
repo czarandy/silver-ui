@@ -2,7 +2,12 @@
 
 import {ChevronDown} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {Button, type ButtonProps, type ButtonSize} from 'components/Button';
+import {
+  Button,
+  type ButtonPassthroughProps,
+  type ButtonProps,
+  type ButtonSize,
+} from 'components/Button';
 import {ButtonGroup} from 'components/ButtonGroup';
 import {DropdownMenu, type DropdownMenuOption} from 'components/DropdownMenu';
 import type {IconComponent} from 'components/Icon';
@@ -13,10 +18,10 @@ import {useResolvedSize} from 'internal/SizeContext';
  * that opens a menu of related actions. A thin composition of `ButtonGroup`,
  * `Button`, and `DropdownMenu`.
  */
-export interface SplitButtonProps extends Pick<
-  ButtonProps,
-  'endContent' | 'isLoading' | 'onClick' | 'startContent'
-> {
+export interface SplitButtonProps
+  extends
+    ButtonPassthroughProps,
+    Pick<ButtonProps, 'endContent' | 'isLoading' | 'onClick' | 'startContent'> {
   /**
    * Compound menu content (`<DropdownMenuItem>`), an alternative to `items`.
    */
@@ -113,6 +118,7 @@ export function SplitButton({
   startContent,
   style,
   variant = 'secondary',
+  ...passthrough
 }: SplitButtonProps): React.JSX.Element {
   const size = useResolvedSize(sizeProp);
 
@@ -124,6 +130,7 @@ export function SplitButton({
       size={size}
       style={style}>
       <Button
+        {...passthrough}
         data-testid={dataTestId}
         endContent={endContent}
         icon={icon}
