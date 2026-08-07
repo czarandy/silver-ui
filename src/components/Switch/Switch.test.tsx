@@ -5,6 +5,7 @@ import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Switch} from 'components/Switch/Switch';
 import {SizeContext} from 'internal/SizeContext';
+import {css} from 'styled-system/css';
 
 function LabelIcon(props: LucideProps): React.JSX.Element {
   return <ShieldCheck {...props} data-testid="label-icon" />;
@@ -129,9 +130,10 @@ describe('Switch', () => {
     expect(onChange).toHaveBeenCalledWith(true, expect.any(Object));
   });
 
-  it('keeps visually hidden labels accessible', () => {
+  it('keeps visually hidden labels accessible without hiding the description', () => {
     render(
       <Switch
+        description="Receive account alerts."
         isLabelHidden
         isSelected={false}
         label="Notifications"
@@ -139,9 +141,16 @@ describe('Switch', () => {
       />,
     );
 
+    const control = screen.getByRole('switch', {name: 'Notifications'});
+    const description = screen.getByText('Receive account alerts.');
+    const visuallyHiddenClass = css({clipPath: 'inset(50%)'});
+
+    expect(control).toHaveAttribute('aria-describedby', description.id);
+    expect(description).toBeVisible();
     expect(
-      screen.getByRole('switch', {name: 'Notifications'}),
-    ).toBeInTheDocument();
+      // eslint-disable-next-line testing-library/no-node-access -- the regression is specifically that no visually-hidden ancestor wraps the description.
+      description.closest(`[class~="${visuallyHiddenClass}"]`),
+    ).toBeNull();
   });
 
   it('renders the label before the switch when labelPosition is start', () => {
