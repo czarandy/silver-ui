@@ -101,6 +101,39 @@ export const OpaqueSurface: Story = {
   ),
 };
 
+export const SurfaceElevation: Story = {
+  render: () => (
+    <HStack gap={6} style={{alignItems: 'stretch', flexWrap: 'wrap'}}>
+      {(
+        [
+          ['Default background', 'var(--silver-colors-bg)'],
+          ['Subtle background', 'var(--silver-colors-bg-subtle)'],
+        ] as const
+      ).map(([label, background]) => (
+        <Card
+          key={label}
+          padding={8}
+          style={{
+            alignItems: 'center',
+            background,
+            display: 'flex',
+            justifyContent: 'center',
+            minHeight: 240,
+            minWidth: 320,
+          }}>
+          <HoverCard
+            content={previewContent}
+            delay={0}
+            label={`${label} preview`}
+            placement="above">
+            {label}
+          </HoverCard>
+        </Card>
+      ))}
+    </HStack>
+  ),
+};
+
 export const Placements: Story = {
   render: () => (
     <div

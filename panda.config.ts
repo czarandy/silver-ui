@@ -680,6 +680,12 @@ export default defineConfig({
           },
         },
         shadows: {
+          overlay: {
+            value: {
+              base: '0 1px 2px rgb(0 0 0 / 0.1), 0 2px 12px rgb(0 0 0 / 0.1)',
+              _dark: '0 1px 2px rgb(0 0 0 / 0.2), 0 2px 12px rgb(0 0 0 / 0.2)',
+            },
+          },
           focus: {
             DEFAULT: {
               value: 'inset 0 0 0 {borderWidths.focus} {colors.primary.subtle}',

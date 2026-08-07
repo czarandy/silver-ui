@@ -223,7 +223,11 @@ describe('HoverCard', () => {
     render(<HoverCard content="Details">Hover target</HoverCard>);
 
     const hoverCard = screen.getByRole('group', {hidden: true});
-    expect(hoverCard).toHaveClass('silver-layer-reset', 'silver-bg_bg');
+    expect(hoverCard).toHaveClass(
+      'silver-layer-reset',
+      'silver-bg_bg',
+      'silver-bx-sh_overlay',
+    );
     expect(hoverCard).not.toHaveClass('silver-bg_transparent');
   });
 
