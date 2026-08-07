@@ -142,6 +142,19 @@ export function usePopover({
   layerId,
 }: UsePopoverOptions = {}): UsePopoverReturn {
   const skipAutoFocusRef = useRef(false);
+  const autoFocusFrameRef = useRef<number | null>(null);
+  const restoreFocusTargetRef = useRef<HTMLElement | null>(null);
+
+  const restoreFocus = useCallback(() => {
+    if (autoFocusFrameRef.current != null) {
+      cancelAnimationFrame(autoFocusFrameRef.current);
+      autoFocusFrameRef.current = null;
+    }
+
+    restoreFocusTargetRef.current?.focus();
+    restoreFocusTargetRef.current = null;
+  }, []);
+
   // Guards against a light-dismiss close immediately re-opening the popover.
   // When the trigger is clicked while the popover is open, the browser's native
   // light dismiss closes it (firing `onHide`) *before* the trigger's own click
@@ -156,8 +169,9 @@ export function usePopover({
     requestAnimationFrame(() => {
       isDismissingRef.current = false;
     });
+    restoreFocus();
     onHide?.();
-  }, [onHide]);
+  }, [onHide, restoreFocus]);
 
   const layer = useLayer({
     isDismissable,
@@ -177,9 +191,33 @@ export function usePopover({
     }
 
     if (hasAutoFocus && !skipAutoFocusRef.current) {
-      requestAnimationFrame(() => focusFirst());
+      const previouslyFocusedElement =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+      autoFocusFrameRef.current = requestAnimationFrame(() => {
+        autoFocusFrameRef.current = null;
+        const activeElementBeforeFocus = document.activeElement;
+        focusFirst();
+        const activeElementAfterFocus = document.activeElement;
+
+        if (
+          previouslyFocusedElement != null &&
+          activeElementAfterFocus !== activeElementBeforeFocus &&
+          contentRef.current?.contains(activeElementAfterFocus) === true
+        ) {
+          restoreFocusTargetRef.current = previouslyFocusedElement;
+        }
+      });
     }
-  }, [focusFirst, hasAutoFocus, layer.isOpen]);
+
+    return () => {
+      if (autoFocusFrameRef.current != null) {
+        cancelAnimationFrame(autoFocusFrameRef.current);
+        autoFocusFrameRef.current = null;
+      }
+    };
+  }, [contentRef, focusFirst, hasAutoFocus, layer.isOpen]);
 
   const show = useCallback(
     (options?: {isAutoFocusSkipped?: boolean}) => {
