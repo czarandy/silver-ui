@@ -160,11 +160,28 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function snapToStep(value: number, min: number, step: number): number {
+function getDecimalPlaces(value: number): number {
+  const [coefficient, exponent = '0'] = value.toString().split('e');
+  const decimalPlaces = coefficient.split('.')[1]?.length ?? 0;
+  return Math.max(0, decimalPlaces - Number(exponent));
+}
+
+function roundToDecimalPlaces(value: number, decimalPlaces: number): number {
+  const rounded = Number(value.toFixed(decimalPlaces));
+  return rounded === 0 ? 0 : rounded;
+}
+
+function snapToStep(
+  value: number,
+  min: number,
+  step: number,
+  decimalPlaces: number,
+): number {
   if (step <= 0) {
     return value;
   }
-  return min + Math.round((value - min) / step) * step;
+  const snapped = min + Math.round((value - min) / step) * step;
+  return roundToDecimalPlaces(snapped, decimalPlaces);
 }
 
 function getPercent(value: number, min: number, max: number): number {
@@ -208,6 +225,10 @@ export function Slider({
   const isRange = Array.isArray(value);
   const isHorizontal = orientation === 'horizontal';
   const values = useMemo(() => (isRange ? value : [value]), [isRange, value]);
+  const stepDecimalPlaces = useMemo(
+    () => Math.max(getDecimalPlaces(min), getDecimalPlaces(step)),
+    [min, step],
+  );
   const onChange = props.onChange;
   const onChangeEnd = 'onChangeEnd' in props ? props.onChangeEnd : undefined;
   const minStepsBetweenThumbs =
@@ -233,6 +254,12 @@ export function Slider({
     [formatValue],
   );
 
+  const getSnappedValue = useCallback(
+    (newValue: number): number =>
+      clamp(snapToStep(newValue, min, step, stepDecimalPlaces), min, max),
+    [max, min, step, stepDecimalPlaces],
+  );
+
   const getValueFromPosition = useCallback(
     (clientX: number, clientY: number): number => {
       const track = trackRef.current;
@@ -245,9 +272,9 @@ export function Slider({
         : 1 - (clientY - rect.top) / rect.height;
       const percent = clamp(rawPercent, 0, 1);
       const rawValue = min + percent * (max - min);
-      return clamp(snapToStep(rawValue, min, step), min, max);
+      return getSnappedValue(rawValue);
     },
-    [isHorizontal, max, min, step],
+    [getSnappedValue, isHorizontal, max, min],
   );
 
   const getClosestThumb = useCallback(
@@ -263,7 +290,7 @@ export function Slider({
 
   const getNextValues = useCallback(
     (thumbIndex: number, newValue: number): number[] => {
-      const snapped = clamp(snapToStep(newValue, min, step), min, max);
+      const snapped = getSnappedValue(newValue);
       if (!isRange) {
         return [snapped];
       }
@@ -276,11 +303,24 @@ export function Slider({
       } else {
         nextValues[1] = Math.max(nextValues[1], nextValues[0] + minGap);
       }
+      nextValues[thumbIndex] = roundToDecimalPlaces(
+        nextValues[thumbIndex],
+        stepDecimalPlaces,
+      );
       nextValues[0] = clamp(nextValues[0], min, max);
       nextValues[1] = clamp(nextValues[1], min, max);
       return nextValues;
     },
-    [isRange, max, min, minStepsBetweenThumbs, step, values],
+    [
+      getSnappedValue,
+      isRange,
+      max,
+      min,
+      minStepsBetweenThumbs,
+      step,
+      stepDecimalPlaces,
+      values,
+    ],
   );
 
   const emitChange = useCallback(

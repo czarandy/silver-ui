@@ -256,6 +256,35 @@ describe('Slider', () => {
     expect(onChangeEnd).toHaveBeenCalledWith(55);
   });
 
+  it('rounds fractional steps during keyboard interaction', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const formatValue = vi.fn((currentValue: number) => String(currentValue));
+    render(
+      <ControlledSingleSlider
+        formatValue={formatValue}
+        label="Volume"
+        max={1}
+        onChange={onChange}
+        step={0.1}
+        value={0}
+        valueDisplay="text"
+      />,
+    );
+
+    const slider = screen.getByRole('slider');
+    act(() => {
+      slider.focus();
+    });
+    await user.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
+
+    expect(onChange).toHaveBeenNthCalledWith(1, 0.1);
+    expect(onChange).toHaveBeenNthCalledWith(2, 0.2);
+    expect(onChange).toHaveBeenNthCalledWith(3, 0.3);
+    expect(slider).toHaveAttribute('aria-valuenow', '0.3');
+    expect(formatValue).toHaveBeenCalledWith(0.3);
+  });
+
   it('handles Home, End, PageUp, and PageDown keyboard shortcuts', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
@@ -311,6 +340,33 @@ describe('Slider', () => {
     expect(onChangeEnd).toHaveBeenCalledWith([20, 30]);
   });
 
+  it('rounds fractional range values when enforcing thumb spacing', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onChangeEnd = vi.fn();
+    render(
+      <Slider
+        label="Range"
+        max={1}
+        min={0}
+        minStepsBetweenThumbs={4}
+        onChange={onChange}
+        onChangeEnd={onChangeEnd}
+        step={0.1}
+        value={[0.3, 0.7]}
+      />,
+    );
+
+    const lowerThumb = screen.getAllByRole('slider')[0];
+    act(() => {
+      lowerThumb.focus();
+    });
+    await user.keyboard('{ArrowRight}');
+
+    expect(onChange).toHaveBeenCalledWith([0.3, 0.7]);
+    expect(onChangeEnd).toHaveBeenCalledWith([0.3, 0.7]);
+  });
+
   it('updates from pointer interaction and commits on pointer up', () => {
     const onChange = vi.fn();
     const onChangeEnd = vi.fn();
@@ -334,6 +390,33 @@ describe('Slider', () => {
 
     expect(onChange).toHaveBeenCalledWith(50);
     expect(onChangeEnd).toHaveBeenCalledWith(50);
+  });
+
+  it('rounds fractional steps during pointer interaction', () => {
+    const onChange = vi.fn();
+    const onChangeEnd = vi.fn();
+    render(
+      <ControlledSingleSlider
+        label="Volume"
+        max={1.05}
+        min={0.05}
+        onChange={onChange}
+        onChangeEnd={onChangeEnd}
+        step={0.1}
+        value={0.05}
+        valueDisplay="none"
+      />,
+    );
+
+    const track = screen.getByTestId('slider-track-container');
+    mockRect(track, {width: 200});
+
+    fireEvent.pointerDown(track, {clientX: 60, clientY: 10, pointerId: 1});
+    fireEvent.pointerUp(track, {clientX: 60, clientY: 10, pointerId: 1});
+
+    expect(onChange).toHaveBeenCalledWith(0.35);
+    expect(onChangeEnd).toHaveBeenCalledWith(0.35);
+    expect(screen.getByRole('slider')).toHaveAttribute('aria-valuenow', '0.35');
   });
 
   it('updates while dragging with pointerMove', () => {
