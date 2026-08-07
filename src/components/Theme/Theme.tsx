@@ -178,6 +178,7 @@ export interface ThemeShadowTokens {
   focusError?: string;
   focusSuccess?: string;
   focusWarning?: string;
+  overlay?: string;
 }
 
 export interface ThemeSizeTokens {
@@ -404,6 +405,7 @@ const shadowTokenVariables: Record<
   focusError: '--silver-shadows-focus-error',
   focusSuccess: '--silver-shadows-focus-success',
   focusWarning: '--silver-shadows-focus-warning',
+  overlay: '--silver-shadows-overlay',
 };
 
 const sizeTokenVariables: Record<keyof ThemeSizeTokens, ThemeCssVariableName> =

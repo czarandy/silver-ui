@@ -110,6 +110,7 @@ describe('Theme', () => {
           },
           shadows: {
             focus: '0 0 0 2px #268bd2',
+            overlay: '0 2px 12px rgba(0, 0, 0, 0.2)',
           },
           sizes: {
             iconMd: '1.25rem',
@@ -146,6 +147,9 @@ describe('Theme', () => {
     );
     expect(style.getPropertyValue('--silver-shadows-focus')).toBe(
       '0 0 0 2px #268bd2',
+    );
+    expect(style.getPropertyValue('--silver-shadows-overlay')).toBe(
+      '0 2px 12px rgba(0, 0, 0, 0.2)',
     );
     expect(style.getPropertyValue('--silver-sizes-icon-md')).toBe('1.25rem');
     expect(style.getPropertyValue('--silver-spacing-focus-offset-loose')).toBe(

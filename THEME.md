@@ -630,6 +630,12 @@ selects, etc.). Override these to change the size system globally.
 | `--silver-shadows-xl`  | `0 20px 25px -5px rgb(0 0 0 / 0.1), ...` |
 | `--silver-shadows-2xl` | `0 25px 50px -12px rgb(0 0 0 / 0.25)`    |
 
+#### Overlay elevation
+
+| Variable                   | Description                                   |
+| -------------------------- | --------------------------------------------- |
+| `--silver-shadows-overlay` | Floating surface shadow (10% light, 20% dark) |
+
 #### Focus rings
 
 | Variable                         | Description                                  |

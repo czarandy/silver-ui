@@ -58,7 +58,7 @@ const styles = {
   container: css({
     bg: 'bg',
     borderRadius: 'md',
-    boxShadow: 'lg',
+    boxShadow: 'overlay',
     borderWidth: 'default',
     borderStyle: 'solid',
     borderColor: 'border',
