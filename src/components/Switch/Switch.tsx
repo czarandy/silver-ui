@@ -201,30 +201,39 @@ export function Switch({
       ) : null}
     </span>
   );
+  const labelContent = (
+    <>
+      {labelIcon != null ? (
+        <span className={classes.labelIcon}>
+          <Icon color="secondary" icon={labelIcon} size="sm" />
+        </span>
+      ) : null}
+      <Text as="span" color="inherit" type="label">
+        {label}
+      </Text>
+      {requirednessText != null ? (
+        <Text as="span" className={classes.requiredness} type="supporting">
+          <span aria-hidden="true"> · </span>
+          {requirednessText}
+        </Text>
+      ) : null}
+      {isNonEmptyReactNode(labelTooltip) ? (
+        <Tooltip content={labelTooltip}>
+          <span className={classes.tooltipIcon}>
+            <Icon icon={Info} size="sm" />
+          </span>
+        </Tooltip>
+      ) : null}
+    </>
+  );
   const labelNode = (
     <div className={classes.labelWrapper}>
       <label className={classes.label} htmlFor={inputId}>
-        {labelIcon != null ? (
-          <span className={classes.labelIcon}>
-            <Icon color="secondary" icon={labelIcon} size="sm" />
-          </span>
-        ) : null}
-        <Text as="span" color="inherit" type="label">
-          {label}
-        </Text>
-        {requirednessText != null ? (
-          <Text as="span" className={classes.requiredness} type="supporting">
-            <span aria-hidden="true"> · </span>
-            {requirednessText}
-          </Text>
-        ) : null}
-        {isNonEmptyReactNode(labelTooltip) ? (
-          <Tooltip content={labelTooltip}>
-            <span className={classes.tooltipIcon}>
-              <Icon icon={Info} size="sm" />
-            </span>
-          </Tooltip>
-        ) : null}
+        {isLabelHidden ? (
+          <VisuallyHidden>{labelContent}</VisuallyHidden>
+        ) : (
+          labelContent
+        )}
       </label>
       {isNonEmptyReactNode(description) ? (
         <Text as="span" color="secondary" id={descriptionID} type="supporting">
@@ -237,22 +246,8 @@ export function Switch({
   return (
     <div className={cx(classes.field, className)} style={style}>
       <div className={classes.row}>
-        {labelPosition === 'start' ? (
-          isLabelHidden ? (
-            <VisuallyHidden>{labelNode}</VisuallyHidden>
-          ) : (
-            labelNode
-          )
-        ) : (
-          control
-        )}
-        {labelPosition === 'start' ? (
-          control
-        ) : isLabelHidden ? (
-          <VisuallyHidden>{labelNode}</VisuallyHidden>
-        ) : (
-          labelNode
-        )}
+        {labelPosition === 'start' ? labelNode : control}
+        {labelPosition === 'start' ? control : labelNode}
       </div>
       {status?.message != null ? (
         <div

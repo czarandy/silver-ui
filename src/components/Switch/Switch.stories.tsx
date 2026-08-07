@@ -160,7 +160,7 @@ export const Spread: Story = {
 
 export const HiddenLabel: Story = {
   args: {
-    description: undefined,
+    description: 'Receive account alerts.',
     isLabelHidden: true,
     label: 'Enable notifications',
   },
