@@ -150,6 +150,7 @@ export function Kbd({
       className={cx(classes.root, className)}
       data-testid={dataTestId}
       ref={ref}
+      role="img"
       style={style}>
       {keyedParts.map(part => (
         <kbd className={classes.key} key={part.id}>
