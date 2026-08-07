@@ -434,6 +434,53 @@ describe('Popover', () => {
     );
   });
 
+  it('restores focus after Escape closes a popover that moved focus', async () => {
+    render(
+      <Popover content={<button type="button">Inside</button>} label="Actions">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Open'});
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', {hidden: true, name: 'Inside'}),
+      ).toHaveFocus(),
+    );
+
+    fireEvent.keyDown(document, {key: 'Escape'});
+
+    expect(trigger).toHaveFocus();
+  });
+
+  it('leaves focus alone when opening did not move focus', async () => {
+    render(
+      <>
+        <Popover
+          content={<div>Nothing focusable</div>}
+          hasCloseButton={false}
+          label="Actions">
+          <Button label="Open" />
+        </Popover>
+        <Button label="Elsewhere" />
+      </>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Open'});
+    trigger.focus();
+    fireEvent.click(trigger);
+    await nextAnimationFrame();
+
+    const elsewhere = screen.getByRole('button', {name: 'Elsewhere'});
+    elsewhere.focus();
+    fireEvent(getPopoverElement(), closeToggleEvent());
+
+    expect(elsewhere).toHaveFocus();
+  });
+
   it('does not move focus when hasAutoFocus is false', async () => {
     showPopoverMock.mockClear();
 
