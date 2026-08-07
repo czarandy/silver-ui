@@ -161,6 +161,39 @@ describe('Table', () => {
     expect(screen.getByRole('cell', {name: 'Bob'})).toBeInTheDocument();
   });
 
+  it('clears a cell when its field is removed from the row', () => {
+    interface OptionalRoleRow extends Record<string, unknown> {
+      id: string;
+      name: string;
+      role?: string;
+    }
+
+    const optionalRoleColumns: TableColumn<OptionalRoleRow>[] = [
+      {key: 'name', header: 'Name'},
+      {key: 'role', header: 'Role'},
+    ];
+    const {rerender} = render(
+      <Table
+        columns={optionalRoleColumns}
+        data={[{id: '1', name: 'Alice', role: 'Admin'}]}
+        idKey="id"
+      />,
+    );
+
+    expect(screen.getByRole('cell', {name: 'Admin'})).toBeInTheDocument();
+
+    rerender(
+      <Table
+        columns={optionalRoleColumns}
+        data={[{id: '1', name: 'Alice'}]}
+        idKey="id"
+      />,
+    );
+
+    const dataRow = screen.getAllByRole('row')[1];
+    expect(within(dataRow).getAllByRole('cell')[1]).toBeEmptyDOMElement();
+  });
+
   it('applies visual context props through row and cell classes', () => {
     const {rerender} = render(
       <Table

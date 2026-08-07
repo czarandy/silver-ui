@@ -42,6 +42,7 @@ import type {
 import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
 import {Text} from 'components/Text';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {shallowEqual} from 'internal/shallowEqual';
 import useShallowEqualMemo from 'internal/useShallowEqualMemo';
 import {cx} from 'utils/cx';
 
@@ -253,13 +254,7 @@ function areRowPropsEqual<T extends Record<string, unknown>>(
     return false;
   }
 
-  if (previous.item === next.item) {
-    return true;
-  }
-
-  return Object.keys(next.item).every(
-    key => previous.item[key] === next.item[key],
-  );
+  return shallowEqual(previous.item, next.item);
 }
 
 const MemoizedDataRow = memo(DataRowInner, areRowPropsEqual) as <
