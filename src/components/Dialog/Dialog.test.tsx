@@ -9,7 +9,7 @@ import {
 import userEvent from '@testing-library/user-event';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
-import {Dialog} from 'components/Dialog/Dialog';
+import {Dialog, type DialogPosition} from 'components/Dialog/Dialog';
 import {dialogRecipe} from 'components/Dialog/Dialog.recipe';
 import {useDialog} from 'components/Dialog/useDialog';
 import {LayoutHeader} from 'components/Layout';
@@ -342,25 +342,50 @@ describe('Dialog', () => {
     expect(screen.getByTestId('dialog')).toHaveClass('silver-m_auto');
   });
 
-  it('applies fixed position offsets and pins the remaining edges to auto', () => {
+  it.each(['ltr', 'rtl'] as const)(
+    'applies logical position offsets under %s direction',
+    direction => {
+      render(
+        <div dir={direction}>
+          <Dialog
+            data-testid="dialog"
+            isOpen
+            label="Preferences"
+            onOpenChange={() => {}}
+            position={{end: '2rem', start: 30, top: 20}}>
+            Content
+          </Dialog>
+        </div>,
+      );
+
+      expect(screen.getByTestId('dialog')).toHaveStyle({
+        bottom: 'auto',
+        insetInlineEnd: '2rem',
+        insetInlineStart: '30px',
+        margin: '0px',
+        top: '20px',
+      });
+    },
+  );
+
+  it('ignores unsupported physical position offsets', () => {
+    // @ts-expect-error Physical offsets were removed in favor of start/end.
+    const position: DialogPosition = {left: 30, right: 40};
+
     render(
       <Dialog
         data-testid="dialog"
         isOpen
         label="Preferences"
         onOpenChange={() => {}}
-        position={{left: 30, top: 20}}>
+        position={position}>
         Content
       </Dialog>,
     );
 
-    expect(screen.getByTestId('dialog')).toHaveStyle({
-      bottom: 'auto',
-      left: '30px',
-      margin: '0px',
-      right: 'auto',
-      top: '20px',
-    });
+    const dialog = screen.getByTestId('dialog');
+    expect(dialog).not.toHaveStyle({left: '30px'});
+    expect(dialog).not.toHaveStyle({right: '40px'});
   });
 
   it('ignores position in the fullscreen variant', () => {
@@ -370,7 +395,7 @@ describe('Dialog', () => {
         isOpen
         label="Preferences"
         onOpenChange={() => {}}
-        position={{left: 30, top: 20}}
+        position={{start: 30, top: 20}}
         variant="fullscreen">
         Content
       </Dialog>,
@@ -379,7 +404,7 @@ describe('Dialog', () => {
     // Fullscreen pins itself via the recipe (inset: 0), so the inline
     // position offsets are not applied.
     const dialog = screen.getByTestId('dialog');
-    expect(dialog).not.toHaveStyle({left: '30px', top: '20px'});
+    expect(dialog).not.toHaveStyle({insetInlineStart: '30px', top: '20px'});
   });
 
   it('focuses a data-autofocus element after opening', async () => {

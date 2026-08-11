@@ -30,12 +30,13 @@ export type DialogRole = 'alertdialog' | 'dialog';
 export type DialogDismissBehavior = DismissBehavior;
 
 /**
- * Fixed positioning offsets. Numbers are pixels, strings are used as-is.
+ * Logical fixed positioning offsets. Numbers are pixels, strings are used
+ * as-is. `start` and `end` follow the document's text direction.
  */
 export interface DialogPosition {
   bottom?: SizeValue;
-  left?: SizeValue;
-  right?: SizeValue;
+  end?: SizeValue;
+  start?: SizeValue;
   top?: SizeValue;
 }
 
@@ -81,7 +82,7 @@ export interface DialogProps {
    */
   onOpenChange: (isOpen: boolean) => void;
   /**
-   * Fixed positioning offsets for the dialog.
+   * Logical fixed positioning offsets for the dialog.
    */
   position?: Readonly<DialogPosition>;
   /**
@@ -179,9 +180,9 @@ export function Dialog({
     position != null && !isFullscreen
       ? {
           bottom: toPixelSize(position.bottom) ?? 'auto',
-          left: toPixelSize(position.left) ?? 'auto',
+          insetInlineEnd: toPixelSize(position.end) ?? 'auto',
+          insetInlineStart: toPixelSize(position.start) ?? 'auto',
           margin: 0,
-          right: toPixelSize(position.right) ?? 'auto',
           top: toPixelSize(position.top) ?? 'auto',
         }
       : undefined;
