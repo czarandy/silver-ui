@@ -26,3 +26,23 @@ export const gapVariants = {
   8: {gap: '8'},
   10: {gap: '10'},
 } as const satisfies Record<SpacingToken, {gap: string}>;
+
+/**
+ * `padding` recipe variant map covering every `SpacingToken`.
+ *
+ * Keep token-backed layout primitives on the same spacing scale by sharing
+ * this map instead of repeating the variants in each recipe.
+ */
+export const paddingVariants = {
+  0: {p: '0'},
+  0.5: {p: '0.5'},
+  1: {p: '1'},
+  1.5: {p: '1.5'},
+  2: {p: '2'},
+  3: {p: '3'},
+  4: {p: '4'},
+  5: {p: '5'},
+  6: {p: '6'},
+  8: {p: '8'},
+  10: {p: '10'},
+} as const satisfies Record<SpacingToken, {p: string}>;

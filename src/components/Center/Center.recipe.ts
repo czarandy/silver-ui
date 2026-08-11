@@ -1,3 +1,4 @@
+import {paddingVariants} from 'internal/spacingTokens';
 import {cva, type RecipeVariantProps} from 'styled-system/css';
 
 export const centerRecipe = cva({
@@ -22,6 +23,7 @@ export const centerRecipe = cva({
         display: 'inline-flex',
       },
     },
+    padding: paddingVariants,
   },
   defaultVariants: {
     axis: 'both',
