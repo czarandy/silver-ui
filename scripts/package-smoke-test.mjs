@@ -98,33 +98,45 @@ export type PublicToken = SpacingToken;
 export type PublicHookOptions = UseHotkeyOptions;
 `.trimStart(),
   );
-  await writeFile(
-    join(consumerDir, 'tsconfig.json'),
-    JSON.stringify(
-      {
-        compilerOptions: {
-          allowSyntheticDefaultImports: true,
-          jsx: 'react-jsx',
-          lib: ['DOM', 'DOM.Iterable', 'ES2022'],
-          module: 'ESNext',
-          moduleResolution: 'bundler',
-          noEmit: true,
-          skipLibCheck: false,
-          strict: true,
-          target: 'ES2022',
+  // Compile the same consumer under both resolution modes: bundler matches
+  // our own tsconfig, nodenext requires fully specified specifiers in the
+  // shipped declarations (issue #461).
+  for (const [moduleKind, moduleResolution] of [
+    ['ESNext', 'bundler'],
+    ['NodeNext', 'NodeNext'],
+  ]) {
+    const tsconfigPath = join(
+      consumerDir,
+      `tsconfig.${moduleResolution.toLowerCase()}.json`,
+    );
+    await writeFile(
+      tsconfigPath,
+      JSON.stringify(
+        {
+          compilerOptions: {
+            allowSyntheticDefaultImports: true,
+            jsx: 'react-jsx',
+            lib: ['DOM', 'DOM.Iterable', 'ES2022'],
+            module: moduleKind,
+            moduleResolution,
+            noEmit: true,
+            skipLibCheck: false,
+            strict: true,
+            target: 'ES2022',
+          },
+          include: ['index.ts'],
         },
-        include: ['index.ts'],
-      },
-      null,
-      2,
-    ) + '\n',
-  );
+        null,
+        2,
+      ) + '\n',
+    );
 
-  execFileSync(
-    join(rootDir, 'node_modules', '.bin', 'tsc'),
-    ['-p', join(consumerDir, 'tsconfig.json')],
-    {stdio: 'inherit'},
-  );
+    execFileSync(
+      join(rootDir, 'node_modules', '.bin', 'tsc'),
+      ['-p', tsconfigPath],
+      {stdio: 'inherit'},
+    );
+  }
 } finally {
   await rm(tempDir, {force: true, recursive: true});
 }

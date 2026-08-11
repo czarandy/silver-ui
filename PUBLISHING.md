@@ -48,9 +48,9 @@ The script will:
      4) prerelease  — pre-release tag        (0.1.0 → 0.1.1-beta.0)
    ```
 
-3. **Run the gates** — `typecheck`, `test`, `lint`, `build`, `publint`, the
-   package smoke test, and `pnpm pack --dry-run` (so you can eyeball the tarball
-   contents).
+3. **Run the gates** — `typecheck`, `test`, `lint`, `build`, `publint`, `attw`,
+   the package smoke test, and `pnpm pack --dry-run` (so you can eyeball the
+   tarball contents).
 4. **Bump + tag** — `npm version` updates `package.json` and creates the
    `vX.Y.Z` commit and tag.
 5. **Push** the commit and tag to origin (rolls the bump back locally if the
@@ -115,7 +115,7 @@ npm install silver-ui@next
 `publish.yml` runs on `release: published` and:
 
 - reinstalls with `--frozen-lockfile` and re-runs `typecheck`, `test`, `lint`,
-  `build`, `publint`, and the package smoke test on a clean checkout;
+  `build`, `publint`, `attw`, and the package smoke test on a clean checkout;
 - **verifies the release tag matches `package.json`'s version**, so a mistagged
   release can't publish the wrong thing;
 - upgrades to npm `>= 11.5.1` (required for OIDC; newer than the npm bundled with
