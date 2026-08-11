@@ -2,9 +2,10 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {NumberInput} from 'components/NumberInput/NumberInput';
+import {numberInputRecipe} from 'components/NumberInput/NumberInput.recipe';
 import {SizeContext} from 'internal/SizeContext';
 
 function ControlledClearableNumberInput({
@@ -29,6 +30,47 @@ function ControlledClearableNumberInput({
   );
 }
 
+function ControlledSteppableNumberInput({
+  initialValue,
+  isDisabled,
+  isIntegerOnly,
+  isWheelEnabled,
+  label = 'Count',
+  max,
+  min,
+  onChange,
+  step,
+}: {
+  initialValue: number | null;
+  isDisabled?: boolean;
+  isIntegerOnly?: boolean;
+  isWheelEnabled?: boolean;
+  label?: string;
+  max?: number | null;
+  min?: number | null;
+  onChange?: (value: number) => void;
+  step?: number | null;
+}): React.JSX.Element {
+  const [value, setValue] = useState<number | null>(initialValue);
+
+  return (
+    <NumberInput
+      isDisabled={isDisabled}
+      isIntegerOnly={isIntegerOnly}
+      isWheelEnabled={isWheelEnabled}
+      label={label}
+      max={max}
+      min={min}
+      onChange={nextValue => {
+        setValue(nextValue);
+        onChange?.(nextValue);
+      }}
+      step={step}
+      value={value}
+    />
+  );
+}
+
 describe('NumberInput', () => {
   it('inherits the ambient size', () => {
     render(
@@ -40,6 +82,236 @@ describe('NumberInput', () => {
     const input = screen.getByRole('spinbutton', {name: 'Count'});
     // eslint-disable-next-line testing-library/no-node-access -- the size recipe is applied to the input wrapper
     expect(input.parentElement).toHaveClass(inputRecipe({size: 'lg'}));
+  });
+
+  it('renders a text-backed spinbutton with numeric ARIA attributes', () => {
+    render(
+      <NumberInput
+        label="Count"
+        max={10}
+        min={0}
+        onChange={() => {}}
+        value={4}
+      />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    expect(input).toHaveAttribute('type', 'text');
+    expect(input).toHaveAttribute('inputmode', 'decimal');
+    expect(input).toHaveAttribute('aria-valuemin', '0');
+    expect(input).toHaveAttribute('aria-valuemax', '10');
+    expect(input).toHaveAttribute('aria-valuenow', '4');
+  });
+
+  it('uses a numeric input mode for integer-only values', () => {
+    render(
+      <NumberInput isIntegerOnly label="Count" onChange={() => {}} value={4} />,
+    );
+
+    expect(screen.getByRole('spinbutton', {name: 'Count'})).toHaveAttribute(
+      'inputmode',
+      'numeric',
+    );
+  });
+
+  it('does not change the value or consume wheel events by default', () => {
+    const onChange = vi.fn();
+    const onWheel = vi.fn();
+
+    render(
+      <div onWheel={onWheel}>
+        <NumberInput label="Count" onChange={onChange} value={2} />
+      </div>,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    input.focus();
+
+    expect(fireEvent.wheel(input, {deltaY: -100})).toBe(true);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(onWheel).toHaveBeenCalledOnce();
+    expect(input).toHaveFocus();
+  });
+
+  it('changes the focused value with wheel events when enabled', () => {
+    const onChange = vi.fn();
+
+    render(
+      <ControlledSteppableNumberInput
+        initialValue={0.2}
+        isWheelEnabled
+        onChange={onChange}
+        step={0.1}
+      />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    input.focus();
+
+    expect(fireEvent.wheel(input, {deltaY: -100})).toBe(false);
+    expect(input).toHaveValue('0.3');
+    expect(onChange).toHaveBeenLastCalledWith(0.3);
+
+    expect(fireEvent.wheel(input, {deltaY: 100})).toBe(false);
+    expect(input).toHaveValue('0.2');
+    expect(onChange).toHaveBeenLastCalledWith(0.2);
+  });
+
+  it('ignores wheel events when unfocused, modified, or disabled', () => {
+    const onChange = vi.fn();
+
+    render(
+      <>
+        <ControlledSteppableNumberInput
+          initialValue={2}
+          isWheelEnabled
+          onChange={onChange}
+        />
+        <ControlledSteppableNumberInput
+          initialValue={2}
+          isDisabled
+          isWheelEnabled
+          label="Disabled count"
+          onChange={onChange}
+        />
+      </>,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    expect(fireEvent.wheel(input, {deltaY: -100})).toBe(true);
+
+    input.focus();
+    expect(fireEvent.wheel(input, {ctrlKey: true, deltaY: -100})).toBe(true);
+    expect(fireEvent.wheel(input, {deltaY: -100, shiftKey: true})).toBe(true);
+
+    const disabledInput = screen.getByRole('spinbutton', {
+      name: 'Disabled count',
+    });
+    expect(fireEvent.wheel(disabledInput, {deltaY: -100})).toBe(true);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('supports keyboard stepping and bound shortcuts', async () => {
+    const user = userEvent.setup();
+
+    render(<ControlledSteppableNumberInput initialValue={1} max={3} min={0} />);
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    input.focus();
+
+    await user.keyboard('{ArrowUp}');
+    expect(input).toHaveValue('2');
+    await user.keyboard('{ArrowDown}');
+    expect(input).toHaveValue('1');
+    await user.keyboard('{End}');
+    expect(input).toHaveValue('3');
+    await user.keyboard('{Home}');
+    expect(input).toHaveValue('0');
+  });
+
+  it('moves off-grid values to the next step without floating-point drift', async () => {
+    const user = userEvent.setup();
+
+    render(<ControlledSteppableNumberInput initialValue={0.25} step={0.1} />);
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    input.focus();
+    await user.keyboard('{ArrowUp}');
+    expect(input).toHaveValue('0.3');
+    await user.keyboard('{ArrowDown}');
+    expect(input).toHaveValue('0.2');
+  });
+
+  it('falls back to a step of one when step is not positive', async () => {
+    const user = userEvent.setup();
+
+    render(<ControlledSteppableNumberInput initialValue={2} step={0} />);
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    input.focus();
+    await user.keyboard('{ArrowUp}');
+    expect(input).toHaveValue('3');
+  });
+
+  it('steps with the chevron buttons while retaining input focus', async () => {
+    const user = userEvent.setup();
+
+    render(<ControlledSteppableNumberInput initialValue={1} max={2} min={0} />);
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    const incrementButton = screen.getByRole('button', {
+      name: 'Increment value',
+    });
+    const decrementButton = screen.getByRole('button', {
+      name: 'Decrement value',
+    });
+    expect(incrementButton).toHaveAttribute('tabindex', '-1');
+    expect(decrementButton).toHaveAttribute('tabindex', '-1');
+    // eslint-disable-next-line testing-library/no-node-access -- verify the stepper is the flush trailing adornment
+    const stepper = incrementButton.parentElement;
+    const stepperClassName = numberInputRecipe({size: 'md'}).stepper;
+    if (stepperClassName == null) {
+      throw new Error('Expected NumberInput stepper styles');
+    }
+    expect(stepper).toHaveClass(stepperClassName);
+    // eslint-disable-next-line testing-library/no-node-access -- DOM order determines which adornment is right-aligned
+    expect(input.parentElement?.lastElementChild).toBe(stepper);
+
+    input.focus();
+    await user.click(incrementButton);
+    expect(input).toHaveValue('2');
+    expect(input).toHaveFocus();
+    expect(incrementButton).toBeDisabled();
+
+    await user.click(decrementButton);
+    expect(input).toHaveValue('1');
+    expect(input).toHaveFocus();
+  });
+
+  it('starts empty values at the available bound or zero', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <ControlledSteppableNumberInput
+          initialValue={null}
+          label="Minimum count"
+          max={10}
+          min={5}
+        />
+        <ControlledSteppableNumberInput
+          initialValue={null}
+          label="Maximum count"
+          max={10}
+          min={5}
+        />
+        <ControlledSteppableNumberInput
+          initialValue={null}
+          label="Unbounded count"
+        />
+      </>,
+    );
+
+    const minimumInput = screen.getByRole('spinbutton', {
+      name: 'Minimum count',
+    });
+    minimumInput.focus();
+    await user.keyboard('{ArrowUp}');
+    expect(minimumInput).toHaveValue('5');
+
+    const maximumInput = screen.getByRole('spinbutton', {
+      name: 'Maximum count',
+    });
+    maximumInput.focus();
+    await user.keyboard('{ArrowDown}');
+    expect(maximumInput).toHaveValue('10');
+
+    const unboundedInput = screen.getByRole('spinbutton', {
+      name: 'Unbounded count',
+    });
+    unboundedInput.focus();
+    await user.keyboard('{ArrowUp}');
+    expect(unboundedInput).toHaveValue('0');
   });
 
   it('calls onChange with valid numbers', async () => {
@@ -62,7 +334,6 @@ describe('NumberInput', () => {
     );
 
     const clearButton = screen.getByRole('button', {name: 'Clear Count'});
-    expect(clearButton).toHaveClass(inputStyles.clearButton);
     await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith(null);
   });
@@ -80,7 +351,7 @@ describe('NumberInput', () => {
     await user.tab();
 
     expect(onChange).toHaveBeenCalledWith(null);
-    expect(input).toHaveValue(null);
+    expect(input).toHaveValue('');
   });
 
   it('clears nullable values from the keyboard on Enter', async () => {
@@ -96,7 +367,7 @@ describe('NumberInput', () => {
     await user.keyboard('{Enter}');
 
     expect(onChange).toHaveBeenCalledWith(null);
-    expect(input).toHaveValue(null);
+    expect(input).toHaveValue('');
   });
 
   it('does not clear non-nullable values from the keyboard', async () => {
@@ -110,7 +381,7 @@ describe('NumberInput', () => {
     await user.tab();
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(input).toHaveValue(4);
+    expect(input).toHaveValue('4');
   });
 
   it('clamps values to max on blur', async () => {
@@ -185,6 +456,12 @@ describe('NumberInput', () => {
     );
 
     expect(screen.getByRole('spinbutton', {name: 'Count'})).toBeDisabled();
+    expect(
+      screen.getByRole('button', {name: 'Increment value'}),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', {name: 'Decrement value'}),
+    ).toBeDisabled();
   });
 
   it('hides the clear button when disabled', () => {
@@ -287,7 +564,7 @@ describe('NumberInput', () => {
     await user.clear(input);
     await user.type(input, '99');
 
-    expect(input).toHaveValue(99);
+    expect(input).toHaveValue('99');
   });
 
   it('does not set aria-invalid while typing an out-of-range value', async () => {

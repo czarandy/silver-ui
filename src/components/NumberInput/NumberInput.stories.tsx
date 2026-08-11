@@ -5,6 +5,7 @@ import {
   NumberInput,
   type NumberInputProps,
 } from 'components/NumberInput/NumberInput';
+import {css} from 'styled-system/css';
 
 type NumberInputStoryArgs = Omit<NumberInputProps, 'onChange'> & {
   onChange?: NumberInputProps['onChange'];
@@ -24,6 +25,35 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<NumberInputStoryArgs>;
+
+const wheelStoryStyles = {
+  grid: css({
+    display: 'grid',
+    gridTemplateColumns: {base: '1fr', md: 'repeat(2, minmax(0, 1fr))'},
+    gap: '4',
+    maxW: '160',
+  }),
+  panel: css({
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2',
+  }),
+  scrollArea: css({
+    h: '40',
+    overflowY: 'auto',
+    p: '4',
+    borderWidth: 'default',
+    borderStyle: 'solid',
+    borderColor: 'border',
+    borderRadius: 'md',
+  }),
+  spacer: css({h: '16'}),
+  text: css({
+    color: 'fg.muted',
+    fontFamily: 'body',
+    fontSize: 'sm',
+  }),
+} as const;
 
 type ControlledNumberInputProps = Omit<
   NumberInputProps,
@@ -49,6 +79,38 @@ function ControlledNumberInput({
 
 export const Default: Story = {
   render: args => <ControlledNumberInput {...args} />,
+};
+
+export const WheelBehavior: Story = {
+  render: () => (
+    <div className={wheelStoryStyles.grid}>
+      <div className={wheelStoryStyles.panel}>
+        <p className={wheelStoryStyles.text}>
+          Wheel disabled (default): scrolling over the focused input scrolls
+          this panel.
+        </p>
+        <div className={wheelStoryStyles.scrollArea}>
+          <div className={wheelStoryStyles.spacer} />
+          <ControlledNumberInput label="Wheel disabled" value={2} />
+          <div className={wheelStoryStyles.spacer} />
+        </div>
+      </div>
+      <div className={wheelStoryStyles.panel}>
+        <p className={wheelStoryStyles.text}>
+          Wheel enabled: scrolling over the focused input changes its value.
+        </p>
+        <div className={wheelStoryStyles.scrollArea}>
+          <div className={wheelStoryStyles.spacer} />
+          <ControlledNumberInput
+            isWheelEnabled
+            label="Wheel enabled"
+            value={2}
+          />
+          <div className={wheelStoryStyles.spacer} />
+        </div>
+      </div>
+    </div>
+  ),
 };
 
 export const WithUnits: Story = {
