@@ -61,6 +61,10 @@ export interface StackProps extends HTMLAttributes<HTMLElement> {
    */
   justify?: StackMainAlignment;
   /**
+   * Inner padding step.
+   */
+  padding?: SpacingToken;
+  /**
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLElement>;
@@ -111,6 +115,7 @@ export function Stack({
   hAlign,
   height,
   justify,
+  padding,
   ref,
   style,
   vAlign,
@@ -143,7 +148,7 @@ export function Stack({
   return (
     <Element
       {...htmlProps}
-      className={cx(stackRecipe({direction, gap, wrap}), className)}
+      className={cx(stackRecipe({direction, gap, padding, wrap}), className)}
       data-testid={dataTestId}
       ref={ref}
       style={stackStyle}>

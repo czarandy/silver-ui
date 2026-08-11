@@ -49,6 +49,16 @@ describe('Center', () => {
     expect(center).toHaveClass('silver-jc_center');
   });
 
+  it('applies tokenized padding', () => {
+    render(
+      <Center data-testid="center" padding={4}>
+        Content
+      </Center>,
+    );
+
+    expect(screen.getByTestId('center')).toHaveClass('silver-p_4');
+  });
+
   it('applies numeric width and height as pixels', () => {
     render(
       <Center data-testid="center" height={200} width={300}>

@@ -1,5 +1,6 @@
 import type {HTMLAttributes, ReactNode, Ref} from 'react';
 import {centerRecipe} from 'components/Center/Center.recipe';
+import type {SpacingToken} from 'internal/spacingTokens';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
@@ -27,6 +28,10 @@ export interface CenterProps extends HTMLAttributes<HTMLDivElement> {
    */
   isInline?: boolean;
   /**
+   * Inner padding step.
+   */
+  padding?: SpacingToken;
+  /**
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLDivElement>;
@@ -43,6 +48,7 @@ export function Center({
   'data-testid': dataTestId,
   height,
   isInline = false,
+  padding,
   ref,
   style,
   width,
@@ -51,7 +57,7 @@ export function Center({
   return (
     <div
       {...htmlProps}
-      className={cx(centerRecipe({axis, isInline}), className)}
+      className={cx(centerRecipe({axis, isInline, padding}), className)}
       data-testid={dataTestId}
       ref={ref}
       style={{

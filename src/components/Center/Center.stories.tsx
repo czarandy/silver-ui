@@ -34,6 +34,19 @@ export const Basic: Story = {
   ),
 };
 
+export const Padding: Story = {
+  args: {
+    height: 'auto',
+    padding: 6,
+    width: 'fit-content',
+  },
+  render: args => (
+    <Center {...args} className={containerStyle}>
+      <Text type="body">Token-scaled inner padding</Text>
+    </Center>
+  ),
+};
+
 export const Horizontal: Story = {
   args: {
     axis: 'horizontal',

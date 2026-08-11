@@ -55,6 +55,22 @@ describe('Stack', () => {
     expect(classList.some(c => c.includes('gap'))).toBe(false);
   });
 
+  it('applies tokenized padding to both stack directions', () => {
+    render(
+      <>
+        <HStack data-testid="hstack" padding={4}>
+          Horizontal
+        </HStack>
+        <VStack data-testid="vstack" padding={6}>
+          Vertical
+        </VStack>
+      </>,
+    );
+
+    expect(screen.getByTestId('hstack')).toHaveClass('silver-p_4');
+    expect(screen.getByTestId('vstack')).toHaveClass('silver-p_6');
+  });
+
   it('applies numeric width and height as pixels', () => {
     render(
       <VStack data-testid="stack" height={200} width={300}>

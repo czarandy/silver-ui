@@ -1,4 +1,4 @@
-import {gapVariants} from 'internal/spacingTokens';
+import {gapVariants, paddingVariants} from 'internal/spacingTokens';
 import {cva, type RecipeVariantProps} from 'styled-system/css';
 
 export const stackRecipe = cva({
@@ -16,6 +16,7 @@ export const stackRecipe = cva({
       },
     },
     gap: gapVariants,
+    padding: paddingVariants,
     wrap: {
       nowrap: {
         flexWrap: 'nowrap',

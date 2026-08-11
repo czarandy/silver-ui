@@ -17,17 +17,15 @@ type Story = StoryObj<typeof meta>;
 const boxStyle = css({
   bg: 'bg.subtle',
   borderRadius: 'sm',
-  px: '3',
-  py: '2',
   borderWidth: 'default',
   borderColor: 'border',
 });
 
 function Box({children}: {children: React.ReactNode}) {
   return (
-    <div className={boxStyle}>
+    <VStack className={boxStyle} padding={3}>
       <Text type="body">{children}</Text>
-    </div>
+    </VStack>
   );
 }
 
@@ -59,6 +57,21 @@ export const Vertical: Story = {
       <Card>
         <Text type="body">Three</Text>
       </Card>
+    </VStack>
+  ),
+};
+
+export const Padding: Story = {
+  render: () => (
+    <VStack className={boxStyle} gap={2} padding={6} width="fit-content">
+      <Text color="secondary" type="supporting">
+        padding=&#123;6&#125;
+      </Text>
+      <HStack gap={2}>
+        <Box>One</Box>
+        <Box>Two</Box>
+        <Box>Three</Box>
+      </HStack>
     </VStack>
   ),
 };
