@@ -40,7 +40,7 @@ describe('DateRangeInput', () => {
       />,
     );
 
-    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveTextContent(
       'May 10, 2026 - May 12, 2026',
     );
     const clearButton = screen.getByRole('button', {name: 'Clear Window'});
@@ -64,7 +64,7 @@ describe('DateRangeInput', () => {
       />,
     );
 
-    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveTextContent(
       'January 5, 2026 - January 12, 2026',
     );
 
@@ -77,7 +77,7 @@ describe('DateRangeInput', () => {
       />,
     );
 
-    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveTextContent(
       '2026-01-05 - 2026-01-12',
     );
 
@@ -90,16 +90,34 @@ describe('DateRangeInput', () => {
       />,
     );
 
-    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveValue(
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveTextContent(
       '5 - 12',
     );
+  });
+
+  it('renders a same-day range as a single date', () => {
+    const date = plainDateCreate(2026, 8, 9);
+
+    render(
+      <DateRangeInput
+        label="Window"
+        onChange={() => {}}
+        value={{start: date, end: date}}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveTextContent(
+      'Aug 9, 2026',
+    );
+    expect(
+      screen.getByRole('combobox', {name: 'Window'}),
+    ).not.toHaveTextContent('Aug 9, 2026 - Aug 9, 2026');
   });
 
   it('renders placeholder when value is undefined', () => {
     render(<DateRangeInput label="Window" onChange={() => {}} value={null} />);
 
-    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveAttribute(
-      'placeholder',
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveTextContent(
       'Select a date range',
     );
   });
@@ -133,7 +151,7 @@ describe('DateRangeInput', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('disables the input and calendar button when isDisabled is true', () => {
+  it('disables the trigger when isDisabled is true', () => {
     render(
       <DateRangeInput
         isDisabled
@@ -144,7 +162,6 @@ describe('DateRangeInput', () => {
     );
 
     expect(screen.getByRole('combobox', {name: 'Window'})).toBeDisabled();
-    expect(screen.getByRole('button', {name: 'Choose Window'})).toBeDisabled();
   });
 
   it('hides clear button when isDisabled is true', () => {
@@ -163,7 +180,7 @@ describe('DateRangeInput', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('does not disable the input or calendar button when isLoading is true', () => {
+  it('does not disable the trigger when isLoading is true', () => {
     render(
       <DateRangeInput
         isLoading
@@ -174,7 +191,6 @@ describe('DateRangeInput', () => {
     );
 
     expect(screen.getByRole('combobox', {name: 'Window'})).toBeEnabled();
-    expect(screen.getByRole('button', {name: 'Choose Window'})).toBeEnabled();
   });
 
   it('hides clear button when isLoading is true', () => {
@@ -252,7 +268,7 @@ describe('DateRangeInput', () => {
     ).toBeInTheDocument();
   });
 
-  it('forwards data-testid to the input', () => {
+  it('forwards data-testid to the trigger', () => {
     render(
       <DateRangeInput
         data-testid="range-field"
@@ -265,25 +281,25 @@ describe('DateRangeInput', () => {
     expect(screen.getByTestId('range-field')).toBeInTheDocument();
   });
 
-  it('forwards ref to the input element', () => {
-    let inputEl: HTMLInputElement | null = null;
+  it('forwards ref to the trigger button', () => {
+    let triggerElement: HTMLButtonElement | null = null;
 
     render(
       <DateRangeInput
         label="Window"
         onChange={() => {}}
         ref={node => {
-          inputEl = node;
+          triggerElement = node;
         }}
         value={null}
       />,
     );
 
-    expect(inputEl).toBe(screen.getByRole('combobox', {name: 'Window'}));
-    expect(inputEl).toBeInstanceOf(HTMLInputElement);
+    expect(triggerElement).toBe(screen.getByRole('combobox', {name: 'Window'}));
+    expect(triggerElement).toBeInstanceOf(HTMLButtonElement);
   });
 
-  it('renders a calendar trigger button', () => {
+  it('renders the displayed range as the calendar trigger button', () => {
     render(
       <DateRangeInput
         label="Window"
@@ -292,8 +308,10 @@ describe('DateRangeInput', () => {
       />,
     );
 
-    const trigger = screen.getByRole('button', {name: 'Choose Window'});
+    const trigger = screen.getByRole('combobox', {name: 'Window'});
     expect(trigger).toBeInTheDocument();
+    expect(trigger.tagName).toBe('BUTTON');
+    expect(trigger).toHaveTextContent('May 10, 2026 - May 12, 2026');
     expect(trigger).toBeEnabled();
   });
 
@@ -319,7 +337,7 @@ describe('DateRangeInput', () => {
       const input = screen.getByRole('combobox', {name: 'Window'});
       expect(input).toHaveAttribute('aria-expanded', 'false');
 
-      await user.click(screen.getByRole('button', {name: 'Choose Window'}));
+      await user.click(input);
 
       await waitFor(() => {
         expect(input).toHaveAttribute('aria-expanded', 'true');
@@ -356,7 +374,7 @@ describe('DateRangeInput', () => {
       const input = screen.getByRole('combobox', {name: 'Window'});
       expect(input).toHaveAttribute('aria-expanded', 'false');
 
-      await user.click(screen.getByRole('button', {name: 'Choose Window'}));
+      await user.click(input);
       await waitFor(() => {
         expect(input).toHaveAttribute('aria-expanded', 'true');
       });
@@ -388,7 +406,7 @@ describe('DateRangeInput', () => {
       const input = screen.getByRole('combobox', {name: 'Window'});
       expect(input).toHaveAttribute('aria-expanded', 'false');
 
-      await user.click(input);
+      input.focus();
       await user.keyboard('{ArrowDown}');
 
       await waitFor(() => {
@@ -408,17 +426,16 @@ describe('DateRangeInput', () => {
         />,
       );
 
-      const input = screen.getByRole('combobox', {name: 'Window'});
-      const trigger = screen.getByRole('button', {name: 'Choose Window'});
+      const trigger = screen.getByRole('combobox', {name: 'Window'});
 
       await user.click(trigger);
       await waitFor(() => {
-        expect(input).toHaveAttribute('aria-expanded', 'true');
+        expect(trigger).toHaveAttribute('aria-expanded', 'true');
       });
 
       await user.click(trigger);
       await waitFor(() => {
-        expect(input).toHaveAttribute('aria-expanded', 'false');
+        expect(trigger).toHaveAttribute('aria-expanded', 'false');
       });
       expect(onChange).not.toHaveBeenCalled();
     });
@@ -435,7 +452,7 @@ describe('DateRangeInput', () => {
         />,
       );
 
-      await user.click(screen.getByRole('button', {name: 'Choose Window'}));
+      await user.click(screen.getByRole('combobox', {name: 'Window'}));
 
       await waitFor(() => {
         expect(
