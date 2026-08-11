@@ -3,6 +3,9 @@
 import {X} from 'lucide-react';
 import {
   useId,
+  useRef,
+  type AriaAttributes,
+  type AriaRole,
   type ChangeEvent,
   type CSSProperties,
   type FocusEvent,
@@ -31,11 +34,25 @@ import {Spinner} from 'components/Spinner';
 import {useResolvedSize} from 'internal/SizeContext';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export type TextInputType = 'email' | 'password' | 'tel' | 'text';
 
 export type TextInputProps = {
+  /**
+   * Identifies the currently active element in a composite widget controlled
+   * by the input.
+   */
+  'aria-activedescendant'?: AriaAttributes['aria-activedescendant'];
+  /**
+   * Indicates whether typing displays completion suggestions.
+   */
+  'aria-autocomplete'?: AriaAttributes['aria-autocomplete'];
+  /**
+   * Identifies the element controlled by the input.
+   */
+  'aria-controls'?: AriaAttributes['aria-controls'];
   /**
    * HTML autocomplete hint for the browser.
    */
@@ -130,6 +147,10 @@ export type TextInputProps = {
    */
   ref?: Ref<HTMLInputElement>;
   /**
+   * ARIA role applied to the input element.
+   */
+  role?: AriaRole;
+  /**
    * Visual size.
    */
   size?: InputSize;
@@ -160,6 +181,9 @@ export type TextInputProps = {
  * Single-line text input field.
  */
 export function TextInput({
+  'aria-activedescendant': ariaActiveDescendant,
+  'aria-autocomplete': ariaAutocomplete,
+  'aria-controls': ariaControls,
   autoComplete,
   label,
   value,
@@ -189,7 +213,9 @@ export function TextInput({
   'data-testid': dataTestId,
   style,
   ref,
+  role,
 }: TextInputProps): React.JSX.Element {
+  const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
   const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
@@ -222,7 +248,10 @@ export function TextInput({
         </span>
       ) : null}
       <input
+        aria-activedescendant={ariaActiveDescendant}
+        aria-autocomplete={ariaAutocomplete}
         aria-busy={isLoading || undefined}
+        aria-controls={ariaControls}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         aria-label={inputGroup != null ? label : undefined}
@@ -246,8 +275,9 @@ export function TextInput({
           onKeyDown?.(event);
         }}
         placeholder={placeholder}
-        ref={ref}
+        ref={mergeRefs(ref, inputRef)}
         required={isRequired ?? undefined}
+        role={role}
         type={type}
         value={value}
       />
@@ -261,7 +291,10 @@ export function TextInput({
           icon={X}
           isIconOnly
           label={`Clear ${label}`}
-          onClick={() => onChange('', null)}
+          onClick={() => {
+            onChange('', null);
+            inputRef.current?.focus();
+          }}
           size="sm"
           variant="ghost"
         />

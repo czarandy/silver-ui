@@ -336,7 +336,7 @@ describe('Select', () => {
   it('filters options when search is enabled', async () => {
     const user = userEvent.setup();
 
-    render(
+    const {container} = render(
       <Select
         hasSearch
         label="Fruit"
@@ -353,7 +353,12 @@ describe('Select', () => {
       hidden: true,
       name: 'Fruit options',
     });
+    expect(search).toHaveAttribute('aria-autocomplete', 'list');
     expect(search).toHaveAttribute('aria-controls', listbox.id);
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the decorative search icon has no accessible role
+    expect(container.querySelector('.lucide-search')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- the standard input recipe is applied to the TextInput wrapper
+    expect(search.parentElement).toHaveClass(inputRecipe());
 
     await user.type(search, 'ba');
     await user.keyboard('{ArrowDown}');
@@ -365,6 +370,14 @@ describe('Select', () => {
     expect(
       screen.getByRole('option', {hidden: true, name: 'Banana'}),
     ).toHaveAttribute('id', search.getAttribute('aria-activedescendant'));
+
+    await user.click(
+      screen.getByRole('button', {hidden: true, name: 'Clear Search Fruit'}),
+    );
+    expect(search).toHaveValue('');
+    expect(search).toHaveFocus();
+    expect(screen.getByText('Apple')).toBeInTheDocument();
+    expect(screen.getByText('Cherry')).toBeInTheDocument();
   });
 
   it('leaves Home and End to the search caret and jumps with PageUp and PageDown', async () => {

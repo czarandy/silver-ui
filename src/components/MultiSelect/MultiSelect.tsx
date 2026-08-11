@@ -1,6 +1,6 @@
 'use client';
 
-import {Check, ChevronDown, X} from 'lucide-react';
+import {Check, ChevronDown, Search, X} from 'lucide-react';
 import {
   useCallback,
   useMemo,
@@ -28,6 +28,7 @@ import {
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
+import {TextInput} from 'components/TextInput';
 import {useResolvedSize} from 'internal/SizeContext';
 import {
   renderSelectListboxOptions,
@@ -435,19 +436,22 @@ export function MultiSelect({
   const menu = (
     <>
       {hasSearch ? (
-        <input
+        <TextInput
           aria-activedescendant={activeDescendantId}
           aria-autocomplete="list"
           aria-controls={listboxId}
-          aria-label={`Search ${label}`}
-          className={menuClasses.search}
-          onChange={event => {
-            setQuery(event.target.value);
+          hasClear
+          isLabelHidden
+          label={`Search ${label}`}
+          onChange={nextQuery => {
+            setQuery(nextQuery);
             setHighlightedValue(null);
           }}
           onKeyDown={handleKeyboardNavigation}
           placeholder={searchPlaceholder}
-          type="search"
+          role="searchbox"
+          size={size}
+          startIcon={Search}
           value={query}
         />
       ) : null}
