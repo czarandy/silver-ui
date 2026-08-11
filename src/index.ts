@@ -4,6 +4,11 @@ export {
   type ButtonProps,
   type ButtonSize,
 } from 'components/Button';
+export {
+  Clickable,
+  type ClickableBaseProps,
+  type ClickableProps,
+} from 'components/Clickable';
 export {CopyButton, type CopyButtonProps} from 'components/CopyButton';
 export {
   ChatComposer,
