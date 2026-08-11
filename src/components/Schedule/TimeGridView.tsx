@@ -232,6 +232,9 @@ function TimeGridEvent({
       <span className={classes.time}>
         {getEventTimeLabel(event, timezoneID)}
       </span>
+      {event.location != null && event.location !== '' ? (
+        <span className={classes.location}>{event.location}</span>
+      ) : null}
       {pluginEndContent}
     </>
   );

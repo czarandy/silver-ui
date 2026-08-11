@@ -1798,6 +1798,33 @@ describe('Schedule', () => {
     expect(event).toHaveTextContent('Duration migration9:00 AM - 10:30 AM');
   });
 
+  it('renders a location on timed event blocks', () => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          {
+            ...createEventFromISO({
+              category: 'Sync',
+              end: '2026-05-13T10:00:00.000Z',
+              id: 'with-location',
+              start: '2026-05-13T09:00:00.000Z',
+              title: 'Located sync',
+            }),
+            location: 'Room 4',
+          },
+        ]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 11, minHour: 9})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(
+      screen.getByTestId('schedule-event-with-location'),
+    ).toHaveTextContent('Located sync9:00 AM - 10:00 AMRoom 4');
+  });
+
   it('keeps short visible timed event slices tall enough for title and time', () => {
     render(
       <Schedule
