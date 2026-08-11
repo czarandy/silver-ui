@@ -5,6 +5,7 @@ import {
   useCallback,
   useId,
   useMemo,
+  useRef,
   useState,
   type CSSProperties,
   type KeyboardEvent,
@@ -13,6 +14,7 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {Calendar} from 'components/Calendar';
+import {dateRangeInputRecipe} from 'components/DateRangeInput/DateRangeInput.recipe';
 import {
   Field,
   getNecessity,
@@ -26,24 +28,20 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
-import type {IconComponent} from 'components/Icon';
+import {Icon, type IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import type {DateRange} from 'internal/dateTypes';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
   plainDateFormatWith,
+  plainDateIsEqual,
   type DateFormat,
   type PlainDate,
 } from 'internal/plainDate';
-import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 export type {DateRange} from 'internal/dateTypes';
-
-const styles = {
-  wrapper: css({ps: '1', gap: '1'}),
-} as const;
 
 export type DateRangeInputProps = {
   /**
@@ -51,7 +49,7 @@ export type DateRangeInputProps = {
    */
   className?: string;
   /**
-   * Test ID applied to the input element.
+   * Test ID applied to the trigger button.
    */
   'data-testid'?: string;
   /**
@@ -123,9 +121,9 @@ export type DateRangeInputProps = {
    */
   placeholder?: string;
   /**
-   * Ref forwarded to the input element.
+   * Ref forwarded to the trigger button.
    */
-  ref?: Ref<HTMLInputElement>;
+  ref?: Ref<HTMLButtonElement>;
   /**
    * Visual size of the input.
    * @default 'md'
@@ -152,7 +150,11 @@ function formatRange(
   if (value == null) {
     return '';
   }
-  return `${plainDateFormatWith(value.start, format)} - ${plainDateFormatWith(value.end, format)}`;
+  const formattedStart = plainDateFormatWith(value.start, format);
+  if (plainDateIsEqual(value.start, value.end)) {
+    return formattedStart;
+  }
+  return `${formattedStart} - ${plainDateFormatWith(value.end, format)}`;
 }
 
 /**
@@ -192,15 +194,20 @@ export function DateRangeInput({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
   const displayValue = useMemo(
     () => formatRange(value, format),
     [format, value],
   );
 
   const necessity = getNecessity(isOptional, isRequired);
+  const classes = dateRangeInputRecipe({
+    isDisabled,
+    isPlaceholder: displayValue === '',
+  });
 
   const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
+    (event: KeyboardEvent<HTMLButtonElement>) => {
       if (event.key === 'ArrowDown') {
         event.preventDefault();
         setIsOpen(true);
@@ -225,6 +232,7 @@ export function DateRangeInput({
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
       style={style}>
+      {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- mouse clicks anywhere on the visual input delegate to the inner combobox button; keyboard handling stays on that button. */}
       <div
         className={cx(
           inputRecipe({
@@ -232,41 +240,15 @@ export function DateRangeInput({
             status: status?.type,
             isDisabled,
           }),
-          styles.wrapper,
-        )}>
-        <Popover
-          content={
-            <Calendar
-              getIsDateDisabled={getIsDateDisabled}
-              max={max}
-              min={min}
-              mode="range"
-              numberOfMonths={numberOfMonths}
-              onChange={nextValue => {
-                onChange(nextValue);
-                setIsOpen(false);
-              }}
-              value={value ?? undefined}
-              viewDate={value?.start}
-            />
+          classes.wrapper,
+        )}
+        onClick={() => {
+          if (!isDisabled) {
+            setIsOpen(currentIsOpen => !currentIsOpen);
           }
-          hasAutoFocus
-          id={popoverId}
-          isEnabled={!isDisabled}
-          isOpen={isOpen}
-          label={`Choose ${label}`}
-          onOpenChange={setIsOpen}
-          padding={3}>
-          <Button
-            icon={CalendarIcon}
-            isDisabled={isDisabled}
-            isIconOnly
-            label={`Choose ${label}`}
-            size="sm"
-            variant="ghost"
-          />
-        </Popover>
-        <input
+        }}
+        ref={triggerRef}>
+        <button
           aria-busy={isLoading || undefined}
           aria-controls={popoverId}
           aria-describedby={describedBy}
@@ -274,25 +256,31 @@ export function DateRangeInput({
           aria-haspopup="dialog"
           aria-invalid={status?.type === 'error' || undefined}
           aria-required={isRequired ?? undefined}
-          className={inputStyles.control}
+          className={classes.trigger}
           data-testid={dataTestId}
           disabled={isDisabled}
           id={inputId}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          readOnly
           ref={ref}
           role="combobox"
-          type="text"
-          value={displayValue}
-        />
+          type="button">
+          <span className={classes.icon}>
+            <Icon data-testid="calendar-icon" icon={CalendarIcon} size="sm" />
+          </span>
+          <span className={classes.value}>
+            {displayValue === '' ? placeholder : displayValue}
+          </span>
+        </button>
         {hasClear && value != null && !isDisabled && !isLoading ? (
           <Button
             className={status == null ? inputStyles.clearButton : undefined}
             icon={X}
             isIconOnly
             label={`Clear ${label}`}
-            onClick={() => onChange(null)}
+            onClick={event => {
+              event.stopPropagation();
+              onChange(null);
+            }}
             size="sm"
             variant="ghost"
           />
@@ -304,6 +292,31 @@ export function DateRangeInput({
           </span>
         ) : null}
       </div>
+      <Popover
+        anchorRef={triggerRef}
+        content={
+          <Calendar
+            getIsDateDisabled={getIsDateDisabled}
+            max={max}
+            min={min}
+            mode="range"
+            numberOfMonths={numberOfMonths}
+            onChange={nextValue => {
+              onChange(nextValue);
+              setIsOpen(false);
+            }}
+            value={value ?? undefined}
+            viewDate={value?.start}
+          />
+        }
+        hasAutoFocus
+        id={popoverId}
+        isEnabled={false}
+        isOpen={isOpen}
+        label={`Choose ${label}`}
+        onOpenChange={setIsOpen}
+        padding={3}
+      />
     </Field>
   );
 }

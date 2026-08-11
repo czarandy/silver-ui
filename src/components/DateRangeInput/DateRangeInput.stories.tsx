@@ -1,7 +1,8 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 
-import type {Meta, StoryObj} from '@storybook/react-vite';
+import type {Meta, StoryContext, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
+import {userEvent, within} from 'storybook/test';
 import {
   DateRangeInput,
   type DateRangeInputProps,
@@ -32,6 +33,29 @@ const defaultRange: DateRange = {
 export const Default: Story = {
   render: (args: DateRangeInputProps) => {
     const [value, setValue] = useState<DateRange | null>(() => defaultRange);
+    return <DateRangeInput {...args} onChange={setValue} value={value} />;
+  },
+};
+
+export const ClickableDateText: Story = {
+  render: (args: DateRangeInputProps) => {
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
+    return <DateRangeInput {...args} onChange={setValue} value={value} />;
+  },
+  play: async ({canvasElement}: StoryContext<DateRangeInputProps>) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('combobox', {name: 'Window'}));
+  },
+};
+
+const singleDateRange: DateRange = {
+  start: plainDateCreate(2026, 8, 9),
+  end: plainDateCreate(2026, 8, 9),
+};
+
+export const SingleDate: Story = {
+  render: (args: DateRangeInputProps) => {
+    const [value, setValue] = useState<DateRange | null>(() => singleDateRange);
     return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
