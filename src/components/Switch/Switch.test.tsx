@@ -4,6 +4,7 @@ import {ShieldCheck, type LucideProps} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Switch} from 'components/Switch/Switch';
+import {necessityIndicatorRecipe} from 'internal/NecessityIndicator.recipe';
 import {SizeContext} from 'internal/SizeContext';
 import {css} from 'styled-system/css';
 
@@ -268,7 +269,7 @@ describe('Switch', () => {
     ).not.toHaveAttribute('aria-describedby');
   });
 
-  it('renders required and optional text', () => {
+  it('renders required and optional indicators with shared styling', () => {
     render(
       <>
         <Switch
@@ -286,7 +287,9 @@ describe('Switch', () => {
       </>,
     );
 
-    expect(screen.getByText('Required')).toBeInTheDocument();
+    expect(screen.getByText('Required')).toHaveClass(
+      necessityIndicatorRecipe(),
+    );
     expect(screen.getByText('Optional')).toBeInTheDocument();
   });
 
