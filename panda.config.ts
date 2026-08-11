@@ -371,7 +371,10 @@ export default defineConfig({
                 value: {base: '{colors.blue.100}', _dark: '{colors.blue.900}'},
               },
               fg: {
-                value: {base: '{colors.blue.800}', _dark: '{colors.blue.100}'},
+                // Blue 800 on the blue 200 hover fill is only 4.42:1. The
+                // darker foreground keeps 12px interactive surface text at
+                // WCAG AA contrast in both its normal and hover states.
+                value: {base: '{colors.blue.900}', _dark: '{colors.blue.100}'},
               },
               hover: {
                 value: {base: '{colors.blue.200}', _dark: '{colors.blue.800}'},
