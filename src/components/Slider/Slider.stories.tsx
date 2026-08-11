@@ -99,6 +99,12 @@ export const Default: Story = {
   render: args => <ControlledSingleSlider {...args} />,
 };
 
+export const CustomWidth: Story = {
+  render: () => (
+    <ControlledSingleSlider label="Volume" value={50} width={320} />
+  ),
+};
+
 export const Range: Story = {
   render: () => <ControlledRangeSlider label="Price range" value={[20, 80]} />,
 };

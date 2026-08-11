@@ -119,6 +119,47 @@ describe('Slider', () => {
     expect(slider).toHaveAttribute('aria-valuenow', '50');
   });
 
+  it('applies numeric and string widths to the field root', () => {
+    const {rerender} = render(
+      <Slider
+        data-testid="slider"
+        label="Volume"
+        onChange={noop}
+        value={50}
+        width={320}
+      />,
+    );
+
+    expect(screen.getByTestId('slider')).toHaveStyle({width: '320px'});
+
+    rerender(
+      <Slider
+        data-testid="slider"
+        label="Volume"
+        onChange={noop}
+        value={50}
+        width="50%"
+      />,
+    );
+
+    expect(screen.getByTestId('slider')).toHaveStyle({width: '50%'});
+  });
+
+  it('lets consumer style override width', () => {
+    render(
+      <Slider
+        data-testid="slider"
+        label="Volume"
+        onChange={noop}
+        style={{width: '10rem'}}
+        value={50}
+        width={320}
+      />,
+    );
+
+    expect(screen.getByTestId('slider')).toHaveStyle({width: '10rem'});
+  });
+
   it('renders labelled range thumbs', () => {
     render(<Slider label="Price range" onChange={() => {}} value={[20, 80]} />);
 

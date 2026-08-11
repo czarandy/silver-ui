@@ -19,6 +19,7 @@ import {
 } from 'components/Field';
 import {sliderRecipe} from 'components/Slider/Slider.recipe';
 import {Tooltip} from 'components/Tooltip';
+import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 export type SliderOrientation = 'horizontal' | 'vertical';
@@ -117,6 +118,10 @@ export type SliderBaseProps = {
    * @default 'tooltip'
    */
   valueDisplay?: SliderValueDisplay;
+  /**
+   * Slider width. Numbers are pixels, strings are used as-is.
+   */
+  width?: SizeValue;
 } & FieldNecessity;
 
 export type SliderSingleProps = SliderBaseProps & {
@@ -216,6 +221,7 @@ export function Slider({
   style,
   value,
   valueDisplay = 'tooltip',
+  width,
   ...props
 }: SliderProps): React.JSX.Element {
   const inputId = useId();
@@ -490,6 +496,8 @@ export function Slider({
     ) : null;
 
   const necessity = getNecessity(isOptional, isRequired);
+  const rootStyle: CSSProperties | undefined =
+    width == null ? style : {width: toPixelSize(width), ...style};
 
   return (
     <Field
@@ -509,7 +517,7 @@ export function Slider({
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
       statusVariant="detached"
-      style={style}>
+      style={rootStyle}>
       {htmlName == null
         ? null
         : values.map((currentValue, index) => (
