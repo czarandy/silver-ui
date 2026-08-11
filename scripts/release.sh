@@ -199,6 +199,14 @@ info "Validating package exports (publint)"
 pnpm exec publint
 ok "publint passed"
 
+info "Validating package types (attw)"
+# esm-only: the CJS build ships without .d.cts, so the strict profile's
+# node16-CJS and node10 checks fail on known, tracked gaps. styles.css is
+# excluded because attw can only check JS/type entrypoints; ./Button stands
+# in for the wildcard component subpaths attw cannot expand.
+pnpm exec attw --pack . --profile esm-only --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks
+ok "attw passed"
+
 info "Running package smoke test"
 node scripts/package-smoke-test.mjs
 ok "Package smoke test passed"
