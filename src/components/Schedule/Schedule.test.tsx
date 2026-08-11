@@ -10,6 +10,7 @@ import {
 import {Component, useState, type ErrorInfo, type ReactNode} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {buttonRecipe} from 'components/Button/Button.recipe';
+import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover';
 import {createEventFromISO} from 'components/Schedule/CalendarEvent';
 import {createScheduleDayView} from 'components/Schedule/DayView';
@@ -2856,12 +2857,14 @@ describe('Schedule', () => {
     // minute is simply `hour * 60 + clientY`.
     function ScheduleWithEventCreate({
       defaultDurationMinutes,
+      hasLayoutHeader = false,
       onCreate,
       snapMinutes,
       withMovePlugin = false,
       withPopoverPlugin = false,
     }: {
       defaultDurationMinutes?: number;
+      hasLayoutHeader?: boolean;
       onCreate: (draft: ScheduleEventDraft) => void;
       snapMinutes?: number;
       withMovePlugin?: boolean;
@@ -2869,17 +2872,28 @@ describe('Schedule', () => {
     }) {
       const createPlugin = useScheduleEventCreatePlugin({
         defaultDurationMinutes,
-        renderContent: ({close, draft}) => (
-          <button
-            data-testid="save-draft"
-            onClick={() => {
-              onCreate(draft);
-              close();
-            }}
-            type="button">
-            Save draft
-          </button>
-        ),
+        renderContent: ({close, draft}) => {
+          const saveButton = (
+            <button
+              data-testid="save-draft"
+              onClick={() => {
+                onCreate(draft);
+                close();
+              }}
+              type="button">
+              Save draft
+            </button>
+          );
+          return hasLayoutHeader ? (
+            <Layout
+              content={<LayoutContent>{saveButton}</LayoutContent>}
+              header={<LayoutHeader title="New appointment" />}
+              height="auto"
+            />
+          ) : (
+            saveButton
+          );
+        },
         snapMinutes,
       });
       const movePlugin = useScheduleEventMovePlugin({onMove: () => {}});
@@ -3120,6 +3134,26 @@ describe('Schedule', () => {
       saveDraft();
 
       expect(onCreate).toHaveBeenCalledTimes(1);
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('integrates its close action into LayoutHeader', () => {
+      render(
+        <ScheduleWithEventCreate
+          hasLayoutHeader
+          onCreate={vi.fn<(draft: ScheduleEventDraft) => void>()}
+        />,
+      );
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+
+      fireEvent.click(
+        screen.getByRole('button', {hidden: true, name: 'Close'}),
+      );
+
       expect(
         screen.queryByTestId('schedule-event-create-ghost'),
       ).not.toBeInTheDocument();

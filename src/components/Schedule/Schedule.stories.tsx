@@ -4,6 +4,12 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useMemo, useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
+import {
+  Layout,
+  LayoutContent,
+  LayoutFooter,
+  LayoutHeader,
+} from 'components/Layout';
 import {createEventFromISO} from 'components/Schedule/CalendarEvent';
 import {createScheduleDayView} from 'components/Schedule/DayView';
 import {createScheduleListView} from 'components/Schedule/ListView';
@@ -345,25 +351,49 @@ function CreateEventForm({
 
   return (
     <form
+      className={css({w: 80})}
       onSubmit={submitEvent => {
         submitEvent.preventDefault();
         onCreate(title.trim() === '' ? 'Untitled event' : title.trim());
-      }}
-      style={{display: 'grid', gap: '0.75rem', padding: '0.75rem', width: 280}}>
-      <TextInput
-        hasAutoFocus
-        label="Title"
-        onChange={setTitle}
-        placeholder="Add a title"
-        value={title}
+      }}>
+      <Layout
+        content={
+          <LayoutContent className={css({display: 'grid', gap: 3})}>
+            <TextInput
+              hasAutoFocus
+              label="Title"
+              onChange={setTitle}
+              placeholder="Add a title"
+              value={title}
+            />
+            <Text color="secondary" type="supporting">
+              {timeLabel}
+            </Text>
+          </LayoutContent>
+        }
+        footer={
+          <LayoutFooter
+            primaryButton={
+              <Button
+                label="Create"
+                size="sm"
+                type="submit"
+                variant="primary"
+              />
+            }
+            secondaryButton={
+              <Button
+                label="Cancel"
+                onClick={onCancel}
+                size="sm"
+                variant="ghost"
+              />
+            }
+          />
+        }
+        header={<LayoutHeader title="New event" />}
+        height="auto"
       />
-      <Text color="secondary" type="supporting">
-        {timeLabel}
-      </Text>
-      <div style={{display: 'flex', gap: '0.5rem', justifyContent: 'flex-end'}}>
-        <Button label="Cancel" onClick={onCancel} size="sm" variant="ghost" />
-        <Button label="Create" size="sm" type="submit" variant="primary" />
-      </div>
     </form>
   );
 }
