@@ -311,6 +311,7 @@ describe('DateRangeInput', () => {
     const trigger = screen.getByRole('combobox', {name: 'Window'});
     expect(trigger).toBeInTheDocument();
     expect(trigger.tagName).toBe('BUTTON');
+    expect(screen.getByTestId('calendar-icon')).toBeInTheDocument();
     expect(trigger).toHaveTextContent('May 10, 2026 - May 12, 2026');
     expect(trigger).toBeEnabled();
   });

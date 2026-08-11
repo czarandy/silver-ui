@@ -264,11 +264,11 @@ export function DateRangeInput({
           ref={ref}
           role="combobox"
           type="button">
+          <span className={classes.icon}>
+            <Icon data-testid="calendar-icon" icon={CalendarIcon} size="sm" />
+          </span>
           <span className={classes.value}>
             {displayValue === '' ? placeholder : displayValue}
-          </span>
-          <span className={classes.icon}>
-            <Icon icon={CalendarIcon} size="sm" />
           </span>
         </button>
         {hasClear && value != null && !isDisabled && !isLoading ? (
