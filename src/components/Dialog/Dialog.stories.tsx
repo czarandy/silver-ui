@@ -13,6 +13,7 @@ import {
   LayoutHeader,
 } from 'components/Layout';
 import {Select} from 'components/Select';
+import {HStack} from 'components/Stack';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 
@@ -22,6 +23,7 @@ const meta: Meta<typeof Dialog> = {
   argTypes: {
     dismissBehavior: {control: 'object'},
     maxHeight: {control: 'text'},
+    position: {control: 'object'},
     role: {
       control: {type: 'select'},
       options: ['dialog', 'alertdialog'],
@@ -269,6 +271,47 @@ export const Fullscreen: Story = {
           />
         </Dialog>
       </>
+    );
+  },
+};
+
+/**
+ * `start` and `end` are logical offsets: `end` places the dialog on the right
+ * in LTR and on the left in RTL.
+ */
+export const LogicalPosition: Story = {
+  args: {position: {end: 24, top: 24}},
+  render: args => {
+    const [direction, setDirection] = useState<'ltr' | 'rtl'>('ltr');
+    const [isOpen, setIsOpen] = useState(false);
+    const openDialog = (nextDirection: 'ltr' | 'rtl') => {
+      setDirection(nextDirection);
+      setIsOpen(true);
+    };
+
+    return (
+      <div dir={direction}>
+        <HStack gap={3}>
+          <Button label="Open LTR dialog" onClick={() => openDialog('ltr')} />
+          <Button label="Open RTL dialog" onClick={() => openDialog('rtl')} />
+        </HStack>
+        <Dialog {...args} isOpen={isOpen} onOpenChange={setIsOpen}>
+          <Layout
+            content={
+              <LayoutContent>
+                <Text as="p" color="secondary">
+                  This dialog is positioned at the logical end of the viewport.
+                </Text>
+              </LayoutContent>
+            }
+            header={
+              <LayoutHeader
+                title={`Logical end (${direction.toUpperCase()})`}
+              />
+            }
+          />
+        </Dialog>
+      </div>
     );
   },
 };
