@@ -26,7 +26,7 @@
         "default": "./dist/index.js"
       },
       "require": {
-        "types": "./dist/index.d.ts",
+        "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
     },
@@ -37,7 +37,7 @@
         "default": "./dist/hooks/index.js"
       },
       "require": {
-        "types": "./dist/hooks/index.d.ts",
+        "types": "./dist/hooks/index.d.cts",
         "default": "./dist/hooks/index.cjs"
       }
     },
@@ -47,7 +47,7 @@
         "default": "./dist/components/*/index.js"
       },
       "require": {
-        "types": "./dist/components/*/index.d.ts",
+        "types": "./dist/components/*/index.d.cts",
         "default": "./dist/components/*/index.cjs"
       }
     }
@@ -58,7 +58,7 @@
   "scripts": {
     "prepare": "husky && panda codegen",
     "storybook": "storybook dev -p 6006 --ci",
-    "build": "panda codegen && tsup && node scripts/preserve-use-client.mjs && tsc -p tsconfig.build.json && node scripts/rewrite-declaration-aliases.mjs && panda cssgen --outfile dist/styles.css --minify && node scripts/inject-system-theme.mjs",
+    "build": "panda codegen && tsup && node scripts/preserve-use-client.mjs && tsc -p tsconfig.build.json && node scripts/rewrite-declaration-aliases.mjs && node scripts/emit-cjs-declarations.mjs && panda cssgen --outfile dist/styles.css --minify && node scripts/inject-system-theme.mjs",
     "build:storybook": "panda codegen && storybook build",
     "sync:brand": "cp brand/logo.svg brand/wordmark.svg site/public/ && cp brand/wordmark.svg site/src/assets/",
     "build:site": "pnpm sync:brand && pnpm -C site build",
@@ -70,7 +70,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "check:exports": "pnpm build && publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks",
+    "check:exports": "pnpm build && publint && attw --pack . --profile node16 --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks",
     "clean": "rm -rf dist storybook-static",
     "theme": "npx tsx scripts/generate-theme.ts",
     "release": "bash scripts/release.sh"

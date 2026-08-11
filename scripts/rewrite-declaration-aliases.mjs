@@ -15,7 +15,7 @@ import {fileURLToPath} from 'node:url';
  * extensionless survives.
  */
 
-const specifierPattern =
+export const specifierPattern =
   /\b(from\s*['"]|import\s*\(\s*['"])([^'"]+)(['"]\s*\)?)/g;
 
 export async function rewriteDeclarationSpecifiers(distDir) {
@@ -142,18 +142,18 @@ async function verifyDeclarationSpecifiers(distDir, declarationFiles) {
   }
 }
 
-async function findDeclarationFiles(directory) {
+export async function findDeclarationFiles(directory, extension = '.d.ts') {
   const files = [];
   const entries = await readdir(directory, {withFileTypes: true});
 
   for (const entry of entries) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) {
-      files.push(...(await findDeclarationFiles(path)));
+      files.push(...(await findDeclarationFiles(path, extension)));
       continue;
     }
 
-    if (entry.isFile() && path.endsWith('.d.ts')) {
+    if (entry.isFile() && path.endsWith(extension)) {
       files.push(path);
     }
   }
@@ -161,11 +161,11 @@ async function findDeclarationFiles(directory) {
   return files;
 }
 
-function isRelativeSpecifier(specifier) {
+export function isRelativeSpecifier(specifier) {
   return specifier.startsWith('./') || specifier.startsWith('../');
 }
 
-function isInside(directory, path) {
+export function isInside(directory, path) {
   return path === directory || path.startsWith(`${directory}${sep}`);
 }
 
