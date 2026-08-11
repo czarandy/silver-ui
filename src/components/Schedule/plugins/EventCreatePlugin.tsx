@@ -126,8 +126,10 @@ export interface ScheduleEventCreatePluginOptions {
    */
   defaultDurationMinutes?: number;
   /**
-   * Renders the popover content anchored to the ghost event. Receives the
-   * drafted range and `close` so the content can dismiss itself after saving.
+   * Renders the popover content anchored to the ghost event. A nested
+   * `LayoutHeader` receives the popover's automatic close button. The drafted
+   * range and `close` are also provided so the content can dismiss itself after
+   * saving.
    */
   renderContent: (props: ScheduleEventCreateRenderProps) => ReactNode;
   /**
@@ -329,8 +331,6 @@ function ScheduleEventCreateGhost({
     onDismiss(id);
   }, [id, onDismiss]);
   const popover = usePopover({
-    // The consumer's content renders its own dismiss affordance via `close`.
-    hasCloseButton: false,
     label: 'Create event',
     onHide: handleHide,
     role: 'dialog',
