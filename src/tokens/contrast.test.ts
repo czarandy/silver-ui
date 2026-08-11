@@ -128,6 +128,13 @@ const PAIRINGS: {name: string; bg: string; fg: string}[] = [
     bg: `{colors.surface.${c}.DEFAULT}`,
     fg: `{colors.surface.${c}.fg}`,
   })),
+  // Interactive ScheduleEvent pills switch to the surface hover fill while
+  // retaining their normal foreground. Keep the 12px title/time text at AA.
+  {
+    name: 'interactive blue ScheduleEvent hover',
+    bg: '{colors.surface.blue.hover}',
+    fg: '{colors.surface.blue.fg}',
+  },
 ];
 
 const MODES: Mode[] = ['base', '_dark'];
