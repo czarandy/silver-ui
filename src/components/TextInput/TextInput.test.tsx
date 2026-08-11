@@ -34,6 +34,26 @@ describe('TextInput', () => {
     expect(clearButton).toHaveClass(inputStyles.clearButton);
     await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith('', null);
+    expect(screen.getByRole('textbox', {name: 'Name'})).toHaveFocus();
+  });
+
+  it('forwards composite widget attributes to the input', () => {
+    render(
+      <TextInput
+        aria-activedescendant="option-2"
+        aria-autocomplete="list"
+        aria-controls="search-results"
+        label="Search"
+        onChange={noop}
+        role="searchbox"
+        value=""
+      />,
+    );
+
+    const input = screen.getByRole('searchbox', {name: 'Search'});
+    expect(input).toHaveAttribute('aria-activedescendant', 'option-2');
+    expect(input).toHaveAttribute('aria-autocomplete', 'list');
+    expect(input).toHaveAttribute('aria-controls', 'search-results');
   });
 
   it('does not offset a clear button when end content follows it', () => {

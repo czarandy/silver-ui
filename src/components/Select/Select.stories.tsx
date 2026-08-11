@@ -144,6 +144,14 @@ export const Default: Story = {
 
 export const Searchable: Story = {
   args: {hasSearch: true},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The dropdown search uses the standard TextInput styling, with a leading search icon and a clear action after typing.',
+      },
+    },
+  },
   render: (args: SelectProps) => <SelectStory {...args} />,
 };
 

@@ -3,7 +3,6 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
 export const multiSelectMenuRecipe = sva({
   slots: [
     'menu',
-    'search',
     'option',
     'optionContent',
     'checkbox',
@@ -19,20 +18,6 @@ export const multiSelectMenuRecipe = sva({
       maxH: '80',
       overflowY: 'auto',
       p: '1',
-    },
-    search: {
-      w: 'full',
-      px: '2',
-      py: '1',
-      borderWidth: 'default',
-      borderStyle: 'solid',
-      borderColor: 'border.emphasized',
-      borderRadius: 'md',
-      fontFamily: 'body',
-      outline: 'none',
-      _focus: {
-        borderColor: 'primary',
-      },
     },
     option: {
       display: 'flex',

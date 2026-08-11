@@ -335,7 +335,7 @@ describe('MultiSelect', () => {
   it('filters options when search is enabled', async () => {
     const user = userEvent.setup();
 
-    render(
+    const {container} = render(
       <MultiSelect
         hasSearch
         label="Columns"
@@ -352,7 +352,12 @@ describe('MultiSelect', () => {
       hidden: true,
       name: 'Columns options',
     });
+    expect(search).toHaveAttribute('aria-autocomplete', 'list');
     expect(search).toHaveAttribute('aria-controls', listbox.id);
+    // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- the decorative search icon has no accessible role
+    expect(container.querySelector('.lucide-search')).toBeInTheDocument();
+    // eslint-disable-next-line testing-library/no-node-access -- the standard input recipe is applied to the TextInput wrapper
+    expect(search.parentElement).toHaveClass(inputRecipe());
 
     await user.type(search, 'ro');
     await user.keyboard('{ArrowDown}');
@@ -364,6 +369,17 @@ describe('MultiSelect', () => {
     expect(
       screen.getByRole('option', {hidden: true, name: 'Role'}),
     ).toHaveAttribute('id', search.getAttribute('aria-activedescendant'));
+
+    await user.click(
+      screen.getByRole('button', {
+        hidden: true,
+        name: 'Clear Search Columns',
+      }),
+    );
+    expect(search).toHaveValue('');
+    expect(search).toHaveFocus();
+    expect(screen.getByText('Name')).toBeInTheDocument();
+    expect(screen.getByText('Email')).toBeInTheDocument();
   });
 
   it('selects and deselects all enabled options', async () => {
