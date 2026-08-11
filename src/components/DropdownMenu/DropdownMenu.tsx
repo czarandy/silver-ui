@@ -22,6 +22,7 @@ import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -39,6 +40,11 @@ type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
 export type DropdownMenuButtonProps = DistributiveOmit<ButtonProps, 'onClick'>;
 
 export interface DropdownMenuProps {
+  /**
+   * Alignment along the placement axis.
+   * @default 'start'
+   */
+  alignment?: LayerAlignment;
   /**
    * Trigger button props.
    */
@@ -78,6 +84,14 @@ export interface DropdownMenuProps {
    */
   menuWidth?: number | string;
   /**
+   * Gap in pixels between the menu and its trigger along the inline axis.
+   */
+  offsetX?: number;
+  /**
+   * Gap in pixels between the menu and its trigger along the block axis.
+   */
+  offsetY?: number;
+  /**
    * Click handler for the trigger button.
    */
   onClick?: () => void;
@@ -85,6 +99,11 @@ export interface DropdownMenuProps {
    * Called when the menu open state changes.
    */
   onOpenChange?: (isOpen: boolean) => void;
+  /**
+   * Position relative to the trigger.
+   * @default 'below'
+   */
+  placement?: LayerPlacement;
   /**
    * Ref forwarded to the trigger button.
    */
@@ -112,6 +131,7 @@ const defaultButton = {label: 'Menu'} satisfies DropdownMenuButtonProps;
  * Button-triggered menu for grouped actions.
  */
 export function DropdownMenu({
+  alignment = 'start',
   button = defaultButton,
   children,
   className,
@@ -121,8 +141,11 @@ export function DropdownMenu({
   isMenuOpen,
   items,
   menuWidth,
+  offsetX,
+  offsetY,
   onClick,
   onOpenChange,
+  placement = 'below',
   ref,
   style,
 }: DropdownMenuProps): React.JSX.Element {
@@ -169,6 +192,7 @@ export function DropdownMenu({
 
   return (
     <Popover
+      alignment={alignment}
       content={
         <DropdownMenuContext value={contextValue}>
           {/* eslint-disable-next-line jsx-a11y-x/no-static-element-interactions -- keyboard handler captures events for the parent role="menu" element */}
@@ -184,6 +208,8 @@ export function DropdownMenu({
       hasAutoFocus={hasAutoFocus}
       hasCloseButton={false}
       isOpen={isOpen}
+      offsetX={offsetX}
+      offsetY={offsetY}
       onOpenChange={(isNextOpen: boolean): void => {
         if (isControlled) {
           onOpenChange?.(isNextOpen);
@@ -191,6 +217,7 @@ export function DropdownMenu({
           setInternalOpen(isNextOpen);
         }
       }}
+      placement={placement}
       role="menu"
       style={{width: formatMenuWidth(menuWidth), ...style}}>
       <Button

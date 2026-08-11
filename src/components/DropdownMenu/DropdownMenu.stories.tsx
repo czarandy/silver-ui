@@ -35,6 +35,22 @@ export const Compound: Story = {
   ),
 };
 
+export const EndAligned: Story = {
+  args: {
+    alignment: 'end',
+    items: [
+      {icon: Edit, label: 'Edit'},
+      {icon: Archive, label: 'Archive'},
+      {type: 'divider'},
+      {icon: Trash2, label: 'Delete'},
+    ],
+    isMenuOpen: true,
+    menuWidth: 240,
+    offsetY: 8,
+    placement: 'below',
+  },
+};
+
 export const WithDescriptions: Story = {
   args: {
     items: [

@@ -4,6 +4,7 @@ import {Edit, Trash2} from 'lucide-react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
+import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -56,6 +57,30 @@ describe('DropdownMenu', () => {
 
     await user.click(screen.getByRole('button', {name: 'Actions'}));
     expect(screen.getByRole('separator', {hidden: true})).toBeInTheDocument();
+  });
+
+  it('forwards positioning props to the popover', () => {
+    render(
+      <DropdownMenu
+        alignment="end"
+        button={{label: 'Actions'}}
+        isMenuOpen
+        items={[{label: 'Edit'}]}
+        offsetX={8}
+        offsetY={4}
+        placement="above"
+      />,
+    );
+
+    const popover = assertNonNull(
+      // eslint-disable-next-line testing-library/no-node-access -- the positioned native popover layer has no accessible role or test ID
+      document.querySelector<HTMLElement>('[popover]'),
+    );
+    expect(popover).toHaveStyle({
+      marginBlockEnd: '4px',
+      marginInlineStart: '8px',
+      positionArea: 'block-start span-inline-start',
+    });
   });
 
   it('renders sections with titles', async () => {
