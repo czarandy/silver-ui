@@ -7,6 +7,8 @@ export {
 export {
   Clickable,
   type ClickableBaseProps,
+  ClickableContainer,
+  type ClickableContainerProps,
   type ClickableProps,
 } from 'components/Clickable';
 export {CopyButton, type CopyButtonProps} from 'components/CopyButton';

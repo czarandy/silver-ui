@@ -33,6 +33,7 @@ export interface ActionElementProps {
   as?: LinkComponent;
   children?: ReactNode;
   className?: string;
+  'data-clickable-control'?: string;
   'data-testid'?: string;
   form?: string;
   href?: string;
