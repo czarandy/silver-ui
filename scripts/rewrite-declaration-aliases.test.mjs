@@ -117,7 +117,6 @@ describe('rewriteDeclarationSpecifiers', () => {
     const source = [
       "import { ReactNode } from 'react';",
       "import { Temporal } from '@js-temporal/polyfill';",
-      "import { css } from 'styled-system/css';",
       '',
     ].join('\n');
     await writeDeclaration('components/Button/Button.d.ts', source);
@@ -127,16 +126,29 @@ describe('rewriteDeclarationSpecifiers', () => {
     expect(await readDeclaration('components/Button/Button.d.ts')).toBe(source);
   });
 
-  it('leaves relative specifiers that escape dist untouched', async () => {
-    const source =
-      "export declare const recipe: import('../../../styled-system/types').RecipeDefinition;\n";
-    await writeDeclaration('components/Timeline/Timeline.recipe.d.ts', source);
+  it('throws for a relative specifier that escapes dist', async () => {
+    // prune-private-declarations.mjs removes the recipe declarations that
+    // used to carry these; anything left pointing outside dist is broken
+    // for consumers and must fail the build.
+    await writeDeclaration(
+      'components/Timeline/Timeline.d.ts',
+      "export declare const recipe: import('../../../styled-system/types').RecipeDefinition;\n",
+    );
 
-    await rewriteDeclarationSpecifiers(distDir);
+    await expect(rewriteDeclarationSpecifiers(distDir)).rejects.toThrow(
+      /Could not resolve relative declaration specifier "\.\.\/\.\.\/\.\.\/styled-system\/types"/,
+    );
+  });
 
-    expect(
-      await readDeclaration('components/Timeline/Timeline.recipe.d.ts'),
-    ).toBe(source);
+  it('fails verification when a bare styled-system specifier leaks', async () => {
+    await writeDeclaration(
+      'components/Button/Button.d.ts',
+      "import { RecipeVariantProps } from 'styled-system/css';\nexport declare const x: RecipeVariantProps;\n",
+    );
+
+    await expect(rewriteDeclarationSpecifiers(distDir)).rejects.toThrow(
+      /declaration alias "styled-system\/css" leaked/,
+    );
   });
 
   it('is idempotent', async () => {
