@@ -11,6 +11,7 @@ import {Divider} from 'components/Divider';
 import {Item} from 'components/Item';
 import {LayoutFooter, LayoutHeader, LayoutPanel} from 'components/Layout';
 import {Skeleton} from 'components/Skeleton';
+import {Slider} from 'components/Slider';
 import {HStack, VStack} from 'components/Stack';
 import type {WidthValue} from 'internal/toPixelSize';
 
@@ -171,6 +172,18 @@ const cases: Record<string, SizeCase> = {
   'Skeleton width': {
     property: 'width',
     render: size => <Skeleton data-testid="size" width={size} />,
+  },
+  'Slider width': {
+    property: 'width',
+    render: size => (
+      <Slider
+        data-testid="size"
+        label="Volume"
+        onChange={() => {}}
+        value={50}
+        width={size}
+      />
+    ),
   },
   'VStack height': {
     property: 'height',
