@@ -76,16 +76,17 @@ describe('emitCjsDeclarations', () => {
     );
   });
 
-  it('leaves relative specifiers that escape dist untouched', async () => {
-    const source =
-      "export declare const recipe: import('../../../styled-system/types.js').RecipeDefinition;\n";
-    await writeDeclaration('components/Timeline/Timeline.recipe.d.ts', source);
+  it('throws for a relative specifier that escapes dist', async () => {
+    // rewrite-declaration-aliases.mjs already rejects these on the .d.ts
+    // side; the .d.cts verification must stay just as strict.
+    await writeDeclaration(
+      'components/Timeline/Timeline.d.ts',
+      "export declare const recipe: import('../../../styled-system/types.js').RecipeDefinition;\n",
+    );
 
-    await emitCjsDeclarations(distDir);
-
-    expect(
-      await readDeclaration('components/Timeline/Timeline.recipe.d.cts'),
-    ).toBe(source);
+    await expect(emitCjsDeclarations(distDir)).rejects.toThrow(
+      /has no matching CJS declaration file/,
+    );
   });
 
   it('drops the declaration map reference from the copy', async () => {

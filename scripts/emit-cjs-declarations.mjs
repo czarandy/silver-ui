@@ -5,7 +5,6 @@ import process from 'node:process';
 import {fileURLToPath} from 'node:url';
 import {
   findDeclarationFiles,
-  isInside,
   isRelativeSpecifier,
   specifierPattern,
 } from './rewrite-declaration-aliases.mjs';
@@ -30,9 +29,6 @@ export async function emitCjsDeclarations(distDir) {
     const rewritten = source
       .replace(specifierPattern, (match, prefix, specifier, suffix) => {
         if (!isRelativeSpecifier(specifier) || !specifier.endsWith('.js')) {
-          return match;
-        }
-        if (!isInside(distDir, resolve(dirname(file), specifier))) {
           return match;
         }
         return `${prefix}${specifier.slice(0, -'.js'.length)}.cjs${suffix}`;
@@ -63,9 +59,6 @@ async function verifyCjsDeclarations(distDir) {
         continue;
       }
       const base = resolve(dirname(file), specifier);
-      if (!isInside(distDir, base)) {
-        continue;
-      }
       if (!specifier.endsWith('.cjs')) {
         problems.push(
           `${file}: relative specifier "${specifier}" does not use the .cjs extension`,

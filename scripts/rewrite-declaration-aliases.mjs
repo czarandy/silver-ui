@@ -36,7 +36,7 @@ export async function rewriteDeclarationSpecifiers(distDir) {
     const rewritten = source.replace(
       specifierPattern,
       (match, prefix, specifier, suffix) => {
-        const target = resolveSpecifier(specifier, file, distDir, aliases);
+        const target = resolveSpecifier(specifier, file, aliases);
         if (target == null) {
           return match;
         }
@@ -56,25 +56,22 @@ export async function rewriteDeclarationSpecifiers(distDir) {
     }
   }
 
-  await verifyDeclarationSpecifiers(distDir, declarationFiles);
+  await verifyDeclarationSpecifiers(declarationFiles);
 
   return rewriteCount;
 }
 
 /**
- * Resolve a specifier to the `.d.ts` file it refers to, or null when it
- * should be left untouched (bare package imports, and relative specifiers
- * that escape dist — the unpublished styled-system references, tracked
- * separately). Throws for alias or in-dist relative specifiers that
- * resolve to nothing, so a bad emit fails the build instead of shipping.
+ * Resolve a specifier to the `.d.ts` file it refers to, or null when it is
+ * a bare package import that should be left untouched. Throws for alias or
+ * relative specifiers that resolve to nothing — including paths escaping
+ * dist entirely — so a bad emit fails the build instead of shipping.
+ * (prune-private-declarations.mjs removes the only legitimate sources of
+ * out-of-dist specifiers before this runs.)
  */
-function resolveSpecifier(specifier, file, distDir, aliases) {
+function resolveSpecifier(specifier, file, aliases) {
   if (isRelativeSpecifier(specifier)) {
     const base = resolve(dirname(file), specifier);
-    if (!isInside(distDir, base)) {
-      return null;
-    }
-
     const withoutJs = specifier.endsWith('.js')
       ? base.slice(0, -'.js'.length)
       : base;
@@ -99,7 +96,7 @@ function resolveSpecifier(specifier, file, distDir, aliases) {
   return aliasTarget;
 }
 
-async function verifyDeclarationSpecifiers(distDir, declarationFiles) {
+async function verifyDeclarationSpecifiers(declarationFiles) {
   const problems = [];
 
   for (const file of declarationFiles) {
@@ -108,9 +105,6 @@ async function verifyDeclarationSpecifiers(distDir, declarationFiles) {
       const specifier = match[2];
       if (isRelativeSpecifier(specifier)) {
         const base = resolve(dirname(file), specifier);
-        if (!isInside(distDir, base)) {
-          continue;
-        }
         if (!specifier.endsWith('.js')) {
           problems.push(
             `${file}: relative specifier "${specifier}" is not fully specified`,
@@ -126,7 +120,9 @@ async function verifyDeclarationSpecifiers(distDir, declarationFiles) {
       }
 
       if (
-        /^(?:components|hooks|internal|themes|utils)(?:\/|$)/.test(specifier)
+        /^(?:components|hooks|internal|themes|utils|styled-system)(?:\/|$)/.test(
+          specifier,
+        )
       ) {
         problems.push(`${file}: declaration alias "${specifier}" leaked`);
       }
@@ -163,10 +159,6 @@ export async function findDeclarationFiles(directory, extension = '.d.ts') {
 
 export function isRelativeSpecifier(specifier) {
   return specifier.startsWith('./') || specifier.startsWith('../');
-}
-
-export function isInside(directory, path) {
-  return path === directory || path.startsWith(`${directory}${sep}`);
 }
 
 /**
