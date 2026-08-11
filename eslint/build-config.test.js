@@ -37,7 +37,7 @@ describe('build config', () => {
         default: './dist/components/*/index.js',
       },
       require: {
-        types: './dist/components/*/index.d.ts',
+        types: './dist/components/*/index.d.cts',
         default: './dist/components/*/index.cjs',
       },
     });

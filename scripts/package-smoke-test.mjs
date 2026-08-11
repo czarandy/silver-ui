@@ -98,12 +98,29 @@ export type PublicToken = SpacingToken;
 export type PublicHookOptions = UseHotkeyOptions;
 `.trimStart(),
   );
+  // A .cts module resolves silver-ui through the `require` condition, so it
+  // exercises the shipped .d.cts declarations (issue #478).
+  await writeFile(
+    join(consumerDir, 'require.cts'),
+    `
+import {cx, type ButtonProps as RootButtonProps} from 'silver-ui';
+import {Button, type ButtonProps} from 'silver-ui/Button';
+import {useHotkey, type UseHotkeyOptions} from 'silver-ui/hooks';
+
+export const components = [Button] as const;
+export const className = cx('base', 'extra');
+export const hooks = [useHotkey] as const;
+export type PublicProps = ButtonProps | RootButtonProps;
+export type PublicHookOptions = UseHotkeyOptions;
+`.trimStart(),
+  );
   // Compile the same consumer under both resolution modes: bundler matches
   // our own tsconfig, nodenext requires fully specified specifiers in the
-  // shipped declarations (issue #461).
-  for (const [moduleKind, moduleResolution] of [
-    ['ESNext', 'bundler'],
-    ['NodeNext', 'NodeNext'],
+  // shipped declarations (issue #461). Only the nodenext pass includes the
+  // CJS consumer — module: ESNext cannot compile .cts files.
+  for (const [moduleKind, moduleResolution, include] of [
+    ['ESNext', 'bundler', ['index.ts']],
+    ['NodeNext', 'NodeNext', ['index.ts', 'require.cts']],
   ]) {
     const tsconfigPath = join(
       consumerDir,
@@ -124,7 +141,7 @@ export type PublicHookOptions = UseHotkeyOptions;
             strict: true,
             target: 'ES2022',
           },
-          include: ['index.ts'],
+          include,
         },
         null,
         2,

@@ -40,11 +40,12 @@ jobs:
       - run: pnpm lint
       - run: pnpm build
       - run: pnpm exec publint
-      # esm-only: the CJS build ships without .d.cts, so the strict profile's
-      # node16-CJS and node10 checks fail on known, tracked gaps. styles.css is
-      # excluded because attw can only check JS/type entrypoints; ./Button
-      # stands in for the wildcard component subpaths attw cannot expand.
-      - run: pnpm exec attw --pack . --profile esm-only --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks
+      # node16 profile: node10 resolution ignores the exports map, so subpath
+      # entrypoints can never resolve there — not a gap we intend to close.
+      # styles.css is excluded because attw can only check JS/type entrypoints;
+      # ./Button stands in for the wildcard component subpaths attw cannot
+      # expand.
+      - run: pnpm exec attw --pack . --profile node16 --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks
       - run: node scripts/package-smoke-test.mjs
 
       # Sanity check: the tag being released must match package.json's version,
