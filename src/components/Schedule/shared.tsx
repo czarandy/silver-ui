@@ -2,7 +2,10 @@
 
 import {Temporal} from '@js-temporal/polyfill';
 import {
+  useCallback,
+  useEffect,
   useMemo,
+  useRef,
   type CSSProperties,
   type HTMLAttributes,
   type ReactNode,
@@ -15,6 +18,7 @@ import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
+import {useScheduleInteractionState} from 'components/Schedule/interaction';
 import type {
   CalendarEvent,
   ScheduleCategory,
@@ -296,11 +300,27 @@ export function useScheduleEventPopover(
   triggerProps?: ScheduleEventTriggerProps;
 } {
   const {categoryMap, plugins, timezoneID} = useScheduleContext();
+  const interactionState = useScheduleInteractionState();
+  const interactionTokenRef = useRef(Symbol('schedule-event-popover'));
+  const handleShow = useCallback(() => {
+    interactionState.markEventPopoverShown(interactionTokenRef.current);
+  }, [interactionState]);
+  const handleHide = useCallback(() => {
+    interactionState.markEventPopoverHidden(interactionTokenRef.current);
+  }, [interactionState]);
+  useEffect(
+    () => () => {
+      interactionState.unregisterEventPopover(interactionTokenRef.current);
+    },
+    [interactionState],
+  );
   const popover = usePopover({
     // Content renders its own close affordance via the `controls.close` passed
     // to renderEventPopover, so suppress the built-in close button.
     hasCloseButton: false,
     label: getEventAccessibleLabel(event, categoryMap, timezoneID),
+    onHide: handleHide,
+    onShow: handleShow,
     role: 'dialog',
   });
   const {hide} = popover;

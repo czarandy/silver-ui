@@ -13,6 +13,7 @@ import {
 } from 'react';
 import {usePopover} from 'components/Popover/usePopover';
 import {instantFromDateAndMinutes} from 'components/Schedule/dateMath';
+import {isEventPopoverDismissPointerEvent} from 'components/Schedule/interaction';
 import {
   formatTimeRange,
   getTimedEventBlockStyle,
@@ -588,6 +589,7 @@ export function useScheduleEventCreatePlugin(
       // pointer landing on the cell itself starts a draft. Touch is excluded:
       // the grid needs `touch-action` for scrolling.
       if (
+        isEventPopoverDismissPointerEvent(pointerEvent.nativeEvent) ||
         pointerEvent.button !== 0 ||
         pointerEvent.pointerType === 'touch' ||
         pointerEvent.target !== pointerEvent.currentTarget
