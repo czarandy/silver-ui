@@ -790,6 +790,8 @@ const DayCell = memo(function DayCell({
     rangeStart != null &&
     rangeEnd != null &&
     plainDateIsInRange(day.date, [rangeStart, rangeEnd]);
+  const hasRangeBackground =
+    isInRange && !plainDateIsEqual(rangeStart, rangeEnd);
   const isRangeStart =
     !effectivelyDisabled &&
     mode === 'range' &&
@@ -836,7 +838,7 @@ const DayCell = memo(function DayCell({
 
   return (
     <div className={styles.cell}>
-      {isInRange ? <div className={rangeBackgroundClass} /> : null}
+      {hasRangeBackground ? <div className={rangeBackgroundClass} /> : null}
       {isInPreview ? <div className={previewBackgroundClass} /> : null}
       <button
         aria-current={isToday ? 'date' : undefined}

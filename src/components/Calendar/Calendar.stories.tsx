@@ -73,6 +73,23 @@ export const Range: Story = {
   },
 };
 
+export const SingleDayRange: Story = {
+  render: () => {
+    const [value, setValue] = useState<DateRange | undefined>(() => ({
+      start: plainDateCreate(2026, 5, 5),
+      end: plainDateCreate(2026, 5, 5),
+    }));
+    return (
+      <Calendar
+        mode="range"
+        onChange={setValue}
+        value={value}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />
+    );
+  },
+};
+
 export const TwoMonths: Story = {
   render: () => {
     const [value, setValue] = useState<PlainDate | undefined>(() =>
