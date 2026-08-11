@@ -17,6 +17,7 @@ import {switchRecipe} from 'components/Switch/Switch.recipe';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {useResolvedSize, type ComponentSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
@@ -148,11 +149,6 @@ export function Switch({
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
-  const requirednessText = isOptional
-    ? 'Optional'
-    : isRequired
-      ? 'Required'
-      : null;
   const classes = switchRecipe({
     size,
     labelSpacing,
@@ -211,12 +207,7 @@ export function Switch({
       <Text as="span" color="inherit" type="label">
         {label}
       </Text>
-      {requirednessText != null ? (
-        <Text as="span" className={classes.requiredness} type="supporting">
-          <span aria-hidden="true"> · </span>
-          {requirednessText}
-        </Text>
-      ) : null}
+      <NecessityIndicator isOptional={isOptional} isRequired={isRequired} />
       {isNonEmptyReactNode(labelTooltip) ? (
         <Tooltip content={labelTooltip}>
           <span className={classes.tooltipIcon}>

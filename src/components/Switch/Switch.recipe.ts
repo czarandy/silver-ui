@@ -7,7 +7,6 @@ export const switchRecipe = sva({
     'labelWrapper',
     'label',
     'labelIcon',
-    'requiredness',
     'tooltipIcon',
     'status',
     'control',
@@ -44,10 +43,6 @@ export const switchRecipe = sva({
     labelIcon: {
       display: 'inline-flex',
       alignItems: 'center',
-    },
-    requiredness: {
-      fontWeight: 'normal',
-      color: 'fg.muted',
     },
     tooltipIcon: {
       display: 'inline-flex',
