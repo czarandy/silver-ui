@@ -1822,7 +1822,7 @@ describe('Schedule', () => {
 
     expect(
       screen.getByTestId('schedule-event-with-location'),
-    ).toHaveTextContent('Located sync9:00 AM - 10:00 AMRoom 4');
+    ).toHaveTextContent('Located syncRoom 49:00 AM - 10:00 AM');
   });
 
   it('keeps short visible timed event slices tall enough for title and time', () => {
