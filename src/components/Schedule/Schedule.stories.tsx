@@ -584,13 +584,16 @@ const weekEvents = [
     start: allDayISO(0),
     title: 'Research sprint',
   }),
-  createEventFromISO({
-    category: 'Sync',
-    end: timedISO(0, 11),
-    id: 'week-timed-1',
-    start: timedISO(0, 10),
-    title: 'Team sync',
-  }),
+  {
+    ...createEventFromISO({
+      category: 'Sync',
+      end: timedISO(0, 11),
+      id: 'week-timed-1',
+      start: timedISO(0, 10),
+      title: 'Team sync',
+    }),
+    location: 'Room 4',
+  },
   createEventFromISO({
     category: 'Design',
     end: timedISO(2, 15),
