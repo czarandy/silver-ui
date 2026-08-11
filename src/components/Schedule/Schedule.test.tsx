@@ -10,6 +10,7 @@ import {
 import {Component, useState, type ErrorInfo, type ReactNode} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {buttonRecipe} from 'components/Button/Button.recipe';
+import {Popover} from 'components/Popover';
 import {createEventFromISO} from 'components/Schedule/CalendarEvent';
 import {createScheduleDayView} from 'components/Schedule/DayView';
 import {createScheduleListView} from 'components/Schedule/ListView';
@@ -107,6 +108,20 @@ function createDragDataTransfer(): Pick<
     setData: vi.fn(),
     setDragImage: vi.fn(),
   };
+}
+
+// jsdom lacks a ToggleEvent constructor; fake the state transition emitted by
+// native popover light dismiss.
+function closeToggleEvent(): Event {
+  const event = new Event('toggle');
+  Object.assign(event, {newState: 'closed', oldState: 'open'});
+  return event;
+}
+
+async function nextAnimationFrame(): Promise<void> {
+  await new Promise(resolve => {
+    requestAnimationFrame(() => resolve(undefined));
+  });
 }
 
 beforeAll(() => {
@@ -2844,11 +2859,13 @@ describe('Schedule', () => {
       onCreate,
       snapMinutes,
       withMovePlugin = false,
+      withPopoverPlugin = false,
     }: {
       defaultDurationMinutes?: number;
       onCreate: (draft: ScheduleEventDraft) => void;
       snapMinutes?: number;
       withMovePlugin?: boolean;
+      withPopoverPlugin?: boolean;
     }) {
       const createPlugin = useScheduleEventCreatePlugin({
         defaultDurationMinutes,
@@ -2866,13 +2883,19 @@ describe('Schedule', () => {
         snapMinutes,
       });
       const movePlugin = useScheduleEventMovePlugin({onMove: () => {}});
+      const popoverPlugin = useScheduleEventPopoverPlugin();
+      const plugins = withPopoverPlugin
+        ? [createPlugin, popoverPlugin]
+        : withMovePlugin
+          ? [createPlugin, movePlugin]
+          : [createPlugin];
 
       return (
         <Schedule
           categories={categories}
           events={events}
           highlightDate={instantUTC(2026, 4, 13)}
-          plugins={withMovePlugin ? [createPlugin, movePlugin] : [createPlugin]}
+          plugins={plugins}
           timezoneID="UTC"
           view={createScheduleDayView({
             hourHeight: 60,
@@ -3130,6 +3153,78 @@ describe('Schedule', () => {
       );
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
+    });
+
+    it('does not create through an event popover light-dismiss gesture', async () => {
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} withPopoverPlugin />);
+
+      const eventTrigger = screen.getByTestId('schedule-event-visible');
+      fireEvent.click(eventTrigger);
+      expect(eventTrigger).toHaveAttribute('aria-expanded', 'true');
+
+      const layerId = eventTrigger.getAttribute('aria-controls');
+      expect(layerId).toBeTruthy();
+      // The browser emits this close transition before dispatching the
+      // pointerdown that caused light dismiss to the empty cell.
+      // eslint-disable-next-line testing-library/no-node-access -- the native layer has no accessible role or test ID
+      const layer = document.getElementById(layerId ?? '');
+      expect(layer).not.toBeNull();
+      fireEvent(layer as HTMLElement, closeToggleEvent());
+      fireEvent.pointerDown(getCell(10), {
+        button: 0,
+        clientY: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+
+      expect(eventTrigger).toHaveAttribute('aria-expanded', 'false');
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+
+      await nextAnimationFrame();
+      fireEvent.pointerDown(getCell(10), {
+        button: 0,
+        clientY: 0,
+        pointerId: 2,
+      });
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
+    });
+
+    it('still creates through an unrelated popover light-dismiss gesture', () => {
+      render(
+        <>
+          <Popover content={<div>Unrelated content</div>} label="Unrelated">
+            <button data-testid="unrelated-popover-trigger" type="button">
+              Open unrelated popover
+            </button>
+          </Popover>
+          <ScheduleWithEventCreate onCreate={vi.fn()} withPopoverPlugin />
+        </>,
+      );
+
+      const unrelatedTrigger = screen.getByTestId('unrelated-popover-trigger');
+      fireEvent.click(unrelatedTrigger);
+      const layerId = unrelatedTrigger.getAttribute('aria-controls');
+      expect(layerId).toBeTruthy();
+      // eslint-disable-next-line testing-library/no-node-access -- the native layer has no accessible role or test ID
+      const layer = document.getElementById(layerId ?? '');
+      expect(layer).not.toBeNull();
+      fireEvent(layer as HTMLElement, closeToggleEvent());
+      fireEvent.pointerDown(getCell(10), {
+        button: 0,
+        clientY: 0,
+        pointerId: 1,
+      });
       fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
 
       expect(

@@ -6,11 +6,17 @@ import {
   useReducer,
   useState,
   type CSSProperties,
+  type PointerEvent,
   type Ref,
 } from 'react';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {ScheduleContext} from 'components/Schedule/context';
 import {eventOverlapsRange, sortEvents} from 'components/Schedule/dateMath';
+import {
+  createScheduleInteractionState,
+  ScheduleInteractionContext,
+  type ScheduleInteractionState,
+} from 'components/Schedule/interaction';
 import {defaultSchedulePlugins} from 'components/Schedule/plugins';
 import {createScheduleZonedInstant} from 'components/Schedule/scheduleZonedInstant';
 import {createCategoryMap} from 'components/Schedule/shared';
@@ -182,6 +188,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   eventSource,
   height,
   highlightDate,
+  interactionState,
   plugins,
   view,
   viewDate,
@@ -190,6 +197,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   eventSource: ScheduleEventSource;
   height: ScheduleHeight;
   highlightDate: ScheduleZonedInstant;
+  interactionState: ScheduleInteractionState;
   plugins: ReadonlyArray<SchedulePlugin>;
   view: ScheduleView<Options>;
   viewDate: ScheduleZonedInstant;
@@ -229,9 +237,11 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   ]);
 
   return (
-    <ScheduleContext value={contextValue}>
-      <Component height={height} options={view.options} />
-    </ScheduleContext>
+    <ScheduleInteractionContext value={interactionState}>
+      <ScheduleContext value={contextValue}>
+        <Component height={height} options={view.options} />
+      </ScheduleContext>
+    </ScheduleInteractionContext>
   );
 }
 
@@ -265,12 +275,18 @@ export function Schedule({
     () => createScheduleZonedInstant(highlightDate, timezoneID),
     [highlightDate, timezoneID],
   );
+  const interactionState = useMemo(() => createScheduleInteractionState(), []);
+  useEffect(() => () => interactionState.dispose(), [interactionState]);
+  const handlePointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
+    interactionState.markPointerDown(event.nativeEvent);
+  };
   const classes = scheduleRecipe({height});
 
   return (
     <div
       className={cx(classes.root, className)}
       data-testid={dataTestId}
+      onPointerDownCapture={handlePointerDownCapture}
       ref={ref}
       style={style}>
       <ScheduleViewContent
@@ -278,6 +294,7 @@ export function Schedule({
         eventSource={events}
         height={height}
         highlightDate={highlightScheduleZonedInstant}
+        interactionState={interactionState}
         plugins={plugins}
         view={view}
         viewDate={scheduleZonedInstant}
