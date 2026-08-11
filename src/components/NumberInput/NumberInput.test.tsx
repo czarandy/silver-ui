@@ -2,9 +2,10 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
-import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
+import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {NumberInput} from 'components/NumberInput/NumberInput';
+import {numberInputRecipe} from 'components/NumberInput/NumberInput.recipe';
 import {SizeContext} from 'internal/SizeContext';
 
 function ControlledClearableNumberInput({
@@ -246,6 +247,15 @@ describe('NumberInput', () => {
     });
     expect(incrementButton).toHaveAttribute('tabindex', '-1');
     expect(decrementButton).toHaveAttribute('tabindex', '-1');
+    // eslint-disable-next-line testing-library/no-node-access -- verify the stepper is the flush trailing adornment
+    const stepper = incrementButton.parentElement;
+    const stepperClassName = numberInputRecipe({size: 'md'}).stepper;
+    if (stepperClassName == null) {
+      throw new Error('Expected NumberInput stepper styles');
+    }
+    expect(stepper).toHaveClass(stepperClassName);
+    // eslint-disable-next-line testing-library/no-node-access -- DOM order determines which adornment is right-aligned
+    expect(input.parentElement?.lastElementChild).toBe(stepper);
 
     input.focus();
     await user.click(incrementButton);
@@ -324,7 +334,6 @@ describe('NumberInput', () => {
     );
 
     const clearButton = screen.getByRole('button', {name: 'Clear Count'});
-    expect(clearButton).toHaveClass(inputStyles.clearButton);
     await user.click(clearButton);
     expect(onChange).toHaveBeenCalledWith(null);
   });

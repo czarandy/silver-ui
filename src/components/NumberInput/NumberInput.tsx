@@ -574,6 +574,24 @@ export function NumberInput({
         type="text"
         value={displayValue}
       />
+      {units != null ? <span className={styles.units}>{units}</span> : null}
+      {hasClear === true && value != null && !effectiveDisabled ? (
+        <Button
+          icon={X}
+          isIconOnly
+          label={`Clear ${label}`}
+          onClick={() => onChange(null)}
+          size="sm"
+          variant="ghost"
+        />
+      ) : null}
+      {endContent}
+      {isLoading ? <Spinner size="sm" /> : null}
+      {status != null ? (
+        <span className={inputStyles.iconSlot}>
+          {getStatusIcon(status.type)}
+        </span>
+      ) : null}
       <span className={numberInputStyles.stepper}>
         <button
           aria-label="Increment value"
@@ -606,29 +624,6 @@ export function NumberInput({
           <Icon icon={ChevronDown} size="sm" />
         </button>
       </span>
-      {units != null ? <span className={styles.units}>{units}</span> : null}
-      {hasClear === true && value != null && !effectiveDisabled ? (
-        <Button
-          className={
-            !isNonEmptyReactNode(endContent) && !isLoading && status == null
-              ? inputStyles.clearButton
-              : undefined
-          }
-          icon={X}
-          isIconOnly
-          label={`Clear ${label}`}
-          onClick={() => onChange(null)}
-          size="sm"
-          variant="ghost"
-        />
-      ) : null}
-      {endContent}
-      {isLoading ? <Spinner size="sm" /> : null}
-      {status != null ? (
-        <span className={inputStyles.iconSlot}>
-          {getStatusIcon(status.type)}
-        </span>
-      ) : null}
     </div>
   );
 

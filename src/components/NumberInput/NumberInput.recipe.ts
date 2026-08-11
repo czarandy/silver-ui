@@ -8,6 +8,7 @@ export const numberInputRecipe = sva({
       display: 'flex',
       flexDirection: 'column',
       flexShrink: 0,
+      marginInlineEnd: '-3',
       borderInlineStartWidth: 'default',
       borderInlineStartStyle: 'solid',
       borderInlineStartColor: 'border',
