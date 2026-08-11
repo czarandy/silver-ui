@@ -134,6 +134,26 @@ describe('Calendar', () => {
     });
   });
 
+  it('hides the range background when only one day is selected', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar
+        mode="range"
+        onChange={() => {}}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />,
+    );
+
+    const selectedDay = screen.getByRole('gridcell', {
+      name: /May 10, 2026/,
+    });
+    await user.click(selectedDay);
+
+    expect(selectedDay).toHaveAttribute('aria-selected', 'true');
+    expect(getRangeBackground(selectedDay)).toBeNull();
+  });
+
   it('disables dates outside min and max constraints', () => {
     render(
       <Calendar
