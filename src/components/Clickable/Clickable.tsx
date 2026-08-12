@@ -90,7 +90,8 @@ export interface ClickableProps extends ClickableBaseProps {
 
 /**
  * Turns non-interactive phrasing content into one button or link target.
- * Children must not contain independent interactive descendants.
+ * Use `ClickableContainer` instead when the content contains independent
+ * interactive descendants.
  */
 export function Clickable({
   as,

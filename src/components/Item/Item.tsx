@@ -14,6 +14,7 @@ import {itemRecipe} from 'components/Item/Item.recipe';
 import type {LinkComponent as LinkComponentType} from 'components/Link';
 import {Text} from 'components/Text';
 import {ActionElement} from 'internal/ActionElement';
+import {isInteractiveTarget} from 'internal/interactiveTarget';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {useRel} from 'internal/linkAccessibility';
 import type {SpacingToken} from 'internal/spacingTokens';
@@ -153,34 +154,6 @@ export interface ItemProps {
    * @default 'full'
    */
   width?: WidthValue;
-}
-
-// Native and ARIA interactive elements that own their own click, plus anything
-// explicitly placed in the tab order or made editable. Used as a safety net so
-// the row action does not also fire when a consumer-provided control in a slot
-// is clicked.
-const INTERACTIVE_SELECTOR = [
-  'button',
-  'a[href]',
-  'input',
-  'select',
-  'textarea',
-  '[role="button"]',
-  '[role="link"]',
-  '[role="checkbox"]',
-  '[role="switch"]',
-  '[role="menuitem"]',
-  '[role="menuitemcheckbox"]',
-  '[role="menuitemradio"]',
-  '[role="tab"]',
-  '[role="radio"]',
-  '[role="option"]',
-  '[contenteditable="true"]',
-  '[tabindex]:not([tabindex="-1"])',
-].join(', ');
-
-function isInteractiveTarget(element: HTMLElement): boolean {
-  return element.closest(INTERACTIVE_SELECTOR) != null;
 }
 
 function getMaxLines(
