@@ -31,6 +31,7 @@ import type {
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
+import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
   DATE_FORMAT_MONTH_YEAR,
@@ -151,19 +152,18 @@ export function formatListRangeTitle(start: PlainDate, end: PlainDate): string {
 }
 
 function formatTime(instant: number, timezoneID: string): string {
-  return Temporal.Instant.fromEpochMilliseconds(instant)
-    .toZonedDateTimeISO(timezoneID)
-    .toLocaleString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+  return getCachedDateTimeFormat({
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: timezoneID,
+  }).format(Temporal.Instant.fromEpochMilliseconds(instant));
 }
 
 export function formatTimezoneAbbreviation(
   date: PlainDate,
   timezoneID: string,
 ): string {
-  const formatter = new Intl.DateTimeFormat(undefined, {
+  const formatter = getCachedDateTimeFormat({
     timeZone: timezoneID,
     timeZoneName: 'short',
   });
@@ -174,9 +174,9 @@ export function formatTimezoneAbbreviation(
 }
 
 export function formatHour(hour: number): string {
-  return Temporal.PlainTime.from({hour}).toLocaleString(undefined, {
-    hour: 'numeric',
-  });
+  return getCachedDateTimeFormat({hour: 'numeric'}).format(
+    Temporal.PlainTime.from({hour}),
+  );
 }
 
 export function formatTimeRange(

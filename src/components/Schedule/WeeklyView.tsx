@@ -1,6 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 'use client';
 
+import {useMemo} from 'react';
 import {TimeGridView} from 'components/Schedule/TimeGridView';
 import {useScheduleContext} from 'components/Schedule/context';
 import {
@@ -67,14 +68,19 @@ function ScheduleWeeklyView({
   options,
 }: ScheduleViewComponentProps<ScheduleWeeklyViewOptions>): React.JSX.Element {
   const {range} = useScheduleContext();
-  const hiddenDays = normalizeHiddenDays(
-    options.hiddenDays ?? EMPTY_HIDDEN_DAYS,
-  );
-  const weekDays = enumerateDates(range.startDate, range.endDate);
-  // The range is already trimmed to visible days at its edges, but an interior
-  // hidden day still falls inside it and must be dropped as a column here.
-  const visibleDays = weekDays.filter(day => !isDayHidden(day, hiddenDays));
-  const days = visibleDays.length > 0 ? visibleDays : weekDays;
+  // Memoized so the days array keeps its identity across re-renders; the time
+  // grid's layout memos key on it.
+  const days = useMemo(() => {
+    const hiddenDays = normalizeHiddenDays(
+      options.hiddenDays ?? EMPTY_HIDDEN_DAYS,
+    );
+    const weekDays = enumerateDates(range.startDate, range.endDate);
+    // The range is already trimmed to visible days at its edges, but an
+    // interior hidden day still falls inside it and must be dropped as a
+    // column here.
+    const visibleDays = weekDays.filter(day => !isDayHidden(day, hiddenDays));
+    return visibleDays.length > 0 ? visibleDays : weekDays;
+  }, [options.hiddenDays, range.endDate, range.startDate]);
   const title = formatWeekTitle(days[0], days[days.length - 1]);
   return (
     <ScheduleFrame height={height} title={title} titleLabel={title}>

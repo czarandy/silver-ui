@@ -1872,6 +1872,77 @@ describe('Schedule', () => {
     );
   });
 
+  it('renders a timed event that ends exactly at midnight', () => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-14T00:00:00.000Z',
+            id: 'until-midnight',
+            start: '2026-05-13T22:00:00.000Z',
+            title: 'Evening wrap-up',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleDayView({
+          hourHeight: 100,
+          maxHour: 24,
+          minHour: 20,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const event = screen.getByTestId('schedule-event-until-midnight');
+    expect(event).toHaveStyle({height: '195px', top: '2px'});
+    expect(event).toHaveTextContent('Evening wrap-up10:00 PM - 12:00 AM');
+  });
+
+  it('does no timezone-resolution work when only plugin identities change', () => {
+    const view = createScheduleWeeklyView({maxHour: 18, minHour: 8});
+    const gridEvents = [
+      createEventFromISO({
+        category: 'Sync',
+        end: '2026-05-13T16:30:00.000Z',
+        id: 'visible',
+        start: '2026-05-13T16:00:00.000Z',
+        title: 'Visible sync',
+      }),
+      createEventFromISO({
+        category: 'Design',
+        end: '2026-05-15T10:00:00.000Z',
+        id: 'spanning',
+        start: '2026-05-14T22:00:00.000Z',
+        title: 'Overnight design push',
+      }),
+    ];
+    const renderSchedule = (plugins: SchedulePlugin[]) => (
+      <Schedule
+        categories={categories}
+        events={gridEvents}
+        plugins={plugins}
+        timezoneID="UTC"
+        view={view}
+        viewDate={instantUTC(2026, 4, 13)}
+      />
+    );
+    const {rerender} = render(renderSchedule([{}]));
+
+    // A plugin storing interaction state re-renders the schedule with fresh
+    // plugin identities (e.g. the create plugin opening its popover). The grid
+    // must reuse its per-event timezone resolution instead of redoing
+    // O(cells x events) Temporal conversions.
+    const toZonedDateTimeISO = vi.spyOn(
+      Temporal.Instant.prototype,
+      'toZonedDateTimeISO',
+    );
+    rerender(renderSchedule([{}]));
+
+    expect(toZonedDateTimeISO).not.toHaveBeenCalled();
+  });
+
   it('exposes all-day events in accessible all-day grid cells', () => {
     render(
       <Schedule

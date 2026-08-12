@@ -1,7 +1,6 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {
   Fragment,
   useMemo,
@@ -41,6 +40,7 @@ import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateFormat,
   plainDateFromInstant,
+  plainDateIsAfter,
   plainDateIsBefore,
   plainDateIsEqual,
   type PlainDate,
@@ -50,29 +50,33 @@ import {cx} from 'utils/cx';
 type GridStyle = CSSProperties & {'--schedule-day-count': string};
 type HourStyle = Pick<CSSProperties, 'height' | 'minHeight'>;
 
-function eventOverlapsHour(
-  event: CalendarEvent,
-  day: PlainDate,
-  hour: number,
-  timezoneID: string,
-): boolean {
-  if (isDayEvent(event)) {
-    return false;
-  }
-  if (!eventOccursOnDate(event, day, timezoneID)) {
-    return false;
-  }
+const MINUTES_PER_DAY = 24 * 60;
 
-  const hourStart = day
-    .toPlainDateTime(Temporal.PlainTime.from({hour}))
-    .toZonedDateTime(timezoneID).epochMilliseconds;
-  const hourEnd =
-    hour === 23
-      ? day.add({days: 1}).toZonedDateTime(timezoneID).epochMilliseconds
-      : day
-          .toPlainDateTime(Temporal.PlainTime.from({hour: hour + 1}))
-          .toZonedDateTime(timezoneID).epochMilliseconds;
-  return event.start < hourEnd && event.end > hourStart;
+/**
+ * A timed event's wall-clock extent, resolved to the grid timezone once so the
+ * per-day and per-hour-cell work below is plain arithmetic. Temporal timezone
+ * conversions dominate the grid's render cost otherwise: converting per
+ * (event, cell) pair is O(hours x days x events) conversions per render.
+ */
+interface TimedEventExtent {
+  endDate: PlainDate;
+  /**
+   * Minutes into `endDate`; `1440` when the event ends exactly at the
+   * following midnight.
+   */
+  endMinute: number;
+  event: CalendarInstantEvent;
+  startDate: PlainDate;
+  startMinute: number;
+}
+
+/**
+ * A timed event clipped to one grid day, in minutes since that day's midnight.
+ */
+interface TimedEventDaySpan {
+  endMinute: number;
+  event: CalendarInstantEvent;
+  startMinute: number;
 }
 
 interface TimedEventLayout {
@@ -83,15 +87,60 @@ interface TimedEventLayout {
   top: number;
 }
 
-function eventSpansPastDay(
-  event: CalendarInstantEvent,
-  day: PlainDate,
+function getTimedEventExtents(
+  events: ReadonlyArray<CalendarEvent>,
   timezoneID: string,
-): boolean {
-  return !plainDateIsEqual(
-    plainDateFromInstant(Math.max(event.end - 1, event.start), timezoneID),
-    day,
-  );
+): TimedEventExtent[] {
+  return events
+    .filter((event): event is CalendarInstantEvent => !isDayEvent(event))
+    .map(event => {
+      const startDate = plainDateFromInstant(event.start, timezoneID);
+      // An event ending exactly at midnight belongs to the day it ends on, not
+      // the day the ending midnight starts, so the end date comes from the
+      // final contained millisecond.
+      const endDate = plainDateFromInstant(
+        Math.max(event.end - 1, event.start),
+        timezoneID,
+      );
+      const endsAtFollowingMidnight = !plainDateIsEqual(
+        plainDateFromInstant(event.end, timezoneID),
+        endDate,
+      );
+      return {
+        endDate,
+        endMinute: endsAtFollowingMidnight
+          ? MINUTES_PER_DAY
+          : getMinutesSinceStartOfDay(event.end, timezoneID),
+        event,
+        startDate,
+        startMinute: getMinutesSinceStartOfDay(event.start, timezoneID),
+      };
+    });
+}
+
+function getTimedEventDaySpans(
+  extents: ReadonlyArray<TimedEventExtent>,
+  day: PlainDate,
+): TimedEventDaySpan[] {
+  return extents
+    .filter(
+      extent =>
+        !plainDateIsAfter(extent.startDate, day) &&
+        !plainDateIsBefore(extent.endDate, day),
+    )
+    .map(extent => ({
+      endMinute: plainDateIsEqual(extent.endDate, day)
+        ? extent.endMinute
+        : MINUTES_PER_DAY,
+      event: extent.event,
+      startMinute: plainDateIsEqual(extent.startDate, day)
+        ? extent.startMinute
+        : 0,
+    }));
+}
+
+function spanOverlapsHour(span: TimedEventDaySpan, hour: number): boolean {
+  return span.startMinute < (hour + 1) * 60 && span.endMinute > hour * 60;
 }
 
 function getAvailableTimedEventLevel(
@@ -105,40 +154,29 @@ function getAvailableTimedEventLevel(
 }
 
 function getTimedEventLayouts({
-  day,
-  events,
   hourHeight,
   maxHour,
   minHour,
-  timezoneID,
+  spans,
 }: {
-  day: PlainDate;
-  events: ReadonlyArray<CalendarInstantEvent>;
   hourHeight: number;
   maxHour: number;
   minHour: number;
-  timezoneID: string;
+  spans: ReadonlyArray<TimedEventDaySpan>;
 }): TimedEventLayout[] {
   const levelEndMinutes: number[] = [];
   const minMinute = minHour * 60;
   const maxMinute = maxHour * 60;
 
-  return events
-    .map(event => {
-      const startDate = plainDateFromInstant(event.start, timezoneID);
-      const rawStart = plainDateIsBefore(startDate, day)
-        ? 0
-        : getMinutesSinceStartOfDay(event.start, timezoneID);
-      const rawEnd = eventSpansPastDay(event, day, timezoneID)
-        ? 24 * 60
-        : getMinutesSinceStartOfDay(event.end, timezoneID);
-      if (rawEnd <= minMinute || rawStart >= maxMinute) {
+  return spans
+    .map(({event, endMinute, startMinute}) => {
+      if (endMinute <= minMinute || startMinute >= maxMinute) {
         return null;
       }
-      const visibleStart = Math.max(rawStart, minMinute);
+      const visibleStart = Math.max(startMinute, minMinute);
       const visibleEnd = Math.min(
         maxMinute,
-        Math.max(visibleStart + 15, rawEnd),
+        Math.max(visibleStart + 15, endMinute),
       );
       return {event, visibleEnd, visibleStart};
     })
@@ -218,6 +256,12 @@ function TimeGridEvent({
     [event, hourHeight, maxHour, minHour, plugins, timezoneID],
   );
   const category = getCategory(categoryMap, event);
+  // Formatting an instant resolves its timezone; memoized so grid re-renders
+  // (e.g. a plugin popover opening) skip it.
+  const timeLabel = useMemo(
+    () => getEventTimeLabel(event, timezoneID),
+    [event, timezoneID],
+  );
   const isPast = isEventInPast(event, currentTime, timezoneID);
   const classes = scheduleEventRecipe({
     layout: 'block',
@@ -232,9 +276,7 @@ function TimeGridEvent({
       {event.location != null && event.location !== '' ? (
         <span className={classes.location}>{event.location}</span>
       ) : null}
-      <span className={classes.time}>
-        {getEventTimeLabel(event, timezoneID)}
-      </span>
+      <span className={classes.time}>{timeLabel}</span>
       {pluginEndContent}
     </>
   );
@@ -336,15 +378,22 @@ export function TimeGridView({
     normalizedMinHour + 1,
     Math.min(24, Math.floor(maxHour)),
   );
-  const hours = Array.from(
-    {length: normalizedMaxHour - normalizedMinHour},
-    (_, index) => normalizedMinHour + index,
+  const hours = useMemo(
+    () =>
+      Array.from(
+        {length: normalizedMaxHour - normalizedMinHour},
+        (_, index) => normalizedMinHour + index,
+      ),
+    [normalizedMaxHour, normalizedMinHour],
   );
   const currentTime = useCurrentTime();
-  const highlightPlainDate = highlightDate.toPlainDate();
-  const timezoneLabel = formatTimezoneAbbreviation(
-    days[0] ?? highlightPlainDate,
-    timezoneID,
+  const highlightPlainDate = useMemo(
+    () => highlightDate.toPlainDate(),
+    [highlightDate],
+  );
+  const timezoneLabel = useMemo(
+    () => formatTimezoneAbbreviation(days[0] ?? highlightPlainDate, timezoneID),
+    [days, highlightPlainDate, timezoneID],
   );
   const gridStyle: GridStyle = {
     '--schedule-day-count': String(days.length),
@@ -359,20 +408,62 @@ export function TimeGridView({
     height: normalizedHourHeight,
     minHeight: normalizedHourHeight,
   };
-  // Layout is independent of the hour row, so compute it once per day and reuse
-  // it across all hour cells rather than recomputing for every (day, hour) pair.
-  const timedEventLayoutsByDay = days.map(day =>
-    getTimedEventLayouts({
-      day,
-      events: events.filter(
-        (event): event is CalendarInstantEvent =>
-          !isDayEvent(event) && eventOccursOnDate(event, day, timezoneID),
+  // Timezone resolution happens once per event here; every per-day and
+  // per-cell decision below (block layout, hour overlap for cell labels) is
+  // arithmetic on these extents. The memos also keep the grid cheap to
+  // re-render when unrelated schedule state changes, e.g. a plugin opening a
+  // popover.
+  const timedEventExtents = useMemo(
+    () => getTimedEventExtents(events, timezoneID),
+    [events, timezoneID],
+  );
+  const timedEventSpansByDay = useMemo(
+    () => days.map(day => getTimedEventDaySpans(timedEventExtents, day)),
+    [days, timedEventExtents],
+  );
+  const timedEventLayoutsByDay = useMemo(
+    () =>
+      timedEventSpansByDay.map(spans =>
+        getTimedEventLayouts({
+          hourHeight: normalizedHourHeight,
+          maxHour: normalizedMaxHour,
+          minHour: normalizedMinHour,
+          spans,
+        }),
       ),
-      hourHeight: normalizedHourHeight,
-      maxHour: normalizedMaxHour,
-      minHour: normalizedMinHour,
-      timezoneID,
+    [
+      normalizedHourHeight,
+      normalizedMaxHour,
+      normalizedMinHour,
+      timedEventSpansByDay,
+    ],
+  );
+  const currentTimePosition = useMemo(
+    () => ({
+      date: plainDateFromInstant(currentTime, timezoneID),
+      minute: getMinutesSinceStartOfDay(currentTime, timezoneID),
     }),
+    [currentTime, timezoneID],
+  );
+  // Cell names embed each overlapping event's formatted times, and formatting
+  // an instant resolves its timezone, so they are memoized alongside the spans
+  // they are derived from. Indexed as [dayIndex][hour - normalizedMinHour].
+  const hourCellNamesByDay = useMemo(
+    () =>
+      timedEventSpansByDay.map((spans, dayIndex) =>
+        hours.map(hour =>
+          getCellName({
+            categoryMap,
+            date: days[dayIndex],
+            events: spans
+              .filter(span => spanOverlapsHour(span, hour))
+              .map(span => span.event),
+            hourLabel: formatHour(hour),
+            timezoneID,
+          }),
+        ),
+      ),
+    [categoryMap, days, hours, timedEventSpansByDay, timezoneID],
   );
 
   return (
@@ -528,19 +619,15 @@ export function TimeGridView({
               </div>
               <div className={styles.timeRow}>
                 {days.map((day, index) => {
-                  const hourEvents = events.filter(event =>
-                    eventOverlapsHour(event, day, hour, timezoneID),
-                  );
                   const visibleTimedEventLayouts = timedEventLayoutsByDay[
                     index
                   ].filter(layout => layout.startHour === hour);
                   const currentTimeTop = getCurrentTimeTopForHour({
-                    currentTime,
+                    currentTimePosition,
                     day,
                     hour,
                     maxHour: normalizedMaxHour,
                     minHour: normalizedMinHour,
-                    timezoneID,
                   });
                   const hourCellClasses = scheduleTimeGridViewRecipe({
                     isLastColumn: index === days.length - 1,
@@ -583,13 +670,9 @@ export function TimeGridView({
                   return (
                     <div
                       aria-colindex={index + 2}
-                      aria-label={getCellName({
-                        categoryMap,
-                        date: day,
-                        events: hourEvents,
-                        hourLabel,
-                        timezoneID,
-                      })}
+                      aria-label={
+                        hourCellNamesByDay[index][hour - normalizedMinHour]
+                      }
                       className={hourCellClasses.hourCell}
                       data-testid={`schedule-time-grid-cell-${day.toString()}-${hour}`}
                       key={`${day.toString()}-${hour}`}
@@ -629,25 +712,23 @@ export function TimeGridView({
 }
 
 function getCurrentTimeTopForHour({
-  currentTime,
+  currentTimePosition,
   day,
   hour,
   maxHour,
   minHour,
-  timezoneID,
 }: {
-  currentTime: number;
+  currentTimePosition: {date: PlainDate; minute: number};
   day: PlainDate;
   hour: number;
   maxHour: number;
   minHour: number;
-  timezoneID: string;
 }): number | null {
-  if (!plainDateIsEqual(day, plainDateFromInstant(currentTime, timezoneID))) {
+  if (!plainDateIsEqual(day, currentTimePosition.date)) {
     return null;
   }
 
-  const currentMinute = getMinutesSinceStartOfDay(currentTime, timezoneID);
+  const currentMinute = currentTimePosition.minute;
   const minMinute = minHour * 60;
   const maxMinute = maxHour * 60;
   if (currentMinute < minMinute || currentMinute > maxMinute) {

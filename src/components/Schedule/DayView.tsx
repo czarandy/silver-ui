@@ -1,6 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 'use client';
 
+import {useMemo} from 'react';
 import {TimeGridView} from 'components/Schedule/TimeGridView';
 import {useScheduleContext} from 'components/Schedule/context';
 import {getScheduleRangeFromDates} from 'components/Schedule/dateMath';
@@ -48,7 +49,10 @@ function ScheduleDayView({
   options,
 }: ScheduleViewComponentProps<ScheduleDayViewOptions>): React.JSX.Element {
   const {viewDate} = useScheduleContext();
-  const day = viewDate.toPlainDate();
+  // Memoized so the days array keeps its identity across re-renders; the time
+  // grid's layout memos key on it.
+  const days = useMemo(() => [viewDate.toPlainDate()], [viewDate]);
+  const day = days[0];
   return (
     <ScheduleFrame
       height={height}
@@ -56,7 +60,7 @@ function ScheduleDayView({
       titleLabel={formatDate(day)}>
       <TimeGridView
         allDayEventLimit={options.allDayEventLimit}
-        days={[day]}
+        days={days}
         height={height}
         hourHeight={options.hourHeight}
         maxHour={options.maxHour}
