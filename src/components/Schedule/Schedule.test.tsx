@@ -2083,6 +2083,27 @@ describe('Schedule', () => {
     );
   });
 
+  it('clips current-time marker overflow at the end of the time grid', async () => {
+    mockCurrentTime('2026-05-13T10:00:00.000Z');
+
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 10, minHour: 9})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(await screen.findByTestId('schedule-current-time-line')).toHaveStyle(
+      {top: '100%'},
+    );
+    expect(scheduleTimeGridViewRecipe.raw().timeRows).toHaveProperty(
+      'overflowBlock',
+      'clip',
+    );
+  });
+
   it('renders the current-time marker in list view on the current day', async () => {
     mockCurrentTime('2026-05-13T09:30:00.000Z');
 
