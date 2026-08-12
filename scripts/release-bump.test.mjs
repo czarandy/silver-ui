@@ -66,6 +66,32 @@ describe('release-bump.sh', () => {
     expect(git('tag', '--list')).toBe('v1.5.5');
   });
 
+  it('keeps version lifecycle output out of the captured tag', () => {
+    writeFileSync(
+      join(root, 'package.json'),
+      JSON.stringify(
+        {
+          name: 'fake-pkg',
+          version: '1.5.4',
+          scripts: {
+            version: 'node -e "console.log(\'generated version output\')"',
+          },
+        },
+        null,
+        2,
+      ),
+    );
+    git('add', 'package.json');
+    git('commit', '--quiet', '-m', 'add version lifecycle script');
+
+    const {status, stdout} = bump('patch');
+
+    expect(status).toBe(0);
+    expect(stdout).toBe('v1.5.5\n');
+    expect(version()).toBe('1.5.5');
+    expect(git('tag', '--list')).toBe('v1.5.5');
+  });
+
   it('bumps a pre-release under the given preid', () => {
     const {status, stdout} = bump('prerelease', 'rc');
 
