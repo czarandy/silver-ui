@@ -4,6 +4,7 @@ import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
 import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover/Popover';
+import {usePopover} from 'components/Popover/usePopover';
 import {SizeContext} from 'internal/SizeContext';
 import {assertNonNull} from 'internal/testHelpers';
 import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
@@ -640,5 +641,47 @@ describe('Popover', () => {
     );
 
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
+  });
+});
+
+describe('usePopover isLazy', () => {
+  function PopoverHarness({isLazy}: {isLazy?: boolean}) {
+    const popover = usePopover({isLazy, label: 'Harness popover'});
+    return (
+      <>
+        <button
+          data-testid="harness-trigger"
+          onClick={popover.toggle}
+          ref={popover.triggerRef}
+          type="button"
+          {...popover.triggerProps}>
+          Open
+        </button>
+        {popover.render(<div data-testid="harness-content">Content</div>)}
+      </>
+    );
+  }
+
+  it('mounts content while closed by default', () => {
+    render(<PopoverHarness />);
+
+    expect(screen.getByTestId('harness-content')).toBeInTheDocument();
+  });
+
+  it('defers content until first open, then keeps it mounted', () => {
+    render(<PopoverHarness isLazy />);
+
+    expect(screen.queryByTestId('harness-content')).not.toBeInTheDocument();
+
+    const trigger = screen.getByTestId('harness-trigger');
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('harness-content')).toBeInTheDocument();
+
+    // Light dismiss closes the popover; the content stays mounted so its state
+    // survives a reopen exactly as it would without `isLazy`.
+    fireEvent(getPopoverElement(), closeToggleEvent());
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('harness-content')).toBeInTheDocument();
   });
 });

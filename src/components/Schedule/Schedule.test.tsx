@@ -3416,6 +3416,30 @@ describe('Schedule', () => {
       );
     }
 
+    it('mounts event popover content only on first open', () => {
+      render(
+        <ScheduleWithPopover
+          renderContent={({event}) => (
+            <div data-testid="event-popover-content">{event.title}</div>
+          )}
+          view={createScheduleDayView({maxHour: 18, minHour: 8})}
+        />,
+      );
+
+      // Closed popovers must not mount consumer content: it renders once per
+      // event, so eager mounting multiplies every schedule render by the
+      // number of events.
+      expect(
+        screen.queryByTestId('event-popover-content'),
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+      expect(screen.getByTestId('event-popover-content')).toHaveTextContent(
+        'Visible sync',
+      );
+    });
+
     it('renders pills as buttons that toggle a popover in the month view', () => {
       render(<ScheduleWithPopover view={createScheduleMonthlyView()} />);
 
