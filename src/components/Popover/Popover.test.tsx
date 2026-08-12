@@ -76,6 +76,8 @@ describe('Popover', () => {
       </SizeContext>,
     );
 
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
+
     expect(screen.getByRole('button', {name: 'Open'})).toHaveClass(
       'silver-h_component.lg',
     );
@@ -387,6 +389,8 @@ describe('Popover', () => {
       </Popover>,
     );
 
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
+
     const popover = screen.getByTestId('popover');
     expect(popover).toHaveClass('custom-popover');
     expect(popover).toHaveStyle({color: 'rgb(255, 0, 0)'});
@@ -581,6 +585,8 @@ describe('Popover', () => {
       </Popover>,
     );
 
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
+
     expect(
       screen.getByRole('button', {hidden: true, name: 'Dismiss'}),
     ).toBeInTheDocument();
@@ -608,6 +614,8 @@ describe('Popover', () => {
       </Popover>,
     );
 
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
+
     expect(screen.getByRole('button', {name: 'Open'})).toHaveAttribute(
       'aria-haspopup',
       'menu',
@@ -626,6 +634,8 @@ describe('Popover', () => {
       </Popover>,
     );
 
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
+
     expect(screen.getByTestId('popover')).toHaveStyle({
       padding: token('spacing.4'),
     });
@@ -639,6 +649,8 @@ describe('Popover', () => {
         <Button label="Open" />
       </Popover>,
     );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Open'}));
 
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
@@ -662,14 +674,14 @@ describe('usePopover isLazy', () => {
     );
   }
 
-  it('mounts content while closed by default', () => {
-    render(<PopoverHarness />);
+  it('mounts content while closed with isLazy false', () => {
+    render(<PopoverHarness isLazy={false} />);
 
     expect(screen.getByTestId('harness-content')).toBeInTheDocument();
   });
 
-  it('defers content until first open, then keeps it mounted', () => {
-    render(<PopoverHarness isLazy />);
+  it('defers content until first open by default, then keeps it mounted', () => {
+    render(<PopoverHarness />);
 
     expect(screen.queryByTestId('harness-content')).not.toBeInTheDocument();
 

@@ -87,6 +87,10 @@ export function useHoverCard({
     focusTrigger,
     hideDelay,
     isEnabled,
+    // The trigger keeps an `aria-describedby` link to the layer, so — like a
+    // tooltip — the closed content must stay mounted for screen readers that
+    // read descriptions without ever opening the card.
+    isLazy: false,
     onFocusIn: () => {
       if (isEscapeDismissingRef.current) {
         isEscapeDismissingRef.current = false;

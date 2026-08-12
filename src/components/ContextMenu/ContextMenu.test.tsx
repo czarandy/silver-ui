@@ -138,6 +138,8 @@ describe('ContextMenu', () => {
       </ContextMenu>,
     );
 
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+
     expect(
       screen.getByRole('group', {hidden: true, name: 'Edit'}),
     ).toBeInTheDocument();
@@ -187,6 +189,7 @@ describe('ContextMenu', () => {
       </ContextMenu>,
     );
 
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
     await user.click(
       screen.getByRole('menuitem', {hidden: true, name: 'Copy'}),
     );
@@ -641,8 +644,15 @@ describe('ContextMenu', () => {
       </ContextMenu>,
     );
 
+    // First open mounts the lazy menu content so it can be spied on; the
+    // content stays mounted across close/reopen.
+    fireEvent.contextMenu(screen.getByText('Right-click me'), {
+      clientX: 100,
+      clientY: 100,
+    });
     const menu = screen.getByRole('menu', {hidden: true});
     const getBoundingClientRect = vi.spyOn(menu, 'getBoundingClientRect');
+    fireEvent.mouseDown(document.body);
 
     fireEvent.contextMenu(screen.getByText('Right-click me'), {
       clientX: 750,
@@ -659,6 +669,8 @@ describe('ContextMenu', () => {
       </ContextMenu>,
     );
 
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+
     expect(screen.getByRole('menu', {hidden: true})).toHaveStyle({
       width: '160px',
     });
@@ -671,6 +683,8 @@ describe('ContextMenu', () => {
       </ContextMenu>,
     );
 
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+
     expect(screen.getByRole('menu', {hidden: true})).toHaveStyle({
       width: '240px',
     });
@@ -682,6 +696,8 @@ describe('ContextMenu', () => {
         <div>Right-click me</div>
       </ContextMenu>,
     );
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
 
     expect(screen.getByRole('menu', {hidden: true})).toHaveStyle({
       width: '20rem',

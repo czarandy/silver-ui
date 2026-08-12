@@ -20,6 +20,13 @@ export interface UseHoverLayerOptions {
   hideDelay?: number;
   isEnabled?: boolean;
   isHiddenOnPress?: boolean;
+  /**
+   * Forwarded to the underlying layer: children are not mounted until the
+   * layer first opens. Set to `false` when closed content must stay in the
+   * accessibility tree, e.g. tooltip content referenced by `aria-describedby`.
+   * Defaults to `true`.
+   */
+  isLazy?: boolean;
   onFocusIn?: (event: FocusEvent) => boolean;
   onFocusOut?: (event: FocusEvent) => boolean;
   onHide?: () => void;
@@ -70,6 +77,7 @@ export function useHoverLayer({
   hideDelay = 0,
   isEnabled = true,
   isHiddenOnPress = false,
+  isLazy,
   onFocusIn,
   onFocusOut,
   onHide,
@@ -77,7 +85,7 @@ export function useHoverLayer({
   onTriggerEscape,
   shouldHide,
 }: UseHoverLayerOptions = {}): UseHoverLayerReturn {
-  const layer = useLayer({onShow, onHide});
+  const layer = useLayer({isLazy, onShow, onHide});
   const showTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);

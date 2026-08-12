@@ -170,6 +170,7 @@ describe('useKeyboardHint', () => {
     ['both' as const, ['←', '→', '↑', '↓']],
   ])('draws the %s arrows', (orientation, expected) => {
     const {container} = renderHarness({orientation});
+    fireEvent.focus(screen.getByRole('tab', {name: 'One'}));
 
     expect(getArrowGlyphs(container)).toEqual(expected);
   });
