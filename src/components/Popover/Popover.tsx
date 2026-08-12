@@ -78,6 +78,15 @@ export interface PopoverProps {
    */
   isEnabled?: boolean;
   /**
+   * When `true`, the popover content is not mounted until it first opens;
+   * after that it stays mounted, so state inside the content survives
+   * close/reopen exactly as if it were always mounted. Set to `false` when
+   * closed content must stay in the accessibility tree or be reachable in the
+   * DOM before the first open.
+   * @default true
+   */
+  isLazy?: boolean;
+  /**
    * Controlled open state.
    */
   isOpen?: boolean;
@@ -165,6 +174,7 @@ export function Popover({
   label,
   hasCloseButton,
   isDismissable,
+  isLazy,
   closeButtonLabel,
   padding,
   ref,
@@ -183,6 +193,7 @@ export function Popover({
     hasAutoFocus,
     hasCloseButton,
     isDismissable,
+    isLazy,
     label,
     layerId: id,
     onHide: () => onOpenChange?.(false),

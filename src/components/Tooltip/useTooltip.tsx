@@ -111,6 +111,10 @@ export function useTooltip(options: UseTooltipOptions = {}): UseTooltipReturn {
     hideDelay,
     isEnabled,
     isHiddenOnPress,
+    // Tooltip content is an `aria-describedby` target: screen readers read the
+    // description from the closed layer without ever opening it, so the
+    // content must stay mounted (never lazy).
+    isLazy: false,
     onFocusIn: event => {
       const target = event.target as HTMLElement;
       return target.matches(':focus-visible');

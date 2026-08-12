@@ -6,7 +6,6 @@ import {
   useEffect,
   useMemo,
   useRef,
-  useState,
   type ReactNode,
   type RefCallback,
 } from 'react';
@@ -48,11 +47,11 @@ export interface UsePopoverOptions {
   /**
    * When `true`, the popover's children are not mounted until it first opens;
    * after that they stay mounted, so state inside the content survives
-   * close/reopen exactly as it would without this option. Use for popovers
-   * whose content is expensive and rarely opened — e.g. one popover per row or
-   * event — where eagerly mounting every closed popover's content is wasted
-   * work. The popover layer element itself always mounts, so trigger wiring
-   * (`aria-controls`, anchor positioning) is unaffected. Defaults to `false`.
+   * close/reopen exactly as if it were always mounted. The popover layer
+   * element itself always mounts, so trigger wiring (`aria-controls`, anchor
+   * positioning) is unaffected. Set to `false` when closed content must stay
+   * in the accessibility tree or be reachable in the DOM before the first
+   * open. Defaults to `true`.
    */
   isLazy?: boolean;
   /**
@@ -148,12 +147,11 @@ export function usePopover({
   hasSurface = true,
   hasCloseButton = true,
   closeButtonLabel = 'Close popover',
-  isLazy = false,
+  isLazy,
   label,
   role = 'dialog',
   layerId,
 }: UsePopoverOptions = {}): UsePopoverReturn {
-  const [hasEverOpened, setHasEverOpened] = useState(false);
   const skipAutoFocusRef = useRef(false);
   const autoFocusFrameRef = useRef<number | null>(null);
   const restoreFocusTargetRef = useRef<HTMLElement | null>(null);
@@ -189,6 +187,7 @@ export function usePopover({
   const layer = useLayer({
     isDismissable,
     isEscapeDismissEnabled: true,
+    isLazy,
     id: layerId,
     onShow,
     onHide: handleHide,
@@ -235,9 +234,6 @@ export function usePopover({
   const show = useCallback(
     (options?: {isAutoFocusSkipped?: boolean}) => {
       skipAutoFocusRef.current = options?.isAutoFocusSkipped ?? false;
-      // Batched with the layer's own open state, so lazy content mounts in the
-      // same commit that opens the popover and the autofocus effect finds it.
-      setHasEverOpened(true);
       layer.show();
     },
     [layer],
@@ -270,8 +266,6 @@ export function usePopover({
     show();
   }, [layer, show]);
 
-  const isContentMounted = !isLazy || hasEverOpened || layer.isOpen;
-
   const render = useCallback(
     (children: ReactNode, props?: ContextRenderProps): ReactNode => {
       const surface = (
@@ -280,7 +274,7 @@ export function usePopover({
           className={hasSurface ? styles.surface : undefined}
           ref={contentRef}
           role={role}>
-          {isContentMounted ? children : null}
+          {children}
           {hasCloseButton ? (
             <VisuallyHidden>
               <Button
@@ -314,7 +308,6 @@ export function usePopover({
       dialogContextValue,
       hasCloseButton,
       hasSurface,
-      isContentMounted,
       label,
       layer,
       role,

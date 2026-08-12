@@ -87,6 +87,17 @@ interface LayerOptions {
    */
   isEscapeDismissEnabled?: boolean;
   /**
+   * When `true`, the layer's children are not mounted until it first opens;
+   * after that they stay mounted, so state inside the content survives
+   * close/reopen exactly as if it were always mounted. The layer element
+   * itself always mounts, so trigger wiring (`aria-controls`, anchor
+   * positioning) is unaffected. Set to `false` when closed content must stay
+   * in the accessibility tree — e.g. a tooltip referenced by
+   * `aria-describedby`, whose description screen readers read without ever
+   * opening the layer. Defaults to `true`.
+   */
+  isLazy?: boolean;
+  /**
    * Called when this layer is the topmost layer and Escape is pressed. Defaults
    * to hiding the layer.
    */
@@ -206,12 +217,14 @@ export function useLayer({
   onEscape,
   isDismissable = false,
   isEscapeDismissEnabled = false,
+  isLazy = true,
   id: providedId,
 }: LayerOptions = {}): LayerReturn {
   const generatedId = useId();
   const id = providedId ?? generatedId;
   const anchorId = `--silver-layer-${id.replace(/:/g, '')}`;
   const [isOpen, setIsOpen] = useState(false);
+  const [hasEverOpened, setHasEverOpened] = useState(false);
   const popoverRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const isOpenRef = useRef(false);
@@ -223,6 +236,9 @@ export function useLayer({
 
     popoverRef.current.showPopover();
     isOpenRef.current = true;
+    // Batched with `isOpen`, so lazy children mount in the same commit that
+    // opens the layer and open-effects (autofocus) find them mounted.
+    setHasEverOpened(true);
     setIsOpen(true);
     onShow?.();
   }, [onShow]);
@@ -296,6 +312,8 @@ export function useLayer({
     [handleToggle],
   );
 
+  const isContentMounted = !isLazy || hasEverOpened || isOpen;
+
   const render = useCallback(
     (children: ReactNode, props?: ContextRenderProps) => {
       const placement = props?.placement ?? 'above';
@@ -323,12 +341,21 @@ export function useLayer({
       return (
         <div {...layerProps}>
           <LayerContext value={layerContextValue}>
-            <SizeContext value={null}>{children}</SizeContext>
+            <SizeContext value={null}>
+              {isContentMounted ? children : null}
+            </SizeContext>
           </LayerContext>
         </div>
       );
     },
-    [anchorId, isDismissable, id, layerContextValue, popoverRefCallback],
+    [
+      anchorId,
+      isContentMounted,
+      isDismissable,
+      id,
+      layerContextValue,
+      popoverRefCallback,
+    ],
   );
 
   return useMemo(

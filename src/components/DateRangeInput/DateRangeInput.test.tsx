@@ -357,6 +357,8 @@ describe('DateRangeInput', () => {
         />,
       );
 
+      fireEvent.click(screen.getByRole('combobox', {name: 'Window'}));
+
       expect(screen.getAllByRole('grid', {hidden: true})).toHaveLength(1);
     });
 

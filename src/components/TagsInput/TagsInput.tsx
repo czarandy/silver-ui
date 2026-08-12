@@ -339,7 +339,11 @@ export function TagsInput<T extends SearchableItem>({
   const {announce, announcer} = useAnnounce();
   const [queryValue, setQueryValue] = useState('');
   const isLayerMode = tagOverflowBehavior === 'unfocusedLayer';
-  const layer = useLayer();
+  // Never lazy: in `unfocusedLayer` mode the layer contains the real input —
+  // the element outside the layer is only a collapsed placeholder — and focus
+  // moving into that input is what opens the layer, so it must be mounted and
+  // focusable while the layer is still closed.
+  const layer = useLayer({isLazy: false});
   const layerContentRef = useRef<HTMLDivElement>(null);
   const selectedIDsRef = useLatest(new Set(value.map(item => item.id)));
   const isAtMax = maxEntries != null && value.length >= maxEntries;

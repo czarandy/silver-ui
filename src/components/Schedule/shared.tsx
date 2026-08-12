@@ -319,10 +319,6 @@ export function useScheduleEventPopover(
   );
   const popover = usePopover({
     hasCloseButton: eventPopoverPlugin?.eventPopoverHasCloseButton ?? false,
-    // Every event pill carries a popover, and consumer content can be a large
-    // subtree (detail views, nested dialogs); mounting it for closed popovers
-    // multiplies every schedule render by the number of events.
-    isLazy: true,
     label: getEventAccessibleLabel(event, categoryMap, timezoneID),
     onHide: handleHide,
     onShow: handleShow,
