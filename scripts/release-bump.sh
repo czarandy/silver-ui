@@ -61,8 +61,10 @@ NPM_ARGS=(version "$RELEASE_TYPE")
 PRE_BUMP="$(git rev-parse HEAD)"
 
 BUMP_FAILED=0
-# npm's own stderr flows to the terminal, so the user sees the real git error.
-NEW_TAG="$(npm "${NPM_ARGS[@]}")" || BUMP_FAILED=1
+# Both npm streams go to the terminal. npm also writes lifecycle-script banners
+# to stdout, so capturing its output would make NEW_TAG a multiline string.
+# Read the authoritative version from package.json after npm succeeds instead.
+npm "${NPM_ARGS[@]}" >&2 || BUMP_FAILED=1
 
 if [ "$BUMP_FAILED" -eq 1 ]; then
   if [ "$(git rev-parse HEAD)" != "$PRE_BUMP" ]; then
@@ -72,5 +74,8 @@ if [ "$BUMP_FAILED" -eq 1 ]; then
   fi
   die "npm version $RELEASE_TYPE failed — see the error above. Nothing was left behind."
 fi
+
+NEW_VERSION="$(node -p "require('./package.json').version")"
+NEW_TAG="v${NEW_VERSION}"
 
 printf '%s\n' "$NEW_TAG"
