@@ -314,10 +314,11 @@ export function useScheduleEventPopover(
     },
     [interactionState],
   );
+  const eventPopoverPlugin = plugins.find(
+    plugin => plugin.renderEventPopover != null,
+  );
   const popover = usePopover({
-    // Content renders its own close affordance via the `controls.close` passed
-    // to renderEventPopover, so suppress the built-in close button.
-    hasCloseButton: false,
+    hasCloseButton: eventPopoverPlugin?.eventPopoverHasCloseButton ?? false,
     label: getEventAccessibleLabel(event, categoryMap, timezoneID),
     onHide: handleHide,
     onShow: handleShow,

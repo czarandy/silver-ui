@@ -117,6 +117,14 @@ export interface ScheduleTimeGridCellPropsRenderProps {
 }
 
 export interface SchedulePlugin {
+  /**
+   * Whether event popovers rendered by this plugin provide the standard
+   * popover close affordance and Dialog context. A nested `LayoutHeader` uses
+   * that context to append its automatic close button.
+   *
+   * @default false
+   */
+  eventPopoverHasCloseButton?: boolean;
   getEventProps?: (
     props: ScheduleEventPropsRenderProps,
   ) => HTMLAttributes<HTMLElement>;

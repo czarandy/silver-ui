@@ -1048,18 +1048,18 @@ export const EventPopoverCustomContent: Story = {
       onViewDateChange: setViewDate,
     });
     const eventPopoverPlugin = useScheduleEventPopoverPlugin({
+      hasCloseButton: true,
       renderContent: ({event}) => (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-            maxWidth: 260,
-            padding: 16,
-          }}>
-          <strong>{event.title}</strong>
-          <Badge color="info" label={event.category ?? 'Event'} size="sm" />
-        </div>
+        <Layout
+          className={css({w: '64'})}
+          content={
+            <LayoutContent padding={4}>
+              <Badge color="info" label={event.category ?? 'Event'} size="sm" />
+            </LayoutContent>
+          }
+          header={<LayoutHeader title={event.title} />}
+          height="auto"
+        />
       ),
     });
     return (

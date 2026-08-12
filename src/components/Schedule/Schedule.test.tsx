@@ -3372,12 +3372,14 @@ describe('Schedule', () => {
 
     function ScheduleWithPopover({
       eventsList = popoverEvents,
+      hasCloseButton,
       onDelete,
       onEdit,
       renderContent,
       view,
     }: {
       eventsList?: CalendarEvent[];
+      hasCloseButton?: boolean;
       onDelete?: (event: CalendarEvent) => void;
       onEdit?: (event: CalendarEvent) => void;
       renderContent?: (props: {
@@ -3387,6 +3389,7 @@ describe('Schedule', () => {
       view: ScheduleView;
     }) {
       const plugin = useScheduleEventPopoverPlugin({
+        hasCloseButton,
         renderContent:
           renderContent ??
           (onEdit != null || onDelete != null
@@ -3568,6 +3571,51 @@ describe('Schedule', () => {
         within(popover).getByTestId('schedule-event-popover-close'),
       );
       expect(pill).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('integrates its close action into a custom LayoutHeader when enabled', () => {
+      render(
+        <ScheduleWithPopover
+          hasCloseButton
+          renderContent={({event}) => (
+            <Layout
+              content={<LayoutContent>Custom content</LayoutContent>}
+              header={<LayoutHeader title={event.title} />}
+              height="auto"
+            />
+          )}
+          view={createScheduleMonthlyView()}
+        />,
+      );
+      const pill = screen.getByTestId('schedule-event-visible');
+      fireEvent.click(pill);
+
+      fireEvent.click(
+        screen.getByRole('button', {hidden: true, name: 'Close'}),
+      );
+
+      expect(pill).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('keeps the built-in content on its single close affordance', () => {
+      render(
+        <ScheduleWithPopover
+          hasCloseButton
+          view={createScheduleMonthlyView()}
+        />,
+      );
+      fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+      const dialog = screen.getByRole('dialog', {hidden: true});
+      expect(
+        within(dialog).getAllByRole('button', {hidden: true, name: 'Close'}),
+      ).toHaveLength(1);
+      expect(
+        within(dialog).queryByRole('button', {
+          hidden: true,
+          name: 'Close popover',
+        }),
+      ).not.toBeInTheDocument();
     });
 
     it('omits action buttons when no callbacks are provided', () => {
