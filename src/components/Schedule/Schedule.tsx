@@ -171,7 +171,10 @@ function useRange<Options extends ScheduleViewOptions>(
   view: ScheduleView<Options>,
   date: ScheduleZonedInstant,
 ): ScheduleRange {
-  const [start, end] = view.getDateRange(date);
+  // The range value below is keyed on the resolved instants so an inline
+  // (unstable) view object still yields a stable range; this inner memo just
+  // skips re-running the view's date math when identities are stable.
+  const [start, end] = useMemo(() => view.getDateRange(date), [date, view]);
   return useMemo(
     () => ({
       end: end.instant,
@@ -205,15 +208,25 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   const Component = view.component;
   const range = useRange(view, viewDate);
   const {events: rangeEvents, isLoading} = useAsyncEvents(eventSource, range);
-  const contextValue = useMemo(() => {
-    const categoryMap = createCategoryMap(categories);
-    const events = sortEvents(
-      rangeEvents.filter(event =>
-        eventOverlapsRange(event, range, viewDate.timezoneID),
+  // `events` and `categoryMap` are memoized apart from the context value so
+  // their identities survive unrelated context changes (e.g. a plugin updating
+  // as its popover opens); the views' expensive layout memos key on them.
+  const categoryMap = useMemo(
+    () => createCategoryMap(categories),
+    [categories],
+  );
+  const events = useMemo(
+    () =>
+      sortEvents(
+        rangeEvents.filter(event =>
+          eventOverlapsRange(event, range, viewDate.timezoneID),
+        ),
+        viewDate.timezoneID,
       ),
-      viewDate.timezoneID,
-    );
-    return {
+    [range, rangeEvents, viewDate.timezoneID],
+  );
+  const contextValue = useMemo(
+    () => ({
       categoryMap,
       categories,
       events,
@@ -224,17 +237,19 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
       timezoneID: viewDate.timezoneID,
       view,
       viewDate,
-    };
-  }, [
-    categories,
-    highlightDate,
-    isLoading,
-    plugins,
-    range,
-    rangeEvents,
-    view,
-    viewDate,
-  ]);
+    }),
+    [
+      categories,
+      categoryMap,
+      events,
+      highlightDate,
+      isLoading,
+      plugins,
+      range,
+      view,
+      viewDate,
+    ],
+  );
 
   return (
     <ScheduleInteractionContext value={interactionState}>

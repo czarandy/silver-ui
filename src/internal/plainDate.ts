@@ -1,4 +1,5 @@
 import {Temporal} from '@js-temporal/polyfill';
+import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
 import type {PlainDate} from 'internal/dateTypes';
 
 export type {PlainDate} from 'internal/dateTypes';
@@ -137,7 +138,7 @@ export function plainDateFormat(
   date: PlainDate,
   options: Intl.DateTimeFormatOptions,
 ): string {
-  return date.toLocaleString(undefined, options);
+  return getCachedDateTimeFormat(options).format(date);
 }
 
 /**
