@@ -73,6 +73,7 @@
     "check:exports": "pnpm build && publint && attw --pack . --profile node16 --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks",
     "clean": "rm -rf dist storybook-static",
     "theme": "npx tsx scripts/generate-theme.ts",
+    "version": "node scripts/generate-version.mjs && git add src/utils/version.ts",
     "release": "bash scripts/release.sh"
   },
   "lint-staged": {

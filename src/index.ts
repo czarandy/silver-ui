@@ -831,6 +831,7 @@ export {
   type RadioGroupSize,
 } from 'components/RadioGroup';
 export {cx} from 'utils/cx';
+export {version} from 'utils/version';
 export {
   VisuallyHidden,
   type VisuallyHiddenElement,
