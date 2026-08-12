@@ -21,6 +21,16 @@ export interface ScheduleEventPopoverRenderProps<
 
 export interface ScheduleEventPopoverPluginOptions<TAuxiliaryData = unknown> {
   /**
+   * When `true`, custom popover content receives the standard visually hidden
+   * close affordance and Dialog context. A nested `LayoutHeader` uses that
+   * context to append its automatic close button. This option only applies
+   * when `renderContent` is provided; the built-in content continues to render
+   * its own close button.
+   *
+   * @default false
+   */
+  hasCloseButton?: boolean;
+  /**
    * Renders the popover content for an event. Receives `{event, close}` so the
    * content can render the event and dismiss the popover. Return
    * `null`/`undefined` to opt out of a popover for that event.
@@ -38,8 +48,9 @@ export interface ScheduleEventPopoverPluginOptions<TAuxiliaryData = unknown> {
 function createScheduleEventPopoverPlugin<TAuxiliaryData>(
   options: ScheduleEventPopoverPluginOptions<TAuxiliaryData>,
 ): SchedulePlugin {
-  const {renderContent} = options;
+  const {hasCloseButton = false, renderContent} = options;
   return {
+    eventPopoverHasCloseButton: renderContent != null && hasCloseButton,
     renderEventPopover(event, controls): ReactNode {
       const typedEvent = event as CalendarEvent<TAuxiliaryData>;
       if (renderContent != null) {
@@ -64,9 +75,13 @@ function createScheduleEventPopoverPlugin<TAuxiliaryData>(
 export function useScheduleEventPopoverPlugin<TAuxiliaryData = unknown>(
   options: ScheduleEventPopoverPluginOptions<TAuxiliaryData> = {},
 ): SchedulePlugin {
-  const {renderContent} = options;
+  const {hasCloseButton, renderContent} = options;
   return useMemo(
-    () => createScheduleEventPopoverPlugin<TAuxiliaryData>({renderContent}),
-    [renderContent],
+    () =>
+      createScheduleEventPopoverPlugin<TAuxiliaryData>({
+        hasCloseButton,
+        renderContent,
+      }),
+    [hasCloseButton, renderContent],
   );
 }
