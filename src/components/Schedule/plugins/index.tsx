@@ -1,5 +1,10 @@
 import type {SchedulePlugin} from 'components/Schedule/types';
 
+export {
+  type ScheduleAvailabilityPluginOptions,
+  type ScheduleUnavailableRange,
+  useScheduleAvailabilityPlugin,
+} from 'components/Schedule/plugins/AvailabilityPlugin';
 export {useScheduleEventCreatePlugin} from 'components/Schedule/plugins/EventCreatePlugin';
 export {useScheduleEventMovePlugin} from 'components/Schedule/plugins/EventMovePlugin';
 export {useScheduleEventResizePlugin} from 'components/Schedule/plugins/EventResizePlugin';

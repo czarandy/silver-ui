@@ -24,6 +24,7 @@ export {ScheduleContext, useScheduleContext} from 'components/Schedule/context';
 export {
   defaultSchedulePlugins,
   ScheduleEventPopoverContent,
+  useScheduleAvailabilityPlugin,
   useScheduleEventCreatePlugin,
   useScheduleEventMovePlugin,
   useScheduleEventPopoverPlugin,
@@ -32,6 +33,10 @@ export {
   useScheduleViewSelectorPlugin,
 } from 'components/Schedule/plugins';
 export type {ScheduleContextValue} from 'components/Schedule/context';
+export type {
+  ScheduleAvailabilityPluginOptions,
+  ScheduleUnavailableRange,
+} from 'components/Schedule/plugins/AvailabilityPlugin';
 export type {
   ScheduleEventCreatePluginOptions,
   ScheduleEventCreateRenderProps,

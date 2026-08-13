@@ -76,17 +76,30 @@ try {
   await writeFile(
     join(consumerDir, 'index.ts'),
     `
-import {cx, type ButtonProps as RootButtonProps} from 'silver-ui';
+import {
+  cx,
+  useScheduleAvailabilityPlugin,
+  type ButtonProps as RootButtonProps,
+  type ScheduleAvailabilityPluginOptions,
+} from 'silver-ui';
 import {Alert, type AlertProps} from 'silver-ui/Alert';
 import {Button, type ButtonProps} from 'silver-ui/Button';
 import {Layout, type LayoutProps, type SpacingToken} from 'silver-ui/Layout';
 import {Popover, type PopoverProps} from 'silver-ui/Popover';
+import {
+  useScheduleAvailabilityPlugin as useScheduleAvailabilityPluginFromSubpath,
+  type ScheduleAvailabilityPluginOptions as ScheduleAvailabilityPluginOptionsFromSubpath,
+} from 'silver-ui/Schedule';
 import {Spinner, type SpinnerProps} from 'silver-ui/Spinner';
 import {useHotkey, type UseHotkeyOptions} from 'silver-ui/hooks';
 
 export const components = [Alert, Button, Layout, Popover, Spinner] as const;
 export const className = cx('base', 'extra');
-export const hooks = [useHotkey] as const;
+export const hooks = [
+  useHotkey,
+  useScheduleAvailabilityPlugin,
+  useScheduleAvailabilityPluginFromSubpath,
+] as const;
 export type PublicProps =
   | AlertProps
   | ButtonProps
@@ -95,7 +108,10 @@ export type PublicProps =
   | RootButtonProps
   | SpinnerProps;
 export type PublicToken = SpacingToken;
-export type PublicHookOptions = UseHotkeyOptions;
+export type PublicHookOptions =
+  | ScheduleAvailabilityPluginOptions
+  | ScheduleAvailabilityPluginOptionsFromSubpath
+  | UseHotkeyOptions;
 `.trimStart(),
   );
   // A .cts module resolves silver-ui through the `require` condition, so it
@@ -103,15 +119,22 @@ export type PublicHookOptions = UseHotkeyOptions;
   await writeFile(
     join(consumerDir, 'require.cts'),
     `
-import {cx, type ButtonProps as RootButtonProps} from 'silver-ui';
+import {
+  cx,
+  useScheduleAvailabilityPlugin,
+  type ButtonProps as RootButtonProps,
+  type ScheduleAvailabilityPluginOptions,
+} from 'silver-ui';
 import {Button, type ButtonProps} from 'silver-ui/Button';
 import {useHotkey, type UseHotkeyOptions} from 'silver-ui/hooks';
 
 export const components = [Button] as const;
 export const className = cx('base', 'extra');
-export const hooks = [useHotkey] as const;
+export const hooks = [useHotkey, useScheduleAvailabilityPlugin] as const;
 export type PublicProps = ButtonProps | RootButtonProps;
-export type PublicHookOptions = UseHotkeyOptions;
+export type PublicHookOptions =
+  | ScheduleAvailabilityPluginOptions
+  | UseHotkeyOptions;
 `.trimStart(),
   );
   // Compile the same consumer under both resolution modes: bundler matches

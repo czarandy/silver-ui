@@ -17,6 +17,10 @@ import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {
+  useScheduleAvailabilityPlugin,
+  type ScheduleUnavailableRange,
+} from 'components/Schedule/plugins/AvailabilityPlugin';
+import {
   useScheduleEventCreatePlugin,
   type ScheduleEventDraft,
 } from 'components/Schedule/plugins/EventCreatePlugin';
@@ -36,6 +40,7 @@ import type {
   ScheduleEventSource,
   ScheduleHeight,
   SchedulePlugin,
+  ScheduleTimeGridCellPropsRenderProps,
   ScheduleView,
 } from 'components/Schedule/types';
 import {Text} from 'components/Text';
@@ -273,6 +278,19 @@ const colorFallbackCategories: ScheduleCategory[] = [
 
 const defaultHighlightDate: Instant = dayInstant(0);
 const defaultViewDate: Instant = dayInstant(0);
+const fullyUnavailableHour: ReadonlyArray<ScheduleUnavailableRange> = [
+  {endMinute: 60, startMinute: 0},
+];
+
+function getStoryUnavailableRanges({
+  date,
+  hour,
+}: ScheduleTimeGridCellPropsRenderProps): ReadonlyArray<ScheduleUnavailableRange> {
+  if (date.dayOfWeek >= 6 || hour < 9 || hour >= 17) {
+    return fullyUnavailableHour;
+  }
+  return hour === 9 ? [{endMinute: 30, startMinute: 0}] : [];
+}
 
 const meta: Meta<typeof Schedule> = {
   title: 'Components/Schedule',
@@ -640,6 +658,21 @@ export const Week: Story = {
       view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
     />
   ),
+};
+
+export const Availability: Story = {
+  render: () => {
+    const availabilityPlugin = useScheduleAvailabilityPlugin({
+      getUnavailableRanges: getStoryUnavailableRanges,
+    });
+    return (
+      <ScheduleStory
+        events={weekEvents}
+        plugins={[availabilityPlugin]}
+        view={createScheduleWeeklyView({maxHour: 19, minHour: 7})}
+      />
+    );
+  },
 };
 
 export const PaginationHotkeys: Story = {

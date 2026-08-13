@@ -635,20 +635,27 @@ export function TimeGridView({
                   });
                   const hourCellPluginProps = plugins.reduce<
                     HTMLAttributes<HTMLElement>
-                  >(
-                    (props, plugin) => ({
-                      ...props,
-                      ...plugin.getTimeGridCellProps?.({
-                        date: day,
-                        hour,
-                        hourHeight: normalizedHourHeight,
-                        maxHour: normalizedMaxHour,
-                        minHour: normalizedMinHour,
-                        timezoneID,
-                      }),
-                    }),
-                    {},
-                  );
+                  >((props, plugin) => {
+                    const pluginProps = plugin.getTimeGridCellProps?.({
+                      date: day,
+                      hour,
+                      hourHeight: normalizedHourHeight,
+                      maxHour: normalizedMaxHour,
+                      minHour: normalizedMinHour,
+                      timezoneID,
+                    });
+                    return pluginProps == null
+                      ? props
+                      : {
+                          ...props,
+                          ...pluginProps,
+                          style: {...props.style, ...pluginProps.style},
+                        };
+                  }, {});
+                  const {
+                    style: hourCellPluginStyle,
+                    ...hourCellPassthroughProps
+                  } = hourCellPluginProps;
                   // The plugins array is stable, ordered config that is never
                   // reordered, so the index is a safe key for the cell content.
                   const hourCellContent = plugins.map(
@@ -677,8 +684,8 @@ export function TimeGridView({
                       data-testid={`schedule-time-grid-cell-${day.toString()}-${hour}`}
                       key={`${day.toString()}-${hour}`}
                       role="gridcell"
-                      style={hourStyle}
-                      {...hourCellPluginProps}>
+                      style={{...hourStyle, ...hourCellPluginStyle}}
+                      {...hourCellPassthroughProps}>
                       {currentTimeTop != null ? (
                         <ScheduleCurrentTimeIndicator
                           layout="timeGrid"
