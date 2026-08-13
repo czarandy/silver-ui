@@ -566,6 +566,83 @@ describe('Schedule', () => {
     },
   );
 
+  it('composes className, style, and handlers across time-grid cell plugins', () => {
+    const firstOnClick = vi.fn();
+    const secondOnClick = vi.fn();
+    const plugins: SchedulePlugin[] = [
+      {
+        getTimeGridCellProps: () => ({
+          className: 'first-plugin-cell',
+          onClick: firstOnClick,
+          style: {outline: '1px solid red'},
+        }),
+      },
+      {
+        getTimeGridCellProps: () => ({
+          onClick: secondOnClick,
+          style: {background: 'rebeccapurple'},
+        }),
+      },
+    ];
+
+    render(
+      <Schedule
+        events={[]}
+        plugins={plugins}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 9, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const cell = screen.getByTestId('schedule-time-grid-cell-2026-05-13-8');
+    expect(cell).toHaveClass('first-plugin-cell');
+    expect(cell.classList.length).toBeGreaterThan(1);
+    expect(cell).toHaveStyle({
+      background: 'rebeccapurple',
+      height: '100px',
+      minHeight: '100px',
+      outline: '1px solid red',
+    });
+
+    fireEvent.click(cell);
+
+    expect(firstOnClick).toHaveBeenCalledTimes(1);
+    expect(secondOnClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('composes className and style across month cell plugins', () => {
+    const plugins: SchedulePlugin[] = [
+      {
+        getMonthCellProps: () => ({
+          className: 'first-plugin-cell',
+          style: {outline: '1px solid red'},
+        }),
+      },
+      {
+        getMonthCellProps: () => ({style: {background: 'rebeccapurple'}}),
+      },
+    ];
+
+    render(
+      <Schedule
+        events={[]}
+        plugins={plugins}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
+    expect(cell).toHaveClass('first-plugin-cell');
+    expect(cell.classList.length).toBeGreaterThan(1);
+    expect(cell).toHaveStyle({
+      background: 'rebeccapurple',
+      outline: '1px solid red',
+    });
+  });
+
   it('renders loading state while async events are pending', () => {
     const pendingEvents = new Promise<CalendarEvent[]>(() => {});
     const loader = vi.fn(async () => pendingEvents);

@@ -1,13 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 'use client';
 
-import {
-  Fragment,
-  useMemo,
-  type CSSProperties,
-  type HTMLAttributes,
-  type ReactNode,
-} from 'react';
+import {Fragment, useMemo, type CSSProperties, type ReactNode} from 'react';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
@@ -23,6 +17,7 @@ import {
   getMinutesSinceStartOfDay,
   getTimedEventBlockStyle,
   isEventInPast,
+  mergeSchedulePluginProps,
   ScheduleCurrentTimeIndicator,
   ScheduleEventOverflowPopover,
   useScheduleEventPluginProps,
@@ -32,6 +27,8 @@ import type {
   CalendarEvent,
   CalendarInstantEvent,
   ScheduleHeight,
+  SchedulePluginElementProps,
+  ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
@@ -269,7 +266,14 @@ function TimeGridEvent({
     isPast,
     isInteractive: triggerProps != null,
   });
-  const style = getTimedEventBlockStyle(layout);
+  const {
+    className: eventClassName,
+    style: eventStyle,
+    ...eventPassthroughProps
+  } = mergeSchedulePluginProps(
+    {className: classes.event, style: getTimedEventBlockStyle(layout)},
+    eventPluginProps,
+  );
   const body = (
     <>
       <span className={classes.title}>{event.title}</span>
@@ -284,22 +288,22 @@ function TimeGridEvent({
     <>
       {triggerProps != null ? (
         <button
-          className={classes.event}
+          className={eventClassName}
           data-state={isPast ? 'past' : undefined}
           data-testid={`schedule-event-${event.id}`}
-          style={style}
+          style={eventStyle}
           type="button"
-          {...eventPluginProps}
+          {...eventPassthroughProps}
           {...triggerProps}>
           {body}
         </button>
       ) : (
         <div
-          className={classes.event}
+          className={eventClassName}
           data-state={isPast ? 'past' : undefined}
           data-testid={`schedule-event-${event.id}`}
-          {...eventPluginProps}
-          style={style}>
+          style={eventStyle}
+          {...eventPassthroughProps}>
           {body}
         </div>
       )}
@@ -633,34 +637,38 @@ export function TimeGridView({
                     isLastColumn: index === days.length - 1,
                     isLastRow: isLastHour,
                   });
-                  const hourCellPluginProps = plugins.reduce<
-                    HTMLAttributes<HTMLElement>
-                  >(
-                    (props, plugin) => ({
-                      ...props,
-                      ...plugin.getTimeGridCellProps?.({
-                        date: day,
-                        hour,
-                        hourHeight: normalizedHourHeight,
-                        maxHour: normalizedMaxHour,
-                        minHour: normalizedMinHour,
-                        timezoneID,
-                      }),
-                    }),
-                    {},
+                  const cellRenderProps: ScheduleTimeGridCellPropsRenderProps =
+                    {
+                      date: day,
+                      hour,
+                      hourHeight: normalizedHourHeight,
+                      maxHour: normalizedMaxHour,
+                      minHour: normalizedMinHour,
+                      timezoneID,
+                    };
+                  const hourCellPluginProps =
+                    plugins.reduce<SchedulePluginElementProps>(
+                      (props, plugin) =>
+                        mergeSchedulePluginProps(
+                          props,
+                          plugin.getTimeGridCellProps?.(cellRenderProps),
+                        ),
+                      {},
+                    );
+                  const {
+                    className: hourCellClassName,
+                    style: hourCellStyle,
+                    ...hourCellPassthroughProps
+                  } = mergeSchedulePluginProps(
+                    {className: hourCellClasses.hourCell, style: hourStyle},
+                    hourCellPluginProps,
                   );
                   // The plugins array is stable, ordered config that is never
                   // reordered, so the index is a safe key for the cell content.
                   const hourCellContent = plugins.map(
                     (plugin, pluginIndex): ReactNode => {
-                      const content = plugin.renderTimeGridCellContent?.({
-                        date: day,
-                        hour,
-                        hourHeight: normalizedHourHeight,
-                        maxHour: normalizedMaxHour,
-                        minHour: normalizedMinHour,
-                        timezoneID,
-                      });
+                      const content =
+                        plugin.renderTimeGridCellContent?.(cellRenderProps);
                       return isNonEmptyReactNode(content) ? (
                         // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
                         <Fragment key={pluginIndex}>{content}</Fragment>
@@ -673,12 +681,12 @@ export function TimeGridView({
                       aria-label={
                         hourCellNamesByDay[index][hour - normalizedMinHour]
                       }
-                      className={hourCellClasses.hourCell}
+                      className={hourCellClassName}
                       data-testid={`schedule-time-grid-cell-${day.toString()}-${hour}`}
                       key={`${day.toString()}-${hour}`}
                       role="gridcell"
-                      style={hourStyle}
-                      {...hourCellPluginProps}>
+                      style={hourCellStyle}
+                      {...hourCellPassthroughProps}>
                       {currentTimeTop != null ? (
                         <ScheduleCurrentTimeIndicator
                           layout="timeGrid"
