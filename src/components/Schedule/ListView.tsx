@@ -16,6 +16,7 @@ import {
   getEventTimeLabel,
   isEventInPast,
   formatListRangeTitle,
+  mergeSchedulePluginProps,
   ScheduleCurrentTimeIndicator,
   ScheduleFrame,
   useScheduleEventPluginProps,
@@ -70,6 +71,8 @@ function ListEvent({
     isInteractiveEvent: triggerProps != null,
     isPastEvent: isPast,
   });
+  const {className: eventContentClassName, ...pluginPassthroughProps} =
+    mergeSchedulePluginProps({className: classes.eventContent}, pluginProps);
   const eventContent = (
     <>
       <Tooltip content={category.label} hoverIndication="never">
@@ -89,20 +92,20 @@ function ListEvent({
       </Text>
       {triggerProps != null ? (
         <button
-          className={classes.eventContent}
+          className={eventContentClassName}
           data-state={eventDataState}
           data-testid={`schedule-event-${event.id}`}
-          {...pluginProps}
+          {...pluginPassthroughProps}
           type="button"
           {...triggerProps}>
           {eventContent}
         </button>
       ) : (
         <div
-          className={classes.eventContent}
+          className={eventContentClassName}
           data-state={eventDataState}
           data-testid={`schedule-event-${event.id}`}
-          {...pluginProps}>
+          {...pluginPassthroughProps}>
           {eventContent}
         </div>
       )}

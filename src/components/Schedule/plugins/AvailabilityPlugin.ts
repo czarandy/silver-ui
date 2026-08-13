@@ -121,7 +121,8 @@ function unavailableRangesToBackground(
  * Paints unavailable portions of Schedule day/week hour cells. Availability
  * resolution stays with the consumer so recurring rules, overrides, and time
  * zones can follow the application's domain model; the plugin owns range
- * normalization and theme-aware gray shading.
+ * normalization, theme-aware gray shading, and an `aria-description` that
+ * announces unavailable time to assistive technology.
  */
 export function useScheduleAvailabilityPlugin({
   getUnavailableRanges,
@@ -161,7 +162,15 @@ export function useScheduleAvailabilityPlugin({
           ranges,
           unavailableColor,
         );
+        // The shading is color-only, so unavailability is also announced to
+        // assistive technology, which never surfaces data attributes.
         const cellProps: SchedulePluginElementProps = {
+          'aria-description':
+            availability === 'available'
+              ? undefined
+              : availability === 'unavailable'
+                ? 'Unavailable'
+                : 'Partially unavailable',
           'data-schedule-availability': availability,
           style: background == null ? undefined : {background},
         };

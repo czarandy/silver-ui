@@ -2,7 +2,7 @@
 'use client';
 
 import {useMemo} from 'react';
-import type {CSSProperties, HTMLAttributes} from 'react';
+import type {CSSProperties} from 'react';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -13,11 +13,13 @@ import {
   getEventAccessibleLabel,
   hasEventPopoverPlugin,
   isEventInPast,
+  mergeSchedulePluginProps,
   ScheduleEventOverflowPopover,
   ScheduleFrame,
 } from 'components/Schedule/shared';
 import type {
   CalendarEvent,
+  SchedulePluginElementProps,
   ScheduleView,
   ScheduleViewComponentProps,
   ScheduleZonedInstant,
@@ -648,18 +650,23 @@ function ScheduleMonthlyView({
                 isToday,
                 isTwoDigit: day.day >= 10,
               });
-              const dayCellPluginProps = plugins.reduce<
-                HTMLAttributes<HTMLElement>
-              >(
-                (props, plugin) => ({
-                  ...props,
-                  ...plugin.getMonthCellProps?.({
-                    date: day,
-                    timezoneID,
-                  }),
-                }),
-                {},
-              );
+              const dayCellPluginProps =
+                plugins.reduce<SchedulePluginElementProps>(
+                  (props, plugin) =>
+                    mergeSchedulePluginProps(
+                      props,
+                      plugin.getMonthCellProps?.({
+                        date: day,
+                        timezoneID,
+                      }),
+                    ),
+                  {},
+                );
+              const {className: dayCellClassName, ...dayCellPassthroughProps} =
+                mergeSchedulePluginProps(
+                  {className: dayClasses.cell},
+                  dayCellPluginProps,
+                );
               return (
                 <div
                   aria-current={isToday ? 'date' : undefined}
@@ -672,11 +679,11 @@ function ScheduleMonthlyView({
                     events: eventPopoverActive ? [] : dayEvents,
                     timezoneID,
                   })}
-                  className={dayClasses.cell}
+                  className={dayCellClassName}
                   data-testid={`schedule-month-cell-${day.toString()}`}
                   key={day.toString()}
                   role="gridcell"
-                  {...dayCellPluginProps}>
+                  {...dayCellPassthroughProps}>
                   <span className={dayClasses.dayNumber}>
                     <Text
                       as="span"

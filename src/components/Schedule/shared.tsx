@@ -7,7 +7,6 @@ import {
   useMemo,
   useRef,
   type CSSProperties,
-  type HTMLAttributes,
   type ReactNode,
   type RefCallback,
 } from 'react';
@@ -28,6 +27,7 @@ import type {
   ScheduleHeight,
   ScheduleHeaderContent,
   SchedulePlugin,
+  SchedulePluginElementProps,
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
@@ -43,6 +43,7 @@ import {
   type PlainDate,
 } from 'internal/plainDate';
 import {cva} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 const categoryFallback: ScheduleCategory = {label: 'Event', color: 'blue'};
 
@@ -356,18 +357,62 @@ export function useScheduleEventPopover(
   };
 }
 
+/**
+ * Merges plugin-provided element props onto previously accumulated props.
+ * `style` objects are merged, `className`s are combined, and event handlers
+ * are chained (accumulated handler first) instead of last-writer-wins, so no
+ * plugin can silently disable another plugin's interaction or drop an
+ * element's recipe classes. Keys with `undefined` values are ignored; all
+ * other keys are last-writer-wins. Used both to combine props across plugins
+ * and to apply the combined props over an element's own defaults.
+ */
+export function mergeSchedulePluginProps(
+  props: SchedulePluginElementProps,
+  overrides: SchedulePluginElementProps | null | undefined,
+): SchedulePluginElementProps {
+  if (overrides == null) {
+    return props;
+  }
+  const merged: Record<string, unknown> = {...props};
+  for (const [key, next] of Object.entries(overrides)) {
+    if (next === undefined) {
+      continue;
+    }
+    const previous = merged[key];
+    if (key === 'style' && previous != null) {
+      merged.style = {
+        ...(previous as CSSProperties),
+        ...(next as CSSProperties),
+      };
+    } else if (key === 'className' && previous != null) {
+      merged.className = cx(previous as string, next as string);
+    } else if (typeof previous === 'function' && typeof next === 'function') {
+      merged[key] = (...args: unknown[]): void => {
+        (previous as (...handlerArgs: unknown[]) => void)(...args);
+        (next as (...handlerArgs: unknown[]) => void)(...args);
+      };
+    } else {
+      merged[key] = next;
+    }
+  }
+  return merged as SchedulePluginElementProps;
+}
+
 export function useScheduleEventPluginProps({
   event,
   layout,
 }: Pick<ScheduleEventPropsRenderProps, 'event' | 'layout'>):
-  HTMLAttributes<HTMLElement> | undefined {
+  SchedulePluginElementProps | undefined {
   const {plugins, timezoneID} = useScheduleContext();
   return useMemo(() => {
-    let props: HTMLAttributes<HTMLElement> | undefined;
+    let props: SchedulePluginElementProps | undefined;
     plugins.forEach(plugin => {
       const pluginProps = plugin.getEventProps?.({event, layout, timezoneID});
       if (pluginProps != null) {
-        props = {...props, ...pluginProps};
+        props =
+          props == null
+            ? pluginProps
+            : mergeSchedulePluginProps(props, pluginProps);
       }
     });
     return props;
@@ -391,16 +436,18 @@ function EventPillRoot({
   className?: string;
   dataState?: 'past';
   dataTestId: string;
-  pluginProps?: HTMLAttributes<HTMLElement>;
+  pluginProps?: SchedulePluginElementProps;
   triggerProps?: ScheduleEventTriggerProps;
 }): React.JSX.Element {
+  const {className: mergedClassName, ...pluginPassthroughProps} =
+    mergeSchedulePluginProps({className}, pluginProps);
   if (triggerProps != null) {
     return (
       <button
-        className={className}
+        className={mergedClassName}
         data-state={dataState}
         data-testid={dataTestId}
-        {...pluginProps}
+        {...pluginPassthroughProps}
         type="button"
         {...triggerProps}>
         {children}
@@ -409,10 +456,10 @@ function EventPillRoot({
   }
   return (
     <span
-      className={className}
+      className={mergedClassName}
       data-state={dataState}
       data-testid={dataTestId}
-      {...pluginProps}>
+      {...pluginPassthroughProps}>
       {children}
     </span>
   );

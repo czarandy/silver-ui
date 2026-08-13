@@ -81,6 +81,7 @@ it('paints full and partial unavailable ranges while preserving cell geometry', 
   const cell = (hour: number) =>
     screen.getByTestId(`schedule-time-grid-cell-2026-08-12-${hour}`);
   expect(cell(8)).toHaveAttribute('data-schedule-availability', 'unavailable');
+  expect(cell(8)).toHaveAttribute('aria-description', 'Unavailable');
   expect(cell(8)).toHaveAttribute('data-supplemental-cell', 'true');
   expect(cell(8)).toHaveStyle({
     background: 'var(--silver-colors-bg-subtle)',
@@ -89,11 +90,13 @@ it('paints full and partial unavailable ranges while preserving cell geometry', 
     outline: '1px solid red',
   });
   expect(cell(9)).toHaveAttribute('data-schedule-availability', 'partial');
+  expect(cell(9)).toHaveAttribute('aria-description', 'Partially unavailable');
   expect(cell(9)).toHaveStyle({
     background:
       'linear-gradient(to bottom, var(--silver-colors-bg-subtle) 0%, var(--silver-colors-bg-subtle) 50%, transparent 50%, transparent 100%)',
   });
   expect(cell(10)).toHaveAttribute('data-schedule-availability', 'available');
+  expect(cell(10)).not.toHaveAttribute('aria-description');
   expect(cell(10)).toHaveStyle({
     background: '',
     height: '100px',

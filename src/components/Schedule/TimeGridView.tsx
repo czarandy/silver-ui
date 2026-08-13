@@ -17,6 +17,7 @@ import {
   getMinutesSinceStartOfDay,
   getTimedEventBlockStyle,
   isEventInPast,
+  mergeSchedulePluginProps,
   ScheduleCurrentTimeIndicator,
   ScheduleEventOverflowPopover,
   useScheduleEventPluginProps,
@@ -265,7 +266,14 @@ function TimeGridEvent({
     isPast,
     isInteractive: triggerProps != null,
   });
-  const style = getTimedEventBlockStyle(layout);
+  const {
+    className: eventClassName,
+    style: eventStyle,
+    ...eventPassthroughProps
+  } = mergeSchedulePluginProps(
+    {className: classes.event, style: getTimedEventBlockStyle(layout)},
+    eventPluginProps,
+  );
   const body = (
     <>
       <span className={classes.title}>{event.title}</span>
@@ -280,22 +288,22 @@ function TimeGridEvent({
     <>
       {triggerProps != null ? (
         <button
-          className={classes.event}
+          className={eventClassName}
           data-state={isPast ? 'past' : undefined}
           data-testid={`schedule-event-${event.id}`}
-          style={style}
+          style={eventStyle}
           type="button"
-          {...eventPluginProps}
+          {...eventPassthroughProps}
           {...triggerProps}>
           {body}
         </button>
       ) : (
         <div
-          className={classes.event}
+          className={eventClassName}
           data-state={isPast ? 'past' : undefined}
           data-testid={`schedule-event-${event.id}`}
-          {...eventPluginProps}
-          style={style}>
+          style={eventStyle}
+          {...eventPassthroughProps}>
           {body}
         </div>
       )}
@@ -640,23 +648,21 @@ export function TimeGridView({
                     };
                   const hourCellPluginProps =
                     plugins.reduce<SchedulePluginElementProps>(
-                      (props, plugin) => {
-                        const pluginProps =
-                          plugin.getTimeGridCellProps?.(cellRenderProps);
-                        return pluginProps == null
-                          ? props
-                          : {
-                              ...props,
-                              ...pluginProps,
-                              style: {...props.style, ...pluginProps.style},
-                            };
-                      },
+                      (props, plugin) =>
+                        mergeSchedulePluginProps(
+                          props,
+                          plugin.getTimeGridCellProps?.(cellRenderProps),
+                        ),
                       {},
                     );
                   const {
-                    style: hourCellPluginStyle,
+                    className: hourCellClassName,
+                    style: hourCellStyle,
                     ...hourCellPassthroughProps
-                  } = hourCellPluginProps;
+                  } = mergeSchedulePluginProps(
+                    {className: hourCellClasses.hourCell, style: hourStyle},
+                    hourCellPluginProps,
+                  );
                   // The plugins array is stable, ordered config that is never
                   // reordered, so the index is a safe key for the cell content.
                   const hourCellContent = plugins.map(
@@ -675,11 +681,11 @@ export function TimeGridView({
                       aria-label={
                         hourCellNamesByDay[index][hour - normalizedMinHour]
                       }
-                      className={hourCellClasses.hourCell}
+                      className={hourCellClassName}
                       data-testid={`schedule-time-grid-cell-${day.toString()}-${hour}`}
                       key={`${day.toString()}-${hour}`}
                       role="gridcell"
-                      style={{...hourStyle, ...hourCellPluginStyle}}
+                      style={hourCellStyle}
                       {...hourCellPassthroughProps}>
                       {currentTimeTop != null ? (
                         <ScheduleCurrentTimeIndicator
