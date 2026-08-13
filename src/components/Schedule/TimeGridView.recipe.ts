@@ -193,11 +193,17 @@ export const scheduleTimeGridViewRecipe = sva({
     height: {
       auto: {},
       fill: {
+        grid: {
+          alignContent: 'start',
+        },
         fixedRows: {
           position: 'sticky',
           top: 0,
           zIndex: 1,
           bg: 'bg',
+        },
+        timeRows: {
+          alignContent: 'start',
         },
       },
     },
