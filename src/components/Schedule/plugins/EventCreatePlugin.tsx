@@ -28,6 +28,7 @@ import type {
 import useHotkey from 'hooks/useHotkey';
 import {plainDateIsEqual} from 'internal/plainDate';
 import useLatest from 'internal/useLatest';
+import {useWindowHasFocus} from 'internal/useWindowHasFocus';
 import {sva} from 'styled-system/css';
 
 const DEFAULT_DURATION_MINUTES = 60;
@@ -478,6 +479,7 @@ export function useScheduleEventCreatePlugin(
   const dragRef = useRef<DragState | null>(null);
   const draftIDRef = useRef(0);
   const ghostElementRef = useRef<HTMLElement | null>(null);
+  const windowHasFocus = useWindowHasFocus();
   const listenersRef = useRef<{
     cancel: (event: globalThis.PointerEvent) => void;
     move: (event: globalThis.PointerEvent) => void;
@@ -590,6 +592,7 @@ export function useScheduleEventCreatePlugin(
       // pointer landing on the cell itself starts a draft. Touch is excluded:
       // the grid needs `touch-action` for scrolling.
       if (
+        !windowHasFocus ||
         isEventPopoverDismissPointerEvent(pointerEvent.nativeEvent) ||
         pointerEvent.button !== 0 ||
         pointerEvent.pointerType === 'touch' ||
@@ -641,6 +644,7 @@ export function useScheduleEventCreatePlugin(
       handlePointerUp,
       removeListeners,
       snapMinutes,
+      windowHasFocus,
     ],
   );
 

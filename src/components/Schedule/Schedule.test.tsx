@@ -1,5 +1,6 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {
+  act,
   createEvent,
   fireEvent,
   render,
@@ -8,7 +9,15 @@ import {
   within,
 } from '@testing-library/react';
 import {Component, useState, type ErrorInfo, type ReactNode} from 'react';
-import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import {buttonRecipe} from 'components/Button/Button.recipe';
 import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover';
@@ -3029,6 +3038,10 @@ describe('Schedule', () => {
   });
 
   describe('event create plugin', () => {
+    beforeEach(() => {
+      vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+    });
+
     // Cells report a zero `top` in jsdom, so with `hourHeight: 60` the drafted
     // minute is simply `hour * 60 + clientY`.
     function ScheduleWithEventCreate({
@@ -3122,6 +3135,37 @@ describe('Schedule', () => {
         instantUTC(2026, 4, 13, 10),
       );
       expect(onCreate.mock.calls[0]?.[0].end).toBe(instantUTC(2026, 4, 13, 11));
+    });
+
+    it('does not create when the pointer press focuses the window', async () => {
+      vi.spyOn(document, 'hasFocus').mockReturnValue(false);
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      // Some browsers deliver window focus before the pointerdown that caused
+      // it, so exercise that ordering as well as the initially unfocused state.
+      fireEvent(window, new FocusEvent('focus'));
+      fireEvent.pointerDown(getCell(10), {
+        button: 0,
+        clientY: 0,
+        pointerId: 1,
+      });
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+
+      await act(nextAnimationFrame);
+      fireEvent.pointerDown(getCell(10), {
+        button: 0,
+        clientY: 0,
+        pointerId: 2,
+      });
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
     });
 
     it('honors a custom click-to-create duration', () => {
