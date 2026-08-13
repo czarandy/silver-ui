@@ -894,6 +894,17 @@ export const FillHeight: Story = {
   },
 };
 
+export const FillHeightWithSurplusSpace: Story = {
+  render: () => (
+    <div className={fillHeightStoryContainer}>
+      <ScheduleStory
+        height="fill"
+        view={createScheduleWeeklyView({maxHour: 10, minHour: 8})}
+      />
+    </div>
+  ),
+};
+
 export const CustomPlugin: Story = {
   render: () => {
     const customPlugin = useMemo<SchedulePlugin>(
