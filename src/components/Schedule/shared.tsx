@@ -523,6 +523,7 @@ export function CalendarEventPill({
   const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({
     color: category.color,
+    isCanceled: event.isCanceled,
     isFullWidth,
     isPast,
     isInteractive: triggerProps != null,
@@ -565,6 +566,7 @@ export function CalendarMonthEventPill({
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);
   const classes = scheduleEventRecipe({
     color: category.color,
+    isCanceled: event.isCanceled,
     isPast,
     isFullWidth: true,
     isInteractive: triggerProps != null,

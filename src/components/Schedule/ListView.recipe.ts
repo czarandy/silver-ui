@@ -99,6 +99,10 @@ export const scheduleListViewRecipe = sva({
       },
       false: {},
     },
+    isCanceledEvent: {
+      true: {eventTitle: {textDecoration: 'line-through'}},
+      false: {},
+    },
     isLastDay: {
       true: {
         day: {
@@ -139,6 +143,7 @@ export const scheduleListViewRecipe = sva({
     },
   },
   defaultVariants: {
+    isCanceledEvent: false,
     isHighlightedDay: false,
     isLastDay: false,
     isPastEvent: false,

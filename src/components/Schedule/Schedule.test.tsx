@@ -173,10 +173,12 @@ describe('createEventFromISO', () => {
     const event = createEventFromISO({
       end: '2026-05-13T16:30:00.000Z',
       id: 'standup',
+      isCanceled: true,
       start: '2026-05-13T16:00:00.000Z',
       title: 'Standup',
     });
 
+    expect(event.isCanceled).toBe(true);
     expect(typeof event.start).toBe('number');
     expect(event.start).toBe(
       Temporal.Instant.from('2026-05-13T16:00:00.000Z').epochMilliseconds,
@@ -531,6 +533,75 @@ describe('Schedule', () => {
       scheduleEventRecipe({color: 'yellow', isPast: true}).event as string,
     );
   });
+
+  it.each([
+    {
+      event: createEventFromISO({
+        end: '2026-05-13T10:00:00.000Z',
+        id: 'canceled-time-grid',
+        isCanceled: true,
+        start: '2026-05-13T09:00:00.000Z',
+        title: 'Canceled time-grid event',
+      }),
+      expectedTitleClass: scheduleEventRecipe({isCanceled: true}).title,
+      layout: 'time-grid',
+      view: createScheduleDayView({maxHour: 11, minHour: 8}),
+    },
+    {
+      event: createEventFromISO({
+        end: '2026-05-14',
+        id: 'canceled-inline',
+        isCanceled: true,
+        start: '2026-05-13',
+        title: 'Canceled inline event',
+      }),
+      expectedTitleClass: scheduleEventRecipe({isCanceled: true}).title,
+      layout: 'inline',
+      view: createScheduleDayView({maxHour: 11, minHour: 8}),
+    },
+    {
+      event: createEventFromISO({
+        end: '2026-05-13T10:00:00.000Z',
+        id: 'canceled-month',
+        isCanceled: true,
+        start: '2026-05-13T09:00:00.000Z',
+        title: 'Canceled month event',
+      }),
+      expectedTitleClass: scheduleEventRecipe({isCanceled: true}).title,
+      layout: 'month',
+      view: createScheduleMonthlyView(),
+    },
+    {
+      event: createEventFromISO({
+        end: '2026-05-13T10:00:00.000Z',
+        id: 'canceled-list',
+        isCanceled: true,
+        start: '2026-05-13T09:00:00.000Z',
+        title: 'Canceled list event',
+      }),
+      expectedTitleClass: scheduleListViewRecipe({isCanceledEvent: true})
+        .eventTitle,
+      layout: 'list',
+      view: createScheduleListView({days: 7}),
+    },
+  ])(
+    'strikes through canceled event titles in the $layout layout',
+    ({event, expectedTitleClass, view}) => {
+      render(
+        <Schedule
+          events={[event]}
+          timezoneID="UTC"
+          view={view}
+          viewDate={instantUTC(2026, 4, 13)}
+        />,
+      );
+
+      expect(expectedTitleClass).toContain('silver-td_line-through');
+      expect(screen.getByText(event.title)).toHaveClass(
+        ...(expectedTitleClass?.split(' ') ?? []),
+      );
+    },
+  );
 
   it.each([
     {isInteractive: false, tagName: 'DIV'},
