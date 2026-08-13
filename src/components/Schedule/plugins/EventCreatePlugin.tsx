@@ -13,7 +13,10 @@ import {
 } from 'react';
 import {usePopover} from 'components/Popover/usePopover';
 import {instantFromDateAndMinutes} from 'components/Schedule/dateMath';
-import {isEventPopoverDismissPointerEvent} from 'components/Schedule/interaction';
+import {
+  isSchedulePopoverDismissPointerEvent,
+  useScheduleInteractionState,
+} from 'components/Schedule/interaction';
 import {
   formatTimeRange,
   getTimedEventBlockStyle,
@@ -329,15 +332,29 @@ function ScheduleEventCreateGhost({
 }): React.JSX.Element {
   const {date, endMinutes, id, isCommitted, startMinutes} = draft;
   const hasOpenedRef = useRef(false);
+  const interactionState = useScheduleInteractionState();
+  const interactionTokenRef = useRef(Symbol('schedule-create-popover'));
+  const handleShow = useCallback(() => {
+    interactionState.markPopoverShown(interactionTokenRef.current);
+  }, [interactionState]);
   const handleHide = useCallback(() => {
+    interactionState.markPopoverHidden(interactionTokenRef.current);
     onDismiss(id);
-  }, [id, onDismiss]);
+  }, [id, interactionState, onDismiss]);
   const popover = usePopover({
     label: 'Create event',
     onHide: handleHide,
+    onShow: handleShow,
     role: 'dialog',
   });
   const {hide, show, triggerRef} = popover;
+
+  useEffect(
+    () => () => {
+      interactionState.unregisterPopover(interactionTokenRef.current);
+    },
+    [interactionState],
+  );
 
   // Opening from an effect rather than a click keeps the popover clear of the
   // gesture that created it: binding `toggle` to the ghost would let the click
@@ -593,7 +610,7 @@ export function useScheduleEventCreatePlugin(
       // the grid needs `touch-action` for scrolling.
       if (
         !windowHasFocus ||
-        isEventPopoverDismissPointerEvent(pointerEvent.nativeEvent) ||
+        isSchedulePopoverDismissPointerEvent(pointerEvent.nativeEvent) ||
         pointerEvent.button !== 0 ||
         pointerEvent.pointerType === 'touch' ||
         pointerEvent.target !== pointerEvent.currentTarget

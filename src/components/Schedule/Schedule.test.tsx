@@ -3594,7 +3594,7 @@ describe('Schedule', () => {
       ).not.toBeInTheDocument();
     });
 
-    it('replaces an open draft when a new cell is pressed', () => {
+    it('does not replace a draft while its create popover is open', () => {
       const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
       render(<ScheduleWithEventCreate onCreate={onCreate} />);
 
@@ -3608,8 +3608,47 @@ describe('Schedule', () => {
       );
       saveDraft();
       expect(onCreate.mock.calls[0]?.[0].start).toBe(
-        instantUTC(2026, 4, 13, 14),
+        instantUTC(2026, 4, 13, 10),
       );
+    });
+
+    it('does not create through a create popover light-dismiss gesture', async () => {
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+
+      const ghost = screen.getByTestId('schedule-event-create-ghost');
+      const layerId = ghost.getAttribute('aria-controls');
+      expect(layerId).toBeTruthy();
+      // The browser emits this close transition before dispatching the
+      // pointerdown that caused light dismiss to the next empty cell.
+      // eslint-disable-next-line testing-library/no-node-access -- the native layer has no accessible role or test ID
+      const layer = document.getElementById(layerId ?? '');
+      expect(layer).not.toBeNull();
+      fireEvent(layer as HTMLElement, closeToggleEvent());
+      fireEvent.pointerDown(getCell(14), {
+        button: 0,
+        clientY: 0,
+        pointerId: 2,
+      });
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+
+      expect(
+        screen.queryByTestId('schedule-event-create-ghost'),
+      ).not.toBeInTheDocument();
+
+      await nextAnimationFrame();
+      fireEvent.pointerDown(getCell(14), {
+        button: 0,
+        clientY: 0,
+        pointerId: 3,
+      });
+      fireEvent.pointerUp(window, {clientY: 0, pointerId: 3});
+
+      expect(
+        screen.getByTestId('schedule-event-create-ghost'),
+      ).toBeInTheDocument();
     });
 
     it('coexists with the event move plugin', () => {
