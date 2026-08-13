@@ -263,6 +263,7 @@ function TimeGridEvent({
   const classes = scheduleEventRecipe({
     layout: 'block',
     color: category.color,
+    isCanceled: event.isCanceled,
     isPast,
     isInteractive: triggerProps != null,
   });

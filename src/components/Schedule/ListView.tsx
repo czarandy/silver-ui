@@ -69,6 +69,7 @@ function ListEvent({
   const category = getCategory(categoryMap, event);
   const eventDataState = isPast ? 'past' : undefined;
   const classes = scheduleListViewRecipe({
+    isCanceledEvent: event.isCanceled,
     isInteractiveEvent: triggerProps != null,
     isPastEvent: isPast,
   });

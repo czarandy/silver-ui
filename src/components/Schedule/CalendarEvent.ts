@@ -26,6 +26,12 @@ export interface CalendarEventBase<TAuxiliaryData = unknown> {
   description?: string;
   id: string;
   /**
+   * Whether built-in Schedule views should strike through the event title.
+   * Category and description remain caller-owned, so consumers can provide
+   * the cancellation wording appropriate for their domain.
+   */
+  isCanceled?: boolean;
+  /**
    * Optional location shown by the default event popover.
    */
   location?: string;
@@ -53,12 +59,14 @@ export function createEventFromISO({
   category,
   end,
   id,
+  isCanceled,
   start,
   title,
 }: {
   category?: CalendarEvent['category'];
   end: string;
   id: string;
+  isCanceled?: CalendarEvent['isCanceled'];
   start: string;
   title: string;
 }): CalendarEvent {
@@ -67,6 +75,7 @@ export function createEventFromISO({
       category,
       end: Temporal.PlainDate.from(end),
       id,
+      isCanceled,
       start: Temporal.PlainDate.from(start),
       title,
     };
@@ -76,6 +85,7 @@ export function createEventFromISO({
     category,
     end: Temporal.Instant.from(end).epochMilliseconds,
     id,
+    isCanceled,
     start: Temporal.Instant.from(start).epochMilliseconds,
     title,
   };
