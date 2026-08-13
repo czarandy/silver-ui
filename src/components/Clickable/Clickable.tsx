@@ -9,10 +9,10 @@ import type {
 } from 'react';
 import {clickableRecipe} from 'components/Clickable/Clickable.recipe';
 import type {LinkComponent} from 'components/Link';
-import {useTooltip} from 'components/Tooltip';
+import {Tooltip} from 'components/Tooltip';
 import {ActionElement} from 'internal/ActionElement';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {useRel} from 'internal/linkAccessibility';
-import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 /**
@@ -86,6 +86,11 @@ export interface ClickableProps extends ClickableBaseProps {
    * Ref forwarded to the rendered button, link, or static span.
    */
   ref?: Ref<HTMLElement>;
+  /**
+   * Content shown in a tooltip during normal interaction. When the action is
+   * disabled, a non-empty `disabledReason` takes precedence.
+   */
+  tooltip?: ReactNode;
 }
 
 /**
@@ -108,6 +113,7 @@ export function Clickable({
   rel,
   style,
   target,
+  tooltip,
 }: ClickableProps): React.JSX.Element {
   const hasAction = href != null || onClick != null;
   const isInteractive = hasAction && !isReadOnly;
@@ -115,8 +121,9 @@ export function Clickable({
   const renderAsLink = isInteractive && href != null && !isActionDisabled;
   const hasDisabledReason =
     isActionDisabled && disabledReason != null && disabledReason !== '';
+  const tooltipContent = hasDisabledReason ? disabledReason : tooltip;
+  const hasTooltip = isNonEmptyReactNode(tooltipContent);
   const linkRel = useRel({target, rel});
-  const tooltip = useTooltip({isEnabled: hasDisabledReason});
   const classes = clickableRecipe({
     isDisabled: isActionDisabled,
     isInteractive,
@@ -147,7 +154,6 @@ export function Clickable({
 
   const element = (
     <ActionElement
-      aria-describedby={hasDisabledReason ? tooltip.describedBy : undefined}
       aria-disabled={isActionDisabled || undefined}
       aria-label={label}
       as={renderAsLink ? as : undefined}
@@ -156,7 +162,7 @@ export function Clickable({
       href={renderAsLink ? href : undefined}
       isLink={renderAsLink}
       onClick={handleClick}
-      ref={mergeRefs(ref, tooltip.ref)}
+      ref={ref}
       rel={renderAsLink ? linkRel : undefined}
       style={style}
       target={renderAsLink ? target : undefined}>
@@ -164,11 +170,10 @@ export function Clickable({
     </ActionElement>
   );
 
-  return (
-    <>
-      {element}
-      {hasDisabledReason ? tooltip.renderTooltip(disabledReason) : null}
-    </>
+  return hasTooltip ? (
+    <Tooltip content={tooltipContent}>{element}</Tooltip>
+  ) : (
+    element
   );
 }
 
