@@ -320,6 +320,13 @@ describe('Schedule', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps fill-height time-grid tracks at their natural height', () => {
+    const fillStyles = scheduleTimeGridViewRecipe.raw({height: 'fill'});
+
+    expect(fillStyles.grid).toHaveProperty('alignContent', 'start');
+    expect(fillStyles.timeRows).toHaveProperty('alignContent', 'start');
+  });
+
   it('defaults to auto height behavior', () => {
     render(
       <Schedule
