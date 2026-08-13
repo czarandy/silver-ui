@@ -44,6 +44,19 @@ describe('Clickable', () => {
     expect(button).toHaveTextContent('Count');
   });
 
+  it('preserves the child appearance without a hover background overlay', () => {
+    render(
+      <Clickable label="Select team" onClick={() => {}}>
+        <span data-testid="content">Engineering</span>
+      </Clickable>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Select team'});
+    // eslint-disable-next-line testing-library/no-node-access -- the removed decorative overlay has no accessible query
+    expect(button.querySelector('[data-clickable-overlay]')).toBeNull();
+    expect(screen.getByTestId('content')).toHaveTextContent('Engineering');
+  });
+
   it('activates a button once by pointer, Enter, and Space', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
@@ -230,7 +243,5 @@ describe('Clickable', () => {
     expect(button).toHaveClass('custom-clickable', 'silver-bdr_inherit');
     expect(button).toHaveStyle({borderRadius: '12px'});
     expect(ref).toHaveBeenCalledWith(button);
-    // eslint-disable-next-line testing-library/no-node-access -- the decorative overlay has no accessible query
-    expect(button.firstElementChild).toHaveAttribute('data-clickable-overlay');
   });
 });
