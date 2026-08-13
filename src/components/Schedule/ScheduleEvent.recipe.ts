@@ -8,7 +8,7 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
  * properties consumed by every slot, and `isPast` mutes them.
  */
 export const scheduleEventRecipe = sva({
-  slots: ['event', 'dot', 'location', 'time', 'title'],
+  slots: ['event', 'dot', 'endContent', 'location', 'time', 'title'],
   base: {
     event: {
       borderWidth: 'default',
@@ -53,6 +53,14 @@ export const scheduleEventRecipe = sva({
       borderRadius: 'full',
       bg: 'var(--schedule-event-dot)',
       flexShrink: 0,
+    },
+    endContent: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      alignSelf: 'center',
+      flexShrink: 0,
+      gap: '1',
+      marginInlineStart: 'auto',
     },
     location: {
       flexShrink: 0,

@@ -18,6 +18,7 @@ import {
   formatListRangeTitle,
   mergeSchedulePluginProps,
   ScheduleCurrentTimeIndicator,
+  ScheduleEventEndContent,
   ScheduleFrame,
   useScheduleEventPluginProps,
   useScheduleEventPopover,
@@ -73,16 +74,22 @@ function ListEvent({
   });
   const {className: eventContentClassName, ...pluginPassthroughProps} =
     mergeSchedulePluginProps({className: classes.eventContent}, pluginProps);
+  const eventClasses = scheduleEventRecipe({color: category.color});
   const eventContent = (
     <>
       <Tooltip content={category.label} hoverIndication="never">
         <span
           aria-label={category.label}
-          className={scheduleEventRecipe({color: category.color}).dot}
+          className={eventClasses.dot}
           role="img"
         />
       </Tooltip>
-      <Text>{event.title}</Text>
+      <Text className={classes.eventTitle}>{event.title}</Text>
+      <ScheduleEventEndContent
+        className={eventClasses.endContent}
+        event={event}
+        layout="inline"
+      />
     </>
   );
   return (

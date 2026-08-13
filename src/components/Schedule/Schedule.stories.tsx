@@ -1,9 +1,11 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
+import {CircleCheck, Repeat2, TriangleAlert} from 'lucide-react';
 import {useMemo, useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
+import {Icon} from 'components/Icon';
 import {
   Layout,
   LayoutContent,
@@ -46,6 +48,7 @@ import type {
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import {ToastViewport, useToast} from 'components/Toast';
+import {Tooltip} from 'components/Tooltip';
 import {css} from 'styled-system/css';
 
 // Anchor every story to the current date in the viewer's local timezone so the
@@ -934,6 +937,69 @@ export const CustomPlugin: Story = {
       <ScheduleStory
         plugins={[customPlugin]}
         view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+      />
+    );
+  },
+};
+
+export const EventEndContentPlugin: Story = {
+  render: () => {
+    const views = useMemo(
+      (): ScheduleViewSelectorOption[] => [
+        {label: 'Month', view: createScheduleMonthlyView()},
+        {
+          label: 'Week',
+          view: createScheduleWeeklyView({maxHour: 18, minHour: 8}),
+        },
+        {label: 'List', view: createScheduleListView({days: 7})},
+      ],
+      [],
+    );
+    const [view, setView] = useState<ScheduleView>(views[0].view);
+    const viewSelectorPlugin = useScheduleViewSelectorPlugin(views, {
+      onChangeView: setView,
+    });
+    const statusPlugin = useMemo<SchedulePlugin>(
+      () => ({
+        renderEventEndContent: ({event}) => {
+          if (event.id === 'customer-escalation') {
+            return (
+              <Tooltip content="Needs attention" hoverIndication="never">
+                <span aria-label="Needs attention" role="img">
+                  <Icon color="warning" icon={TriangleAlert} size="sm" />
+                </span>
+              </Tooltip>
+            );
+          }
+          return event.id === 'offsite' ? (
+            <Tooltip content="Confirmed" hoverIndication="never">
+              <span aria-label="Confirmed" role="img">
+                <Icon color="success" icon={CircleCheck} size="sm" />
+              </span>
+            </Tooltip>
+          ) : null;
+        },
+      }),
+      [],
+    );
+    const recurrencePlugin = useMemo<SchedulePlugin>(
+      () => ({
+        renderEventEndContent: ({event}) =>
+          event.category === 'Planning' ? (
+            <Tooltip content="Recurring" hoverIndication="never">
+              <span aria-label="Recurring" role="img">
+                <Icon icon={Repeat2} size="sm" />
+              </span>
+            </Tooltip>
+          ) : null,
+      }),
+      [],
+    );
+
+    return (
+      <ScheduleStory
+        plugins={[viewSelectorPlugin, statusPlugin, recurrencePlugin]}
+        view={view}
       />
     );
   },
