@@ -4,6 +4,12 @@ import type {ComponentPropsWithRef, MouseEvent} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Clickable} from 'components/Clickable/Clickable';
 import {LinkProvider} from 'components/Link';
+import {Tooltip} from 'components/Tooltip';
+
+function getStyleProperty(element: HTMLElement, property: string): string {
+  const style = element.style as unknown as Record<string, string | undefined>;
+  return style[property] ?? '';
+}
 
 function RouterLink({
   children,
@@ -55,6 +61,34 @@ describe('Clickable', () => {
     // eslint-disable-next-line testing-library/no-node-access -- the removed decorative overlay has no accessible query
     expect(button.querySelector('[data-clickable-overlay]')).toBeNull();
     expect(screen.getByTestId('content')).toHaveTextContent('Engineering');
+  });
+
+  it('preserves an outer tooltip anchor across parent rerenders', () => {
+    const onClick = vi.fn();
+    const {rerender} = render(
+      <Tooltip content="Click to turn off">
+        <Clickable label="Disable flag" onClick={onClick}>
+          Enabled
+        </Clickable>
+      </Tooltip>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Disable flag'});
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    const anchorName = getStyleProperty(button, 'anchorName');
+    expect(anchorName).not.toBe('');
+    expect(getStyleProperty(tooltip, 'positionAnchor')).toBe(anchorName);
+
+    rerender(
+      <Tooltip content="Click to turn off">
+        <Clickable label="Disable flag" onClick={onClick}>
+          Still enabled
+        </Clickable>
+      </Tooltip>,
+    );
+
+    expect(getStyleProperty(button, 'anchorName')).toBe(anchorName);
+    expect(getStyleProperty(tooltip, 'positionAnchor')).toBe(anchorName);
   });
 
   it('activates a button once by pointer, Enter, and Space', async () => {
@@ -182,6 +216,57 @@ describe('Clickable', () => {
     const tooltip = screen.getByRole('tooltip', {hidden: true});
     expect(tooltip).toHaveTextContent('Requires administrator access');
     expect(button).toHaveAttribute('aria-describedby', tooltip.id);
+  });
+
+  it('shows tooltip content during normal interaction', () => {
+    render(
+      <Clickable
+        label="Disable flag"
+        onClick={() => {}}
+        tooltip={<strong>Click to turn off</strong>}>
+        Enabled
+      </Clickable>,
+    );
+
+    const button = screen.getByRole('button', {name: 'Disable flag'});
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    expect(tooltip).toHaveTextContent('Click to turn off');
+    expect(button).toHaveAttribute('aria-describedby', tooltip.id);
+  });
+
+  it('lets disabledReason override tooltip content while disabled', () => {
+    const {rerender} = render(
+      <Clickable
+        disabledReason="Requires administrator access"
+        isDisabled
+        label="Delete"
+        onClick={() => {}}
+        tooltip="Delete this item">
+        Delete
+      </Clickable>,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Requires administrator access',
+    );
+    expect(screen.queryByText('Delete this item')).not.toBeInTheDocument();
+
+    rerender(
+      <Clickable
+        disabledReason="Requires administrator access"
+        label="Delete"
+        onClick={() => {}}
+        tooltip="Delete this item">
+        Delete
+      </Clickable>,
+    );
+
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(
+      'Delete this item',
+    );
+    expect(
+      screen.queryByText('Requires administrator access'),
+    ).not.toBeInTheDocument();
   });
 
   it('ignores disabledReason while enabled', () => {

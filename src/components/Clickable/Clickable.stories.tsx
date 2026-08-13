@@ -23,6 +23,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Action: Story = {};
 
+export const WithTooltip: Story = {
+  args: {
+    tooltip: 'Click to select the Engineering team',
+  },
+};
+
 export const Link: Story = {
   args: {
     href: '/teams/engineering',
