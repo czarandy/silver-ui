@@ -1,14 +1,12 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const clickableRecipe = sva({
-  slots: ['root', 'overlay', 'content'],
+  slots: ['root', 'content'],
   base: {
     root: {
-      position: 'relative',
       display: 'inline-flex',
       appearance: 'none',
       alignItems: 'center',
-      isolation: 'isolate',
       p: 0,
       borderWidth: 0,
       bg: 'transparent',
@@ -21,19 +19,7 @@ export const clickableRecipe = sva({
       textDecoration: 'none',
       borderRadius: 'inherit',
     },
-    overlay: {
-      position: 'absolute',
-      inset: 0,
-      zIndex: 0,
-      borderRadius: 'inherit',
-      pointerEvents: 'none',
-      transitionProperty: 'background-color',
-      transitionDuration: 'fast',
-      transitionTimingFunction: 'default',
-    },
     content: {
-      position: 'relative',
-      zIndex: 1,
       display: 'inline-flex',
       alignItems: 'inherit',
       borderRadius: 'inherit',
@@ -49,12 +35,6 @@ export const clickableRecipe = sva({
             outlineStyle: 'solid',
             outlineColor: 'primary',
             outlineOffset: 'focusOffset',
-          },
-          '&:not([aria-disabled="true"]):hover > [data-clickable-overlay]': {
-            bg: 'bg.ghost.hover',
-          },
-          '&:not([aria-disabled="true"]):active > [data-clickable-overlay]': {
-            bg: 'bg.ghost.active',
           },
         },
       },

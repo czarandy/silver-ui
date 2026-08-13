@@ -160,11 +160,6 @@ export function Clickable({
       rel={renderAsLink ? linkRel : undefined}
       style={style}
       target={renderAsLink ? target : undefined}>
-      <span
-        aria-hidden="true"
-        className={classes.overlay}
-        data-clickable-overlay=""
-      />
       {content}
     </ActionElement>
   );
