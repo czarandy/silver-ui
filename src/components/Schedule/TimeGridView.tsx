@@ -1,13 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 'use client';
 
-import {
-  Fragment,
-  useMemo,
-  type CSSProperties,
-  type HTMLAttributes,
-  type ReactNode,
-} from 'react';
+import {Fragment, useMemo, type CSSProperties, type ReactNode} from 'react';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
@@ -32,6 +26,8 @@ import type {
   CalendarEvent,
   CalendarInstantEvent,
   ScheduleHeight,
+  SchedulePluginElementProps,
+  ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
@@ -633,25 +629,30 @@ export function TimeGridView({
                     isLastColumn: index === days.length - 1,
                     isLastRow: isLastHour,
                   });
-                  const hourCellPluginProps = plugins.reduce<
-                    HTMLAttributes<HTMLElement>
-                  >((props, plugin) => {
-                    const pluginProps = plugin.getTimeGridCellProps?.({
+                  const cellRenderProps: ScheduleTimeGridCellPropsRenderProps =
+                    {
                       date: day,
                       hour,
                       hourHeight: normalizedHourHeight,
                       maxHour: normalizedMaxHour,
                       minHour: normalizedMinHour,
                       timezoneID,
-                    });
-                    return pluginProps == null
-                      ? props
-                      : {
-                          ...props,
-                          ...pluginProps,
-                          style: {...props.style, ...pluginProps.style},
-                        };
-                  }, {});
+                    };
+                  const hourCellPluginProps =
+                    plugins.reduce<SchedulePluginElementProps>(
+                      (props, plugin) => {
+                        const pluginProps =
+                          plugin.getTimeGridCellProps?.(cellRenderProps);
+                        return pluginProps == null
+                          ? props
+                          : {
+                              ...props,
+                              ...pluginProps,
+                              style: {...props.style, ...pluginProps.style},
+                            };
+                      },
+                      {},
+                    );
                   const {
                     style: hourCellPluginStyle,
                     ...hourCellPassthroughProps
@@ -660,14 +661,8 @@ export function TimeGridView({
                   // reordered, so the index is a safe key for the cell content.
                   const hourCellContent = plugins.map(
                     (plugin, pluginIndex): ReactNode => {
-                      const content = plugin.renderTimeGridCellContent?.({
-                        date: day,
-                        hour,
-                        hourHeight: normalizedHourHeight,
-                        maxHour: normalizedMaxHour,
-                        minHour: normalizedMinHour,
-                        timezoneID,
-                      });
+                      const content =
+                        plugin.renderTimeGridCellContent?.(cellRenderProps);
                       return isNonEmptyReactNode(content) ? (
                         // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
                         <Fragment key={pluginIndex}>{content}</Fragment>

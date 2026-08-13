@@ -302,10 +302,6 @@ describe('Schedule', () => {
 
     expect(fixedRowClasses).not.toHaveLength(0);
     expect(timeRowClasses).not.toHaveLength(0);
-    expect(scheduleTimeGridViewRecipe.raw().timeRows).toHaveProperty(
-      'alignContent',
-      'start',
-    );
     expect(fixedRows).toHaveClass(...fixedRowClasses);
     expect(timeRows).toHaveClass(...timeRowClasses);
     expect(

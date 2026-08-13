@@ -18,6 +18,7 @@ import type {
   ScheduleEventPropsRenderProps,
   ScheduleMonthCellPropsRenderProps,
   SchedulePlugin,
+  SchedulePluginElementProps,
   ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
 import useLatest from 'internal/useLatest';
@@ -211,7 +212,7 @@ function createScheduleEventMovePlugin<TAuxiliaryData>({
       event,
       layout,
       timezoneID,
-    }: ScheduleEventPropsRenderProps): React.HTMLAttributes<HTMLElement> {
+    }: ScheduleEventPropsRenderProps): SchedulePluginElementProps {
       if (layout !== 'month' && (layout !== 'timeGrid' || isDayEvent(event))) {
         return {};
       }
@@ -274,7 +275,7 @@ function createScheduleEventMovePlugin<TAuxiliaryData>({
     getMonthCellProps({
       date,
       timezoneID,
-    }: ScheduleMonthCellPropsRenderProps): React.HTMLAttributes<HTMLElement> {
+    }: ScheduleMonthCellPropsRenderProps): SchedulePluginElementProps {
       return {
         onDragOver: dragEvent => {
           if (dragRef.current != null) {
@@ -304,7 +305,7 @@ function createScheduleEventMovePlugin<TAuxiliaryData>({
       hour,
       hourHeight,
       timezoneID,
-    }: ScheduleTimeGridCellPropsRenderProps): React.HTMLAttributes<HTMLElement> {
+    }: ScheduleTimeGridCellPropsRenderProps): SchedulePluginElementProps {
       return {
         onDragOver: dragEvent => {
           if (dragRef.current != null && !isDayEvent(dragRef.current.event)) {

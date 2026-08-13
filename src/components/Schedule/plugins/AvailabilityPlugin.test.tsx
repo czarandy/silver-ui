@@ -18,8 +18,8 @@ const VIEW_DATE = Temporal.Instant.from(
 ).epochMilliseconds;
 
 function range(
-  endMinute: number,
   startMinute: number,
+  endMinute: number,
 ): ScheduleUnavailableRange {
   return {endMinute, startMinute};
 }
@@ -29,16 +29,16 @@ it('paints full and partial unavailable ranges while preserving cell geometry', 
     ({hour}: ScheduleTimeGridCellPropsRenderProps) => {
       switch (hour) {
         case 8:
-          return [range(60, 0)];
+          return [range(0, 60)];
         case 9:
-          return [range(30, 0)];
+          return [range(0, 30)];
         case 11:
           return [
-            range(15, -10),
-            range(30, 10),
-            range(90, 45),
-            range(10, 20),
-            range(20, Number.NaN),
+            range(-10, 15),
+            range(10, 30),
+            range(45, 90),
+            range(20, 10),
+            range(Number.NaN, 20),
           ];
         default:
           return [];
@@ -56,10 +56,19 @@ it('paints full and partial unavailable ranges while preserving cell geometry', 
       }),
       [],
     );
+    // Returning only a data-* attribute exercises the
+    // SchedulePluginElementProps index signature, which plain
+    // HTMLAttributes<HTMLElement> rejects without a co-present known key.
+    const dataOnlyPlugin = useMemo<SchedulePlugin>(
+      () => ({
+        getTimeGridCellProps: () => ({'data-supplemental-cell': 'true'}),
+      }),
+      [],
+    );
     return (
       <Schedule
         events={[]}
-        plugins={[availabilityPlugin, supplementalStylePlugin]}
+        plugins={[availabilityPlugin, supplementalStylePlugin, dataOnlyPlugin]}
         timezoneID="UTC"
         view={createScheduleDayView({maxHour: 12, minHour: 8})}
         viewDate={VIEW_DATE}
@@ -72,6 +81,7 @@ it('paints full and partial unavailable ranges while preserving cell geometry', 
   const cell = (hour: number) =>
     screen.getByTestId(`schedule-time-grid-cell-2026-08-12-${hour}`);
   expect(cell(8)).toHaveAttribute('data-schedule-availability', 'unavailable');
+  expect(cell(8)).toHaveAttribute('data-supplemental-cell', 'true');
   expect(cell(8)).toHaveStyle({
     background: 'var(--silver-colors-bg-subtle)',
     height: '100px',
@@ -111,7 +121,7 @@ it('paints full and partial unavailable ranges while preserving cell geometry', 
 it('supports a custom unavailable color', () => {
   function Fixture(): React.JSX.Element {
     const availabilityPlugin = useScheduleAvailabilityPlugin({
-      getUnavailableRanges: () => [range(45, 15)],
+      getUnavailableRanges: () => [range(15, 45)],
       unavailableColor: 'rebeccapurple',
     });
     return (
@@ -132,4 +142,34 @@ it('supports a custom unavailable color', () => {
   expect(background).toContain('transparent 25%');
   expect(background).toContain('rebeccapurple 25%');
   expect(background).toContain('rebeccapurple 75%');
+});
+
+it('caches cell props between re-renders while availability data is stable', () => {
+  const getUnavailableRanges = vi.fn(() => [range(0, 60)]);
+
+  function Fixture(): React.JSX.Element {
+    const availabilityPlugin = useScheduleAvailabilityPlugin({
+      getUnavailableRanges,
+    });
+    return (
+      <Schedule
+        events={[]}
+        plugins={[availabilityPlugin]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 10, minHour: 8})}
+        viewDate={VIEW_DATE}
+      />
+    );
+  }
+
+  const {rerender} = render(<Fixture />);
+  const callsAfterInitialRender = getUnavailableRanges.mock.calls.length;
+  expect(callsAfterInitialRender).toBeGreaterThan(0);
+
+  rerender(<Fixture />);
+
+  expect(getUnavailableRanges).toHaveBeenCalledTimes(callsAfterInitialRender);
+  expect(
+    screen.getByTestId('schedule-time-grid-cell-2026-08-12-8'),
+  ).toHaveAttribute('data-schedule-availability', 'unavailable');
 });

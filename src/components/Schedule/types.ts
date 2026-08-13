@@ -116,6 +116,15 @@ export interface ScheduleTimeGridCellPropsRenderProps {
   timezoneID: string;
 }
 
+/**
+ * Props a plugin may return for a Schedule element. `data-*` attributes are
+ * part of the contract; without the index signature they only typecheck when
+ * another `HTMLAttributes` key happens to be present in the same object.
+ */
+export type SchedulePluginElementProps = HTMLAttributes<HTMLElement> & {
+  [dataAttribute: `data-${string}`]: boolean | number | string | undefined;
+};
+
 export interface SchedulePlugin {
   /**
    * Whether event popovers rendered by this plugin provide the standard
@@ -127,13 +136,13 @@ export interface SchedulePlugin {
   eventPopoverHasCloseButton?: boolean;
   getEventProps?: (
     props: ScheduleEventPropsRenderProps,
-  ) => HTMLAttributes<HTMLElement>;
+  ) => SchedulePluginElementProps;
   getMonthCellProps?: (
     props: ScheduleMonthCellPropsRenderProps,
-  ) => HTMLAttributes<HTMLElement>;
+  ) => SchedulePluginElementProps;
   getTimeGridCellProps?: (
     props: ScheduleTimeGridCellPropsRenderProps,
-  ) => HTMLAttributes<HTMLElement>;
+  ) => SchedulePluginElementProps;
   /**
    * Provides the popover content shown when an event pill is clicked. Receives
    * `controls` (e.g. `close`) so content can dismiss the popover. Return

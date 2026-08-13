@@ -79,6 +79,7 @@ export type {
   ScheduleTimeGridEventRenderProps,
   ScheduleTimeGridCellPropsRenderProps,
   SchedulePlugin,
+  SchedulePluginElementProps,
   SchedulePluginPosition,
   ScheduleRange,
   ScheduleView,

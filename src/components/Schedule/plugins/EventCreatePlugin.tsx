@@ -22,6 +22,7 @@ import type {
   Instant,
   PlainDate,
   SchedulePlugin,
+  SchedulePluginElementProps,
   ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
 import useHotkey from 'hooks/useHotkey';
@@ -416,7 +417,7 @@ function createScheduleEventCreatePlugin({
   return {
     getTimeGridCellProps(
       cell: ScheduleTimeGridCellPropsRenderProps,
-    ): React.HTMLAttributes<HTMLElement> {
+    ): SchedulePluginElementProps {
       return {
         onPointerDown: pointerEvent => {
           onPointerDown(pointerEvent, cell);

@@ -318,6 +318,7 @@ export {
   type ScheduleMonthCellPropsRenderProps,
   type SchedulePaginationPluginOptions,
   type SchedulePlugin,
+  type SchedulePluginElementProps,
   type SchedulePluginPosition,
   type ScheduleProps,
   type ScheduleRange,

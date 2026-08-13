@@ -3,6 +3,7 @@
 import {useMemo} from 'react';
 import type {
   SchedulePlugin,
+  SchedulePluginElementProps,
   ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
 import {token} from 'styled-system/tokens';
@@ -24,7 +25,9 @@ export interface ScheduleAvailabilityPluginOptions {
   /**
    * Returns the unavailable portions of a time-grid cell. Ranges may be
    * unsorted or overlapping; the plugin clamps them to the cell and merges
-   * them before painting. Invalid or empty ranges are ignored.
+   * them before painting. Invalid or empty ranges are ignored. Results are
+   * cached per cell, so pass a new function identity when the underlying
+   * availability data changes.
    */
   getUnavailableRanges: (
     props: ScheduleTimeGridCellPropsRenderProps,
@@ -73,6 +76,11 @@ function minuteToPercent(minute: number): string {
   return `${percentage}%`;
 }
 
+function isFullHour(ranges: ReadonlyArray<ScheduleUnavailableRange>): boolean {
+  const only = ranges.length === 1 ? ranges[0] : undefined;
+  return only?.startMinute === 0 && only.endMinute === MINUTES_PER_HOUR;
+}
+
 function unavailableRangesToBackground(
   ranges: ReadonlyArray<ScheduleUnavailableRange>,
   unavailableColor: string,
@@ -80,11 +88,7 @@ function unavailableRangesToBackground(
   if (ranges.length === 0) {
     return undefined;
   }
-  if (
-    ranges.length === 1 &&
-    ranges[0]?.startMinute === 0 &&
-    ranges[0].endMinute === MINUTES_PER_HOUR
-  ) {
+  if (isFullHour(ranges)) {
     return unavailableColor;
   }
 
@@ -123,29 +127,48 @@ export function useScheduleAvailabilityPlugin({
   getUnavailableRanges,
   unavailableColor = DEFAULT_UNAVAILABLE_COLOR,
 }: ScheduleAvailabilityPluginOptions): SchedulePlugin {
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    // TimeGridView re-renders on every current-time tick and drag update, so
+    // cell props are cached per cell to avoid re-running the consumer callback
+    // and range normalization for identical output. Consumers signal changed
+    // availability data with a new `getUnavailableRanges` identity, which
+    // remounts the memo and drops the cache.
+    const cellPropsCache = new Map<string, SchedulePluginElementProps>();
+
+    return {
       getTimeGridCellProps: props => {
+        const cacheKey = [
+          props.date.toString(),
+          props.hour,
+          props.hourHeight,
+          props.maxHour,
+          props.minHour,
+          props.timezoneID,
+        ].join('|');
+        const cachedProps = cellPropsCache.get(cacheKey);
+        if (cachedProps != null) {
+          return cachedProps;
+        }
+
         const ranges = normalizeUnavailableRanges(getUnavailableRanges(props));
         const availability =
           ranges.length === 0
             ? 'available'
-            : ranges.length === 1 &&
-                ranges[0]?.startMinute === 0 &&
-                ranges[0].endMinute === MINUTES_PER_HOUR
+            : isFullHour(ranges)
               ? 'unavailable'
               : 'partial';
         const background = unavailableRangesToBackground(
           ranges,
           unavailableColor,
         );
-
-        return {
+        const cellProps: SchedulePluginElementProps = {
           'data-schedule-availability': availability,
           style: background == null ? undefined : {background},
         };
+
+        cellPropsCache.set(cacheKey, cellProps);
+        return cellProps;
       },
-    }),
-    [getUnavailableRanges, unavailableColor],
-  );
+    };
+  }, [getUnavailableRanges, unavailableColor]);
 }

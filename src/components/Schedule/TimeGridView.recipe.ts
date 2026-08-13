@@ -43,7 +43,6 @@ export const scheduleTimeGridViewRecipe = sva({
       position: 'relative',
       zIndex: 0,
       display: 'grid',
-      alignContent: 'start',
       gridColumn: '1 / -1',
       gridTemplateColumns: '72px 1fr',
       overflowBlock: 'clip',
