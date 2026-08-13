@@ -144,6 +144,12 @@ export interface SchedulePlugin {
     props: ScheduleTimeGridCellPropsRenderProps,
   ) => SchedulePluginElementProps;
   /**
+   * Appends content at the logical inline end of compact event renderers. This
+   * is invoked for month events and inline events such as list rows and all-day
+   * pills, but not for timed day/week event blocks.
+   */
+  renderEventEndContent?: (props: ScheduleEventPropsRenderProps) => ReactNode;
+  /**
    * Provides the popover content shown when an event pill is clicked. Receives
    * `controls` (e.g. `close`) so content can dismiss the popover. Return
    * `null`/`undefined` to decline (e.g. to opt out for a specific event). When

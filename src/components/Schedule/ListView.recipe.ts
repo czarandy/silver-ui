@@ -14,6 +14,7 @@ export const scheduleListViewRecipe = sva({
     'events',
     'eventRow',
     'eventContent',
+    'eventTitle',
     'eventTime',
   ],
   base: {
@@ -75,7 +76,14 @@ export const scheduleListViewRecipe = sva({
       alignItems: 'center',
       gap: '2',
       justifySelf: 'start',
+      maxW: 'full',
       minW: 0,
+    },
+    eventTitle: {
+      minW: 0,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
     },
     eventTime: {
       whiteSpace: 'nowrap',

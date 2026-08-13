@@ -24,6 +24,7 @@ import {Popover} from 'components/Popover';
 import {createEventFromISO} from 'components/Schedule/CalendarEvent';
 import {createScheduleDayView} from 'components/Schedule/DayView';
 import {createScheduleListView} from 'components/Schedule/ListView';
+import {scheduleListViewRecipe} from 'components/Schedule/ListView.recipe';
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {Schedule} from 'components/Schedule/Schedule';
@@ -574,6 +575,149 @@ describe('Schedule', () => {
       });
     },
   );
+
+  it.each(
+    [
+      {
+        event: events[1],
+        layout: 'inline' as const,
+        name: 'all-day',
+        staticTagName: 'SPAN',
+        view: createScheduleDayView({maxHour: 10, minHour: 8}),
+      },
+      {
+        event: events[0],
+        layout: 'month' as const,
+        name: 'month',
+        staticTagName: 'SPAN',
+        view: createScheduleMonthlyView(),
+      },
+      {
+        event: events[0],
+        layout: 'inline' as const,
+        name: 'list',
+        staticTagName: 'DIV',
+        view: createScheduleListView({days: 7}),
+      },
+    ].flatMap(testCase =>
+      [false, true].map(isInteractive => ({...testCase, isInteractive})),
+    ),
+  )(
+    'renders plugin end content in order for $name events when interactive is $isInteractive',
+    ({event, isInteractive, layout, staticTagName, view}) => {
+      const firstRender = vi.fn(() => (
+        <span data-testid="first-event-end-content">First</span>
+      ));
+      const secondRender = vi.fn(() => (
+        <span data-testid="second-event-end-content">Second</span>
+      ));
+      const plugins: SchedulePlugin[] = [
+        {
+          renderEventEndContent: firstRender,
+          renderEventPopover: isInteractive
+            ? () => <span>Event details</span>
+            : undefined,
+        },
+        {renderEventEndContent: secondRender},
+      ];
+
+      render(
+        <Schedule
+          categories={categories}
+          events={[event]}
+          plugins={plugins}
+          timezoneID="UTC"
+          view={view}
+          viewDate={instantUTC(2026, 4, 13)}
+        />,
+      );
+
+      const eventRoot = screen.getByTestId(`schedule-event-${event.id}`);
+      const wrapper = within(eventRoot).getByTestId(
+        `schedule-event-end-content-${event.id}`,
+      );
+      const first = within(wrapper).getByTestId('first-event-end-content');
+      const second = within(wrapper).getByTestId('second-event-end-content');
+      const endContentClasses =
+        scheduleEventRecipe().endContent?.split(' ') ?? [];
+
+      expect(eventRoot.tagName).toBe(isInteractive ? 'BUTTON' : staticTagName);
+      expect(within(wrapper).getAllByTestId(/event-end-content$/)).toEqual([
+        first,
+        second,
+      ]);
+      expect(endContentClasses).not.toHaveLength(0);
+      expect(wrapper).toHaveClass(...endContentClasses);
+      expect(firstRender).toHaveBeenCalledWith({
+        event,
+        layout,
+        timezoneID: 'UTC',
+      });
+      expect(secondRender).toHaveBeenCalledWith({
+        event,
+        layout,
+        timezoneID: 'UTC',
+      });
+    },
+  );
+
+  it('keeps compact event metadata aligned without shrinking titles', () => {
+    const eventStyles = scheduleEventRecipe.raw();
+    const listStyles = scheduleListViewRecipe.raw();
+
+    expect(eventStyles.endContent).toMatchObject({
+      alignItems: 'center',
+      alignSelf: 'center',
+      flexShrink: 0,
+      marginInlineStart: 'auto',
+    });
+    expect(eventStyles.title).toMatchObject({
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+    expect(listStyles.eventContent).toMatchObject({maxW: 'full', minW: 0});
+    expect(listStyles.eventTitle).toMatchObject({
+      minW: 0,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    });
+  });
+
+  it('leaves timed day events on the time-grid content hook', () => {
+    const renderEventEndContent = vi.fn(() => <span>Compact metadata</span>);
+    const renderTimeGridEventContent = vi.fn(() => (
+      <span>Time-grid metadata</span>
+    ));
+
+    render(
+      <Schedule
+        categories={categories}
+        events={[events[0]]}
+        plugins={[{renderEventEndContent, renderTimeGridEventContent}]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 17, minHour: 15})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const eventRoot = screen.getByTestId('schedule-event-visible');
+    expect(
+      within(eventRoot).getByText('Time-grid metadata'),
+    ).toBeInTheDocument();
+    expect(
+      within(eventRoot).queryByText('Compact metadata'),
+    ).not.toBeInTheDocument();
+    expect(renderEventEndContent).not.toHaveBeenCalled();
+    expect(renderTimeGridEventContent).toHaveBeenCalledWith({
+      event: events[0],
+      hourHeight: 100,
+      maxHour: 17,
+      minHour: 15,
+      timezoneID: 'UTC',
+    });
+  });
 
   it('composes className, style, and handlers across time-grid cell plugins', () => {
     const firstOnClick = vi.fn();

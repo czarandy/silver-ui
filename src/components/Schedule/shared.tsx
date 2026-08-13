@@ -2,6 +2,7 @@
 
 import {Temporal} from '@js-temporal/polyfill';
 import {
+  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -420,6 +421,45 @@ export function useScheduleEventPluginProps({
 }
 
 /**
+ * Renders plugin content in registration order at the end of a compact event.
+ */
+export function ScheduleEventEndContent({
+  className,
+  event,
+  layout,
+}: {
+  className?: string;
+  event: CalendarEvent;
+  layout: 'inline' | 'month';
+}): React.JSX.Element | null {
+  const {plugins, timezoneID} = useScheduleContext();
+  const content = useMemo(
+    () =>
+      plugins.map((plugin, index): ReactNode => {
+        const node = plugin.renderEventEndContent?.({
+          event,
+          layout,
+          timezoneID,
+        });
+        // The plugins array is stable, ordered config that is never reordered,
+        // so the index is a safe key for the appended content nodes.
+        return isNonEmptyReactNode(node) ? (
+          // eslint-disable-next-line @eslint-react/no-array-index-key -- stable plugin order
+          <Fragment key={index}>{node}</Fragment>
+        ) : null;
+      }),
+    [event, layout, plugins, timezoneID],
+  );
+  return content.some(isNonEmptyReactNode) ? (
+    <span
+      className={className}
+      data-testid={`schedule-event-end-content-${event.id}`}>
+      {content}
+    </span>
+  ) : null;
+}
+
+/**
  * Renders an event pill root as either a clickable `<button>` trigger (when
  * `triggerProps` is supplied) or a static `<span>`, keeping identical classes
  * and data attributes so the two forms look the same.
@@ -500,6 +540,11 @@ export function CalendarEventPill({
             ? event.title
             : getEventAccessibleLabel(event, categoryMap, timezoneID)}
         </span>
+        <ScheduleEventEndContent
+          className={classes.endContent}
+          event={event}
+          layout="inline"
+        />
       </EventPillRoot>
       {popover}
     </>
@@ -536,6 +581,11 @@ export function CalendarMonthEventPill({
           <span className={classes.time}>{startTimeLabel}</span>
         ) : null}
         <span className={classes.title}>{event.title}</span>
+        <ScheduleEventEndContent
+          className={classes.endContent}
+          event={event}
+          layout="month"
+        />
       </EventPillRoot>
       {popover}
     </>
