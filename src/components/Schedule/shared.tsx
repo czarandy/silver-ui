@@ -305,14 +305,14 @@ export function useScheduleEventPopover(
   const interactionState = useScheduleInteractionState();
   const interactionTokenRef = useRef(Symbol('schedule-event-popover'));
   const handleShow = useCallback(() => {
-    interactionState.markEventPopoverShown(interactionTokenRef.current);
+    interactionState.markPopoverShown(interactionTokenRef.current);
   }, [interactionState]);
   const handleHide = useCallback(() => {
-    interactionState.markEventPopoverHidden(interactionTokenRef.current);
+    interactionState.markPopoverHidden(interactionTokenRef.current);
   }, [interactionState]);
   useEffect(
     () => () => {
-      interactionState.unregisterEventPopover(interactionTokenRef.current);
+      interactionState.unregisterPopover(interactionTokenRef.current);
     },
     [interactionState],
   );

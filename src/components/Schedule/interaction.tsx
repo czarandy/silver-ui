@@ -2,24 +2,24 @@
 
 import {createContext, use} from 'react';
 
-const eventPopoverDismissPointerEvents = new WeakSet<Event>();
+const schedulePopoverDismissPointerEvents = new WeakSet<Event>();
 
 export interface ScheduleInteractionState {
   dispose: () => void;
-  markEventPopoverHidden: (token: symbol) => void;
-  markEventPopoverShown: (token: symbol) => void;
   markPointerDown: (event: Event) => void;
-  unregisterEventPopover: (token: symbol) => void;
+  markPopoverHidden: (token: symbol) => void;
+  markPopoverShown: (token: symbol) => void;
+  unregisterPopover: (token: symbol) => void;
 }
 
 /**
  * Coordinates pointer gestures between otherwise independent Schedule plugins.
- * Event-popover light dismiss can happen before the target cell receives the
+ * Popover light dismiss can happen before the target cell receives the
  * pointerdown, so a hidden popover remains active through the current frame.
  */
 export function createScheduleInteractionState(): ScheduleInteractionState {
-  const openEventPopovers = new Set<symbol>();
-  const recentlyHiddenEventPopovers = new Set<symbol>();
+  const openPopovers = new Set<symbol>();
+  const recentlyHiddenPopovers = new Set<symbol>();
   const hiddenFrames = new Map<symbol, number>();
 
   const clearHiddenFrame = (token: symbol): void => {
@@ -30,47 +30,51 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     }
   };
 
-  const unregisterEventPopover = (token: symbol): void => {
-    clearHiddenFrame(token);
-    openEventPopovers.delete(token);
-    recentlyHiddenEventPopovers.delete(token);
+  const unregisterPopover = (token: symbol): void => {
+    openPopovers.delete(token);
+    // A create popover unmounts as soon as it is hidden. Keep its hidden token
+    // through the current frame so the pointerdown that caused light dismiss
+    // cannot immediately create another draft.
+    if (!recentlyHiddenPopovers.has(token)) {
+      clearHiddenFrame(token);
+    }
   };
 
   return {
     dispose: () => {
       hiddenFrames.forEach(frame => cancelAnimationFrame(frame));
       hiddenFrames.clear();
-      openEventPopovers.clear();
-      recentlyHiddenEventPopovers.clear();
+      openPopovers.clear();
+      recentlyHiddenPopovers.clear();
     },
-    markEventPopoverHidden: token => {
+    markPopoverHidden: token => {
       clearHiddenFrame(token);
-      openEventPopovers.delete(token);
-      recentlyHiddenEventPopovers.add(token);
+      openPopovers.delete(token);
+      recentlyHiddenPopovers.add(token);
       hiddenFrames.set(
         token,
         requestAnimationFrame(() => {
           hiddenFrames.delete(token);
-          recentlyHiddenEventPopovers.delete(token);
+          recentlyHiddenPopovers.delete(token);
         }),
       );
     },
-    markEventPopoverShown: token => {
+    markPopoverShown: token => {
       clearHiddenFrame(token);
-      recentlyHiddenEventPopovers.delete(token);
-      openEventPopovers.add(token);
+      recentlyHiddenPopovers.delete(token);
+      openPopovers.add(token);
     },
     markPointerDown: event => {
-      if (openEventPopovers.size > 0 || recentlyHiddenEventPopovers.size > 0) {
-        eventPopoverDismissPointerEvents.add(event);
+      if (openPopovers.size > 0 || recentlyHiddenPopovers.size > 0) {
+        schedulePopoverDismissPointerEvents.add(event);
       }
     },
-    unregisterEventPopover,
+    unregisterPopover,
   };
 }
 
-export function isEventPopoverDismissPointerEvent(event: Event): boolean {
-  return eventPopoverDismissPointerEvents.has(event);
+export function isSchedulePopoverDismissPointerEvent(event: Event): boolean {
+  return schedulePopoverDismissPointerEvents.has(event);
 }
 
 export const ScheduleInteractionContext =
