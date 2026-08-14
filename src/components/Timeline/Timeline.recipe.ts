@@ -83,14 +83,12 @@ export const timelineRecipe = sva({
     },
     title: {
       display: 'block',
-      flex: '1 1 auto',
       minW: 0,
     },
     endContent: {
       display: 'flex',
       alignItems: 'center',
       flexShrink: 0,
-      marginInlineStart: 'auto',
     },
     body: {
       mt: '2',

@@ -9,7 +9,6 @@ import {
   type TimelineItemConfig,
   type TimelineProps,
 } from 'components/Timeline/Timeline';
-import {css} from 'styled-system/css';
 
 const shippingItems: TimelineItemConfig[] = [
   {
@@ -127,13 +126,4 @@ export const AuditLog: Story = {
 
 export const WithEndContent: Story = {
   args: {items: appointmentItems},
-};
-
-export const NarrowWithEndContent: Story = {
-  args: {items: appointmentItems},
-  render: args => (
-    <div className={css({w: '64'})}>
-      <Timeline {...args} />
-    </div>
-  ),
 };

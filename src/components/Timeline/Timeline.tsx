@@ -18,7 +18,7 @@ export interface TimelineItemConfig {
    */
   'data-testid'?: string;
   /**
-   * Content rendered beside the title and aligned to the row's trailing edge.
+   * Content rendered beside the entry title.
    */
   endContent?: ReactNode;
   /**
