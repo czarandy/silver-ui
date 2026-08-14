@@ -13,6 +13,12 @@ import {cx} from 'utils/cx';
  */
 interface AutocompleteInputCustomItemProps {
   /**
+   * Whether the item is disabled. Custom element content is responsible for
+   * its own disabled styling.
+   * @default false
+   */
+  isDisabled?: boolean;
+  /**
    * Search result item with custom element content.
    */
   item: SearchableItem & {element: ReactNode};

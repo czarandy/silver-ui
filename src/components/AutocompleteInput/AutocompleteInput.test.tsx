@@ -125,6 +125,83 @@ describe('AutocompleteInput', () => {
     expect(input).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('keeps the query and menu open when a disabled result is activated', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        getIsItemDisabled={item => item.id === 'grace'}
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSearchSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'gr');
+
+    const option = screen.getByRole('option', {
+      hidden: true,
+      name: 'Grace Hopper',
+    });
+    expect(option).toHaveAttribute('aria-disabled', 'true');
+
+    await user.keyboard('{Enter}');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input).toHaveValue('gr');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(option);
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input).toHaveValue('gr');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('skips disabled results during keyboard navigation', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        getIsItemDisabled={item => item.id === 'grace'}
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSearchSource(items)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'a');
+    await user.keyboard('{ArrowDown}');
+
+    const disabledOption = screen.getByRole('option', {
+      hidden: true,
+      name: 'Grace Hopper',
+    });
+    const nextEnabledOption = screen.getByRole('option', {
+      hidden: true,
+      name: 'Katherine Johnson',
+    });
+    expect(input).not.toHaveAttribute(
+      'aria-activedescendant',
+      disabledOption.id,
+    );
+    expect(input).toHaveAttribute(
+      'aria-activedescendant',
+      nextEnabledOption.id,
+    );
+
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith(items[2]);
+  });
+
   it('clears the selected item', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

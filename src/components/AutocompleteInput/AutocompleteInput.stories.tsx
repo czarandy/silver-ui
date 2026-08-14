@@ -147,6 +147,39 @@ export const CustomItems: Story = {
   render: (args: AutocompleteInputProps) => <CustomItemsStory {...args} />,
 };
 
+function DisabledResultsStory(
+  args: React.ComponentProps<typeof AutocompleteInput>,
+) {
+  const [value, setValue] = useState<SearchableItem<{role: string}> | null>(
+    null,
+  );
+  const source = useMemo(() => createStaticSearchSource(people), []);
+  const getIsItemDisabled = (item: SearchableItem): boolean =>
+    item.id === 'grace';
+  return (
+    <AutocompleteInput
+      {...args}
+      debounceMs={0}
+      getIsItemDisabled={getIsItemDisabled}
+      hasEntriesOnFocus
+      onChange={setValue}
+      renderItem={item => (
+        <AutocompleteInputItem
+          description={item.auxiliaryData?.role}
+          isDisabled={getIsItemDisabled(item)}
+          item={item}
+        />
+      )}
+      searchSource={source}
+      value={value}
+    />
+  );
+}
+
+export const DisabledResults: Story = {
+  render: (args: AutocompleteInputProps) => <DisabledResultsStory {...args} />,
+};
+
 export const Disabled: Story = {
   args: {isDisabled: true},
   render: (args: AutocompleteInputProps) => (

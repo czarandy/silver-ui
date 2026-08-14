@@ -31,6 +31,9 @@ export const autocompleteMenuRecipe = sva({
         outlineColor: 'primary',
         outlineOffset: 'focusOffsetTight',
       },
+      '&[aria-disabled="true"]': {
+        cursor: 'not-allowed',
+      },
     },
     check: {
       display: 'inline-flex',
