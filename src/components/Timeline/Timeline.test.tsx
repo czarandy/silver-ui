@@ -84,6 +84,45 @@ describe('Timeline', () => {
     );
   });
 
+  it('renders end content beside the title with its own semantics', () => {
+    render(
+      <Timeline
+        items={[
+          {
+            endContent: <span role="status">Completed</span>,
+            id: 'completed',
+            timestamp: DELIVERED,
+            title: 'Appointment #3',
+          },
+        ]}
+        timestampFormat="isoDateTime"
+      />,
+    );
+
+    const title = screen.getByText('Appointment #3');
+    const status = screen.getByRole('status');
+    expect(status).toHaveTextContent('Completed');
+    expect(title.parentElement).toBe(status.parentElement?.parentElement);
+  });
+
+  it('renders numeric end content', () => {
+    render(
+      <Timeline
+        items={[
+          {
+            endContent: 0,
+            id: 'remaining',
+            timestamp: SHIPPED,
+            title: 'Appointments remaining',
+          },
+        ]}
+        timestampFormat="isoDateTime"
+      />,
+    );
+
+    expect(screen.getByText('0')).toBeInTheDocument();
+  });
+
   it('forwards timestampFormat to every Timestamp', () => {
     render(<Timeline items={items} timestampFormat="isoDateTime" />);
 
