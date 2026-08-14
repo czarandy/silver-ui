@@ -18,6 +18,10 @@ export interface TimelineItemConfig {
    */
   'data-testid'?: string;
   /**
+   * Content rendered beside the title and aligned to the row's trailing edge.
+   */
+  endContent?: ReactNode;
+  /**
    * Custom decorative indicator content replacing the default dot.
    */
   icon?: ReactNode;
@@ -103,9 +107,14 @@ export function Timeline({
               format={timestampFormat}
               value={item.timestamp}
             />
-            <Text as="span" className={classes.title} type="label">
-              {item.title}
-            </Text>
+            <div className={classes.titleRow}>
+              <Text as="span" className={classes.title} type="label">
+                {item.title}
+              </Text>
+              {isNonEmptyReactNode(item.endContent) ? (
+                <div className={classes.endContent}>{item.endContent}</div>
+              ) : null}
+            </div>
             {isNonEmptyReactNode(item.content) ? (
               <div className={classes.body}>{item.content}</div>
             ) : null}

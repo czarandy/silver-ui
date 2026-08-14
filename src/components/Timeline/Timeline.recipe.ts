@@ -10,7 +10,9 @@ export const timelineRecipe = sva({
     'connector',
     'content',
     'timestamp',
+    'titleRow',
     'title',
+    'endContent',
     'body',
   ],
   base: {
@@ -71,9 +73,24 @@ export const timelineRecipe = sva({
     timestamp: {
       display: 'block',
     },
+    titleRow: {
+      display: 'flex',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      columnGap: '2',
+      rowGap: '1',
+      mt: '0.5',
+    },
     title: {
       display: 'block',
-      mt: '0.5',
+      flex: '1 1 auto',
+      minW: 0,
+    },
+    endContent: {
+      display: 'flex',
+      alignItems: 'center',
+      flexShrink: 0,
+      marginInlineStart: 'auto',
     },
     body: {
       mt: '2',

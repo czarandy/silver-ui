@@ -1,6 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Check, PackageCheck, Truck} from 'lucide-react';
+import {Badge} from 'components/Badge';
 import {Icon} from 'components/Icon';
 import {Text} from 'components/Text';
 import {
@@ -8,6 +9,7 @@ import {
   type TimelineItemConfig,
   type TimelineProps,
 } from 'components/Timeline/Timeline';
+import {css} from 'styled-system/css';
 
 const shippingItems: TimelineItemConfig[] = [
   {
@@ -66,6 +68,30 @@ const auditItems: TimelineItemConfig[] = [
   },
 ];
 
+const appointmentItems: TimelineItemConfig[] = [
+  {
+    endContent: <Badge color="success" label="Completed" size="sm" />,
+    id: 'completed',
+    timestamp: Temporal.Instant.from('2026-07-17T16:02:00Z'),
+    title: 'Appointment #1',
+    content: 'Annual physical with Dr. Rivera.',
+  },
+  {
+    endContent: <Badge color="info" label="Confirmed" size="sm" />,
+    id: 'confirmed',
+    timestamp: Temporal.Instant.from('2026-07-24T18:30:00Z'),
+    title: 'Appointment #2',
+    content: 'Lab review with Dr. Chen.',
+  },
+  {
+    endContent: <Badge color="warning" label="Pending" size="sm" />,
+    id: 'pending',
+    timestamp: Temporal.Instant.from('2026-08-03T21:00:00Z'),
+    title: 'Appointment #3: Post-operative follow-up',
+    content: 'Confirmation is still required.',
+  },
+];
+
 const meta = {
   title: 'Components/Timeline',
   component: Timeline,
@@ -97,4 +123,17 @@ export const ShippingHistory: Story = {};
 
 export const AuditLog: Story = {
   args: {items: auditItems},
+};
+
+export const WithEndContent: Story = {
+  args: {items: appointmentItems},
+};
+
+export const NarrowWithEndContent: Story = {
+  args: {items: appointmentItems},
+  render: args => (
+    <div className={css({w: '64'})}>
+      <Timeline {...args} />
+    </div>
+  ),
 };
