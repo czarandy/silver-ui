@@ -13,12 +13,6 @@ import {cx} from 'utils/cx';
  */
 interface AutocompleteInputCustomItemProps {
   /**
-   * Whether the item is disabled. Custom element content is responsible for
-   * its own disabled styling.
-   * @default false
-   */
-  isDisabled?: boolean;
-  /**
    * Search result item with custom element content.
    */
   item: SearchableItem & {element: ReactNode};
@@ -45,8 +39,9 @@ interface AutocompleteInputStandardItemProps {
    */
   icon?: IconComponent;
   /**
-   * Whether the item is disabled.
-   * @default false
+   * Whether the item is disabled. Defaults to `item.isDisabled`.
+   * @deprecated Set `item.isDisabled` so the autocomplete can also prevent
+   * selection.
    */
   isDisabled?: boolean;
   /**
@@ -85,12 +80,14 @@ export function AutocompleteInputItem(
     'data-testid': dataTestId,
     description,
     icon,
-    isDisabled = false,
+    // eslint-disable-next-line @typescript-eslint/no-deprecated -- retained as a backwards-compatible visual override
+    isDisabled: isDisabledProp,
     item,
     ref,
     style,
   } = props as AutocompleteInputStandardItemProps;
 
+  const isDisabled = item.isDisabled ?? isDisabledProp ?? false;
   const classes = autocompleteItemRecipe({isDisabled});
 
   return (

@@ -72,10 +72,6 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    */
   errorText?: string;
   /**
-   * Returns true for results that should remain visible but not be selectable.
-   */
-  getIsItemDisabled?: (item: T) => boolean;
-  /**
    * Whether to focus the input on mount.
    * @default false
    */
@@ -194,7 +190,6 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
   debounceMs = 150,
   emptySearchResultsText = 'No results found',
   errorText = 'Something went wrong',
-  getIsItemDisabled,
   hasAutoFocus = false,
   hasEntriesOnFocus = false,
   hasReopenOnSelect = false,
@@ -265,7 +260,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         const limitedResults = nextResults.slice(0, maxMenuItems);
         setResults(limitedResults);
         setHighlightedIndex(
-          limitedResults.findIndex(item => getIsItemDisabled?.(item) !== true),
+          limitedResults.findIndex(item => item.isDisabled !== true),
         );
         if (limitedResults.length > 0 || nextQuery !== '') {
           showMenu();
@@ -285,7 +280,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         }
       }
     },
-    [getIsItemDisabled, maxMenuItems, searchSource, setOpen, showMenu],
+    [maxMenuItems, searchSource, setOpen, showMenu],
   );
 
   const updateQuery = useCallback(
@@ -329,7 +324,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
 
   const selectItem = useCallback(
     (item: T) => {
-      if (getIsItemDisabled?.(item) === true) {
+      if (item.isDisabled === true) {
         return;
       }
 
@@ -354,7 +349,6 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       }
     },
     [
-      getIsItemDisabled,
       hasEntriesOnFocus,
       hasReopenOnSelect,
       onChange,
@@ -403,7 +397,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         </div>
       ) : (
         results.map((item, index) => {
-          const isItemDisabled = getIsItemDisabled?.(item) === true;
+          const isItemDisabled = item.isDisabled === true;
           const isSelected = value?.id === item.id;
           return (
             // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
@@ -424,10 +418,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
               role="option"
               tabIndex={-1}>
               {renderItem == null ? (
-                <AutocompleteInputItem
-                  isDisabled={isItemDisabled}
-                  item={item}
-                />
+                <AutocompleteInputItem item={item} />
               ) : (
                 renderItem(item)
               )}
@@ -516,13 +507,11 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
           };
           const edgeIndex = (edge: 'first' | 'last'): number => {
             if (edge === 'first') {
-              return results.findIndex(
-                item => getIsItemDisabled?.(item) !== true,
-              );
+              return results.findIndex(item => item.isDisabled !== true);
             }
 
             for (let index = results.length - 1; index >= 0; index--) {
-              if (getIsItemDisabled?.(results[index]) !== true) {
+              if (results[index].isDisabled !== true) {
                 return index;
               }
             }
@@ -535,10 +524,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
                   ? edgeIndex(step === 1 ? 'first' : 'last')
                   : (highlightedIndex + step * offset + results.length) %
                     results.length;
-              if (
-                candidate >= 0 &&
-                getIsItemDisabled?.(results[candidate]) !== true
-              ) {
+              if (candidate >= 0 && results[candidate].isDisabled !== true) {
                 return candidate;
               }
             }

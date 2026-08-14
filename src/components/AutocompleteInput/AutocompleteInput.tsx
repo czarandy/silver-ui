@@ -66,10 +66,6 @@ export type AutocompleteInputProps<T extends SearchableItem = SearchableItem> =
      */
     errorText?: string;
     /**
-     * Returns true for results that should remain visible but not be selectable.
-     */
-    getIsItemDisabled?: (item: T) => boolean;
-    /**
      * Whether to focus the input on mount.
      * @default false
      */
@@ -203,7 +199,6 @@ export function AutocompleteInput<T extends SearchableItem>({
   description,
   emptySearchResultsText,
   errorText,
-  getIsItemDisabled,
   hasAutoFocus = false,
   hasClear = true,
   hasEntriesOnFocus = false,
@@ -321,7 +316,6 @@ export function AutocompleteInput<T extends SearchableItem>({
         debounceMs={debounceMs}
         emptySearchResultsText={emptySearchResultsText}
         errorText={errorText}
-        getIsItemDisabled={getIsItemDisabled}
         hasAutoFocus={hasAutoFocus}
         hasEntriesOnFocus={hasEntriesOnFocus}
         inputId={inputId}

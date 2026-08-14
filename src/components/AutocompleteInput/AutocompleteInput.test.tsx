@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {AutocompleteInput} from 'components/AutocompleteInput/AutocompleteInput';
+import {autocompleteItemRecipe} from 'components/AutocompleteInput/AutocompleteInput.recipe';
 import {AutocompleteInputItem} from 'components/AutocompleteInput/AutocompleteInputItem';
 import {BaseAutocompleteInput} from 'components/AutocompleteInput/BaseAutocompleteInput';
 import {
@@ -21,6 +22,9 @@ const items: SearchableItem[] = [
   {id: 'grace', label: 'Grace Hopper'},
   {id: 'katherine', label: 'Katherine Johnson'},
 ];
+const itemsWithDisabledResult: SearchableItem[] = items.map(item =>
+  item.id === 'grace' ? {...item, isDisabled: true} : item,
+);
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -132,10 +136,9 @@ describe('AutocompleteInput', () => {
     render(
       <AutocompleteInput
         debounceMs={0}
-        getIsItemDisabled={item => item.id === 'grace'}
         label="Assignee"
         onChange={onChange}
-        searchSource={createStaticSearchSource(items)}
+        searchSource={createStaticSearchSource(itemsWithDisabledResult)}
         value={null}
       />,
     );
@@ -168,10 +171,9 @@ describe('AutocompleteInput', () => {
     render(
       <AutocompleteInput
         debounceMs={0}
-        getIsItemDisabled={item => item.id === 'grace'}
         label="Assignee"
         onChange={onChange}
-        searchSource={createStaticSearchSource(items)}
+        searchSource={createStaticSearchSource(itemsWithDisabledResult)}
         value={null}
       />,
     );
@@ -199,7 +201,7 @@ describe('AutocompleteInput', () => {
 
     await user.keyboard('{Enter}');
 
-    expect(onChange).toHaveBeenCalledWith(items[2]);
+    expect(onChange).toHaveBeenCalledWith(itemsWithDisabledResult[2]);
   });
 
   it('clears the selected item', async () => {
@@ -944,6 +946,19 @@ describe('AutocompleteInputItem', () => {
     );
 
     expect(screen.getByTestId('custom-element')).toBeInTheDocument();
+  });
+
+  it('derives disabled styling from the item', () => {
+    render(
+      <AutocompleteInputItem
+        data-testid="disabled-item"
+        item={{...items[0], isDisabled: true}}
+      />,
+    );
+
+    expect(screen.getByTestId('disabled-item')).toHaveClass(
+      assertNonNull(autocompleteItemRecipe({isDisabled: true}).root),
+    );
   });
 });
 
