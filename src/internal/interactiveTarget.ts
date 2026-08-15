@@ -5,6 +5,7 @@ export const INTERACTIVE_SELECTOR = [
   'button',
   'a[href]',
   'input',
+  'label',
   'select',
   'textarea',
   'summary',

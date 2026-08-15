@@ -36,6 +36,10 @@ export const cardRecipe = cva({
       teal: {bg: 'surface.teal'},
       yellow: {bg: 'surface.yellow'},
     },
+    isSelected: {
+      true: {borderColor: 'primary'},
+      false: {},
+    },
     // Each padding value also exposes `--card-padding` so descendants (e.g. a
     // full-bleed Divider) can offset the card's padding to reach its edges.
     padding: {
@@ -55,6 +59,9 @@ export const cardRecipe = cva({
   defaultVariants: {
     variant: 'default',
     padding: 0,
+    // Keep this state last so its visible border overrides the variant's
+    // parity/default border without changing the Card's dimensions.
+    isSelected: false,
   },
 });
 

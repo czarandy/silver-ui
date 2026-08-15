@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Bell, ChevronRight, Settings, Star, User} from 'lucide-react';
+import {Bell, Settings, Star, User} from 'lucide-react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import type {CardVariant} from 'components/Card/Card';
@@ -212,31 +212,6 @@ export const RichContent: Story = {
           <Button label="Open" size="sm" variant="primary" />
         </HStack>
       </VStack>
-    </Card>
-  ),
-};
-
-export const Clickable: Story = {
-  render: () => (
-    <Card
-      className={css({cursor: 'pointer', _hover: {borderColor: 'primary'}})}
-      onClick={() => {}}
-      padding={4}
-      role="button"
-      style={{width: 360}}
-      tabIndex={0}>
-      <HStack align="center" gap={3} justify="between">
-        <HStack align="center" gap={2}>
-          <Icon icon={Settings} />
-          <VStack gap={0}>
-            <Text type="label">Account settings</Text>
-            <Text color="secondary" type="supporting">
-              Manage your profile and preferences
-            </Text>
-          </VStack>
-        </HStack>
-        <Icon color="secondary" icon={ChevronRight} />
-      </HStack>
     </Card>
   ),
 };

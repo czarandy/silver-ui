@@ -401,6 +401,12 @@ export {
   type CardColor,
   type CardProps,
   type CardVariant,
+  CheckboxCard,
+  type CheckboxCardProps,
+  ClickableCard,
+  type ClickableCardProps,
+  RadioCard,
+  type RadioCardProps,
 } from 'components/Card';
 export {Center, type CenterAxis, type CenterProps} from 'components/Center';
 export {

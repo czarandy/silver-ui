@@ -6,7 +6,7 @@ import type {ClickableBaseProps} from 'components/Clickable/Clickable';
 import {clickableContainerRecipe} from 'components/Clickable/ClickableContainer.recipe';
 import {useTooltip} from 'components/Tooltip';
 import {ActionElement} from 'internal/ActionElement';
-import {isInteractiveTarget} from 'internal/interactiveTarget';
+import {forwardSurfaceEvent} from 'internal/forwardSurfaceEvent';
 import {useRel} from 'internal/linkAccessibility';
 import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
@@ -18,56 +18,21 @@ export interface ClickableContainerProps extends ClickableBaseProps {
   ref?: Ref<HTMLDivElement>;
 }
 
-function hasSelectionWithin(container: HTMLElement): boolean {
-  const selection = window.getSelection();
-  if (
-    selection == null ||
-    selection.isCollapsed ||
-    selection.toString() === ''
-  ) {
-    return false;
-  }
-
-  return (
-    (selection.anchorNode != null &&
-      container.contains(selection.anchorNode)) ||
-    (selection.focusNode != null && container.contains(selection.focusNode))
-  );
-}
-
-function cloneMouseEvent(
-  event: ReactMouseEvent<HTMLElement>,
-  type: 'auxclick' | 'click',
-): MouseEvent {
-  return new MouseEvent(type, {
-    altKey: event.altKey,
-    bubbles: true,
-    button: event.button,
-    buttons: event.buttons,
-    cancelable: true,
-    clientX: event.clientX,
-    clientY: event.clientY,
-    composed: true,
-    ctrlKey: event.ctrlKey,
-    detail: event.detail,
-    metaKey: event.metaKey,
-    relatedTarget: event.relatedTarget,
-    screenX: event.screenX,
-    screenY: event.screenY,
-    shiftKey: event.shiftKey,
-  });
+interface ClickableContainerInternalProps extends ClickableContainerProps {
+  hasInheritedBorderRadius?: boolean;
 }
 
 /**
  * Makes a card, row, or other surface clickable while keeping buttons, links,
  * and other interactive descendants valid and independently operable.
  */
-export function ClickableContainer({
+export function ClickableContainerInternal({
   children,
   className,
   'data-testid': dataTestId,
   disabledReason,
   href,
+  hasInheritedBorderRadius = true,
   isDisabled = false,
   isReadOnly = false,
   label,
@@ -76,7 +41,7 @@ export function ClickableContainer({
   rel,
   style,
   target,
-}: ClickableContainerProps): React.JSX.Element {
+}: ClickableContainerInternalProps): React.JSX.Element {
   const controlRef = useRef<HTMLElement>(null);
   const hasAction = href != null || onClick != null;
   const isInteractive = hasAction && !isReadOnly;
@@ -90,6 +55,7 @@ export function ClickableContainer({
     isEnabled: hasDisabledReason,
   });
   const classes = clickableContainerRecipe({
+    hasInheritedBorderRadius,
     isDisabled: isActionDisabled,
     isInteractive,
   });
@@ -103,40 +69,17 @@ export function ClickableContainer({
     onClick?.(event);
   };
 
-  const forwardSurfaceEvent = (
+  const handleSurfaceEvent = (
     event: ReactMouseEvent<HTMLDivElement>,
     type: 'auxclick' | 'click',
   ) => {
-    const root = event.currentTarget;
-    const control = controlRef.current;
-    const targetNode = event.target instanceof Node ? event.target : null;
-
-    if (
-      control == null ||
-      (targetNode != null && control.contains(targetNode))
-    ) {
-      return;
-    }
-
-    if (
-      event.defaultPrevented ||
-      isInteractiveTarget(event.target, root) ||
-      hasSelectionWithin(root)
-    ) {
-      return;
-    }
-
-    if (type === 'auxclick' && (!renderAsLink || event.button !== 1)) {
-      return;
-    }
-
-    event.stopPropagation();
-    if (isActionDisabled) {
-      event.preventDefault();
-      return;
-    }
-
-    control.dispatchEvent(cloneMouseEvent(event, type));
+    forwardSurfaceEvent({
+      allowAuxClick: renderAsLink,
+      control: controlRef.current,
+      event,
+      isDisabled: isActionDisabled,
+      type,
+    });
   };
 
   const content = (
@@ -162,8 +105,8 @@ export function ClickableContainer({
       className={cx(classes.root, className)}
       data-clickable-disabled={isActionDisabled ? 'true' : undefined}
       data-testid={dataTestId}
-      onAuxClick={event => forwardSurfaceEvent(event, 'auxclick')}
-      onClick={event => forwardSurfaceEvent(event, 'click')}
+      onAuxClick={event => handleSurfaceEvent(event, 'auxclick')}
+      onClick={event => handleSurfaceEvent(event, 'click')}
       ref={mergeRefs(ref, tooltip.ref)}
       style={style}>
       <ActionElement
@@ -194,6 +137,14 @@ export function ClickableContainer({
       {hasDisabledReason ? tooltip.renderTooltip(disabledReason) : null}
     </>
   );
+}
+
+ClickableContainerInternal.displayName = 'ClickableContainerInternal';
+
+export function ClickableContainer(
+  props: ClickableContainerProps,
+): React.JSX.Element {
+  return <ClickableContainerInternal {...props} />;
 }
 
 ClickableContainer.displayName = 'ClickableContainer';
