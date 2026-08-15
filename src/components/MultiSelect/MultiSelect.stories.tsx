@@ -254,3 +254,8 @@ export const SelectAll: Story = {
   args: {hasSelectAll: true},
   render: (args: MultiSelectProps) => <EmptyMultiSelectStory {...args} />,
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true},
+  render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
+};

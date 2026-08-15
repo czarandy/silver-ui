@@ -32,6 +32,11 @@ export interface CheckboxGroupItemProps {
    */
   isDisabled?: boolean;
   /**
+   * Whether this checkbox item is read-only.
+   * @default false
+   */
+  isReadOnly?: boolean;
+  /**
    * Label text for the checkbox item.
    */
   label: string;
@@ -63,6 +68,7 @@ export function CheckboxGroupItem({
   endContent,
   endContentPosition = 'inline',
   isDisabled: isItemDisabled = false,
+  isReadOnly: isItemReadOnly = false,
   label,
   ref,
   startContent,
@@ -75,6 +81,7 @@ export function CheckboxGroupItem({
   }
 
   const isDisabled = context.isDisabled || isItemDisabled;
+  const isReadOnly = !isDisabled && (context.isReadOnly || isItemReadOnly);
   const isChecked = context.selectedValues.has(value);
 
   return (
@@ -87,6 +94,7 @@ export function CheckboxGroupItem({
       htmlName={context.htmlName}
       htmlValue={value}
       isDisabled={isDisabled}
+      isReadOnly={isReadOnly}
       label={label}
       onChange={checked => context.onChange(value, checked)}
       ref={ref}

@@ -4,8 +4,10 @@ import {ShieldCheck, type LucideProps} from 'lucide-react';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {Switch} from 'components/Switch/Switch';
+import {switchRecipe} from 'components/Switch/Switch.recipe';
 import {necessityIndicatorRecipe} from 'internal/NecessityIndicator.recipe';
 import {SizeContext} from 'internal/SizeContext';
+import {assertNonNull} from 'internal/testHelpers';
 import {css} from 'styled-system/css';
 
 function LabelIcon(props: LucideProps): React.JSX.Element {
@@ -33,6 +35,25 @@ function getThumb(testId: string): HTMLElement {
 }
 
 describe('Switch', () => {
+  it('does not show pointer press feedback when read-only', () => {
+    render(
+      <Switch
+        isReadOnly
+        isSelected
+        label="Notifications"
+        onChange={() => {}}
+      />,
+    );
+
+    const input = screen.getByRole('switch', {name: 'Notifications'});
+    const pointerEventsClass = switchRecipe({isReadOnly: true})
+      .input?.split(' ')
+      .find(className => className.includes('pointer-events_none'));
+
+    expect(input).toHaveAttribute('aria-readonly', 'true');
+    expect(input).toHaveClass(assertNonNull(pointerEventsClass));
+  });
+
   it('submits its checked value with htmlName', () => {
     render(
       <form data-testid="form">

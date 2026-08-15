@@ -2,8 +2,10 @@ import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {DateRangeInput} from 'components/DateRangeInput/DateRangeInput';
+import {dateRangeInputRecipe} from 'components/DateRangeInput/DateRangeInput.recipe';
 import {inputStyles} from 'components/Field/inputStyles';
 import {plainDateCreate} from 'internal/plainDate';
+import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {
   // jsdom has no native popover support. Toggle display so opened content is
@@ -162,6 +164,26 @@ describe('DateRangeInput', () => {
     );
 
     expect(screen.getByRole('combobox', {name: 'Window'})).toBeDisabled();
+  });
+
+  it('uses the default cursor when read-only', () => {
+    render(
+      <DateRangeInput
+        isReadOnly
+        label="Window"
+        onChange={() => {}}
+        value={defaultRange}
+      />,
+    );
+
+    const cursorClass = assertNonNull(
+      assertNonNull(dateRangeInputRecipe({isReadOnly: true}).trigger)
+        .split(' ')
+        .find(className => className.includes('cursor_default')),
+    );
+    expect(screen.getByRole('combobox', {name: 'Window'})).toHaveClass(
+      cursorClass,
+    );
   });
 
   it('hides clear button when isDisabled is true', () => {

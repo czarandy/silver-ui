@@ -3,6 +3,7 @@
 import {Upload, X} from 'lucide-react';
 import {
   useId,
+  useEffect,
   useRef,
   useState,
   type CSSProperties,
@@ -23,6 +24,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {fileInputRecipe} from 'components/FileInput/FileInput.recipe';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
@@ -31,6 +33,10 @@ import {VisuallyHidden} from 'components/VisuallyHidden';
 import {formatFileSize} from 'internal/formatFileSize';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {cx} from 'utils/cx';
 
 export type FileInputMode = 'dropzone' | 'input';
@@ -67,6 +73,11 @@ interface FileInputBaseProps {
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Whether the selected files are displayed without allowing interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label text.
    */
@@ -235,6 +246,7 @@ export function FileInput({
   isOptional,
   isRequired,
   isDisabled = false,
+  isReadOnly = false,
   isLoading = false,
   size = 'md',
   status: statusFromProps,
@@ -249,6 +261,10 @@ export function FileInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   // A validation error from the user's most recent selection is immediate,
   // actionable feedback about what they just tried to do (wrong type, too
   // large, too many), so it takes precedence over a consumer-provided `status`
@@ -271,12 +287,13 @@ export function FileInput({
     mode,
     size,
     status: status?.type,
-    isDisabled,
+    isDisabled: effectiveDisabled,
+    isReadOnly: effectiveReadOnly,
     isDragOver,
   });
 
   const handleFiles = (files: File[]) => {
-    if (isDisabled) {
+    if (effectiveDisabled || effectiveReadOnly) {
       return;
     }
     const result = validateFiles(files, {
@@ -305,7 +322,7 @@ export function FileInput({
   };
 
   const openFilePicker = () => {
-    if (!isDisabled) {
+    if (!effectiveDisabled && !effectiveReadOnly) {
       inputRef.current?.click();
     }
   };
@@ -314,7 +331,7 @@ export function FileInput({
     ? {
         onDragEnter: (event: DragEvent<HTMLDivElement>) => {
           event.preventDefault();
-          if (!isDisabled) {
+          if (!effectiveDisabled && !effectiveReadOnly) {
             setIsDragOver(true);
           }
         },
@@ -324,19 +341,30 @@ export function FileInput({
         },
         onDragOver: (event: DragEvent<HTMLDivElement>) => {
           event.preventDefault();
-          if (!isDisabled) {
+          if (!effectiveDisabled && !effectiveReadOnly) {
             setIsDragOver(true);
           }
         },
         onDrop: (event: DragEvent<HTMLDivElement>) => {
           event.preventDefault();
           setIsDragOver(false);
-          if (!isDisabled) {
+          if (!effectiveDisabled && !effectiveReadOnly) {
             handleFiles(Array.from(event.dataTransfer.files));
           }
         },
       }
     : {};
+
+  useEffect(() => {
+    if (!effectiveReadOnly) {
+      return;
+    }
+    inputRef.current?.blur();
+    const animationFrame = requestAnimationFrame(() => {
+      setIsDragOver(false);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [effectiveReadOnly]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -345,8 +373,9 @@ export function FileInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}
@@ -367,6 +396,16 @@ export function FileInput({
         aria-busy={isLoading || undefined}
         className={cx(classes.surface, className)}
         onClick={openFilePicker}
+        onClickCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onPointerDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
         style={style}
         {...dragProps}>
         <VisuallyHidden>
@@ -375,7 +414,7 @@ export function FileInput({
             aria-describedby={describedBy}
             aria-invalid={status?.type === 'error' || undefined}
             data-testid={dataTestId}
-            disabled={isDisabled}
+            disabled={effectiveDisabled}
             id={inputId}
             multiple={isMultiple}
             onChange={event => {
@@ -384,6 +423,7 @@ export function FileInput({
             }}
             ref={mergeRefs(ref, inputRef)}
             required={isRequired}
+            tabIndex={effectiveReadOnly ? -1 : undefined}
             type="file"
           />
         </VisuallyHidden>
@@ -400,7 +440,10 @@ export function FileInput({
           color={fileNames == null ? 'secondary' : 'primary'}>
           {isDragOver ? 'Drop files here' : displayText}
         </Text>
-        {fileNames != null && !isDisabled && !isLoading ? (
+        {fileNames != null &&
+        !effectiveDisabled &&
+        !effectiveReadOnly &&
+        !isLoading ? (
           <Button
             icon={X}
             isIconOnly

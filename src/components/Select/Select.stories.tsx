@@ -288,3 +288,8 @@ export const DisabledOptions: Story = {
   args: {options: disabledOptions},
   render: (args: SelectProps) => <EmptySelectStory {...args} />,
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true},
+  render: (args: SelectProps) => <SelectStory {...args} />,
+};

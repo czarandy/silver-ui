@@ -16,6 +16,11 @@ const meta: Meta<typeof Thumbnail> = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+function solidImage(color: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="${color}" /></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
 export const Default: Story = {};
 
 export const Interactive: Story = {
@@ -27,9 +32,25 @@ export const Interactive: Story = {
 
 export const Removable: Story = {
   args: {
-    label: 'Remove photo.jpg',
     onRemove: fn(),
   },
+  render: args => (
+    <HStack gap={3}>
+      <Thumbnail {...args} />
+      <Thumbnail
+        {...args}
+        alt="Light test image"
+        label="light-image.jpg"
+        src={solidImage('#ffffff')}
+      />
+      <Thumbnail
+        {...args}
+        alt="Dark test image"
+        label="dark-image.jpg"
+        src={solidImage('#22272d')}
+      />
+    </HStack>
+  ),
 };
 
 export const Disabled: Story = {

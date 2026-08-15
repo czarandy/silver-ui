@@ -128,3 +128,14 @@ export const DropzoneDisabled: Story = {
     />
   ),
 };
+
+export const ReadOnly: Story = {
+  render: (): React.JSX.Element => (
+    <FileInput
+      isReadOnly
+      label="Upload"
+      onChange={() => {}}
+      value={new File(['report'], 'report.pdf', {type: 'application/pdf'})}
+    />
+  ),
+};

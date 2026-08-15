@@ -192,6 +192,13 @@ export const multiSelectTriggerRecipe = sva({
       true: {wrapper: {cursor: 'not-allowed'}},
       false: {},
     },
+    isReadOnly: {
+      true: {
+        wrapper: {cursor: 'default'},
+        trigger: {cursor: 'default'},
+      },
+      false: {},
+    },
     isPlaceholder: {
       true: {triggerText: {color: 'fg.muted'}},
       false: {},
@@ -222,6 +229,7 @@ export const multiSelectTriggerRecipe = sva({
   defaultVariants: {
     variant: 'outline',
     isDisabled: false,
+    isReadOnly: false,
     isPlaceholder: false,
   },
 });

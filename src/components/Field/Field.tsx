@@ -1,8 +1,12 @@
+'use client';
+
 import {Info} from 'lucide-react';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {fieldRecipe} from 'components/Field/Field.recipe';
 import type {InputStatusType} from 'components/Field/types';
+import {useFieldset} from 'components/Fieldset/FieldsetContext';
 import {Icon, type IconComponent} from 'components/Icon';
+import {useInputGroup} from 'components/InputGroup/InputGroupContext';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
@@ -63,6 +67,11 @@ interface FieldBaseProps {
    * @default false
    */
   isLabelHidden?: boolean;
+  /**
+   * Whether the associated control is read-only.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label text.
    */
@@ -148,6 +157,7 @@ export function Field({
   isOptional = false,
   isRequired = false,
   isDisabled = false,
+  isReadOnly = false,
   labelAs: LabelComponent = 'label',
   labelIcon,
   labelId,
@@ -159,13 +169,27 @@ export function Field({
   style,
   ref,
 }: FieldProps): React.JSX.Element {
+  const inputGroup = useInputGroup();
+  const fieldset = useFieldset();
+  const effectiveDisabled =
+    isDisabled ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled &&
+    (isReadOnly ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
   const resolvedDescriptionID =
     descriptionID ??
     (isNonEmptyReactNode(description) ? `${inputId}-description` : undefined);
   const resolvedStatusID =
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
-  const classes = fieldRecipe({isDisabled});
+  const classes = fieldRecipe({
+    isDisabled: effectiveDisabled,
+    isReadOnly: effectiveReadOnly,
+  });
   const labelNode = (
     <LabelComponent
       className={classes.label}

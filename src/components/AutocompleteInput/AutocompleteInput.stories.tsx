@@ -408,3 +408,15 @@ export const RequiredAndOptional: Story = {
     );
   },
 };
+
+export const ReadOnly: Story = {
+  args: {hasClear: true, isReadOnly: true},
+  render: (args: AutocompleteInputProps) => (
+    <AutocompleteInput
+      {...args}
+      onChange={() => {}}
+      searchSource={createStaticSearchSource(people)}
+      value={people[0]}
+    />
+  ),
+};

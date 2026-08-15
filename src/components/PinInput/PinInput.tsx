@@ -2,6 +2,7 @@
 
 import {
   useId,
+  useEffect,
   useRef,
   type ChangeEvent,
   type ClipboardEvent,
@@ -29,12 +30,17 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import type {IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {pinInputRecipe} from 'components/PinInput/PinInput.recipe';
 import useListFocus from 'hooks/useListFocus';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -73,6 +79,11 @@ export type PinInputProps = {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Whether to visually hide the label.
    * @default false
@@ -184,6 +195,7 @@ export function PinInput({
   hasMask = false,
   htmlName,
   isDisabled = false,
+  isReadOnly = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -222,7 +234,16 @@ export function PinInput({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
-  const effectiveDisabled = isDisabled || inputGroup?.isDisabled === true;
+  const fieldset = useFieldset();
+  const effectiveDisabled =
+    isDisabled ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled &&
+    (isReadOnly ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
   const size = inputGroup?.size ?? sizeProp;
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
   const cellsRef = useRef<(HTMLInputElement | null)[]>([]);
@@ -254,6 +275,7 @@ export function PinInput({
       size,
       status: effectiveStatusType,
       isDisabled: effectiveDisabled,
+      isReadOnly: effectiveReadOnly,
     }),
     slots.wrapper,
   );
@@ -261,6 +283,9 @@ export function PinInput({
   const statusIconClassName = cx(inputStyles.iconSlot, css(slots.statusIcon));
 
   const focusCell = (index: number): void => {
+    if (effectiveReadOnly) {
+      return;
+    }
     const cell = cellsRef.current[Math.max(0, Math.min(index, length - 1))];
     if (cell == null) {
       return;
@@ -323,6 +348,9 @@ export function PinInput({
     nextValue: string,
     event: ChangeEvent<HTMLInputElement> | null,
   ): void => {
+    if (effectiveReadOnly) {
+      return;
+    }
     onChange(nextValue, event);
     // Completion is tracked against the committed sequence in a ref, not the
     // displayed value: a controlled parent that echoes onChange asynchronously
@@ -443,6 +471,12 @@ export function PinInput({
     focusCell(Math.min(nextValue.length, length - 1));
   };
 
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      cellsRef.current.forEach(cell => cell?.blur());
+    }
+  }, [effectiveReadOnly]);
+
   const inputWrapper = (
     <div
       aria-describedby={describedBy}
@@ -454,6 +488,16 @@ export function PinInput({
       )}
       data-testid={dataTestId}
       id={inputId}
+      onClickCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onPointerDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
       ref={inputGroup != null ? ref : undefined}
       role="group"
       style={inputGroup != null ? style : undefined}>
@@ -463,10 +507,14 @@ export function PinInput({
           aria-label={`${type === 'numeric' ? 'Digit' : 'Character'} ${index + 1} of ${length}`}
           aria-required={isRequired ?? undefined}
           autoComplete={index === 0 ? 'one-time-code' : 'off'}
-          autoFocus={hasAutoFocus && index === activeCellIndex}
+          autoFocus={
+            hasAutoFocus && !effectiveReadOnly && index === activeCellIndex
+          }
           className={cellClassName}
           data-autofocus={
-            hasAutoFocus && index === activeCellIndex ? true : undefined
+            hasAutoFocus && !effectiveReadOnly && index === activeCellIndex
+              ? true
+              : undefined
           }
           disabled={effectiveDisabled}
           inputMode={type === 'numeric' ? 'numeric' : 'text'}
@@ -478,10 +526,11 @@ export function PinInput({
           onKeyDown={event => handleKeyDown(index, event)}
           onPaste={event => handlePaste(index, event)}
           pattern={type === 'numeric' ? '[0-9]*' : undefined}
+          readOnly={effectiveReadOnly}
           ref={element => {
             cellsRef.current[index] = element;
           }}
-          tabIndex={index === activeCellIndex ? 0 : -1}
+          tabIndex={effectiveReadOnly ? -1 : index === activeCellIndex ? 0 : -1}
           type={hasMask ? 'password' : 'text'}
           value={displayedValue[index] ?? ''}
         />
@@ -510,8 +559,9 @@ export function PinInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...getNecessity(isOptional, isRequired)}
       label={label}
       labelAs="span"

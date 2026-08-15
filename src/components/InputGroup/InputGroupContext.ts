@@ -6,6 +6,7 @@ import type {InputSize, InputStatusType} from 'components/Field';
 export interface InputGroupContextValue {
   isDisabled: boolean;
   isInGroup: true;
+  isReadOnly: boolean;
   label: string;
   size: InputSize;
   statusType?: InputStatusType;

@@ -132,3 +132,5 @@ export const DrivesOtherComponents: Story = {
     <DrivesOtherComponentsStory {...args} />
   ),
 };
+
+export const ReadOnly: Story = {args: {isReadOnly: true}};

@@ -34,6 +34,30 @@ beforeAll(() => {
 });
 
 describe('Select', () => {
+  it('uses the default cursor when read-only', () => {
+    render(
+      <Select
+        isReadOnly
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value="Apple"
+      />,
+    );
+
+    const classes = selectTriggerRecipe({isReadOnly: true});
+    const cursorClass = (slot: string | undefined) =>
+      assertNonNull(slot)
+        .split(' ')
+        .find(className => className.includes('cursor_default'));
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    expect(trigger).toHaveClass(assertNonNull(cursorClass(classes.trigger)));
+    // eslint-disable-next-line testing-library/no-node-access -- the wrapper has its own pointer cursor in the base recipe
+    expect(trigger.parentElement).toHaveClass(
+      assertNonNull(cursorClass(classes.wrapper)),
+    );
+  });
+
   it('submits the selected value with htmlName', () => {
     render(
       <form data-testid="form">

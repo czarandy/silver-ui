@@ -165,6 +165,13 @@ export const selectTriggerRecipe = sva({
       true: {wrapper: {cursor: 'not-allowed'}},
       false: {},
     },
+    isReadOnly: {
+      true: {
+        wrapper: {cursor: 'default'},
+        trigger: {cursor: 'default'},
+      },
+      false: {},
+    },
     isPlaceholder: {
       true: {label: {color: 'fg.muted'}},
       false: {},
@@ -195,6 +202,7 @@ export const selectTriggerRecipe = sva({
   defaultVariants: {
     variant: 'outline',
     isDisabled: false,
+    isReadOnly: false,
     isPlaceholder: false,
   },
 });

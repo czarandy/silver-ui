@@ -3,6 +3,7 @@
 import {X} from 'lucide-react';
 import {
   useCallback,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -33,6 +34,10 @@ import {Tag} from 'components/Tag';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -85,6 +90,11 @@ export type AutocompleteInputProps<T extends SearchableItem = SearchableItem> =
      * @default false
      */
     isDisabled?: boolean;
+    /**
+     * Whether the value is displayed without allowing focus or interaction.
+     * @default false
+     */
+    isReadOnly?: boolean;
     /**
      * Whether to visually hide the label.
      * @default false
@@ -203,6 +213,7 @@ export function AutocompleteInput<T extends SearchableItem>({
   hasClear = true,
   hasEntriesOnFocus = false,
   isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -229,6 +240,11 @@ export function AutocompleteInput<T extends SearchableItem>({
     isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
   const statusType = status?.type ?? inputGroup?.statusType;
 
@@ -253,7 +269,7 @@ export function AutocompleteInput<T extends SearchableItem>({
 
   const startEditing = useCallback(
     (seedQuery: string) => {
-      if (isDisabled) {
+      if (isDisabled || isReadOnly) {
         return;
       }
       setIsEditing(true);
@@ -266,8 +282,20 @@ export function AutocompleteInput<T extends SearchableItem>({
         }
       });
     },
-    [isDisabled],
+    [isDisabled, isReadOnly],
   );
+
+  useEffect(() => {
+    if (!isReadOnly) {
+      return;
+    }
+    inputRef.current?.blur();
+    const animationFrame = requestAnimationFrame(() => {
+      setIsEditing(false);
+      setQueryValue('');
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isReadOnly]);
 
   const wrapper = (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- wrapper delegates focus to the inner input; keyboard users interact with the input directly
@@ -277,6 +305,7 @@ export function AutocompleteInput<T extends SearchableItem>({
           size,
           status: statusType,
           isDisabled,
+          isReadOnly,
         }),
         styles.wrapper,
         inputGroup != null ? className : undefined,
@@ -287,6 +316,10 @@ export function AutocompleteInput<T extends SearchableItem>({
           startEditing(value.label);
         }
       }}
+      onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       // Outside a group the ref targets the Field root; in a group there is no
       // Field, so it targets the wrapper -- the component's outermost element
       // either way.
@@ -320,6 +353,7 @@ export function AutocompleteInput<T extends SearchableItem>({
         hasEntriesOnFocus={hasEntriesOnFocus}
         inputId={inputId}
         isDisabled={isDisabled}
+        isReadOnly={isReadOnly}
         isRequired={isRequired}
         maxMenuItems={maxMenuItems}
         onChange={item => {
@@ -340,7 +374,7 @@ export function AutocompleteInput<T extends SearchableItem>({
         size={size}
         value={value}
       />
-      {hasClear && value != null && !isDisabled ? (
+      {hasClear && value != null && !isDisabled && !isReadOnly ? (
         <Button
           className={inputStyles.clearButton}
           icon={X}
@@ -371,6 +405,7 @@ export function AutocompleteInput<T extends SearchableItem>({
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}

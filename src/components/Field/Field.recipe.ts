@@ -40,9 +40,16 @@ export const fieldRecipe = sva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        label: {cursor: 'default'},
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     isDisabled: false,
+    isReadOnly: false,
   },
 });
 

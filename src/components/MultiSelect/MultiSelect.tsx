@@ -3,7 +3,9 @@
 import {Check, ChevronDown, Search, X} from 'lucide-react';
 import {
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   type CSSProperties,
   type ReactNode,
   type Ref,
@@ -30,6 +32,11 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import {useResolvedSize} from 'internal/SizeContext';
+import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -136,6 +143,11 @@ export type MultiSelectProps = {
    */
   isDisabled?: boolean;
   /**
+   * Whether the values are displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
+  /**
    * Whether to visually hide the label.
    * @default false
    */
@@ -236,6 +248,7 @@ export function MultiSelect({
   htmlName,
   isDefaultOpen = false,
   isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isLabelHidden = false,
   isLoading = false,
   isOptional,
@@ -264,6 +277,12 @@ export function MultiSelect({
     isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
   const statusType = status?.type ?? inputGroup?.statusType;
 
@@ -271,7 +290,7 @@ export function MultiSelect({
 
   const toggleValue = useCallback(
     (option: MultiSelectOptionData): boolean => {
-      if (option.isDisabled === true) {
+      if (isReadOnly || option.isDisabled === true) {
         return false;
       }
 
@@ -284,7 +303,7 @@ export function MultiSelect({
       onChange(Array.from(nextValues));
       return true;
     },
-    [onChange, value],
+    [isReadOnly, onChange, value],
   );
 
   const {
@@ -311,7 +330,7 @@ export function MultiSelect({
     visibleSelectableOptions,
   } = useSelectListbox({
     description,
-    isDefaultOpen,
+    isDefaultOpen: isDefaultOpen && !isReadOnly,
     isDisabled,
     isHighlightClearedOnCommit: false,
     isLoading,
@@ -320,6 +339,14 @@ export function MultiSelect({
     selectedValues,
     status,
   });
+
+  useEffect(() => {
+    if (isReadOnly) {
+      setIsOpen(false);
+      setQuery('');
+      buttonRef.current?.blur();
+    }
+  }, [isReadOnly, setIsOpen, setQuery]);
 
   const selectedOptions = useMemo(
     () => selectableOptions.filter(option => selectedValues.has(option.value)),
@@ -334,6 +361,9 @@ export function MultiSelect({
     enabledVisibleOptions.every(option => selectedValues.has(option.value));
 
   const toggleAll = useCallback(() => {
+    if (isReadOnly) {
+      return;
+    }
     if (allSelected) {
       onChange(
         value.filter(
@@ -349,11 +379,12 @@ export function MultiSelect({
       nextValues.add(option.value);
     }
     onChange(Array.from(nextValues));
-  }, [allSelected, onChange, enabledVisibleOptions, value]);
+  }, [allSelected, isReadOnly, onChange, enabledVisibleOptions, value]);
 
   const triggerClasses = multiSelectTriggerRecipe({
     variant,
     isDisabled: isInteractionDisabled,
+    isReadOnly,
     isPlaceholder: selectedOptions.length === 0,
   });
   const triggerWrapperClassName = css(
@@ -361,10 +392,12 @@ export function MultiSelect({
       size,
       status: statusType,
       isDisabled,
+      isReadOnly,
     }),
     multiSelectTriggerRecipe.raw({
       variant,
       isDisabled: isInteractionDisabled,
+      isReadOnly,
       isPlaceholder: selectedOptions.length === 0,
     }).wrapper,
   );
@@ -512,10 +545,14 @@ export function MultiSelect({
         inputGroup != null ? className : undefined,
       )}
       onClick={() => {
-        if (!isInteractionDisabled) {
+        if (!isInteractionDisabled && !isReadOnly) {
           setIsOpen(currentIsOpen => !currentIsOpen);
         }
       }}
+      onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       ref={triggerRef}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
@@ -532,18 +569,20 @@ export function MultiSelect({
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
         aria-label={inputGroup != null ? label : undefined}
+        aria-readonly={isReadOnly || undefined}
         className={triggerClasses.trigger}
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
         id={inputId}
         onKeyDown={handleKeyboardNavigation}
-        ref={ref}
+        ref={mergeRefs(ref, buttonRef)}
         role="combobox"
+        tabIndex={isReadOnly ? -1 : undefined}
         type="button">
         {renderTriggerValue()}
       </button>
       {isLoading ? <Spinner size="sm" /> : null}
-      {hasClear && value.length > 0 && !isDisabled ? (
+      {hasClear && value.length > 0 && !isDisabled && !isReadOnly ? (
         <Button
           icon={X}
           isIconOnly
@@ -593,6 +632,7 @@ export function MultiSelect({
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}

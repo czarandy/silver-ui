@@ -3,7 +3,9 @@
 import {Check, ChevronDown, Search, X} from 'lucide-react';
 import {
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   type CSSProperties,
   type ReactNode,
   type Ref,
@@ -28,6 +30,11 @@ import {
 import {Spinner} from 'components/Spinner';
 import {TextInput} from 'components/TextInput';
 import {useResolvedSize} from 'internal/SizeContext';
+import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -127,6 +134,11 @@ export type SelectProps = {
    */
   isLoading?: boolean;
   /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
+  /**
    * Field label.
    */
   label: string;
@@ -205,6 +217,7 @@ export function Select({
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
+  isReadOnly = false,
   isOptional,
   isRequired,
   label,
@@ -229,6 +242,12 @@ export function Select({
     isDisabled ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled &&
+    (isReadOnly ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 
@@ -239,14 +258,14 @@ export function Select({
 
   const commitOption = useCallback(
     (option: SelectOptionData): boolean => {
-      if (option.isDisabled) {
+      if (effectiveReadOnly || option.isDisabled) {
         return false;
       }
 
       onChange(option.value);
       return true;
     },
-    [onChange],
+    [effectiveReadOnly, onChange],
   );
 
   const {
@@ -282,6 +301,14 @@ export function Select({
     selectedValues,
     status,
   });
+
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      setIsOpen(false);
+      setQuery('');
+      buttonRef.current?.blur();
+    }
+  }, [effectiveReadOnly, setIsOpen, setQuery]);
 
   const selectedOption = useMemo(
     () => selectableOptions.find(option => option.value === value),
@@ -385,6 +412,7 @@ export function Select({
   const triggerClasses = selectTriggerRecipe({
     variant,
     isDisabled: isInteractionDisabled,
+    isReadOnly: effectiveReadOnly,
     isPlaceholder: selectedOption == null,
   });
   const triggerWrapperClassName = css(
@@ -392,10 +420,12 @@ export function Select({
       size,
       status: effectiveStatusType,
       isDisabled: effectiveDisabled,
+      isReadOnly: effectiveReadOnly,
     }),
     selectTriggerRecipe.raw({
       variant,
       isDisabled: isInteractionDisabled,
+      isReadOnly: effectiveReadOnly,
       isPlaceholder: selectedOption == null,
     }).wrapper,
   );
@@ -408,10 +438,20 @@ export function Select({
         inputGroup != null ? className : undefined,
       )}
       onClick={() => {
-        if (!isInteractionDisabled) {
+        if (!isInteractionDisabled && !effectiveReadOnly) {
           setIsOpen(currentIsOpen => !currentIsOpen);
         }
       }}
+      onClickCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onPointerDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
       ref={triggerRef}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
@@ -428,20 +468,25 @@ export function Select({
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
         aria-label={inputGroup != null ? label : undefined}
+        aria-readonly={effectiveReadOnly || undefined}
         className={triggerClasses.trigger}
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
         id={inputId}
         onKeyDown={handleKeyboardNavigation}
-        ref={ref}
+        ref={mergeRefs(ref, buttonRef)}
         role="combobox"
+        tabIndex={effectiveReadOnly ? -1 : undefined}
         type="button">
         <span className={triggerClasses.label}>
           {selectedOption?.label ?? placeholder}
         </span>
       </button>
       {isLoading ? <Spinner size="sm" /> : null}
-      {hasClear && selectedOption != null && !effectiveDisabled ? (
+      {hasClear &&
+      selectedOption != null &&
+      !effectiveDisabled &&
+      !effectiveReadOnly ? (
         <Button
           icon={X}
           isIconOnly
@@ -487,8 +532,9 @@ export function Select({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}
@@ -500,7 +546,7 @@ export function Select({
       style={style}>
       {htmlName == null || value == null ? null : (
         <input
-          disabled={isDisabled}
+          disabled={effectiveDisabled}
           name={htmlName}
           type="hidden"
           value={value}

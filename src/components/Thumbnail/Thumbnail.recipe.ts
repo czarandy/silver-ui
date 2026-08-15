@@ -63,6 +63,17 @@ export const thumbnailRecipe = sva({
       right: '1',
       zIndex: 1,
       color: 'fg.onPrimary',
+      '& button': {
+        w: '6',
+        h: '6',
+        bg: 'overlay.scrim',
+        _hover: {
+          bg: 'overlay.scrim.strong',
+        },
+        _active: {
+          bg: 'overlay.scrim.strong',
+        },
+      },
     },
     overlay: {
       position: 'absolute',

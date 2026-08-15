@@ -44,6 +44,16 @@ describe('PasswordInput', () => {
     expect(screen.getByRole('button', {name: 'Show password'})).toBeDisabled();
   });
 
+  it('hides the visibility toggle when read-only', () => {
+    render(
+      <PasswordInput isReadOnly label="Password" onChange={noop} value="" />,
+    );
+
+    expect(
+      screen.queryByRole('button', {name: 'Show password'}),
+    ).not.toBeInTheDocument();
+  });
+
   it('forwards ref to the input element', () => {
     const ref = vi.fn<(el: HTMLInputElement | null) => void>();
     render(

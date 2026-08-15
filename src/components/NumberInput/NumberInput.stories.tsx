@@ -215,3 +215,8 @@ export const Loading: Story = {
   args: {isLoading: true, label: 'Calculating', value: 42},
   render: args => <ControlledNumberInput {...args} />,
 };
+
+export const ReadOnly: Story = {
+  args: {hasClear: true, isReadOnly: true, value: 42},
+  render: args => <ControlledNumberInput {...args} />,
+};

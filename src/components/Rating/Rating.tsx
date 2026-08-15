@@ -8,6 +8,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconColor, type IconSize} from 'components/Icon';
 import {ratingRecipe} from 'components/Rating/Rating.recipe';
 import {VisuallyHidden} from 'components/VisuallyHidden';
@@ -138,32 +139,42 @@ export function Rating({
   const value = Math.max(0, Math.min(count, Math.round(valueFromProps)));
   const groupId = useId();
   const [hoverValue, setHoverValue] = useState<number | null>(null);
-  const isInteractive = !isReadOnly && !isDisabled && onChange != null;
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isInteractive =
+    !effectiveReadOnly && !effectiveDisabled && onChange != null;
   const displayValue = isInteractive ? (hoverValue ?? value) : value;
   const classes = ratingRecipe({
-    isDisabled: isDisabled || undefined,
-    isReadOnly: isReadOnly || undefined,
+    isDisabled: effectiveDisabled || undefined,
+    isReadOnly: effectiveReadOnly || undefined,
   });
 
   if (!isInteractive) {
     return (
-      <div
-        aria-label={`${label}: ${value} out of ${count}`}
-        className={cx(classes.root, className)}
-        data-testid={dataTestId}
-        ref={ref}
-        role="img"
-        style={style}>
-        {Array.from({length: count}, (_, i) => (
-          <span className={classes.star} key={i}>
-            <StarIcon
-              color={i < value ? filledColor : emptyColor}
-              isFilled={i < value}
-              size={size}
-            />
-          </span>
-        ))}
-      </div>
+      <>
+        <div
+          aria-label={`${label}: ${value} out of ${count}`}
+          className={cx(classes.root, className)}
+          data-testid={dataTestId}
+          ref={ref}
+          role="img"
+          style={style}>
+          {Array.from({length: count}, (_, i) => (
+            <span className={classes.star} key={i}>
+              <StarIcon
+                color={i < value ? filledColor : emptyColor}
+                isFilled={i < value}
+                size={size}
+              />
+            </span>
+          ))}
+        </div>
+        {effectiveReadOnly && htmlName != null ? (
+          <input name={htmlName} type="hidden" value={value} />
+        ) : null}
+      </>
     );
   }
 

@@ -36,6 +36,9 @@ export const chatComposerRecipe = sva({
       transitionProperty: 'box-shadow',
       transitionDuration: 'fast',
       transitionTimingFunction: 'default',
+      '@media (prefers-reduced-motion: reduce)': {
+        transitionDuration: '0s',
+      },
       _hover: {boxShadow: 'md'},
       _focusWithin: {boxShadow: 'md'},
     },

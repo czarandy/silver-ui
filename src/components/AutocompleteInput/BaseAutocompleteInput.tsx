@@ -30,6 +30,10 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {resolveListboxKeyAction} from 'internal/listboxKeyboard';
 import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {scrollOptionIntoView} from 'internal/scrollOptionIntoView';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -96,6 +100,11 @@ export interface BaseAutocompleteInputProps<T extends SearchableItem> {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Whether the input is required.
    * @default false
@@ -175,6 +184,7 @@ const styles = {
     outline: 'none',
     _placeholder: {color: 'fg.muted'},
     _disabled: {cursor: 'not-allowed'},
+    '&:read-only:not(:disabled)': {cursor: 'default'},
   }),
 } as const;
 
@@ -195,6 +205,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
   hasReopenOnSelect = false,
   inputId,
   isDisabled = false,
+  isReadOnly = false,
   isRequired = false,
   maxMenuItems = 10,
   onChange,
@@ -227,6 +238,9 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
 
   const setOpen = useCallback(
     (isNextOpen: boolean) => {
+      if (isNextOpen && isReadOnly) {
+        return;
+      }
       setIsOpen(isNextOpen);
       onOpenChange?.(isNextOpen);
       if (!isNextOpen) {
@@ -234,7 +248,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         setHighlightedIndex(-1);
       }
     },
-    [onOpenChange, searchSource],
+    [isReadOnly, onOpenChange, searchSource],
   );
 
   const showMenu = useCallback(() => {
@@ -243,6 +257,9 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
 
   const runSearch = useCallback(
     async (nextQuery: string, kind: 'bootstrap' | 'search') => {
+      if (isReadOnly) {
+        return;
+      }
       const generation = ++generationRef.current;
       searchSource.cancel?.();
       setIsLoading(true);
@@ -280,11 +297,14 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         }
       }
     },
-    [maxMenuItems, searchSource, setOpen, showMenu],
+    [isReadOnly, maxMenuItems, searchSource, setOpen, showMenu],
   );
 
   const updateQuery = useCallback(
     (nextQuery: string) => {
+      if (isReadOnly) {
+        return;
+      }
       onQueryChange(nextQuery);
 
       if (timeoutRef.current != null) {
@@ -315,6 +335,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
     [
       debounceMs,
       hasEntriesOnFocus,
+      isReadOnly,
       onQueryChange,
       runSearch,
       searchSource,
@@ -324,7 +345,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
 
   const selectItem = useCallback(
     (item: T) => {
-      if (item.isDisabled === true) {
+      if (isReadOnly || item.isDisabled === true) {
         return;
       }
 
@@ -351,6 +372,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
     [
       hasEntriesOnFocus,
       hasReopenOnSelect,
+      isReadOnly,
       onChange,
       onQueryChange,
       runSearch,
@@ -367,6 +389,24 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       searchSource.cancel?.();
     };
   }, [searchSource]);
+
+  useEffect(() => {
+    if (!isReadOnly) {
+      return;
+    }
+    generationRef.current++;
+    if (timeoutRef.current != null) {
+      clearTimeout(timeoutRef.current);
+    }
+    searchSource.cancel?.();
+    inputRef.current?.blur();
+    const animationFrame = requestAnimationFrame(() => {
+      setIsOpen(false);
+      setHighlightedIndex(-1);
+      setIsLoading(false);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isReadOnly, searchSource]);
 
   const menuClasses = autocompleteMenuRecipe({size});
 
@@ -447,12 +487,12 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         aria-describedby={ariaDescribedBy}
         aria-expanded={isOpen}
         aria-label={ariaLabel}
+        aria-readonly={isReadOnly || undefined}
         aria-required={isRequired || undefined}
         autoComplete="off"
-        // eslint-disable-next-line jsx-a11y-x/no-autofocus
-        autoFocus={hasAutoFocus}
+        autoFocus={hasAutoFocus && !isReadOnly}
         className={cx(styles.input, className)}
-        data-autofocus={hasAutoFocus || undefined}
+        data-autofocus={(hasAutoFocus && !isReadOnly) || undefined}
         data-testid={dataTestId}
         disabled={isDisabled}
         id={resolvedInputId}
@@ -486,6 +526,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
             showMenu();
           }
         }}
+        onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
         onKeyDown={event => {
           onKeyDown?.(event);
           if (event.defaultPrevented) {
@@ -570,10 +611,13 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
             }
           }
         }}
+        onPointerDown={isReadOnly ? preventReadOnlyInteraction : undefined}
         placeholder={placeholder}
+        readOnly={isReadOnly}
         ref={mergeRefs(ref, inputRef, fallbackAnchorRef)}
         role="combobox"
         style={style}
+        tabIndex={isReadOnly ? -1 : undefined}
         type="text"
         value={query}
       />

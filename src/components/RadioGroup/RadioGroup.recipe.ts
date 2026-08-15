@@ -117,11 +117,19 @@ export const radioGroupItemRecipe = sva({
         label: {color: 'fg.disabled', cursor: 'not-allowed'},
       },
     },
+    isReadOnly: {
+      true: {
+        input: {cursor: 'default'},
+        label: {cursor: 'default'},
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     size: 'md',
     isChecked: false,
     isDisabled: false,
+    isReadOnly: false,
   },
 });
 
