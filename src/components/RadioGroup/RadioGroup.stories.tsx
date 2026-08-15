@@ -106,6 +106,8 @@ export const Large: Story = {args: {size: 'lg'}};
 
 export const Disabled: Story = {args: {isDisabled: true}};
 
+export const ReadOnly: Story = {args: {isReadOnly: true}};
+
 export const ItemDisabled: Story = {
   render: (args: RadioGroupProps): React.JSX.Element => (
     <ItemDisabledStory {...args} />
