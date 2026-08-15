@@ -3,6 +3,7 @@
 import {X} from 'lucide-react';
 import {
   useCallback,
+  useEffect,
   useImperativeHandle,
   useId,
   useMemo,
@@ -36,6 +37,10 @@ import useAnnounce from 'hooks/useAnnounce';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import useLatest from 'internal/useLatest';
 import {useLayer} from 'internal/useLayer';
 import {cx} from 'utils/cx';
@@ -45,6 +50,11 @@ export type TagsInputChange<T extends SearchableItem> =
   | {item: T; type: 'create'}
   | {item: T; type: 'remove'}
   | {items: T[]; type: 'remove-all'};
+
+export interface TagsInputTagState {
+  isDisabled: boolean;
+  isReadOnly: boolean;
+}
 
 export type TagsInputOverflowBehavior =
   'none' | 'unfocusedInline' | 'unfocusedLayer';
@@ -230,7 +240,11 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
   /**
    * Custom tag renderer.
    */
-  renderTag?: (item: T, onRemove: () => void) => ReactNode;
+  renderTag?: (
+    item: T,
+    onRemove: () => void,
+    state: TagsInputTagState,
+  ) => ReactNode;
   /**
    * Provides results for the menu. Use `createStaticSearchSource` for
    * in-memory data, or implement {@link SearchSource} for async/remote
@@ -294,7 +308,7 @@ export function TagsInput<T extends SearchableItem>({
   htmlName,
   isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
-  isReadOnly = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isOptional,
   isRequired,
   label,
@@ -324,6 +338,11 @@ export function TagsInput<T extends SearchableItem>({
     isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
   const statusType = status?.type ?? inputGroup?.statusType;
 
@@ -430,9 +449,13 @@ export function TagsInput<T extends SearchableItem>({
     handleRef,
     () => ({
       blur: () => inputRef.current?.blur(),
-      focus: () => inputRef.current?.focus(),
+      focus: () => {
+        if (!isReadOnly) {
+          inputRef.current?.focus();
+        }
+      },
     }),
-    [],
+    [isReadOnly],
   );
 
   const valueRef = useLatest(value);
@@ -440,13 +463,16 @@ export function TagsInput<T extends SearchableItem>({
 
   const removeItem = useCallback(
     (item: T) => {
+      if (isDisabled || isReadOnly) {
+        return;
+      }
       onChangeRef.current(
         valueRef.current.filter(selectedItem => selectedItem.id !== item.id),
         {item, type: 'remove'},
       );
       announce(`Removed ${item.label}`);
     },
-    [announce],
+    [announce, isDisabled, isReadOnly],
   );
 
   const handleFocus = useCallback(
@@ -477,7 +503,7 @@ export function TagsInput<T extends SearchableItem>({
   );
 
   const handleWrapperPointerDown = useCallback(() => {
-    if (!isDisabled) {
+    if (!isDisabled && !isReadOnly) {
       if (isLayerMode) {
         layer.show();
         setIsFocusedWithin(true);
@@ -498,7 +524,20 @@ export function TagsInput<T extends SearchableItem>({
         {once: true},
       );
     }
-  }, [isDisabled, isFocusInTagsInput, isLayerMode, layer]);
+  }, [isDisabled, isFocusInTagsInput, isLayerMode, isReadOnly, layer]);
+
+  useEffect(() => {
+    if (!isReadOnly) {
+      return;
+    }
+    layer.hide();
+    inputRef.current?.blur();
+    const animationFrame = requestAnimationFrame(() => {
+      setIsFocusedWithin(false);
+      setQueryValue('');
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [isReadOnly, layer]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -508,11 +547,11 @@ export function TagsInput<T extends SearchableItem>({
         <Tag
           isDisabled={isDisabled}
           label={item.label}
-          onRemove={() => removeItem(item)}
+          onRemove={isReadOnly ? undefined : () => removeItem(item)}
           size={size}
         />
       ) : (
-        renderTag(item, () => removeItem(item))
+        renderTag(item, () => removeItem(item), {isDisabled, isReadOnly})
       )}
     </span>
   ));
@@ -531,14 +570,19 @@ export function TagsInput<T extends SearchableItem>({
           size,
           status: statusType,
           isDisabled,
+          isReadOnly,
         }),
         classes.wrapper,
         isWrapperGroupItem ? className : undefined,
       )}
       data-testid={dataTestId}
       onBlur={handleBlur}
+      onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       onFocus={handleFocus}
+      onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       onPointerDown={handleWrapperPointerDown}
+      onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       ref={isWrapperGroupItem ? mergeRefs(ref, wrapperRef) : wrapperRef}
       role="group"
       style={isWrapperGroupItem ? style : undefined}>
@@ -572,7 +616,8 @@ export function TagsInput<T extends SearchableItem>({
         hasEntriesOnFocus={hasEntriesOnFocus}
         hasReopenOnSelect={hasEntriesOnFocus}
         inputId={inputId}
-        isDisabled={isDisabled || isReadOnly || isAtMax}
+        isDisabled={isDisabled || isAtMax}
+        isReadOnly={isReadOnly}
         maxMenuItems={maxMenuItems}
         onChange={item => {
           if (item == null) {
@@ -667,11 +712,18 @@ export function TagsInput<T extends SearchableItem>({
             size,
             status: statusType,
             isDisabled,
+            isReadOnly,
           }),
           placeholderClasses.wrapper,
           inputGroup != null ? className : undefined,
         )}
+        onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+        onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
         onPointerDown={handleWrapperPointerDown}
+        onPointerDownCapture={
+          isReadOnly ? preventReadOnlyInteraction : undefined
+        }
         ref={
           inputGroup != null ? mergeRefs(ref, placeholderRef) : placeholderRef
         }

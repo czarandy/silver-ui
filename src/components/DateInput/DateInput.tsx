@@ -3,6 +3,7 @@
 import {CalendarIcon, X} from 'lucide-react';
 import {
   useCallback,
+  useEffect,
   useId,
   useRef,
   useState,
@@ -27,6 +28,7 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import type {IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
@@ -40,6 +42,10 @@ import {
   type DateFormat,
   type PlainDate,
 } from 'internal/plainDate';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -98,6 +104,11 @@ export type DateInputProps = {
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label text.
    */
@@ -198,6 +209,7 @@ export function DateInput({
   isRequired,
   isDisabled = false,
   isLoading = false,
+  isReadOnly = false,
   hasClear = false,
   htmlId,
   status,
@@ -221,6 +233,22 @@ export function DateInput({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingInput, setPendingInput] = useState<string | null>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+
+  useEffect(() => {
+    if (!effectiveReadOnly) {
+      return;
+    }
+    inputRef.current?.blur();
+    const animationFrame = requestAnimationFrame(() => {
+      setIsOpen(false);
+      setPendingInput(null);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [effectiveReadOnly]);
 
   const displayValue = pendingInput ?? formatDate(value, format);
 
@@ -228,16 +256,22 @@ export function DateInput({
 
   const handleCalendarChange = useCallback(
     (nextValue: PlainDate) => {
+      if (effectiveReadOnly) {
+        return;
+      }
       onChange(nextValue);
       setPendingInput(null);
       setIsOpen(false);
       inputRef.current?.focus();
     },
-    [onChange],
+    [effectiveReadOnly, onChange],
   );
 
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
+      if (effectiveReadOnly) {
+        return;
+      }
       const text = event.target.value;
       setPendingInput(text);
 
@@ -250,10 +284,13 @@ export function DateInput({
         calendarRef.current?.navigateTo(parsed);
       }
     },
-    [getIsDateDisabled, max, min, onChange],
+    [effectiveReadOnly, getIsDateDisabled, max, min, onChange],
   );
 
   const commitPendingInput = useCallback(() => {
+    if (effectiveReadOnly) {
+      return;
+    }
     if (pendingInput == null) {
       return;
     }
@@ -274,7 +311,15 @@ export function DateInput({
       onChange(parsed);
     }
     setPendingInput(null);
-  }, [getIsDateDisabled, max, min, onChange, pendingInput, value]);
+  }, [
+    effectiveReadOnly,
+    getIsDateDisabled,
+    max,
+    min,
+    onChange,
+    pendingInput,
+    value,
+  ]);
 
   const handleBlur = useCallback(() => {
     commitPendingInput();
@@ -282,6 +327,9 @@ export function DateInput({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
+      if (effectiveReadOnly) {
+        return;
+      }
       if (event.key === 'Enter') {
         event.preventDefault();
         commitPendingInput();
@@ -290,14 +338,17 @@ export function DateInput({
         setIsOpen(true);
       }
     },
-    [commitPendingInput],
+    [commitPendingInput, effectiveReadOnly],
   );
 
   const handleClear = useCallback(() => {
+    if (effectiveReadOnly) {
+      return;
+    }
     onChange(null);
     setPendingInput(null);
     inputRef.current?.focus();
-  }, [onChange]);
+  }, [effectiveReadOnly, onChange]);
 
   return (
     <Field
@@ -305,7 +356,7 @@ export function DateInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
       {...necessity}
       label={label}
@@ -320,10 +371,21 @@ export function DateInput({
           inputRecipe({
             size,
             status: status?.type,
-            isDisabled: isDisabled,
+            isDisabled: effectiveDisabled,
+            isReadOnly: effectiveReadOnly,
           }),
           styles.wrapper,
         )}
+        onClickCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onPointerDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
         ref={wrapperRef}>
         <Popover
           content={
@@ -340,14 +402,14 @@ export function DateInput({
           }
           hasAutoFocus={false}
           id={popoverId}
-          isEnabled={!isDisabled}
+          isEnabled={!effectiveDisabled && !effectiveReadOnly}
           isOpen={isOpen}
           label={`Choose ${label}`}
           onOpenChange={setIsOpen}
           padding={3}>
           <Button
             icon={CalendarIcon}
-            isDisabled={isDisabled}
+            isDisabled={effectiveDisabled || effectiveReadOnly}
             isIconOnly
             label={`Choose ${label}`}
             size="sm"
@@ -361,22 +423,29 @@ export function DateInput({
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           aria-invalid={status?.type === 'error' || undefined}
+          aria-readonly={effectiveReadOnly || undefined}
           aria-required={isRequired ?? undefined}
           autoComplete="off"
           className={inputStyles.control}
           data-testid={dataTestId}
-          disabled={isDisabled}
+          disabled={effectiveDisabled}
           id={inputId}
           onBlur={handleBlur}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
+          readOnly={effectiveReadOnly}
           ref={mergeRefs(ref, inputRef)}
           role="combobox"
+          tabIndex={effectiveReadOnly ? -1 : undefined}
           type="text"
           value={displayValue}
         />
-        {hasClear && value != null && !isDisabled && !isLoading ? (
+        {hasClear &&
+        value != null &&
+        !effectiveDisabled &&
+        !effectiveReadOnly &&
+        !isLoading ? (
           <Button
             className={status == null ? inputStyles.clearButton : undefined}
             icon={X}

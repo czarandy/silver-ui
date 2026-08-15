@@ -3,6 +3,7 @@
 import {Check} from 'lucide-react';
 import {
   useCallback,
+  useEffect,
   useId,
   useRef,
   type CSSProperties,
@@ -22,6 +23,7 @@ import {
   type InputStatus,
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon} from 'components/Icon';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
@@ -54,6 +56,11 @@ export type ColorSwatchPickerProps = {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether the selected color is displayed without allowing interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Whether to visually hide the label.
    * @default false
@@ -97,6 +104,7 @@ export type ColorSwatchPickerProps = {
 interface ColorSwatchProps {
   color: ColorName;
   isDisabled: boolean;
+  isReadOnly: boolean;
   isSelected: boolean;
   isTabbable: boolean;
   onSelect: (color: ColorName) => void;
@@ -106,13 +114,20 @@ interface ColorSwatchProps {
 function ColorSwatch({
   color,
   isDisabled,
+  isReadOnly,
   isSelected,
   isTabbable,
   onSelect,
   size,
 }: ColorSwatchProps): React.JSX.Element {
   const label = COLOR_LABELS[color];
-  const classes = colorSwatchRecipe({color, isDisabled, isSelected, size});
+  const classes = colorSwatchRecipe({
+    color,
+    isDisabled,
+    isReadOnly,
+    isSelected,
+    size,
+  });
 
   return (
     <button
@@ -122,12 +137,22 @@ function ColorSwatch({
       className={classes.button}
       data-value={color}
       onClick={() => {
-        if (!isDisabled) {
+        if (!isDisabled && !isReadOnly) {
           onSelect(color);
         }
       }}
+      onFocus={event => {
+        if (isReadOnly) {
+          event.currentTarget.blur();
+        }
+      }}
+      onPointerDown={event => {
+        if (isReadOnly) {
+          event.preventDefault();
+        }
+      }}
       role="radio"
-      tabIndex={isTabbable ? 0 : -1}
+      tabIndex={isReadOnly ? -1 : isTabbable ? 0 : -1}
       type="button">
       <span aria-hidden="true" className={classes.fill}>
         {isSelected ? (
@@ -147,6 +172,7 @@ export function ColorSwatchPicker({
   'data-testid': dataTestId,
   description,
   isDisabled = false,
+  isReadOnly = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -167,16 +193,20 @@ export function ColorSwatchPicker({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const selectedIndex = colors.indexOf(value);
   const tabStopIndex = selectedIndex === -1 ? 0 : selectedIndex;
 
   const handleChange = useCallback(
     (nextValue: ColorName) => {
-      if (nextValue !== value) {
+      if (!effectiveReadOnly && nextValue !== value) {
         onChange(nextValue);
       }
     },
-    [onChange, value],
+    [effectiveReadOnly, onChange, value],
   );
 
   const getItems = useCallback(
@@ -199,20 +229,26 @@ export function ColorSwatchPicker({
     orientation: 'both',
   });
   const hint = useKeyboardHint({
-    isEnabled: !isDisabled,
+    isEnabled: !effectiveDisabled && !effectiveReadOnly,
     orientation: 'horizontal',
   });
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       hint.onKeyDown(event);
-      if (isDisabled) {
+      if (effectiveDisabled || effectiveReadOnly) {
         return;
       }
       handleListKeyDown(event);
     },
-    [handleListKeyDown, hint, isDisabled],
+    [effectiveDisabled, effectiveReadOnly, handleListKeyDown, hint],
   );
+
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      getItems().forEach(item => item.blur());
+    }
+  }, [effectiveReadOnly, getItems]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -223,7 +259,7 @@ export function ColorSwatchPicker({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
       {...necessity}
       label={label}
@@ -238,10 +274,11 @@ export function ColorSwatchPicker({
       style={style}>
       <div
         aria-describedby={describedBy}
-        aria-disabled={isDisabled || undefined}
+        aria-disabled={effectiveDisabled || undefined}
         aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
         aria-orientation="horizontal"
+        aria-readonly={effectiveReadOnly || undefined}
         aria-required={isRequired ?? undefined}
         className={pickerClass}
         id={inputId}
@@ -254,7 +291,8 @@ export function ColorSwatchPicker({
         {colors.map((color, index) => (
           <ColorSwatch
             color={color}
-            isDisabled={isDisabled}
+            isDisabled={effectiveDisabled}
+            isReadOnly={effectiveReadOnly}
             isSelected={color === value}
             isTabbable={index === tabStopIndex}
             key={color}

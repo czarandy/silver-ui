@@ -38,6 +38,10 @@ import {useResolvedSize} from 'internal/SizeContext';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -77,6 +81,11 @@ type NumberInputBaseProps = {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Whether to restrict input to integer values only.
    * @default false
@@ -322,6 +331,7 @@ export function NumberInput({
   isOptional,
   isRequired,
   isDisabled = false,
+  isReadOnly = false,
   isIntegerOnly = false,
   isWheelEnabled = false,
   isLoading = false,
@@ -360,6 +370,11 @@ export function NumberInput({
     isDisabled ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled &&
+    (isReadOnly ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
   const numberInputStyles = numberInputRecipe({size});
@@ -448,10 +463,12 @@ export function NumberInput({
   });
   const isDecrementDisabled =
     effectiveDisabled ||
+    effectiveReadOnly ||
     decrementValue == null ||
     decrementValue === valueForStepping;
   const isIncrementDisabled =
     effectiveDisabled ||
+    effectiveReadOnly ||
     incrementValue == null ||
     incrementValue === valueForStepping;
 
@@ -464,6 +481,7 @@ export function NumberInput({
     const handleWheel = (event: WheelEvent): void => {
       if (
         effectiveDisabled ||
+        effectiveReadOnly ||
         document.activeElement !== input ||
         event.deltaY === 0 ||
         event.altKey ||
@@ -481,7 +499,18 @@ export function NumberInput({
     return () => {
       input.removeEventListener('wheel', handleWheel);
     };
-  }, [effectiveDisabled, isWheelEnabled, stepValue]);
+  }, [effectiveDisabled, effectiveReadOnly, isWheelEnabled, stepValue]);
+
+  useEffect(() => {
+    if (!effectiveReadOnly) {
+      return;
+    }
+    inputRef.current?.blur();
+    const animationFrame = requestAnimationFrame(() => {
+      setPendingInput(null);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [effectiveReadOnly]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -492,9 +521,20 @@ export function NumberInput({
           size,
           status: effectiveStatusType,
           isDisabled: effectiveDisabled,
+          isReadOnly: effectiveReadOnly,
         }),
         inputGroup != null ? className : undefined,
       )}
+      onClickCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onPointerDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={inputStyles.iconSlot}>
@@ -511,20 +551,24 @@ export function NumberInput({
         aria-valuemin={min ?? undefined}
         aria-valuenow={parsedDisplayValue ?? undefined}
         autoComplete={autoComplete}
-        // eslint-disable-next-line jsx-a11y-x/no-autofocus
-        autoFocus={hasAutoFocus}
+        autoFocus={hasAutoFocus && !effectiveReadOnly}
         className={inputStyles.control}
-        data-autofocus={hasAutoFocus || undefined}
+        data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
         data-testid={dataTestId}
         disabled={effectiveDisabled}
         id={inputId}
         inputMode={isIntegerOnly ? 'numeric' : 'decimal'}
         name={htmlName}
         onBlur={event => {
-          commitPendingInput();
+          if (!effectiveReadOnly) {
+            commitPendingInput();
+          }
           onBlur?.(event);
         }}
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          if (effectiveReadOnly) {
+            return;
+          }
           const nextValue = event.target.value;
           setPendingInput(nextValue);
           const parsed = parseNumberInput(nextValue, {isIntegerOnly});
@@ -568,14 +612,19 @@ export function NumberInput({
           onKeyDown?.(event);
         }}
         placeholder={placeholder}
+        readOnly={effectiveReadOnly}
         ref={mergeRefs(ref, inputRef)}
         required={isRequired ?? undefined}
         role="spinbutton"
+        tabIndex={effectiveReadOnly ? -1 : undefined}
         type="text"
         value={displayValue}
       />
       {units != null ? <span className={styles.units}>{units}</span> : null}
-      {hasClear === true && value != null && !effectiveDisabled ? (
+      {hasClear === true &&
+      value != null &&
+      !effectiveDisabled &&
+      !effectiveReadOnly ? (
         <Button
           icon={X}
           isIconOnly
@@ -637,7 +686,7 @@ export function NumberInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
       {...necessity}
       label={label}

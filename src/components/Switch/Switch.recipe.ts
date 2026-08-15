@@ -177,6 +177,13 @@ export const switchRecipe = sva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        input: {cursor: 'default'},
+        label: {cursor: 'default'},
+      },
+      false: {},
+    },
     // Applied only when a status message is rendered (status?.type is defined).
     status: {
       warning: {status: {bg: 'surface.yellow', color: 'surface.yellow.fg'}},
@@ -189,6 +196,7 @@ export const switchRecipe = sva({
     labelSpacing: 'default',
     isSelected: false,
     isDisabled: false,
+    isReadOnly: false,
   },
 });
 

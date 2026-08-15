@@ -237,3 +237,8 @@ export const Success: Story = {
   },
   render: (args: SwitchProps) => <SwitchStory {...args} />,
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true},
+  render: (args: SwitchProps) => <SwitchStory {...args} />,
+};

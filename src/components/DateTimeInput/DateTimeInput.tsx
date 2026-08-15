@@ -74,6 +74,11 @@ export type DateTimeInputProps = {
    */
   isLoading?: boolean;
   /**
+   * Whether both values are displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
+  /**
    * Field label text.
    */
   label: string;
@@ -186,6 +191,7 @@ export function DateTimeInput({
   isRequired,
   isDisabled = false,
   isLoading = false,
+  isReadOnly = false,
   status,
   labelIcon,
   labelTooltip,
@@ -251,6 +257,7 @@ export function DateTimeInput({
           isDisabled={isDisabled}
           isLabelHidden
           isLoading={isLoading}
+          isReadOnly={isReadOnly}
           label={`${label} date`}
           max={maxParts.date}
           min={minParts.date}
@@ -264,6 +271,7 @@ export function DateTimeInput({
           isDisabled={isDisabled}
           isLabelHidden
           isLoading={isLoading}
+          isReadOnly={isReadOnly}
           label={`${label} time`}
           max={
             date != null &&

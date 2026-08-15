@@ -4,4 +4,5 @@ export {
   type TagsInputHandle,
   type TagsInputOverflowBehavior,
   type TagsInputProps,
+  type TagsInputTagState,
 } from 'components/TagsInput/TagsInput';

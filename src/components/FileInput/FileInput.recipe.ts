@@ -82,6 +82,16 @@ export const fileInputRecipe = sva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        surface: {
+          cursor: 'default',
+          _hover: {borderColor: 'border.emphasized'},
+          _focusWithin: {boxShadow: 'none', outline: 'none'},
+        },
+      },
+      false: {},
+    },
     isDragOver: {
       true: {
         surface: {borderColor: 'primary', bg: 'bg.selected'},
@@ -135,11 +145,54 @@ export const fileInputRecipe = sva({
         },
       },
     },
+    {
+      mode: 'input',
+      status: 'warning',
+      isReadOnly: true,
+      css: {
+        surface: {
+          _hover: {borderColor: 'status.warning.border'},
+          _focusWithin: {
+            borderColor: 'status.warning.border',
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+    {
+      mode: 'input',
+      status: 'error',
+      isReadOnly: true,
+      css: {
+        surface: {
+          _hover: {borderColor: 'status.error.border'},
+          _focusWithin: {
+            borderColor: 'status.error.border',
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
+    {
+      mode: 'input',
+      status: 'success',
+      isReadOnly: true,
+      css: {
+        surface: {
+          _hover: {borderColor: 'status.success.border'},
+          _focusWithin: {
+            borderColor: 'status.success.border',
+            boxShadow: 'none',
+          },
+        },
+      },
+    },
   ],
   defaultVariants: {
     mode: 'input',
     size: 'md',
     isDisabled: false,
+    isReadOnly: false,
     isDragOver: false,
   },
 });

@@ -223,3 +223,14 @@ export const WithLabelTooltip: Story = {
     return <DateInput {...args} onChange={setValue} value={value} />;
   },
 };
+
+export const ReadOnly: Story = {
+  args: {hasClear: true, isReadOnly: true},
+  render: (args: DateInputProps) => (
+    <DateInput
+      {...args}
+      onChange={() => {}}
+      value={plainDateCreate(2026, 5, 21)}
+    />
+  ),
+};

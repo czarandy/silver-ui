@@ -89,6 +89,18 @@ export const inputRecipe = cva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        cursor: 'default',
+        _hover: {borderColor: 'border.emphasized'},
+        _focusWithin: {
+          borderColor: 'border.emphasized',
+          boxShadow: 'none',
+          _hover: {borderColor: 'border.emphasized'},
+        },
+      },
+      false: {},
+    },
   },
   compoundVariants: [
     {
@@ -106,10 +118,47 @@ export const inputRecipe = cva({
       isDisabled: true,
       css: {_hover: {borderColor: statusBorderColor.success}},
     },
+    {
+      status: 'warning',
+      isReadOnly: true,
+      css: {
+        _hover: {borderColor: statusBorderColor.warning},
+        _focusWithin: {
+          borderColor: statusBorderColor.warning,
+          boxShadow: 'none',
+          _hover: {borderColor: statusBorderColor.warning},
+        },
+      },
+    },
+    {
+      status: 'error',
+      isReadOnly: true,
+      css: {
+        _hover: {borderColor: statusBorderColor.error},
+        _focusWithin: {
+          borderColor: statusBorderColor.error,
+          boxShadow: 'none',
+          _hover: {borderColor: statusBorderColor.error},
+        },
+      },
+    },
+    {
+      status: 'success',
+      isReadOnly: true,
+      css: {
+        _hover: {borderColor: statusBorderColor.success},
+        _focusWithin: {
+          borderColor: statusBorderColor.success,
+          boxShadow: 'none',
+          _hover: {borderColor: statusBorderColor.success},
+        },
+      },
+    },
   ],
   defaultVariants: {
     size: 'md',
     isDisabled: false,
+    isReadOnly: false,
   },
 });
 

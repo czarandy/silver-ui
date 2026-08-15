@@ -35,6 +35,10 @@ import {useResolvedSize} from 'internal/SizeContext';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {cx} from 'utils/cx';
 
 export type TextInputType = 'email' | 'password' | 'tel' | 'text';
@@ -103,6 +107,11 @@ export type TextInputProps = {
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label.
    */
@@ -200,6 +209,7 @@ export function TextInput({
   isRequired,
   isDisabled = false,
   isLoading = false,
+  isReadOnly = false,
   hasClear = false,
   hasAutoFocus = false,
   htmlName,
@@ -228,6 +238,11 @@ export function TextInput({
     isDisabled ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled &&
+    (isReadOnly ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 
@@ -238,9 +253,20 @@ export function TextInput({
           size,
           status: effectiveStatusType,
           isDisabled: effectiveDisabled,
+          isReadOnly: effectiveReadOnly,
         }),
         inputGroup != null ? className : undefined,
       )}
+      onClickCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
+      onPointerDownCapture={
+        effectiveReadOnly ? preventReadOnlyInteraction : undefined
+      }
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={inputStyles.iconSlot}>
@@ -257,16 +283,19 @@ export function TextInput({
         aria-label={inputGroup != null ? label : undefined}
         aria-required={isRequired ?? undefined}
         autoComplete={autoComplete}
-        // eslint-disable-next-line jsx-a11y-x/no-autofocus
-        autoFocus={hasAutoFocus}
+        autoFocus={hasAutoFocus && !effectiveReadOnly}
         className={inputStyles.control}
-        data-autofocus={hasAutoFocus || undefined}
+        data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
         data-testid={dataTestId}
         disabled={effectiveDisabled}
         id={inputId}
         name={htmlName}
         onBlur={onBlur}
-        onChange={event => onChange(event.target.value, event)}
+        onChange={event => {
+          if (!effectiveReadOnly) {
+            onChange(event.target.value, event);
+          }
+        }}
         onFocus={onFocus}
         onKeyDown={event => {
           if (event.key === 'Enter' && !isComposingEvent(event)) {
@@ -275,13 +304,15 @@ export function TextInput({
           onKeyDown?.(event);
         }}
         placeholder={placeholder}
+        readOnly={effectiveReadOnly}
         ref={mergeRefs(ref, inputRef)}
         required={isRequired ?? undefined}
         role={role}
+        tabIndex={effectiveReadOnly ? -1 : undefined}
         type={type}
         value={value}
       />
-      {hasClear && value !== '' && !effectiveDisabled ? (
+      {hasClear && value !== '' && !effectiveDisabled && !effectiveReadOnly ? (
         <Button
           className={
             !isNonEmptyReactNode(endContent) && !isLoading && status == null
@@ -319,7 +350,7 @@ export function TextInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
       {...getNecessity(isOptional, isRequired)}
       label={label}

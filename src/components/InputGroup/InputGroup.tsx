@@ -44,6 +44,11 @@ export type InputGroupProps = {
    */
   isDisabled?: boolean;
   /**
+   * Whether all grouped inputs are read-only.
+   * @default false
+   */
+  isReadOnly?: boolean;
+  /**
    * Whether to visually hide the label.
    * @default false
    */
@@ -88,6 +93,7 @@ export function InputGroup({
   label,
   description,
   isDisabled = false,
+  isReadOnly = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -113,11 +119,12 @@ export function InputGroup({
     () => ({
       isInGroup: true as const,
       isDisabled,
+      isReadOnly: !isDisabled && isReadOnly,
       label,
       size,
       statusType: status?.type,
     }),
-    [isDisabled, label, size, status?.type],
+    [isDisabled, isReadOnly, label, size, status?.type],
   );
 
   const necessity = getNecessity(isOptional, isRequired);

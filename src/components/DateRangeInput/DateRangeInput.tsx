@@ -3,6 +3,7 @@
 import {CalendarIcon, X} from 'lucide-react';
 import {
   useCallback,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -28,17 +29,23 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import type {DateRange} from 'internal/dateTypes';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import {
   plainDateFormatWith,
   plainDateIsEqual,
   type DateFormat,
   type PlainDate,
 } from 'internal/plainDate';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {cx} from 'utils/cx';
 
 export type {DateRange} from 'internal/dateTypes';
@@ -87,6 +94,11 @@ export type DateRangeInputProps = {
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label text.
    */
@@ -177,6 +189,7 @@ export function DateRangeInput({
   isRequired,
   isDisabled = false,
   isLoading = false,
+  isReadOnly = false,
   hasClear = false,
   status,
   labelIcon,
@@ -195,6 +208,11 @@ export function DateRangeInput({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const displayValue = useMemo(
     () => formatRange(value, format),
     [format, value],
@@ -202,7 +220,7 @@ export function DateRangeInput({
 
   const necessity = getNecessity(isOptional, isRequired);
   const classes = dateRangeInputRecipe({
-    isDisabled,
+    isDisabled: effectiveDisabled,
     isPlaceholder: displayValue === '',
   });
 
@@ -216,13 +234,24 @@ export function DateRangeInput({
     [],
   );
 
+  useEffect(() => {
+    if (!effectiveReadOnly) {
+      return;
+    }
+    buttonRef.current?.blur();
+    const animationFrame = requestAnimationFrame(() => {
+      setIsOpen(false);
+    });
+    return () => cancelAnimationFrame(animationFrame);
+  }, [effectiveReadOnly]);
+
   return (
     <Field
       className={className}
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
       {...necessity}
       label={label}
@@ -238,15 +267,26 @@ export function DateRangeInput({
           inputRecipe({
             size,
             status: status?.type,
-            isDisabled,
+            isDisabled: effectiveDisabled,
+            isReadOnly: effectiveReadOnly,
           }),
           classes.wrapper,
         )}
         onClick={() => {
-          if (!isDisabled) {
+          if (!effectiveDisabled && !effectiveReadOnly) {
             setIsOpen(currentIsOpen => !currentIsOpen);
           }
         }}
+        onClickCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onPointerDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
         ref={triggerRef}>
         <button
           aria-busy={isLoading || undefined}
@@ -255,14 +295,16 @@ export function DateRangeInput({
           aria-expanded={isOpen}
           aria-haspopup="dialog"
           aria-invalid={status?.type === 'error' || undefined}
+          aria-readonly={effectiveReadOnly || undefined}
           aria-required={isRequired ?? undefined}
           className={classes.trigger}
           data-testid={dataTestId}
-          disabled={isDisabled}
+          disabled={effectiveDisabled}
           id={inputId}
           onKeyDown={handleKeyDown}
-          ref={ref}
+          ref={mergeRefs(ref, buttonRef)}
           role="combobox"
+          tabIndex={effectiveReadOnly ? -1 : undefined}
           type="button">
           <span className={classes.icon}>
             <Icon data-testid="calendar-icon" icon={CalendarIcon} size="sm" />
@@ -271,7 +313,11 @@ export function DateRangeInput({
             {displayValue === '' ? placeholder : displayValue}
           </span>
         </button>
-        {hasClear && value != null && !isDisabled && !isLoading ? (
+        {hasClear &&
+        value != null &&
+        !effectiveDisabled &&
+        !effectiveReadOnly &&
+        !isLoading ? (
           <Button
             className={status == null ? inputStyles.clearButton : undefined}
             icon={X}
@@ -302,7 +348,9 @@ export function DateRangeInput({
             mode="range"
             numberOfMonths={numberOfMonths}
             onChange={nextValue => {
-              onChange(nextValue);
+              if (!effectiveReadOnly) {
+                onChange(nextValue);
+              }
               setIsOpen(false);
             }}
             value={value ?? undefined}

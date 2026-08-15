@@ -153,3 +153,10 @@ export const WithLabelTooltip: Story = {
     return <TimeInput {...args} onChange={setValue} value={value} />;
   },
 };
+
+export const ReadOnly: Story = {
+  args: {hasClear: true, isReadOnly: true},
+  render: (args: TimeInputProps) => (
+    <TimeInput {...args} onChange={() => {}} value={TIME_0900} />
+  ),
+};

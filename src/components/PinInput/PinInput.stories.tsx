@@ -123,3 +123,8 @@ export const InInputGroup: Story = {
     </div>
   ),
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true, value: '123456'},
+  render: args => <ControlledPinInput {...args} />,
+};

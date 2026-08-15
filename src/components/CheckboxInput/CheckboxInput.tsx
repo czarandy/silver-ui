@@ -14,12 +14,14 @@ import {
 import {checkboxInputRecipe} from 'components/CheckboxInput/CheckboxInput.recipe';
 import type {FieldNecessity, InputStatus} from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Item} from 'components/Item';
 import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {NecessityIndicator} from 'internal/NecessityIndicator';
+import {ReadOnlyInteractionBoundary} from 'internal/ReadOnlyInteractionBoundary';
 import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
@@ -186,10 +188,15 @@ export function CheckboxInput({
   const isIndeterminate = value === 'indeterminate';
   const isChecked = value === true;
   const isCheckedOrIndeterminate = isChecked || isIndeterminate;
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const classes = checkboxInputRecipe({
     size,
     mark: isIndeterminate ? 'indeterminate' : isChecked ? 'check' : 'none',
-    isDisabled,
+    isDisabled: effectiveDisabled,
+    isReadOnly: effectiveReadOnly,
   });
 
   useEffect(() => {
@@ -198,6 +205,12 @@ export function CheckboxInput({
     }
   }, [isIndeterminate]);
 
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      inputRef.current?.blur();
+    }
+  }, [effectiveReadOnly]);
+
   const control = (
     <span className={classes.boxWrap}>
       <input
@@ -205,19 +218,19 @@ export function CheckboxInput({
         aria-checked={isIndeterminate ? 'mixed' : undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
-        aria-readonly={isReadOnly || undefined}
+        aria-readonly={effectiveReadOnly || undefined}
         checked={isChecked}
         // `peer` is the marker class Panda's `_peerFocusVisible` selector on
         // the box targets (`.peer:is(:focus-visible,…) ~ &`); without it the
         // box's keyboard focus ring never renders.
         className={cx('peer', classes.input)}
         data-testid={dataTestId}
-        disabled={isDisabled}
+        disabled={effectiveDisabled}
         id={inputId}
         name={htmlName}
         onBlur={onBlur}
         onChange={event => {
-          if (isReadOnly) {
+          if (effectiveReadOnly) {
             event.preventDefault();
             return;
           }
@@ -229,14 +242,26 @@ export function CheckboxInput({
           // momentarily until React resets it. Preventing the click stops the
           // toggle outright — and covers label clicks and Space-key activation,
           // which both dispatch a click on the input.
-          if (isReadOnly) {
+          if (effectiveReadOnly) {
             event.preventDefault();
           }
         }}
-        onFocus={onFocus}
-        readOnly={isReadOnly}
+        onFocus={event => {
+          if (effectiveReadOnly) {
+            event.currentTarget.blur();
+            return;
+          }
+          onFocus?.(event);
+        }}
+        onPointerDown={event => {
+          if (effectiveReadOnly) {
+            event.preventDefault();
+          }
+        }}
+        readOnly={effectiveReadOnly}
         ref={mergeRefs(ref, inputRef)}
         required={isRequired}
+        tabIndex={effectiveReadOnly ? -1 : undefined}
         type="checkbox"
         value={htmlValue}
       />
@@ -293,13 +318,25 @@ export function CheckboxInput({
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }
-      endContent={endContent}
+      endContent={
+        isNonEmptyReactNode(endContent) ? (
+          <ReadOnlyInteractionBoundary isReadOnly={effectiveReadOnly}>
+            {endContent}
+          </ReadOnlyInteractionBoundary>
+        ) : undefined
+      }
       endContentPosition={endContentPosition}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       label={labelNode}
       leadingContent={control}
       padding={padding}
-      startContent={startContent}
+      startContent={
+        isNonEmptyReactNode(startContent) ? (
+          <ReadOnlyInteractionBoundary isReadOnly={effectiveReadOnly}>
+            {startContent}
+          </ReadOnlyInteractionBoundary>
+        ) : undefined
+      }
       width={width}
     />
   );

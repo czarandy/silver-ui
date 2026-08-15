@@ -183,9 +183,20 @@ export const sliderRecipe = sva({
         },
       },
     },
+    isReadOnly: {
+      true: {
+        trackContainer: {cursor: 'default'},
+        thumb: {
+          cursor: 'default',
+          _hover: {'@media (hover: hover)': {bg: 'primary'}},
+        },
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     orientation: 'horizontal',
+    isReadOnly: false,
   },
 });
 

@@ -370,3 +370,18 @@ export const MultipleInputs: Story = {
     );
   },
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true},
+  render: (args: InputGroupProps) => (
+    <InputGroup {...args}>
+      <InputGroupText>https://</InputGroupText>
+      <TextInput
+        isLabelHidden
+        label="URL"
+        onChange={() => {}}
+        value="example.com"
+      />
+    </InputGroup>
+  ),
+};

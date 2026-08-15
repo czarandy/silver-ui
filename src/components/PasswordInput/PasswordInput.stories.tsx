@@ -115,3 +115,8 @@ export const WithLabelTooltip: Story = {
   args: {labelTooltip: 'Your account password. Never share this with anyone.'},
   render: args => <ControlledPasswordInput {...args} />,
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true, value: 'supersecret'},
+  render: args => <ControlledPasswordInput {...args} />,
+};

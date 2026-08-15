@@ -84,11 +84,19 @@ export const checkboxInputRecipe = sva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        input: {cursor: 'default'},
+        label: {cursor: 'default'},
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     size: 'md',
     mark: 'none',
     isDisabled: false,
+    isReadOnly: false,
   },
 });
 

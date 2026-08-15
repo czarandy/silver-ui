@@ -4,6 +4,8 @@ import {Temporal} from '@js-temporal/polyfill';
 import {Clock, X} from 'lucide-react';
 import {
   useId,
+  useEffect,
+  useRef,
   type CSSProperties,
   type FocusEvent,
   type ReactNode,
@@ -23,9 +25,15 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -86,6 +94,11 @@ export type TimeInputProps = {
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label.
    */
@@ -195,6 +208,7 @@ export function TimeInput({
   isRequired,
   isDisabled = false,
   isLoading = false,
+  isReadOnly = false,
   htmlName,
   status,
   labelIcon,
@@ -211,6 +225,17 @@ export function TimeInput({
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      inputRef.current?.blur();
+    }
+  }, [effectiveReadOnly]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -220,7 +245,7 @@ export function TimeInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
       {...necessity}
       label={label}
@@ -234,8 +259,19 @@ export function TimeInput({
         className={inputRecipe({
           size,
           status: status?.type,
-          isDisabled,
-        })}>
+          isDisabled: effectiveDisabled,
+          isReadOnly: effectiveReadOnly,
+        })}
+        onClickCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onPointerDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }>
         <span className={inputStyles.iconSlot}>
           <Icon icon={Clock} size="sm" />
         </span>
@@ -244,26 +280,34 @@ export function TimeInput({
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || undefined}
           aria-required={isRequired ?? undefined}
-          // eslint-disable-next-line jsx-a11y-x/no-autofocus
-          autoFocus={hasAutoFocus}
+          autoFocus={hasAutoFocus && !effectiveReadOnly}
           className={cx(inputStyles.control, styles.input)}
-          data-autofocus={hasAutoFocus || undefined}
+          data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
           data-testid={dataTestId}
-          disabled={isDisabled}
+          disabled={effectiveDisabled}
           id={inputId}
           max={toInputString(max, hasSeconds)}
           min={toInputString(min, hasSeconds)}
           name={htmlName}
           onBlur={onBlur}
-          onChange={event => onChange(fromInputString(event.target.value))}
+          onChange={event => {
+            if (!effectiveReadOnly) {
+              onChange(fromInputString(event.target.value));
+            }
+          }}
           onFocus={onFocus}
           placeholder={placeholder}
-          ref={ref}
+          readOnly={effectiveReadOnly}
+          ref={mergeRefs(ref, inputRef)}
           step={step ?? (hasSeconds ? 1 : 60)}
+          tabIndex={effectiveReadOnly ? -1 : undefined}
           type="time"
           value={toInputString(value, hasSeconds)}
         />
-        {hasClear && value != null && !isDisabled ? (
+        {hasClear &&
+        value != null &&
+        !effectiveDisabled &&
+        !effectiveReadOnly ? (
           <Button
             className={
               !isLoading && status == null ? inputStyles.clearButton : undefined

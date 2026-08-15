@@ -21,6 +21,7 @@ import {
   type InputStatus,
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export type {CheckboxGroupOrientation} from 'components/CheckboxGroup/CheckboxGroupContext';
@@ -51,6 +52,11 @@ export type CheckboxGroupProps = {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether all checkbox items are read-only.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Whether to visually hide the label.
    * @default false
@@ -107,6 +113,7 @@ export function CheckboxGroup({
   description,
   htmlName,
   isDisabled = false,
+  isReadOnly = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -127,8 +134,15 @@ export function CheckboxGroup({
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const handleItemChange = useCallback(
     (itemValue: string, isChecked: boolean) => {
+      if (effectiveReadOnly) {
+        return;
+      }
       if (isChecked) {
         onChange(value.includes(itemValue) ? value : [...value, itemValue]);
         return;
@@ -136,19 +150,28 @@ export function CheckboxGroup({
 
       onChange(value.filter(currentValue => currentValue !== itemValue));
     },
-    [onChange, value],
+    [effectiveReadOnly, onChange, value],
   );
   const selectedValues = useMemo(() => new Set(value), [value]);
   const contextValue = useMemo(
     () => ({
       htmlName,
-      isDisabled,
+      isDisabled: effectiveDisabled,
+      isReadOnly: effectiveReadOnly,
       onChange: handleItemChange,
       orientation,
       selectedValues,
       size,
     }),
-    [handleItemChange, htmlName, isDisabled, orientation, selectedValues, size],
+    [
+      effectiveDisabled,
+      effectiveReadOnly,
+      handleItemChange,
+      htmlName,
+      orientation,
+      selectedValues,
+      size,
+    ],
   );
 
   const necessity = getNecessity(isOptional, isRequired);
@@ -158,7 +181,7 @@ export function CheckboxGroup({
       className={className}
       data-testid={dataTestId}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
       {...necessity}
       description={description}

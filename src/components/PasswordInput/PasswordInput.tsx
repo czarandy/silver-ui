@@ -4,6 +4,8 @@ import {Eye, EyeOff} from 'lucide-react';
 import {useCallback, useState, type Ref} from 'react';
 import {Button} from 'components/Button';
 import {getNecessity} from 'components/Field';
+import {useFieldset} from 'components/Fieldset';
+import {useInputGroup} from 'components/InputGroup';
 import {TextInput, type TextInputProps} from 'components/TextInput';
 
 export type PasswordInputProps = Omit<
@@ -23,6 +25,7 @@ export function PasswordInput({
   className,
   'data-testid': dataTestId,
   isDisabled = false,
+  isReadOnly = false,
   isOptional,
   isRequired,
   ref,
@@ -30,6 +33,17 @@ export function PasswordInput({
   ...props
 }: PasswordInputProps): React.JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
+  const inputGroup = useInputGroup();
+  const fieldset = useFieldset();
+  const effectiveDisabled =
+    isDisabled ||
+    inputGroup?.isDisabled === true ||
+    fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled &&
+    (isReadOnly ||
+      inputGroup?.isReadOnly === true ||
+      fieldset?.isReadOnly === true);
   const toggleVisibility = useCallback(() => setIsVisible(v => !v), []);
 
   return (
@@ -41,7 +55,7 @@ export function PasswordInput({
       endContent={
         <Button
           icon={isVisible ? EyeOff : Eye}
-          isDisabled={isDisabled}
+          isDisabled={effectiveDisabled || effectiveReadOnly}
           isIconOnly
           label={isVisible ? 'Hide password' : 'Show password'}
           onClick={toggleVisibility}
@@ -50,6 +64,7 @@ export function PasswordInput({
         />
       }
       isDisabled={isDisabled}
+      isReadOnly={isReadOnly}
       ref={ref}
       style={style}
       type={isVisible ? 'text' : 'password'}

@@ -4,6 +4,7 @@ import {
   Children,
   isValidElement,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   type CSSProperties,
@@ -12,6 +13,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {useFieldset} from 'components/Fieldset';
 import {segmentedControlRecipe} from 'components/SegmentedControl/SegmentedControl.recipe';
 import {
   SegmentedControlContext,
@@ -46,6 +48,11 @@ export interface SegmentedControlProps<TValue extends string = string> {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether the selected segment is displayed without allowing interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Accessible label for the radio group.
    */
@@ -103,6 +110,7 @@ export function SegmentedControl<TValue extends string = string>({
   className,
   'data-testid': dataTestId,
   isDisabled = false,
+  isReadOnly = false,
   label,
   layout = 'hug',
   onChange,
@@ -113,14 +121,20 @@ export function SegmentedControl<TValue extends string = string>({
 }: SegmentedControlProps<TValue>): React.JSX.Element {
   const size = useResolvedSize(sizeProp);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const handleChange = useCallback(
     (nextValue: string) => {
-      onChange(nextValue as TValue);
+      if (!effectiveReadOnly) {
+        onChange(nextValue as TValue);
+      }
     },
-    [onChange],
+    [effectiveReadOnly, onChange],
   );
   const tabStopValue = useMemo(() => {
-    if (isDisabled) {
+    if (effectiveDisabled || effectiveReadOnly) {
       return undefined;
     }
 
@@ -129,19 +143,33 @@ export function SegmentedControl<TValue extends string = string>({
       enabledItemValues.find(itemValue => itemValue === value) ??
       enabledItemValues[0]
     );
-  }, [children, isDisabled, value]);
+  }, [children, effectiveDisabled, effectiveReadOnly, value]);
   const contextValue = useMemo(
     () => ({
-      isDisabled,
+      isDisabled: effectiveDisabled,
+      isReadOnly: effectiveReadOnly,
       layout,
       onChange: handleChange,
       size,
       tabStopValue,
       value,
     }),
-    [handleChange, isDisabled, layout, size, tabStopValue, value],
+    [
+      effectiveDisabled,
+      effectiveReadOnly,
+      handleChange,
+      layout,
+      size,
+      tabStopValue,
+      value,
+    ],
   );
-  const classes = segmentedControlRecipe({isDisabled, layout, size});
+  const classes = segmentedControlRecipe({
+    isDisabled: effectiveDisabled,
+    isReadOnly: effectiveReadOnly,
+    layout,
+    size,
+  });
 
   const getItems = useCallback(
     () =>
@@ -169,7 +197,7 @@ export function SegmentedControl<TValue extends string = string>({
   // reads as a horizontal row, and drawing all four arrows is noise for an
   // affordance the user only has to be shown once.
   const hint = useKeyboardHint({
-    isEnabled: !isDisabled,
+    isEnabled: !effectiveDisabled && !effectiveReadOnly,
     orientation: 'horizontal',
   });
 
@@ -177,20 +205,27 @@ export function SegmentedControl<TValue extends string = string>({
     (event: KeyboardEvent<HTMLDivElement>) => {
       // Dismissing is safe even while disabled — the hint cannot be showing.
       hint.onKeyDown(event);
-      if (isDisabled) {
+      if (effectiveDisabled || effectiveReadOnly) {
         return;
       }
       handleListKeyDown(event);
     },
-    [handleListKeyDown, hint, isDisabled],
+    [effectiveDisabled, effectiveReadOnly, handleListKeyDown, hint],
   );
+
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      getItems().forEach(item => item.blur());
+    }
+  }, [effectiveReadOnly, getItems]);
 
   return (
     <SegmentedControlContext value={contextValue}>
       <div
-        aria-disabled={isDisabled || undefined}
+        aria-disabled={effectiveDisabled || undefined}
         aria-label={label}
         aria-orientation="horizontal"
+        aria-readonly={effectiveReadOnly || undefined}
         className={cx(classes.root, className)}
         data-testid={dataTestId}
         onBlur={hint.onBlur}

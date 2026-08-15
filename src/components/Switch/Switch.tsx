@@ -3,6 +3,8 @@
 import {Info} from 'lucide-react';
 import {
   useId,
+  useEffect,
+  useRef,
   type ChangeEvent,
   type CSSProperties,
   type FocusEvent,
@@ -11,6 +13,7 @@ import {
 } from 'react';
 import type {FieldNecessity, InputStatus} from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {switchRecipe} from 'components/Switch/Switch.recipe';
@@ -20,6 +23,7 @@ import {VisuallyHidden} from 'components/VisuallyHidden';
 import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {useResolvedSize, type ComponentSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export type SwitchLabelPosition = 'end' | 'start';
@@ -58,6 +62,11 @@ export type SwitchProps = {
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Whether the switch is on.
    */
@@ -126,6 +135,7 @@ export function Switch({
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
+  isReadOnly = false,
   isOptional,
   isRequired,
   label,
@@ -149,31 +159,66 @@ export function Switch({
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const classes = switchRecipe({
     size,
     labelSpacing,
     isSelected,
-    isDisabled,
+    isDisabled: effectiveDisabled,
+    isReadOnly: effectiveReadOnly,
     status: status?.type,
   });
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      inputRef.current?.blur();
+    }
+  }, [effectiveReadOnly]);
   const control = (
     <span className={classes.control}>
       <input
         aria-busy={isLoading || undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
+        aria-readonly={effectiveReadOnly || undefined}
         checked={isSelected}
         className={classes.input}
         data-testid={dataTestId}
-        disabled={isDisabled}
+        disabled={effectiveDisabled}
         id={inputId}
         name={htmlName}
         onBlur={onBlur}
-        onChange={event => onChange(event.target.checked, event)}
-        onFocus={onFocus}
-        ref={ref}
+        onChange={event => {
+          if (effectiveReadOnly) {
+            event.preventDefault();
+            return;
+          }
+          onChange(event.target.checked, event);
+        }}
+        onClick={event => {
+          if (effectiveReadOnly) {
+            event.preventDefault();
+          }
+        }}
+        onFocus={event => {
+          if (effectiveReadOnly) {
+            event.currentTarget.blur();
+            return;
+          }
+          onFocus?.(event);
+        }}
+        onPointerDown={event => {
+          if (effectiveReadOnly) {
+            event.preventDefault();
+          }
+        }}
+        ref={mergeRefs(ref, inputRef)}
         required={isRequired}
         role="switch"
+        tabIndex={effectiveReadOnly ? -1 : undefined}
         type="checkbox"
       />
       <span
