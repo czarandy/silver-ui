@@ -138,13 +138,45 @@ describe('Thumbnail', () => {
   });
 
   it('renders tooltip wiring when label is provided', () => {
-    render(<Thumbnail label="photo.jpg" src="/photo.jpg" />);
+    render(<Thumbnail alt="Preview" label="photo.jpg" src="/photo.jpg" />);
 
     const thumbnail = screen.getByLabelText('photo.jpg');
+    // eslint-disable-next-line testing-library/no-node-access -- the tooltip intentionally targets the structural image-area wrapper
+    const imageArea = screen.getByRole('img').closest('[aria-describedby]');
     const tooltip = screen.getByRole('tooltip', {hidden: true});
 
-    expect(thumbnail).toHaveAttribute('aria-describedby', tooltip.id);
+    expect(thumbnail).not.toHaveAttribute('aria-describedby');
+    expect(imageArea).toHaveAttribute('aria-describedby', tooltip.id);
     expect(tooltip).toHaveTextContent('photo.jpg');
+  });
+
+  it('keeps the remove button outside the thumbnail tooltip trigger', () => {
+    render(
+      <Thumbnail
+        alt="Preview"
+        label="photo.jpg"
+        onRemove={() => {}}
+        src="/photo.jpg"
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access -- the regression depends on the image area and remove action being sibling tooltip triggers
+    const imageArea = screen.getByRole('img').closest('[aria-describedby]');
+    const removeButton = screen.getByRole('button', {
+      name: 'Remove photo.jpg',
+    });
+    const tooltips = screen.getAllByRole('tooltip', {hidden: true});
+    const imageTooltip = tooltips.find(
+      tooltip => tooltip.id === imageArea?.getAttribute('aria-describedby'),
+    );
+    const removeTooltip = tooltips.find(
+      tooltip => tooltip.id === removeButton.getAttribute('aria-describedby'),
+    );
+
+    expect(imageArea).not.toContainElement(removeButton);
+    expect(tooltips).toHaveLength(2);
+    expect(imageTooltip).toHaveTextContent('photo.jpg');
+    expect(removeTooltip).toHaveTextContent('Remove photo.jpg');
   });
 
   it('does not trigger thumbnail click when removing', async () => {

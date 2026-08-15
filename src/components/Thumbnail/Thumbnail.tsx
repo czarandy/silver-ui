@@ -66,7 +66,7 @@ type ThumbnailClasses = ReturnType<typeof thumbnailRecipe>;
 
 type ThumbnailImageAreaProps = Pick<
   ThumbnailProps,
-  'alt' | 'isLoading' | 'onClick' | 'onRemove' | 'src'
+  'alt' | 'isLoading' | 'onClick' | 'src'
 > & {
   accessibleName: string;
   classes: ThumbnailClasses;
@@ -80,7 +80,6 @@ function ThumbnailImageArea({
   isDisabled,
   isLoading = false,
   onClick,
-  onRemove,
   src,
 }: ThumbnailImageAreaProps): React.JSX.Element {
   const {status, ref: imageRef, onLoad, onError} = useImageLoadState(src ?? '');
@@ -124,21 +123,6 @@ function ThumbnailImageArea({
           <Spinner size="sm" variant="onMedia" />
         </div>
       ) : null}
-      {onRemove != null && !isDisabled ? (
-        <div className={classes.remove}>
-          <Button
-            icon={X}
-            isIconOnly
-            label={`Remove ${accessibleName}`}
-            onClick={event => {
-              event.stopPropagation();
-              onRemove(event as MouseEvent<HTMLButtonElement>);
-            }}
-            size="sm"
-            variant="onSolid"
-          />
-        </div>
-      ) : null}
     </div>
   );
 }
@@ -163,7 +147,19 @@ export function Thumbnail({
   const isInteractive = onClick != null && !isDisabled && !isLoading;
   const classes = thumbnailRecipe({isDisabled, isInteractive});
 
-  const thumbnail = (
+  const imageArea = (
+    <ThumbnailImageArea
+      accessibleName={accessibleName}
+      alt={alt}
+      classes={classes}
+      isDisabled={isDisabled}
+      isLoading={isLoading}
+      onClick={onClick}
+      src={src}
+    />
+  );
+
+  return (
     <div
       aria-busy={isLoading || undefined}
       aria-label={accessibleName}
@@ -172,23 +168,27 @@ export function Thumbnail({
       ref={ref}
       role="group"
       style={style}>
-      <ThumbnailImageArea
-        accessibleName={accessibleName}
-        alt={alt}
-        classes={classes}
-        isDisabled={isDisabled}
-        isLoading={isLoading}
-        onClick={onClick}
-        onRemove={onRemove}
-        src={src}
-      />
+      {label != null ? (
+        <Tooltip content={label}>{imageArea}</Tooltip>
+      ) : (
+        imageArea
+      )}
+      {onRemove != null && !isDisabled ? (
+        <div className={classes.remove}>
+          <Button
+            icon={X}
+            isIconOnly
+            label={`Remove ${accessibleName}`}
+            onClick={event => {
+              event.stopPropagation();
+              onRemove(event as MouseEvent<HTMLButtonElement>);
+            }}
+            size="sm"
+            variant="onSolid"
+          />
+        </div>
+      ) : null}
     </div>
-  );
-
-  return label != null ? (
-    <Tooltip content={label}>{thumbnail}</Tooltip>
-  ) : (
-    thumbnail
   );
 }
 

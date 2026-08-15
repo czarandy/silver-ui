@@ -46,13 +46,13 @@ export const RemoveContrast: Story = {
       <Thumbnail
         {...args}
         alt="Light test image"
-        label="Remove light image"
+        label="light-image.jpg"
         src={solidImage('#ffffff')}
       />
       <Thumbnail
         {...args}
         alt="Dark test image"
-        label="Remove dark image"
+        label="dark-image.jpg"
         src={solidImage('#22272d')}
       />
     </HStack>
