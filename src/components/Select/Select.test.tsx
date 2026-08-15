@@ -6,10 +6,16 @@ import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
-import {Select} from 'components/Select/Select';
-import {selectOptionItemRecipe} from 'components/Select/Select.recipe';
+import {Select, type SelectVariant} from 'components/Select/Select';
+import {
+  selectOptionItemRecipe,
+  selectTriggerRecipe,
+} from 'components/Select/Select.recipe';
 import {SelectOption} from 'components/Select/SelectOption';
+import {SizeContext} from 'internal/SizeContext';
+import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 import {assertNonNull} from 'internal/testHelpers';
+import {css} from 'styled-system/css';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -78,6 +84,89 @@ describe('Select', () => {
     await user.click(screen.getByText('Banana'));
     expect(onChange).toHaveBeenCalledWith('Banana');
   });
+
+  it('uses the existing outline trigger by default', () => {
+    render(
+      <Select
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value="Apple"
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    // eslint-disable-next-line testing-library/no-node-access -- recipe classes are applied to the visual trigger wrapper
+    const wrapper = assertNonNull(trigger.parentElement);
+    expect(wrapper).toHaveClass(inputRecipe({size: 'md'}));
+    expect(wrapper).toHaveClass(
+      css(selectTriggerRecipe.raw({variant: 'outline'}).wrapper),
+    );
+  });
+
+  it.each([
+    {backgroundClass: 'silver-bg_transparent', variant: 'ghost'},
+    {backgroundClass: 'silver-bg_surface.gray', variant: 'button'},
+  ] satisfies ReadonlyArray<{
+    backgroundClass: string;
+    variant: SelectVariant;
+  }>)(
+    'renders the $variant trigger without changing its semantics',
+    async ({backgroundClass, variant}) => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <SizeContext value="sm">
+          <Select
+            label="Fruit"
+            onChange={onChange}
+            options={['Apple', 'Banana']}
+            value="Apple"
+            variant={variant}
+          />
+        </SizeContext>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+      // eslint-disable-next-line testing-library/no-node-access -- recipe classes are applied to the visual trigger wrapper
+      const wrapper = assertNonNull(trigger.parentElement);
+      expect(wrapper).toHaveClass(
+        'silver-bd-w_0',
+        'silver-min-h_component.sm',
+        backgroundClass,
+      );
+      expect(wrapper).toHaveClass(
+        css(selectTriggerRecipe.raw({variant}).wrapper),
+      );
+      expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+      await user.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      await user.click(screen.getByText('Banana'));
+      expect(onChange).toHaveBeenCalledWith('Banana');
+    },
+  );
+
+  it.each(['ghost', 'button'] as const)(
+    'detaches the validation status for the %s trigger',
+    variant => {
+      render(
+        <Select
+          label="Fruit"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          status={{message: 'Choose a fruit', type: 'error'}}
+          value={null}
+          variant={variant}
+        />,
+      );
+
+      expect(screen.getByRole('alert')).toHaveClass(
+        statusMessageRecipe({statusType: 'error', variant: 'detached'}),
+      );
+    },
+  );
 
   it('opens when clicking the dropdown icon area', async () => {
     const user = userEvent.setup();

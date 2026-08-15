@@ -5,10 +5,16 @@ import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
-import {MultiSelect} from 'components/MultiSelect/MultiSelect';
+import {
+  MultiSelect,
+  type MultiSelectVariant,
+} from 'components/MultiSelect/MultiSelect';
+import {multiSelectTriggerRecipe} from 'components/MultiSelect/MultiSelect.recipe';
 import {SelectOption} from 'components/Select';
 import {SizeContext} from 'internal/SizeContext';
+import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 import {assertNonNull} from 'internal/testHelpers';
+import {css} from 'styled-system/css';
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -87,6 +93,89 @@ describe('MultiSelect', () => {
 
     expect(onChange).toHaveBeenCalledWith(['Name', 'Email']);
   });
+
+  it('uses the existing outline trigger by default', () => {
+    render(
+      <MultiSelect
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={['Name']}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    // eslint-disable-next-line testing-library/no-node-access -- recipe classes are applied to the visual trigger wrapper
+    const wrapper = assertNonNull(trigger.parentElement);
+    expect(wrapper).toHaveClass(inputRecipe({size: 'md'}));
+    expect(wrapper).toHaveClass(
+      css(multiSelectTriggerRecipe.raw({variant: 'outline'}).wrapper),
+    );
+  });
+
+  it.each([
+    {backgroundClass: 'silver-bg_transparent', variant: 'ghost'},
+    {backgroundClass: 'silver-bg_surface.gray', variant: 'button'},
+  ] satisfies ReadonlyArray<{
+    backgroundClass: string;
+    variant: MultiSelectVariant;
+  }>)(
+    'renders the $variant trigger without changing its semantics',
+    async ({backgroundClass, variant}) => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <SizeContext value="sm">
+          <MultiSelect
+            label="Columns"
+            onChange={onChange}
+            options={['Name', 'Email']}
+            value={['Name']}
+            variant={variant}
+          />
+        </SizeContext>,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Columns'});
+      // eslint-disable-next-line testing-library/no-node-access -- recipe classes are applied to the visual trigger wrapper
+      const wrapper = assertNonNull(trigger.parentElement);
+      expect(wrapper).toHaveClass(
+        'silver-bd-w_0',
+        'silver-min-h_component.sm',
+        backgroundClass,
+      );
+      expect(wrapper).toHaveClass(
+        css(multiSelectTriggerRecipe.raw({variant}).wrapper),
+      );
+      expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+      await user.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      await user.click(screen.getByText('Email'));
+      expect(onChange).toHaveBeenCalledWith(['Name', 'Email']);
+    },
+  );
+
+  it.each(['ghost', 'button'] as const)(
+    'detaches the validation status for the %s trigger',
+    variant => {
+      render(
+        <MultiSelect
+          label="Columns"
+          onChange={() => {}}
+          options={['Name', 'Email']}
+          status={{message: 'Choose columns', type: 'error'}}
+          value={[]}
+          variant={variant}
+        />,
+      );
+
+      expect(screen.getByRole('alert')).toHaveClass(
+        statusMessageRecipe({statusType: 'error', variant: 'detached'}),
+      );
+    },
+  );
 
   it('deselects an already selected option', async () => {
     const user = userEvent.setup();

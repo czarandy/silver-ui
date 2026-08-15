@@ -1,8 +1,11 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {BriefcaseBusiness, User} from 'lucide-react';
+import {BriefcaseBusiness, Filter, User} from 'lucide-react';
 import {useState} from 'react';
+import {Button} from 'components/Button';
 import {Select, type SelectProps} from 'components/Select/Select';
 import {SelectOption} from 'components/Select/SelectOption';
+import {VStack} from 'components/Stack';
+import {Toolbar} from 'components/Toolbar';
 
 const peopleOptions = [
   {label: 'Ada Lovelace', value: 'ada'},
@@ -53,6 +56,12 @@ const meta = {
     label: 'Assignee',
     options: peopleOptions,
     placeholder: 'Select a person',
+  },
+  argTypes: {
+    variant: {
+      control: {type: 'select'},
+      options: ['outline', 'ghost', 'button'],
+    },
   },
 } satisfies Meta<SelectProps>;
 
@@ -130,6 +139,54 @@ function OptionLabelTooltipsStory(args: React.ComponentProps<typeof Select>) {
   );
 }
 
+function ToolbarTriggerVariantsStory(
+  args: React.ComponentProps<typeof Select>,
+) {
+  const [ghostValue, setGhostValue] = useState<string | null>('ada');
+  const [buttonValue, setButtonValue] = useState<string | null>('grace');
+
+  return (
+    <VStack gap={2} width="full">
+      <Toolbar
+        dividers={['bottom']}
+        label="Ghost trigger example"
+        size="sm"
+        startContent={
+          <>
+            <Button icon={Filter} label="Filter" variant="ghost" />
+            <Select
+              {...args}
+              isLabelHidden
+              label="Assignee filter"
+              onChange={setGhostValue}
+              value={ghostValue}
+              variant="ghost"
+            />
+          </>
+        }
+      />
+      <Toolbar
+        dividers={['bottom']}
+        label="Button trigger example"
+        size="sm"
+        startContent={
+          <>
+            <Button icon={Filter} label="Filter" variant="secondary" />
+            <Select
+              {...args}
+              isLabelHidden
+              label="Assignee filter"
+              onChange={setButtonValue}
+              value={buttonValue}
+              variant="button"
+            />
+          </>
+        }
+      />
+    </VStack>
+  );
+}
+
 export const Default: Story = {
   parameters: {
     docs: {
@@ -153,6 +210,18 @@ export const Searchable: Story = {
     },
   },
   render: (args: SelectProps) => <SelectStory {...args} />,
+};
+
+export const ToolbarTriggerVariants: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Ghost triggers share the same hover and focus treatment as ghost Buttons. Button triggers use the standard secondary Button surface. Both inherit their small size from Toolbar.',
+      },
+    },
+  },
+  render: (args: SelectProps) => <ToolbarTriggerVariantsStory {...args} />,
 };
 
 export const CustomOptions: Story = {

@@ -121,6 +121,57 @@ export const selectTriggerRecipe = sva({
     },
   },
   variants: {
+    variant: {
+      outline: {},
+      ghost: {
+        wrapper: {
+          borderWidth: 0,
+          borderStyle: 'none',
+          borderColor: 'transparent',
+          bg: 'transparent',
+          color: 'fg',
+          transitionProperty: 'background-color, opacity',
+          _hover: {
+            borderColor: 'transparent',
+            bg: 'bg.ghost.hover',
+          },
+          _active: {bg: 'bg.ghost.active'},
+          _focusWithin: {
+            borderColor: 'transparent',
+            boxShadow: 'none',
+            outlineWidth: 'focus',
+            outlineStyle: 'solid',
+            outlineColor: 'primary',
+            outlineOffset: 'focusOffsetLoose',
+            _hover: {borderColor: 'transparent'},
+          },
+        },
+      },
+      button: {
+        wrapper: {
+          borderWidth: 0,
+          borderStyle: 'none',
+          borderColor: 'transparent',
+          bg: 'surface.gray',
+          color: 'fg',
+          transitionProperty: 'background-color, opacity',
+          _hover: {
+            borderColor: 'transparent',
+            bg: 'surface.gray.hover',
+          },
+          _active: {bg: 'surface.gray.hover'},
+          _focusWithin: {
+            borderColor: 'transparent',
+            boxShadow: 'none',
+            outlineWidth: 'focus',
+            outlineStyle: 'solid',
+            outlineColor: 'primary',
+            outlineOffset: 'focusOffsetLoose',
+            _hover: {borderColor: 'transparent'},
+          },
+        },
+      },
+    },
     isDisabled: {
       true: {wrapper: {cursor: 'not-allowed'}},
       false: {},
@@ -130,7 +181,30 @@ export const selectTriggerRecipe = sva({
       false: {},
     },
   },
+  compoundVariants: [
+    {
+      variant: 'ghost',
+      isDisabled: true,
+      css: {
+        wrapper: {
+          _hover: {bg: 'transparent'},
+          _active: {bg: 'transparent'},
+        },
+      },
+    },
+    {
+      variant: 'button',
+      isDisabled: true,
+      css: {
+        wrapper: {
+          _hover: {bg: 'surface.gray'},
+          _active: {bg: 'surface.gray'},
+        },
+      },
+    },
+  ],
   defaultVariants: {
+    variant: 'outline',
     isDisabled: false,
     isPlaceholder: false,
   },

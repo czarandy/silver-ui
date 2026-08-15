@@ -33,6 +33,7 @@ import {
   useSelectListbox,
   type SelectListboxOptionData,
 } from 'internal/useSelectListbox';
+import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 const menuClasses = selectMenuRecipe();
@@ -80,6 +81,8 @@ export interface SelectSection {
 
 export type SelectOptionDefinition =
   SelectDivider | SelectOptionData | SelectSection | string;
+
+export type SelectVariant = 'button' | 'ghost' | 'outline';
 
 export type SelectProps = {
   /**
@@ -182,6 +185,11 @@ export type SelectProps = {
    * Selected option value.
    */
   value: string | null;
+  /**
+   * Visual style of the selector trigger.
+   * @default 'outline'
+   */
+  variant?: SelectVariant;
 } & FieldNecessity;
 
 /**
@@ -213,6 +221,7 @@ export function Select({
   status,
   style,
   value,
+  variant = 'outline',
 }: SelectProps): React.JSX.Element {
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
@@ -374,20 +383,28 @@ export function Select({
 
   const necessity = getNecessity(isOptional, isRequired);
   const triggerClasses = selectTriggerRecipe({
+    variant,
     isDisabled: isInteractionDisabled,
     isPlaceholder: selectedOption == null,
   });
+  const triggerWrapperClassName = css(
+    inputRecipe.raw({
+      size,
+      status: effectiveStatusType,
+      isDisabled: effectiveDisabled,
+    }),
+    selectTriggerRecipe.raw({
+      variant,
+      isDisabled: isInteractionDisabled,
+      isPlaceholder: selectedOption == null,
+    }).wrapper,
+  );
 
   const trigger = (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- mouse clicks anywhere on the visual input delegate to the inner combobox button; keyboard handling stays on that button.
     <div
       className={cx(
-        inputRecipe({
-          size,
-          status: effectiveStatusType,
-          isDisabled: effectiveDisabled,
-        }),
-        triggerClasses.wrapper,
+        triggerWrapperClassName,
         inputGroup != null ? className : undefined,
       )}
       onClick={() => {
@@ -479,6 +496,7 @@ export function Select({
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
+      statusVariant={variant === 'outline' ? 'attached' : 'detached'}
       style={style}>
       {htmlName == null || value == null ? null : (
         <input

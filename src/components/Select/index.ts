@@ -5,6 +5,7 @@ export {
   type SelectOptionDefinition,
   type SelectProps,
   type SelectSection,
+  type SelectVariant,
 } from 'components/Select/Select';
 export {
   SelectOption,
