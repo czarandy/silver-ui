@@ -22,7 +22,11 @@ export const tagsInputRecipe = sva({
       alignItems: 'center',
       h: 'auto',
     },
-    tag: {flexShrink: 0},
+    tag: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      flexShrink: 0,
+    },
     input: {
       minW: '10',
       flex: '1 1 40px',
