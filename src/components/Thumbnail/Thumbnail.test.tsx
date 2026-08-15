@@ -2,6 +2,7 @@ import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Thumbnail} from 'components/Thumbnail/Thumbnail';
+import {thumbnailRecipe} from 'components/Thumbnail/Thumbnail.recipe';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -164,6 +165,16 @@ describe('Thumbnail', () => {
 
     expect(onRemove).toHaveBeenCalledOnce();
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('keeps the remove button on a contrast scrim', () => {
+    expect(thumbnailRecipe.raw().remove).toMatchObject({
+      '& button': {
+        bg: 'overlay.scrim',
+        _hover: {bg: 'overlay.scrim.strong'},
+        _active: {bg: 'overlay.scrim.strong'},
+      },
+    });
   });
 
   it('forwards className, style, and ref to the root element', () => {
