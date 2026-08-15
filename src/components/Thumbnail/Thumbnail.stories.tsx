@@ -36,6 +36,7 @@ export const Removable: Story = {
   },
   render: args => (
     <HStack gap={3}>
+      <Thumbnail {...args} />
       <Thumbnail
         {...args}
         alt="Light test image"
