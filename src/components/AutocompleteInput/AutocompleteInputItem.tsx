@@ -39,12 +39,6 @@ interface AutocompleteInputStandardItemProps {
    */
   icon?: IconComponent;
   /**
-   * Whether the item is disabled. Defaults to `item.isDisabled`.
-   * @deprecated Set `item.isDisabled` so the autocomplete can also prevent
-   * selection.
-   */
-  isDisabled?: boolean;
-  /**
    * Search result item without a custom element.
    */
   item: SearchableItem & {element?: undefined};
@@ -80,15 +74,12 @@ export function AutocompleteInputItem(
     'data-testid': dataTestId,
     description,
     icon,
-    // eslint-disable-next-line @typescript-eslint/no-deprecated -- retained as a backwards-compatible visual override
-    isDisabled: isDisabledProp,
     item,
     ref,
     style,
   } = props as AutocompleteInputStandardItemProps;
 
-  const isDisabled = item.isDisabled ?? isDisabledProp ?? false;
-  const classes = autocompleteItemRecipe({isDisabled});
+  const classes = autocompleteItemRecipe({isDisabled: item.isDisabled});
 
   return (
     <div
