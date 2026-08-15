@@ -202,6 +202,8 @@ describe('Thumbnail', () => {
   it('keeps the remove button on a contrast scrim', () => {
     expect(thumbnailRecipe.raw().remove).toMatchObject({
       '& button': {
+        w: '7',
+        h: '7',
         bg: 'overlay.scrim',
         _hover: {bg: 'overlay.scrim.strong'},
         _active: {bg: 'overlay.scrim.strong'},
