@@ -95,6 +95,7 @@ export const componentCategories: Record<string, readonly string[]> = {
   'Chat & Messaging': ['Chat'],
   'Feedback & Status': [
     'Alert',
+    'CircularProgress',
     'EmptyState',
     'Progress',
     'Skeleton',

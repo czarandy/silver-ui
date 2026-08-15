@@ -242,6 +242,10 @@ export {
   type ProgressProps,
   type ProgressVariant,
 } from 'components/Progress';
+export {
+  CircularProgress,
+  type CircularProgressProps,
+} from 'components/CircularProgress';
 export {Kbd, type KbdProps} from 'components/Kbd';
 export {NavIcon, type NavIconProps} from 'components/NavIcon';
 export {

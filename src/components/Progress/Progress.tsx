@@ -1,7 +1,8 @@
 'use client';
 
-import {useId, type CSSProperties, type Ref} from 'react';
+import type {CSSProperties, Ref} from 'react';
 import {progressRecipe} from 'components/Progress/Progress.recipe';
+import {useProgressState} from 'components/Progress/useProgressState';
 import {VisuallyHidden} from 'components/VisuallyHidden';
 import {cx} from 'utils/cx';
 
@@ -76,20 +77,13 @@ export interface ProgressProps {
   variant?: ProgressVariant;
 }
 
-function defaultFormatValueLabel(value: number, max: number): string {
-  if (max <= 0) {
-    return '0%';
-  }
-  return `${Math.round((value / max) * 100)}%`;
-}
-
 /**
  * A progress bar that communicates determinate or indeterminate loading state.
  */
 export function Progress({
   className,
   'data-testid': dataTestId,
-  formatValueLabel = defaultFormatValueLabel,
+  formatValueLabel,
   hasValueLabel = false,
   isDisabled = false,
   isIndeterminate = false,
@@ -102,18 +96,17 @@ export function Progress({
   value = 0,
   variant = 'info',
 }: ProgressProps): React.JSX.Element {
-  const labelId = useId();
-
-  if (process.env.NODE_ENV !== 'production' && max <= 0) {
-    console.warn('Progress: `max` must be greater than 0.');
-  }
-
-  const clampedValue = Number.isNaN(value)
-    ? 0
-    : Math.min(Math.max(0, value), max);
-  const percentage = max > 0 ? (clampedValue / max) * 100 : 0;
-  const valueText = formatValueLabel(clampedValue, max);
-  const showValueLabel = hasValueLabel && !isIndeterminate;
+  const {ariaProps, labelId, percentage, showValueLabel, valueText} =
+    useProgressState({
+      componentName: 'Progress',
+      formatValueLabel,
+      hasValueLabel,
+      isDisabled,
+      isIndeterminate,
+      max,
+      role: roleProp,
+      value,
+    });
   const classes = progressRecipe({variant, isDisabled, isIndeterminate});
 
   return (
@@ -139,15 +132,7 @@ export function Progress({
         <VisuallyHidden id={labelId}>{label}</VisuallyHidden>
       )}
 
-      <div
-        aria-disabled={isDisabled || undefined}
-        aria-labelledby={labelId}
-        aria-valuemax={isIndeterminate ? undefined : max}
-        aria-valuemin={isIndeterminate ? undefined : 0}
-        aria-valuenow={isIndeterminate ? undefined : clampedValue}
-        aria-valuetext={isIndeterminate ? undefined : valueText}
-        className={classes.track}
-        role={isIndeterminate ? 'progressbar' : roleProp}>
+      <div {...ariaProps} className={classes.track}>
         <div
           className={classes.fill}
           style={isIndeterminate ? undefined : {width: `${percentage}%`}}

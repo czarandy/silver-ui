@@ -210,6 +210,7 @@ mode details, scoped theming examples, and per-instance overrides.
 ### Feedback & Status
 
 - **Alert** — dismissable notification banner
+- **CircularProgress** — determinate or indeterminate circular progress ring
 - **EmptyState** — placeholder for empty content areas
 - **Progress** — determinate progress bar
 - **Skeleton** — loading placeholder with pulse animation

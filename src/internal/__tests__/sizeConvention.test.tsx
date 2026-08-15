@@ -5,6 +5,7 @@ import {AlertDialog} from 'components/AlertDialog';
 import {Button} from 'components/Button';
 import {Center} from 'components/Center';
 import {CheckboxInput} from 'components/CheckboxInput';
+import {CircularProgress} from 'components/CircularProgress';
 import {CodeBlock} from 'components/CodeBlock';
 import {Dialog} from 'components/Dialog';
 import {Divider} from 'components/Divider';
@@ -29,7 +30,7 @@ interface SizeCase {
   /**
    * CSS property the prop feeds.
    */
-  property: 'width' | 'height';
+  property: '--circular-progress-size' | 'width' | 'height';
   /**
    * Renders the component with the size prop under test.
    */
@@ -110,6 +111,12 @@ const cases: Record<string, SizeCase> = {
     ),
     supportsFull: true,
     target: checkboxItem,
+  },
+  'CircularProgress size': {
+    property: '--circular-progress-size',
+    render: size => (
+      <CircularProgress data-testid="size" label="Progress" size={size} />
+    ),
   },
   'CodeBlock width': {
     property: 'width',
