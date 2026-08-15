@@ -76,3 +76,10 @@ export const Small: Story = {
 export const Large: Story = {
   args: {size: 'lg', rows: 5},
 };
+
+export const ReadOnly: Story = {
+  args: {
+    isReadOnly: true,
+    value: 'This content can be reviewed but not edited.',
+  },
+};

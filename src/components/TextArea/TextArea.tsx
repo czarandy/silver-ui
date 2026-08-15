@@ -22,11 +22,16 @@ import {
   getStatusIcon,
   getStatusMessageID,
 } from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {
+  blurReadOnlyInteraction,
+  preventReadOnlyInteraction,
+} from 'internal/readOnlyInteraction';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -72,6 +77,11 @@ export type TextAreaProps = {
    * @default false
    */
   isLoading?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Field label.
    */
@@ -173,6 +183,7 @@ export function TextArea({
   isRequired,
   isDisabled = false,
   isLoading = false,
+  isReadOnly = false,
   hasSpellCheck = true,
   hasAutoFocus = false,
   htmlName,
@@ -199,6 +210,10 @@ export function TextArea({
   const counterID = maxLength != null ? `${inputId}-counter` : undefined;
   const describedBy = getDescribedBy(descriptionID, statusMessageID, counterID);
   const isOverLimit = maxLength != null && value.length > maxLength;
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -208,8 +223,9 @@ export function TextArea({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}
@@ -223,10 +239,21 @@ export function TextArea({
           inputRecipe({
             size,
             status: status?.type,
-            isDisabled,
+            isDisabled: effectiveDisabled,
+            isReadOnly: effectiveReadOnly,
           }),
           styles.wrapper,
-        )}>
+        )}
+        onClickCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }
+        onPointerDownCapture={
+          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+        }>
         {startIcon != null ? (
           <span className={inputStyles.iconSlot}>
             <Icon color="secondary" icon={startIcon} size="sm" />
@@ -237,23 +264,28 @@ export function TextArea({
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || isOverLimit || undefined}
           aria-required={isRequired ?? undefined}
-          // eslint-disable-next-line jsx-a11y-x/no-autofocus
-          autoFocus={hasAutoFocus}
+          autoFocus={hasAutoFocus && !effectiveReadOnly}
           className={cx(inputStyles.control, styles.textarea)}
-          data-autofocus={hasAutoFocus || undefined}
+          data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
           data-testid={dataTestId}
-          disabled={isDisabled}
+          disabled={effectiveDisabled}
           id={inputId}
           maxLength={maxLength}
           name={htmlName}
           onBlur={onBlur}
-          onChange={event => onChange(event.target.value, event)}
+          onChange={event => {
+            if (!effectiveReadOnly) {
+              onChange(event.target.value, event);
+            }
+          }}
           onFocus={onFocus}
           onPaste={onPaste}
           placeholder={placeholder}
+          readOnly={effectiveReadOnly}
           ref={ref}
           rows={rows}
           spellCheck={hasSpellCheck}
+          tabIndex={effectiveReadOnly ? -1 : undefined}
           value={value}
         />
         {isLoading ? <Spinner size="sm" /> : null}

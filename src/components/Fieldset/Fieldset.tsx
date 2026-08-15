@@ -48,6 +48,11 @@ export type FieldsetProps = NativeFieldsetProps &
      */
     isDisabled?: boolean;
     /**
+     * Whether silver-ui form controls in the fieldset are read-only.
+     * @default false
+     */
+    isReadOnly?: boolean;
+    /**
      * Text used by the native legend to name the fieldset.
      */
     legend: string;
@@ -78,6 +83,7 @@ export function Fieldset({
   description,
   hidden,
   isDisabled = false,
+  isReadOnly = false,
   isOptional = false,
   isRequired = false,
   legend,
@@ -89,6 +95,8 @@ export function Fieldset({
   const fieldsetId = useId();
   const parentFieldset = useFieldset();
   const effectiveDisabled = isDisabled || parentFieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || parentFieldset?.isReadOnly === true);
   const descriptionId = isNonEmptyReactNode(description)
     ? `${fieldsetId}-description`
     : undefined;
@@ -99,8 +107,8 @@ export function Fieldset({
     statusType: status?.type,
   });
   const contextValue = useMemo(
-    () => ({isDisabled: effectiveDisabled}),
-    [effectiveDisabled],
+    () => ({isDisabled: effectiveDisabled, isReadOnly: effectiveReadOnly}),
+    [effectiveDisabled, effectiveReadOnly],
   );
 
   return (

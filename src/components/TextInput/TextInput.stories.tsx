@@ -164,3 +164,8 @@ export const PhoneType: Story = {
   },
   render: args => <ControlledTextInput {...args} />,
 };
+
+export const ReadOnly: Story = {
+  args: {hasClear: true, isReadOnly: true, value: 'Ada Lovelace'},
+  render: args => <ControlledTextInput {...args} />,
+};

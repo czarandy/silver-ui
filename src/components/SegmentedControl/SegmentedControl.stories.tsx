@@ -254,3 +254,5 @@ export const ManyItems: Story = {
     <ManyItemsStory {...args} />
   ),
 };
+
+export const ReadOnly: Story = {args: {isReadOnly: true}};

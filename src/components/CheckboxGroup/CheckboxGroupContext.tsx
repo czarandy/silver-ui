@@ -9,6 +9,7 @@ export type CheckboxGroupSize = CheckboxInputSize;
 export interface CheckboxGroupContextValue {
   htmlName?: string;
   isDisabled: boolean;
+  isReadOnly: boolean;
   onChange: (value: string, isChecked: boolean) => void;
   orientation: CheckboxGroupOrientation;
   selectedValues: Set<string>;

@@ -199,3 +199,10 @@ export const Formats: Story = {
     );
   },
 };
+
+export const ReadOnly: Story = {
+  args: {hasClear: true, isReadOnly: true},
+  render: (args: DateRangeInputProps) => (
+    <DateRangeInput {...args} onChange={() => {}} value={defaultRange} />
+  ),
+};

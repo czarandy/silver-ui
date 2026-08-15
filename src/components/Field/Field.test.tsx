@@ -66,6 +66,22 @@ describe('Field', () => {
     expect(labelSpan).not.toHaveAttribute('for');
   });
 
+  it('uses the default cursor for a read-only field label', () => {
+    render(
+      <Field inputId="name" isReadOnly label="Name">
+        <input id="name" readOnly />
+      </Field>,
+    );
+
+    const cursorClass = assertNonNull(
+      assertNonNull(fieldRecipe({isReadOnly: true}).label)
+        .split(' ')
+        .find(className => className.includes('cursor_default')),
+    );
+    // eslint-disable-next-line testing-library/no-node-access -- the recipe class is applied to the label surrounding its text
+    expect(screen.getByText('Name').parentElement).toHaveClass(cursorClass);
+  });
+
   it('shows Optional indicator when isOptional is true', () => {
     render(
       <Field inputId="opt" isOptional label="Name">

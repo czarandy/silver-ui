@@ -115,12 +115,29 @@ export const segmentedControlRecipe = sva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        item: {
+          cursor: 'default',
+          _hover: {bg: 'transparent'},
+        },
+      },
+      false: {},
+    },
   },
+  compoundVariants: [
+    {
+      isReadOnly: true,
+      isSelected: true,
+      css: {item: {_hover: {bg: 'bg'}}},
+    },
+  ],
   defaultVariants: {
     size: 'md',
     layout: 'hug',
     isSelected: false,
     isDisabled: false,
+    isReadOnly: false,
   },
 });
 

@@ -70,6 +70,7 @@ export function SegmentedControlItem<TValue extends string = string>({
     layout: context.layout,
     isSelected,
     isDisabled: isItemDisabled,
+    isReadOnly: context.isReadOnly,
   });
 
   return (
@@ -81,14 +82,28 @@ export function SegmentedControlItem<TValue extends string = string>({
       data-testid={dataTestId}
       data-value={value}
       onClick={() => {
-        if (!isItemDisabled && !isSelected) {
+        if (!isItemDisabled && !context.isReadOnly && !isSelected) {
           context.onChange(value);
+        }
+      }}
+      onFocus={event => {
+        if (context.isReadOnly) {
+          event.currentTarget.blur();
+        }
+      }}
+      onPointerDown={event => {
+        if (context.isReadOnly) {
+          event.preventDefault();
         }
       }}
       ref={ref}
       role="radio"
       style={style}
-      tabIndex={!isItemDisabled && context.tabStopValue === value ? 0 : -1}
+      tabIndex={
+        !isItemDisabled && !context.isReadOnly && context.tabStopValue === value
+          ? 0
+          : -1
+      }
       type="button">
       {icon != null ? (
         <span className={classes.icon}>

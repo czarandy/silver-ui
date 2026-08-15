@@ -176,3 +176,5 @@ export const Success: Story = {
     status: {message: 'Preferences saved.', type: 'success'},
   },
 };
+
+export const ReadOnly: Story = {args: {isReadOnly: true}};

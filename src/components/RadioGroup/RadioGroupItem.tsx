@@ -4,6 +4,7 @@ import {use, useId, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {Item} from 'components/Item';
 import {radioGroupItemRecipe} from 'components/RadioGroup/RadioGroup.recipe';
 import {RadioGroupContext} from 'components/RadioGroup/RadioGroupContext';
+import {ReadOnlyInteractionBoundary} from 'internal/ReadOnlyInteractionBoundary';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export interface RadioGroupItemProps {
@@ -73,9 +74,15 @@ export function RadioGroupItem({
   const id = useId();
   const descriptionId = useId();
   const isDisabled = context.isDisabled || isItemDisabled;
+  const isReadOnly = !isDisabled && context.isReadOnly;
   const isChecked = context.value === value;
   const size = context.size;
-  const classes = radioGroupItemRecipe({size, isChecked, isDisabled});
+  const classes = radioGroupItemRecipe({
+    size,
+    isChecked,
+    isDisabled,
+    isReadOnly,
+  });
   const control = (
     <span className={classes.controlWrap}>
       <input
@@ -88,7 +95,7 @@ export function RadioGroupItem({
         id={id}
         name={context.name}
         onChange={event => {
-          if (context.isReadOnly) {
+          if (isReadOnly) {
             event.preventDefault();
             return;
           }
@@ -99,11 +106,22 @@ export function RadioGroupItem({
           // click prevents mouse, label, Space-key, and arrow-key activation
           // from changing the native checked state before React restores the
           // controlled value.
-          if (context.isReadOnly) {
+          if (isReadOnly) {
+            event.preventDefault();
+          }
+        }}
+        onFocus={event => {
+          if (isReadOnly) {
+            event.currentTarget.blur();
+          }
+        }}
+        onPointerDown={event => {
+          if (isReadOnly) {
             event.preventDefault();
           }
         }}
         required={context.isRequired}
+        tabIndex={isReadOnly ? -1 : undefined}
         type="radio"
         value={value}
       />
@@ -122,7 +140,13 @@ export function RadioGroupItem({
           <span id={descriptionId}>{description}</span>
         ) : undefined
       }
-      endContent={endContent}
+      endContent={
+        isNonEmptyReactNode(endContent) ? (
+          <ReadOnlyInteractionBoundary isReadOnly={isReadOnly}>
+            {endContent}
+          </ReadOnlyInteractionBoundary>
+        ) : undefined
+      }
       endContentPosition="inline"
       isDisabled={isDisabled}
       label={
@@ -136,7 +160,13 @@ export function RadioGroupItem({
       // from the group's gap instead.
       padding={0}
       ref={ref}
-      startContent={startContent}
+      startContent={
+        isNonEmptyReactNode(startContent) ? (
+          <ReadOnlyInteractionBoundary isReadOnly={isReadOnly}>
+            {startContent}
+          </ReadOnlyInteractionBoundary>
+        ) : undefined
+      }
       style={style}
       width={context.orientation === 'horizontal' ? 'auto' : 'full'}
     />

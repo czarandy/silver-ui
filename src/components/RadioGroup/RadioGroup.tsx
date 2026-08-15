@@ -2,7 +2,9 @@
 
 import {
   useId,
+  useEffect,
   useMemo,
+  useRef,
   type CSSProperties,
   type ReactNode,
   type Ref,
@@ -14,6 +16,7 @@ import {
   type InputStatus,
 } from 'components/Field';
 import {getDescribedBy, getStatusMessageID} from 'components/Field/inputUtils';
+import {useFieldset} from 'components/Fieldset';
 import {radioGroupRecipe} from 'components/RadioGroup/RadioGroup.recipe';
 import {
   RadioGroupContext,
@@ -52,7 +55,8 @@ export type RadioGroupProps = {
   isDisabled?: boolean;
   /**
    * Whether the selected value can be changed by the user.
-   * Read-only radio items remain enabled and focusable.
+   * Read-only radio items remain enabled for form submission but cannot be
+   * focused or activated.
    * @default false
    */
   isReadOnly?: boolean;
@@ -134,21 +138,30 @@ export function RadioGroup({
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
+  const fieldset = useFieldset();
+  const groupRef = useRef<HTMLDivElement>(null);
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const contextValue = useMemo(
     () => ({
-      isDisabled,
-      isReadOnly,
+      isDisabled: effectiveDisabled,
+      isReadOnly: effectiveReadOnly,
       isRequired,
       name: htmlName ?? nameId,
-      onChange,
+      onChange: (nextValue: string) => {
+        if (!effectiveReadOnly) {
+          onChange(nextValue);
+        }
+      },
       orientation,
       size,
       value,
     }),
     [
       htmlName,
-      isDisabled,
-      isReadOnly,
+      effectiveDisabled,
+      effectiveReadOnly,
       isRequired,
       nameId,
       onChange,
@@ -158,6 +171,14 @@ export function RadioGroup({
     ],
   );
 
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      groupRef.current
+        ?.querySelectorAll<HTMLInputElement>('input[type="radio"]')
+        .forEach(input => input.blur());
+    }
+  }, [effectiveReadOnly]);
+
   const necessity = getNecessity(isOptional, isRequired);
 
   return (
@@ -165,8 +186,9 @@ export function RadioGroup({
       className={className}
       data-testid={dataTestId}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelAs="span"
@@ -183,10 +205,11 @@ export function RadioGroup({
         aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
         aria-orientation={orientation}
-        aria-readonly={isReadOnly || undefined}
+        aria-readonly={effectiveReadOnly || undefined}
         aria-required={isRequired ?? undefined}
         className={radioGroupRecipe({orientation})}
         id={inputId}
+        ref={groupRef}
         role="radiogroup">
         <RadioGroupContext value={contextValue}>{children}</RadioGroupContext>
       </div>

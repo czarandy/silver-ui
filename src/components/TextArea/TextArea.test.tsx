@@ -2,9 +2,10 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {MessageSquare, type LucideProps} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
-import {inputRecipe} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {TextArea} from 'components/TextArea/TextArea';
 import {SizeContext} from 'internal/SizeContext';
+import {assertNonNull} from 'internal/testHelpers';
 
 function MessageIcon(props: LucideProps): React.JSX.Element {
   return <MessageSquare {...props} data-testid="message-icon" />;
@@ -56,6 +57,21 @@ describe('TextArea', () => {
     render(<TextArea isDisabled label="Notes" onChange={() => {}} value="" />);
 
     expect(screen.getByRole('textbox', {name: 'Notes'})).toBeDisabled();
+  });
+
+  it('uses the default cursor when read-only', () => {
+    render(
+      <TextArea isReadOnly label="Notes" onChange={() => {}} value="Text" />,
+    );
+
+    const cursorClass = assertNonNull(
+      inputStyles.control
+        .split(' ')
+        .find(className => className.includes('cursor_default')),
+    );
+    expect(screen.getByRole('textbox', {name: 'Notes'})).toHaveClass(
+      cursorClass,
+    );
   });
 
   it('sets aria-invalid for error status', () => {

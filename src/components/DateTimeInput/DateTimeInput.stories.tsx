@@ -145,3 +145,10 @@ export const IsoFormat: Story = {
     value: Temporal.PlainDateTime.from('2026-01-15T09:00'),
   },
 };
+
+export const ReadOnly: Story = {
+  args: {
+    isReadOnly: true,
+    value: Temporal.PlainDateTime.from('2026-05-21T09:00'),
+  },
+};

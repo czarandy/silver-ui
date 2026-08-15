@@ -8,6 +8,7 @@ export type SegmentedControlSize = ComponentSize;
 
 export interface SegmentedControlContextValue {
   isDisabled: boolean;
+  isReadOnly: boolean;
   layout: SegmentedControlLayout;
   onChange: (value: string) => void;
   size: SegmentedControlSize;

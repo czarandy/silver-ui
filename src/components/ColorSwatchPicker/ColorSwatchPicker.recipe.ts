@@ -173,11 +173,19 @@ export const colorSwatchRecipe = sva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        button: {cursor: 'default'},
+        fill: {'[role="radio"]:hover &': {transform: 'none'}},
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     size: 'md',
     isSelected: false,
     isDisabled: false,
+    isReadOnly: false,
   },
 });
 

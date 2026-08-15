@@ -268,6 +268,19 @@ describe('NumberInput', () => {
     expect(input).toHaveFocus();
   });
 
+  it('hides the stepper buttons when read-only', () => {
+    render(
+      <NumberInput isReadOnly label="Count" onChange={() => {}} value={1} />,
+    );
+
+    expect(
+      screen.queryByRole('button', {name: 'Increment value'}),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {name: 'Decrement value'}),
+    ).not.toBeInTheDocument();
+  });
+
   it('starts empty values at the available bound or zero', async () => {
     const user = userEvent.setup();
 

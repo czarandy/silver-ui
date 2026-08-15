@@ -132,3 +132,26 @@ export const Disabled: Story = {
     </Fieldset>
   ),
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Read-only context keeps child values visually enabled while removing focus and activation.',
+      },
+    },
+  },
+  render: args => (
+    <Fieldset {...args}>
+      <ProfileFields />
+      <MultiSelect
+        label="Notification channels"
+        onChange={() => {}}
+        options={['Email', 'SMS', 'Push']}
+        value={['Email']}
+      />
+    </Fieldset>
+  ),
+};

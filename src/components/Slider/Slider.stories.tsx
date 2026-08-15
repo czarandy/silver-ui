@@ -234,3 +234,8 @@ export const MinMaxCustom: Story = {
     />
   ),
 };
+
+export const ReadOnly: Story = {
+  args: {isReadOnly: true, value: 50},
+  render: args => <ControlledSingleSlider {...args} />,
+};

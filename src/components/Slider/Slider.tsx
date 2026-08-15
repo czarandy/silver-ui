@@ -17,6 +17,7 @@ import {
   type FieldNecessity,
   type InputStatus,
 } from 'components/Field';
+import {useFieldset} from 'components/Fieldset';
 import {sliderRecipe} from 'components/Slider/Slider.recipe';
 import {Tooltip} from 'components/Tooltip';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
@@ -64,6 +65,11 @@ export type SliderBaseProps = {
    * @default false
    */
   isDisabled?: boolean;
+  /**
+   * Whether the value is displayed without allowing focus or interaction.
+   * @default false
+   */
+  isReadOnly?: boolean;
   /**
    * Whether to visually hide the label.
    * @default false
@@ -206,6 +212,7 @@ export function Slider({
   formatValue,
   htmlName,
   isDisabled = false,
+  isReadOnly = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -228,6 +235,10 @@ export function Slider({
   const trackRef = useRef<HTMLDivElement>(null);
   const pendingValuesRef = useRef<number[] | null>(null);
   const draggingThumbRef = useRef<number | null>(null);
+  const fieldset = useFieldset();
+  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
+  const effectiveReadOnly =
+    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const isRange = Array.isArray(value);
   const isHorizontal = orientation === 'horizontal';
   const values = useMemo(() => (isRange ? value : [value]), [isRange, value]);
@@ -251,6 +262,15 @@ export function Slider({
   useEffect(() => {
     pendingValuesRef.current = values;
   }, [values]);
+
+  useEffect(() => {
+    if (effectiveReadOnly) {
+      draggingThumbRef.current = null;
+      trackRef.current
+        ?.querySelectorAll<HTMLElement>('[role="slider"]')
+        .forEach(thumb => thumb.blur());
+    }
+  }, [effectiveReadOnly]);
 
   const displayValue = useCallback(
     (displayedValue: number): string =>
@@ -358,19 +378,22 @@ export function Slider({
 
   const updateValue = useCallback(
     (thumbIndex: number, newValue: number): number[] | null => {
-      if (isDisabled) {
+      if (effectiveDisabled || effectiveReadOnly) {
         return null;
       }
       const nextValues = getNextValues(thumbIndex, newValue);
       emitChange(nextValues);
       return nextValues;
     },
-    [emitChange, getNextValues, isDisabled],
+    [effectiveDisabled, effectiveReadOnly, emitChange, getNextValues],
   );
 
   const handlePointerDown = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
-      if (isDisabled) {
+      if (effectiveDisabled || effectiveReadOnly) {
+        if (effectiveReadOnly) {
+          event.preventDefault();
+        }
         return;
       }
       event.preventDefault();
@@ -389,12 +412,22 @@ export function Slider({
         event.currentTarget.setPointerCapture(event.pointerId);
       }
     },
-    [getClosestThumb, getValueFromPosition, isDisabled, updateValue],
+    [
+      effectiveDisabled,
+      effectiveReadOnly,
+      getClosestThumb,
+      getValueFromPosition,
+      updateValue,
+    ],
   );
 
   const handlePointerMove = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
-      if (draggingThumbRef.current == null || isDisabled) {
+      if (
+        draggingThumbRef.current == null ||
+        effectiveDisabled ||
+        effectiveReadOnly
+      ) {
         return;
       }
       updateValue(
@@ -402,20 +435,25 @@ export function Slider({
         getValueFromPosition(event.clientX, event.clientY),
       );
     },
-    [getValueFromPosition, isDisabled, updateValue],
+    [effectiveDisabled, effectiveReadOnly, getValueFromPosition, updateValue],
   );
 
   const handlePointerUp = useCallback(() => {
-    if (draggingThumbRef.current == null) {
+    if (
+      draggingThumbRef.current == null ||
+      effectiveDisabled ||
+      effectiveReadOnly
+    ) {
+      draggingThumbRef.current = null;
       return;
     }
     draggingThumbRef.current = null;
     emitChangeEnd(pendingValuesRef.current ?? values);
-  }, [emitChangeEnd, values]);
+  }, [effectiveDisabled, effectiveReadOnly, emitChangeEnd, values]);
 
   const handleKeyDown = useCallback(
     (thumbIndex: number, event: KeyboardEvent<HTMLDivElement>) => {
-      if (isDisabled) {
+      if (effectiveDisabled || effectiveReadOnly) {
         return;
       }
 
@@ -455,7 +493,8 @@ export function Slider({
       emitChange,
       emitChangeEnd,
       getNextValues,
-      isDisabled,
+      effectiveDisabled,
+      effectiveReadOnly,
       max,
       min,
       step,
@@ -483,7 +522,8 @@ export function Slider({
 
   const classes = sliderRecipe({
     orientation,
-    isDisabled: isDisabled || undefined,
+    isDisabled: effectiveDisabled || undefined,
+    isReadOnly: effectiveReadOnly || undefined,
   });
 
   const textDisplay =
@@ -506,8 +546,9 @@ export function Slider({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={isDisabled}
+      isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelAs="span"
@@ -522,7 +563,7 @@ export function Slider({
         ? null
         : values.map((currentValue, index) => (
             <input
-              disabled={isDisabled}
+              disabled={effectiveDisabled}
               key={isRange ? (index === 0 ? 'minimum' : 'maximum') : 'value'}
               name={htmlName}
               type="hidden"
@@ -593,10 +634,11 @@ export function Slider({
             const thumb = (
               <div
                 aria-describedby={ariaDescribedBy}
-                aria-disabled={isDisabled || undefined}
+                aria-disabled={effectiveDisabled || undefined}
                 aria-invalid={status?.type === 'error' || undefined}
                 aria-label={thumbLabel}
                 aria-orientation={orientation}
+                aria-readonly={effectiveReadOnly || undefined}
                 aria-valuemax={max}
                 aria-valuemin={min}
                 aria-valuenow={currentValue}
@@ -606,10 +648,15 @@ export function Slider({
                 className={classes.thumb}
                 id={!isRange || thumbIndex === 0 ? inputId : undefined}
                 key={thumbKey}
+                onFocus={event => {
+                  if (effectiveReadOnly) {
+                    event.currentTarget.blur();
+                  }
+                }}
                 onKeyDown={event => handleKeyDown(thumbIndex, event)}
                 role="slider"
                 style={thumbStyle}
-                tabIndex={isDisabled ? -1 : 0}
+                tabIndex={effectiveDisabled || effectiveReadOnly ? -1 : 0}
               />
             );
 
