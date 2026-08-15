@@ -32,13 +32,6 @@ export const Interactive: Story = {
 
 export const Removable: Story = {
   args: {
-    label: 'Remove photo.jpg',
-    onRemove: fn(),
-  },
-};
-
-export const RemoveContrast: Story = {
-  args: {
     onRemove: fn(),
   },
   render: args => (
