@@ -8,6 +8,15 @@ import {computeInputHeight} from 'components/Chat/ChatComposerInput.utils';
 import {ChatSendButton} from 'components/Chat/ChatSendButton';
 
 describe('ChatComposer', () => {
+  it('disables body transitions for reduced motion preferences', () => {
+    render(<ChatComposer data-testid="composer" onSubmit={() => {}} />);
+
+    // eslint-disable-next-line testing-library/no-node-access -- the body is a layout wrapper without a semantic query
+    const body = screen.getByTestId('composer').firstElementChild;
+    expect(body?.className).toContain('prefers-reduced-motion');
+    expect(body?.className).toContain('silver-trs-dur_0s');
+  });
+
   it('submits the trimmed value and clears the input', async () => {
     const user = userEvent.setup();
     const onSubmit = vi.fn();

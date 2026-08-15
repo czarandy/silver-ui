@@ -17,6 +17,9 @@ export const chatScrollButtonRecipe = sva({
       transitionProperty: 'opacity, max-width, visibility',
       transitionDuration: 'normal',
       transitionTimingFunction: 'default',
+      '@media (prefers-reduced-motion: reduce)': {
+        transitionDuration: '0s',
+      },
     },
     button: {
       whiteSpace: 'nowrap',

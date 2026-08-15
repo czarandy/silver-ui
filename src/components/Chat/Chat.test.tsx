@@ -12,6 +12,19 @@ const resizeObserver = createResizeObserverStub();
 
 beforeEach(() => {
   vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
+  vi.stubGlobal(
+    'matchMedia',
+    vi.fn().mockImplementation((query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  );
 });
 
 afterEach(() => {
@@ -305,6 +318,21 @@ describe('ChatScrollButton', () => {
     expect(
       screen.getByTestId('scroll-button').firstElementChild?.className,
     ).not.toBe(hiddenPill);
+  });
+
+  it('disables pill transitions for reduced motion preferences', () => {
+    render(
+      <ChatScrollButton
+        data-testid="scroll-button"
+        isVisible
+        onClick={() => {}}
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access -- the decorative pill is intentionally not exposed through an accessibility query
+    const pill = screen.getByTestId('scroll-button').firstElementChild;
+    expect(pill?.className).toContain('prefers-reduced-motion');
+    expect(pill?.className).toContain('silver-trs-dur_0s');
   });
 
   it('forwards the shared button passthrough props to the button', () => {
