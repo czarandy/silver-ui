@@ -1,6 +1,9 @@
 'use client';
 
 import {useCallback, useEffect, useRef, useState, type RefObject} from 'react';
+import {useMediaQuery} from 'internal/useMediaQuery';
+
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 export interface UseChatStreamScrollOptions {
   /**
@@ -87,6 +90,7 @@ export function useChatStreamScroll({
 }: UseChatStreamScrollOptions): UseChatStreamScrollReturn {
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [isLocked, setIsLocked] = useState(true);
+  const prefersReducedMotion = useMediaQuery(REDUCED_MOTION_QUERY);
 
   const lockedRef = useRef(true);
   // True while a smooth scrollToBottom is in flight, so wheel/touch input
@@ -121,15 +125,16 @@ export function useChatStreamScroll({
       return;
     }
     if (typeof el.scrollTo === 'function') {
-      isProgrammaticScrollRef.current = true;
+      const behavior = prefersReducedMotion ? 'instant' : 'smooth';
+      isProgrammaticScrollRef.current = behavior === 'smooth';
       el.scrollTo({
-        behavior: 'smooth',
+        behavior,
         top: el.scrollHeight - el.clientHeight,
       });
     } else {
       followBottom();
     }
-  }, [followBottom, scrollRef, setLocked]);
+  }, [followBottom, prefersReducedMotion, scrollRef, setLocked]);
 
   const scrollToMessage = useCallback(
     (element: HTMLElement) => {

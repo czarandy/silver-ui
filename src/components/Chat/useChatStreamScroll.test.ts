@@ -1,5 +1,5 @@
 import {act, renderHook} from '@testing-library/react';
-import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {useChatStreamScroll} from 'components/Chat/useChatStreamScroll';
 
 interface ScrollMetrics {
@@ -62,6 +62,19 @@ function dispatchTouch(
 
 const METRICS = {clientHeight: 400, offsetHeight: 400, scrollHeight: 1000};
 
+function createMatchMedia(matches: boolean) {
+  return vi.fn().mockImplementation((query: string) => ({
+    matches,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
+}
+
 function renderScrollHook(element: HTMLElement) {
   return renderHook(() => useChatStreamScroll({scrollRef: {current: element}}));
 }
@@ -69,6 +82,11 @@ function renderScrollHook(element: HTMLElement) {
 describe('useChatStreamScroll', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
+    vi.stubGlobal('matchMedia', createMatchMedia(false));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('starts locked and scrolled down', () => {
@@ -147,6 +165,16 @@ describe('useChatStreamScroll', () => {
     expect(scrollTo).toHaveBeenCalledWith({behavior: 'smooth', top: 600});
     expect(result.current.isLocked).toBe(true);
     expect(result.current.isScrolledUp).toBe(false);
+  });
+
+  it('scrollToBottom scrolls instantly when reduced motion is preferred', () => {
+    vi.stubGlobal('matchMedia', createMatchMedia(true));
+    const {element, scrollTo} = createScrollContainer(METRICS);
+    const {result} = renderScrollHook(element);
+
+    act(() => result.current.scrollToBottom());
+
+    expect(scrollTo).toHaveBeenCalledWith({behavior: 'instant', top: 600});
   });
 
   it('unlocks when the user wheels up during a programmatic scroll', () => {
