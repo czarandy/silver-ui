@@ -238,7 +238,6 @@ export function SearchFilterInput({
   timezoneID,
 }: SearchFilterInputProps): React.JSX.Element {
   const size = useResolvedSize(sizeProp);
-  const tagSize = size === 'lg' ? 'md' : 'sm';
   const config = useInternalSearchFilterInputConfig(configFromProps);
   const searchSource = useSearchFilterInputSource(config);
   const tagsInputRef = useRef<TagsInputHandle>(null);
@@ -480,7 +479,7 @@ export function SearchFilterInput({
             : undefined
         }
         onRemove={canInteract ? onRemove : undefined}
-        size={tagSize}
+        size={size}
         startContent={
           entityPhoto != null ? (
             <img alt="" className={styles.entityPhoto} src={entityPhoto} />

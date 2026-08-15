@@ -257,21 +257,30 @@ describe('TagsInput', () => {
     });
   });
 
-  it('uses tighter vertical padding for selected tags in the small size', () => {
-    render(
-      <TagsInput
-        data-testid="tags"
-        label="Team"
-        onChange={() => {}}
-        searchSource={emptySource}
-        size="sm"
-        value={[items[0]]}
-      />,
-    );
+  it.each(['sm', 'md', 'lg'] as const)(
+    'uses centered symmetric vertical inset for selected tags in the %s size',
+    size => {
+      render(
+        <TagsInput
+          data-testid="tags"
+          label="Team"
+          onChange={() => {}}
+          searchSource={emptySource}
+          size={size}
+          value={[items[0]]}
+        />,
+      );
 
-    expect(screen.getByTestId('tags')).toHaveClass('silver-pt_0px');
-    expect(screen.getByTestId('tags')).toHaveClass('silver-pb_0.5');
-  });
+      expect(screen.getByTestId('tags')).toHaveClass('silver-py_1px');
+      // eslint-disable-next-line testing-library/no-node-access -- the anonymous layout wrapper has no accessible role; its direct-child position is what this assertion pins
+      const tag = assertNonNull(screen.getByText('Ada Lovelace').parentElement);
+      // eslint-disable-next-line testing-library/no-node-access -- see above
+      expect(assertNonNull(tag.parentElement)).toHaveClass(
+        'silver-d_inline-flex',
+        'silver-ai_center',
+      );
+    },
+  );
 
   it('removes last tag on backspace when input is empty', async () => {
     const user = userEvent.setup();

@@ -22,7 +22,11 @@ export const tagsInputRecipe = sva({
       alignItems: 'center',
       h: 'auto',
     },
-    tag: {flexShrink: 0},
+    tag: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      flexShrink: 0,
+    },
     input: {
       minW: '10',
       flex: '1 1 40px',
@@ -80,15 +84,11 @@ export const tagsInputRecipe = sva({
     },
   },
   compoundVariants: [
-    {hasTags: true, isTruncated: false, css: {wrapper: {rowGap: '1'}}},
     {
-      size: 'sm',
       hasTags: true,
       isTruncated: false,
-      css: {wrapper: {pt: '0px', pb: '0.5'}},
+      css: {wrapper: {rowGap: '1', py: '1px'}},
     },
-    {size: 'md', hasTags: true, isTruncated: false, css: {wrapper: {py: '1'}}},
-    {size: 'lg', hasTags: true, isTruncated: false, css: {wrapper: {py: '1'}}},
     {size: 'sm', hasFixedHeight: true, css: {wrapper: {h: 'component.sm'}}},
     {size: 'md', hasFixedHeight: true, css: {wrapper: {h: 'component.md'}}},
     {size: 'lg', hasFixedHeight: true, css: {wrapper: {h: 'component.lg'}}},
