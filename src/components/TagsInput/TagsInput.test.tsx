@@ -257,21 +257,23 @@ describe('TagsInput', () => {
     });
   });
 
-  it('uses tighter vertical padding for selected tags in the small size', () => {
-    render(
-      <TagsInput
-        data-testid="tags"
-        label="Team"
-        onChange={() => {}}
-        searchSource={emptySource}
-        size="sm"
-        value={[items[0]]}
-      />,
-    );
+  it.each(['sm', 'md', 'lg'] as const)(
+    'uses symmetric vertical inset for selected tags in the %s size',
+    size => {
+      render(
+        <TagsInput
+          data-testid="tags"
+          label="Team"
+          onChange={() => {}}
+          searchSource={emptySource}
+          size={size}
+          value={[items[0]]}
+        />,
+      );
 
-    expect(screen.getByTestId('tags')).toHaveClass('silver-pt_0px');
-    expect(screen.getByTestId('tags')).toHaveClass('silver-pb_0.5');
-  });
+      expect(screen.getByTestId('tags')).toHaveClass('silver-py_1px');
+    },
+  );
 
   it('removes last tag on backspace when input is empty', async () => {
     const user = userEvent.setup();

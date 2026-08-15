@@ -81,10 +81,10 @@ describe('SearchFilterInput', () => {
 
   it.each([
     ['sm', 'sm'],
-    ['md', 'sm'],
-    ['lg', 'md'],
+    ['md', 'md'],
+    ['lg', 'lg'],
   ] as const)(
-    'renders a %s filter input with a %s tag so one token does not increase its height',
+    'renders a %s filter input with a matching %s tag',
     (inputSize, tagSize) => {
       render(
         <SearchFilterInput
