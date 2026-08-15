@@ -73,9 +73,10 @@ export const switchRecipe = sva({
       '& [data-switch-track][data-selected="true"]': {
         bg: 'primary',
       },
-      '&:has(input:active:not(:disabled)) [data-switch-track]': {
-        bg: 'primary.active',
-      },
+      '&:has(input:active:not(:disabled):not([aria-readonly="true"])) [data-switch-track]':
+        {
+          bg: 'primary.active',
+        },
     },
     input: {
       position: 'absolute',
@@ -179,7 +180,7 @@ export const switchRecipe = sva({
     },
     isReadOnly: {
       true: {
-        input: {cursor: 'default'},
+        input: {cursor: 'default', pointerEvents: 'none'},
         label: {cursor: 'default'},
       },
       false: {},
