@@ -39,11 +39,6 @@ interface AutocompleteInputStandardItemProps {
    */
   icon?: IconComponent;
   /**
-   * Whether the item is disabled.
-   * @default false
-   */
-  isDisabled?: boolean;
-  /**
    * Search result item without a custom element.
    */
   item: SearchableItem & {element?: undefined};
@@ -79,13 +74,12 @@ export function AutocompleteInputItem(
     'data-testid': dataTestId,
     description,
     icon,
-    isDisabled = false,
     item,
     ref,
     style,
   } = props as AutocompleteInputStandardItemProps;
 
-  const classes = autocompleteItemRecipe({isDisabled});
+  const classes = autocompleteItemRecipe({isDisabled: item.isDisabled});
 
   return (
     <div

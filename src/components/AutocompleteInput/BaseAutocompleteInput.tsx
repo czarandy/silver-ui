@@ -259,7 +259,9 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         }
         const limitedResults = nextResults.slice(0, maxMenuItems);
         setResults(limitedResults);
-        setHighlightedIndex(limitedResults.length > 0 ? 0 : -1);
+        setHighlightedIndex(
+          limitedResults.findIndex(item => item.isDisabled !== true),
+        );
         if (limitedResults.length > 0 || nextQuery !== '') {
           showMenu();
         } else {
@@ -322,6 +324,10 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
 
   const selectItem = useCallback(
     (item: T) => {
+      if (item.isDisabled === true) {
+        return;
+      }
+
       generationRef.current++;
       if (timeoutRef.current != null) {
         clearTimeout(timeoutRef.current);
@@ -391,10 +397,12 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         </div>
       ) : (
         results.map((item, index) => {
+          const isItemDisabled = item.isDisabled === true;
           const isSelected = value?.id === item.id;
           return (
             // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
             <div
+              aria-disabled={isItemDisabled || undefined}
               aria-selected={isSelected}
               className={cx(
                 menuClasses.option,
@@ -403,8 +411,10 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
               )}
               id={`${listboxId}-option-${index}`}
               key={item.id}
-              onClick={() => selectItem(item)}
-              onMouseEnter={() => setHighlightedIndex(index)}
+              onClick={isItemDisabled ? undefined : () => selectItem(item)}
+              onMouseEnter={
+                isItemDisabled ? undefined : () => setHighlightedIndex(index)
+              }
               role="option"
               tabIndex={-1}>
               {renderItem == null ? (
@@ -491,10 +501,35 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
           // overflowing list.
           const highlightIndex = (index: number): void => {
             setHighlightedIndex(index);
-            scrollOptionIntoView(`${listboxId}-option-${index}`);
+            if (index >= 0) {
+              scrollOptionIntoView(`${listboxId}-option-${index}`);
+            }
           };
-          const edgeIndex = (edge: 'first' | 'last'): number =>
-            edge === 'last' ? results.length - 1 : 0;
+          const edgeIndex = (edge: 'first' | 'last'): number => {
+            if (edge === 'first') {
+              return results.findIndex(item => item.isDisabled !== true);
+            }
+
+            for (let index = results.length - 1; index >= 0; index--) {
+              if (results[index].isDisabled !== true) {
+                return index;
+              }
+            }
+            return -1;
+          };
+          const nextEnabledIndex = (step: -1 | 1): number => {
+            for (let offset = 1; offset <= results.length; offset++) {
+              const candidate =
+                highlightedIndex < 0
+                  ? edgeIndex(step === 1 ? 'first' : 'last')
+                  : (highlightedIndex + step * offset + results.length) %
+                    results.length;
+              if (candidate >= 0 && results[candidate].isDisabled !== true) {
+                return candidate;
+              }
+            }
+            return -1;
+          };
 
           switch (action.type) {
             case 'open': {
@@ -513,12 +548,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
                 setHighlightedIndex(-1);
                 return;
               }
-              highlightIndex(
-                highlightedIndex < 0
-                  ? edgeIndex(action.step === 1 ? 'first' : 'last')
-                  : (highlightedIndex + action.step + results.length) %
-                      results.length,
-              );
+              highlightIndex(nextEnabledIndex(action.step));
               return;
             }
             case 'jump': {

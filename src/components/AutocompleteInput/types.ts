@@ -21,6 +21,11 @@ export interface CustomSearchableItem<TAuxiliaryData = unknown> {
    */
   id: string;
   /**
+   * Whether the item remains visible but cannot be selected.
+   * @default false
+   */
+  isDisabled?: boolean;
+  /**
    * Display text used for the selected-value tag chip.
    */
   label: string;
@@ -44,6 +49,11 @@ export interface StandardSearchableItem<TAuxiliaryData = unknown> {
    * Stable unique identifier.
    */
   id: string;
+  /**
+   * Whether the item remains visible but cannot be selected.
+   * @default false
+   */
+  isDisabled?: boolean;
   /**
    * Display text.
    */

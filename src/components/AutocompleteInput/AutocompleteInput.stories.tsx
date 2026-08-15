@@ -24,6 +24,9 @@ const people: SearchableItem<{role: string}>[] = [
     auxiliaryData: {role: 'Physicist'},
   },
 ];
+const peopleWithDisabledResult: SearchableItem<{role: string}>[] = people.map(
+  item => (item.id === 'grace' ? {...item, isDisabled: true} : item),
+);
 
 const manyPeople: SearchableItem<{role: string}>[] = [
   ...people,
@@ -145,6 +148,38 @@ function CustomItemsStory(
 
 export const CustomItems: Story = {
   render: (args: AutocompleteInputProps) => <CustomItemsStory {...args} />,
+};
+
+function DisabledResultsStory(
+  args: React.ComponentProps<typeof AutocompleteInput>,
+) {
+  const [value, setValue] = useState<SearchableItem<{role: string}> | null>(
+    null,
+  );
+  const source = useMemo(
+    () => createStaticSearchSource(peopleWithDisabledResult),
+    [],
+  );
+  return (
+    <AutocompleteInput
+      {...args}
+      debounceMs={0}
+      hasEntriesOnFocus
+      onChange={setValue}
+      renderItem={item => (
+        <AutocompleteInputItem
+          description={item.auxiliaryData?.role}
+          item={item}
+        />
+      )}
+      searchSource={source}
+      value={value}
+    />
+  );
+}
+
+export const DisabledResults: Story = {
+  render: (args: AutocompleteInputProps) => <DisabledResultsStory {...args} />,
 };
 
 export const Disabled: Story = {

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {AutocompleteInput} from 'components/AutocompleteInput/AutocompleteInput';
+import {autocompleteItemRecipe} from 'components/AutocompleteInput/AutocompleteInput.recipe';
 import {AutocompleteInputItem} from 'components/AutocompleteInput/AutocompleteInputItem';
 import {BaseAutocompleteInput} from 'components/AutocompleteInput/BaseAutocompleteInput';
 import {
@@ -21,6 +22,9 @@ const items: SearchableItem[] = [
   {id: 'grace', label: 'Grace Hopper'},
   {id: 'katherine', label: 'Katherine Johnson'},
 ];
+const itemsWithDisabledResult: SearchableItem[] = items.map(item =>
+  item.id === 'grace' ? {...item, isDisabled: true} : item,
+);
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -123,6 +127,81 @@ describe('AutocompleteInput', () => {
     await user.click(screen.getByText('Grace Hopper'));
 
     expect(input).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('keeps the query and menu open when a disabled result is activated', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSearchSource(itemsWithDisabledResult)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'gr');
+
+    const option = screen.getByRole('option', {
+      hidden: true,
+      name: 'Grace Hopper',
+    });
+    expect(option).toHaveAttribute('aria-disabled', 'true');
+
+    await user.keyboard('{Enter}');
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input).toHaveValue('gr');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(option);
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input).toHaveValue('gr');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('skips disabled results during keyboard navigation', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={onChange}
+        searchSource={createStaticSearchSource(itemsWithDisabledResult)}
+        value={null}
+      />,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Assignee'});
+    await user.type(input, 'a');
+    await user.keyboard('{ArrowDown}');
+
+    const disabledOption = screen.getByRole('option', {
+      hidden: true,
+      name: 'Grace Hopper',
+    });
+    const nextEnabledOption = screen.getByRole('option', {
+      hidden: true,
+      name: 'Katherine Johnson',
+    });
+    expect(input).not.toHaveAttribute(
+      'aria-activedescendant',
+      disabledOption.id,
+    );
+    expect(input).toHaveAttribute(
+      'aria-activedescendant',
+      nextEnabledOption.id,
+    );
+
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith(itemsWithDisabledResult[2]);
   });
 
   it('clears the selected item', async () => {
@@ -867,6 +946,19 @@ describe('AutocompleteInputItem', () => {
     );
 
     expect(screen.getByTestId('custom-element')).toBeInTheDocument();
+  });
+
+  it('derives disabled styling from the item', () => {
+    render(
+      <AutocompleteInputItem
+        data-testid="disabled-item"
+        item={{...items[0], isDisabled: true}}
+      />,
+    );
+
+    expect(screen.getByTestId('disabled-item')).toHaveClass(
+      assertNonNull(autocompleteItemRecipe({isDisabled: true}).root),
+    );
   });
 });
 
