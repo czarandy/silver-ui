@@ -195,6 +195,23 @@ describe('ClickableContainer', () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
+  it('does not activate from a nested control label', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    render(
+      <ClickableContainer label="Open item" onClick={onClick}>
+        <label htmlFor="nested-checkbox">Include archived items</label>
+        <input id="nested-checkbox" type="checkbox" />
+      </ClickableContainer>,
+    );
+
+    await user.click(screen.getByText('Include archived items'));
+    expect(
+      screen.getByRole('checkbox', {name: 'Include archived items'}),
+    ).toBeChecked();
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
   it.each([
     {props: {role: 'button'}, label: 'ARIA button'},
     {props: {contentEditable: true}, label: 'Editable content'},

@@ -113,7 +113,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Accordion** — collapsible content sections
 - **AppShell** — application-level layout shell with responsive mobile navigation
 - **AspectRatio** — constrains children to a fixed aspect ratio
-- **Card** — rounded container surface for grouping content
+- **Card / ClickableCard / CheckboxCard / RadioCard** — static, actionable, and selectable container surfaces
 - **Center** — centers content horizontally, vertically, or both
 - **Divider** — visual separator between sections
 - **Grid** — responsive equal-width columns with minimum-child-width reflow

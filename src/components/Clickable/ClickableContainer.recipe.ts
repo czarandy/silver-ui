@@ -6,7 +6,6 @@ export const clickableContainerRecipe = sva({
     root: {
       position: 'relative',
       isolation: 'isolate',
-      borderRadius: 'inherit',
     },
     control: {
       position: 'absolute',
@@ -40,6 +39,10 @@ export const clickableContainerRecipe = sva({
     },
   },
   variants: {
+    hasInheritedBorderRadius: {
+      true: {root: {borderRadius: 'inherit'}},
+      false: {},
+    },
     isInteractive: {
       true: {
         root: {
@@ -71,6 +74,7 @@ export const clickableContainerRecipe = sva({
     },
   },
   defaultVariants: {
+    hasInheritedBorderRadius: true,
     isInteractive: false,
     isDisabled: false,
   },
