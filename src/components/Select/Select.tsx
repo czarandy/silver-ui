@@ -402,6 +402,7 @@ export function Select({
   const necessity = getNecessity(isOptional, isRequired);
   const triggerClasses = selectTriggerRecipe({
     isDisabled: isInteractionDisabled,
+    isReadOnly: effectiveReadOnly,
     isPlaceholder: selectedOption == null,
   });
 

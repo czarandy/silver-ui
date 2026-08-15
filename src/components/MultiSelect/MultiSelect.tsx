@@ -374,6 +374,7 @@ export function MultiSelect({
 
   const triggerClasses = multiSelectTriggerRecipe({
     isDisabled: isInteractionDisabled,
+    isReadOnly,
     isPlaceholder: selectedOptions.length === 0,
   });
 

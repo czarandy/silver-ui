@@ -6,6 +6,7 @@ import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {MultiSelect} from 'components/MultiSelect/MultiSelect';
+import {multiSelectTriggerRecipe} from 'components/MultiSelect/MultiSelect.recipe';
 import {SelectOption} from 'components/Select';
 import {SizeContext} from 'internal/SizeContext';
 import {assertNonNull} from 'internal/testHelpers';
@@ -26,6 +27,30 @@ beforeAll(() => {
 });
 
 describe('MultiSelect', () => {
+  it('uses the default cursor when read-only', () => {
+    render(
+      <MultiSelect
+        isReadOnly
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={['Name']}
+      />,
+    );
+
+    const classes = multiSelectTriggerRecipe({isReadOnly: true});
+    const cursorClass = (slot: string | undefined) =>
+      assertNonNull(slot)
+        .split(' ')
+        .find(className => className.includes('cursor_default'));
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    expect(trigger).toHaveClass(assertNonNull(cursorClass(classes.trigger)));
+    // eslint-disable-next-line testing-library/no-node-access -- the wrapper has its own pointer cursor in the base recipe
+    expect(trigger.parentElement).toHaveClass(
+      assertNonNull(cursorClass(classes.wrapper)),
+    );
+  });
+
   it('inherits the ambient size', () => {
     render(
       <SizeContext value="lg">
