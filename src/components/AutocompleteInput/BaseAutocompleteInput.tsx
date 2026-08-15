@@ -184,6 +184,7 @@ const styles = {
     outline: 'none',
     _placeholder: {color: 'fg.muted'},
     _disabled: {cursor: 'not-allowed'},
+    '&:read-only:not(:disabled)': {cursor: 'default'},
   }),
 } as const;
 

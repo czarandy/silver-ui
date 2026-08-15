@@ -358,6 +358,7 @@ export function DateInput({
       inputId={inputId}
       isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}

@@ -131,7 +131,7 @@ describe('read-only behavior for form controls', () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(
       screen.queryByRole('button', {name: 'Show password'}),
-    ).toBeDisabled();
+    ).not.toBeInTheDocument();
   });
 
   it('blocks selection controls without disabled semantics or styling', async () => {

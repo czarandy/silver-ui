@@ -261,6 +261,7 @@ export function ColorSwatchPicker({
       inputId={inputId}
       isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelAs="span"

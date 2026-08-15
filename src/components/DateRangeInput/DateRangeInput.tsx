@@ -221,6 +221,7 @@ export function DateRangeInput({
   const necessity = getNecessity(isOptional, isRequired);
   const classes = dateRangeInputRecipe({
     isDisabled: effectiveDisabled,
+    isReadOnly: effectiveReadOnly,
     isPlaceholder: displayValue === '',
   });
 
@@ -253,6 +254,7 @@ export function DateRangeInput({
       inputId={inputId}
       isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}

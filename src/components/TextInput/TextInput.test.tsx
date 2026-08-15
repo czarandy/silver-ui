@@ -78,6 +78,19 @@ describe('TextInput', () => {
     expect(screen.getByRole('textbox', {name: 'Name'})).toBeDisabled();
   });
 
+  it('uses the default cursor when read-only', () => {
+    render(<TextInput isReadOnly label="Name" onChange={noop} value="Ada" />);
+
+    const cursorClass = assertNonNull(
+      inputStyles.control
+        .split(' ')
+        .find(className => className.includes('cursor_default')),
+    );
+    expect(screen.getByRole('textbox', {name: 'Name'})).toHaveClass(
+      cursorClass,
+    );
+  });
+
   // Regression: the wrapper is a plain <div>, so hovering a disabled input
   // still matched the recipe's `:hover` rule and darkened its border.
   it('drops the hover border affordance while disabled', () => {

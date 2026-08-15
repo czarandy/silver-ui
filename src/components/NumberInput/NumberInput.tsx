@@ -641,38 +641,40 @@ export function NumberInput({
           {getStatusIcon(status.type)}
         </span>
       ) : null}
-      <span className={numberInputStyles.stepper}>
-        <button
-          aria-label="Increment value"
-          className={numberInputStyles.stepperButton}
-          disabled={isIncrementDisabled}
-          onClick={() => {
-            inputRef.current?.focus({preventScroll: true});
-            stepValue(1);
-          }}
-          onPointerDown={event => {
-            event.preventDefault();
-          }}
-          tabIndex={-1}
-          type="button">
-          <Icon icon={ChevronUp} size="sm" />
-        </button>
-        <button
-          aria-label="Decrement value"
-          className={numberInputStyles.stepperButton}
-          disabled={isDecrementDisabled}
-          onClick={() => {
-            inputRef.current?.focus({preventScroll: true});
-            stepValue(-1);
-          }}
-          onPointerDown={event => {
-            event.preventDefault();
-          }}
-          tabIndex={-1}
-          type="button">
-          <Icon icon={ChevronDown} size="sm" />
-        </button>
-      </span>
+      {effectiveReadOnly ? null : (
+        <span className={numberInputStyles.stepper}>
+          <button
+            aria-label="Increment value"
+            className={numberInputStyles.stepperButton}
+            disabled={isIncrementDisabled}
+            onClick={() => {
+              inputRef.current?.focus({preventScroll: true});
+              stepValue(1);
+            }}
+            onPointerDown={event => {
+              event.preventDefault();
+            }}
+            tabIndex={-1}
+            type="button">
+            <Icon icon={ChevronUp} size="sm" />
+          </button>
+          <button
+            aria-label="Decrement value"
+            className={numberInputStyles.stepperButton}
+            disabled={isDecrementDisabled}
+            onClick={() => {
+              inputRef.current?.focus({preventScroll: true});
+              stepValue(-1);
+            }}
+            onPointerDown={event => {
+              event.preventDefault();
+            }}
+            tabIndex={-1}
+            type="button">
+            <Icon icon={ChevronDown} size="sm" />
+          </button>
+        </span>
+      )}
     </div>
   );
 
@@ -688,6 +690,7 @@ export function NumberInput({
       inputId={inputId}
       isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}

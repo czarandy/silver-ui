@@ -188,6 +188,9 @@ export const inputControlStyles = css.raw({
   _disabled: {
     cursor: 'not-allowed',
   },
+  '&:read-only:not(:disabled)': {
+    cursor: 'default',
+  },
 });
 
 export const inputStyles = {

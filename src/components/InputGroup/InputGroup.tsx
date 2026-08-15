@@ -137,6 +137,7 @@ export function InputGroup({
         inputId={inputId}
         isDisabled={isDisabled}
         isLabelHidden={isLabelHidden}
+        isReadOnly={isReadOnly}
         labelAs="span"
         labelId={labelId}
         {...necessity}

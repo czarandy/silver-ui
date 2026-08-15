@@ -48,6 +48,13 @@ export const dateRangeInputRecipe = sva({
       },
       false: {},
     },
+    isReadOnly: {
+      true: {
+        wrapper: {cursor: 'default'},
+        trigger: {cursor: 'default'},
+      },
+      false: {},
+    },
     isPlaceholder: {
       true: {
         value: {color: 'fg.muted'},
@@ -57,6 +64,7 @@ export const dateRangeInputRecipe = sva({
   },
   defaultVariants: {
     isDisabled: false,
+    isReadOnly: false,
     isPlaceholder: false,
   },
 });

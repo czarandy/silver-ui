@@ -352,6 +352,7 @@ export function TextInput({
       inputId={inputId}
       isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...getNecessity(isOptional, isRequired)}
       label={label}
       labelIcon={labelIcon}

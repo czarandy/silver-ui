@@ -183,6 +183,7 @@ export function CheckboxGroup({
       inputId={inputId}
       isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...necessity}
       description={description}
       descriptionID={descriptionID}

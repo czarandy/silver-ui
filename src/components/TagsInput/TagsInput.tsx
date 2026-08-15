@@ -778,6 +778,7 @@ export function TagsInput<T extends SearchableItem>({
       inputId={inputId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}

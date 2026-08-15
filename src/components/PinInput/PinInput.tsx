@@ -561,6 +561,7 @@ export function PinInput({
       inputId={inputId}
       isDisabled={effectiveDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={effectiveReadOnly}
       {...getNecessity(isOptional, isRequired)}
       label={label}
       labelAs="span"

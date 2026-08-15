@@ -53,15 +53,17 @@ export function PasswordInput({
       className={className}
       data-testid={dataTestId}
       endContent={
-        <Button
-          icon={isVisible ? EyeOff : Eye}
-          isDisabled={effectiveDisabled || effectiveReadOnly}
-          isIconOnly
-          label={isVisible ? 'Hide password' : 'Show password'}
-          onClick={toggleVisibility}
-          size="sm"
-          variant="ghost"
-        />
+        effectiveReadOnly ? undefined : (
+          <Button
+            icon={isVisible ? EyeOff : Eye}
+            isDisabled={effectiveDisabled}
+            isIconOnly
+            label={isVisible ? 'Hide password' : 'Show password'}
+            onClick={toggleVisibility}
+            size="sm"
+            variant="ghost"
+          />
+        )
       }
       isDisabled={isDisabled}
       isReadOnly={isReadOnly}

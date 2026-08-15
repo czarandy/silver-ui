@@ -241,6 +241,7 @@ export function DateTimeInput({
       inputId={fieldId}
       isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}
