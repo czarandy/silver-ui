@@ -1,3 +1,4 @@
+import {getButtonSurfaceStyles} from 'components/Button/Button.recipe';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const selectMenuRecipe = sva({
@@ -128,14 +129,7 @@ export const selectTriggerRecipe = sva({
           borderWidth: 0,
           borderStyle: 'none',
           borderColor: 'transparent',
-          bg: 'transparent',
-          color: 'fg',
           transitionProperty: 'background-color, opacity',
-          _hover: {
-            borderColor: 'transparent',
-            bg: 'bg.ghost.hover',
-          },
-          _active: {bg: 'bg.ghost.active'},
           _focusWithin: {
             borderColor: 'transparent',
             boxShadow: 'none',
@@ -145,6 +139,7 @@ export const selectTriggerRecipe = sva({
             outlineOffset: 'focusOffsetLoose',
             _hover: {borderColor: 'transparent'},
           },
+          ...getButtonSurfaceStyles('ghost'),
         },
       },
       button: {
@@ -152,14 +147,7 @@ export const selectTriggerRecipe = sva({
           borderWidth: 0,
           borderStyle: 'none',
           borderColor: 'transparent',
-          bg: 'surface.gray',
-          color: 'fg',
           transitionProperty: 'background-color, opacity',
-          _hover: {
-            borderColor: 'transparent',
-            bg: 'surface.gray.hover',
-          },
-          _active: {bg: 'surface.gray.hover'},
           _focusWithin: {
             borderColor: 'transparent',
             boxShadow: 'none',
@@ -169,6 +157,7 @@ export const selectTriggerRecipe = sva({
             outlineOffset: 'focusOffsetLoose',
             _hover: {borderColor: 'transparent'},
           },
+          ...getButtonSurfaceStyles('secondary'),
         },
       },
     },

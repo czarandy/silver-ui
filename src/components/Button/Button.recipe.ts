@@ -1,4 +1,5 @@
-import {sva, type RecipeVariantProps} from 'styled-system/css';
+import type {ButtonVariant} from 'components/Button/Button.types';
+import {cva, sva, type RecipeVariantProps} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
 
 const primaryBg = `var(--silver-button-primary-bg, ${token.var('colors.primary')})`;
@@ -6,6 +7,74 @@ const primaryFg = `var(--silver-button-primary-fg, ${token.var('colors.fg.onPrim
 const primaryBgHover = `var(--silver-button-primary-bg-hover, ${token.var('colors.primary.hover')})`;
 const primaryBgActive = `var(--silver-button-primary-bg-active, ${token.var('colors.primary.active')})`;
 const focusColor = `var(--silver-button-focus-color, ${token.var('colors.primary')})`;
+
+/**
+ * Shared Button surface treatments. Composite controls can reuse these raw
+ * styles while keeping their own layout and focus-within behavior.
+ */
+export const buttonSurfaceRecipe = cva({
+  variants: {
+    variant: {
+      primary: {
+        bg: primaryBg,
+        color: primaryFg,
+        _hover: {bg: primaryBgHover},
+        _active: {bg: primaryBgActive},
+      },
+      secondary: {
+        bg: 'surface.gray',
+        color: 'fg',
+        _hover: {bg: 'surface.gray.hover'},
+        _active: {bg: 'surface.gray.hover'},
+      },
+      ghost: {
+        color: 'fg',
+        bg: 'transparent',
+        _hover: {bg: 'bg.ghost.hover'},
+        _active: {bg: 'bg.ghost.active'},
+      },
+      destructive: {
+        bg: 'destructive',
+        color: 'destructive.fg',
+        _hover: {bg: 'destructive.hover'},
+        _active: {bg: 'destructive.active'},
+        _focusVisible: {
+          outlineColor: 'destructive',
+        },
+      },
+      onSolid: {
+        color: 'inherit',
+        bg: 'transparent',
+        _hover: {bg: 'color-mix(in srgb, currentColor 15%, transparent)'},
+        _active: {bg: 'color-mix(in srgb, currentColor 20%, transparent)'},
+        _focusVisible: {
+          outlineColor: 'currentColor',
+        },
+      },
+    },
+  },
+  defaultVariants: {
+    variant: 'secondary',
+  },
+});
+
+type ButtonSurfaceStyles = {
+  bg: string;
+  color: string;
+  _active: {bg: string};
+  _focusVisible?: {outlineColor: string};
+  _hover: {bg: string};
+};
+
+/**
+ * Returns a narrowly typed raw surface so other recipes can compose it
+ * without expanding every SystemStyleObject property into their public type.
+ */
+export function getButtonSurfaceStyles(
+  variant: ButtonVariant,
+): ButtonSurfaceStyles {
+  return buttonSurfaceRecipe.raw({variant}) as ButtonSurfaceStyles;
+}
 
 export const buttonRecipe = sva({
   slots: [
@@ -97,50 +166,19 @@ export const buttonRecipe = sva({
   variants: {
     variant: {
       primary: {
-        root: {
-          bg: primaryBg,
-          color: primaryFg,
-          _hover: {bg: primaryBgHover},
-          _active: {bg: primaryBgActive},
-        },
+        root: getButtonSurfaceStyles('primary'),
       },
       secondary: {
-        root: {
-          bg: 'surface.gray',
-          color: 'fg',
-          _hover: {bg: 'surface.gray.hover'},
-          _active: {bg: 'surface.gray.hover'},
-        },
+        root: getButtonSurfaceStyles('secondary'),
       },
       ghost: {
-        root: {
-          color: 'fg',
-          bg: 'transparent',
-          _hover: {bg: 'bg.ghost.hover'},
-          _active: {bg: 'bg.ghost.active'},
-        },
+        root: getButtonSurfaceStyles('ghost'),
       },
       destructive: {
-        root: {
-          bg: 'destructive',
-          color: 'destructive.fg',
-          _hover: {bg: 'destructive.hover'},
-          _active: {bg: 'destructive.active'},
-          _focusVisible: {
-            outlineColor: 'destructive',
-          },
-        },
+        root: getButtonSurfaceStyles('destructive'),
       },
       onSolid: {
-        root: {
-          color: 'inherit',
-          bg: 'transparent',
-          _hover: {bg: 'color-mix(in srgb, currentColor 15%, transparent)'},
-          _active: {bg: 'color-mix(in srgb, currentColor 20%, transparent)'},
-          _focusVisible: {
-            outlineColor: 'currentColor',
-          },
-        },
+        root: getButtonSurfaceStyles('onSolid'),
       },
     },
     size: {

@@ -2,6 +2,7 @@ import {fireEvent, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {getButtonSurfaceStyles} from 'components/Button/Button.recipe';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
@@ -114,14 +115,23 @@ describe('MultiSelect', () => {
   });
 
   it.each([
-    {backgroundClass: 'silver-bg_transparent', variant: 'ghost'},
-    {backgroundClass: 'silver-bg_surface.gray', variant: 'button'},
+    {
+      backgroundClass: 'silver-bg_transparent',
+      buttonVariant: 'ghost',
+      variant: 'ghost',
+    },
+    {
+      backgroundClass: 'silver-bg_surface.gray',
+      buttonVariant: 'secondary',
+      variant: 'button',
+    },
   ] satisfies ReadonlyArray<{
     backgroundClass: string;
+    buttonVariant: 'ghost' | 'secondary';
     variant: MultiSelectVariant;
   }>)(
     'renders the $variant trigger without changing its semantics',
-    async ({backgroundClass, variant}) => {
+    async ({backgroundClass, buttonVariant, variant}) => {
       const user = userEvent.setup();
       const onChange = vi.fn();
       render(
@@ -147,6 +157,7 @@ describe('MultiSelect', () => {
       expect(wrapper).toHaveClass(
         css(multiSelectTriggerRecipe.raw({variant}).wrapper),
       );
+      expect(wrapper).toHaveClass(css(getButtonSurfaceStyles(buttonVariant)));
       expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
       expect(trigger).toHaveAttribute('aria-expanded', 'false');
 

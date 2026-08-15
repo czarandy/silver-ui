@@ -125,9 +125,7 @@ function CustomOptionsStory(args: React.ComponentProps<typeof MultiSelect>) {
   );
 }
 
-function ToolbarTriggerVariantsStory(
-  args: React.ComponentProps<typeof MultiSelect>,
-) {
+function TriggerVariantsStory(args: React.ComponentProps<typeof MultiSelect>) {
   const [ghostValue, setGhostValue] = useState<string[]>(['name', 'email']);
   const [buttonValue, setButtonValue] = useState<string[]>(['role']);
 
@@ -188,7 +186,7 @@ export const Searchable: Story = {
   },
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
 };
-export const ToolbarTriggerVariants: Story = {
+export const TriggerVariants: Story = {
   parameters: {
     docs: {
       description: {
@@ -197,7 +195,7 @@ export const ToolbarTriggerVariants: Story = {
       },
     },
   },
-  render: (args: MultiSelectProps) => <ToolbarTriggerVariantsStory {...args} />,
+  render: (args: MultiSelectProps) => <TriggerVariantsStory {...args} />,
 };
 export const Badges: Story = {
   args: {triggerDisplay: 'badges'},

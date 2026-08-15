@@ -139,9 +139,7 @@ function OptionLabelTooltipsStory(args: React.ComponentProps<typeof Select>) {
   );
 }
 
-function ToolbarTriggerVariantsStory(
-  args: React.ComponentProps<typeof Select>,
-) {
+function TriggerVariantsStory(args: React.ComponentProps<typeof Select>) {
   const [ghostValue, setGhostValue] = useState<string | null>('ada');
   const [buttonValue, setButtonValue] = useState<string | null>('grace');
 
@@ -212,7 +210,7 @@ export const Searchable: Story = {
   render: (args: SelectProps) => <SelectStory {...args} />,
 };
 
-export const ToolbarTriggerVariants: Story = {
+export const TriggerVariants: Story = {
   parameters: {
     docs: {
       description: {
@@ -221,7 +219,7 @@ export const ToolbarTriggerVariants: Story = {
       },
     },
   },
-  render: (args: SelectProps) => <ToolbarTriggerVariantsStory {...args} />,
+  render: (args: SelectProps) => <TriggerVariantsStory {...args} />,
 };
 
 export const CustomOptions: Story = {
