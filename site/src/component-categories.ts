@@ -21,7 +21,7 @@ export const componentCategories: Record<string, readonly string[]> = {
     'OverflowList',
     'Stack',
   ],
-  Typography: ['Blockquote', 'CodeBlock', 'Kbd', 'Text'],
+  Typography: ['Blockquote', 'CodeBlock', 'Highlight', 'Kbd', 'Text'],
   Navigation: [
     'Breadcrumbs',
     'Link',

@@ -138,6 +138,15 @@ export default defineConfig({
               },
             },
           },
+          highlight: {
+            bg: {value: '{colors.bg.selected}'},
+            fg: {
+              value: {
+                base: '{colors.gray.900}',
+                _dark: '{colors.gray.50}',
+              },
+            },
+          },
           destructive: {
             DEFAULT: {
               value: {base: '{colors.red.600}', _dark: '{colors.red.500}'},
