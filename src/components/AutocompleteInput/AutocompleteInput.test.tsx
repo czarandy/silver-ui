@@ -79,7 +79,9 @@ describe('AutocompleteInput', () => {
     );
 
     await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
-    await user.click(screen.getByText('Grace Hopper'));
+    const option = screen.getByRole('option', {hidden: true});
+    expect(option).toHaveTextContent('Grace Hopper');
+    await user.click(option);
 
     expect(onChange).toHaveBeenCalledWith(items[1]);
   });
@@ -101,7 +103,7 @@ describe('AutocompleteInput', () => {
     await user.type(input, 'gr');
     expect(input).toHaveAttribute('aria-expanded', 'true');
 
-    await user.click(screen.getByText('Grace Hopper'));
+    await user.click(screen.getByRole('option', {hidden: true}));
 
     expect(input).toHaveAttribute('aria-expanded', 'false');
   });
@@ -124,7 +126,7 @@ describe('AutocompleteInput', () => {
     await user.type(input, 'gr');
     expect(input).toHaveAttribute('aria-expanded', 'true');
 
-    await user.click(screen.getByText('Grace Hopper'));
+    await user.click(screen.getByRole('option', {hidden: true}));
 
     expect(input).toHaveAttribute('aria-expanded', 'false');
   });
@@ -596,7 +598,9 @@ describe('AutocompleteInput', () => {
       resolveSearch([items[1]]);
     });
 
-    expect(await screen.findByText('Grace Hopper')).toBeInTheDocument();
+    expect(await screen.findByRole('option', {hidden: true})).toHaveTextContent(
+      'Grace Hopper',
+    );
   });
 
   it('shows error text when search fails', async () => {
@@ -704,7 +708,9 @@ describe('AutocompleteInput', () => {
 
     await user.click(screen.getByRole('combobox', {name: 'Assignee'}));
 
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getAllByRole('option', {hidden: true})[0]).toHaveTextContent(
+      'Ada Lovelace',
+    );
     expect(screen.getByText('Grace Hopper')).toBeInTheDocument();
   });
 
@@ -735,7 +741,9 @@ describe('AutocompleteInput', () => {
     await user.click(input);
 
     expect(input).toHaveAttribute('aria-expanded', 'true');
-    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+    expect(screen.getAllByRole('option', {hidden: true})[0]).toHaveTextContent(
+      'Ada Lovelace',
+    );
   });
 
   it('opens menu on focus when hasEntriesOnFocus is true', async () => {
@@ -826,18 +834,20 @@ describe('AutocompleteInput', () => {
 
   it('renders custom items and a start icon', async () => {
     const user = userEvent.setup();
+    const renderItem = vi.fn((item: SearchableItem, query: string) => (
+      <AutocompleteInputItem
+        description="Engineer"
+        icon={User}
+        item={item}
+        query={query}
+      />
+    ));
     const {container} = render(
       <AutocompleteInput
         debounceMs={0}
         label="Assignee"
         onChange={() => {}}
-        renderItem={item => (
-          <AutocompleteInputItem
-            description="Engineer"
-            icon={User}
-            item={item}
-          />
-        )}
+        renderItem={renderItem}
         searchSource={createStaticSearchSource(items)}
         startIcon={Search}
         value={null}
@@ -847,8 +857,29 @@ describe('AutocompleteInput', () => {
     await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
 
     expect(screen.getByText('Engineer')).toBeInTheDocument();
+    expect(renderItem).toHaveBeenCalledWith(items[1], 'gr');
+    expect(screen.getByText('Gr').tagName).toBe('MARK');
     // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access -- lucide icons are decorative SVGs
     expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('highlights the active query in default result labels', async () => {
+    const user = userEvent.setup();
+    render(
+      <AutocompleteInput
+        debounceMs={0}
+        label="Assignee"
+        onChange={() => {}}
+        searchSource={createStaticSearchSource(items)}
+        value={null}
+      />,
+    );
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+
+    const mark = screen.getByText('Gr');
+    expect(mark.tagName).toBe('MARK');
+    expect(screen.getByRole('option', {hidden: true})).toContainElement(mark);
   });
 
   it('renders validation status and hides clear button when hasClear is false', () => {
@@ -942,10 +973,14 @@ describe('AutocompleteInputItem', () => {
           id: 'custom',
           label: 'Custom',
         }}
+        query="Custom"
       />,
     );
 
     expect(screen.getByTestId('custom-element')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Custom', {selector: 'mark'}),
+    ).not.toBeInTheDocument();
   });
 
   it('derives disabled styling from the item', () => {

@@ -12,6 +12,7 @@ import {
   type ReactNode,
   type Ref,
 } from 'react';
+import {AutocompleteInputItem} from 'components/AutocompleteInput/AutocompleteInputItem';
 import {BaseAutocompleteInput} from 'components/AutocompleteInput/BaseAutocompleteInput';
 import type {
   SearchableItem,
@@ -138,9 +139,9 @@ export type AutocompleteInputProps<T extends SearchableItem = SearchableItem> =
      */
     ref?: Ref<HTMLDivElement>;
     /**
-     * Custom result renderer.
+     * Custom result renderer. Receives the item and active query.
      */
-    renderItem?: (item: T) => ReactNode;
+    renderItem?: (item: T, query: string) => ReactNode;
     /**
      * Provides results for the menu. Use `createStaticSearchSource` for
      * in-memory data, or implement {@link SearchSource} for async/remote
@@ -266,6 +267,15 @@ export function AutocompleteInput<T extends SearchableItem>({
   );
 
   const necessity = getNecessity(isOptional, isRequired);
+  const renderSearchItem = useCallback(
+    (item: T): ReactNode =>
+      renderItem == null ? (
+        <AutocompleteInputItem item={item} query={queryValue} />
+      ) : (
+        renderItem(item, queryValue)
+      ),
+    [queryValue, renderItem],
+  );
 
   const startEditing = useCallback(
     (seedQuery: string) => {
@@ -369,7 +379,7 @@ export function AutocompleteInput<T extends SearchableItem>({
         placeholder={showTag ? undefined : placeholder}
         query={queryValue}
         ref={inputRef}
-        renderItem={renderItem}
+        renderItem={renderSearchItem}
         searchSource={searchSource}
         size={size}
         value={value}

@@ -99,6 +99,8 @@ describe('Theme', () => {
         tokens={{
           colors: {
             bgGhostHover: 'rgba(0, 0, 0, 0.04)',
+            highlightBg: 'teal-100',
+            highlightFg: 'teal-900',
             iconInfo: 'blue-700',
             statusInfoSolid: 'purple-500',
             surfaceBlueFg: '#00458c',
@@ -126,6 +128,12 @@ describe('Theme', () => {
     const style = screen.getByTestId('theme').style;
     expect(style.getPropertyValue('--silver-colors-bg-ghost-hover')).toBe(
       'rgba(0, 0, 0, 0.04)',
+    );
+    expect(style.getPropertyValue('--silver-colors-highlight-bg')).toBe(
+      'var(--silver-colors-teal-100)',
+    );
+    expect(style.getPropertyValue('--silver-colors-highlight-fg')).toBe(
+      'var(--silver-colors-teal-900)',
     );
     expect(style.getPropertyValue('--silver-colors-icon-info')).toBe(
       'var(--silver-colors-blue-700)',

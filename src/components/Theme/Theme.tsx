@@ -52,6 +52,8 @@ export interface ThemeColorTokens {
   fgDisabled?: ThemeColorValue;
   fgMuted?: ThemeColorValue;
   fgOnPrimary?: ThemeColorValue;
+  highlightBg?: ThemeColorValue;
+  highlightFg?: ThemeColorValue;
   iconAccent?: ThemeColorValue;
   iconBlue?: ThemeColorValue;
   iconCyan?: ThemeColorValue;
@@ -269,6 +271,8 @@ const colorTokenVariables: Record<
   fgDisabled: '--silver-colors-fg-disabled',
   fgMuted: '--silver-colors-fg-muted',
   fgOnPrimary: '--silver-colors-fg-on-primary',
+  highlightBg: '--silver-colors-highlight-bg',
+  highlightFg: '--silver-colors-highlight-fg',
   primary: '--silver-colors-primary',
   primaryActive: '--silver-colors-primary-active',
   primaryHover: '--silver-colors-primary-hover',

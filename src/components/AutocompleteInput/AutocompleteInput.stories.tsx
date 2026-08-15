@@ -133,11 +133,12 @@ function CustomItemsStory(
       debounceMs={0}
       hasEntriesOnFocus
       onChange={setValue}
-      renderItem={item => (
+      renderItem={(item, query) => (
         <AutocompleteInputItem
           description={item.auxiliaryData?.role}
           icon={User}
           item={item}
+          query={query}
         />
       )}
       searchSource={source}
@@ -166,10 +167,11 @@ function DisabledResultsStory(
       debounceMs={0}
       hasEntriesOnFocus
       onChange={setValue}
-      renderItem={item => (
+      renderItem={(item, query) => (
         <AutocompleteInputItem
           description={item.auxiliaryData?.role}
           item={item}
+          query={query}
         />
       )}
       searchSource={source}

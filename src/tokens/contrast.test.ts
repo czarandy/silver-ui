@@ -66,6 +66,20 @@ function resolve(ref: string, mode: Mode): string {
     return ref;
   }
 
+  const transparentMix =
+    /^color-mix\(in srgb, (\{colors\.[^}]+\}) (\d+(?:\.\d+)?)%, transparent\)$/.exec(
+      ref,
+    );
+  if (transparentMix != null) {
+    // Semantic tints use a translucent dark-mode color-mix. Composite it over
+    // the default background before measuring the effective contrast.
+    return composite(
+      resolve(transparentMix[1], mode),
+      resolve('{colors.bg}', mode),
+      Number(transparentMix[2]) / 100,
+    );
+  }
+
   const inner = ref.replace(/^\{colors\./, '').replace(/\}$/, '');
   const parts = inner.split('.');
 
@@ -95,6 +109,20 @@ function resolve(ref: string, mode: Mode): string {
   throw new Error(`Unable to resolve color reference: ${ref}`);
 }
 
+function composite(
+  foreground: string,
+  background: string,
+  alpha: number,
+): string {
+  const channels = [1, 3, 5].map(index =>
+    Math.round(
+      parseInt(foreground.slice(index, index + 2), 16) * alpha +
+        parseInt(background.slice(index, index + 2), 16) * (1 - alpha),
+    ),
+  );
+  return `#${channels.map(channel => channel.toString(16).padStart(2, '0')).join('')}`;
+}
+
 function relativeLuminance(hex: string): number {
   const channels = [1, 3, 5]
     .map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
@@ -113,6 +141,11 @@ function contrastRatio(a: string, b: string): number {
 // inactive/disabled UI components from the contrast requirement.
 const PAIRINGS: {name: string; bg: string; fg: string}[] = [
   {name: 'primary button', bg: '{colors.primary}', fg: '{colors.fg.onPrimary}'},
+  {
+    name: 'highlight',
+    bg: '{colors.bg.selected}',
+    fg: '{colors.highlight.fg}',
+  },
   {
     name: 'destructive button',
     bg: '{colors.destructive}',

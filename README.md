@@ -125,6 +125,7 @@ mode details, scoped theming examples, and per-instance overrides.
 
 - **Blockquote** — styled quotation block
 - **CodeBlock** — read-only code display with line numbers, line highlighting, and copy button
+- **Highlight** — marks case-insensitive substring matches in text
 - **Kbd** — keyboard shortcut display with accessible labels
 - **Text / Heading** — typography primitives with size, color, and truncation
 

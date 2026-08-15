@@ -247,6 +247,7 @@ export {
   type CircularProgressProps,
 } from 'components/CircularProgress';
 export {Kbd, type KbdProps} from 'components/Kbd';
+export {Highlight, type HighlightProps} from 'components/Highlight';
 export {NavIcon, type NavIconProps} from 'components/NavIcon';
 export {
   CodeBlock,

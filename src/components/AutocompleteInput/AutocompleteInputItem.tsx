@@ -2,6 +2,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {autocompleteItemRecipe} from 'components/AutocompleteInput/AutocompleteInput.recipe';
 import type {SearchableItem} from 'components/AutocompleteInput/types';
+import {Highlight} from 'components/Highlight';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Text} from 'components/Text';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
@@ -11,7 +12,14 @@ import {cx} from 'utils/cx';
  * Props for an item with a custom `element`. The element is rendered
  * directly — layout props like `icon` and `description` do not apply.
  */
-interface AutocompleteInputCustomItemProps {
+interface AutocompleteInputItemSharedProps {
+  /**
+   * Literal query or queries highlighted in the item label.
+   */
+  query?: string | string[];
+}
+
+interface AutocompleteInputCustomItemProps extends AutocompleteInputItemSharedProps {
   /**
    * Search result item with custom element content.
    */
@@ -21,7 +29,7 @@ interface AutocompleteInputCustomItemProps {
 /**
  * Props for a standard item rendered with the default layout.
  */
-interface AutocompleteInputStandardItemProps {
+interface AutocompleteInputStandardItemProps extends AutocompleteInputItemSharedProps {
   /**
    * Additional CSS class names applied to the item layout.
    */
@@ -75,6 +83,7 @@ export function AutocompleteInputItem(
     description,
     icon,
     item,
+    query,
     ref,
     style,
   } = props as AutocompleteInputStandardItemProps;
@@ -94,7 +103,7 @@ export function AutocompleteInputItem(
       ) : null}
       <span className={classes.text}>
         <Text as="span" color="inherit" type="label">
-          {item.label}
+          <Highlight query={query ?? ''}>{item.label}</Highlight>
         </Text>
         {isNonEmptyReactNode(description) ? (
           <Text as="span" color="secondary" type="supporting">
