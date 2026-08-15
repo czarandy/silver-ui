@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react';
+import {createEvent, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
@@ -107,6 +107,92 @@ describe('RadioGroup', () => {
 
     expect(screen.getByRole('radio', {name: 'Email'})).toBeEnabled();
     expect(screen.getByRole('radio', {name: 'SMS'})).toBeDisabled();
+  });
+
+  it('keeps read-only items enabled and exposes read-only semantics', () => {
+    render(
+      <RadioGroup
+        isReadOnly
+        label="Notification preference"
+        onChange={() => {}}
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+        <RadioGroupItem label="SMS" value="sms" />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByRole('radiogroup')).toHaveAttribute(
+      'aria-readonly',
+      'true',
+    );
+    for (const radio of screen.getAllByRole('radio')) {
+      expect(radio).toBeEnabled();
+    }
+  });
+
+  it('blocks selection changes when isReadOnly is true', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <RadioGroup
+        isReadOnly
+        label="Notification preference"
+        onChange={onChange}
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+        <RadioGroupItem label="SMS" value="sms" />
+      </RadioGroup>,
+    );
+
+    await user.click(screen.getByRole('radio', {name: 'SMS'}));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('radio', {name: 'Email'})).toBeChecked();
+    expect(screen.getByRole('radio', {name: 'SMS'})).not.toBeChecked();
+  });
+
+  it('blocks keyboard selection changes when isReadOnly is true', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <RadioGroup
+        isReadOnly
+        label="Notification preference"
+        onChange={onChange}
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+        <RadioGroupItem label="SMS" value="sms" />
+      </RadioGroup>,
+    );
+
+    screen.getByRole('radio', {name: 'Email'}).focus();
+    await user.keyboard('{ArrowDown}');
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('radio', {name: 'Email'})).toBeChecked();
+    expect(screen.getByRole('radio', {name: 'SMS'})).not.toBeChecked();
+  });
+
+  it('prevents the native radio toggle when isReadOnly is true', () => {
+    render(
+      <RadioGroup
+        isReadOnly
+        label="Notification preference"
+        onChange={() => {}}
+        value="email">
+        <RadioGroupItem label="Email" value="email" />
+        <RadioGroupItem label="SMS" value="sms" />
+      </RadioGroup>,
+    );
+
+    const clickEvent = createEvent.click(
+      screen.getByRole('radio', {name: 'SMS'}),
+    );
+    fireEvent(screen.getByRole('radio', {name: 'SMS'}), clickEvent);
+
+    expect(clickEvent.defaultPrevented).toBe(true);
   });
 
   it('sets aria-invalid and renders error message', () => {

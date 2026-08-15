@@ -51,6 +51,12 @@ export type RadioGroupProps = {
    */
   isDisabled?: boolean;
   /**
+   * Whether the selected value can be changed by the user.
+   * Read-only radio items remain enabled and focusable.
+   * @default false
+   */
+  isReadOnly?: boolean;
+  /**
    * Whether to visually hide the label.
    * @default false
    */
@@ -107,6 +113,7 @@ export function RadioGroup({
   htmlName,
   isDisabled = false,
   isLabelHidden = false,
+  isReadOnly = false,
   isOptional,
   isRequired,
   label,
@@ -130,6 +137,7 @@ export function RadioGroup({
   const contextValue = useMemo(
     () => ({
       isDisabled,
+      isReadOnly,
       isRequired,
       name: htmlName ?? nameId,
       onChange,
@@ -140,6 +148,7 @@ export function RadioGroup({
     [
       htmlName,
       isDisabled,
+      isReadOnly,
       isRequired,
       nameId,
       onChange,
@@ -174,6 +183,7 @@ export function RadioGroup({
         aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
         aria-orientation={orientation}
+        aria-readonly={isReadOnly || undefined}
         aria-required={isRequired ?? undefined}
         className={radioGroupRecipe({orientation})}
         id={inputId}

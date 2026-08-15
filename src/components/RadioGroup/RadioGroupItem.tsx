@@ -87,7 +87,22 @@ export function RadioGroupItem({
         disabled={isDisabled}
         id={id}
         name={context.name}
-        onChange={() => context.onChange(value)}
+        onChange={event => {
+          if (context.isReadOnly) {
+            event.preventDefault();
+            return;
+          }
+          context.onChange(value);
+        }}
+        onClick={event => {
+          // Radio inputs do not natively support `readOnly`. Canceling the
+          // click prevents mouse, label, Space-key, and arrow-key activation
+          // from changing the native checked state before React restores the
+          // controlled value.
+          if (context.isReadOnly) {
+            event.preventDefault();
+          }
+        }}
         required={context.isRequired}
         type="radio"
         value={value}

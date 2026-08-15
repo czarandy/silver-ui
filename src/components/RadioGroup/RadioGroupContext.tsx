@@ -7,6 +7,7 @@ export type RadioGroupSize = 'sm' | 'md' | 'lg';
 
 export interface RadioGroupContextValue {
   isDisabled: boolean;
+  isReadOnly: boolean;
   isRequired?: boolean;
   name: string;
   onChange: (value: string) => void;
