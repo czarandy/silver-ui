@@ -42,6 +42,7 @@ import {
   useSelectListbox,
   type SelectListboxOptionData,
 } from 'internal/useSelectListbox';
+import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 const menuClasses = multiSelectMenuRecipe();
@@ -91,6 +92,8 @@ export type MultiSelectOption =
   MultiSelectDivider | MultiSelectOptionData | MultiSelectSection | string;
 
 export type MultiSelectTriggerDisplay = 'count' | 'labels' | 'badges';
+
+export type MultiSelectVariant = 'button' | 'ghost' | 'outline';
 
 export type MultiSelectProps = {
   /**
@@ -224,6 +227,11 @@ export type MultiSelectProps = {
    * Selected option values.
    */
   value: string[];
+  /**
+   * Visual style of the selector trigger.
+   * @default 'outline'
+   */
+  variant?: MultiSelectVariant;
 } & FieldNecessity;
 
 /**
@@ -261,6 +269,7 @@ export function MultiSelect({
   style,
   triggerDisplay = 'count',
   value,
+  variant = 'outline',
 }: MultiSelectProps): React.JSX.Element {
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
@@ -373,10 +382,25 @@ export function MultiSelect({
   }, [allSelected, isReadOnly, onChange, enabledVisibleOptions, value]);
 
   const triggerClasses = multiSelectTriggerRecipe({
+    variant,
     isDisabled: isInteractionDisabled,
     isReadOnly,
     isPlaceholder: selectedOptions.length === 0,
   });
+  const triggerWrapperClassName = css(
+    inputRecipe.raw({
+      size,
+      status: statusType,
+      isDisabled,
+      isReadOnly,
+    }),
+    multiSelectTriggerRecipe.raw({
+      variant,
+      isDisabled: isInteractionDisabled,
+      isReadOnly,
+      isPlaceholder: selectedOptions.length === 0,
+    }).wrapper,
+  );
 
   const renderTriggerValue = (): ReactNode => {
     if (selectedOptions.length === 0) {
@@ -517,13 +541,7 @@ export function MultiSelect({
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- mouse clicks anywhere on the visual input delegate to the inner combobox button; keyboard handling stays on that button.
     <div
       className={cx(
-        inputRecipe({
-          size,
-          status: statusType,
-          isDisabled,
-          isReadOnly,
-        }),
-        triggerClasses.wrapper,
+        triggerWrapperClassName,
         inputGroup != null ? className : undefined,
       )}
       onClick={() => {
@@ -622,6 +640,7 @@ export function MultiSelect({
       status={
         status == null ? undefined : {...status, messageID: statusMessageID}
       }
+      statusVariant={variant === 'outline' ? 'attached' : 'detached'}
       style={style}>
       {htmlName == null
         ? null

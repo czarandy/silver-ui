@@ -1,11 +1,14 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Columns3, User} from 'lucide-react';
+import {Columns3, Filter, User} from 'lucide-react';
 import {useState} from 'react';
+import {Button} from 'components/Button';
 import {
   MultiSelect,
   type MultiSelectProps,
 } from 'components/MultiSelect/MultiSelect';
 import {SelectOption} from 'components/Select';
+import {VStack} from 'components/Stack';
+import {Toolbar} from 'components/Toolbar';
 
 const options = [
   {label: 'Name', value: 'name'},
@@ -49,6 +52,12 @@ const meta = {
     label: 'Columns',
     options,
     placeholder: 'Select columns',
+  },
+  argTypes: {
+    variant: {
+      control: {type: 'select'},
+      options: ['outline', 'ghost', 'button'],
+    },
   },
 } satisfies Meta<MultiSelectProps>;
 
@@ -116,6 +125,52 @@ function CustomOptionsStory(args: React.ComponentProps<typeof MultiSelect>) {
   );
 }
 
+function TriggerVariantsStory(args: React.ComponentProps<typeof MultiSelect>) {
+  const [ghostValue, setGhostValue] = useState<string[]>(['name', 'email']);
+  const [buttonValue, setButtonValue] = useState<string[]>(['role']);
+
+  return (
+    <VStack gap={2} width="full">
+      <Toolbar
+        dividers={['bottom']}
+        label="Ghost trigger example"
+        size="sm"
+        startContent={
+          <>
+            <Button icon={Filter} label="Filter" variant="ghost" />
+            <MultiSelect
+              {...args}
+              isLabelHidden
+              label="Column filter"
+              onChange={setGhostValue}
+              value={ghostValue}
+              variant="ghost"
+            />
+          </>
+        }
+      />
+      <Toolbar
+        dividers={['bottom']}
+        label="Button trigger example"
+        size="sm"
+        startContent={
+          <>
+            <Button icon={Filter} label="Filter" variant="secondary" />
+            <MultiSelect
+              {...args}
+              isLabelHidden
+              label="Column filter"
+              onChange={setButtonValue}
+              value={buttonValue}
+              variant="button"
+            />
+          </>
+        }
+      />
+    </VStack>
+  );
+}
+
 export const Default: Story = {
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
 };
@@ -130,6 +185,17 @@ export const Searchable: Story = {
     },
   },
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
+};
+export const TriggerVariants: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Ghost triggers share the same hover and focus treatment as ghost Buttons. Button triggers use the standard secondary Button surface. Both inherit their small size from Toolbar.',
+      },
+    },
+  },
+  render: (args: MultiSelectProps) => <TriggerVariantsStory {...args} />,
 };
 export const Badges: Story = {
   args: {triggerDisplay: 'badges'},

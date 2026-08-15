@@ -1,3 +1,4 @@
+import {getButtonSurfaceStyles} from 'components/Button/Button.recipe';
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const selectMenuRecipe = sva({
@@ -121,6 +122,45 @@ export const selectTriggerRecipe = sva({
     },
   },
   variants: {
+    variant: {
+      outline: {},
+      ghost: {
+        wrapper: {
+          borderWidth: 0,
+          borderStyle: 'none',
+          borderColor: 'transparent',
+          transitionProperty: 'background-color, opacity',
+          _focusWithin: {
+            borderColor: 'transparent',
+            boxShadow: 'none',
+            outlineWidth: 'focus',
+            outlineStyle: 'solid',
+            outlineColor: 'primary',
+            outlineOffset: 'focusOffsetLoose',
+            _hover: {borderColor: 'transparent'},
+          },
+          ...getButtonSurfaceStyles('ghost'),
+        },
+      },
+      button: {
+        wrapper: {
+          borderWidth: 0,
+          borderStyle: 'none',
+          borderColor: 'transparent',
+          transitionProperty: 'background-color, opacity',
+          _focusWithin: {
+            borderColor: 'transparent',
+            boxShadow: 'none',
+            outlineWidth: 'focus',
+            outlineStyle: 'solid',
+            outlineColor: 'primary',
+            outlineOffset: 'focusOffsetLoose',
+            _hover: {borderColor: 'transparent'},
+          },
+          ...getButtonSurfaceStyles('secondary'),
+        },
+      },
+    },
     isDisabled: {
       true: {wrapper: {cursor: 'not-allowed'}},
       false: {},
@@ -137,7 +177,30 @@ export const selectTriggerRecipe = sva({
       false: {},
     },
   },
+  compoundVariants: [
+    {
+      variant: 'ghost',
+      isDisabled: true,
+      css: {
+        wrapper: {
+          _hover: {bg: 'transparent'},
+          _active: {bg: 'transparent'},
+        },
+      },
+    },
+    {
+      variant: 'button',
+      isDisabled: true,
+      css: {
+        wrapper: {
+          _hover: {bg: 'surface.gray'},
+          _active: {bg: 'surface.gray'},
+        },
+      },
+    },
+  ],
   defaultVariants: {
+    variant: 'outline',
     isDisabled: false,
     isReadOnly: false,
     isPlaceholder: false,

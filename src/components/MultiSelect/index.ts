@@ -6,4 +6,5 @@ export {
   type MultiSelectProps,
   type MultiSelectSection,
   type MultiSelectTriggerDisplay,
+  type MultiSelectVariant,
 } from 'components/MultiSelect/MultiSelect';
