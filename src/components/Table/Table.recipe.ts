@@ -100,6 +100,11 @@ export const tableRecipe = sva({
             borderTopColor: 'border',
           },
         },
+        headerCell: {
+          'tbody > tr:last-child > &': {
+            borderBottomWidth: 0,
+          },
+        },
       },
       columns: {
         cell: {
@@ -140,6 +145,9 @@ export const tableRecipe = sva({
           },
         },
         headerCell: {
+          'tbody > tr:last-child > &': {
+            borderBottomWidth: 0,
+          },
           borderInlineEndWidth: 'default',
           borderInlineEndStyle: 'solid',
           borderInlineEndColor: 'border',
