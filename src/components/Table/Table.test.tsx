@@ -323,6 +323,44 @@ describe('Table', () => {
     expectRowDividerReset();
   });
 
+  it('suppresses row dividers on a final semantic row header', () => {
+    const renderTable = (dividers: 'grid' | 'rows') => (
+      <Table dividers={dividers}>
+        <TableBody>
+          <TableRow>
+            <TableHeaderCell scope="row">January 2026</TableHeaderCell>
+            <TableCell>$100.00</TableCell>
+          </TableRow>
+          <TableRow>
+            <TableHeaderCell scope="row">Totals</TableHeaderCell>
+            <TableCell>$100.00</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
+    const {rerender} = render(renderTable('rows'));
+
+    const expectRowHeaderDividerReset = () => {
+      const firstRowHeader = screen.getByRole('rowheader', {
+        name: 'January 2026',
+      });
+      const lastRowHeader = screen.getByRole('rowheader', {name: 'Totals'});
+
+      expect(firstRowHeader).toHaveClass(rowDividerWidthClass);
+      expect(firstRowHeader).toHaveClass(lastBodyRowDividerResetClass);
+      expect(firstRowHeader.matches('tbody > tr:last-child > th')).toBe(false);
+      expect(lastRowHeader).toHaveClass(rowDividerWidthClass);
+      expect(lastRowHeader).toHaveClass(lastBodyRowDividerResetClass);
+      expect(lastRowHeader.matches('tbody > tr:last-child > th')).toBe(true);
+    };
+
+    expectRowHeaderDividerReset();
+
+    rerender(renderTable('grid'));
+
+    expectRowHeaderDividerReset();
+  });
+
   it('does not add final body row divider reset for column or no dividers', () => {
     const {rerender} = render(
       <Table columns={columns} data={data} dividers="columns" />,
@@ -339,6 +377,30 @@ describe('Table', () => {
       expect(cell).not.toHaveClass(rowDividerWidthClass);
       expect(cell).not.toHaveClass(lastBodyRowDividerResetClass);
     }
+  });
+
+  it('does not reset semantic row header dividers for column or no dividers', () => {
+    const renderTable = (dividers: 'columns' | 'none') => (
+      <Table dividers={dividers}>
+        <TableBody>
+          <TableRow>
+            <TableHeaderCell scope="row">Totals</TableHeaderCell>
+            <TableCell>$100.00</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    );
+    const {rerender} = render(renderTable('columns'));
+
+    expect(screen.getByRole('rowheader', {name: 'Totals'})).not.toHaveClass(
+      lastBodyRowDividerResetClass,
+    );
+
+    rerender(renderTable('none'));
+
+    expect(screen.getByRole('rowheader', {name: 'Totals'})).not.toHaveClass(
+      lastBodyRowDividerResetClass,
+    );
   });
 
   const manualTableChildren = (
