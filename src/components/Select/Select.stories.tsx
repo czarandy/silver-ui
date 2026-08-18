@@ -2,9 +2,14 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {BriefcaseBusiness, Filter, User} from 'lucide-react';
 import {useState} from 'react';
 import {Button} from 'components/Button';
-import {Select, type SelectProps} from 'components/Select/Select';
+import {
+  Select,
+  type SelectOptionData,
+  type SelectProps,
+} from 'components/Select/Select';
 import {SelectOption} from 'components/Select/SelectOption';
 import {VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 import {Toolbar} from 'components/Toolbar';
 
 const peopleOptions = [
@@ -12,6 +17,33 @@ const peopleOptions = [
   {label: 'Grace Hopper', value: 'grace'},
   {label: 'Katherine Johnson', value: 'katherine'},
 ];
+
+type PersonAuxiliaryData = {email: string; role: string};
+
+const peopleOptionsWithAuxiliaryData: SelectOptionData<PersonAuxiliaryData>[] =
+  [
+    {
+      auxiliaryData: {
+        email: 'ada@example.com',
+        role: 'Mathematician',
+      },
+      label: 'Ada Lovelace',
+      value: 'ada',
+    },
+    {
+      auxiliaryData: {email: 'grace@example.com', role: 'Engineer'},
+      label: 'Grace Hopper',
+      value: 'grace',
+    },
+    {
+      auxiliaryData: {
+        email: 'katherine@example.com',
+        role: 'Mathematician',
+      },
+      label: 'Katherine Johnson',
+      value: 'katherine',
+    },
+  ];
 
 const disabledOptions: SelectProps['options'] = [
   {label: 'Ada Lovelace', value: 'ada'},
@@ -122,6 +154,39 @@ function CustomOptionsStory(args: React.ComponentProps<typeof Select>) {
   );
 }
 
+function AuxiliaryDataStory() {
+  const [value, setValue] = useState<string | null>('ada');
+  const [selectedData, setSelectedData] = useState<PersonAuxiliaryData | null>(
+    peopleOptionsWithAuxiliaryData[0]?.auxiliaryData ?? null,
+  );
+
+  return (
+    <VStack align="start" gap={2}>
+      <Select<PersonAuxiliaryData>
+        hasClear
+        label="Assignee"
+        onChange={(nextValue, option) => {
+          setValue(nextValue);
+          setSelectedData(option?.auxiliaryData ?? null);
+        }}
+        options={peopleOptionsWithAuxiliaryData}
+        renderOption={option => (
+          <SelectOption
+            description={option.auxiliaryData?.role}
+            label={option.label ?? option.value}
+          />
+        )}
+        value={value}
+      />
+      <Text color="secondary" type="supporting">
+        {selectedData == null
+          ? 'No payload selected'
+          : `Selected payload: ${selectedData.email} (${selectedData.role})`}
+      </Text>
+    </VStack>
+  );
+}
+
 function OptionLabelTooltipsStory(args: React.ComponentProps<typeof Select>) {
   const [value, setValue] = useState<string | null>('ada');
   return (
@@ -224,6 +289,18 @@ export const TriggerVariants: Story = {
 
 export const CustomOptions: Story = {
   render: (args: SelectProps) => <CustomOptionsStory {...args} />,
+};
+
+export const AuxiliaryData: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Option values remain stable strings while typed auxiliary data is available to custom rendering and the selection callback.',
+      },
+    },
+  },
+  render: () => <AuxiliaryDataStory />,
 };
 
 export const OptionLabelTooltips: Story = {
