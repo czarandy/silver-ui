@@ -7,7 +7,11 @@ import {getButtonSurfaceStyles} from 'components/Button/Button.recipe';
 import {inputRecipe} from 'components/Field/inputStyles';
 import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
-import {Select, type SelectVariant} from 'components/Select/Select';
+import {
+  Select,
+  type SelectOptionData,
+  type SelectVariant,
+} from 'components/Select/Select';
 import {
   selectOptionItemRecipe,
   selectTriggerRecipe,
@@ -107,7 +111,70 @@ describe('Select', () => {
 
     await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
     await user.click(screen.getByText('Banana'));
-    expect(onChange).toHaveBeenCalledWith('Banana');
+    expect(onChange).toHaveBeenCalledWith('Banana', {
+      label: 'Banana',
+      value: 'Banana',
+    });
+  });
+
+  it('provides typed auxiliary data with the selected option', async () => {
+    const user = userEvent.setup();
+    type PersonData = {email: string; role: string};
+    const graceData = {
+      email: 'grace@example.com',
+      role: 'Engineer',
+    };
+    const options: SelectOptionData<PersonData>[] = [
+      {
+        auxiliaryData: {
+          email: 'ada@example.com',
+          role: 'Mathematician',
+        },
+        label: 'Ada Lovelace',
+        value: 'ada',
+      },
+      {
+        auxiliaryData: graceData,
+        label: 'Grace Hopper',
+        value: 'grace',
+      },
+    ];
+    const onChange =
+      vi.fn<
+        (
+          value: string | null,
+          option: SelectOptionData<PersonData> | null,
+        ) => void
+      >();
+
+    render(
+      <Select<PersonData>
+        label="Person"
+        onChange={onChange}
+        options={options}
+        renderOption={option => (
+          <SelectOption
+            description={option.auxiliaryData?.role}
+            label={option.label ?? option.value}
+          />
+        )}
+        value="ada"
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Person'}));
+    expect(screen.getByText('Engineer')).toBeInTheDocument();
+    await user.click(screen.getByText('Grace Hopper'));
+
+    expect(onChange).toHaveBeenCalledWith(
+      'grace',
+      expect.objectContaining({
+        auxiliaryData: graceData,
+        label: 'Grace Hopper',
+        value: 'grace',
+      }),
+    );
+    expect(onChange.mock.calls[0]?.[1]?.auxiliaryData).toBe(graceData);
   });
 
   it('uses the existing outline trigger by default', () => {
@@ -179,7 +246,10 @@ describe('Select', () => {
       await user.click(trigger);
       expect(trigger).toHaveAttribute('aria-expanded', 'true');
       await user.click(screen.getByText('Banana'));
-      expect(onChange).toHaveBeenCalledWith('Banana');
+      expect(onChange).toHaveBeenCalledWith('Banana', {
+        label: 'Banana',
+        value: 'Banana',
+      });
     },
   );
 
@@ -245,7 +315,7 @@ describe('Select', () => {
     );
 
     await user.click(screen.getByRole('button', {name: 'Clear Fruit'}));
-    expect(onChange).toHaveBeenCalledWith(null);
+    expect(onChange).toHaveBeenCalledWith(null, null);
   });
 
   it('supports custom option rendering', async () => {
@@ -305,7 +375,10 @@ describe('Select', () => {
 
     await user.keyboard('{ArrowDown}');
     await user.keyboard('{Enter}');
-    expect(onChange).toHaveBeenCalledWith('Banana');
+    expect(onChange).toHaveBeenCalledWith('Banana', {
+      label: 'Banana',
+      value: 'Banana',
+    });
   });
 
   it('selects options by typing while closed', async () => {
@@ -330,7 +403,10 @@ describe('Select', () => {
     await user.keyboard('ca');
 
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(onChange).toHaveBeenLastCalledWith('CA');
+    expect(onChange).toHaveBeenLastCalledWith('CA', {
+      label: 'California',
+      value: 'CA',
+    });
   });
 
   it('cycles through options starting with the same typed character', async () => {
@@ -630,7 +706,10 @@ describe('Select', () => {
     expect(screen.getByRole('separator', {hidden: true})).toBeInTheDocument();
 
     await user.click(screen.getByText('Katherine Johnson'));
-    expect(onChange).toHaveBeenCalledWith('katherine');
+    expect(onChange).toHaveBeenCalledWith('katherine', {
+      label: 'Katherine Johnson',
+      value: 'katherine',
+    });
   });
 
   it('hides sections and their dividers when the query filters out every option in them', async () => {

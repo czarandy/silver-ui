@@ -45,7 +45,13 @@ import {cx} from 'utils/cx';
 
 const menuClasses = selectMenuRecipe();
 
-export interface SelectOptionData extends SelectListboxOptionData {
+export interface SelectOptionData<
+  TAuxiliaryData = unknown,
+> extends SelectListboxOptionData {
+  /**
+   * Custom data associated with the option.
+   */
+  auxiliaryData?: TAuxiliaryData;
   /**
    * Icon displayed before the label.
    */
@@ -71,11 +77,11 @@ export interface SelectDivider {
   type: 'divider';
 }
 
-export interface SelectSection {
+export interface SelectSection<TAuxiliaryData = unknown> {
   /**
    * Options within this section.
    */
-  options: ReadonlyArray<SelectOptionData>;
+  options: ReadonlyArray<SelectOptionData<TAuxiliaryData>>;
   /**
    * Optional heading text for the section.
    */
@@ -86,12 +92,15 @@ export interface SelectSection {
   type: 'section';
 }
 
-export type SelectOptionDefinition =
-  SelectDivider | SelectOptionData | SelectSection | string;
+export type SelectOptionDefinition<TAuxiliaryData = unknown> =
+  | SelectDivider
+  | SelectOptionData<TAuxiliaryData>
+  | SelectSection<TAuxiliaryData>
+  | string;
 
 export type SelectVariant = 'button' | 'ghost' | 'outline';
 
-export type SelectProps = {
+export type SelectProps<TAuxiliaryData = unknown> = {
   /**
    * Additional CSS class names applied to the field root.
    */
@@ -151,13 +160,17 @@ export type SelectProps = {
    */
   labelTooltip?: ReactNode;
   /**
-   * Called when selection changes.
+   * Called when selection changes. The selected option is provided as the
+   * second argument, or `null` when the selection is cleared.
    */
-  onChange: (value: string | null) => void;
+  onChange: (
+    value: string | null,
+    option: SelectOptionData<TAuxiliaryData> | null,
+  ) => void;
   /**
    * Options to display.
    */
-  options: ReadonlyArray<SelectOptionDefinition>;
+  options: ReadonlyArray<SelectOptionDefinition<TAuxiliaryData>>;
   /**
    * Placeholder shown when no option is selected.
    * @default 'Select...'
@@ -170,7 +183,7 @@ export type SelectProps = {
   /**
    * Custom render function for selectable options.
    */
-  renderOption?: (option: SelectOptionData) => ReactNode;
+  renderOption?: (option: SelectOptionData<TAuxiliaryData>) => ReactNode;
   /**
    * Search input placeholder.
    * @default 'Search...'
@@ -207,7 +220,7 @@ export type SelectProps = {
 /**
  * Single-select dropdown field.
  */
-export function Select({
+export function Select<TAuxiliaryData = unknown>({
   className,
   'data-testid': dataTestId,
   description,
@@ -235,7 +248,7 @@ export function Select({
   style,
   value,
   variant = 'outline',
-}: SelectProps): React.JSX.Element {
+}: SelectProps<TAuxiliaryData>): React.JSX.Element {
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
   const effectiveDisabled =
@@ -257,12 +270,12 @@ export function Select({
   );
 
   const commitOption = useCallback(
-    (option: SelectOptionData): boolean => {
+    (option: SelectOptionData<TAuxiliaryData>): boolean => {
       if (effectiveReadOnly || option.isDisabled) {
         return false;
       }
 
-      onChange(option.value);
+      onChange(option.value, option);
       return true;
     },
     [effectiveReadOnly, onChange],
@@ -316,7 +329,7 @@ export function Select({
   );
 
   const renderOption = useCallback(
-    (option: SelectOptionData): ReactNode => {
+    (option: SelectOptionData<TAuxiliaryData>): ReactNode => {
       if (!filteredValues.has(option.value)) {
         return null;
       }
@@ -493,7 +506,7 @@ export function Select({
           label={`Clear ${label}`}
           onClick={event => {
             event.stopPropagation();
-            onChange(null);
+            onChange(null, null);
           }}
           size="sm"
           variant="ghost"
