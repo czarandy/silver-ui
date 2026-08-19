@@ -35,7 +35,10 @@ type NativeHeadingProps = Omit<
 
 export interface HeadingProps extends NativeHeadingProps {
   /**
-   * Overrides the ARIA heading level independently of the rendered element.
+   * Overrides the exposed heading level. The rendered h1-h6 element follows
+   * this value while `level` keeps driving the typography, because browsers and
+   * testing tools read the heading level from the element name rather than from
+   * `aria-level`.
    */
   accessibilityLevel?: HeadingLevel;
   /**
@@ -66,7 +69,8 @@ export interface HeadingProps extends NativeHeadingProps {
    */
   hasStrikethrough?: boolean;
   /**
-   * Semantic heading level that determines the rendered h1-h6 element.
+   * Semantic heading level that determines the typography and the rendered
+   * h1-h6 element, unless `accessibilityLevel` overrides the element.
    */
   level: HeadingLevel;
   /**
@@ -123,16 +127,11 @@ function BaseHeading({
   ref,
   ...props
 }: HeadingProps): JSX.Element {
-  const Component = levelToElement[level];
-  const ariaLevel =
-    accessibilityLevel != null && accessibilityLevel !== level
-      ? accessibilityLevel
-      : undefined;
+  const Component = levelToElement[accessibilityLevel ?? level];
 
   return (
     <Component
       {...props}
-      aria-level={ariaLevel}
       className={cx(
         headingRecipe({
           level,
@@ -207,17 +206,12 @@ function TruncatedHeading({
 
   const lineClampStyle: CSSProperties | undefined =
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
-  const Component = levelToElement[level];
-  const ariaLevel =
-    accessibilityLevel != null && accessibilityLevel !== level
-      ? accessibilityLevel
-      : undefined;
+  const Component = levelToElement[accessibilityLevel ?? level];
 
   return (
     <>
       <Component
         {...props}
-        aria-level={ariaLevel}
         className={cx(
           headingRecipe({
             level,

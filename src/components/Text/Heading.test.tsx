@@ -24,16 +24,45 @@ describe('Heading', () => {
     );
   });
 
-  it('sets aria-level when accessibilityLevel differs', () => {
+  it('renders the element for accessibilityLevel while keeping level typography', () => {
     render(
-      <Heading accessibilityLevel={3} level={2}>
-        Sidebar section
+      <>
+        <Heading accessibilityLevel={3} level={2}>
+          Sidebar section
+        </Heading>
+        <Heading data-testid="typography-reference" level={2}>
+          Reference
+        </Heading>
+      </>,
+    );
+
+    const heading = screen.getByRole('heading', {level: 3});
+    expect(heading).toHaveTextContent('Sidebar section');
+    expect(heading).toHaveProperty('tagName', 'H3');
+    expect(heading).toHaveClass(
+      ...screen.getByTestId('typography-reference').classList,
+    );
+  });
+
+  it('renders the element for accessibilityLevel when truncating', () => {
+    render(
+      <Heading accessibilityLevel={2} level={3} maxLines={1}>
+        Truncated section
       </Heading>,
     );
-    expect(screen.getByText('Sidebar section')).toHaveAttribute(
-      'aria-level',
-      '3',
+
+    const heading = screen.getByRole('heading', {level: 2});
+    expect(heading).toHaveProperty('tagName', 'H2');
+    expect(screen.queryByRole('heading', {level: 3})).not.toBeInTheDocument();
+  });
+
+  it('does not set aria-level, which browsers ignore on native headings', () => {
+    render(
+      <Heading accessibilityLevel={2} level={3}>
+        Section
+      </Heading>,
     );
+    expect(screen.getByText('Section')).not.toHaveAttribute('aria-level');
   });
 
   it('sets line clamp style for multiline truncation', () => {
@@ -57,13 +86,16 @@ describe('Heading', () => {
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLHeadingElement));
   });
 
-  it('does not set aria-level when accessibilityLevel equals level', () => {
+  it('renders the level element when accessibilityLevel equals level', () => {
     render(
       <Heading accessibilityLevel={2} level={2}>
         Same level
       </Heading>,
     );
-    expect(screen.getByText('Same level')).not.toHaveAttribute('aria-level');
+
+    const heading = screen.getByRole('heading', {level: 2});
+    expect(heading).toHaveProperty('tagName', 'H2');
+    expect(heading).not.toHaveAttribute('aria-level');
   });
 
   it('merges custom className with recipe classes', () => {
