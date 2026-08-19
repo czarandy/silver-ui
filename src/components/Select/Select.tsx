@@ -123,6 +123,12 @@ export type SelectProps<TAuxiliaryData = unknown> = {
    */
   htmlName?: string;
   /**
+   * Whether focusing the trigger opens the option list. Pointer presses keep
+   * their ordinary click-to-toggle behaviour.
+   * @default false
+   */
+  hasEntriesOnFocus?: boolean;
+  /**
    * Whether to show search input in the dropdown.
    * @default false
    */
@@ -225,6 +231,7 @@ export function Select<TAuxiliaryData = unknown>({
   'data-testid': dataTestId,
   description,
   hasClear = false,
+  hasEntriesOnFocus = false,
   hasSearch = false,
   htmlName,
   isDisabled = false,
@@ -290,6 +297,10 @@ export function Select<TAuxiliaryData = unknown>({
     handleKeyboardNavigation,
     handleOptionClick,
     handleOptionMouseEnter,
+    handleTriggerBlur,
+    handleTriggerClick,
+    handleTriggerFocus,
+    handleTriggerPointerDown,
     highlightedValue,
     inputId,
     isInteractionDisabled,
@@ -304,10 +315,12 @@ export function Select<TAuxiliaryData = unknown>({
     triggerRef,
   } = useSelectListbox({
     description,
+    hasEntriesOnFocus,
     isDisabled: effectiveDisabled,
     isLoading,
     isListboxClosedOnCommit: true,
     isQueryClearedOnCommit: true,
+    isReadOnly: effectiveReadOnly,
     isTypeaheadEnabled: true,
     onCommitOption: commitOption,
     options,
@@ -450,11 +463,7 @@ export function Select<TAuxiliaryData = unknown>({
         triggerWrapperClassName,
         inputGroup != null ? className : undefined,
       )}
-      onClick={() => {
-        if (!isInteractionDisabled && !effectiveReadOnly) {
-          setIsOpen(currentIsOpen => !currentIsOpen);
-        }
-      }}
+      onClick={handleTriggerClick}
       onClickCapture={
         effectiveReadOnly ? preventReadOnlyInteraction : undefined
       }
@@ -462,6 +471,7 @@ export function Select<TAuxiliaryData = unknown>({
       onKeyDownCapture={
         effectiveReadOnly ? preventReadOnlyInteraction : undefined
       }
+      onPointerDown={handleTriggerPointerDown}
       onPointerDownCapture={
         effectiveReadOnly ? preventReadOnlyInteraction : undefined
       }
@@ -486,6 +496,8 @@ export function Select<TAuxiliaryData = unknown>({
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
         id={inputId}
+        onBlur={handleTriggerBlur}
+        onFocus={handleTriggerFocus}
         onKeyDown={handleKeyboardNavigation}
         ref={mergeRefs(ref, buttonRef)}
         role="combobox"

@@ -1,4 +1,4 @@
-import {fireEvent, render, screen, within} from '@testing-library/react';
+import {act, fireEvent, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
@@ -16,6 +16,14 @@ import {SizeContext} from 'internal/SizeContext';
 import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 import {assertNonNull} from 'internal/testHelpers';
 import {css} from 'styled-system/css';
+
+async function nextAnimationFrame(): Promise<void> {
+  await act(async () => {
+    await new Promise(resolve => {
+      requestAnimationFrame(() => resolve(undefined));
+    });
+  });
+}
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -900,6 +908,158 @@ describe('MultiSelect', () => {
     expect(
       screen.getByRole('listbox', {hidden: true, name: 'Columns options'}),
     ).toBeInTheDocument();
+  });
+
+  it('opens the options when the trigger is focused with hasEntriesOnFocus', () => {
+    render(
+      <MultiSelect
+        hasEntriesOnFocus
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={[]}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.focus(trigger);
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Name'}),
+    ).toBeInTheDocument();
+  });
+
+  it('stays closed on focus without hasEntriesOnFocus', () => {
+    render(
+      <MultiSelect
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={[]}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    fireEvent.focus(trigger);
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('does not open on focus when disabled or read-only', () => {
+    const {rerender} = render(
+      <MultiSelect
+        hasEntriesOnFocus
+        isDisabled
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={[]}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    fireEvent.focus(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    rerender(
+      <MultiSelect
+        hasEntriesOnFocus
+        isReadOnly
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={[]}
+      />,
+    );
+
+    fireEvent.focus(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('toggles on pointer clicks with hasEntriesOnFocus', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MultiSelect
+        hasEntriesOnFocus
+        label="Columns"
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        value={[]}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+
+    // The press focuses the trigger before it clicks it, and that focus must not
+    // open the listbox -- the click owns the toggle.
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('keeps the options open while selecting with hasEntriesOnFocus', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <MultiSelect
+        hasEntriesOnFocus
+        label="Columns"
+        onChange={onChange}
+        options={['Name', 'Email']}
+        value={[]}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    fireEvent.focus(trigger);
+
+    await user.click(screen.getByRole('option', {hidden: true, name: 'Email'}));
+
+    expect(onChange).toHaveBeenCalledWith(['Email']);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('reopens on focus once focus has left the trigger', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <MultiSelect
+          hasEntriesOnFocus
+          label="Columns"
+          onChange={() => {}}
+          options={['Name', 'Email']}
+          value={[]}
+        />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    act(() => {
+      trigger.focus();
+    });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await user.keyboard('{Escape}');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    act(() => {
+      screen.getByRole('button', {name: 'Elsewhere'}).focus();
+    });
+    await nextAnimationFrame();
+    act(() => {
+      trigger.focus();
+    });
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });
 
   describe('inside an InputGroup', () => {

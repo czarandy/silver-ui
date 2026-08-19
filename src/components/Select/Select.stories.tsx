@@ -275,6 +275,19 @@ export const Searchable: Story = {
   render: (args: SelectProps) => <SelectStory {...args} />,
 };
 
+export const EntriesOnFocus: Story = {
+  args: {hasEntriesOnFocus: true},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `hasEntriesOnFocus`, tabbing to the trigger opens the option list right away, matching AutocompleteInput. Clicking the trigger still toggles it.',
+      },
+    },
+  },
+  render: (args: SelectProps) => <EmptySelectStory {...args} />,
+};
+
 export const TriggerVariants: Story = {
   parameters: {
     docs: {
