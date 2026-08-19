@@ -123,6 +123,12 @@ export type MultiSelectProps = {
    */
   htmlName?: string;
   /**
+   * Whether focusing the trigger opens the option list. Pointer presses keep
+   * their ordinary click-to-toggle behaviour.
+   * @default false
+   */
+  hasEntriesOnFocus?: boolean;
+  /**
    * Whether to show search input in the dropdown.
    * @default false
    */
@@ -243,6 +249,7 @@ export function MultiSelect({
   'data-testid': dataTestId,
   description,
   hasClear = false,
+  hasEntriesOnFocus = false,
   hasSearch = false,
   hasSelectAll = false,
   htmlName,
@@ -315,6 +322,10 @@ export function MultiSelect({
     handleKeyboardNavigation,
     handleOptionClick,
     handleOptionMouseEnter,
+    handleTriggerBlur,
+    handleTriggerClick,
+    handleTriggerFocus,
+    handleTriggerPointerDown,
     highlightedValue,
     inputId,
     isInteractionDisabled,
@@ -330,10 +341,12 @@ export function MultiSelect({
     visibleSelectableOptions,
   } = useSelectListbox({
     description,
+    hasEntriesOnFocus,
     isDefaultOpen: isDefaultOpen && !isReadOnly,
     isDisabled,
     isHighlightClearedOnCommit: false,
     isLoading,
+    isReadOnly,
     onCommitOption: toggleValue,
     options,
     selectedValues,
@@ -544,14 +557,11 @@ export function MultiSelect({
         triggerWrapperClassName,
         inputGroup != null ? className : undefined,
       )}
-      onClick={() => {
-        if (!isInteractionDisabled && !isReadOnly) {
-          setIsOpen(currentIsOpen => !currentIsOpen);
-        }
-      }}
+      onClick={handleTriggerClick}
       onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
       onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onPointerDown={handleTriggerPointerDown}
       onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       ref={triggerRef}
       style={inputGroup != null ? style : undefined}>
@@ -574,6 +584,8 @@ export function MultiSelect({
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
         id={inputId}
+        onBlur={handleTriggerBlur}
+        onFocus={handleTriggerFocus}
         onKeyDown={handleKeyboardNavigation}
         ref={mergeRefs(ref, buttonRef)}
         role="combobox"

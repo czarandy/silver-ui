@@ -186,6 +186,18 @@ export const Searchable: Story = {
   },
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
 };
+export const EntriesOnFocus: Story = {
+  args: {hasEntriesOnFocus: true},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With `hasEntriesOnFocus`, tabbing to the trigger opens the option list right away, matching AutocompleteInput. Clicking the trigger still toggles it.',
+      },
+    },
+  },
+  render: (args: MultiSelectProps) => <EmptyMultiSelectStory {...args} />,
+};
 export const TriggerVariants: Story = {
   parameters: {
     docs: {

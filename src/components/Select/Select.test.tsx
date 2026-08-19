@@ -1,4 +1,4 @@
-import {fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Search, User} from 'lucide-react';
 import {useState} from 'react';
@@ -21,6 +21,14 @@ import {SizeContext} from 'internal/SizeContext';
 import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 import {assertNonNull} from 'internal/testHelpers';
 import {css} from 'styled-system/css';
+
+async function nextAnimationFrame(): Promise<void> {
+  await act(async () => {
+    await new Promise(resolve => {
+      requestAnimationFrame(() => resolve(undefined));
+    });
+  });
+}
 
 beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
@@ -1025,6 +1033,242 @@ describe('SelectOption', () => {
     expect(screen.getByText('Ada Lovelace').parentElement).toContainElement(
       infoIcon,
     );
+  });
+
+  it('opens the options when the trigger is focused with hasEntriesOnFocus', () => {
+    render(
+      <Select
+        hasEntriesOnFocus
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.focus(trigger);
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByRole('option', {hidden: true, name: 'Apple'}),
+    ).toBeInTheDocument();
+  });
+
+  it('stays closed on focus without hasEntriesOnFocus', () => {
+    render(
+      <Select
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    fireEvent.focus(trigger);
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('does not open on focus when disabled or read-only', () => {
+    const {rerender} = render(
+      <Select
+        hasEntriesOnFocus
+        isDisabled
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    fireEvent.focus(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    rerender(
+      <Select
+        hasEntriesOnFocus
+        isReadOnly
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    fireEvent.focus(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('toggles on pointer clicks with hasEntriesOnFocus', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Select
+        hasEntriesOnFocus
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+
+    // The press focuses the trigger before it clicks it, and that focus must not
+    // open the listbox -- the click owns the toggle.
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('does not reopen when closing returns focus to the trigger', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Select
+        hasEntriesOnFocus
+        hasSearch
+        label="Fruit"
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    act(() => {
+      trigger.focus();
+    });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    // The search field takes focus, so closing restores focus to the trigger.
+    await waitFor(() =>
+      expect(screen.getByLabelText('Search Fruit')).toHaveFocus(),
+    );
+    await user.keyboard('{Escape}');
+
+    expect(trigger).toHaveFocus();
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('stays closed after selecting an option returns focus to the trigger', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <Select
+        hasEntriesOnFocus
+        hasSearch
+        label="Fruit"
+        onChange={onChange}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    act(() => {
+      trigger.focus();
+    });
+    await waitFor(() =>
+      expect(screen.getByLabelText('Search Fruit')).toHaveFocus(),
+    );
+
+    await user.click(
+      screen.getByRole('option', {hidden: true, name: 'Banana'}),
+    );
+
+    expect(onChange).toHaveBeenCalledWith('Banana', {
+      label: 'Banana',
+      value: 'Banana',
+    });
+    expect(trigger).toHaveFocus();
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('reopens on focus after the listbox is dismissed from outside', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <Select
+          hasEntriesOnFocus
+          label="Fruit"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          value={null}
+        />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    // A click outside moves focus away and only then light-dismisses the
+    // popover, so the close lands after the trigger has already blurred.
+    act(() => {
+      screen.getByRole('button', {name: 'Elsewhere'}).focus();
+    });
+    fireEvent(
+      // eslint-disable-next-line testing-library/no-node-access -- the native popover element carries the toggle listener and has no accessible role
+      assertNonNull(document.querySelector('[popover]')),
+      Object.assign(new Event('toggle'), {
+        newState: 'closed',
+        oldState: 'open',
+      }),
+    );
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await nextAnimationFrame();
+
+    act(() => {
+      trigger.focus();
+    });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('reopens on focus once focus has left the trigger', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <>
+        <Select
+          hasEntriesOnFocus
+          label="Fruit"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          value={null}
+        />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+
+    const trigger = screen.getByRole('combobox', {name: 'Fruit'});
+    act(() => {
+      trigger.focus();
+    });
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    await user.keyboard('{Escape}');
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    act(() => {
+      screen.getByRole('button', {name: 'Elsewhere'}).focus();
+    });
+    await nextAnimationFrame();
+    act(() => {
+      trigger.focus();
+    });
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });
 
   describe('inside an InputGroup', () => {

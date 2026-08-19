@@ -66,12 +66,14 @@ function getSelectListboxOptions<TOption extends SelectListboxOptionData>(
 
 export type UseSelectListboxOptions<TOption extends SelectListboxOptionData> = {
   description: ReactNode;
+  hasEntriesOnFocus?: boolean;
   isDefaultOpen?: boolean;
   isDisabled?: boolean;
   isHighlightClearedOnCommit?: boolean;
   isLoading?: boolean;
   isListboxClosedOnCommit?: boolean;
   isQueryClearedOnCommit?: boolean;
+  isReadOnly?: boolean;
   isTypeaheadEnabled?: boolean;
   onCommitOption: (option: TOption) => unknown;
   options: ReadonlyArray<SelectListboxOption<TOption>>;
@@ -90,6 +92,10 @@ export type UseSelectListboxResult<TOption extends SelectListboxOptionData> = {
   ) => void;
   handleOptionClick: (event: MouseEvent<HTMLElement>) => void;
   handleOptionMouseEnter: (event: MouseEvent<HTMLElement>) => void;
+  handleTriggerBlur: () => void;
+  handleTriggerClick: () => void;
+  handleTriggerFocus: () => void;
+  handleTriggerPointerDown: () => void;
   highlightedValue: string | null;
   inputId: string;
   isInteractionDisabled: boolean;
@@ -108,12 +114,14 @@ export type UseSelectListboxResult<TOption extends SelectListboxOptionData> = {
 
 export function useSelectListbox<TOption extends SelectListboxOptionData>({
   description,
+  hasEntriesOnFocus = false,
   isDefaultOpen = false,
   isDisabled = false,
   isHighlightClearedOnCommit = true,
   isLoading = false,
   isListboxClosedOnCommit = false,
   isQueryClearedOnCommit = false,
+  isReadOnly = false,
   isTypeaheadEnabled = false,
   onCommitOption,
   options,
@@ -128,6 +136,40 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const [isOpen, setIsOpen] = useState(isDefaultOpen);
   const [query, setQuery] = useState('');
+  // `hasEntriesOnFocus` opens the listbox as soon as the trigger takes focus,
+  // which two kinds of focus have to be kept out of:
+  //
+  // - The focus a pointer press puts on the trigger on its way to clicking it.
+  //   Opening there fights the browser: the press already opened the listbox by
+  //   the time the pointer is released, so the native popover light-dismisses
+  //   itself and the click appears to do nothing. The press keeps its ordinary
+  //   click-to-toggle behaviour instead.
+  // - The focus a close hands straight back to the trigger -- the popover
+  //   restores focus when it had taken it for an in-popover search field --
+  //   which would immediately re-open the listbox. Closing therefore disarms
+  //   focus-to-open, and `handleTriggerBlur` re-arms it once focus has settled
+  //   outside the field.
+  const isPointerPressRef = useRef(false);
+  const isFocusOpenAllowedRef = useRef(true);
+
+  // Every close goes through here, so focus-to-open is disarmed while the
+  // closing update renders -- before the popover restores focus from its layout
+  // effect, which is too early for an effect here to have run.
+  const updateIsOpen = useCallback<Dispatch<SetStateAction<boolean>>>(
+    nextIsOpen => {
+      setIsOpen(currentIsOpen => {
+        const resolvedIsOpen =
+          typeof nextIsOpen === 'function'
+            ? nextIsOpen(currentIsOpen)
+            : nextIsOpen;
+        if (!resolvedIsOpen) {
+          isFocusOpenAllowedRef.current = false;
+        }
+        return resolvedIsOpen;
+      });
+    },
+    [],
+  );
   const triggerRef = useRef<HTMLDivElement>(null);
   const listboxId = `${inputId}-listbox`;
   const selectableOptions = useMemo(
@@ -182,13 +224,13 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       }
 
       if (isListboxClosedOnCommit) {
-        setIsOpen(false);
+        updateIsOpen(false);
       }
       if (isQueryClearedOnCommit) {
         setQuery('');
       }
     },
-    onOpenChange: setIsOpen,
+    onOpenChange: updateIsOpen,
     options: visibleSelectableOptions,
     selectedValues,
     shouldClearOnCommit: isHighlightClearedOnCommit,
@@ -239,7 +281,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       }
 
       if (isListboxClosedOnCommit) {
-        setIsOpen(false);
+        updateIsOpen(false);
       }
       if (isQueryClearedOnCommit) {
         setQuery('');
@@ -250,6 +292,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       isQueryClearedOnCommit,
       onCommitOption,
       optionByValue,
+      updateIsOpen,
     ],
   );
 
@@ -265,6 +308,61 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     [optionByValue, setHighlightedValue],
   );
 
+  const handleTriggerPointerDown = useCallback((): void => {
+    // The focus that belongs to this press lands before the frame is out; by
+    // the next one the click has had its say and the flag is spent, whether or
+    // not the press ever became a click.
+    isPointerPressRef.current = true;
+    requestAnimationFrame(() => {
+      isPointerPressRef.current = false;
+    });
+  }, []);
+
+  const handleTriggerClick = useCallback((): void => {
+    if (isInteractionDisabled || isReadOnly) {
+      return;
+    }
+
+    updateIsOpen(currentIsOpen => !currentIsOpen);
+  }, [isInteractionDisabled, isReadOnly, updateIsOpen]);
+
+  const handleTriggerFocus = useCallback((): void => {
+    if (
+      !hasEntriesOnFocus ||
+      isInteractionDisabled ||
+      isReadOnly ||
+      isOpen ||
+      isPointerPressRef.current ||
+      !isFocusOpenAllowedRef.current
+    ) {
+      return;
+    }
+
+    updateIsOpen(true);
+  }, [
+    hasEntriesOnFocus,
+    isInteractionDisabled,
+    isOpen,
+    isReadOnly,
+    updateIsOpen,
+  ]);
+
+  const handleTriggerBlur = useCallback((): void => {
+    // Focus moving into the popover -- or being handed straight back by a close
+    // -- is not focus leaving the field. Waiting a frame lets the whole gesture
+    // settle (a click outside dismisses the listbox after the blur), so this
+    // only re-arms once focus really is somewhere else.
+    requestAnimationFrame(() => {
+      const {activeElement} = document;
+      if (
+        triggerRef.current?.contains(activeElement) !== true &&
+        activeElement?.closest('[popover]') == null
+      ) {
+        isFocusOpenAllowedRef.current = true;
+      }
+    });
+  }, []);
+
   return {
     activeDescendantId,
     describedBy,
@@ -274,6 +372,10 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     handleKeyboardNavigation,
     handleOptionClick,
     handleOptionMouseEnter,
+    handleTriggerBlur,
+    handleTriggerClick,
+    handleTriggerFocus,
+    handleTriggerPointerDown,
     highlightedValue,
     inputId,
     isInteractionDisabled,
@@ -283,7 +385,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     query,
     selectableOptions,
     setHighlightedValue,
-    setIsOpen,
+    setIsOpen: updateIsOpen,
     setQuery,
     statusMessageID,
     triggerRef,
