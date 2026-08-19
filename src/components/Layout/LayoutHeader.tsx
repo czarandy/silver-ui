@@ -26,8 +26,8 @@ import {cx} from 'utils/cx';
  */
 export interface LayoutHeaderProps {
   /**
-   * Overrides the ARIA heading level of the title independently of the
-   * rendered heading element.
+   * Overrides the exposed heading level of the title. The rendered h1-h6
+   * element follows this value while `level` keeps driving the typography.
    */
   accessibilityLevel?: HeadingLevel;
   /**

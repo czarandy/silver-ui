@@ -247,8 +247,7 @@ describe('LayoutHeader', () => {
       level: 4,
       name: 'My Title',
     });
-    expect(heading).toHaveProperty('tagName', 'H2');
-    expect(heading).toHaveAttribute('aria-level', '4');
+    expect(heading).toHaveProperty('tagName', 'H4');
   });
 
   it('renders subtitle when provided', () => {
