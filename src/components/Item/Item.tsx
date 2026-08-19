@@ -14,7 +14,10 @@ import {itemRecipe} from 'components/Item/Item.recipe';
 import type {LinkComponent as LinkComponentType} from 'components/Link';
 import {Text} from 'components/Text';
 import {ActionElement} from 'internal/ActionElement';
-import {isInteractiveTarget} from 'internal/interactiveTarget';
+import {
+  isInteractiveTarget,
+  isNestedInteractiveTarget,
+} from 'internal/interactiveTarget';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {useRel} from 'internal/linkAccessibility';
 import type {SpacingToken} from 'internal/spacingTokens';
@@ -212,6 +215,12 @@ export function Item({
   const setInteractiveRef = useCallback((node: HTMLElement | null) => {
     interactiveRef.current = node;
   }, []);
+  const hasEndContent =
+    isNonEmptyReactNode(endContent) && endContentPosition !== 'inline';
+  // When the item owns its interactive element, the end content renders as a
+  // sibling of it rather than a child: consumer controls there must stay valid
+  // HTML and keep owning their own clicks.
+  const hasHoistedEndContent = ownsInteraction && hasEndContent;
   const classes = itemRecipe({
     padding,
     align,
@@ -220,6 +229,7 @@ export function Item({
     isSelected,
     isDisabled,
     hasParentRole,
+    hasHoistedEndContent,
   });
 
   // Consumer `style` still wins, matching the layout primitives.
@@ -274,15 +284,33 @@ export function Item({
     onClick?.(event);
   };
 
+  const handleActionClick = (event: MouseEvent<HTMLElement>) => {
+    if (isDisabled) {
+      event.preventDefault();
+      return;
+    }
+
+    // A control inside a slot owns its own click — including one whose surface
+    // portals elsewhere but still bubbles React events back through us — so the
+    // row action must not also fire.
+    if (isNestedInteractiveTarget(event.target, interactiveRef.current)) {
+      return;
+    }
+
+    onClick?.(event);
+  };
+
+  const endContentSlot = hasEndContent ? (
+    <span className={classes.endContent}>{endContent}</span>
+  ) : null;
+
   const innerSlots = (
     <>
       {isNonEmptyReactNode(startContent) ? (
         <span className={classes.startContent}>{startContent}</span>
       ) : null}
       <span className={classes.textContent}>{labelAndDescription}</span>
-      {isNonEmptyReactNode(endContent) && endContentPosition !== 'inline' ? (
-        <span className={classes.endContent}>{endContent}</span>
-      ) : null}
+      {hasHoistedEndContent ? null : endContentSlot}
     </>
   );
 
@@ -297,13 +325,7 @@ export function Item({
       href={href}
       isDisabled={href == null ? isDisabled : undefined}
       isLink={href != null}
-      onClick={(e: MouseEvent<HTMLElement>) => {
-        if (isDisabled) {
-          e.preventDefault();
-          return;
-        }
-        onClick?.(e);
-      }}
+      onClick={handleActionClick}
       ref={setInteractiveRef}
       rel={href != null ? linkRel : undefined}
       tabIndex={href != null && isDisabled ? -1 : undefined}
@@ -334,6 +356,7 @@ export function Item({
       style={rootStyle}>
       {leadingContent}
       {content}
+      {hasHoistedEndContent ? endContentSlot : null}
       {isNonEmptyReactNode(trailingContent) ? (
         <span className={classes.trailingContent}>{trailingContent}</span>
       ) : null}

@@ -30,6 +30,19 @@ export const INTERACTIVE_SELECTOR = [
   '[tabindex]:not([tabindex^="-"])',
 ].join(', ');
 
+function findInteractiveAncestor(
+  target: EventTarget | null,
+): HTMLElement | null {
+  const element =
+    target instanceof Element
+      ? target
+      : target instanceof Node
+        ? target.parentElement
+        : null;
+
+  return element?.closest<HTMLElement>(INTERACTIVE_SELECTOR) ?? null;
+}
+
 /**
  * Returns whether an event target belongs to an independent interactive
  * element. An optional boundary prevents matching an ancestor outside the
@@ -39,15 +52,29 @@ export function isInteractiveTarget(
   target: EventTarget | null,
   boundary?: HTMLElement,
 ): boolean {
-  const element =
-    target instanceof Element
-      ? target
-      : target instanceof Node
-        ? target.parentElement
-        : null;
-  const interactive = element?.closest<HTMLElement>(INTERACTIVE_SELECTOR);
+  const interactive = findInteractiveAncestor(target);
 
   return (
     interactive != null && (boundary == null || boundary.contains(interactive))
   );
+}
+
+/**
+ * Returns whether an event target belongs to an interactive element nested
+ * inside `control` rather than to `control` itself. Surfaces that render their
+ * own control use this so consumer-provided controls keep owning their clicks,
+ * including ones that portal their surface out of the DOM but still bubble
+ * React events back through the tree.
+ */
+export function isNestedInteractiveTarget(
+  target: EventTarget | null,
+  control: HTMLElement | null,
+): boolean {
+  if (control == null) {
+    return false;
+  }
+
+  const interactive = findInteractiveAncestor(target);
+
+  return interactive != null && interactive !== control;
 }

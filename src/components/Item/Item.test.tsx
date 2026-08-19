@@ -2,6 +2,8 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {ComponentPropsWithRef} from 'react';
 import {describe, expect, it, vi} from 'vitest';
+import {DropdownMenu} from 'components/DropdownMenu';
+import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
 import {Item} from 'components/Item/Item';
 import {LinkProvider} from 'components/Link';
 
@@ -70,10 +72,11 @@ describe('Item', () => {
       />,
     );
 
-    // Trailing content sits outside and after the interactive area, whose own
-    // slots render in start -> label -> end order.
+    // Slots render in start -> label -> end -> trailing order. End and trailing
+    // content both sit outside the interactive area, which only owns the
+    // primary action's own start content and text.
     expect(screen.getByTestId('item')).toHaveTextContent(/^SProjectET$/u);
-    expect(screen.getByRole('button')).toHaveTextContent(/^SProjectE$/u);
+    expect(screen.getByRole('button')).toHaveTextContent(/^SProject$/u);
   });
 
   it('fires onClick from the invisible button', async () => {
@@ -375,6 +378,132 @@ describe('Item', () => {
     await user.click(screen.getByRole('button', {name: 'Action'}));
     expect(onNestedClick).toHaveBeenCalledOnce();
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('renders endContent outside its own interactive element', () => {
+    // Nesting consumer controls inside the row's button is invalid HTML and
+    // makes them fire the row action, so the end content is a sibling of it.
+    render(
+      <Item
+        data-testid="item"
+        endContent={<button data-testid="end" type="button" />}
+        label="Row"
+        onClick={() => {}}
+      />,
+    );
+
+    const control = screen.getByRole('button', {name: 'Row'});
+    expect(control).not.toContainElement(screen.getByTestId('end'));
+    expect(screen.getByTestId('item')).toContainElement(
+      screen.getByTestId('end'),
+    );
+  });
+
+  it('does not fire the row action when a control in endContent is clicked', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    const onNestedClick = vi.fn();
+
+    render(
+      <Item
+        endContent={
+          <button onClick={onNestedClick} type="button">
+            Delete
+          </button>
+        }
+        label="Row"
+        onClick={onClick}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Delete'}));
+    expect(onNestedClick).toHaveBeenCalledOnce();
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not fire the row action when a control in startContent is clicked', async () => {
+    // Start content stays inside the row's own control, so the guard has to
+    // live on that control's handler too.
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    const onNestedChange = vi.fn();
+
+    render(
+      <Item
+        label="Row"
+        onClick={onClick}
+        startContent={
+          <input
+            aria-label="Select row"
+            onChange={onNestedChange}
+            type="checkbox"
+          />
+        }
+      />,
+    );
+
+    await user.click(screen.getByRole('checkbox', {name: 'Select row'}));
+    expect(onNestedChange).toHaveBeenCalledOnce();
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not fire the row action for a control that portals its surface', async () => {
+    // A portaled surface leaves the DOM subtree but React still bubbles its
+    // synthetic events back through the item.
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    const onMenuItemClick = vi.fn();
+
+    render(
+      <Item
+        endContent={
+          <DropdownMenu button={{label: 'Actions'}}>
+            <DropdownMenuItem label="Rename" onClick={onMenuItemClick} />
+          </DropdownMenu>
+        }
+        label="Row"
+        onClick={onClick}
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+    expect(onClick).not.toHaveBeenCalled();
+
+    await user.click(
+      screen.getByRole('menuitem', {hidden: true, name: 'Rename'}),
+    );
+    expect(onMenuItemClick).toHaveBeenCalledOnce();
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('dims hoisted endContent when disabled', () => {
+    // The hoisted end content sits outside the wrapper that carries the
+    // disabled dimming, so it has to pick the dimming up itself.
+    render(
+      <>
+        <Item
+          endContent={<span data-testid="enabled-end">T</span>}
+          label="Enabled"
+          onClick={() => {}}
+        />
+        <Item
+          endContent={<span data-testid="disabled-end">T</span>}
+          isDisabled
+          label="Disabled"
+          onClick={() => {}}
+        />
+      </>,
+    );
+
+    /* eslint-disable testing-library/no-node-access -- the end-content wrapper span has no role or testid */
+    expect(
+      screen.getByTestId('disabled-end').parentElement,
+    ).not.toHaveAttribute(
+      'class',
+      screen.getByTestId('enabled-end').parentElement?.getAttribute('class') ??
+        '',
+    );
+    /* eslint-enable testing-library/no-node-access */
   });
 
   it('fires the row action when non-interactive content is clicked', async () => {
