@@ -136,6 +136,13 @@ export const itemRecipe = sva({
       true: {},
       false: {},
     },
+    // Marker variant; when the item renders its own interactive element the end
+    // content is hoisted out of it, which also takes it outside the wrapper
+    // carrying the disabled dimming. The compound variant below restores it.
+    hasHoistedEndContent: {
+      true: {},
+      false: {},
+    },
   },
   compoundVariants: [
     {
@@ -148,6 +155,13 @@ export const itemRecipe = sva({
         },
       },
     },
+    {
+      isDisabled: true,
+      hasHoistedEndContent: true,
+      css: {
+        endContent: {opacity: 0.5},
+      },
+    },
   ],
   defaultVariants: {
     padding: 2,
@@ -157,6 +171,7 @@ export const itemRecipe = sva({
     isSelected: false,
     isDisabled: false,
     hasParentRole: false,
+    hasHoistedEndContent: false,
   },
 });
 

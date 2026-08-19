@@ -1,6 +1,9 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
+import {CheckboxInput} from 'components/CheckboxInput';
+import {DropdownMenu} from 'components/DropdownMenu';
+import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
 import {List} from 'components/List/List';
 import {listItemRecipe, listRecipe} from 'components/List/List.recipe';
 import {ListItem} from 'components/List/ListItem';
@@ -20,6 +23,51 @@ describe('List', () => {
 
     expect(screen.getByRole('list')).toBeInTheDocument();
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
+  });
+
+  it('keeps controls in endContent from firing the row action', async () => {
+    const user = userEvent.setup();
+    const onRowClick = vi.fn();
+    const onChange = vi.fn();
+    const onMenuItemClick = vi.fn();
+
+    render(
+      <List hasDividers>
+        <ListItem
+          endContent={
+            <>
+              <CheckboxInput
+                label="Select"
+                onChange={onChange}
+                value={false}
+                width="auto"
+              />
+              <DropdownMenu button={{label: 'Actions'}}>
+                <DropdownMenuItem label="Rename" onClick={onMenuItemClick} />
+              </DropdownMenu>
+            </>
+          }
+          label="CBT homework.pdf"
+          onClick={onRowClick}
+        />
+      </List>,
+    );
+
+    await user.click(screen.getByRole('checkbox', {name: 'Select'}));
+    expect(onChange).toHaveBeenCalledOnce();
+    expect(onRowClick).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', {name: 'Actions'}));
+    expect(onRowClick).not.toHaveBeenCalled();
+
+    await user.click(
+      screen.getByRole('menuitem', {hidden: true, name: 'Rename'}),
+    );
+    expect(onMenuItemClick).toHaveBeenCalledOnce();
+    expect(onRowClick).not.toHaveBeenCalled();
+
+    await user.click(screen.getByText('CBT homework.pdf'));
+    expect(onRowClick).toHaveBeenCalledOnce();
   });
 
   it('associates the header with the list via aria-labelledby', () => {
