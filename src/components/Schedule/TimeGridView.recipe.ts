@@ -7,7 +7,10 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
  */
 export const scheduleTimeGridViewRecipe = sva({
   slots: [
+    'container',
     'grid',
+    'overflowCueStart',
+    'overflowCueEnd',
     'fixedRows',
     'timeRows',
     'header',
@@ -29,10 +32,49 @@ export const scheduleTimeGridViewRecipe = sva({
     'rowContents',
   ],
   base: {
+    container: {
+      position: 'relative',
+      minW: 0,
+      w: 'full',
+    },
     grid: {
       display: 'grid',
       gridTemplateColumns: '72px 1fr',
       overflow: 'auto',
+      _focusVisible: {
+        outlineWidth: 'focus',
+        outlineStyle: 'solid',
+        outlineColor: 'primary',
+        outlineOffset: 'focusOffset',
+      },
+    },
+    overflowCueStart: {
+      position: 'absolute',
+      zIndex: 2,
+      insetBlock: '1px',
+      insetInlineStart: '1px',
+      w: '6',
+      pointerEvents: 'none',
+      backgroundImage:
+        'linear-gradient(to right, token(colors.bg) 0%, transparent 100%)',
+      _rtl: {
+        backgroundImage:
+          'linear-gradient(to left, token(colors.bg) 0%, transparent 100%)',
+      },
+    },
+    overflowCueEnd: {
+      position: 'absolute',
+      zIndex: 2,
+      insetBlock: '1px',
+      insetInlineEnd: '1px',
+      w: '6',
+      pointerEvents: 'none',
+      backgroundImage:
+        'linear-gradient(to left, token(colors.bg) 0%, transparent 100%)',
+      _rtl: {
+        backgroundImage:
+          'linear-gradient(to right, token(colors.bg) 0%, transparent 100%)',
+      },
     },
     fixedRows: {
       display: 'grid',
@@ -50,7 +92,7 @@ export const scheduleTimeGridViewRecipe = sva({
     header: {
       display: 'grid',
       gridTemplateColumns:
-        'repeat(var(--schedule-day-count), minmax(160px, 1fr))',
+        'repeat(var(--schedule-day-count), minmax(var(--schedule-day-min-width), 1fr))',
       borderBlockEndWidth: 'default',
       borderBlockEndStyle: 'solid',
       borderBlockEndColor: 'border',
@@ -103,7 +145,7 @@ export const scheduleTimeGridViewRecipe = sva({
     allDayRow: {
       display: 'grid',
       gridTemplateColumns:
-        'repeat(var(--schedule-day-count), minmax(160px, 1fr))',
+        'repeat(var(--schedule-day-count), minmax(var(--schedule-day-min-width), 1fr))',
       borderBlockEndWidth: 'default',
       borderBlockEndStyle: 'solid',
       borderBlockEndColor: 'border',
@@ -129,7 +171,7 @@ export const scheduleTimeGridViewRecipe = sva({
     timeRow: {
       display: 'grid',
       gridTemplateColumns:
-        'repeat(var(--schedule-day-count), minmax(160px, 1fr))',
+        'repeat(var(--schedule-day-count), minmax(var(--schedule-day-min-width), 1fr))',
     },
     hourCell: {
       position: 'relative',
@@ -193,8 +235,13 @@ export const scheduleTimeGridViewRecipe = sva({
     height: {
       auto: {},
       fill: {
+        container: {
+          flex: 1,
+          minH: 0,
+        },
         grid: {
           alignContent: 'start',
+          h: 'full',
         },
         fixedRows: {
           position: 'sticky',

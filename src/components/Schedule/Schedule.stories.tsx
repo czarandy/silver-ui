@@ -304,6 +304,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 const fillHeightStoryContainer = css({h: '600px'});
+const narrowWeekStoryContainer = css({maxW: 'full', w: '980px'});
 const paginationHotkeysStoryContainer = css({display: 'grid', gap: '4'});
 const automaticMonthRowsFillHeightContainer = css({h: '800px'});
 const highlightedDayNumberGrid = css({
@@ -660,6 +661,29 @@ export const Week: Story = {
       events={weekEvents}
       view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
     />
+  ),
+};
+
+export const NarrowWeek: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A 128px day minimum keeps all seven days visible in a 980px content region. Narrower regions retain keyboard scrolling and show an edge fade when more columns are available.',
+      },
+    },
+  },
+  render: () => (
+    <div className={narrowWeekStoryContainer}>
+      <ScheduleStory
+        events={weekEvents}
+        view={createScheduleWeeklyView({
+          dayMinWidth: 128,
+          maxHour: 18,
+          minHour: 8,
+        })}
+      />
+    </div>
   ),
 };
 

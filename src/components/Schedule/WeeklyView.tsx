@@ -31,6 +31,12 @@ export interface ScheduleWeeklyViewOptions {
    */
   allDayEventLimit?: number;
   /**
+   * Minimum pixel width of each day column. Reduce this when a full week
+   * should fit in a narrower content area.
+   * @default 160
+   */
+  dayMinWidth?: number;
+  /**
    * Days of the week to omit from the grid, where 0 is Sunday and 6 is
    * Saturday. The view's date range is trimmed to span only the first through
    * last visible day, so `[0, 6]` renders a Monday-Friday week. Duplicate and
@@ -94,6 +100,7 @@ function ScheduleWeeklyView({
     <ScheduleFrame height={height} title={title} titleLabel={title}>
       <TimeGridView
         allDayEventLimit={options.allDayEventLimit}
+        dayMinWidth={options.dayMinWidth}
         days={days}
         height={height}
         hourHeight={options.hourHeight}
@@ -110,6 +117,7 @@ function ScheduleWeeklyView({
  */
 export function createScheduleWeeklyView({
   allDayEventLimit = 3,
+  dayMinWidth = 160,
   hiddenDays = EMPTY_HIDDEN_DAYS,
   hourHeight = 100,
   maxHour = 24,
@@ -153,6 +161,7 @@ export function createScheduleWeeklyView({
     }),
     options: {
       allDayEventLimit,
+      dayMinWidth,
       hiddenDays: [...hiddenDaySet],
       hourHeight,
       maxHour,
