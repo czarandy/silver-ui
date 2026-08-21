@@ -2171,6 +2171,59 @@ describe('Schedule', () => {
     );
   });
 
+  it.each([
+    {
+      label: 'day',
+      view: createScheduleDayView({
+        maxHour: 11,
+        minHour: 9,
+        overlapBehavior: 'indented',
+      }),
+    },
+    {
+      label: 'weekly',
+      view: createScheduleWeeklyView({
+        maxHour: 11,
+        minHour: 9,
+        overlapBehavior: 'indented',
+      }),
+    },
+  ])('supports indented timed event overlaps in the $label view', ({view}) => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-13T10:00:00.000Z',
+            id: 'indented-a',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Alpha sync',
+          }),
+          createEventFromISO({
+            category: 'Design',
+            end: '2026-05-13T10:00:00.000Z',
+            id: 'indented-b',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Beta review',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={view}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByTestId('schedule-event-indented-a')).toHaveStyle({
+      insetInlineEnd: '2px',
+      insetInlineStart: '2px',
+    });
+    expect(screen.getByTestId('schedule-event-indented-b')).toHaveStyle({
+      insetInlineEnd: '2px',
+      insetInlineStart: 'calc(2px + 8%)',
+    });
+  });
+
   it('uses enough side-by-side columns for partial and three-way overlaps', () => {
     render(
       <Schedule

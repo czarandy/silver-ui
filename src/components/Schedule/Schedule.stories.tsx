@@ -815,11 +815,24 @@ const overlappingEvents = [
   }),
 ];
 
-export const OverlappingEvents: Story = {
+export const OverlappingEventsSideBySide: Story = {
   render: () => (
     <ScheduleStory
       events={overlappingEvents}
       view={createScheduleDayView({maxHour: 16, minHour: 8})}
+    />
+  ),
+};
+
+export const OverlappingEventsIndented: Story = {
+  render: () => (
+    <ScheduleStory
+      events={overlappingEvents}
+      view={createScheduleDayView({
+        maxHour: 16,
+        minHour: 8,
+        overlapBehavior: 'indented',
+      })}
     />
   ),
 };

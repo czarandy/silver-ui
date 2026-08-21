@@ -29,6 +29,7 @@ import type {
   ScheduleHeaderContent,
   SchedulePlugin,
   SchedulePluginElementProps,
+  ScheduleTimeGridOverlapBehavior,
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
@@ -211,11 +212,13 @@ export function getTimedEventBlockStyle({
   columnCount = 1,
   height,
   level,
+  overlapBehavior = 'sideBySide',
   top,
 }: {
   columnCount?: number;
   height: number;
   level: number;
+  overlapBehavior?: ScheduleTimeGridOverlapBehavior;
   top: number;
 }): CSSProperties {
   const inlineStartColumns = level;
@@ -231,8 +234,14 @@ export function getTimedEventBlockStyle({
 
   return {
     height: `${Math.max(36, height - 5)}px`,
-    insetInlineEnd: getColumnInset(inlineEndColumns),
-    insetInlineStart: getColumnInset(inlineStartColumns),
+    insetInlineEnd:
+      overlapBehavior === 'indented' ? '2px' : getColumnInset(inlineEndColumns),
+    insetInlineStart:
+      overlapBehavior === 'indented'
+        ? level === 0
+          ? '2px'
+          : `calc(2px + ${level * 8}%)`
+        : getColumnInset(inlineStartColumns),
     top: `${top + 2}px`,
     zIndex: level + 1,
   };

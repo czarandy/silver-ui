@@ -29,6 +29,7 @@ import type {
   ScheduleHeight,
   SchedulePluginElementProps,
   ScheduleTimeGridCellPropsRenderProps,
+  ScheduleTimeGridOverlapBehavior,
 } from 'components/Schedule/types';
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
@@ -249,12 +250,14 @@ function TimeGridEvent({
   layout,
   maxHour,
   minHour,
+  overlapBehavior,
 }: {
   currentTime: number;
   hourHeight: number;
   layout: TimedEventLayout;
   maxHour: number;
   minHour: number;
+  overlapBehavior: ScheduleTimeGridOverlapBehavior;
 }): React.JSX.Element {
   const {categoryMap, plugins, timezoneID} = useScheduleContext();
   const {event} = layout;
@@ -302,7 +305,10 @@ function TimeGridEvent({
     style: eventStyle,
     ...eventPassthroughProps
   } = mergeSchedulePluginProps(
-    {className: classes.event, style: getTimedEventBlockStyle(layout)},
+    {
+      className: classes.event,
+      style: getTimedEventBlockStyle({...layout, overlapBehavior}),
+    },
     eventPluginProps,
   );
   const body = (
@@ -375,6 +381,7 @@ export function TimeGridView({
   hourHeight = 100,
   maxHour = 24,
   minHour = 0,
+  overlapBehavior = 'sideBySide',
 }: {
   /**
    * Maximum number of all-day events shown before the rest collapse into a
@@ -405,6 +412,11 @@ export function TimeGridView({
    * @default 0
    */
   minHour?: number;
+  /**
+   * How timed events with overlapping ranges share a day column.
+   * @default 'sideBySide'
+   */
+  overlapBehavior?: ScheduleTimeGridOverlapBehavior;
 }): React.JSX.Element {
   const {categoryMap, events, highlightDate, plugins, timezoneID} =
     useScheduleContext();
@@ -734,6 +746,7 @@ export function TimeGridView({
                             layout={layout}
                             maxHour={normalizedMaxHour}
                             minHour={normalizedMinHour}
+                            overlapBehavior={overlapBehavior}
                           />
                         ))}
                       </div>
