@@ -78,6 +78,7 @@ export type {
   ScheduleMonthCellPropsRenderProps,
   ScheduleTimeGridEventRenderProps,
   ScheduleTimeGridCellPropsRenderProps,
+  ScheduleTimeGridOverlapBehavior,
   SchedulePlugin,
   SchedulePluginElementProps,
   SchedulePluginPosition,

@@ -2235,6 +2235,177 @@ describe('Schedule', () => {
     expect(event).toHaveTextContent('Duration migration9:00 AM - 10:30 AM');
   });
 
+  it('lays simultaneous timed events out in side-by-side columns', () => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-13T10:00:00.000Z',
+            id: 'simultaneous-a',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Alpha sync',
+          }),
+          createEventFromISO({
+            category: 'Design',
+            end: '2026-05-13T10:00:00.000Z',
+            id: 'simultaneous-b',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Beta review',
+          }),
+          createEventFromISO({
+            category: 'Migration',
+            end: '2026-05-13T11:00:00.000Z',
+            id: 'after-simultaneous',
+            start: '2026-05-13T10:00:00.000Z',
+            title: 'Migration follow-up',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 11, minHour: 9})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByTestId('schedule-event-simultaneous-a')).toHaveStyle({
+      insetInlineEnd: 'calc(50% + 2px)',
+      insetInlineStart: '2px',
+    });
+    expect(screen.getByTestId('schedule-event-simultaneous-b')).toHaveStyle({
+      insetInlineEnd: '2px',
+      insetInlineStart: 'calc(50% + 2px)',
+    });
+    expect(screen.getByTestId('schedule-event-after-simultaneous')).toHaveStyle(
+      {
+        insetInlineEnd: '2px',
+        insetInlineStart: '2px',
+      },
+    );
+  });
+
+  it.each([
+    {
+      label: 'day',
+      view: createScheduleDayView({
+        maxHour: 11,
+        minHour: 9,
+        overlapBehavior: 'indented',
+      }),
+    },
+    {
+      label: 'weekly',
+      view: createScheduleWeeklyView({
+        maxHour: 11,
+        minHour: 9,
+        overlapBehavior: 'indented',
+      }),
+    },
+  ])('supports indented timed event overlaps in the $label view', ({view}) => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-13T10:00:00.000Z',
+            id: 'indented-a',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Alpha sync',
+          }),
+          createEventFromISO({
+            category: 'Design',
+            end: '2026-05-13T10:00:00.000Z',
+            id: 'indented-b',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Beta review',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={view}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByTestId('schedule-event-indented-a')).toHaveStyle({
+      insetInlineEnd: '2px',
+      insetInlineStart: '2px',
+    });
+    expect(screen.getByTestId('schedule-event-indented-b')).toHaveStyle({
+      insetInlineEnd: '2px',
+      insetInlineStart: 'calc(2px + 8%)',
+    });
+  });
+
+  it('uses enough side-by-side columns for partial and three-way overlaps', () => {
+    render(
+      <Schedule
+        categories={categories}
+        events={[
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-13T12:30:00.000Z',
+            id: 'partial-long',
+            start: '2026-05-13T11:00:00.000Z',
+            title: 'Long consultation',
+          }),
+          createEventFromISO({
+            category: 'Design',
+            end: '2026-05-13T12:00:00.000Z',
+            id: 'partial-short',
+            start: '2026-05-13T11:30:00.000Z',
+            title: 'Partial review',
+          }),
+          createEventFromISO({
+            category: 'Migration',
+            end: '2026-05-13T14:30:00.000Z',
+            id: 'three-way-a',
+            start: '2026-05-13T13:00:00.000Z',
+            title: 'Three-way migration',
+          }),
+          createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-13T14:15:00.000Z',
+            id: 'three-way-b',
+            start: '2026-05-13T13:15:00.000Z',
+            title: 'Three-way sync',
+          }),
+          createEventFromISO({
+            category: 'Design',
+            end: '2026-05-13T14:00:00.000Z',
+            id: 'three-way-c',
+            start: '2026-05-13T13:30:00.000Z',
+            title: 'Three-way review',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 15, minHour: 11})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByTestId('schedule-event-partial-long')).toHaveStyle({
+      insetInlineEnd: 'calc(50% + 2px)',
+      insetInlineStart: '2px',
+    });
+    expect(screen.getByTestId('schedule-event-partial-short')).toHaveStyle({
+      insetInlineEnd: '2px',
+      insetInlineStart: 'calc(50% + 2px)',
+    });
+    expect(screen.getByTestId('schedule-event-three-way-a')).toHaveStyle({
+      insetInlineEnd: 'calc(66.666667% + 2px)',
+      insetInlineStart: '2px',
+    });
+    expect(screen.getByTestId('schedule-event-three-way-b')).toHaveStyle({
+      insetInlineEnd: 'calc(33.333333% + 2px)',
+      insetInlineStart: 'calc(33.333333% + 2px)',
+    });
+    expect(screen.getByTestId('schedule-event-three-way-c')).toHaveStyle({
+      insetInlineEnd: '2px',
+      insetInlineStart: 'calc(66.666667% + 2px)',
+    });
+  });
+
   it('renders a location on timed event blocks', () => {
     render(
       <Schedule

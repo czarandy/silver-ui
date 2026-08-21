@@ -772,6 +772,95 @@ export const Day: Story = {
   ),
 };
 
+const overlappingEvents = [
+  createEventFromISO({
+    category: 'Sync',
+    end: timedISO(0, 9),
+    id: 'stacked-intake',
+    start: timedISO(0, 8),
+    title: 'Full-width intake',
+  }),
+  createEventFromISO({
+    category: 'Operations',
+    end: timedISO(0, 10),
+    id: 'stacked-documentation',
+    start: timedISO(0, 9),
+    title: 'Full-width documentation',
+  }),
+  createEventFromISO({
+    category: 'Sync',
+    end: timedISO(0, 11),
+    id: 'simultaneous-consultation',
+    start: timedISO(0, 10),
+    title: 'Simultaneous consultation',
+  }),
+  createEventFromISO({
+    category: 'Planning',
+    end: timedISO(0, 11),
+    id: 'simultaneous-canceled',
+    isCanceled: true,
+    start: timedISO(0, 10),
+    title: 'Simultaneous canceled visit',
+  }),
+  createEventFromISO({
+    category: 'Customer',
+    end: timedISO(0, 13, 30),
+    id: 'partial-long',
+    start: timedISO(0, 12),
+    title: 'Partially overlapping session',
+  }),
+  createEventFromISO({
+    category: 'Design',
+    end: timedISO(0, 13),
+    id: 'partial-short',
+    start: timedISO(0, 12, 30),
+    title: 'Partial design review',
+  }),
+  createEventFromISO({
+    category: 'Operations',
+    end: timedISO(0, 15, 30),
+    id: 'three-way-operations',
+    start: timedISO(0, 14),
+    title: 'Three-way operations',
+  }),
+  createEventFromISO({
+    category: 'Research',
+    end: timedISO(0, 15, 15),
+    id: 'three-way-research',
+    start: timedISO(0, 14, 15),
+    title: 'Three-way research',
+  }),
+  createEventFromISO({
+    category: 'Design',
+    end: timedISO(0, 15),
+    id: 'three-way-design',
+    start: timedISO(0, 14, 30),
+    title: 'Three-way design',
+  }),
+];
+
+export const OverlappingEventsSideBySide: Story = {
+  render: () => (
+    <ScheduleStory
+      events={overlappingEvents}
+      view={createScheduleDayView({maxHour: 16, minHour: 8})}
+    />
+  ),
+};
+
+export const OverlappingEventsIndented: Story = {
+  render: () => (
+    <ScheduleStory
+      events={overlappingEvents}
+      view={createScheduleDayView({
+        maxHour: 16,
+        minHour: 8,
+        overlapBehavior: 'indented',
+      })}
+    />
+  ),
+};
+
 export const ListView: Story = {
   render: () => {
     const now = Temporal.Now.instant();

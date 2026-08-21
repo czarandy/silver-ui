@@ -29,6 +29,7 @@ import type {
   ScheduleHeaderContent,
   SchedulePlugin,
   SchedulePluginElementProps,
+  ScheduleTimeGridOverlapBehavior,
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
@@ -204,21 +205,43 @@ export function getEventTimeLabel(
  * Positions an absolutely-placed block inside its start-hour time-grid cell.
  * Shared by real timed events and the create plugin's ghost so both sit on the
  * same geometry. `top`/`height` are raw pixel offsets within the cell; `level`
- * is the overlap column index.
+ * is the overlap column index and `columnCount` is the collision group's
+ * maximum number of simultaneous events.
  */
 export function getTimedEventBlockStyle({
+  columnCount = 1,
   height,
   level,
+  overlapBehavior = 'sideBySide',
   top,
 }: {
+  columnCount?: number;
   height: number;
   level: number;
+  overlapBehavior?: ScheduleTimeGridOverlapBehavior;
   top: number;
 }): CSSProperties {
+  const inlineStartColumns = level;
+  const inlineEndColumns = columnCount - level - 1;
+  const getColumnInset = (columns: number): string => {
+    if (columns === 0) {
+      return '2px';
+    }
+
+    const percentage = Number(((columns / columnCount) * 100).toFixed(6));
+    return `calc(${percentage}% + 2px)`;
+  };
+
   return {
     height: `${Math.max(36, height - 5)}px`,
-    insetInlineEnd: '2px',
-    insetInlineStart: level === 0 ? '2px' : `calc(2px + ${level * 8}%)`,
+    insetInlineEnd:
+      overlapBehavior === 'indented' ? '2px' : getColumnInset(inlineEndColumns),
+    insetInlineStart:
+      overlapBehavior === 'indented'
+        ? level === 0
+          ? '2px'
+          : `calc(2px + ${level * 8}%)`
+        : getColumnInset(inlineStartColumns),
     top: `${top + 2}px`,
     zIndex: level + 1,
   };

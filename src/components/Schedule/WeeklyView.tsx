@@ -11,6 +11,7 @@ import {
 import {scheduleRangeToScheduleZonedInstantRange} from 'components/Schedule/scheduleZonedInstant';
 import {ScheduleFrame, formatWeekTitle} from 'components/Schedule/shared';
 import type {
+  ScheduleTimeGridOverlapBehavior,
   ScheduleView,
   ScheduleViewComponentProps,
   ScheduleZonedInstant,
@@ -60,6 +61,13 @@ export interface ScheduleWeeklyViewOptions {
    */
   minHour?: number;
   /**
+   * How timed events with overlapping ranges share each day column.
+   * - `'sideBySide'`: Divide the available width into equal columns.
+   * - `'indented'`: Keep events nearly full width and offset each overlap.
+   * @default 'sideBySide'
+   */
+  overlapBehavior?: ScheduleTimeGridOverlapBehavior;
+  /**
    * Day used as the first day of the week, where 0 is Sunday and 6 is Saturday.
    * @default 0
    */
@@ -98,6 +106,7 @@ function ScheduleWeeklyView({
         hourHeight={options.hourHeight}
         maxHour={options.maxHour}
         minHour={options.minHour}
+        overlapBehavior={options.overlapBehavior}
       />
     </ScheduleFrame>
   );
@@ -113,6 +122,7 @@ export function createScheduleWeeklyView({
   hourHeight = 100,
   maxHour = 24,
   minHour = 0,
+  overlapBehavior = 'sideBySide',
   weekStartsOn = 0,
 }: ScheduleWeeklyViewOptions = {}): ScheduleView<ScheduleWeeklyViewOptions> {
   const hiddenDaySet = normalizeHiddenDays(hiddenDays);
@@ -156,6 +166,7 @@ export function createScheduleWeeklyView({
       hourHeight,
       maxHour,
       minHour,
+      overlapBehavior,
       weekStartsOn,
     },
   };

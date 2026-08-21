@@ -335,6 +335,7 @@ export {
   type ScheduleWeeklyViewOptions,
   type ScheduleTimeGridEventRenderProps,
   type ScheduleTimeGridCellPropsRenderProps,
+  type ScheduleTimeGridOverlapBehavior,
   type ScheduleZonedInstant,
   type ScheduleZonedInstantRange,
 } from 'components/Schedule';

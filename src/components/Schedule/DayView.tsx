@@ -12,6 +12,7 @@ import {
   formatMonthTitle,
 } from 'components/Schedule/shared';
 import type {
+  ScheduleTimeGridOverlapBehavior,
   ScheduleView,
   ScheduleViewComponentProps,
   ScheduleZonedInstant,
@@ -39,6 +40,13 @@ export interface ScheduleDayViewOptions {
    * @default 0
    */
   minHour?: number;
+  /**
+   * How timed events with overlapping ranges share the day column.
+   * - `'sideBySide'`: Divide the available width into equal columns.
+   * - `'indented'`: Keep events nearly full width and offset each overlap.
+   * @default 'sideBySide'
+   */
+  overlapBehavior?: ScheduleTimeGridOverlapBehavior;
 }
 
 /**
@@ -65,6 +73,7 @@ function ScheduleDayView({
         hourHeight={options.hourHeight}
         maxHour={options.maxHour}
         minHour={options.minHour}
+        overlapBehavior={options.overlapBehavior}
       />
     </ScheduleFrame>
   );
@@ -78,6 +87,7 @@ export function createScheduleDayView({
   hourHeight = 100,
   maxHour = 24,
   minHour = 0,
+  overlapBehavior = 'sideBySide',
 }: ScheduleDayViewOptions = {}): ScheduleView<ScheduleDayViewOptions> {
   return {
     component: ScheduleDayView,
@@ -98,6 +108,12 @@ export function createScheduleDayView({
       label: 'Previous day',
       range: [date.startOfDay().addDays(-1), date.startOfDay()],
     }),
-    options: {allDayEventLimit, hourHeight, maxHour, minHour},
+    options: {
+      allDayEventLimit,
+      hourHeight,
+      maxHour,
+      minHour,
+      overlapBehavior,
+    },
   };
 }
