@@ -77,6 +77,7 @@ interface TimedEventDaySpan {
 }
 
 interface TimedEventLayout {
+  columnCount: number;
   event: CalendarInstantEvent;
   height: number;
   level: number;
@@ -164,8 +165,7 @@ function getTimedEventLayouts({
   const levelEndMinutes: number[] = [];
   const minMinute = minHour * 60;
   const maxMinute = maxHour * 60;
-
-  return spans
+  const visibleSpans = spans
     .map(({event, endMinute, startMinute}) => {
       if (endMinute <= minMinute || startMinute >= maxMinute) {
         return null;
@@ -194,19 +194,49 @@ function getTimedEventLayouts({
         a.visibleEnd - b.visibleEnd ||
         a.event.title.localeCompare(b.event.title)
       );
-    })
-    .map(({event, visibleEnd, visibleStart}) => {
-      const level = getAvailableTimedEventLevel(levelEndMinutes, visibleStart);
-      levelEndMinutes[level] = visibleEnd;
-      const startHour = Math.floor(visibleStart / 60);
-      return {
-        event,
-        height: ((visibleEnd - visibleStart) / 60) * hourHeight,
-        level,
-        startHour,
-        top: ((visibleStart - startHour * 60) / 60) * hourHeight,
-      };
     });
+  const layouts: TimedEventLayout[] = [];
+  let groupColumnCount = 0;
+  let groupEndMinute = -1;
+  let groupStartIndex = 0;
+
+  const finishCollisionGroup = (): void => {
+    for (let index = groupStartIndex; index < layouts.length; index += 1) {
+      layouts[index].columnCount = groupColumnCount;
+    }
+  };
+
+  visibleSpans.forEach(({event, visibleEnd, visibleStart}) => {
+    // Events that connect through any overlap share a collision group and use
+    // its maximum simultaneous column count. Reset at the half-open boundary
+    // so an event beginning exactly when the previous group ends can use the
+    // full cell width.
+    if (visibleStart >= groupEndMinute) {
+      finishCollisionGroup();
+      groupColumnCount = 0;
+      groupEndMinute = visibleEnd;
+      groupStartIndex = layouts.length;
+      levelEndMinutes.length = 0;
+    } else {
+      groupEndMinute = Math.max(groupEndMinute, visibleEnd);
+    }
+
+    const level = getAvailableTimedEventLevel(levelEndMinutes, visibleStart);
+    levelEndMinutes[level] = visibleEnd;
+    groupColumnCount = Math.max(groupColumnCount, level + 1);
+    const startHour = Math.floor(visibleStart / 60);
+    layouts.push({
+      columnCount: 1,
+      event,
+      height: ((visibleEnd - visibleStart) / 60) * hourHeight,
+      level,
+      startHour,
+      top: ((visibleStart - startHour * 60) / 60) * hourHeight,
+    });
+  });
+  finishCollisionGroup();
+
+  return layouts;
 }
 
 /**
