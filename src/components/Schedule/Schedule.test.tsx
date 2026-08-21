@@ -1185,6 +1185,119 @@ describe('Schedule', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('fits seven configured day tracks inside a 1000px content region', () => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        return this.getAttribute('role') === 'grid' ? 1000 : 0;
+      },
+    );
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        if (this.getAttribute('role') !== 'grid') {
+          return 0;
+        }
+        const dayMinWidth = Number.parseFloat(
+          this.style.getPropertyValue('--schedule-day-min-width'),
+        );
+        return 72 + dayMinWidth * 7;
+      },
+    );
+
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          dayMinWidth: 128,
+          maxHour: 9,
+          minHour: 8,
+        })}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const grid = screen.getByRole('grid', {name: 'Schedule time grid'});
+    expect(grid.style.getPropertyValue('--schedule-day-min-width')).toBe(
+      '128px',
+    );
+    expect(
+      screen.getByRole('columnheader', {name: 'Saturday, May 16, 2026'}),
+    ).toHaveAttribute('aria-colindex', '8');
+    expect(
+      screen.queryByTestId('schedule-time-grid-overflow-end'),
+    ).not.toBeInTheDocument();
+
+    const timeGridStyles = scheduleTimeGridViewRecipe.raw();
+    const dayTracks =
+      'repeat(var(--schedule-day-count), minmax(var(--schedule-day-min-width), 1fr))';
+    expect(timeGridStyles.header).toHaveProperty(
+      'gridTemplateColumns',
+      dayTracks,
+    );
+    expect(timeGridStyles.allDayRow).toHaveProperty(
+      'gridTemplateColumns',
+      dayTracks,
+    );
+    expect(timeGridStyles.timeRow).toHaveProperty(
+      'gridTemplateColumns',
+      dayTracks,
+    );
+  });
+
+  it('defaults to 160px day tracks and cues horizontally hidden days', () => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        return this.getAttribute('role') === 'grid' ? 1000 : 0;
+      },
+    );
+    vi.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        return this.getAttribute('role') === 'grid' ? 1192 : 0;
+      },
+    );
+
+    render(
+      <Schedule
+        events={[]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({maxHour: 9, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    const grid = screen.getByRole('grid', {name: 'Schedule time grid'});
+    expect(grid.style.getPropertyValue('--schedule-day-min-width')).toBe(
+      '160px',
+    );
+    expect(
+      screen.queryByTestId('schedule-time-grid-overflow-start'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('schedule-time-grid-overflow-end'),
+    ).toHaveAttribute('aria-hidden', 'true');
+
+    grid.scrollLeft = 96;
+    fireEvent.scroll(grid);
+    expect(
+      screen.getByTestId('schedule-time-grid-overflow-start'),
+    ).toHaveAttribute('aria-hidden', 'true');
+    expect(
+      screen.getByTestId('schedule-time-grid-overflow-end'),
+    ).toBeInTheDocument();
+
+    grid.scrollLeft = 192;
+    fireEvent.scroll(grid);
+    expect(
+      screen.getByTestId('schedule-time-grid-overflow-start'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('schedule-time-grid-overflow-end'),
+    ).not.toBeInTheDocument();
+    expect(scheduleTimeGridViewRecipe.raw().grid).toHaveProperty(
+      '_focusVisible',
+    );
+  });
+
   it('renders weekly view with a Monday-start week when configured', () => {
     render(
       <Schedule
