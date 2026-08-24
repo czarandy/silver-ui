@@ -1,13 +1,12 @@
 'use client';
 
 import {Check, Copy} from 'lucide-react';
-import {useCallback, useEffect, useRef, useState} from 'react';
 import {
   Button,
   type ButtonPassthroughProps,
   type ButtonProps,
 } from 'components/Button';
-import useAnnounce from 'hooks/useAnnounce';
+import useClipboard from 'hooks/useClipboard';
 
 export interface CopyButtonProps
   extends
@@ -76,53 +75,13 @@ export function CopyButton({
   variant = 'ghost',
   ...passthrough
 }: CopyButtonProps): React.JSX.Element {
-  const [isCopied, setIsCopied] = useState(false);
-  const resetTimeoutRef = useRef<number | null>(null);
-  const {announce, announcer} = useAnnounce();
-
-  const clearResetTimeout = useCallback(() => {
-    if (resetTimeoutRef.current != null) {
-      window.clearTimeout(resetTimeoutRef.current);
-      resetTimeoutRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => clearResetTimeout, [clearResetTimeout]);
-
-  const handleCopy = useCallback(async () => {
-    try {
-      const resolvedValue = typeof value === 'function' ? value() : value;
-      const clipboard = (navigator as {clipboard?: Clipboard}).clipboard;
-      if (clipboard?.writeText == null) {
-        throw new Error('Clipboard API is unavailable.');
-      }
-      await clipboard.writeText(resolvedValue);
-    } catch (error) {
-      clearResetTimeout();
-      setIsCopied(false);
-      announce(errorMessage, 'assertive');
-      onCopyError?.(error);
-      return;
-    }
-
-    clearResetTimeout();
-    setIsCopied(true);
-    announce(copiedLabel);
-    resetTimeoutRef.current = window.setTimeout(() => {
-      setIsCopied(false);
-      resetTimeoutRef.current = null;
-    }, resetTimeout);
-    onCopy?.();
-  }, [
-    announce,
-    clearResetTimeout,
-    copiedLabel,
+  const {announcer, copy, isCopied} = useClipboard({
+    copiedMessage: copiedLabel,
     errorMessage,
     onCopy,
     onCopyError,
     resetTimeout,
-    value,
-  ]);
+  });
 
   const currentLabel = isCopied ? copiedLabel : copyLabel;
 
@@ -137,7 +96,7 @@ export function CopyButton({
         isIconOnly
         label={currentLabel}
         onClick={() => {
-          void handleCopy();
+          void copy(value);
         }}
         ref={ref}
         size={size}

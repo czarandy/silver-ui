@@ -244,6 +244,7 @@ The primitives silver-ui's own components are built on are published from
 ```tsx
 import {
   useAnnounce,
+  useClipboard,
   useHotkey,
   useListFocus,
   useTypeahead,
@@ -251,6 +252,7 @@ import {
 ```
 
 - **useAnnounce** — visually hidden polite and assertive live regions, plus an `announce(message, politeness?)` function
+- **useClipboard** — clipboard writes with transient copied state and accessible success or failure announcements
 - **useHotkey** — global, IME-safe keyboard shortcuts with exact modifier matching and automatic listener cleanup
 - **useListFocus** — roving-tabindex keyboard navigation over a list of elements (arrow keys, `Home`/`End`, wrapping, RTL)
 - **useTypeahead** — WAI-ARIA typeahead: multi-character search, repeat-press cycling, and wrap-around matching
