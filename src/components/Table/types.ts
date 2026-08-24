@@ -1,10 +1,7 @@
-import type {
-  HTMLAttributes,
-  ReactNode,
-  Ref,
-  TdHTMLAttributes,
-  ThHTMLAttributes,
-} from 'react';
+import type {HTMLAttributes, ReactNode, Ref} from 'react';
+import type {TableCellProps} from 'components/Table/TableCell';
+import type {TableHeaderCellProps} from 'components/Table/TableHeaderCell';
+import type {TableRowProps} from 'components/Table/TableRow';
 import type {TableFilterFieldRef} from 'components/Table/plugins/filtering/useTableFiltering';
 
 export interface ProportionalWidth {
@@ -48,7 +45,7 @@ export interface TableRenderProps {
 export interface HeaderRowRenderProps {
   children: ReactNode;
   className?: string;
-  htmlProps: HTMLAttributes<HTMLTableRowElement>;
+  htmlProps: Omit<TableRowProps, 'children' | 'ref'>;
 }
 
 export interface HeaderCellRenderProps {
@@ -57,20 +54,20 @@ export interface HeaderCellRenderProps {
   below?: ReactNode;
   className?: string;
   content?: ReactNode;
-  htmlProps: ThHTMLAttributes<HTMLTableCellElement>;
+  htmlProps: Omit<TableHeaderCellProps, 'children' | 'ref' | 'title'>;
   overlay?: ReactNode;
 }
 
 export interface BodyRowRenderProps {
   children: ReactNode;
   className?: string;
-  htmlProps: HTMLAttributes<HTMLTableRowElement>;
+  htmlProps: Omit<TableRowProps, 'children' | 'ref'>;
   ref?: Ref<HTMLTableRowElement>;
 }
 
 export interface BodyCellRenderProps {
   className?: string;
-  htmlProps: TdHTMLAttributes<HTMLTableCellElement>;
+  htmlProps: Omit<TableCellProps, 'children' | 'ref'>;
 }
 
 export interface TablePlugin<
@@ -96,21 +93,11 @@ export interface TablePlugin<
   transformTableContext?: (children: ReactNode) => ReactNode;
 }
 
-export interface TableRowComponentProps extends HTMLAttributes<HTMLTableRowElement> {
-  children: ReactNode;
-  className?: string;
-  ref?: Ref<HTMLTableRowElement>;
-}
+export type TableRowComponentProps = TableRowProps;
 
-export interface TableCellComponentProps extends TdHTMLAttributes<HTMLTableCellElement> {
-  children?: ReactNode;
-  className?: string;
-}
+export type TableCellComponentProps = TableCellProps;
 
-export interface TableHeaderCellComponentProps extends ThHTMLAttributes<HTMLTableCellElement> {
-  children?: ReactNode;
-  className?: string;
-}
+export type TableHeaderCellComponentProps = TableHeaderCellProps;
 
 export type TableDensity = 'balanced' | 'compact' | 'spacious';
 export type TableDividers = 'columns' | 'grid' | 'none' | 'rows';
