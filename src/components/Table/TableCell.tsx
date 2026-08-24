@@ -35,10 +35,6 @@ export interface TableCellProps {
    */
   rowSpan?: number;
   /**
-   * Scope of the cell when used as a header-like td.
-   */
-  scope?: 'col' | 'colgroup' | 'row' | 'rowgroup';
-  /**
    * Inline styles applied to the td.
    */
   style?: CSSProperties;
