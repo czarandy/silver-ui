@@ -5,6 +5,7 @@ import {Kbd} from 'components/Kbd';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import useAnnounce from 'hooks/useAnnounce';
+import useClipboard from 'hooks/useClipboard';
 import useHotkey from 'hooks/useHotkey';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
@@ -137,6 +138,39 @@ function AnnounceDemo(): React.JSX.Element {
  */
 export const Announce: Story = {
   render: () => <AnnounceDemo />,
+};
+
+function ClipboardDemo(): React.JSX.Element {
+  const {announcer, copy, isCopied} = useClipboard({
+    copiedMessage: 'Invite link copied',
+  });
+
+  return (
+    <div className={styles.column}>
+      <Text type="supporting">
+        The hook writes the value, exposes a transient copied state, and
+        announces success or failure to screen readers. Its live regions must be
+        rendered alongside the custom copy affordance.
+      </Text>
+      <Button
+        label={isCopied ? 'Invite link copied' : 'Copy invite link'}
+        onClick={() => {
+          void copy('https://example.com/invite/silver-ui');
+        }}
+        variant="secondary"
+      />
+      {announcer}
+    </div>
+  );
+}
+
+/**
+ * `useClipboard` gives custom copy affordances the same copied-state timing and
+ * accessible announcements as `CopyButton`. `copy` resolves to `false` instead
+ * of throwing when the Clipboard API is unavailable or rejects the write.
+ */
+export const Clipboard: Story = {
+  render: () => <ClipboardDemo />,
 };
 
 function HotkeyDemo(): React.JSX.Element {

@@ -91,11 +91,17 @@ import {
   type ScheduleAvailabilityPluginOptions as ScheduleAvailabilityPluginOptionsFromSubpath,
 } from 'silver-ui/Schedule';
 import {Spinner, type SpinnerProps} from 'silver-ui/Spinner';
-import {useHotkey, type UseHotkeyOptions} from 'silver-ui/hooks';
+import {
+  useClipboard,
+  useHotkey,
+  type UseClipboardOptions,
+  type UseHotkeyOptions,
+} from 'silver-ui/hooks';
 
 export const components = [Alert, Button, Layout, Popover, Spinner] as const;
 export const className = cx('base', 'extra');
 export const hooks = [
+  useClipboard,
   useHotkey,
   useScheduleAvailabilityPlugin,
   useScheduleAvailabilityPluginFromSubpath,
@@ -109,6 +115,7 @@ export type PublicProps =
   | SpinnerProps;
 export type PublicToken = SpacingToken;
 export type PublicHookOptions =
+  | UseClipboardOptions
   | ScheduleAvailabilityPluginOptions
   | ScheduleAvailabilityPluginOptionsFromSubpath
   | UseHotkeyOptions;
@@ -126,13 +133,23 @@ import {
   type ScheduleAvailabilityPluginOptions,
 } from 'silver-ui';
 import {Button, type ButtonProps} from 'silver-ui/Button';
-import {useHotkey, type UseHotkeyOptions} from 'silver-ui/hooks';
+import {
+  useClipboard,
+  useHotkey,
+  type UseClipboardOptions,
+  type UseHotkeyOptions,
+} from 'silver-ui/hooks';
 
 export const components = [Button] as const;
 export const className = cx('base', 'extra');
-export const hooks = [useHotkey, useScheduleAvailabilityPlugin] as const;
+export const hooks = [
+  useClipboard,
+  useHotkey,
+  useScheduleAvailabilityPlugin,
+] as const;
 export type PublicProps = ButtonProps | RootButtonProps;
 export type PublicHookOptions =
+  | UseClipboardOptions
   | ScheduleAvailabilityPluginOptions
   | UseHotkeyOptions;
 `.trimStart(),
