@@ -19,6 +19,10 @@ import {cx} from 'utils/cx';
 
 const CIRCLE_EDGE_OFFSET_RATIO = (1 - 1 / Math.SQRT2) / 2;
 const INITIALS_FONT_SIZE_RATIO = 0.4;
+const GRAPHEME_SEGMENTER =
+  typeof Intl.Segmenter === 'function'
+    ? new Intl.Segmenter(undefined, {granularity: 'grapheme'})
+    : undefined;
 
 export type AvatarNamedSize = 'tiny' | 'xsmall' | 'small' | 'medium' | 'large';
 
@@ -171,6 +175,17 @@ export interface AvatarProps extends Omit<
   style?: CSSProperties;
 }
 
+function getFirstGrapheme(value: string): string {
+  if (GRAPHEME_SEGMENTER == null) {
+    return value[Symbol.iterator]().next().value ?? '';
+  }
+
+  const segments = GRAPHEME_SEGMENTER.segment(value);
+  const firstSegment = segments[Symbol.iterator]().next();
+
+  return firstSegment.done ? '' : firstSegment.value.segment;
+}
+
 function getInitials(name: string): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
 
@@ -179,11 +194,11 @@ function getInitials(name: string): string {
   }
 
   if (words.length === 1) {
-    return words[0].charAt(0).toUpperCase();
+    return getFirstGrapheme(words[0]).toUpperCase();
   }
 
-  return `${words[0].charAt(0)}${words[words.length - 1].charAt(
-    0,
+  return `${getFirstGrapheme(words[0])}${getFirstGrapheme(
+    words[words.length - 1],
   )}`.toUpperCase();
 }
 

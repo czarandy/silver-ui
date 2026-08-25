@@ -41,6 +41,16 @@ type Story = StoryObj<typeof meta>;
 
 export const Initials: Story = {};
 
+export const UnicodeInitials: Story = {
+  render: () => (
+    <div className={css({display: 'flex', alignItems: 'center', gap: 4})}>
+      <Avatar name="😀 Rivera" size="medium" />
+      <Avatar name="🧑‍🚀 Alice Smith" size="medium" />
+      <Avatar name={'N\u0303oño'} size="medium" />
+    </div>
+  ),
+};
+
 export const Image: Story = {
   args: {
     alt: 'Ada Lovelace',
