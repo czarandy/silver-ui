@@ -5,6 +5,7 @@ import {useChatMessageContext} from 'components/Chat/ChatContext';
 import {chatMessageBubbleRecipe} from 'components/Chat/ChatMessageBubble.recipe';
 import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {toWidthSize, type WidthValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 export type ChatMessageBubbleVariant = 'filled' | 'ghost';
@@ -54,6 +55,11 @@ export interface ChatMessageBubbleProps extends ChatPassthroughProps {
    * @default 'filled'
    */
   variant?: ChatMessageBubbleVariant;
+  /**
+   * Bubble width. Numbers are pixels, strings are used as-is, `'full'` fills
+   * the message column. When set, replaces the default maximum-width cap.
+   */
+  width?: WidthValue;
 }
 
 /**
@@ -70,12 +76,18 @@ export function ChatMessageBubble({
   ref,
   style,
   variant = 'filled',
+  width,
   ...passthrough
 }: ChatMessageBubbleProps): React.JSX.Element {
   const messageContext = useChatMessageContext();
   const sender = messageContext?.sender ?? 'assistant';
   const density = messageContext?.density ?? 'balanced';
   const classes = chatMessageBubbleRecipe({density, group, sender, variant});
+  // Consumer `style` still wins, matching the layout primitives.
+  const bubbleStyle: CSSProperties | undefined =
+    width == null
+      ? style
+      : {width: toWidthSize(width), maxWidth: 'none', ...style};
 
   return (
     <>
@@ -89,7 +101,7 @@ export function ChatMessageBubble({
         className={cx(classes.bubble, className)}
         data-testid={dataTestId}
         ref={ref}
-        style={style}>
+        style={bubbleStyle}>
         {children}
       </div>
       {isNonEmptyReactNode(metadata) ? (
