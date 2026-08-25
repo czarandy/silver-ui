@@ -39,6 +39,15 @@ describe('Button', () => {
     );
   });
 
+  it('forwards data-autofocus to the button', () => {
+    render(<Button hasAutoFocus label="Cancel" />);
+
+    expect(screen.getByRole('button', {name: 'Cancel'})).toHaveAttribute(
+      'data-autofocus',
+      'true',
+    );
+  });
+
   it('renders variants', () => {
     const {rerender} = render(<Button label="Primary" variant="primary" />);
     expect(screen.getByRole('button', {name: 'Primary'})).toBeInTheDocument();

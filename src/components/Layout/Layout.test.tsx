@@ -324,6 +324,18 @@ describe('LayoutHeader', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('can omit the automatic Dialog close button', () => {
+    render(
+      <DialogContext value={{onOpenChange: vi.fn(), titleId: 'title'}}>
+        <LayoutHeader hasCloseButton={false} title="Header" />
+      </DialogContext>,
+    );
+
+    expect(
+      screen.queryByRole('button', {name: 'Close'}),
+    ).not.toBeInTheDocument();
+  });
+
   it('renders a Dialog close button that calls onOpenChange(false)', async () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();

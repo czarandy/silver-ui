@@ -34,6 +34,26 @@ export const Default: Story = {
   },
 };
 
+export const LeastDestructiveInitialFocus: Story = {
+  render: () => {
+    const [isOpen, setIsOpen] = useState(true);
+
+    return (
+      <>
+        <Button label="Reopen alert dialog" onClick={() => setIsOpen(true)} />
+        <AlertDialog
+          actionLabel="Delete"
+          description="Cancel receives initial focus, and the header has no implicit close action."
+          isOpen={isOpen}
+          onAction={() => setIsOpen(false)}
+          onOpenChange={setIsOpen}
+          title="Delete item?"
+        />
+      </>
+    );
+  },
+};
+
 export const LoadingAction: Story = {
   render: () => {
     const [isOpen, setIsOpen] = useState(false);

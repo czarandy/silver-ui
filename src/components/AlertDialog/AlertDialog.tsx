@@ -161,6 +161,7 @@ export function AlertDialog({
             }
             secondaryButton={
               <Button
+                hasAutoFocus
                 label={cancelLabel}
                 onClick={() => onOpenChange(false)}
                 variant="ghost"
@@ -169,7 +170,7 @@ export function AlertDialog({
           />
         }
         hasDividers
-        header={<LayoutHeader title={title} />}
+        header={<LayoutHeader hasCloseButton={false} title={title} />}
       />
     </Dialog>
   );

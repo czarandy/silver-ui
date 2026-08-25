@@ -110,6 +110,11 @@ interface ButtonBaseProps {
    */
   form?: string;
   /**
+   * Whether the button is the preferred initial focus target in an overlay.
+   * @default false
+   */
+  hasAutoFocus?: boolean;
+  /**
    * URL to navigate to. When set and the button is not isDisabled, the component
    * renders as a link element.
    */
@@ -262,6 +267,7 @@ export function Button({
   'aria-pressed': ariaPressed,
   'aria-roledescription': ariaRoledescription,
   href,
+  hasAutoFocus = false,
   as,
   target,
   rel,
@@ -406,6 +412,7 @@ export function Button({
       aria-label={ariaLabel}
       as={as}
       className={rootClassName}
+      data-autofocus={hasAutoFocus ? 'true' : undefined}
       data-testid={dataTestId}
       form={form}
       href={renderAsLink ? href : undefined}
