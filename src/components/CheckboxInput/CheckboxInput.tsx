@@ -219,6 +219,7 @@ export function CheckboxInput({
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         aria-readonly={effectiveReadOnly || undefined}
+        aria-required={isRequired ?? undefined}
         checked={isChecked}
         // `peer` is the marker class Panda's `_peerFocusVisible` selector on
         // the box targets (`.peer:is(:focus-visible,…) ~ &`); without it the
@@ -260,7 +261,7 @@ export function CheckboxInput({
         }}
         readOnly={effectiveReadOnly}
         ref={mergeRefs(ref, inputRef)}
-        required={isRequired}
+        required={isRequired && !effectiveReadOnly}
         tabIndex={effectiveReadOnly ? -1 : undefined}
         type="checkbox"
         value={htmlValue}

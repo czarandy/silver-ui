@@ -85,6 +85,55 @@ describe('Switch', () => {
     expect(formData.has('disabled')).toBe(false);
   });
 
+  it('submits read-only required values without native validation', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+
+    render(
+      <form
+        data-testid="form"
+        onSubmit={event => {
+          event.preventDefault();
+          onSubmit();
+        }}>
+        <Switch
+          htmlName="notifications"
+          isReadOnly
+          isRequired
+          isSelected
+          label="Notifications"
+          onChange={() => {}}
+        />
+        <Switch
+          htmlName="digest"
+          isReadOnly
+          isRequired
+          isSelected={false}
+          label="Digest"
+          onChange={() => {}}
+        />
+        <button type="submit">Submit</button>
+      </form>,
+    );
+
+    const notifications = screen.getByRole('switch', {
+      name: /Notifications/,
+    });
+    const digest = screen.getByRole('switch', {name: /Digest/});
+    for (const control of [notifications, digest]) {
+      expect(control).toHaveAttribute('aria-required', 'true');
+      // eslint-disable-next-line jest-dom-ya/prefer-required -- read-only switches must retain ARIA necessity without participating in native required validation
+      expect(control).not.toHaveAttribute('required');
+    }
+
+    await user.click(screen.getByRole('button', {name: 'Submit'}));
+
+    expect(onSubmit).toHaveBeenCalledOnce();
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(formData.get('notifications')).toBe('on');
+    expect(formData.has('digest')).toBe(false);
+  });
+
   it('calls onChange with the next checked value', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

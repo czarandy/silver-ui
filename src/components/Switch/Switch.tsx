@@ -184,6 +184,7 @@ export function Switch({
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         aria-readonly={effectiveReadOnly || undefined}
+        aria-required={isRequired ?? undefined}
         checked={isSelected}
         className={classes.input}
         data-testid={dataTestId}
@@ -216,7 +217,7 @@ export function Switch({
           }
         }}
         ref={mergeRefs(ref, inputRef)}
-        required={isRequired}
+        required={isRequired && !effectiveReadOnly}
         role="switch"
         tabIndex={effectiveReadOnly ? -1 : undefined}
         type="checkbox"
