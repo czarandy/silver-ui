@@ -9,7 +9,6 @@ import {
   useRef,
   useState,
   type CSSProperties,
-  type MouseEvent as ReactMouseEvent,
   type ReactNode,
   type Ref,
 } from 'react';
@@ -19,6 +18,7 @@ import {LayerContext} from 'internal/LayerContext';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
+import {useBackdropDismiss} from 'internal/useBackdropDismiss';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {useScrollLock} from 'internal/useScrollLock';
@@ -128,6 +128,7 @@ export function Lightbox({
   style,
 }: LightboxProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
   const [uncontrolledIndex, setUncontrolledIndex] = useState(defaultIndex);
   const [zoom, setZoom] = useState(1);
@@ -240,6 +241,11 @@ export function Lightbox({
   const close = useCallback(() => {
     onOpenChange(false);
   }, [onOpenChange]);
+  const backdropDismiss = useBackdropDismiss<HTMLDialogElement>({
+    isBackdropEvent: event => event.target === containerRef.current,
+    isEnabled: isOpen,
+    onDismiss: close,
+  });
   const escapeDismiss = useEscapeDismiss({
     getElement: () => dialogRef.current,
     isEnabled: isOpen,
@@ -266,11 +272,7 @@ export function Lightbox({
         event.preventDefault();
         close();
       }}
-      onClick={(event: ReactMouseEvent<HTMLDialogElement>) => {
-        if (event.target === event.currentTarget) {
-          close();
-        }
-      }}
+      onClick={backdropDismiss.onClick}
       onKeyDown={event => {
         if (event.key === 'ArrowLeft') {
           event.preventDefault();
@@ -280,10 +282,11 @@ export function Lightbox({
           goNext();
         }
       }}
+      onPointerDown={backdropDismiss.onPointerDown}
       ref={mergeRefs(ref, dialogRef)}
       style={style}>
       <LayerContext value={layerContextValue}>
-        <div className={classes.container}>
+        <div className={classes.container} ref={containerRef}>
           <div className={classes.close}>
             <Button
               className={classes.controlButton}

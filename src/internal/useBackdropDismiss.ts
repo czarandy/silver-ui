@@ -28,7 +28,7 @@ function isPointerOutsideElement(
  * box, can have the same outside coordinates but retain the child as their
  * target while bubbling through the dialog.
  */
-function isBackdropPointerEvent<T extends HTMLElement>(
+function isNativeBackdropPointerEvent<T extends HTMLElement>(
   event: MouseEvent<T> | PointerEvent<T>,
 ): boolean {
   return (
@@ -49,9 +49,15 @@ export interface BackdropDismissHandlers<T extends HTMLElement> {
  * (e.g. text selection that overshoots onto the backdrop) are ignored.
  */
 export function useBackdropDismiss<T extends HTMLElement>({
+  isBackdropEvent = isNativeBackdropPointerEvent,
   isEnabled,
   onDismiss,
 }: {
+  /**
+   * Identifies events that land on the visual backdrop. By default, native
+   * dialog backdrop events are detected from the dialog's border-box geometry.
+   */
+  isBackdropEvent?: (event: MouseEvent<T> | PointerEvent<T>) => boolean;
   isEnabled: boolean;
   onDismiss: () => void;
 }): BackdropDismissHandlers<T> {
@@ -67,13 +73,13 @@ export function useBackdropDismiss<T extends HTMLElement>({
       if (event.detail === 0) {
         return;
       }
-      const releasedOnBackdrop = isBackdropPointerEvent(event);
+      const releasedOnBackdrop = isBackdropEvent(event);
       if (startedOnBackdrop && releasedOnBackdrop && isEnabled) {
         onDismiss();
       }
     },
     onPointerDown: event => {
-      pointerDownOnBackdropRef.current = isBackdropPointerEvent(event);
+      pointerDownOnBackdropRef.current = isBackdropEvent(event);
     },
   };
 }

@@ -40,6 +40,15 @@ function getMediaViewport(element: HTMLElement): HTMLElement {
   return parent;
 }
 
+function getBackdropContainer(): HTMLElement {
+  // eslint-disable-next-line testing-library/no-node-access -- the layout container is the lightbox's backdrop hit target
+  const container = screen.getByRole('dialog').firstElementChild;
+  if (!(container instanceof HTMLElement)) {
+    throw new Error('Expected the lightbox dialog to have a layout container.');
+  }
+  return container;
+}
+
 beforeAll(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
     configurable: true,
@@ -124,7 +133,9 @@ describe('Lightbox', () => {
     const onOpenChange = vi.fn();
     render(<Lightbox isOpen media={media[0]} onOpenChange={onOpenChange} />);
 
-    fireEvent.click(screen.getByRole('dialog', {name: 'Media lightbox'}));
+    const backdropContainer = getBackdropContainer();
+    fireEvent.pointerDown(backdropContainer);
+    fireEvent.click(backdropContainer, {detail: 1});
     expect(onOpenChange).toHaveBeenCalledWith(false);
 
     const cancelEvent = new Event('cancel', {cancelable: true});
@@ -134,6 +145,25 @@ describe('Lightbox', () => {
 
     expect(cancelEvent.defaultPrevented).toBe(true);
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('does not close when a pan drag ends on the backdrop', () => {
+    const onOpenChange = vi.fn();
+    render(
+      <Lightbox hasZoom isOpen media={media[0]} onOpenChange={onOpenChange} />,
+    );
+
+    const viewport = getMediaViewport(
+      screen.getByRole('img', {name: 'First image'}),
+    );
+    const backdropContainer = getBackdropContainer();
+    fireEvent.doubleClick(viewport);
+    fireEvent.pointerDown(viewport, {clientX: 100, clientY: 100});
+    fireEvent.pointerMove(window, {clientX: 125, clientY: 125});
+    fireEvent.pointerUp(backdropContainer, {clientX: 150, clientY: 150});
+    fireEvent.click(backdropContainer, {clientX: 150, clientY: 150, detail: 1});
+
+    expect(onOpenChange).not.toHaveBeenCalled();
   });
 
   it('navigates galleries with arrow keys and buttons while respecting bounds', async () => {
