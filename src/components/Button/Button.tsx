@@ -34,6 +34,10 @@ export type {ButtonSize} from 'components/Button/Button.types';
  */
 interface ButtonBaseProps {
   /**
+   * Custom data attributes applied to the root element.
+   */
+  [dataAttribute: `data-${string}`]: boolean | number | string | undefined;
+  /**
    * Identifies the element(s) whose contents are controlled by the button.
    */
   'aria-controls'?: string;
@@ -109,11 +113,6 @@ interface ButtonBaseProps {
    * HTML `form` attribute associating the button with a `<form>` by ID.
    */
   form?: string;
-  /**
-   * Whether the button is the preferred initial focus target in an overlay.
-   * @default false
-   */
-  hasAutoFocus?: boolean;
   /**
    * URL to navigate to. When set and the button is not isDisabled, the component
    * renders as a link element.
@@ -267,7 +266,6 @@ export function Button({
   'aria-pressed': ariaPressed,
   'aria-roledescription': ariaRoledescription,
   href,
-  hasAutoFocus = false,
   as,
   target,
   rel,
@@ -293,6 +291,7 @@ export function Button({
   name,
   value,
   width,
+  ...dataAttributes
 }: ButtonProps): JSX.Element {
   const buttonGroup = useButtonGroup();
   const size = useResolvedSize(sizeProp, buttonGroup?.size);
@@ -407,12 +406,12 @@ export function Button({
   const element = (
     <ActionElement
       {...ariaAttrs}
+      {...dataAttributes}
       aria-busy={!renderAsLink && isLoading ? true : undefined}
       aria-disabled={!renderAsLink && useAriaDisabled ? true : undefined}
       aria-label={ariaLabel}
       as={as}
       className={rootClassName}
-      data-autofocus={hasAutoFocus ? 'true' : undefined}
       data-testid={dataTestId}
       form={form}
       href={renderAsLink ? href : undefined}

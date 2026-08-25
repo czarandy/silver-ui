@@ -161,7 +161,7 @@ export function AlertDialog({
             }
             secondaryButton={
               <Button
-                hasAutoFocus
+                data-autofocus="true"
                 label={cancelLabel}
                 onClick={() => onOpenChange(false)}
                 variant="ghost"

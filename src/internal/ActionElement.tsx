@@ -14,6 +14,7 @@ import type {LinkComponent} from 'components/Link/types';
 import {useLinkComponent} from 'components/Link/useLinkComponent';
 
 export interface ActionElementProps {
+  [dataAttribute: `data-${string}`]: boolean | number | string | undefined;
   'aria-busy'?: AriaAttributes['aria-busy'];
   'aria-controls'?: AriaAttributes['aria-controls'];
   'aria-current'?: AriaAttributes['aria-current'];
@@ -33,7 +34,6 @@ export interface ActionElementProps {
   as?: LinkComponent;
   children?: ReactNode;
   className?: string;
-  'data-autofocus'?: string;
   'data-clickable-control'?: string;
   'data-testid'?: string;
   form?: string;
