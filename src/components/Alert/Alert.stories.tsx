@@ -152,6 +152,63 @@ export const WithPrimaryAction: Story = {
   },
 };
 
+export const WithSecondaryAction: Story = {
+  render: () => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+      <Alert
+        endContent={
+          <>
+            <Button label="Later" size="sm" variant="secondary" />
+            <Button label="Update now" size="sm" variant="primary" />
+          </>
+        }
+        status="info"
+        title="A new version is available"
+      />
+      <Alert
+        endContent={
+          <>
+            <Button label="View details" size="sm" variant="secondary" />
+            <Button label="Download" size="sm" variant="primary" />
+          </>
+        }
+        status="success"
+        title="Your export is ready"
+      />
+      <Alert
+        endContent={
+          <>
+            <Button label="Not now" size="sm" variant="secondary" />
+            <Button label="Upgrade plan" size="sm" variant="primary" />
+          </>
+        }
+        status="warning"
+        title="Your trial ends in 3 days"
+      />
+      <Alert
+        endContent={
+          <>
+            <Button label="Cancel" size="sm" variant="secondary" />
+            <Button label="Update payment" size="sm" variant="primary" />
+          </>
+        }
+        status="error"
+        title="Payment failed"
+      />
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'A `secondary` button in `endContent` automatically adopts the alert status palette, ' +
+          'using a quiet tonal fill alongside the stronger inverted `primary` action. No alert-specific ' +
+          'button prop or custom styling is needed.',
+      },
+    },
+  },
+};
+
 export const SectionContainer: Story = {
   render: () => (
     <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>

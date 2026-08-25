@@ -3,7 +3,8 @@ import {render, screen} from '@testing-library/react';
 import {describe, expect, it} from 'vitest';
 import * as stories from 'components/Alert/Alert.stories';
 
-const {BlockDescription, CenteredEndContent} = composeStories(stories);
+const {BlockDescription, CenteredEndContent, WithSecondaryAction} =
+  composeStories(stories);
 
 describe('Alert stories', () => {
   it('composes the block description from the List component', () => {
@@ -26,5 +27,22 @@ describe('Alert stories', () => {
     const action = screen.getByRole('button', {name: 'Upgrade plan'});
     // eslint-disable-next-line testing-library/no-node-access -- the end-area slot has no semantic role of its own
     expect(action.parentElement).toHaveClass('silver-as_center');
+  });
+
+  it('shows paired secondary and primary actions for every status', () => {
+    render(<WithSecondaryAction />);
+
+    for (const name of [
+      'Later',
+      'Update now',
+      'View details',
+      'Download',
+      'Not now',
+      'Upgrade plan',
+      'Cancel',
+      'Update payment',
+    ]) {
+      expect(screen.getByRole('button', {name})).toBeInTheDocument();
+    }
   });
 });

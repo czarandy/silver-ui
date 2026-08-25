@@ -136,6 +136,10 @@ function contrastRatio(a: string, b: string): number {
   return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05);
 }
 
+const ALERT_SURFACE_COLORS = ['blue', 'green', 'yellow', 'red'] as const;
+const ALERT_SECONDARY_HOVER_MIX = 0.7;
+const ALERT_SECONDARY_YELLOW_FG_MIX = 0.55;
+
 // Every text-bearing solid fill paired with its intended foreground.
 // status.disabled.solid is intentionally omitted: WCAG 2.1 SC 1.4.3 exempts
 // inactive/disabled UI components from the contrast requirement.
@@ -309,6 +313,77 @@ const EXEMPT_CASES = PRESET_CASES.map(c => ({
   source: exceptionFor(c)?.source,
 })).filter(c => c.expected !== undefined);
 
+type AlertSecondaryState = 'hover/active' | 'resting';
+type ResolveColor = (ref: string) => string;
+
+function alertSecondaryBackground(
+  color: (typeof ALERT_SURFACE_COLORS)[number],
+  state: AlertSecondaryState,
+  resolveColor: ResolveColor,
+): string {
+  const hover = resolveColor(`{colors.surface.${color}.hover}`);
+  return state === 'hover/active'
+    ? hover
+    : composite(
+        hover,
+        resolveColor(`{colors.surface.${color}}`),
+        ALERT_SECONDARY_HOVER_MIX,
+      );
+}
+
+function alertSecondaryForeground(
+  color: (typeof ALERT_SURFACE_COLORS)[number],
+  resolveColor: ResolveColor,
+): string {
+  const surfaceFg = resolveColor(`{colors.surface.${color}.fg}`);
+  return color === 'yellow'
+    ? composite(
+        surfaceFg,
+        resolveColor('{colors.highlight.fg}'),
+        ALERT_SECONDARY_YELLOW_FG_MIX,
+      )
+    : surfaceFg;
+}
+
+const ALERT_SECONDARY_STATES: AlertSecondaryState[] = [
+  'resting',
+  'hover/active',
+];
+
+const ALERT_SECONDARY_CASES = [
+  ...MODES.flatMap(mode => {
+    const appearance: Appearance = mode === '_dark' ? 'dark' : 'light';
+    const resolveColor = (ref: string) => resolve(ref, mode);
+    return ALERT_SURFACE_COLORS.flatMap(color =>
+      ALERT_SECONDARY_STATES.map(state => ({
+        appearance,
+        bgHex: alertSecondaryBackground(color, state, resolveColor),
+        color,
+        fgHex: alertSecondaryForeground(color, resolveColor),
+        palette: 'default',
+        state,
+      })),
+    );
+  }),
+  ...Object.entries(themePresets).flatMap(([presetId, preset]) =>
+    MODES.flatMap(mode => {
+      const appearance: Appearance = mode === '_dark' ? 'dark' : 'light';
+      const resolveColor = (ref: string) =>
+        effective(preset, appearance, ref, mode);
+      return ALERT_SURFACE_COLORS.flatMap(color =>
+        ALERT_SECONDARY_STATES.map(state => ({
+          appearance,
+          bgHex: alertSecondaryBackground(color, state, resolveColor),
+          color,
+          fgHex: alertSecondaryForeground(color, resolveColor),
+          palette: presetId,
+          state,
+        })),
+      );
+    }),
+  ),
+];
+
 describe('theme preset color contrast (WCAG AA, normal text)', () => {
   it.each(ENFORCED_CASES)(
     '$preset · $name in $appearance mode',
@@ -317,6 +392,19 @@ describe('theme preset color contrast (WCAG AA, normal text)', () => {
       expect(
         ratio,
         `${preset} ${name}: ${fgHex} on ${bgHex} is ${ratio.toFixed(2)}:1`,
+      ).toBeGreaterThanOrEqual(AA_NORMAL);
+    },
+  );
+});
+
+describe('Alert secondary action contrast (WCAG AA, normal text)', () => {
+  it.each(ALERT_SECONDARY_CASES)(
+    '$palette · $color $state in $appearance mode',
+    ({bgHex, fgHex, palette}) => {
+      const ratio = contrastRatio(bgHex, fgHex);
+      expect(
+        ratio,
+        `${palette}: ${fgHex} on ${bgHex} is ${ratio.toFixed(2)}:1`,
       ).toBeGreaterThanOrEqual(AA_NORMAL);
     },
   );
