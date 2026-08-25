@@ -277,6 +277,61 @@ describe('ChatMessageBubble', () => {
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 
+  it('resolves a numeric width to pixels and replaces the default cap', () => {
+    render(
+      <ChatMessageBubble data-testid="bubble" width={480}>
+        Hi
+      </ChatMessageBubble>,
+    );
+
+    expect(screen.getByTestId('bubble')).toHaveStyle({
+      width: '480px',
+      maxWidth: 'none',
+    });
+  });
+
+  it('uses string widths as-is', () => {
+    render(
+      <ChatMessageBubble data-testid="bubble" width="75%">
+        Hi
+      </ChatMessageBubble>,
+    );
+
+    expect(screen.getByTestId('bubble')).toHaveStyle({
+      width: '75%',
+      maxWidth: 'none',
+    });
+  });
+
+  it("fills the message column for width='full'", () => {
+    render(
+      <ChatMessageBubble data-testid="bubble" width="full">
+        Hi
+      </ChatMessageBubble>,
+    );
+
+    expect(screen.getByTestId('bubble')).toHaveStyle({
+      width: '100%',
+      maxWidth: 'none',
+    });
+  });
+
+  it('lets consumer style override width and max-width', () => {
+    render(
+      <ChatMessageBubble
+        data-testid="bubble"
+        style={{width: '12rem', maxWidth: '10rem'}}
+        width="full">
+        Hi
+      </ChatMessageBubble>,
+    );
+
+    expect(screen.getByTestId('bubble')).toHaveStyle({
+      width: '12rem',
+      maxWidth: '10rem',
+    });
+  });
+
   it('forwards the curated passthrough props', () => {
     render(
       <ChatMessage sender="user">

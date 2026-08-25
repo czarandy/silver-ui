@@ -6,6 +6,8 @@ import {ChatMessageBubble} from 'components/Chat/ChatMessageBubble';
 import {ChatMessageMetadata} from 'components/Chat/ChatMessageMetadata';
 import {ChatSystemMessage} from 'components/Chat/ChatSystemMessage';
 import {Icon} from 'components/Icon';
+import {Table} from 'components/Table/Table';
+import type {TableColumn} from 'components/Table/types';
 import {Timestamp} from 'components/Timestamp';
 import {css} from 'styled-system/css';
 
@@ -36,6 +38,24 @@ const columnStyle = css({
   gap: '3',
   maxW: '640px',
 });
+
+interface UsageRow extends Record<string, unknown> {
+  model: string;
+  requests: string;
+  tokens: string;
+}
+
+const usageColumns: TableColumn<UsageRow>[] = [
+  {header: 'Model', key: 'model'},
+  {align: 'end', header: 'Requests', key: 'requests'},
+  {align: 'end', header: 'Tokens', key: 'tokens'},
+];
+
+const usageData: UsageRow[] = [
+  {model: 'Atlas', requests: '1,842', tokens: '3.2M'},
+  {model: 'Nova', requests: '967', tokens: '1.1M'},
+  {model: 'Ember', requests: '413', tokens: '620K'},
+];
 
 export const Basic: Story = {
   render: args => (
@@ -70,6 +90,24 @@ export const BubbleVariants: Story = {
       <ChatMessage sender="assistant">
         <ChatMessageBubble variant="ghost">
           A ghost bubble: no background, but the same alignment.
+        </ChatMessageBubble>
+      </ChatMessage>
+    </div>
+  ),
+};
+
+export const FullWidthContent: Story = {
+  render: () => (
+    <div className={columnStyle}>
+      <ChatMessage sender="assistant">
+        <ChatMessageBubble width="full">
+          <Table
+            columns={usageColumns}
+            data={usageData}
+            density="compact"
+            idKey="model"
+            label="Model usage"
+          />
         </ChatMessageBubble>
       </ChatMessage>
     </div>
