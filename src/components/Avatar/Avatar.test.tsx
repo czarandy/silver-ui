@@ -91,6 +91,25 @@ describe('Avatar', () => {
     ).toBeInTheDocument();
   });
 
+  it('trims alt before using it as the accessible name', () => {
+    render(<Avatar alt="  Profile photo  " name="Ada Lovelace" />);
+
+    expect(screen.getByRole('img')).toHaveAccessibleName('Profile photo');
+    expect(screen.getByRole('img')).toHaveAttribute(
+      'aria-label',
+      'Profile photo',
+    );
+  });
+
+  it.each([
+    ['empty', ''],
+    ['whitespace-only', '  '],
+  ])('falls back to name when alt is %s', (_description, alt) => {
+    render(<Avatar alt={alt} name="Ada Lovelace" />);
+
+    expect(screen.getByRole('img')).toHaveAccessibleName('Ada Lovelace');
+  });
+
   it('renders an image and falls back to fallbackSrc when it fails', () => {
     render(
       <Avatar
