@@ -175,6 +175,45 @@ describe('Switch', () => {
     ).toBeNull();
   });
 
+  it.each(['default', 'spread'] as const)(
+    'does not reserve label space with %s spacing when the label is hidden',
+    labelSpacing => {
+      render(
+        <Switch
+          data-testid="notifications"
+          isLabelHidden
+          isSelected={false}
+          label="Notifications"
+          labelSpacing={labelSpacing}
+          onChange={() => {}}
+        />,
+      );
+
+      expect(
+        screen.getByRole('switch', {name: 'Notifications'}),
+      ).toBeInTheDocument();
+      const control = getControl('notifications');
+      /* eslint-disable testing-library/no-node-access -- the regression is the
+         row's direct-child layout: only the control may remain in flex flow. */
+      const row = control.parentElement;
+      const field = row?.parentElement;
+      const visuallyHiddenClass = css({position: 'absolute'});
+      const hiddenLabel = screen
+        .getByText('Notifications')
+        .closest(`[class~="${visuallyHiddenClass}"]`);
+
+      expect(hiddenLabel?.parentElement).toBe(row);
+      expect(
+        [...(row?.children ?? [])].filter(
+          child => !child.classList.contains(visuallyHiddenClass),
+        ),
+      ).toEqual([control]);
+      expect(field).toHaveClass(css({w: 'fit-content'}));
+      expect(row).not.toHaveClass(css({w: 'full'}));
+      /* eslint-enable testing-library/no-node-access */
+    },
+  );
+
   it('renders the label before the switch when labelPosition is start', () => {
     render(
       <Switch

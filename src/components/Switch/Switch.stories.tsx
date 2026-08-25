@@ -167,6 +167,15 @@ export const HiddenLabel: Story = {
   render: (args: SwitchProps) => <SwitchStory {...args} />,
 };
 
+export const HiddenLabelWithoutDescription: Story = {
+  args: {
+    description: undefined,
+    isLabelHidden: true,
+    label: 'Enable notifications',
+  },
+  render: (args: SwitchProps) => <SwitchStory {...args} />,
+};
+
 export const LabelIcon: Story = {
   args: {
     label: 'Security alerts',

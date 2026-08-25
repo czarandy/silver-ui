@@ -154,9 +154,9 @@ export function Switch({
 }: SwitchProps): React.JSX.Element {
   const size = useResolvedSize(sizeProp);
   const inputId = useId();
-  const descriptionID = isNonEmptyReactNode(description)
-    ? `${inputId}-description`
-    : undefined;
+  const hasDescription = isNonEmptyReactNode(description);
+  const hasVisibleLabelContent = !isLabelHidden || hasDescription;
+  const descriptionID = hasDescription ? `${inputId}-description` : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -166,7 +166,7 @@ export function Switch({
     !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
   const classes = switchRecipe({
     size,
-    labelSpacing,
+    labelSpacing: hasVisibleLabelContent ? labelSpacing : 'default',
     isSelected,
     isDisabled: effectiveDisabled,
     isReadOnly: effectiveReadOnly,
@@ -262,21 +262,28 @@ export function Switch({
       ) : null}
     </>
   );
-  const labelNode = (
-    <div className={classes.labelWrapper}>
+  const labelElement = isLabelHidden ? (
+    <VisuallyHidden>
       <label className={classes.label} htmlFor={inputId}>
-        {isLabelHidden ? (
-          <VisuallyHidden>{labelContent}</VisuallyHidden>
-        ) : (
-          labelContent
-        )}
+        {labelContent}
       </label>
-      {isNonEmptyReactNode(description) ? (
+    </VisuallyHidden>
+  ) : (
+    <label className={classes.label} htmlFor={inputId}>
+      {labelContent}
+    </label>
+  );
+  const labelNode = hasVisibleLabelContent ? (
+    <div className={classes.labelWrapper}>
+      {labelElement}
+      {hasDescription ? (
         <Text as="span" color="secondary" id={descriptionID} type="supporting">
           {description}
         </Text>
       ) : null}
     </div>
+  ) : (
+    labelElement
   );
 
   return (
