@@ -209,6 +209,29 @@ describe('NumberInput', () => {
     expect(input).toHaveValue('0');
   });
 
+  it('keeps stepped values within a fractional max', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <ControlledSteppableNumberInput
+        initialValue={99}
+        max={99.99}
+        onChange={onChange}
+      />,
+    );
+
+    const input = screen.getByRole('spinbutton', {name: 'Count'});
+    input.focus();
+    await user.keyboard('{ArrowUp}');
+
+    expect(input).toHaveValue('99.99');
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(99.99);
+    expect(
+      screen.getByRole('button', {name: 'Increment value'}),
+    ).toBeDisabled();
+  });
+
   it('moves off-grid values to the next step without floating-point drift', async () => {
     const user = userEvent.setup();
 
