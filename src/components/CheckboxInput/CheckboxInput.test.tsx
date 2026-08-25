@@ -192,6 +192,55 @@ describe('CheckboxInput', () => {
     expect(clickEvent.defaultPrevented).toBe(true);
   });
 
+  it('submits read-only required values without native validation', async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+
+    render(
+      <form
+        data-testid="form"
+        onSubmit={event => {
+          event.preventDefault();
+          onSubmit();
+        }}>
+        <CheckboxInput
+          htmlName="accepted"
+          htmlValue="yes"
+          isReadOnly
+          isRequired
+          label="Accepted"
+          onChange={() => {}}
+          value
+        />
+        <CheckboxInput
+          htmlName="declined"
+          htmlValue="yes"
+          isReadOnly
+          isRequired
+          label="Declined"
+          onChange={() => {}}
+          value={false}
+        />
+        <button type="submit">Submit</button>
+      </form>,
+    );
+
+    const accepted = screen.getByRole('checkbox', {name: /Accepted/});
+    const declined = screen.getByRole('checkbox', {name: /Declined/});
+    for (const checkbox of [accepted, declined]) {
+      expect(checkbox).toHaveAttribute('aria-required', 'true');
+      // eslint-disable-next-line jest-dom-ya/prefer-required -- read-only checkboxes must retain ARIA necessity without participating in native required validation
+      expect(checkbox).not.toHaveAttribute('required');
+    }
+
+    await user.click(screen.getByRole('button', {name: 'Submit'}));
+
+    expect(onSubmit).toHaveBeenCalledOnce();
+    const formData = new FormData(screen.getByTestId('form'));
+    expect(formData.get('accepted')).toBe('yes');
+    expect(formData.has('declined')).toBe(false);
+  });
+
   it('sets aria-invalid and renders error message', () => {
     render(
       <CheckboxInput
