@@ -69,6 +69,20 @@ describe('Button', () => {
     );
   });
 
+  // Alerts can retint this same variant through CSS variables; everywhere else
+  // the existing neutral secondary treatment must remain unchanged.
+  it('falls back to the neutral surface when no surface retints secondary', () => {
+    render(<Button label="Secondary" variant="secondary" />);
+
+    const button = screen.getByRole('button', {name: 'Secondary'});
+    expect(button).toHaveClass(
+      'silver-bg_var(--silver-button-secondary-bg,_var(--silver-colors-surface-gray))',
+    );
+    expect(button).toHaveClass(
+      'silver-c_var(--silver-button-secondary-fg,_var(--silver-colors-fg))',
+    );
+  });
+
   it('renders icon-only button with aria-label', () => {
     render(<Button icon={Home} isIconOnly label="Settings" />);
 

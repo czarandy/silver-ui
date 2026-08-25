@@ -6,6 +6,10 @@ const primaryBg = `var(--silver-button-primary-bg, ${token.var('colors.primary')
 const primaryFg = `var(--silver-button-primary-fg, ${token.var('colors.fg.onPrimary')})`;
 const primaryBgHover = `var(--silver-button-primary-bg-hover, ${token.var('colors.primary.hover')})`;
 const primaryBgActive = `var(--silver-button-primary-bg-active, ${token.var('colors.primary.active')})`;
+const secondaryBg = `var(--silver-button-secondary-bg, ${token.var('colors.surface.gray')})`;
+const secondaryFg = `var(--silver-button-secondary-fg, ${token.var('colors.fg')})`;
+const secondaryBgHover = `var(--silver-button-secondary-bg-hover, ${token.var('colors.surface.gray.hover')})`;
+const secondaryBgActive = `var(--silver-button-secondary-bg-active, ${token.var('colors.surface.gray.hover')})`;
 const focusColor = `var(--silver-button-focus-color, ${token.var('colors.primary')})`;
 
 /**
@@ -22,10 +26,10 @@ export const buttonSurfaceRecipe = cva({
         _active: {bg: primaryBgActive},
       },
       secondary: {
-        bg: 'surface.gray',
-        color: 'fg',
-        _hover: {bg: 'surface.gray.hover'},
-        _active: {bg: 'surface.gray.hover'},
+        bg: secondaryBg,
+        color: secondaryFg,
+        _hover: {bg: secondaryBgHover},
+        _active: {bg: secondaryBgActive},
       },
       ghost: {
         color: 'fg',

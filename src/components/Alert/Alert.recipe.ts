@@ -2,9 +2,11 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
 import {token} from 'styled-system/tokens';
 
 /**
- * Each status fills a `primary` action with the foreground its own header is
- * built from, so the action inverts the surface it sits on rather than dropping
- * the global accent onto it.
+ * Each status retints actions with the same palette its header uses. A
+ * `primary` action is filled with the status foreground, so it inverts the
+ * surface rather than dropping the global accent onto it. A `secondary` action
+ * uses a stronger step of the status tint, keeping it quieter than the primary
+ * without introducing the unrelated neutral surface.
  *
  * The label is `bg` rather than `fg.onPrimary`: these fills track the theme
  * (`surface.X.fg` is dark on a light theme and light on a dark one), while
@@ -13,28 +15,41 @@ import {token} from 'styled-system/tokens';
  * that flips the same way the fills do, so the label reads white on a light
  * theme and near-black on a dark one.
  *
- * Hover and active shade the fill back toward the tint, mirroring how
- * `primary.hover` lightens the accent. Written out per status because Panda
- * extracts these statically.
+ * Primary hover and active shade the fill back toward the tint, mirroring how
+ * `primary.hover` lightens the accent. Secondary starts 70% of the way from
+ * the header tint to its hover tint, then reaches the hover tint on interaction.
+ * Written out per status because Panda extracts these statically.
  */
 const labelOnFill = token.var('colors.bg');
+const highContrastForeground = token.var('colors.highlight.fg');
 const blueFg = token.var('colors.surface.blue.fg');
 const blueTint = token.var('colors.surface.blue');
+const blueTintHover = token.var('colors.surface.blue.hover');
 const greenFg = token.var('colors.surface.green.fg');
 const greenTint = token.var('colors.surface.green');
+const greenTintHover = token.var('colors.surface.green.hover');
 const redFg = token.var('colors.surface.red.fg');
 const redTint = token.var('colors.surface.red');
+const redTintHover = token.var('colors.surface.red.hover');
 const yellowFg = token.var('colors.surface.yellow.fg');
 const yellowTint = token.var('colors.surface.yellow');
+const yellowTintHover = token.var('colors.surface.yellow.hover');
 
-const blueHover = `color-mix(in srgb, ${blueFg} 88%, ${blueTint})`;
-const blueActive = `color-mix(in srgb, ${blueFg} 78%, ${blueTint})`;
-const greenHover = `color-mix(in srgb, ${greenFg} 88%, ${greenTint})`;
-const greenActive = `color-mix(in srgb, ${greenFg} 78%, ${greenTint})`;
-const redHover = `color-mix(in srgb, ${redFg} 88%, ${redTint})`;
-const redActive = `color-mix(in srgb, ${redFg} 78%, ${redTint})`;
-const yellowHover = `color-mix(in srgb, ${yellowFg} 88%, ${yellowTint})`;
-const yellowActive = `color-mix(in srgb, ${yellowFg} 78%, ${yellowTint})`;
+const bluePrimaryHover = `color-mix(in srgb, ${blueFg} 88%, ${blueTint})`;
+const bluePrimaryActive = `color-mix(in srgb, ${blueFg} 78%, ${blueTint})`;
+const blueSecondary = `color-mix(in srgb, ${blueTintHover} 70%, ${blueTint})`;
+const greenPrimaryHover = `color-mix(in srgb, ${greenFg} 88%, ${greenTint})`;
+const greenPrimaryActive = `color-mix(in srgb, ${greenFg} 78%, ${greenTint})`;
+const greenSecondary = `color-mix(in srgb, ${greenTintHover} 70%, ${greenTint})`;
+const redPrimaryHover = `color-mix(in srgb, ${redFg} 88%, ${redTint})`;
+const redPrimaryActive = `color-mix(in srgb, ${redFg} 78%, ${redTint})`;
+const redSecondary = `color-mix(in srgb, ${redTintHover} 70%, ${redTint})`;
+const yellowPrimaryHover = `color-mix(in srgb, ${yellowFg} 88%, ${yellowTint})`;
+const yellowPrimaryActive = `color-mix(in srgb, ${yellowFg} 78%, ${yellowTint})`;
+const yellowSecondary = `color-mix(in srgb, ${yellowTintHover} 70%, ${yellowTint})`;
+// The dark-mode yellow foreground only clears AA against the base tint. Pulling
+// it toward the theme foreground preserves the hue on the stronger tonal fill.
+const yellowSecondaryFg = `color-mix(in srgb, ${yellowFg} 55%, ${highContrastForeground})`;
 
 /**
  * Symmetric padding overrides for the collapsible body. Keys mirror the
@@ -137,8 +152,12 @@ export const alertRecipe = sva({
           '--silver-text-color-muted': 'token(colors.surface.red.fg)',
           '--silver-button-primary-bg': redFg,
           '--silver-button-primary-fg': labelOnFill,
-          '--silver-button-primary-bg-hover': redHover,
-          '--silver-button-primary-bg-active': redActive,
+          '--silver-button-primary-bg-hover': redPrimaryHover,
+          '--silver-button-primary-bg-active': redPrimaryActive,
+          '--silver-button-secondary-bg': redSecondary,
+          '--silver-button-secondary-fg': redFg,
+          '--silver-button-secondary-bg-hover': redTintHover,
+          '--silver-button-secondary-bg-active': redTintHover,
           '--silver-button-focus-color': redFg,
         },
       },
@@ -150,8 +169,12 @@ export const alertRecipe = sva({
           '--silver-text-color-muted': 'token(colors.surface.blue.fg)',
           '--silver-button-primary-bg': blueFg,
           '--silver-button-primary-fg': labelOnFill,
-          '--silver-button-primary-bg-hover': blueHover,
-          '--silver-button-primary-bg-active': blueActive,
+          '--silver-button-primary-bg-hover': bluePrimaryHover,
+          '--silver-button-primary-bg-active': bluePrimaryActive,
+          '--silver-button-secondary-bg': blueSecondary,
+          '--silver-button-secondary-fg': blueFg,
+          '--silver-button-secondary-bg-hover': blueTintHover,
+          '--silver-button-secondary-bg-active': blueTintHover,
           '--silver-button-focus-color': blueFg,
         },
       },
@@ -163,8 +186,12 @@ export const alertRecipe = sva({
           '--silver-text-color-muted': 'token(colors.surface.green.fg)',
           '--silver-button-primary-bg': greenFg,
           '--silver-button-primary-fg': labelOnFill,
-          '--silver-button-primary-bg-hover': greenHover,
-          '--silver-button-primary-bg-active': greenActive,
+          '--silver-button-primary-bg-hover': greenPrimaryHover,
+          '--silver-button-primary-bg-active': greenPrimaryActive,
+          '--silver-button-secondary-bg': greenSecondary,
+          '--silver-button-secondary-fg': greenFg,
+          '--silver-button-secondary-bg-hover': greenTintHover,
+          '--silver-button-secondary-bg-active': greenTintHover,
           '--silver-button-focus-color': greenFg,
         },
       },
@@ -176,8 +203,12 @@ export const alertRecipe = sva({
           '--silver-text-color-muted': 'token(colors.surface.yellow.fg)',
           '--silver-button-primary-bg': yellowFg,
           '--silver-button-primary-fg': labelOnFill,
-          '--silver-button-primary-bg-hover': yellowHover,
-          '--silver-button-primary-bg-active': yellowActive,
+          '--silver-button-primary-bg-hover': yellowPrimaryHover,
+          '--silver-button-primary-bg-active': yellowPrimaryActive,
+          '--silver-button-secondary-bg': yellowSecondary,
+          '--silver-button-secondary-fg': yellowSecondaryFg,
+          '--silver-button-secondary-bg-hover': yellowTintHover,
+          '--silver-button-secondary-bg-active': yellowTintHover,
           '--silver-button-focus-color': yellowFg,
         },
       },

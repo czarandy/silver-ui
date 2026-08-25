@@ -211,7 +211,8 @@ describe('Select', () => {
       variant: 'ghost',
     },
     {
-      backgroundClass: 'silver-bg_surface.gray',
+      backgroundClass:
+        'silver-bg_var(--silver-button-secondary-bg,_var(--silver-colors-surface-gray))',
       buttonVariant: 'secondary',
       variant: 'button',
     },

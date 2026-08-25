@@ -7,8 +7,8 @@ import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
 
 /**
- * The status colours a `primary` end action reads from live on the header slot,
- * which carries no role or text of its own to query by.
+ * The colours an end action reads from live on the header slot, which carries
+ * no role or text of its own to query by.
  */
 function alertHeader(): HTMLElement {
   // eslint-disable-next-line testing-library/no-node-access -- the header slot is the element under test and has no queryable role of its own
@@ -196,6 +196,41 @@ describe('Alert', () => {
       'silver---silver-button-primary-fg_var(--silver-colors-bg)',
     );
   });
+
+  it.each([
+    {color: 'blue', status: 'info'},
+    {color: 'green', status: 'success'},
+    {color: 'yellow', status: 'warning'},
+    {color: 'red', status: 'error'},
+  ] as const)(
+    'retints a $status secondary end action with the $color tonal surface',
+    ({color, status}) => {
+      render(
+        <Alert
+          data-testid="alert"
+          endContent={
+            <Button label="Secondary" size="sm" variant="secondary" />
+          }
+          status={status}
+          title="With secondary action"
+        />,
+      );
+
+      const header = alertHeader();
+      expect(header).toHaveClass(
+        `silver---silver-button-secondary-bg-hover_var(--silver-colors-surface-${color}-hover)`,
+        `silver---silver-button-secondary-bg-active_var(--silver-colors-surface-${color}-hover)`,
+      );
+      expect(header.className).toContain(
+        `silver---silver-button-secondary-bg_color-mix(in_srgb,_var(--silver-colors-surface-${color}-hover)_70%,_var(--silver-colors-surface-${color}))`,
+      );
+      expect(header.className).toContain(
+        color === 'yellow'
+          ? 'silver---silver-button-secondary-fg_color-mix(in_srgb,_var(--silver-colors-surface-yellow-fg)_55%,_var(--silver-colors-highlight-fg))'
+          : `silver---silver-button-secondary-fg_var(--silver-colors-surface-${color}-fg)`,
+      );
+    },
+  );
 
   it('renders custom icon instead of default', () => {
     render(
