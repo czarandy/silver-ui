@@ -243,7 +243,11 @@ export function Avatar({
     isGrouped: avatarGroup != null,
     isLarge: numericSize >= 96,
   });
-  const accessibleName = alt ?? (showInitials ? name : undefined) ?? 'Avatar';
+  const normalizedAlt = alt?.trim();
+  const accessibleName =
+    (normalizedAlt === '' ? undefined : normalizedAlt) ??
+    (showInitials ? name : undefined) ??
+    'Avatar';
   const describedBy = isTooltipEnabled
     ? [ariaDescribedBy, tooltip.describedBy].filter(Boolean).join(' ')
     : ariaDescribedBy;
