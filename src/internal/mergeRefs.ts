@@ -2,23 +2,29 @@ import type {Ref, RefCallback} from 'react';
 
 export function mergeRefs<T>(...refs: (Ref<T> | undefined)[]): RefCallback<T> {
   return (value: T | null) => {
-    const cleanups: (() => void)[] = [];
+    const detachCallbacks: (() => void)[] = [];
     for (const ref of refs) {
       if (typeof ref === 'function') {
         const cleanup = ref(value);
         if (typeof cleanup === 'function') {
-          cleanups.push(cleanup);
+          detachCallbacks.push(cleanup);
+        } else {
+          detachCallbacks.push(() => {
+            ref(null);
+          });
         }
       } else if (ref != null) {
-        (ref as {current: T | null}).current = value;
+        const objectRef = ref as {current: T | null};
+        objectRef.current = value;
+        detachCallbacks.push(() => {
+          objectRef.current = null;
+        });
       }
     }
-    if (cleanups.length > 0) {
-      return () => {
-        for (const cleanup of cleanups) {
-          cleanup();
-        }
-      };
-    }
+    return () => {
+      for (const detach of detachCallbacks) {
+        detach();
+      }
+    };
   };
 }
