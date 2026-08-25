@@ -20,9 +20,9 @@ import {cx} from 'utils/cx';
  * optional subtitle, and start/end content slots.
  *
  * When rendered inside a Dialog, Drawer, or Popover, a close button is
- * automatically appended after `endContent`. The button calls
- * `onOpenChange(false)` on the parent surface. Dialog and Drawer also use the
- * title as their fallback initial focus target.
+ * automatically appended after `endContent` unless `hasCloseButton` is false.
+ * The button calls `onOpenChange(false)` on the parent surface. Dialog and
+ * Drawer also use the title as their fallback initial focus target.
  */
 export interface LayoutHeaderProps {
   /**
@@ -47,6 +47,11 @@ export interface LayoutHeaderProps {
    * Content rendered after the title area.
    */
   endContent?: ReactNode;
+  /**
+   * Whether to append the automatic close button inside an overlay.
+   * @default true
+   */
+  hasCloseButton?: boolean;
   /**
    * Fixed height for the header. Numbers are pixels, strings are used as-is.
    */
@@ -91,9 +96,9 @@ export interface LayoutHeaderProps {
  * optional subtitle, and start/end content slots.
  *
  * When rendered inside a Dialog, Drawer, or Popover, a close button is
- * automatically appended after `endContent`. The button calls
- * `onOpenChange(false)` on the parent surface. Dialog and Drawer also use the
- * title as their fallback initial focus target.
+ * automatically appended after `endContent` unless `hasCloseButton` is false.
+ * The button calls `onOpenChange(false)` on the parent surface. Dialog and
+ * Drawer also use the title as their fallback initial focus target.
  */
 export function LayoutHeader({
   accessibilityLevel,
@@ -101,6 +106,7 @@ export function LayoutHeader({
   className,
   'data-testid': dataTestId,
   endContent,
+  hasCloseButton = true,
   height,
   label,
   level = 4,
@@ -118,7 +124,7 @@ export function LayoutHeader({
   const classes = layoutHeaderRecipe({align, hasDivider});
 
   const closeButton =
-    dialogContext != null ? (
+    dialogContext != null && hasCloseButton ? (
       <Button
         className={classes.closeButton}
         icon={X}

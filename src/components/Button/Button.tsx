@@ -34,6 +34,10 @@ export type {ButtonSize} from 'components/Button/Button.types';
  */
 interface ButtonBaseProps {
   /**
+   * Custom data attributes applied to the root element.
+   */
+  [dataAttribute: `data-${string}`]: boolean | number | string | undefined;
+  /**
    * Identifies the element(s) whose contents are controlled by the button.
    */
   'aria-controls'?: string;
@@ -287,6 +291,7 @@ export function Button({
   name,
   value,
   width,
+  ...dataAttributes
 }: ButtonProps): JSX.Element {
   const buttonGroup = useButtonGroup();
   const size = useResolvedSize(sizeProp, buttonGroup?.size);
@@ -401,6 +406,7 @@ export function Button({
   const element = (
     <ActionElement
       {...ariaAttrs}
+      {...dataAttributes}
       aria-busy={!renderAsLink && isLoading ? true : undefined}
       aria-disabled={!renderAsLink && useAriaDisabled ? true : undefined}
       aria-label={ariaLabel}

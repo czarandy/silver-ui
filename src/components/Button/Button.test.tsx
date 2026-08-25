@@ -39,6 +39,20 @@ describe('Button', () => {
     );
   });
 
+  it('forwards arbitrary data attributes to the button', () => {
+    render(
+      <Button
+        data-autofocus="true"
+        data-tracking-id="cancel-action"
+        label="Cancel"
+      />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Cancel'});
+    expect(button).toHaveAttribute('data-autofocus', 'true');
+    expect(button).toHaveAttribute('data-tracking-id', 'cancel-action');
+  });
+
   it('renders variants', () => {
     const {rerender} = render(<Button label="Primary" variant="primary" />);
     expect(screen.getByRole('button', {name: 'Primary'})).toBeInTheDocument();

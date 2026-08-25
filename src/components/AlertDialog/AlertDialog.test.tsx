@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react';
+import {render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
 import {AlertDialog} from 'components/AlertDialog/AlertDialog';
@@ -44,6 +44,40 @@ describe('AlertDialog', () => {
     expect(onAction).toHaveBeenCalled();
     await user.click(screen.getByRole('button', {name: 'Cancel'}));
     expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('focuses the cancel button when opened', async () => {
+    render(
+      <AlertDialog
+        actionLabel="Delete"
+        description="This cannot be undone."
+        isOpen
+        onAction={() => {}}
+        onOpenChange={() => {}}
+        title="Delete item?"
+      />,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', {name: 'Cancel'})).toHaveFocus();
+    });
+  });
+
+  it('does not render an automatic header close button', () => {
+    render(
+      <AlertDialog
+        actionLabel="Delete"
+        description="This cannot be undone."
+        isOpen
+        onAction={() => {}}
+        onOpenChange={() => {}}
+        title="Delete item?"
+      />,
+    );
+
+    expect(
+      screen.queryByRole('button', {name: 'Close'}),
+    ).not.toBeInTheDocument();
   });
 
   it('supports the imperative hook', async () => {
