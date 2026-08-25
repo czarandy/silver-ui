@@ -32,6 +32,16 @@ describe('Avatar', () => {
     expect(screen.getByText('AL')).toBeInTheDocument();
   });
 
+  it.each([
+    ['a surrogate-pair emoji', '😀 Rivera', '😀R'],
+    ['a zero-width joiner emoji', '🧑‍🚀 Alice Smith', '🧑‍🚀S'],
+    ['a decomposed character', 'N\u0303oño', 'N\u0303'],
+  ])('keeps %s intact in initials', (_description, name, expectedInitials) => {
+    render(<Avatar name={name} />);
+
+    expect(screen.getByText(expectedInitials)).toBeInTheDocument();
+  });
+
   it('nudges initials up with bottom padding', () => {
     render(<Avatar name="Ada Lovelace" />);
 
