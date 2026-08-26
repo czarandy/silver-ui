@@ -5,6 +5,7 @@ import {useCallback, useRef} from 'react';
 export interface UseGridFocusOptions {
   cellSelector?: string;
   columns: number;
+  getIsCellDisabled?: (cell: HTMLElement) => boolean;
   onNavigateAfter?: (column: number, offset: number) => void;
   onNavigateBefore?: (column: number, offset: number) => void;
   onPageDown?: () => void;
@@ -22,6 +23,7 @@ export interface UseGridFocusReturn<T extends HTMLElement = HTMLElement> {
 export function useGridFocus<T extends HTMLElement = HTMLElement>({
   columns,
   cellSelector = 'button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  getIsCellDisabled,
   onNavigateAfter,
   onNavigateBefore,
   onPageDown,
@@ -38,18 +40,34 @@ export function useGridFocus<T extends HTMLElement = HTMLElement>({
   const focusCell = useCallback(
     (index: number) => {
       const cells = getCells();
+      if (cells.length === 0) {
+        return;
+      }
       const clampedIndex = Math.max(0, Math.min(index, cells.length - 1));
-      cells[clampedIndex]?.focus();
+      const cell = cells[clampedIndex];
+      if (getIsCellDisabled?.(cell) !== true) {
+        cell.focus();
+      }
     },
-    [getCells],
+    [getCells, getIsCellDisabled],
   );
 
-  const focusFirst = useCallback(() => focusCell(0), [focusCell]);
+  const focusFirst = useCallback(() => {
+    getCells()
+      .find(cell => getIsCellDisabled?.(cell) !== true)
+      ?.focus();
+  }, [getCells, getIsCellDisabled]);
 
   const focusLast = useCallback(() => {
     const cells = getCells();
-    cells.at(-1)?.focus();
-  }, [getCells]);
+    for (let index = cells.length - 1; index >= 0; index -= 1) {
+      const cell = cells[index];
+      if (getIsCellDisabled?.(cell) !== true) {
+        cell.focus();
+        return;
+      }
+    }
+  }, [getCells, getIsCellDisabled]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -65,36 +83,51 @@ export function useGridFocus<T extends HTMLElement = HTMLElement>({
       const currentColumn = currentIndex % columns;
       const totalRows = Math.ceil(cells.length / columns);
       let nextIndex: number | null = null;
+      let searchStep = 1;
+      let searchStart: number | null = null;
+      let searchEnd = cells.length - 1;
 
       switch (event.key) {
         case 'ArrowRight':
-          nextIndex = currentIndex + 1;
+          searchStart = currentIndex + 1;
           break;
         case 'ArrowLeft':
-          nextIndex = currentIndex - 1;
+          searchStart = currentIndex - 1;
+          searchEnd = 0;
+          searchStep = -1;
           break;
         case 'ArrowDown':
           if (currentRow >= totalRows - 1) {
             onNavigateAfter?.(currentColumn, columns);
           } else {
-            nextIndex = currentIndex + columns;
+            searchStart = currentIndex + columns;
+            searchStep = columns;
           }
           break;
         case 'ArrowUp':
           if (currentRow <= 0) {
             onNavigateBefore?.(currentColumn, columns);
           } else {
-            nextIndex = currentIndex - columns;
+            searchStart = currentIndex - columns;
+            searchEnd = 0;
+            searchStep = -columns;
           }
           break;
         case 'Home':
-          nextIndex = event.ctrlKey || event.metaKey ? 0 : currentRow * columns;
-          break;
-        case 'End':
-          nextIndex =
+          searchStart =
+            event.ctrlKey || event.metaKey ? 0 : currentRow * columns;
+          searchEnd =
             event.ctrlKey || event.metaKey
               ? cells.length - 1
               : Math.min((currentRow + 1) * columns - 1, cells.length - 1);
+          break;
+        case 'End':
+          searchStart =
+            event.ctrlKey || event.metaKey
+              ? cells.length - 1
+              : Math.min((currentRow + 1) * columns - 1, cells.length - 1);
+          searchEnd = event.ctrlKey || event.metaKey ? 0 : currentRow * columns;
+          searchStep = -1;
           break;
         case 'PageUp':
           onPageUp?.();
@@ -109,25 +142,42 @@ export function useGridFocus<T extends HTMLElement = HTMLElement>({
       event.preventDefault();
       event.stopPropagation();
 
-      if (nextIndex == null) {
+      if (searchStart == null) {
         return;
       }
 
-      if (nextIndex < 0) {
+      const isWithinSearchBounds = (index: number): boolean =>
+        searchStep > 0 ? index <= searchEnd : index >= searchEnd;
+      for (
+        let index = searchStart;
+        isWithinSearchBounds(index);
+        index += searchStep
+      ) {
+        const cell = cells[index];
+        if (getIsCellDisabled?.(cell) !== true) {
+          nextIndex = index;
+          break;
+        }
+      }
+
+      if (nextIndex == null && searchStart < 0) {
         onNavigateBefore?.(currentColumn, 1);
         return;
       }
 
-      if (nextIndex >= cells.length) {
+      if (nextIndex == null && searchStart >= cells.length) {
         onNavigateAfter?.(currentColumn, 1);
         return;
       }
 
-      cells[nextIndex]?.focus();
+      if (nextIndex != null) {
+        cells[nextIndex]?.focus();
+      }
     },
     [
       columns,
       getCells,
+      getIsCellDisabled,
       onNavigateAfter,
       onNavigateBefore,
       onPageDown,

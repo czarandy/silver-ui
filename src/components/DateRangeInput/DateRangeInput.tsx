@@ -1,5 +1,6 @@
 'use client';
 
+import type {Temporal} from '@js-temporal/polyfill';
 import {CalendarIcon, X} from 'lucide-react';
 import {
   useCallback,
@@ -116,9 +117,19 @@ export type DateRangeInputProps = {
    */
   max?: PlainDate;
   /**
+   * Maximum duration between the selected range start and end. Must be a
+   * non-negative, date-based Temporal duration.
+   */
+  maxRangeSpan?: Temporal.Duration;
+  /**
    * Minimum selectable date.
    */
   min?: PlainDate;
+  /**
+   * Minimum duration between the selected range start and end. Must be a
+   * non-negative, date-based Temporal duration.
+   */
+  minRangeSpan?: Temporal.Duration;
   /**
    * Number of calendar months shown in the popover.
    * @default 2
@@ -178,6 +189,8 @@ export function DateRangeInput({
   onChange,
   min,
   max,
+  minRangeSpan,
+  maxRangeSpan,
   getIsDateDisabled,
   format = 'short',
   numberOfMonths = 2,
@@ -346,7 +359,9 @@ export function DateRangeInput({
           <Calendar
             getIsDateDisabled={getIsDateDisabled}
             max={max}
+            maxRangeSpan={maxRangeSpan}
             min={min}
+            minRangeSpan={minRangeSpan}
             mode="range"
             numberOfMonths={numberOfMonths}
             onChange={nextValue => {

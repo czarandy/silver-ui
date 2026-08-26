@@ -1,3 +1,4 @@
+import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -486,6 +487,34 @@ describe('DateRangeInput', () => {
       });
       expect(
         screen.getByRole('gridcell', {hidden: true, name: /May 14, 2026/}),
+      ).toBeEnabled();
+    });
+
+    it('forwards range span constraints to the calendar', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <DateRangeInput
+          label="Window"
+          maxRangeSpan={Temporal.Duration.from({days: 14})}
+          numberOfMonths={1}
+          onChange={() => {}}
+          value={defaultRange}
+        />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Window'}));
+      fireEvent.click(
+        screen.getByRole('gridcell', {hidden: true, name: /May 10, 2026/}),
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('gridcell', {hidden: true, name: /May 25, 2026/}),
+        ).toBeDisabled();
+      });
+      expect(
+        screen.getByRole('gridcell', {hidden: true, name: /May 24, 2026/}),
       ).toBeEnabled();
     });
   });

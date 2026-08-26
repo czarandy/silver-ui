@@ -40,6 +40,9 @@ const styles = calendarRecipe();
 
 const outsideDayCellClass = styles.cell;
 
+const getIsDisabledGridCell = (cell: HTMLElement): boolean =>
+  cell.matches(':disabled, [data-range-span-disabled="true"]');
+
 export type {DateRange, DayOfWeek} from 'internal/dateTypes';
 
 export interface CalendarHandle {
@@ -134,6 +137,14 @@ interface CalendarSingleProps extends CalendarBaseProps {
    */
   defaultValue?: PlainDate;
   /**
+   * Range span constraints are only available in range mode.
+   */
+  maxRangeSpan?: never;
+  /**
+   * Range span constraints are only available in range mode.
+   */
+  minRangeSpan?: never;
+  /**
    * Selection mode. Defaults to 'single'.
    */
   mode?: 'single';
@@ -152,6 +163,16 @@ interface CalendarRangeProps extends CalendarBaseProps {
    * Default selected range for uncontrolled usage.
    */
   defaultValue?: DateRange;
+  /**
+   * Maximum duration between the selected range start and end. Must be a
+   * non-negative, date-based Temporal duration.
+   */
+  maxRangeSpan?: Temporal.Duration;
+  /**
+   * Minimum duration between the selected range start and end. Must be a
+   * non-negative, date-based Temporal duration.
+   */
+  minRangeSpan?: Temporal.Duration;
   /**
    * Selection mode set to 'range'.
    */
@@ -226,6 +247,7 @@ function checkDateDisabled(
     getIsDateDisabled?: (date: PlainDate) => boolean;
     max?: PlainDate;
     min?: PlainDate;
+    rangeSpanBounds: RangeSpanBounds | null;
   },
 ): boolean {
   if (options.min != null && plainDateIsBefore(date, options.min)) {
@@ -236,7 +258,66 @@ function checkDateDisabled(
     return true;
   }
 
+  const {rangeSpanBounds} = options;
+  if (rangeSpanBounds != null) {
+    const {maximum, minimum} = rangeSpanBounds;
+    if (
+      minimum != null &&
+      plainDateIsAfter(date, minimum.start) &&
+      plainDateIsBefore(date, minimum.end)
+    ) {
+      return true;
+    }
+
+    if (
+      maximum != null &&
+      (plainDateIsBefore(date, maximum.start) ||
+        plainDateIsAfter(date, maximum.end))
+    ) {
+      return true;
+    }
+  }
+
   return options.getIsDateDisabled?.(date) ?? false;
+}
+
+interface RangeSpanBounds {
+  maximum: {end: PlainDate; start: PlainDate} | null;
+  minimum: {end: PlainDate; start: PlainDate} | null;
+}
+
+function getRangeSpanBounds(
+  selectionStart: PlainDate | null,
+  minRangeSpan?: Temporal.Duration,
+  maxRangeSpan?: Temporal.Duration,
+): RangeSpanBounds | null {
+  if (selectionStart == null) {
+    return null;
+  }
+
+  if (minRangeSpan != null && minRangeSpan.sign < 0) {
+    throw new RangeError('minRangeSpan must be non-negative');
+  }
+  if (maxRangeSpan != null && maxRangeSpan.sign < 0) {
+    throw new RangeError('maxRangeSpan must be non-negative');
+  }
+
+  return {
+    maximum:
+      maxRangeSpan == null
+        ? null
+        : {
+            start: selectionStart.subtract(maxRangeSpan),
+            end: selectionStart.add(maxRangeSpan),
+          },
+    minimum:
+      minRangeSpan == null
+        ? null
+        : {
+            start: selectionStart.subtract(minRangeSpan),
+            end: selectionStart.add(minRangeSpan),
+          },
+  };
 }
 
 function getSelectedTabDate({
@@ -284,7 +365,9 @@ export function Calendar({
   hasVariableRowCount = false,
   hasWeekNumbers = false,
   max,
+  maxRangeSpan,
   min,
+  minRangeSpan,
   mode = 'single',
   numberOfMonths: numberOfMonthsFromProps = 1,
   onChange,
@@ -336,6 +419,10 @@ export function Calendar({
         baseMonth.add({months: index}),
       ),
     [baseMonth, numberOfMonths],
+  );
+  const rangeSpanBounds = useMemo(
+    () => getRangeSpanBounds(rangeSelectionStart, minRangeSpan, maxRangeSpan),
+    [maxRangeSpan, minRangeSpan, rangeSelectionStart],
   );
   const monthYearLabel = useMemo(
     () =>
@@ -494,6 +581,7 @@ export function Calendar({
             onPendingFocusHandled={handlePendingFocusHandled}
             pendingFocus={pendingFocus}
             rangeSelectionStart={rangeSelectionStart}
+            rangeSpanBounds={rangeSpanBounds}
             today={today}
             value={effectiveValue}
             weekStartsOn={weekStartsOn}
@@ -521,6 +609,7 @@ interface MonthGridProps {
   onPendingFocusHandled: () => void;
   pendingFocus: PlainDate | null;
   rangeSelectionStart: PlainDate | null;
+  rangeSpanBounds: RangeSpanBounds | null;
   today: PlainDate;
   value: DateRange | PlainDate | undefined;
   weekStartsOn: DayOfWeek;
@@ -546,6 +635,7 @@ const MonthGrid = memo(function MonthGrid({
   onNavigateNext,
   pendingFocus,
   onPendingFocusHandled,
+  rangeSpanBounds,
 }: MonthGridProps): React.JSX.Element {
   const {dayNames, weeks} = useMemo(
     () =>
@@ -564,8 +654,9 @@ const MonthGrid = memo(function MonthGrid({
         min,
         max,
         getIsDateDisabled: getIsDateDisabledProp,
+        rangeSpanBounds,
       }),
-    [getIsDateDisabledProp, max, min],
+    [getIsDateDisabledProp, max, min, rangeSpanBounds],
   );
   const selectedDate =
     mode === 'single' && value != null && 'year' in value ? value : null;
@@ -586,7 +677,8 @@ const MonthGrid = memo(function MonthGrid({
 
   const {gridRef, handleKeyDown} = useGridFocus<HTMLDivElement>({
     columns: 7,
-    cellSelector: 'button:not([disabled])',
+    cellSelector: 'button',
+    getIsCellDisabled: getIsDisabledGridCell,
     onNavigateBefore: (_column, offset) => {
       const focusedDate = getFocusedDate();
       if (focusedDate != null) {
@@ -792,11 +884,15 @@ const DayCell = memo(function DayCell({
     plainDateIsInRange(day.date, [rangeStart, rangeEnd]);
   const hasRangeBackground =
     isInRange && !plainDateIsEqual(rangeStart, rangeEnd);
-  const isRangeStart =
-    !effectivelyDisabled &&
-    mode === 'range' &&
+  const isPendingRangeStart =
+    isSelectingRange &&
     rangeStart != null &&
     plainDateIsEqual(day.date, rangeStart);
+  const isRangeStart =
+    mode === 'range' &&
+    rangeStart != null &&
+    plainDateIsEqual(day.date, rangeStart) &&
+    (!effectivelyDisabled || isPendingRangeStart);
   const isRangeEnd =
     !effectivelyDisabled &&
     mode === 'range' &&
@@ -844,10 +940,15 @@ const DayCell = memo(function DayCell({
         aria-current={isToday ? 'date' : undefined}
         aria-disabled={effectivelyDisabled || undefined}
         aria-label={plainDateFormat(day.date, DATE_FORMAT_WITH_WEEKDAY)}
-        aria-selected={isSelected || isInRange || undefined}
+        aria-selected={
+          isSelected || isInRange || isPendingRangeStart || undefined
+        }
         className={styles.day}
         data-date={day.date.toString()}
-        disabled={isDisabled}
+        data-range-span-disabled={
+          (isPendingRangeStart && isDisabled) || undefined
+        }
+        disabled={isDisabled && !isPendingRangeStart}
         onClick={() => {
           if (!effectivelyDisabled) {
             onDayClick(day.date);
