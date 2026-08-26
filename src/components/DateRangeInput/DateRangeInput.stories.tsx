@@ -1,5 +1,6 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 
+import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryContext, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {userEvent, within} from 'storybook/test';
@@ -16,7 +17,9 @@ const meta = {
   argTypes: {
     getIsDateDisabled: {control: false},
     max: {control: false},
+    maxRangeSpan: {control: false},
     min: {control: false},
+    minRangeSpan: {control: false},
     value: {control: false},
   },
   args: {label: 'Window'},
@@ -87,6 +90,17 @@ export const WithConstraints: Story = {
         value={value}
       />
     );
+  },
+};
+
+export const MaximumFourteenDayRange: Story = {
+  args: {
+    description: 'Select a range of up to 14 days.',
+    maxRangeSpan: Temporal.Duration.from({days: 14}),
+  },
+  render: (args: DateRangeInputProps) => {
+    const [value, setValue] = useState<DateRange | null>(() => defaultRange);
+    return <DateRangeInput {...args} onChange={setValue} value={value} />;
   },
 };
 

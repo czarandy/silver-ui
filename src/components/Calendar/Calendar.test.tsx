@@ -462,6 +462,146 @@ describe('Calendar', () => {
     });
   });
 
+  it.each([
+    {
+      anchorDay: 10,
+      boundaryDay: 24,
+      invalidDay: 25,
+      range: {
+        start: plainDateCreate(2026, 5, 10),
+        end: plainDateCreate(2026, 5, 24),
+      },
+    },
+    {
+      anchorDay: 20,
+      boundaryDay: 6,
+      invalidDay: 5,
+      range: {
+        start: plainDateCreate(2026, 5, 6),
+        end: plainDateCreate(2026, 5, 20),
+      },
+    },
+  ])(
+    'enforces maxRangeSpan when selecting day $boundaryDay from day $anchorDay',
+    async ({anchorDay, boundaryDay, invalidDay, range}) => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <Calendar
+          maxRangeSpan={Temporal.Duration.from({days: 14})}
+          mode="range"
+          onChange={onChange}
+          viewDate={plainDateCreate(2026, 5, 1)}
+        />,
+      );
+
+      const getDay = (day: number): HTMLElement =>
+        screen.getByRole('gridcell', {
+          name: new RegExp(`May ${day}, 2026`),
+        });
+
+      await user.click(getDay(anchorDay));
+
+      expect(getDay(invalidDay)).toBeDisabled();
+      expect(getDay(invalidDay)).toHaveAttribute('aria-disabled', 'true');
+      expect(getDay(boundaryDay)).toBeEnabled();
+
+      await user.click(getDay(invalidDay));
+      expect(onChange).not.toHaveBeenCalled();
+
+      await user.click(getDay(boundaryDay));
+      expect(onChange).toHaveBeenCalledWith(range);
+    },
+  );
+
+  it.each([
+    {anchorDay: 15, boundaryDay: 13, invalidDay: 14},
+    {anchorDay: 15, boundaryDay: 17, invalidDay: 16},
+  ])(
+    'enforces minRangeSpan when selecting day $boundaryDay from day $anchorDay',
+    async ({anchorDay, boundaryDay, invalidDay}) => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <Calendar
+          minRangeSpan={Temporal.Duration.from({days: 2})}
+          mode="range"
+          onChange={onChange}
+          viewDate={plainDateCreate(2026, 5, 1)}
+        />,
+      );
+
+      const getDay = (day: number): HTMLElement =>
+        screen.getByRole('gridcell', {
+          name: new RegExp(`May ${day}, 2026`),
+        });
+
+      await user.click(getDay(anchorDay));
+
+      expect(getDay(anchorDay)).toHaveAttribute('aria-disabled', 'true');
+      expect(getDay(invalidDay)).toBeDisabled();
+      expect(getDay(boundaryDay)).toBeEnabled();
+
+      await user.click(getDay(boundaryDay));
+      expect(onChange).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('combines range spans with min and max date bounds', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar
+        max={plainDateCreate(2026, 5, 25)}
+        maxRangeSpan={Temporal.Duration.from({days: 7})}
+        min={plainDateCreate(2026, 5, 5)}
+        mode="range"
+        onChange={() => {}}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />,
+    );
+
+    const getDay = (day: number): HTMLElement =>
+      screen.getByRole('gridcell', {name: new RegExp(`May ${day}, 2026`)});
+
+    await user.click(getDay(15));
+
+    expect(getDay(4)).toBeDisabled();
+    expect(getDay(7)).toBeDisabled();
+    expect(getDay(8)).toBeEnabled();
+    expect(getDay(22)).toBeEnabled();
+    expect(getDay(23)).toBeDisabled();
+    expect(getDay(26)).toBeDisabled();
+  });
+
+  it('skips disabled-by-span dates during keyboard navigation', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Calendar
+        maxRangeSpan={Temporal.Duration.from({days: 4})}
+        minRangeSpan={Temporal.Duration.from({days: 2})}
+        mode="range"
+        onChange={() => {}}
+        viewDate={plainDateCreate(2026, 5, 1)}
+      />,
+    );
+
+    const getDay = (day: number): HTMLElement =>
+      screen.getByRole('gridcell', {name: new RegExp(`May ${day}, 2026`)});
+
+    await user.click(getDay(10));
+    expect(getDay(10)).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+    expect(getDay(12)).toHaveFocus();
+
+    await user.keyboard('{ArrowLeft}');
+    expect(getDay(8)).toHaveFocus();
+  });
+
   it('renders with defaultValue in single mode', () => {
     render(
       <Calendar
