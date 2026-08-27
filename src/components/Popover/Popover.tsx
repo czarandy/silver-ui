@@ -188,7 +188,15 @@ export function Popover({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const isControlled = isOpen !== undefined;
 
-  const popover = usePopover({
+  const {
+    hide: hidePopover,
+    isOpen: isPopoverOpen,
+    render: renderPopover,
+    show: showPopover,
+    toggle: togglePopover,
+    triggerProps,
+    triggerRef,
+  } = usePopover({
     closeButtonLabel,
     hasAutoFocus,
     hasCloseButton,
@@ -206,8 +214,8 @@ export function Popover({
       return;
     }
 
-    popover.toggle();
-  }, [isEnabled, popover]);
+    togglePopover();
+  }, [isEnabled, togglePopover]);
 
   const handleTriggerKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -230,18 +238,12 @@ export function Popover({
   // on every toggle. Keep `triggerProps` in the dep arrays or that sync breaks.
   const attachTrigger = useCallback(
     (button: HTMLElement) => {
-      button.setAttribute(
-        'aria-haspopup',
-        popover.triggerProps['aria-haspopup'],
-      );
+      button.setAttribute('aria-haspopup', triggerProps['aria-haspopup']);
       button.setAttribute(
         'aria-expanded',
-        String(popover.triggerProps['aria-expanded']),
+        String(triggerProps['aria-expanded']),
       );
-      button.setAttribute(
-        'aria-controls',
-        popover.triggerProps['aria-controls'],
-      );
+      button.setAttribute('aria-controls', triggerProps['aria-controls']);
       button.addEventListener('click', handleTriggerClick);
 
       const needsKeyDown =
@@ -260,8 +262,23 @@ export function Popover({
         }
       };
     },
-    [handleTriggerClick, handleTriggerKeyDown, popover.triggerProps],
+    [handleTriggerClick, handleTriggerKeyDown, triggerProps],
   );
+
+  // Keep the CSS anchor association independent from the interaction props.
+  // Opening changes `aria-expanded` and refreshes the listener effect below,
+  // but the anchor must remain attached to the same live element throughout.
+  useIsomorphicLayoutEffect(() => {
+    const anchor = anchorRef?.current ?? wrapperRef.current;
+    if (anchor == null) {
+      return;
+    }
+
+    triggerRef(anchor);
+    return () => {
+      triggerRef(null);
+    };
+  }, [anchorRef, triggerRef]);
 
   useIsomorphicLayoutEffect(() => {
     const anchor = anchorRef?.current ?? wrapperRef.current;
@@ -269,32 +286,25 @@ export function Popover({
       return;
     }
 
-    popover.triggerRef(anchor);
     const trigger = findTriggerButton(anchor);
     if (trigger == null || !isEnabled) {
-      return () => {
-        popover.triggerRef(null);
-      };
+      return;
     }
 
-    const detach = attachTrigger(trigger);
-    return () => {
-      popover.triggerRef(null);
-      detach();
-    };
-  }, [anchorRef, attachTrigger, isEnabled, popover]);
+    return attachTrigger(trigger);
+  }, [anchorRef, attachTrigger, isEnabled]);
 
   useIsomorphicLayoutEffect(() => {
     if (!isControlled) {
       return;
     }
 
-    if (isOpen === true && !popover.isOpen) {
-      popover.show();
-    } else if (isOpen === false && popover.isOpen) {
-      popover.hide();
+    if (isOpen === true && !isPopoverOpen) {
+      showPopover();
+    } else if (isOpen === false && isPopoverOpen) {
+      hidePopover();
     }
-  }, [isControlled, isOpen, popover]);
+  }, [hidePopover, isControlled, isOpen, isPopoverOpen, showPopover]);
 
   const widthStyle = width == null ? undefined : {width: toPixelSize(width)};
 
@@ -303,7 +313,7 @@ export function Popover({
       ? {padding: token(`spacing.${padding}`)}
       : undefined;
 
-  const popoverContent = popover.render(
+  const popoverContent = renderPopover(
     <div
       className={cx(styles.content, className)}
       data-testid={dataTestId}

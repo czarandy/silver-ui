@@ -32,6 +32,11 @@ function getPopoverElement(): HTMLElement {
   return assertNonNull(document.querySelector<HTMLElement>('[popover]'));
 }
 
+function getStyleProperty(element: HTMLElement, property: string): string {
+  const style = element.style as unknown as Record<string, string | undefined>;
+  return style[property] ?? '';
+}
+
 const positionAreaCases = [
   ['above', 'start', 'block-start span-inline-end', 'ltr'],
   ['above', 'center', 'block-start', 'rtl'],
@@ -150,6 +155,44 @@ describe('Popover', () => {
     expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
     expect(trigger).toHaveAttribute('aria-controls');
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('preserves the positioning anchor across open-state updates', () => {
+    function Fixture(): React.JSX.Element {
+      const anchorRef = useRef<HTMLButtonElement>(null);
+      return (
+        <>
+          <button ref={anchorRef} type="button">
+            Toggle
+          </button>
+          <Popover
+            anchorRef={anchorRef}
+            content={<div>Popover content</div>}
+            label="Actions"
+          />
+        </>
+      );
+    }
+
+    render(<Fixture />);
+
+    const trigger = screen.getByRole('button', {name: 'Toggle'});
+    const anchorName = getStyleProperty(trigger, 'anchorName');
+    const assignedAnchorNames: string[] = [];
+    expect(anchorName).not.toBe('');
+
+    Object.defineProperty(trigger.style, 'anchorName', {
+      configurable: true,
+      get: () => anchorName,
+      set: (value: string) => assignedAnchorNames.push(value),
+    });
+
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    expect(assignedAnchorNames).not.toContain('');
   });
 
   it('applies offsetX/offsetY as logical margins toward the trigger', () => {
