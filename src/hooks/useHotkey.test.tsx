@@ -54,6 +54,14 @@ describe('useHotkey', () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  it('ignores keydown events without a string key', () => {
+    const handler = vi.fn();
+    renderHook(() => useHotkey('k', handler, {isEnabledOnFormElements: true}));
+
+    expect(() => document.dispatchEvent(new Event('keydown'))).not.toThrow();
+    expect(handler).not.toHaveBeenCalled();
+  });
+
   it('requires bare keys and modifiers to match exactly', () => {
     const bareHandler = vi.fn();
     const modifiedHandler = vi.fn();
