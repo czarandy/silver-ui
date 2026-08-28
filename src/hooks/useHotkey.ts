@@ -99,6 +99,7 @@ function matchesHotkey(
 ): boolean {
   const isApple = isApplePlatform();
   return (
+    typeof event.key === 'string' &&
     event.key.toLowerCase() === descriptor.key.toLowerCase() &&
     event.altKey === descriptor.alt &&
     event.ctrlKey === (descriptor.ctrl || (!isApple && descriptor.mod)) &&
