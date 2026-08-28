@@ -97,6 +97,10 @@ function matchesHotkey(
   event: KeyboardEvent,
   descriptor: HotkeyDescriptor,
 ): boolean {
+  if (typeof event.key !== 'string') {
+    return false;
+  }
+
   const isApple = isApplePlatform();
   return (
     event.key.toLowerCase() === descriptor.key.toLowerCase() &&
@@ -147,7 +151,6 @@ const useHotkey = (
       const current = currentRef.current;
       if (
         current.descriptor == null ||
-        typeof keyboardEvent.key !== 'string' ||
         isComposingEvent(keyboardEvent) ||
         (!current.isEnabledOnFormElements && isEditableTarget(event.target)) ||
         !matchesHotkey(keyboardEvent, current.descriptor)
