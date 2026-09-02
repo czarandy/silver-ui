@@ -1,7 +1,10 @@
 import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {describe, expect, it, vi} from 'vitest';
-import {PasswordInput} from 'components/PasswordInput/PasswordInput';
+import {describe, expect, expectTypeOf, it, vi} from 'vitest';
+import {
+  PasswordInput,
+  type PasswordInputProps,
+} from 'components/PasswordInput/PasswordInput';
 
 describe('PasswordInput', () => {
   const noop = () => {};
@@ -98,6 +101,10 @@ describe('PasswordInput', () => {
   });
 
   it('forwards data-testid to the input', () => {
+    expectTypeOf<PasswordInputProps['data-testid']>().toEqualTypeOf<
+      string | undefined
+    >();
+
     render(
       <PasswordInput
         data-testid="pw-input"
@@ -109,6 +116,24 @@ describe('PasswordInput', () => {
 
     expect(screen.getByTestId('pw-input')).toBeInTheDocument();
     expect(screen.getByTestId('pw-input').tagName).toBe('INPUT');
+  });
+
+  it('forwards arbitrary data attributes to the input', () => {
+    render(
+      <PasswordInput
+        data-1p-ignore="true"
+        data-bwignore="true"
+        data-lpignore="true"
+        label="ZIP passphrase"
+        onChange={noop}
+        value=""
+      />,
+    );
+
+    const input = screen.getByLabelText('ZIP passphrase');
+    expect(input).toHaveAttribute('data-1p-ignore', 'true');
+    expect(input).toHaveAttribute('data-bwignore', 'true');
+    expect(input).toHaveAttribute('data-lpignore', 'true');
   });
 
   it('forwards className and style', () => {

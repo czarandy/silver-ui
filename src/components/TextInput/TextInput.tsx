@@ -45,6 +45,10 @@ export type TextInputType = 'email' | 'password' | 'tel' | 'text';
 
 export type TextInputProps = {
   /**
+   * Custom data attributes applied to the input element.
+   */
+  [dataAttribute: `data-${string}`]: boolean | number | string | undefined;
+  /**
    * Identifies the currently active element in a composite widget controlled
    * by the input.
    */
@@ -224,6 +228,7 @@ export function TextInput({
   style,
   ref,
   role,
+  ...dataAttributes
 }: TextInputProps): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
   const inputId = useId();
@@ -274,6 +279,7 @@ export function TextInput({
         </span>
       ) : null}
       <input
+        {...dataAttributes}
         aria-activedescendant={ariaActiveDescendant}
         aria-autocomplete={ariaAutocomplete}
         aria-busy={isLoading || undefined}

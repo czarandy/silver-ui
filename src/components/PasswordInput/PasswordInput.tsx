@@ -13,6 +13,10 @@ export type PasswordInputProps = Omit<
   'endContent' | 'hasClear' | 'startIcon' | 'type'
 > & {
   /**
+   * Test ID applied to the input element.
+   */
+  'data-testid'?: string;
+  /**
    * Ref forwarded to the input element.
    */
   ref?: Ref<HTMLInputElement>;

@@ -56,6 +56,22 @@ describe('TextInput', () => {
     expect(input).toHaveAttribute('aria-controls', 'search-results');
   });
 
+  it('forwards arbitrary data attributes to the input', () => {
+    render(
+      <TextInput
+        data-1p-ignore="true"
+        data-lpignore="true"
+        label="External secret"
+        onChange={noop}
+        value=""
+      />,
+    );
+
+    const input = screen.getByRole('textbox', {name: 'External secret'});
+    expect(input).toHaveAttribute('data-1p-ignore', 'true');
+    expect(input).toHaveAttribute('data-lpignore', 'true');
+  });
+
   it('does not offset a clear button when end content follows it', () => {
     render(
       <TextInput
