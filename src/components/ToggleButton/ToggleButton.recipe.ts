@@ -55,8 +55,11 @@ export const toggleButtonRecipe = sva({
   },
   variants: {
     // The core button visuals (size/variant/iconOnly) come from the shared
-    // `buttonRecipe`; this recipe only layers the selected-state override on the
-    // root, which is composed with the button root via `cx`.
+    // `buttonRecipe`; this recipe only carries the selected-state override for
+    // the root. Overrides of buttonRecipe values (background, font-weight) must
+    // use the exact same property keys: ToggleButton merges this slot into
+    // buttonRecipe.raw() with css(), which resolves same-key conflicts in JS
+    // rather than leaving two utilities to race in the cascade.
     isSelected: {
       true: {
         root: {
