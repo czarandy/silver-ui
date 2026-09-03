@@ -1,9 +1,11 @@
+import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {RotateCcw, Settings2} from 'lucide-react';
 import {useMemo, useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import {EmptyState} from 'components/EmptyState';
+import {Item} from 'components/Item';
 import type {SearchFilterInputConfig} from 'components/SearchFilterInput';
 import {Table} from 'components/Table/Table';
 import {TableBody} from 'components/Table/TableBody';
@@ -159,6 +161,57 @@ const longTextColumns: TableColumn<TaskRow>[] = [
   {header: 'Task', key: 'task', width: pixel(180)},
   {header: 'Notes', key: 'notes', width: proportional(3)},
   {header: 'Owner', key: 'owner', width: pixel(180)},
+];
+
+interface ContactRow extends Record<string, unknown> {
+  dob: Temporal.PlainDate | null;
+  email: string;
+  id: string;
+  name: string;
+}
+
+const contactData: ContactRow[] = [
+  {
+    dob: Temporal.PlainDate.from('1980-01-19'),
+    email: 'alex.morgan@example.com',
+    id: 'alex',
+    name: 'Alex Morgan',
+  },
+  {
+    dob: Temporal.PlainDate.from('1983-09-27'),
+    email: 'sam.rivera@example.com',
+    id: 'sam',
+    name: 'Sam Rivera',
+  },
+  {
+    dob: null,
+    email: 'jordan.lee@example.com',
+    id: 'jordan',
+    name: 'Jordan Lee',
+  },
+  {
+    dob: Temporal.PlainDate.from('1994-08-22'),
+    email: 'taylor.kim@example.com',
+    id: 'taylor',
+    name: 'Taylor Kim',
+  },
+];
+
+const contactColumns: TableColumn<ContactRow>[] = [
+  {
+    header: 'Name',
+    key: 'name',
+    renderCell: item => (
+      <Item description={item.email} label={item.name} padding={0} />
+    ),
+    width: proportional(2),
+  },
+  {
+    header: 'DOB',
+    key: 'dob',
+    renderCell: item => item.dob?.toString() ?? '—',
+    width: pixel(180),
+  },
 ];
 
 const widthColumns: TableColumn<TaskRow>[] = [
@@ -468,6 +521,51 @@ function SelectionStory() {
       data={data}
       idKey="id"
       plugins={{selectionPlugin}}
+    />
+  );
+}
+
+function MultilineSelectionStory() {
+  const [selectedKeys, setSelectedKeys] = useState(
+    () => new Set(contactData.map(item => item.id)),
+  );
+  const selection = useTableSelectionState({
+    data: contactData,
+    idKey: 'id',
+    selectedKeys,
+    setSelectedKeys,
+  });
+  const selectionPlugin = useTableSelection(selection.selectionConfig);
+  return (
+    <Table
+      columns={contactColumns}
+      data={contactData}
+      idKey="id"
+      plugins={{selectionPlugin}}
+      verticalAlign="top"
+    />
+  );
+}
+
+function StripedSelectionStory() {
+  const [selectedKeys, setSelectedKeys] = useState(
+    () => new Set([contactData[0].id, contactData[2].id]),
+  );
+  const selection = useTableSelectionState({
+    data: contactData,
+    idKey: 'id',
+    selectedKeys,
+    setSelectedKeys,
+  });
+  const selectionPlugin = useTableSelection(selection.selectionConfig);
+  return (
+    <Table
+      columns={contactColumns}
+      data={contactData}
+      idKey="id"
+      isStriped
+      plugins={{selectionPlugin}}
+      verticalAlign="top"
     />
   );
 }
@@ -992,6 +1090,24 @@ export const Sortable: Story = {
 
 export const Selection: Story = {
   render: () => <SelectionStory />,
+};
+
+/**
+ * Selection controls remain centered in rows with multi-line content, even
+ * when the table's content cells use top alignment.
+ */
+export const SelectionMultilineRows: Story = {
+  name: 'Selection / Multi-line rows',
+  render: () => <MultilineSelectionStory />,
+};
+
+/**
+ * Striped tables retain the active selection color because the quiet gray
+ * selection fill would otherwise be indistinguishable from ordinary stripes.
+ */
+export const SelectionStripedRows: Story = {
+  name: 'Selection / Striped rows',
+  render: () => <StripedSelectionStory />,
 };
 
 /**

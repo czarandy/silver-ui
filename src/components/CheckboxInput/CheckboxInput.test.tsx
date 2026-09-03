@@ -343,6 +343,44 @@ describe('CheckboxInput', () => {
     expect(item).toHaveStyle({width: 'auto'});
   });
 
+  it('removes the empty label gap when the label is visually hidden', () => {
+    render(
+      <CheckboxInput
+        isLabelHidden
+        label="Accept"
+        onChange={() => {}}
+        value={false}
+        width="auto"
+      />,
+    );
+
+    // The Item wrapper is presentational, but its gap determines whether the
+    // visible box is centered when CheckboxInput uses intrinsic width.
+    // eslint-disable-next-line testing-library/no-node-access
+    const item = screen.getByRole('checkbox', {name: 'Accept'}).closest('div');
+    expect(item).toHaveClass(
+      checkboxInputRecipe({isItemContentHidden: true}).item as string,
+    );
+  });
+
+  it('keeps the item gap when a hidden label has visible supporting content', () => {
+    render(
+      <CheckboxInput
+        description="Visible details"
+        isLabelHidden
+        label="Accept"
+        onChange={() => {}}
+        value={false}
+        width="auto"
+      />,
+    );
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const item = screen.getByRole('checkbox', {name: 'Accept'}).closest('div');
+    expect(screen.getByText('Visible details')).toBeVisible();
+    expect(item).not.toHaveClass('[&&]:silver-gap_0');
+  });
+
   it('accepts an explicit width', () => {
     render(
       <CheckboxInput

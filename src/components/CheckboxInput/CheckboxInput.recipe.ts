@@ -4,7 +4,16 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
 const markedBox = {bg: 'primary', borderColor: 'primary'};
 
 export const checkboxInputRecipe = sva({
-  slots: ['root', 'boxWrap', 'input', 'box', 'icon', 'label', 'tooltipIcon'],
+  slots: [
+    'root',
+    'item',
+    'boxWrap',
+    'input',
+    'box',
+    'icon',
+    'label',
+    'tooltipIcon',
+  ],
   base: {
     root: {
       display: 'flex',
@@ -91,11 +100,23 @@ export const checkboxInputRecipe = sva({
       },
       false: {},
     },
+    isItemContentHidden: {
+      true: {
+        item: {
+          // Item normally separates the control and content by 8px. When all
+          // of that content is visually hidden, retaining the gap offsets the
+          // visible checkbox inside intrinsically sized layouts.
+          '&&': {gap: '0'},
+        },
+      },
+      false: {},
+    },
   },
   defaultVariants: {
     size: 'md',
     mark: 'none',
     isDisabled: false,
+    isItemContentHidden: false,
     isReadOnly: false,
   },
 });
