@@ -9,6 +9,7 @@ import {toggleButtonRecipe} from 'components/ToggleButton/ToggleButton.recipe';
 import {useToggleButtonGroup} from 'components/ToggleButton/ToggleButtonGroup';
 import {Tooltip} from 'components/Tooltip';
 import {useResolvedSize} from 'internal/SizeContext';
+import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 export interface ToggleButtonProps extends ButtonPassthroughProps {
@@ -121,6 +122,15 @@ export function ToggleButton({
   const isDisabled = isDisabledProp || group?.isDisabled === true;
   const resolvedIcon = isSelected && selectedIcon != null ? selectedIcon : icon;
   const classes = toggleButtonRecipe({isSelected});
+  // Merge the shared button chrome with the selected-state overrides in JS so
+  // each property resolves to a single utility class; layering the classes
+  // with cx would leave the same-property conflicts (background, font-weight)
+  // to be decided by stylesheet emission order, and the ghost variant's
+  // `background: transparent` happens to win, erasing the selected surface.
+  const rootClassName = css(
+    buttonRecipe.raw({variant: 'ghost', size, iconOnly: isIconOnly}).root,
+    toggleButtonRecipe.raw({isSelected}).root,
+  );
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     if (isDisabled || isLoading) {
@@ -142,11 +152,7 @@ export function ToggleButton({
       aria-busy={isLoading || undefined}
       aria-label={isIconOnly || isLoading ? label : undefined}
       aria-pressed={isSelected}
-      className={cx(
-        buttonRecipe({variant: 'ghost', size, iconOnly: isIconOnly}).root,
-        classes.root,
-        className,
-      )}
+      className={cx(rootClassName, className)}
       data-testid={dataTestId}
       disabled={isDisabled || isLoading}
       onClick={handleClick}

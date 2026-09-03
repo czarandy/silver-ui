@@ -77,6 +77,17 @@ export const IconOnly: Story = {
   },
 };
 
+export const Selected: Story = {
+  render: () => (
+    <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>
+      <ToggleButton icon={Star} label="Unselected" />
+      <ToggleButton icon={Star} isSelected label="Selected" />
+      <ToggleButton icon={Star} isIconOnly label="Unselected icon" />
+      <ToggleButton icon={Star} isIconOnly isSelected label="Selected icon" />
+    </div>
+  ),
+};
+
 export const Sizes: Story = {
   render: () => (
     <div style={{display: 'flex', gap: '1rem', alignItems: 'center'}}>

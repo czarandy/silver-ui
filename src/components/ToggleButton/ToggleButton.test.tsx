@@ -79,6 +79,61 @@ describe('ToggleButton', () => {
     expect(button).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('replaces the ghost surface utilities when selected', () => {
+    const surfaceClasses = (): string[] =>
+      screen
+        .getByRole('button')
+        .className.split(' ')
+        .filter(name => /(^|:)silver-(bg|fw)_/.test(name))
+        .sort();
+
+    const {rerender} = render(<ToggleButton label="Bold" />);
+    expect(surfaceClasses()).toEqual([
+      'active:silver-bg_bg.ghost.active',
+      'hover:silver-bg_bg.ghost.hover',
+      'silver-bg_transparent',
+      'silver-fw_medium',
+    ]);
+
+    rerender(<ToggleButton isSelected label="Bold" />);
+    // Panda's atomic utilities all carry single-class specificity, so keeping
+    // the ghost background/font-weight classes alongside the selected ones
+    // would leave the winner to stylesheet emission order — where
+    // `bg_transparent` is emitted last and erases the selected surface.
+    expect(surfaceClasses()).toEqual([
+      'active:silver-bg_bg.subtle',
+      'hover:silver-bg_bg.subtle',
+      'silver-bg_bg.subtle',
+      'silver-fw_semibold',
+    ]);
+  });
+
+  it('keeps the shared button chrome after merging the selected surface', () => {
+    render(<ToggleButton icon={Star} isIconOnly isSelected label="Favorite" />);
+
+    const button = screen.getByRole('button', {name: 'Favorite'});
+    expect(button).toHaveClass('silver-h_component.md');
+    expect(button).toHaveClass('silver-px_0');
+    expect(button).toHaveClass('silver-asp_square');
+    expect(button).toHaveClass('silver-bg_bg.subtle');
+  });
+
+  it('applies the selected surface to the active button in a group', () => {
+    render(
+      <ToggleButtonGroup label="Alignment" onChange={vi.fn()} value="left">
+        <ToggleButton isIconOnly label="Align left" value="left" />
+        <ToggleButton isIconOnly label="Align right" value="right" />
+      </ToggleButtonGroup>,
+    );
+
+    expect(screen.getByRole('button', {name: 'Align left'})).toHaveClass(
+      'silver-bg_bg.subtle',
+    );
+    expect(screen.getByRole('button', {name: 'Align right'})).toHaveClass(
+      'silver-bg_transparent',
+    );
+  });
+
   it('renders selectedIcon when selected', () => {
     render(
       <ToggleButton
