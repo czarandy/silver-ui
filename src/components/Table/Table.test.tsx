@@ -12,6 +12,7 @@ import {useMemo, useState} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import type {SearchFilterInputConfig} from 'components/SearchFilterInput';
 import {Table} from 'components/Table/Table';
+import {tableRecipe} from 'components/Table/Table.recipe';
 import {TableBody} from 'components/Table/TableBody';
 import {TableCell} from 'components/Table/TableCell';
 import {TableFooter} from 'components/Table/TableFooter';
@@ -48,6 +49,7 @@ import {
   useTableSelection,
   useTableSelectionState,
 } from 'components/Table/plugins/selection';
+import {tableSelectionRecipe} from 'components/Table/plugins/selection/TableSelection.recipe';
 import {
   useTableSortable,
   useTableSortableState,
@@ -967,8 +969,8 @@ describe('Table plugins', () => {
     expect(screen.getByLabelText('Selected count')).toHaveTextContent('1');
   });
 
-  it('applies selected row styling with a token-safe class', () => {
-    function SelectableTable() {
+  it('uses quiet selection styling normally and active styling with stripes', () => {
+    function SelectableTable({isStriped = false}: {isStriped?: boolean}) {
       const [selectedKeys, setSelectedKeys] = useState(
         () => new Set<string>(['1']),
       );
@@ -1002,12 +1004,13 @@ describe('Table plugins', () => {
           columns={columns}
           data={data}
           idKey="id"
+          isStriped={isStriped}
           plugins={[rowPlugin, selectionPlugin]}
         />
       );
     }
 
-    render(<SelectableTable />);
+    const {rerender} = render(<SelectableTable />);
 
     const rows = screen.getAllByRole('row');
     const selectedRow = rows.find(
@@ -1025,13 +1028,95 @@ describe('Table plugins', () => {
     expect(selectedRow).toHaveClass('html-row');
     expect(unselectedRow).toHaveClass('custom-row');
     expect(unselectedRow).toHaveClass('html-row');
-    expect(selectedRow.getAttribute('class')).not.toBe(
-      unselectedRow.getAttribute('class'),
+    expect(selectedRow).toHaveAttribute('aria-selected', 'true');
+    expect(unselectedRow).not.toHaveAttribute('aria-selected');
+    expect(selectedRow).toHaveClass(
+      tableRecipe({isStriped: false}).row as string,
+    );
+    expect(tableRecipe({isStriped: false}).row).toContain(
+      'silver-bg_bg.subtle',
+    );
+    expect(tableRecipe({isStriped: true}).row).toContain(
+      'silver-bg_bg.selected',
     );
     expect(selectedRow.getAttribute('style') ?? '').not.toContain(
       'token(colors.bg.selected)',
     );
     expect(selectedRow).toHaveStyle({color: 'rgb(255, 0, 0)'});
+
+    rerender(<SelectableTable isStriped />);
+
+    const stripedSelectedRow = screen
+      .getAllByRole('row')
+      .find(row => within(row).queryByRole('cell', {name: 'Alice'}) != null);
+    expect(stripedSelectedRow).toHaveClass(
+      tableRecipe({isStriped: true}).row as string,
+    );
+  });
+
+  it('centers selection controls in multi-line rows independently of table alignment', () => {
+    const multilineColumns: TableColumn<PersonRow>[] = [
+      {
+        header: 'Person',
+        key: 'name',
+        renderCell: item => (
+          <>
+            <span>{item.name}</span>
+            <br />
+            <span>{item.role}</span>
+          </>
+        ),
+      },
+    ];
+
+    function SelectableTable() {
+      const [selectedKeys, setSelectedKeys] = useState(() => new Set<string>());
+      const selection = useTableSelectionState({
+        data,
+        idKey: 'id',
+        selectedKeys,
+        setSelectedKeys,
+      });
+      const selectionPlugin = useTableSelection(selection.selectionConfig);
+      return (
+        <Table
+          columns={multilineColumns}
+          data={data}
+          idKey="id"
+          plugins={{selectionPlugin}}
+          verticalAlign="top"
+        />
+      );
+    }
+
+    render(<SelectableTable />);
+
+    const firstDataRow = screen
+      .getAllByRole('row')
+      .find(row => within(row).queryByText('Alice') != null);
+
+    if (firstDataRow == null) {
+      throw new Error('Expected the first selectable row to render');
+    }
+
+    const [selectionCell, personCell] =
+      within(firstDataRow).getAllByRole('cell');
+    const selectionCheckbox =
+      within(selectionCell).getByLabelText('Select row');
+    const selectAllCheckbox = screen.getByLabelText('Select all rows');
+    // eslint-disable-next-line testing-library/no-node-access -- width is applied to CheckboxInput's presentational Item wrapper
+    const checkboxItem = selectionCheckbox.closest('div');
+    // eslint-disable-next-line testing-library/no-node-access -- width is applied to CheckboxInput's presentational Item wrapper
+    const selectAllItem = selectAllCheckbox.closest('div');
+    const selectionHeader = screen.getAllByRole('columnheader')[0];
+
+    expect(selectionCell).toHaveClass(tableSelectionRecipe().cell as string);
+    expect(selectionHeader).toHaveClass(tableSelectionRecipe().cell as string);
+    expect(selectionCell).toHaveStyle({textAlign: 'center'});
+    expect(selectionHeader).toHaveStyle({textAlign: 'center'});
+    expect(personCell).not.toHaveClass(tableSelectionRecipe().cell as string);
+    expect(checkboxItem).toHaveStyle({width: 'auto'});
+    expect(selectAllItem).toHaveStyle({width: 'auto'});
   });
 
   it('updates selection without re-rendering row content', async () => {

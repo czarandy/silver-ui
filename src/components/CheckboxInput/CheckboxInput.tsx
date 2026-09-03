@@ -192,10 +192,16 @@ export function CheckboxInput({
   const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
   const effectiveReadOnly =
     !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isItemContentHidden =
+    isLabelHidden &&
+    !isNonEmptyReactNode(description) &&
+    !isNonEmptyReactNode(startContent) &&
+    !isNonEmptyReactNode(endContent);
   const classes = checkboxInputRecipe({
     size,
     mark: isIndeterminate ? 'indeterminate' : isChecked ? 'check' : 'none',
     isDisabled: effectiveDisabled,
+    isItemContentHidden,
     isReadOnly: effectiveReadOnly,
   });
 
@@ -314,6 +320,7 @@ export function CheckboxInput({
 
   const item = (
     <Item
+      className={classes.item}
       description={
         isNonEmptyReactNode(description) ? (
           <span id={descriptionId}>{description}</span>

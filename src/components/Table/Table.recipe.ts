@@ -52,6 +52,9 @@ export const tableRecipe = sva({
       transitionDuration: 'fast',
       transitionProperty: 'background-color',
       transitionTimingFunction: 'default',
+      '&[aria-selected="true"]': {
+        bg: 'bg.subtle',
+      },
     },
     cell: {
       maxWidth: 0,
@@ -182,7 +185,15 @@ export const tableRecipe = sva({
     // Row background variants. Striping and hover combine, so the combined
     // presentation lives in compoundVariants below.
     isStriped: {
-      true: {},
+      true: {
+        row: {
+          // A subtle selected row is indistinguishable from an ordinary
+          // stripe, so striped tables retain the active selection treatment.
+          '&&[aria-selected="true"]': {
+            bg: 'bg.selected',
+          },
+        },
+      },
       false: {},
     },
     hasHover: {

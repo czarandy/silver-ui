@@ -12,15 +12,18 @@ import {
 } from 'react';
 import {CheckboxInput} from 'components/CheckboxInput';
 import {pixel} from 'components/Table/columnUtils';
+import {tableSelectionRecipe} from 'components/Table/plugins/selection/TableSelection.recipe';
 import type {
+  BodyCellRenderProps,
   BodyRowRenderProps,
+  HeaderCellRenderProps,
   TableColumn,
   TablePlugin,
 } from 'components/Table/types';
 import useConstant from 'hooks/useConstant';
 import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
-import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 export interface UseTableSelectionConfig<T extends Record<string, unknown>> {
   getIsAllSelected: () => boolean;
@@ -32,16 +35,7 @@ export interface UseTableSelectionConfig<T extends Record<string, unknown>> {
   onSelectItem: (event: {isSelected: boolean; item: T}) => void;
 }
 
-const styles = {
-  center: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }),
-  selectedRow: css({
-    bg: 'bg.selected',
-  }),
-} as const;
+const styles = tableSelectionRecipe();
 
 const SELECTION_COLUMN_KEY = '__table_selection';
 
@@ -76,7 +70,6 @@ function applyRowSelectionStyle(
   element: HTMLTableRowElement,
   isSelected: boolean,
 ): void {
-  element.classList.toggle(styles.selectedRow, isSelected);
   if (isSelected) {
     element.setAttribute('aria-selected', 'true');
   } else {
@@ -155,6 +148,7 @@ function SelectAllCheckboxInner<T extends Record<string, unknown>>({
             ? 'indeterminate'
             : false
       }
+      width="auto"
     />
   );
 }
@@ -202,6 +196,7 @@ function SelectionCellContentInner<T extends Record<string, unknown>>({
       }}
       size="sm"
       value={isSelected}
+      width="auto"
     />
   );
 }
@@ -222,14 +217,15 @@ export function useTableSelection<T extends Record<string, unknown>>(
 
   const selectionColumn = useMemo(
     (): TableColumn<T> => ({
+      align: 'center',
       header: (
-        <div className={styles.center}>
+        <div className={styles.control}>
           <SelectAllCheckbox<T> />
         </div>
       ),
       key: SELECTION_COLUMN_KEY,
       renderCell: item => (
-        <div className={styles.center}>
+        <div className={styles.control}>
           <SelectionCellContent item={item} />
         </div>
       ),
@@ -282,6 +278,32 @@ export function useTableSelection<T extends Record<string, unknown>>(
             props.ref == null
               ? selectionRef
               : mergeRefs(props.ref, selectionRef),
+        };
+      },
+      transformBodyCell(
+        props: BodyCellRenderProps,
+        column: TableColumn<T>,
+      ): BodyCellRenderProps {
+        if (column.key !== SELECTION_COLUMN_KEY) {
+          return props;
+        }
+
+        return {
+          ...props,
+          className: cx(props.className, styles.cell),
+        };
+      },
+      transformHeaderCell(
+        props: HeaderCellRenderProps,
+        column: TableColumn<T>,
+      ): HeaderCellRenderProps {
+        if (column.key !== SELECTION_COLUMN_KEY) {
+          return props;
+        }
+
+        return {
+          ...props,
+          className: cx(props.className, styles.cell),
         };
       },
       transformColumns(columns: TableColumn<T>[]): TableColumn<T>[] {
