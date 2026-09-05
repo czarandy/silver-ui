@@ -69,6 +69,17 @@ beforeEach(() => {
   hidePopover.mockClear();
 });
 
+function getStyleProperty(element: HTMLElement, property: string): string {
+  const style = element.style as unknown as Record<string, string | undefined>;
+  return style[property] ?? '';
+}
+
+// The menu layer is a native popover element with no accessible role to query
+// by, so reach for the `[popover]` attribute directly.
+function getMenuLayer(): HTMLElement {
+  return assertNonNull(document.querySelector<HTMLElement>('[popover]'));
+}
+
 describe('TagsInput', () => {
   it('inherits the ambient size', () => {
     render(
@@ -133,6 +144,40 @@ describe('TagsInput', () => {
       item: items[0],
       type: 'add',
     });
+  });
+
+  it('anchors the menu to the wrapper and keeps the anchor while open', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <TagsInput
+        data-testid="team"
+        debounceMs={0}
+        label="Team"
+        onChange={vi.fn()}
+        searchSource={createStaticSearchSource(items)}
+        value={[]}
+      />,
+    );
+
+    // The wrapper is an ancestor of the menu's Popover, so its ref is only
+    // populated after the Popover's layout effects have run.
+    const wrapper = screen.getByTestId('team');
+    const anchorName = getStyleProperty(wrapper, 'anchorName');
+    expect(anchorName).not.toBe('');
+    expect(getStyleProperty(getMenuLayer(), 'positionAnchor')).toBe(anchorName);
+
+    const assignedAnchorNames: string[] = [];
+    Object.defineProperty(wrapper.style, 'anchorName', {
+      configurable: true,
+      get: () => anchorName,
+      set: (value: string) => assignedAnchorNames.push(value),
+    });
+
+    await user.type(screen.getByRole('combobox', {name: 'Team'}), 'ada');
+    expect(screen.getByText('Ada Lovelace')).toBeInTheDocument();
+
+    expect(assignedAnchorNames).not.toContain('');
   });
 
   it('clears the typed query after selecting an item', async () => {

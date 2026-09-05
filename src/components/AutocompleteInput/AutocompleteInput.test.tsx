@@ -45,6 +45,17 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+function getStyleProperty(element: HTMLElement, property: string): string {
+  const style = element.style as unknown as Record<string, string | undefined>;
+  return style[property] ?? '';
+}
+
+// The menu layer is a native popover element with no accessible role to query
+// by, so reach for the `[popover]` attribute directly.
+function getMenuLayer(): HTMLElement {
+  return assertNonNull(document.querySelector<HTMLElement>('[popover]'));
+}
+
 describe('AutocompleteInput', () => {
   it('inherits the ambient size', () => {
     render(
@@ -84,6 +95,42 @@ describe('AutocompleteInput', () => {
     await user.click(option);
 
     expect(onChange).toHaveBeenCalledWith(items[1]);
+  });
+
+  it('anchors the menu to the wrapper and keeps the anchor while open', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <AutocompleteInput
+        data-testid="assignee"
+        debounceMs={0}
+        label="Assignee"
+        onChange={vi.fn()}
+        searchSource={createStaticSearchSource(items)}
+        value={null}
+      />,
+    );
+
+    // The wrapper is an ancestor of the menu's Popover, so its ref is only
+    // populated after the Popover's layout effects have run.
+    const wrapper = screen.getByTestId('assignee');
+    const anchorName = getStyleProperty(wrapper, 'anchorName');
+    expect(anchorName).not.toBe('');
+    expect(getStyleProperty(getMenuLayer(), 'positionAnchor')).toBe(anchorName);
+
+    const assignedAnchorNames: string[] = [];
+    Object.defineProperty(wrapper.style, 'anchorName', {
+      configurable: true,
+      get: () => anchorName,
+      set: (value: string) => assignedAnchorNames.push(value),
+    });
+
+    await user.type(screen.getByRole('combobox', {name: 'Assignee'}), 'gr');
+    expect(screen.getByRole('option', {hidden: true})).toHaveTextContent(
+      'Grace Hopper',
+    );
+
+    expect(assignedAnchorNames).not.toContain('');
   });
 
   it('closes the menu after selecting an item', async () => {
