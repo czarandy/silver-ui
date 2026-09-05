@@ -1,6 +1,7 @@
 'use client';
 
-import {useCallback, useEffect, useRef, useState, type RefObject} from 'react';
+import {useCallback, useRef, useState, type RefObject} from 'react';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {useMediaQuery} from 'internal/useMediaQuery';
 
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
@@ -183,12 +184,18 @@ export function useChatStreamScroll({
     }
   }, [followBottom, isEnabled]);
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const el = scrollRef.current;
     if (el == null || !isEnabled) {
       return;
     }
 
+    // Initial histories should be bottom-aligned before the browser paints.
+    // Deferring this to an animation frame briefly exposes the top of a long
+    // history whenever a chat mounts or the selected conversation changes.
+    if (el.scrollHeight > el.clientHeight) {
+      scrollElementToBottom(el);
+    }
     lastScrollTopRef.current = el.scrollTop;
     lastScrollHeightRef.current = el.scrollHeight;
     lastOffsetHeightRef.current = el.offsetHeight;
@@ -271,15 +278,7 @@ export function useChatStreamScroll({
     el.addEventListener('touchend', onTouchEnd, {passive: true});
     el.addEventListener('touchcancel', onTouchEnd, {passive: true});
 
-    const initialFrame = requestAnimationFrame(() => {
-      if (el.scrollHeight > el.clientHeight) {
-        el.scrollTop = el.scrollHeight - el.clientHeight;
-        lastScrollTopRef.current = el.scrollTop;
-      }
-    });
-
     return () => {
-      cancelAnimationFrame(initialFrame);
       el.removeEventListener('scroll', onScroll);
       el.removeEventListener('scrollend', onScrollEnd);
       el.removeEventListener('wheel', onWheel);

@@ -1,7 +1,7 @@
 'use client';
 
 import type {CSSProperties, ReactNode, Ref, RefObject} from 'react';
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 import {ChatLayoutContext, type ChatDensity} from 'components/Chat/ChatContext';
 import {chatLayoutRecipe} from 'components/Chat/ChatLayout.recipe';
 import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
@@ -11,6 +11,7 @@ import {useChatStreamScroll} from 'components/Chat/useChatStreamScroll';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
 
 function getDensity(width: number): ChatDensity {
@@ -101,9 +102,10 @@ export function ChatLayout({
   const [dockInset, setDockInset] = useState(0);
 
   const scroll = useChatStreamScroll({scrollRef: scrollContainerRef});
+  const {scrollIfLocked} = scroll;
   const newMessages = useChatNewMessages({
     isLocked: scroll.isLocked,
-    onResize: scroll.scrollIfLocked,
+    onResize: scrollIfLocked,
   });
 
   const layoutContext = useMemo(
@@ -115,15 +117,19 @@ export function ChatLayout({
     [density, newMessages.contentRef, scrollContainerRef],
   );
 
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
     if (root == null) {
       return;
     }
-    observeResize(root, () => {
+
+    const updateDensity = () => {
+      // eslint-disable-next-line @eslint-react/set-state-in-effect -- responsive state is derived from measured DOM width before paint
       setDensity(getDensity(root.clientWidth));
-    });
-    return () => unobserveResize(root);
+    };
+    updateDensity();
+    observeResize(root, updateDensity);
+    return () => unobserveResize(root, updateDensity);
   }, []);
 
   // The message area must account for the dock's measured height in both
@@ -133,16 +139,27 @@ export function ChatLayout({
   // the last message slide underneath the composer. External container: the
   // dock is position: fixed and out of that container's flow, so the area
   // must instead pad by the dock height or the final messages hide under it.
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const dock = dockContainerRef.current;
     if (dock == null) {
       return;
     }
-    observeResize(dock, () => {
+
+    const updateDockInset = () => {
+      // eslint-disable-next-line @eslint-react/set-state-in-effect -- layout inset is derived from measured dock height before paint
       setDockInset(dock.offsetHeight);
-    });
-    return () => unobserveResize(dock);
-  }, []);
+    };
+    updateDockInset();
+    observeResize(dock, updateDockInset);
+    return () => unobserveResize(dock, updateDockInset);
+  }, [density]);
+
+  // Density and dock measurements can change the message area's geometry.
+  // Keep a locked history bottom-aligned in the same pre-paint cycle while
+  // preserving the position of a user who has intentionally scrolled up.
+  useIsomorphicLayoutEffect(() => {
+    scrollIfLocked();
+  }, [density, dockInset, scrollIfLocked]);
 
   const classes = chatLayoutRecipe({density, isSelfScrolling});
   const showEmpty = !hasVisibleContent(children);
