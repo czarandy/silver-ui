@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useRef,
   type CSSProperties,
   type ReactNode,
@@ -268,7 +269,15 @@ export function Popover({
   // Keep the CSS anchor association independent from the interaction props.
   // Opening changes `aria-expanded` and refreshes the listener effect below,
   // but the anchor must remain attached to the same live element throughout.
-  useIsomorphicLayoutEffect(() => {
+  //
+  // This is a passive effect on purpose. React attaches a host element's ref
+  // only after its descendants' layout effects have run, so when `anchorRef`
+  // points at an ancestor of this Popover (AutocompleteInput and TagsInput
+  // anchor to their wrapper) the ref is still null during the layout phase of
+  // the mount commit. With the stable deps below that early return would be
+  // permanent and the layer would render unanchored at the viewport origin.
+  // By the passive phase every ref in the commit has been attached.
+  useEffect(() => {
     const anchor = anchorRef?.current ?? wrapperRef.current;
     if (anchor == null) {
       return;

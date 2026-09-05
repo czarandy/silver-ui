@@ -195,6 +195,46 @@ describe('Popover', () => {
     expect(assignedAnchorNames).not.toContain('');
   });
 
+  it('anchors to an ancestor anchorRef and keeps it across open-state updates', () => {
+    function Fixture({isOpen}: {isOpen: boolean}): React.JSX.Element {
+      const anchorRef = useRef<HTMLDivElement>(null);
+      return (
+        <div data-testid="anchor" ref={anchorRef}>
+          <Popover
+            anchorRef={anchorRef}
+            content={<div>Popover content</div>}
+            isOpen={isOpen}
+            label="Actions"
+          />
+        </div>
+      );
+    }
+
+    const {rerender} = render(<Fixture isOpen={false} />);
+
+    // React attaches an ancestor's ref only after this Popover's layout
+    // effects have run, so the anchor must not depend on the layout phase.
+    const anchor = screen.getByTestId('anchor');
+    const anchorName = getStyleProperty(anchor, 'anchorName');
+    expect(anchorName).not.toBe('');
+    expect(getStyleProperty(getPopoverElement(), 'positionAnchor')).toBe(
+      anchorName,
+    );
+
+    const assignedAnchorNames: string[] = [];
+    Object.defineProperty(anchor.style, 'anchorName', {
+      configurable: true,
+      get: () => anchorName,
+      set: (value: string) => assignedAnchorNames.push(value),
+    });
+
+    rerender(<Fixture isOpen />);
+    expect(showPopoverMock).toHaveBeenCalled();
+    rerender(<Fixture isOpen={false} />);
+
+    expect(assignedAnchorNames).not.toContain('');
+  });
+
   it('applies offsetX/offsetY as logical margins toward the trigger', () => {
     render(
       <Popover
