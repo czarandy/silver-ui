@@ -79,6 +79,39 @@ describe('ChatLayout', () => {
     );
   });
 
+  it('keeps the message and composer column widths stable while density resolves', async () => {
+    renderLayout();
+
+    const layout = screen.getByTestId('layout');
+    // These layout slots are intentionally structural and have no semantic
+    // roles. Their max-width classes must not change when hydration replaces
+    // the fallback density with the measured one.
+    // eslint-disable-next-line testing-library/no-node-access -- structural message-area slot
+    const messageArea = layout.firstElementChild as HTMLElement;
+    // eslint-disable-next-line testing-library/no-node-access -- structural dock-container slot
+    const dock = layout.lastElementChild as HTMLElement;
+    // eslint-disable-next-line testing-library/no-node-access -- structural dock slot
+    const dockInner = dock.lastElementChild?.firstElementChild as HTMLElement;
+    const maxWidthClasses = (element: HTMLElement): string[] =>
+      [...element.classList].filter(className => className.includes('max-w'));
+    const initialMessageAreaMaxWidth = maxWidthClasses(messageArea);
+    const initialDockMaxWidth = maxWidthClasses(dockInner);
+
+    Object.defineProperty(layout, 'clientWidth', {
+      configurable: true,
+      value: 1000,
+    });
+    resizeObserver.resize(layout);
+    await waitFor(() =>
+      expect(layout).toHaveAttribute('data-density', 'spacious'),
+    );
+
+    expect(initialMessageAreaMaxWidth).toEqual(['silver-max-w_800px']);
+    expect(initialDockMaxWidth).toEqual(['silver-max-w_800px']);
+    expect(maxWidthClasses(messageArea)).toEqual(initialMessageAreaMaxWidth);
+    expect(maxWidthClasses(dockInner)).toEqual(initialDockMaxWidth);
+  });
+
   it('applies the initial measured density before an observer callback', () => {
     vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1000);
 

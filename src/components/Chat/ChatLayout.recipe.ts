@@ -22,6 +22,7 @@ export const chatLayoutRecipe = sva({
       display: 'flex',
       flexDirection: 'column',
       marginInline: 'auto',
+      maxW: '800px',
       minH: '100%',
       paddingBlockEnd: '6',
     },
@@ -64,36 +65,32 @@ export const chatLayoutRecipe = sva({
     },
     dockInner: {
       marginInline: 'auto',
+      maxW: '800px',
     },
   },
   variants: {
     density: {
       compact: {
-        messageArea: {maxW: '100%'},
         blurLayer: {
           h: '80px',
           maskImage: 'linear-gradient(to bottom, transparent, black 24px)',
         },
         dock: {paddingInline: '2', paddingBlockEnd: '2'},
-        dockInner: {maxW: '100%'},
       },
       balanced: {
-        messageArea: {maxW: '100%'},
         blurLayer: {
           h: '100px',
           maskImage: 'linear-gradient(to bottom, transparent, black 36px)',
         },
         dock: {paddingInline: '3', paddingBlockEnd: '3'},
-        dockInner: {maxW: '100%'},
       },
       spacious: {
-        messageArea: {maxW: '800px', paddingInline: '4'},
+        messageArea: {paddingInline: '4'},
         blurLayer: {
           h: '120px',
           maskImage: 'linear-gradient(to bottom, transparent, black 48px)',
         },
         dock: {paddingInline: '4', paddingBlockEnd: '3'},
-        dockInner: {maxW: '800px'},
       },
     },
     isSelfScrolling: {
