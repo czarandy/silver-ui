@@ -76,7 +76,8 @@ function createMatchMedia(matches: boolean) {
 }
 
 function renderScrollHook(element: HTMLElement) {
-  return renderHook(() => useChatStreamScroll({scrollRef: {current: element}}));
+  const scrollRef = {current: element};
+  return renderHook(() => useChatStreamScroll({scrollRef}));
 }
 
 describe('useChatStreamScroll', () => {
@@ -89,12 +90,15 @@ describe('useChatStreamScroll', () => {
     vi.unstubAllGlobals();
   });
 
-  it('starts locked and scrolled down', () => {
-    const {element} = createScrollContainer(METRICS);
+  it('starts locked and scrolled down before the next animation frame', () => {
+    const animationFrame = vi.spyOn(window, 'requestAnimationFrame');
+    const {element, state} = createScrollContainer(METRICS);
     const {result} = renderScrollHook(element);
 
     expect(result.current.isLocked).toBe(true);
     expect(result.current.isScrolledUp).toBe(false);
+    expect(state.scrollTop).toBe(600);
+    expect(animationFrame).not.toHaveBeenCalled();
   });
 
   it('unlocks when the user scrolls up', () => {
@@ -238,13 +242,14 @@ describe('useChatStreamScroll', () => {
   });
 
   it('scrollToLastMessage targets the last [data-chat-message]', () => {
-    const {element, scrollTo} = createScrollContainer(METRICS);
+    const {element, scrollTo, state} = createScrollContainer(METRICS);
     const first = document.createElement('div');
     first.dataset.chatMessage = '';
     const last = document.createElement('div');
     last.dataset.chatMessage = '';
     element.append(first, last);
     const {result} = renderScrollHook(element);
+    state.scrollTop = 0;
 
     act(() => result.current.scrollToLastMessage());
 

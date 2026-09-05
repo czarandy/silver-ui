@@ -29,6 +29,7 @@ beforeEach(() => {
 
 afterEach(() => {
   resizeObserver.reset();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 
@@ -57,15 +58,15 @@ describe('ChatLayout', () => {
     renderLayout();
 
     const layout = screen.getByTestId('layout');
-    expect(layout).toHaveAttribute('data-density', 'balanced');
+    expect(layout).toHaveAttribute('data-density', 'compact');
 
     Object.defineProperty(layout, 'clientWidth', {
       configurable: true,
-      value: 400,
+      value: 600,
     });
     resizeObserver.resize(layout);
     await waitFor(() =>
-      expect(layout).toHaveAttribute('data-density', 'compact'),
+      expect(layout).toHaveAttribute('data-density', 'balanced'),
     );
 
     Object.defineProperty(layout, 'clientWidth', {
@@ -75,6 +76,17 @@ describe('ChatLayout', () => {
     resizeObserver.resize(layout);
     await waitFor(() =>
       expect(layout).toHaveAttribute('data-density', 'spacious'),
+    );
+  });
+
+  it('applies the initial measured density before an observer callback', () => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1000);
+
+    renderLayout();
+
+    expect(screen.getByTestId('layout')).toHaveAttribute(
+      'data-density',
+      'spacious',
     );
   });
 
@@ -91,16 +103,16 @@ describe('ChatLayout', () => {
     // The composer body is a structural slot without a role.
     // eslint-disable-next-line testing-library/no-node-access -- see above
     const composerBody = composer.firstElementChild;
-    const balancedClasses = composerBody?.className;
+    const initialClasses = composerBody?.className;
 
     Object.defineProperty(layout, 'clientWidth', {
       configurable: true,
-      value: 400,
+      value: 1000,
     });
     resizeObserver.resize(layout);
 
     await waitFor(() =>
-      expect(composerBody?.className).not.toBe(balancedClasses),
+      expect(composerBody?.className).not.toBe(initialClasses),
     );
   });
 
@@ -235,6 +247,36 @@ describe('ChatLayout', () => {
         minHeight: 'calc(100% - 120px)',
       }),
     );
+  });
+
+  it('reserves the initial dock height before an observer callback', () => {
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockReturnValue(120);
+
+    renderLayout();
+
+    const layout = screen.getByTestId('layout');
+    // eslint-disable-next-line testing-library/no-node-access -- structural message-area slot
+    expect(layout.firstElementChild).toHaveStyle({
+      minHeight: 'calc(100% - 120px)',
+    });
+  });
+
+  it('remeasures a density-dependent dock before an observer callback', () => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1000);
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(
+      function (this: HTMLElement) {
+        return this.parentElement?.dataset.density === 'spacious' ? 114 : 106;
+      },
+    );
+
+    renderLayout();
+
+    const layout = screen.getByTestId('layout');
+    expect(layout).toHaveAttribute('data-density', 'spacious');
+    // eslint-disable-next-line testing-library/no-node-access -- structural message-area slot
+    expect(layout.firstElementChild).toHaveStyle({
+      minHeight: 'calc(100% - 114px)',
+    });
   });
 
   it('applies className, style, and ref to the root', () => {
