@@ -22,7 +22,7 @@ import {inputRecipe} from 'components/Field/inputStyles';
 import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
-import {Popover} from 'components/Popover';
+import {usePopover} from 'components/Popover';
 import {
   selectMenuRecipe,
   selectTriggerRecipe,
@@ -30,11 +30,13 @@ import {
 import {Spinner} from 'components/Spinner';
 import {TextInput} from 'components/TextInput';
 import {useResolvedSize} from 'internal/SizeContext';
+import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -328,6 +330,37 @@ export function Select<TAuxiliaryData = unknown>({
     status,
   });
 
+  const handlePopoverShow = useCallback(() => {
+    setIsOpen(true);
+  }, [setIsOpen]);
+  const handlePopoverHide = useCallback(() => {
+    setIsOpen(false);
+  }, [setIsOpen]);
+  const {
+    hide: hidePopover,
+    isOpen: isPopoverOpen,
+    render: renderPopover,
+    show: showPopover,
+    triggerRef: popoverTriggerRef,
+  } = usePopover({
+    hasAutoFocus: hasSearch,
+    hasCloseButton: false,
+    onHide: handlePopoverHide,
+    onShow: handlePopoverShow,
+  });
+  const combinedTriggerRef = useMemo(
+    () => mergeRefs(triggerRef, popoverTriggerRef),
+    [popoverTriggerRef, triggerRef],
+  );
+
+  useIsomorphicLayoutEffect(() => {
+    if (isOpen && !isPopoverOpen) {
+      showPopover();
+    } else if (!isOpen && isPopoverOpen) {
+      hidePopover();
+    }
+  }, [hidePopover, isOpen, isPopoverOpen, showPopover]);
+
   useEffect(() => {
     if (effectiveReadOnly) {
       setIsOpen(false);
@@ -475,7 +508,7 @@ export function Select<TAuxiliaryData = unknown>({
       onPointerDownCapture={
         effectiveReadOnly ? preventReadOnlyInteraction : undefined
       }
-      ref={triggerRef}
+      ref={combinedTriggerRef}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={menuClasses.iconSlot}>
@@ -530,17 +563,12 @@ export function Select<TAuxiliaryData = unknown>({
     </div>
   );
 
-  const popover = (
-    <Popover
-      anchorRef={triggerRef}
-      content={menu}
-      hasAutoFocus={hasSearch}
-      hasCloseButton={false}
-      isEnabled={false}
-      isOpen={isOpen}
-      onOpenChange={setIsOpen}
-    />
-  );
+  const popover = renderPopover(menu, {
+    alignment: 'start',
+    className: layerPlacementGapRecipe({placement: 'below'}),
+    placement: 'below',
+    style: {minWidth: 'anchor-size(width)'},
+  });
 
   if (inputGroup != null) {
     return (

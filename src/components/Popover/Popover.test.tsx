@@ -157,6 +157,22 @@ describe('Popover', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
+  it('supplies its anchor as the native popover source', () => {
+    showPopoverMock.mockClear();
+    render(
+      <Popover content={<div>Popover content</div>} label="Actions">
+        <Button label="Open" />
+      </Popover>,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Open'});
+    fireEvent.click(trigger);
+
+    // eslint-disable-next-line testing-library/no-node-access -- Popover intentionally anchors the wrapper around arbitrary trigger content
+    const source = trigger.parentElement;
+    expect(showPopoverMock).toHaveBeenCalledWith({source});
+  });
+
   it('preserves the positioning anchor across open-state updates', () => {
     function Fixture(): React.JSX.Element {
       const anchorRef = useRef<HTMLButtonElement>(null);
@@ -233,6 +249,47 @@ describe('Popover', () => {
     rerender(<Fixture isOpen={false} />);
 
     expect(assignedAnchorNames).not.toContain('');
+  });
+
+  it('preserves another layer anchor when a shared trigger detaches', () => {
+    function Fixture({hasSecond}: {hasSecond: boolean}): React.JSX.Element {
+      const anchorRef = useRef<HTMLButtonElement>(null);
+      return (
+        <>
+          <button ref={anchorRef} type="button">
+            Shared trigger
+          </button>
+          <Popover
+            anchorRef={anchorRef}
+            content={<div>First content</div>}
+            label="First"
+          />
+          {hasSecond ? (
+            <Popover
+              anchorRef={anchorRef}
+              content={<div>Second content</div>}
+              label="Second"
+            />
+          ) : null}
+        </>
+      );
+    }
+
+    const {rerender} = render(<Fixture hasSecond />);
+    const trigger = screen.getByRole('button', {name: 'Shared trigger'});
+    const initialAnchorNames = getStyleProperty(trigger, 'anchorName').split(
+      ', ',
+    );
+    expect(initialAnchorNames).toHaveLength(2);
+
+    rerender(<Fixture hasSecond={false} />);
+
+    const remainingAnchorName = getStyleProperty(trigger, 'anchorName');
+    expect(initialAnchorNames).toContain(remainingAnchorName);
+    expect(remainingAnchorName).not.toBe('');
+    expect(getStyleProperty(getPopoverElement(), 'positionAnchor')).toBe(
+      remainingAnchorName,
+    );
   });
 
   it('applies offsetX/offsetY as logical margins toward the trigger', () => {

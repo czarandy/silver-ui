@@ -11,6 +11,7 @@ import {
 } from 'react';
 import {LayerContext} from 'internal/LayerContext';
 import {SizeContext} from 'internal/SizeContext';
+import {addAnchorName, removeAnchorName} from 'internal/anchorName';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {layerReset} from 'styled-system/recipes';
 import {cx} from 'utils/cx';
@@ -234,7 +235,7 @@ export function useLayer({
       return;
     }
 
-    popoverRef.current.showPopover();
+    popoverRef.current.showPopover({source: triggerRef.current ?? undefined});
     isOpenRef.current = true;
     // Batched with `isOpen`, so lazy children mount in the same commit that
     // opens the layer and open-effects (autofocus) find them mounted.
@@ -256,15 +257,12 @@ export function useLayer({
 
   const ref: RefCallback<HTMLElement> = useCallback(
     element => {
-      if (triggerRef.current != null) {
-        (
-          triggerRef.current.style as unknown as Record<string, string>
-        ).anchorName = '';
+      if (triggerRef.current != null && triggerRef.current !== element) {
+        removeAnchorName(triggerRef.current, anchorId);
       }
 
       if (element != null) {
-        (element.style as unknown as Record<string, string>).anchorName =
-          anchorId;
+        addAnchorName(element, anchorId);
       }
 
       triggerRef.current = element;

@@ -27,16 +27,18 @@ import {
   multiSelectMenuRecipe,
   multiSelectTriggerRecipe,
 } from 'components/MultiSelect/MultiSelect.recipe';
-import {Popover} from 'components/Popover';
+import {usePopover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import {useResolvedSize} from 'internal/SizeContext';
+import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -353,6 +355,37 @@ export function MultiSelect({
     status,
   });
 
+  const handlePopoverShow = useCallback(() => {
+    setIsOpen(true);
+  }, [setIsOpen]);
+  const handlePopoverHide = useCallback(() => {
+    setIsOpen(false);
+  }, [setIsOpen]);
+  const {
+    hide: hidePopover,
+    isOpen: isPopoverOpen,
+    render: renderPopover,
+    show: showPopover,
+    triggerRef: popoverTriggerRef,
+  } = usePopover({
+    hasAutoFocus: hasSearch,
+    hasCloseButton: false,
+    onHide: handlePopoverHide,
+    onShow: handlePopoverShow,
+  });
+  const combinedTriggerRef = useMemo(
+    () => mergeRefs(triggerRef, popoverTriggerRef),
+    [popoverTriggerRef, triggerRef],
+  );
+
+  useIsomorphicLayoutEffect(() => {
+    if (isOpen && !isPopoverOpen) {
+      showPopover();
+    } else if (!isOpen && isPopoverOpen) {
+      hidePopover();
+    }
+  }, [hidePopover, isOpen, isPopoverOpen, showPopover]);
+
   useEffect(() => {
     if (isReadOnly) {
       setIsOpen(false);
@@ -563,7 +596,7 @@ export function MultiSelect({
       onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       onPointerDown={handleTriggerPointerDown}
       onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
-      ref={triggerRef}
+      ref={combinedTriggerRef}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={menuClasses.iconSlot}>
@@ -615,17 +648,12 @@ export function MultiSelect({
 
   const necessity = getNecessity(isOptional, isRequired);
 
-  const popover = (
-    <Popover
-      anchorRef={triggerRef}
-      content={menu}
-      hasAutoFocus={hasSearch}
-      hasCloseButton={false}
-      isEnabled={false}
-      isOpen={isOpen}
-      onOpenChange={setIsOpen}
-    />
-  );
+  const popover = renderPopover(menu, {
+    alignment: 'start',
+    className: layerPlacementGapRecipe({placement: 'below'}),
+    placement: 'below',
+    style: {minWidth: 'anchor-size(width)'},
+  });
 
   if (inputGroup != null) {
     return (
