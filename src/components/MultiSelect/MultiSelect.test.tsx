@@ -15,6 +15,7 @@ import {SelectOption} from 'components/Select';
 import {SizeContext} from 'internal/SizeContext';
 import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 import {assertNonNull} from 'internal/testHelpers';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
 
 async function nextAnimationFrame(): Promise<void> {
@@ -41,6 +42,35 @@ beforeAll(() => {
 });
 
 describe('MultiSelect', () => {
+  it('attaches its positioning anchor before parent layout effects run', () => {
+    const observedAnchorNames: string[] = [];
+
+    function Fixture(): React.JSX.Element {
+      useIsomorphicLayoutEffect(() => {
+        const trigger = screen.getByRole('combobox', {name: 'Columns'});
+        // eslint-disable-next-line testing-library/no-node-access -- the CSS anchor is the visual wrapper around the semantic combobox
+        const wrapper = assertNonNull(trigger.parentElement);
+        observedAnchorNames.push(
+          (wrapper.style as unknown as Record<string, string>).anchorName,
+        );
+      }, []);
+
+      return (
+        <MultiSelect
+          label="Columns"
+          onChange={() => {}}
+          options={['Name', 'Email']}
+          value={['Name']}
+        />
+      );
+    }
+
+    render(<Fixture />);
+
+    expect(observedAnchorNames).toHaveLength(1);
+    expect(observedAnchorNames[0]).toMatch(/^--silver-layer-/);
+  });
+
   it('uses the default cursor when read-only', () => {
     render(
       <MultiSelect
