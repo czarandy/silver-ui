@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -67,7 +68,6 @@ function getSelectListboxOptions<TOption extends SelectListboxOptionData>(
 export type UseSelectListboxOptions<TOption extends SelectListboxOptionData> = {
   description: ReactNode;
   hasEntriesOnFocus?: boolean;
-  isDefaultOpen?: boolean;
   isDisabled?: boolean;
   isHighlightClearedOnCommit?: boolean;
   isLoading?: boolean;
@@ -75,7 +75,10 @@ export type UseSelectListboxOptions<TOption extends SelectListboxOptionData> = {
   isQueryClearedOnCommit?: boolean;
   isReadOnly?: boolean;
   isTypeaheadEnabled?: boolean;
+  isOpen: boolean;
+  onClose: () => void;
   onCommitOption: (option: TOption) => unknown;
+  onOpen: () => void;
   options: ReadonlyArray<SelectListboxOption<TOption>>;
   selectedValues: ReadonlySet<string>;
   status: InputStatus | undefined;
@@ -99,13 +102,11 @@ export type UseSelectListboxResult<TOption extends SelectListboxOptionData> = {
   highlightedValue: string | null;
   inputId: string;
   isInteractionDisabled: boolean;
-  isOpen: boolean;
   listboxId: string;
   optionByValue: ReadonlyMap<string, TOption>;
   query: string;
   selectableOptions: ReadonlyArray<TOption>;
   setHighlightedValue: Dispatch<SetStateAction<string | null>>;
-  setIsOpen: Dispatch<SetStateAction<boolean>>;
   setQuery: Dispatch<SetStateAction<string>>;
   statusMessageID: string | undefined;
   triggerRef: RefObject<HTMLDivElement | null>;
@@ -115,7 +116,6 @@ export type UseSelectListboxResult<TOption extends SelectListboxOptionData> = {
 export function useSelectListbox<TOption extends SelectListboxOptionData>({
   description,
   hasEntriesOnFocus = false,
-  isDefaultOpen = false,
   isDisabled = false,
   isHighlightClearedOnCommit = true,
   isLoading = false,
@@ -123,7 +123,10 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   isQueryClearedOnCommit = false,
   isReadOnly = false,
   isTypeaheadEnabled = false,
+  isOpen,
+  onClose,
   onCommitOption,
+  onOpen,
   options,
   selectedValues,
   status,
@@ -134,7 +137,6 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
-  const [isOpen, setIsOpen] = useState(isDefaultOpen);
   const [query, setQuery] = useState('');
   // `hasEntriesOnFocus` opens the listbox as soon as the trigger takes focus,
   // which two kinds of focus have to be kept out of:
@@ -152,24 +154,30 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   const isPointerPressRef = useRef(false);
   const isFocusOpenAllowedRef = useRef(true);
 
-  // Every close goes through here, so focus-to-open is disarmed while the
-  // closing update renders -- before the popover restores focus from its layout
-  // effect, which is too early for an effect here to have run.
-  const updateIsOpen = useCallback<Dispatch<SetStateAction<boolean>>>(
-    nextIsOpen => {
-      setIsOpen(currentIsOpen => {
-        const resolvedIsOpen =
-          typeof nextIsOpen === 'function'
-            ? nextIsOpen(currentIsOpen)
-            : nextIsOpen;
-        if (!resolvedIsOpen) {
-          isFocusOpenAllowedRef.current = false;
-        }
-        return resolvedIsOpen;
-      });
+  // Explicit close paths go through here, so focus-to-open is disarmed before
+  // the popover restores focus. Browser-driven light dismiss is observed below.
+  const requestOpenChange = useCallback(
+    (isNextOpen: boolean) => {
+      if (isNextOpen) {
+        onOpen();
+      } else {
+        isFocusOpenAllowedRef.current = false;
+        onClose();
+      }
     },
-    [],
+    [onClose, onOpen],
   );
+  const previousIsOpenRef = useRef(isOpen);
+
+  useEffect(() => {
+    if (previousIsOpenRef.current && !isOpen) {
+      // Native light dismiss closes the popover without calling
+      // requestOpenChange.
+      // Preserve the same focus-to-open suppression as explicit close paths.
+      isFocusOpenAllowedRef.current = false;
+    }
+    previousIsOpenRef.current = isOpen;
+  }, [isOpen]);
   const triggerRef = useRef<HTMLDivElement>(null);
   const listboxId = `${inputId}-listbox`;
   const selectableOptions = useMemo(
@@ -224,13 +232,13 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       }
 
       if (isListboxClosedOnCommit) {
-        updateIsOpen(false);
+        requestOpenChange(false);
       }
       if (isQueryClearedOnCommit) {
         setQuery('');
       }
     },
-    onOpenChange: updateIsOpen,
+    onOpenChange: requestOpenChange,
     options: visibleSelectableOptions,
     selectedValues,
     shouldClearOnCommit: isHighlightClearedOnCommit,
@@ -281,7 +289,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       }
 
       if (isListboxClosedOnCommit) {
-        updateIsOpen(false);
+        requestOpenChange(false);
       }
       if (isQueryClearedOnCommit) {
         setQuery('');
@@ -292,7 +300,7 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       isQueryClearedOnCommit,
       onCommitOption,
       optionByValue,
-      updateIsOpen,
+      requestOpenChange,
     ],
   );
 
@@ -323,8 +331,8 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       return;
     }
 
-    updateIsOpen(currentIsOpen => !currentIsOpen);
-  }, [isInteractionDisabled, isReadOnly, updateIsOpen]);
+    requestOpenChange(!isOpen);
+  }, [isInteractionDisabled, isOpen, isReadOnly, requestOpenChange]);
 
   const handleTriggerFocus = useCallback((): void => {
     if (
@@ -338,13 +346,13 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
       return;
     }
 
-    updateIsOpen(true);
+    requestOpenChange(true);
   }, [
     hasEntriesOnFocus,
     isInteractionDisabled,
     isOpen,
     isReadOnly,
-    updateIsOpen,
+    requestOpenChange,
   ]);
 
   const handleTriggerBlur = useCallback((): void => {
@@ -379,13 +387,11 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
     highlightedValue,
     inputId,
     isInteractionDisabled,
-    isOpen,
     listboxId,
     optionByValue,
     query,
     selectableOptions,
     setHighlightedValue,
-    setIsOpen: updateIsOpen,
     setQuery,
     statusMessageID,
     triggerRef,
