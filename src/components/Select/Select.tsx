@@ -36,7 +36,6 @@ import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
-import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {
   renderSelectListboxOptions,
   useSelectListbox,
@@ -291,6 +290,17 @@ export function Select<TAuxiliaryData = unknown>({
   );
 
   const {
+    hide: hidePopover,
+    isOpen,
+    render: renderPopover,
+    show: showPopover,
+    triggerRef: popoverTriggerRef,
+  } = usePopover({
+    hasAutoFocus: hasSearch,
+    hasCloseButton: false,
+  });
+
+  const {
     activeDescendantId,
     describedBy,
     descriptionID,
@@ -306,12 +316,10 @@ export function Select<TAuxiliaryData = unknown>({
     highlightedValue,
     inputId,
     isInteractionDisabled,
-    isOpen,
     listboxId,
     query,
     selectableOptions,
     setHighlightedValue,
-    setIsOpen,
     setQuery,
     statusMessageID,
     triggerRef,
@@ -324,50 +332,27 @@ export function Select<TAuxiliaryData = unknown>({
     isQueryClearedOnCommit: true,
     isReadOnly: effectiveReadOnly,
     isTypeaheadEnabled: true,
+    isOpen,
+    onClose: hidePopover,
     onCommitOption: commitOption,
+    onOpen: showPopover,
     options,
     selectedValues,
     status,
   });
 
-  const handlePopoverShow = useCallback(() => {
-    setIsOpen(true);
-  }, [setIsOpen]);
-  const handlePopoverHide = useCallback(() => {
-    setIsOpen(false);
-  }, [setIsOpen]);
-  const {
-    hide: hidePopover,
-    isOpen: isPopoverOpen,
-    render: renderPopover,
-    show: showPopover,
-    triggerRef: popoverTriggerRef,
-  } = usePopover({
-    hasAutoFocus: hasSearch,
-    hasCloseButton: false,
-    onHide: handlePopoverHide,
-    onShow: handlePopoverShow,
-  });
   const combinedTriggerRef = useMemo(
     () => mergeRefs(triggerRef, popoverTriggerRef),
     [popoverTriggerRef, triggerRef],
   );
 
-  useIsomorphicLayoutEffect(() => {
-    if (isOpen && !isPopoverOpen) {
-      showPopover();
-    } else if (!isOpen && isPopoverOpen) {
-      hidePopover();
-    }
-  }, [hidePopover, isOpen, isPopoverOpen, showPopover]);
-
   useEffect(() => {
     if (effectiveReadOnly) {
-      setIsOpen(false);
+      hidePopover();
       setQuery('');
       buttonRef.current?.blur();
     }
-  }, [effectiveReadOnly, setIsOpen, setQuery]);
+  }, [effectiveReadOnly, hidePopover, setQuery]);
 
   const selectedOption = useMemo(
     () => selectableOptions.find(option => option.value === value),
