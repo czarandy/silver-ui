@@ -1824,6 +1824,41 @@ describe('Schedule', () => {
     });
   });
 
+  it('orders same-day timed events chronologically in month view', () => {
+    render(
+      <Schedule
+        events={[
+          createEventFromISO({
+            end: '2026-05-13T16:30:00.000Z',
+            id: 'afternoon-month',
+            start: '2026-05-13T16:00:00.000Z',
+            title: 'Alpha appointment',
+          }),
+          createEventFromISO({
+            end: '2026-05-13T09:30:00.000Z',
+            id: 'morning-month',
+            start: '2026-05-13T09:00:00.000Z',
+            title: 'Zulu appointment',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByTestId('schedule-event-span-morning-month')).toHaveStyle(
+      {
+        marginBlockStart: '30px',
+      },
+    );
+    expect(
+      screen.getByTestId('schedule-event-span-afternoon-month'),
+    ).toHaveStyle({
+      marginBlockStart: '52px',
+    });
+  });
+
   it('visually spans month events against the configured week start', () => {
     render(
       <Schedule

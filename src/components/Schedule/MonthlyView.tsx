@@ -290,7 +290,9 @@ function getMonthEventSegments(
       if (aDuration !== bDuration) {
         return bDuration - aDuration;
       }
-      return a.event.title.localeCompare(b.event.title);
+      // Schedule has already sorted events by start time, then title. Preserve
+      // that order once the month layout priorities above are equal.
+      return 0;
     });
 
   monthEvents.forEach(({endIndex, event, startIndex}) => {
