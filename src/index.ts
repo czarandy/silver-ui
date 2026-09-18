@@ -543,6 +543,12 @@ export {
 } from 'components/Skeleton';
 export {EmptyState, type EmptyStateProps} from 'components/EmptyState';
 export {
+  FeaturedIcon,
+  type FeaturedIconColor,
+  type FeaturedIconProps,
+  type FeaturedIconSize,
+} from 'components/FeaturedIcon';
+export {
   Switch,
   type SwitchLabelPosition,
   type SwitchLabelSpacing,

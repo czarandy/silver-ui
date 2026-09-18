@@ -397,6 +397,46 @@ describe('theme preset color contrast (WCAG AA, normal text)', () => {
   );
 });
 
+// FeaturedIcon's accent glyph is a graphic, not text, so it needs the WCAG
+// non-text contrast of 3:1. Its other tints reuse the surface pairs above.
+const AA_NON_TEXT = 3;
+const FEATURED_ICON_ACCENT = {
+  bg: '{colors.primary.subtle}',
+  fg: '{colors.primary.active}',
+};
+const FEATURED_ICON_ACCENT_CASES = [
+  ...MODES.map(mode => ({
+    bgHex: resolve(FEATURED_ICON_ACCENT.bg, mode),
+    fgHex: resolve(FEATURED_ICON_ACCENT.fg, mode),
+    mode,
+    palette: 'default',
+  })),
+  ...Object.entries(themePresets).flatMap(([presetId, preset]) =>
+    MODES.map(mode => {
+      const appearance: Appearance = mode === '_dark' ? 'dark' : 'light';
+      return {
+        bgHex: effective(preset, appearance, FEATURED_ICON_ACCENT.bg, mode),
+        fgHex: effective(preset, appearance, FEATURED_ICON_ACCENT.fg, mode),
+        mode,
+        palette: presetId,
+      };
+    }),
+  ),
+].filter(c => isOpaqueHex(c.bgHex) && isOpaqueHex(c.fgHex));
+
+describe('FeaturedIcon accent contrast (WCAG AA, non-text)', () => {
+  it.each(FEATURED_ICON_ACCENT_CASES)(
+    '$palette meets 3:1 in $mode mode',
+    ({bgHex, fgHex, palette}) => {
+      const ratio = contrastRatio(bgHex, fgHex);
+      expect(
+        ratio,
+        `${palette}: ${fgHex} on ${bgHex} is ${ratio.toFixed(2)}:1`,
+      ).toBeGreaterThanOrEqual(AA_NON_TEXT);
+    },
+  );
+});
+
 describe('Alert secondary action contrast (WCAG AA, normal text)', () => {
   it.each(ALERT_SECONDARY_CASES)(
     '$palette · $color $state in $appearance mode',

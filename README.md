@@ -133,7 +133,7 @@ mode details, scoped theming examples, and per-instance overrides.
 
 - **Breadcrumbs** — hierarchical page location trail
 - **Link** — polymorphic link with external link handling and router integration
-- **NavIcon** — circular accent-colored icon container for navigation headers
+- **NavIcon** — solid primary FeaturedIcon for navigation headers
 - **Pagination** — page navigation controls
 - **SideNav** — vertical side navigation panel with collapsing support
 - **Stepper** — multi-step progress indicator
@@ -192,6 +192,7 @@ mode details, scoped theming examples, and per-instance overrides.
 - **Avatar** — user or entity avatar with status indicators
 - **AvatarGroup** — stacked avatar collection with overflow count
 - **Badge** — small status label with icon support
+- **FeaturedIcon** — icon inside a tinted circle for headlining empty, success, and error states
 - **Icon** — renders Lucide icons with size and color tokens
 - **Image** — responsive image with intrinsic loading and error fallback
 - **Item** — generic list item with icon, label, and description
