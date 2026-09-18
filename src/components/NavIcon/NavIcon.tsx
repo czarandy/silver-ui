@@ -1,5 +1,5 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {css} from 'styled-system/css';
+import {featuredIconRecipe} from 'components/FeaturedIcon/FeaturedIcon.recipe';
 import {cx} from 'utils/cx';
 
 export interface NavIconProps {
@@ -25,23 +25,9 @@ export interface NavIconProps {
   style?: CSSProperties;
 }
 
-const styles = {
-  base: css({
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 'full',
-    bg: 'primary',
-    color: 'fg.onPrimary',
-    flexShrink: 0,
-    w: 'component.sm',
-    h: 'component.sm',
-  }),
-};
-
 /**
  * Circular icon container for navigation headers.
- * Wraps an icon with a circular accent-colored background.
+ * The solid primary, `sm` treatment of FeaturedIcon.
  */
 export function NavIcon({
   className,
@@ -52,7 +38,10 @@ export function NavIcon({
 }: NavIconProps): React.JSX.Element {
   return (
     <span
-      className={cx(styles.base, className)}
+      className={cx(
+        featuredIconRecipe({size: 'sm', variant: 'solid'}),
+        className,
+      )}
       data-testid={dataTestId}
       ref={ref}
       style={style}>
