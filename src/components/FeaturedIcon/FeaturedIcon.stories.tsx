@@ -118,7 +118,6 @@ export const InEmptyState: Story = {
       <EmptyState
         actions={<Button label="Return home" variant="primary" />}
         description="This link is no longer valid. Please use the link from your most recent reminder."
-        headingLevel={2}
         illustration={<FeaturedIcon color="error" icon={X} size="lg" />}
         title="Response link unavailable"
       />
