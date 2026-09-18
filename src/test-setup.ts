@@ -22,6 +22,20 @@ nodeStderr.write = (chunk, ...rest) => {
   return originalStderrWrite(chunk, ...rest);
 };
 
+// Node 25+ ships its own Web Storage globals, which are `undefined` unless
+// `--localstorage-file` is passed, and they shadow jsdom's. Point them back at
+// the jsdom window's storage so tests see a working Storage on any Node version.
+const jsdomWindow = (globalThis as {jsdom?: {window: Window}}).jsdom?.window;
+for (const key of ['localStorage', 'sessionStorage'] as const) {
+  if (jsdomWindow != null && globalThis[key] !== jsdomWindow[key]) {
+    Object.defineProperty(globalThis, key, {
+      configurable: true,
+      value: jsdomWindow[key],
+      writable: true,
+    });
+  }
+}
+
 if (!Reflect.has(HTMLElement.prototype, 'showPopover')) {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
     configurable: true,
