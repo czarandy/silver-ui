@@ -208,6 +208,14 @@ export function getEventTimeLabel(
  * is the overlap column index and `columnCount` is the collision group's
  * maximum number of simultaneous events.
  */
+/**
+ * Rendered height of a timed block: its layout height less the 5px gap to the
+ * next hour, but never shorter than two lines of text (title and time).
+ */
+export function getTimedEventBlockHeight(layoutHeight: number): number {
+  return Math.max(36, layoutHeight - 5);
+}
+
 export function getTimedEventBlockStyle({
   columnCount = 1,
   height,
@@ -233,7 +241,7 @@ export function getTimedEventBlockStyle({
   };
 
   return {
-    height: `${Math.max(36, height - 5)}px`,
+    height: `${getTimedEventBlockHeight(height)}px`,
     insetInlineEnd:
       overlapBehavior === 'indented' ? '2px' : getColumnInset(inlineEndColumns),
     insetInlineStart:
