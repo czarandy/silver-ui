@@ -30,7 +30,7 @@ export const toggleButtonRecipe = sva({
       // "g" in "Going"), so pad the clip box vertically and cancel the padding
       // with a negative margin to keep layout unchanged.
       py: '0.25em',
-      mt: '-0.35em',
+      mt: '-0.25em',
       mb: '-0.25em',
     },
     widthReservation: {
