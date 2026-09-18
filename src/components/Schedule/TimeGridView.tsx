@@ -22,6 +22,7 @@ import {
   getEventAccessibleLabel,
   getEventTimeLabel,
   getMinutesSinceStartOfDay,
+  getTimedEventBlockHeight,
   getTimedEventBlockStyle,
   isEventInPast,
   mergeSchedulePluginProps,
@@ -258,6 +259,13 @@ function getTimedEventLayouts({
 }
 
 /**
+ * Height a timed block needs to stack a title, a location, and a time: three
+ * lines of its 12px/1.25 text plus 4px of padding and 2px of border (see
+ * `ScheduleEvent.recipe.ts`).
+ */
+const THREE_LINE_BLOCK_HEIGHT_PX = 51;
+
+/**
  * Renders a single positioned timed-event block. Becomes a clickable `<button>`
  * trigger when an event popover plugin is active, otherwise a static `<div>`.
  */
@@ -310,10 +318,14 @@ function TimeGridEvent({
     [event, timezoneID],
   );
   const isPast = isEventInPast(event, currentTime, timezoneID);
+  const hasLocation = event.location != null && event.location !== '';
   const classes = scheduleEventRecipe({
     layout: 'block',
     color: category.color,
     isCanceled: event.isCanceled,
+    isCompact:
+      hasLocation &&
+      getTimedEventBlockHeight(layout.height) < THREE_LINE_BLOCK_HEIGHT_PX,
     isPast,
     isInteractive: triggerProps != null,
   });
@@ -330,11 +342,17 @@ function TimeGridEvent({
   );
   const body = (
     <>
-      <span className={classes.title}>{event.title}</span>
-      {event.location != null && event.location !== '' ? (
-        <span className={classes.location}>{event.location}</span>
+      <span className={classes.title} data-part="title">
+        {event.title}
+      </span>
+      {hasLocation ? (
+        <span className={classes.location} data-part="location">
+          {event.location}
+        </span>
       ) : null}
-      <span className={classes.time}>{timeLabel}</span>
+      <span className={classes.time} data-part="time">
+        {timeLabel}
+      </span>
       {pluginEndContent}
     </>
   );

@@ -2468,6 +2468,63 @@ describe('Schedule', () => {
     ).toHaveTextContent('Located syncRoom 49:00 AM - 10:00 AM');
   });
 
+  it.each([
+    {end: '2026-05-13T09:30:00.000Z', isCompact: true, location: 'Room 4'},
+    {end: '2026-05-13T09:45:00.000Z', isCompact: false, location: 'Room 4'},
+    {end: '2026-05-13T09:30:00.000Z', isCompact: false, location: undefined},
+  ])(
+    'hides the time line of a block too short for three lines (ends $end, location $location)',
+    ({end, isCompact, location}) => {
+      render(
+        <Schedule
+          categories={categories}
+          events={[
+            {
+              ...createEventFromISO({
+                category: 'Sync',
+                end,
+                id: 'short',
+                start: '2026-05-13T09:00:00.000Z',
+                title: 'Check-in',
+              }),
+              location,
+            },
+          ]}
+          timezoneID="UTC"
+          view={createScheduleDayView({
+            hourHeight: 100,
+            maxHour: 11,
+            minHour: 9,
+          })}
+          viewDate={instantUTC(2026, 4, 13)}
+        />,
+      );
+
+      const block = screen.getByTestId('schedule-event-short');
+      const timeClasses = (compact: boolean): string[] =>
+        (
+          scheduleEventRecipe({isCompact: compact, layout: 'block'}).time ?? ''
+        ).split(' ');
+      const compactOnlyClasses = timeClasses(true).filter(
+        className => !timeClasses(false).includes(className),
+      );
+      // The time stays in the accessible text either way.
+      const time = within(block).getByText(/^9:00 AM - 9:(30|45) AM$/);
+
+      expect(compactOnlyClasses).not.toHaveLength(0);
+      expect(within(block).getByText('Check-in')).toHaveAttribute(
+        'data-part',
+        'title',
+      );
+      expect(time).toHaveAttribute('data-part', 'time');
+      expect(
+        compactOnlyClasses.every(className =>
+          time.className.split(' ').includes(className),
+        ),
+      ).toBe(isCompact);
+    },
+  );
+
   it('keeps short visible timed event slices tall enough for title and time', () => {
     render(
       <Schedule

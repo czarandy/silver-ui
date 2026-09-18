@@ -121,6 +121,13 @@ export const scheduleEventRecipe = sva({
       true: {title: {textDecoration: 'line-through'}},
       false: {},
     },
+    // A time-grid block too short to stack its title, location, and time drops
+    // the time line visually. It stays in the accessible text, and the popover
+    // still shows it.
+    isCompact: {
+      true: {time: {srOnly: true}},
+      false: {},
+    },
     // Applied when the pill is rendered as a clickable <button> trigger (event
     // popover plugin). Resets user-agent button styling so the pill looks
     // identical to its static <span> form.
