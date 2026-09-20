@@ -21,6 +21,7 @@ const meta: Meta<typeof Timestamp> = {
         'date',
         'time',
         'dateTime',
+        'weekdayDateTime',
         'isoDate',
         'isoTime',
         'isoDateTime',
@@ -41,6 +42,7 @@ const formats = [
   'date',
   'time',
   'dateTime',
+  'weekdayDateTime',
   'isoDate',
   'isoTime',
   'isoDateTime',
@@ -62,6 +64,42 @@ export const AllFormats: Story = {
           <Timestamp format={format} value={SAMPLE} />
         </div>
       ))}
+    </div>
+  ),
+};
+
+/**
+ * `weekdayDateTime` is the friendly, human-readable format. It omits the year
+ * for moments in the current year and includes it otherwise, so recent
+ * timestamps stay short without making older ones ambiguous.
+ */
+export const WeekdayDateTime: Story = {
+  render: () => (
+    <div
+      style={{
+        display: 'grid',
+        gap: '0.75rem',
+        gridTemplateColumns: 'auto 1fr',
+      }}>
+      <Text color="secondary" size="sm">
+        this year
+      </Text>
+      <Timestamp
+        format="weekdayDateTime"
+        value={Temporal.Now.instant().subtract({hours: 30})}
+      />
+      <Text color="secondary" size="sm">
+        an earlier year
+      </Text>
+      <Timestamp format="weekdayDateTime" value={SAMPLE} />
+      <Text color="secondary" size="sm">
+        with timezone
+      </Text>
+      <Timestamp
+        format="weekdayDateTime"
+        isTimezoneShown
+        value={Temporal.Now.instant().subtract({hours: 30})}
+      />
     </div>
   ),
 };

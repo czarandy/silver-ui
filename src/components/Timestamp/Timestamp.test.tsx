@@ -92,6 +92,77 @@ describe('Timestamp.utils', () => {
     });
   });
 
+  describe('formatAbsolute weekdayDateTime', () => {
+    it('omits the year within the current year', () => {
+      expect(
+        formatAbsolute(
+          REFERENCE,
+          'weekdayDateTime',
+          'UTC',
+          false,
+          REFERENCE_MS,
+        ),
+      ).toBe('Fri, March 21 at 2:51 PM');
+    });
+
+    it('includes the year outside the current year', () => {
+      const nextYear = Temporal.Instant.from(
+        '2026-01-05T00:00:00Z',
+      ).epochMilliseconds;
+      expect(
+        formatAbsolute(REFERENCE, 'weekdayDateTime', 'UTC', false, nextYear),
+      ).toBe('Fri, March 21, 2025 at 2:51 PM');
+    });
+
+    it('honors the display timezone', () => {
+      // 14:51 UTC is 10:51 in New York (EDT, UTC-4) on this date.
+      expect(
+        formatAbsolute(
+          REFERENCE,
+          'weekdayDateTime',
+          'America/New_York',
+          false,
+          REFERENCE_MS,
+        ),
+      ).toBe('Fri, March 21 at 10:51 AM');
+    });
+
+    it('compares years in the display timezone, not UTC', () => {
+      // 23:30 UTC on New Year's Eve is already 08:30 the next year in Tokyo,
+      // so the Tokyo rendering is in the current year and drops the year while
+      // the UTC rendering of the same instant keeps it.
+      const newYearsEve = Temporal.Instant.from('2024-12-31T23:30:00Z');
+      const newYearsDay = Temporal.Instant.from(
+        '2025-01-01T00:30:00Z',
+      ).epochMilliseconds;
+
+      expect(
+        formatAbsolute(
+          newYearsEve,
+          'weekdayDateTime',
+          'Asia/Tokyo',
+          false,
+          newYearsDay,
+        ),
+      ).toBe('Wed, January 1 at 8:30 AM');
+      expect(
+        formatAbsolute(
+          newYearsEve,
+          'weekdayDateTime',
+          'UTC',
+          false,
+          newYearsDay,
+        ),
+      ).toBe('Tue, December 31, 2024 at 11:30 PM');
+    });
+
+    it('still appends a timezone abbreviation when requested', () => {
+      expect(
+        formatAbsolute(REFERENCE, 'weekdayDateTime', 'UTC', true, REFERENCE_MS),
+      ).toMatch(/UTC|GMT/);
+    });
+  });
+
   describe('formatTimestamp auto mode', () => {
     it('shows a relative string within the threshold', () => {
       const result = formatTimestamp(
@@ -156,6 +227,22 @@ describe('Timestamp', () => {
     );
 
     expect(screen.getByTestId('ts')).toHaveTextContent('2025-03-21 14:51:53');
+  });
+
+  it('renders the weekdayDateTime format', () => {
+    render(
+      <Timestamp
+        data-testid="ts"
+        format="weekdayDateTime"
+        value={REFERENCE.toZonedDateTimeISO('UTC')}
+      />,
+    );
+
+    // The year is present or absent depending on when the suite runs, so match
+    // the parts that do not move.
+    expect(screen.getByTestId('ts')).toHaveTextContent(
+      /^Fri, March 21(, 2025)? at 2:51 PM$/,
+    );
   });
 
   it('wires a tooltip and accessible absolute label for relative text', () => {

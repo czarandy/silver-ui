@@ -107,6 +107,7 @@ const meta = {
         'date',
         'time',
         'dateTime',
+        'weekdayDateTime',
         'isoDate',
         'isoTime',
         'isoDateTime',

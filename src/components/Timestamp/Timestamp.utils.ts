@@ -10,13 +10,15 @@ export type TimestampFormat =
   | 'date'
   | 'time'
   | 'dateTime'
+  | 'weekdayDateTime'
   | 'isoDate'
   | 'isoTime'
   | 'isoDateTime';
 
 /**
- * An absolute format — every `TimestampFormat` except the ones whose output
- * depends on the current time.
+ * An absolute format — every `TimestampFormat` except the ones that render a
+ * relative string. `weekdayDateTime` still consults the current time, but only
+ * to decide whether to include the year.
  */
 type AbsoluteFormat = Exclude<TimestampFormat, 'auto' | 'relative'>;
 
@@ -72,6 +74,15 @@ const LOCALE_OPTIONS: Record<AbsoluteFormat, Intl.DateTimeFormatOptions> = {
     hour: 'numeric',
     minute: '2-digit',
   },
+  // The year is added at format time only when it is not the current year
+  // (see `formatAbsolute`).
+  weekdayDateTime: {
+    weekday: 'short',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  },
   // ISO formats are handled separately (see `formatIso`).
   isoDate: {},
   isoTime: {},
@@ -115,22 +126,48 @@ function formatIso(
 }
 
 /**
+ * Whether the instant falls in the current calendar year. Both years are read
+ * in the display timezone, since that is the wall clock the rendered string
+ * describes — around New Year the same instant is "last year" in one zone and
+ * "this year" in another, and the visible date should decide.
+ */
+function isCurrentYear(
+  instant: Temporal.Instant,
+  timeZone: string,
+  nowMs: number,
+): boolean {
+  const nowYear =
+    Temporal.Instant.fromEpochMilliseconds(nowMs).toZonedDateTimeISO(
+      timeZone,
+    ).year;
+  return instant.toZonedDateTimeISO(timeZone).year === nowYear;
+}
+
+/**
  * Renders an absolute format. Locale formats use `Intl.DateTimeFormat` (via
  * `Instant.toLocaleString`); ISO formats use fixed, locale-independent strings.
  * `isTimezoneShown` appends the timezone abbreviation to locale formats.
+ *
+ * `weekdayDateTime` drops the year within the current year ("Sat, July 8 at
+ * 9:30 AM") and keeps it otherwise ("Sat, July 8, 2023 at 9:30 AM"), so the
+ * common case stays short without making older moments ambiguous.
  */
 export function formatAbsolute(
   instant: Temporal.Instant,
   format: AbsoluteFormat,
   timeZone: string,
   isTimezoneShown: boolean,
+  nowMs: number = nowEpochMilliseconds(),
 ): string {
   if (isIsoFormat(format)) {
     return formatIso(instant, format, timeZone);
   }
+  const isYearShown =
+    format === 'weekdayDateTime' && !isCurrentYear(instant, timeZone, nowMs);
   const options: Intl.DateTimeFormatOptions = {
     ...LOCALE_OPTIONS[format],
     timeZone,
+    ...(isYearShown ? {year: 'numeric'} : {}),
     ...(isTimezoneShown ? {timeZoneName: 'short'} : {}),
   };
   return instant.toLocaleString(undefined, options);
@@ -230,7 +267,13 @@ export function formatTimestamp(
     nowMs,
     autoThreshold,
   );
-  const absoluteLabel = formatAbsolute(instant, 'dateTime', timeZone, true);
+  const absoluteLabel = formatAbsolute(
+    instant,
+    'dateTime',
+    timeZone,
+    true,
+    nowMs,
+  );
 
   if (effective === 'relative') {
     return {
@@ -245,6 +288,6 @@ export function formatTimestamp(
     absoluteLabel,
     dateTime: instant.toString(),
     isRelative: false,
-    text: formatAbsolute(instant, effective, timeZone, isTimezoneShown),
+    text: formatAbsolute(instant, effective, timeZone, isTimezoneShown, nowMs),
   };
 }
