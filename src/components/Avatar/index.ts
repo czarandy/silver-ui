@@ -9,6 +9,6 @@ export {
 } from 'components/Avatar/Avatar';
 export {
   AvatarStatusDot,
+  type AvatarStatusDotColor,
   type AvatarStatusDotProps,
-  type AvatarStatusDotVariant,
 } from 'components/Avatar/AvatarStatusDot';

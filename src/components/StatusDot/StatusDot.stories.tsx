@@ -1,8 +1,27 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Check, X} from 'lucide-react';
 import {Avatar, AvatarStatusDot} from 'components/Avatar';
+import type {BadgeColor} from 'components/Badge';
 import {css} from 'styled-system/css';
 import {StatusDot} from '.';
+
+const colors: BadgeColor[] = [
+  'neutral',
+  'info',
+  'success',
+  'warning',
+  'error',
+  'blue',
+  'cyan',
+  'gray',
+  'green',
+  'orange',
+  'pink',
+  'purple',
+  'red',
+  'teal',
+  'yellow',
+];
 
 const meta: Meta<typeof StatusDot> = {
   title: 'Components/StatusDot',
@@ -16,9 +35,9 @@ const meta: Meta<typeof StatusDot> = {
       control: {type: 'select'},
       options: ['sm', 'md', 'lg'],
     },
-    variant: {
+    color: {
       control: {type: 'select'},
-      options: ['success', 'neutral', 'error'],
+      options: colors,
     },
   },
 };
@@ -28,12 +47,18 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const Variants: Story = {
+export const Colors: Story = {
   render: () => (
-    <div style={{display: 'flex', alignItems: 'center', gap: 16}}>
-      <StatusDot label="Online" variant="success" />
-      <StatusDot label="Away" variant="neutral" />
-      <StatusDot label="Offline" variant="error" />
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        flexWrap: 'wrap',
+      }}>
+      {colors.map(color => (
+        <StatusDot color={color} key={color} label={color} />
+      ))}
     </div>
   ),
 };
@@ -52,7 +77,7 @@ export const WithIcon: Story = {
   render: () => (
     <div style={{display: 'flex', alignItems: 'center', gap: 16}}>
       <StatusDot icon={<Check />} label="Verified" size="md" />
-      <StatusDot icon={<X />} label="Unavailable" size="lg" variant="error" />
+      <StatusDot color="error" icon={<X />} label="Unavailable" size="lg" />
     </div>
   ),
 };
@@ -81,7 +106,7 @@ export const InAListRow: Story = {
         <li
           key={server}
           style={{display: 'flex', alignItems: 'center', gap: 8}}>
-          <StatusDot label={label} size="sm" variant={variant} />
+          <StatusDot color={variant} label={label} size="sm" />
           <span>{server}</span>
         </li>
       ))}

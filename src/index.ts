@@ -178,13 +178,13 @@ export {
 export {
   Avatar,
   AvatarStatusDot,
+  type AvatarStatusDotColor,
   type AvatarColor,
   type AvatarNamedSize,
   type AvatarNumericSize,
   type AvatarProps,
   type AvatarSize,
   type AvatarStatusDotProps,
-  type AvatarStatusDotVariant,
 } from 'components/Avatar';
 export {
   AvatarGroup,
@@ -534,7 +534,6 @@ export {
   StatusDot,
   type StatusDotProps,
   type StatusDotSize,
-  type StatusDotVariant,
 } from 'components/StatusDot';
 export {
   Skeleton,

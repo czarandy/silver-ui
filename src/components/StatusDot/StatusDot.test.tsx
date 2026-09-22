@@ -14,20 +14,30 @@ describe('StatusDot', () => {
     expect(screen.getByRole('img', {name: 'Online'})).toBeInTheDocument();
   });
 
-  it('defaults to the success variant', () => {
+  it('defaults to the success color', () => {
     render(<StatusDot label="Online" />);
 
     expect(screen.getByRole('img')).toHaveClass('silver-bg_presence.success');
   });
 
-  it('applies neutral and error variants', () => {
-    const {rerender} = render(<StatusDot label="Away" variant="neutral" />);
+  it('applies status and palette colors', () => {
+    const {rerender} = render(<StatusDot color="neutral" label="Away" />);
 
     expect(screen.getByRole('img')).toHaveClass('silver-bg_presence.neutral');
 
-    rerender(<StatusDot label="Offline" variant="error" />);
+    rerender(<StatusDot color="error" label="Offline" />);
 
     expect(screen.getByRole('img')).toHaveClass('silver-bg_presence.error');
+
+    rerender(<StatusDot color="blue" label="Blue" />);
+
+    expect(screen.getByRole('img')).toHaveClass('silver-bg_surface.blue');
+
+    rerender(<StatusDot color="warning" label="Warning" />);
+
+    expect(screen.getByRole('img')).toHaveClass(
+      'silver-bg_status.warning.solid',
+    );
   });
 
   it('defaults to the md size', () => {
