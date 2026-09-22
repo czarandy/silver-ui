@@ -1,4 +1,4 @@
-import {render, screen} from '@testing-library/react';
+import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Home} from 'lucide-react';
 import type {ComponentPropsWithRef, ReactNode, Ref} from 'react';
@@ -427,6 +427,25 @@ describe('Button', () => {
 
     await user.click(screen.getByRole('link', {name: 'Docs'}));
     expect(onClick).toHaveBeenCalledOnce();
+  });
+
+  it('fires onPointerEnter on both the button and the link', () => {
+    const onPointerEnter = vi.fn();
+    const {rerender} = render(
+      <Button label="Save" onPointerEnter={onPointerEnter} />,
+    );
+
+    const button = screen.getByRole('button', {name: 'Save'});
+    fireEvent.pointerEnter(button);
+    expect(onPointerEnter).toHaveBeenCalledOnce();
+
+    rerender(
+      <Button href="/save" label="Save" onPointerEnter={onPointerEnter} />,
+    );
+
+    const link = screen.getByRole('link', {name: 'Save'});
+    fireEvent.pointerEnter(link);
+    expect(onPointerEnter).toHaveBeenCalledTimes(2);
   });
 
   it('handles keyboard events when rendered as a link', async () => {

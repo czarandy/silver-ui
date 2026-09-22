@@ -7,6 +7,7 @@ import type {
   KeyboardEvent,
   MouseEvent,
   MouseEventHandler,
+  PointerEventHandler,
   ReactNode,
   Ref,
 } from 'react';
@@ -154,6 +155,10 @@ interface ButtonBaseProps {
    */
   onKeyDown?: (event: KeyboardEvent<HTMLElement>) => void;
   /**
+   * Pointer enter event handler for the root element.
+   */
+  onPointerEnter?: PointerEventHandler<HTMLElement>;
+  /**
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLElement>;
@@ -248,6 +253,7 @@ export type ButtonPassthroughProps = Pick<
   | 'id'
   | 'onFocus'
   | 'onKeyDown'
+  | 'onPointerEnter'
 >;
 
 export function Button({
@@ -286,6 +292,7 @@ export function Button({
   onClick,
   onFocus,
   onKeyDown,
+  onPointerEnter,
   form,
   id,
   name,
@@ -424,6 +431,7 @@ export function Button({
       onClick={renderAsLink ? handleLinkClick : handleButtonClick}
       onFocus={onFocus}
       onKeyDown={renderAsLink ? handleLinkKeyDown : handleButtonKeyDown}
+      onPointerEnter={onPointerEnter}
       ref={ref}
       rel={renderAsLink ? linkRel : undefined}
       style={rootStyle}

@@ -7,6 +7,7 @@ import type {
   FocusEventHandler,
   KeyboardEventHandler,
   MouseEventHandler,
+  PointerEventHandler,
   ReactNode,
   Ref,
 } from 'react';
@@ -45,6 +46,7 @@ export interface ActionElementProps {
   onClick?: MouseEventHandler<HTMLElement>;
   onFocus?: FocusEventHandler<HTMLElement>;
   onKeyDown?: KeyboardEventHandler<HTMLElement>;
+  onPointerEnter?: PointerEventHandler<HTMLElement>;
   ref?: Ref<HTMLElement>;
   rel?: string;
   role?: string;
