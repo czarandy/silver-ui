@@ -34,10 +34,27 @@ export const sideNavRecipe = sva({
       minW: 0,
     },
     scrollable: {
+      '--side-nav-scrollbar-color': 'transparent',
       flex: 1,
+      minH: 0,
       overflowY: 'auto',
       overflowX: 'hidden',
       px: '2',
+      scrollbarColor: 'var(--side-nav-scrollbar-color) transparent',
+      scrollbarWidth: 'thin',
+      '&::-webkit-scrollbar': {
+        w: '1.5',
+      },
+      '&::-webkit-scrollbar-track': {
+        bg: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        bg: 'var(--side-nav-scrollbar-color)',
+        borderRadius: 'full',
+      },
+      '&[data-scroll-state="scrolling"]': {
+        '--side-nav-scrollbar-color': 'token(colors.fg.muted)',
+      },
     },
     stickyBottom: {
       display: 'flex',
@@ -84,10 +101,10 @@ export const sideNavRecipe = sva({
           w: '14',
         },
         scrollable: {
-          flex: 'none',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          scrollbarGutter: 'stable both-edges',
         },
         footerRow: {
           flexDirection: 'column',

@@ -9,6 +9,7 @@ import {Item} from 'components/Item';
 import type {LinkComponent} from 'components/Link';
 import {useSideNavCollapse} from 'components/SideNav/SideNavContext';
 import {sideNavItemRecipe} from 'components/SideNav/SideNavItem.recipe';
+import {Tooltip} from 'components/Tooltip';
 import {ActionElement} from 'internal/ActionElement';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
@@ -148,21 +149,23 @@ export function SideNavItem({
     const collapsedClassNames = cx(classes.collapsed, className);
 
     return (
-      <ActionElement
-        aria-current={isSelected ? 'page' : undefined}
-        aria-label={label}
-        as={as}
-        className={collapsedClassNames}
-        data-testid={dataTestId}
-        href={isDisabled ? undefined : href}
-        isDisabled={href == null || isDisabled ? isDisabled : undefined}
-        isLink={href != null && !isDisabled}
-        onClick={handleClick}
-        ref={ref}
-        style={style}
-        type="button">
-        {iconSlot}
-      </ActionElement>
+      <Tooltip content={label} hoverIndication="never" placement="end">
+        <ActionElement
+          aria-current={isSelected ? 'page' : undefined}
+          aria-label={label}
+          as={as}
+          className={collapsedClassNames}
+          data-testid={dataTestId}
+          href={isDisabled ? undefined : href}
+          isDisabled={href == null || isDisabled ? isDisabled : undefined}
+          isLink={href != null && !isDisabled}
+          onClick={handleClick}
+          ref={ref}
+          style={style}
+          type="button">
+          {iconSlot}
+        </ActionElement>
+      </Tooltip>
     );
   }
 

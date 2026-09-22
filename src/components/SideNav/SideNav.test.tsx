@@ -1,10 +1,11 @@
-import {render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Home} from 'lucide-react';
 import type {ComponentPropsWithRef, ReactNode, Ref} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {LinkProvider} from 'components/Link';
 import {SideNav} from 'components/SideNav/SideNav';
+import {sideNavRecipe} from 'components/SideNav/SideNav.recipe';
 import {SideNavRenderContext} from 'components/SideNav/SideNavContext';
 import {SideNavHeading} from 'components/SideNav/SideNavHeading';
 import {SideNavItem} from 'components/SideNav/SideNavItem';
@@ -751,6 +752,37 @@ describe('SideNavHeading', () => {
 });
 
 describe('SideNav collapsed state', () => {
+  it('keeps the item list scrollable when collapsed', () => {
+    const classes = sideNavRecipe({isCollapsed: true});
+
+    expect(classes.scrollable).toContain('silver-flex_1');
+    expect(classes.scrollable).toContain('silver-min-h_0');
+    expect(classes.scrollable).not.toContain('silver-flex_none');
+  });
+
+  it('shows the scrollbar only while the item list is scrolling', async () => {
+    vi.useFakeTimers();
+
+    render(
+      <SideNav data-testid="side-nav" isCollapsible>
+        <SideNavItem icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    const scrollable = screen.getByTestId('side-nav-scrollable');
+    expect(scrollable).toHaveAttribute('data-scroll-state', 'idle');
+
+    fireEvent.scroll(scrollable);
+    expect(scrollable).toHaveAttribute('data-scroll-state', 'scrolling');
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(600);
+    });
+    expect(scrollable).toHaveAttribute('data-scroll-state', 'idle');
+
+    vi.useRealTimers();
+  });
+
   it('starts collapsed at the default lg breakpoint', () => {
     const matchMedia = createMatchMedia(true);
     vi.stubGlobal('matchMedia', matchMedia);
@@ -899,8 +931,11 @@ describe('SideNav collapsed state', () => {
     await user.click(screen.getByRole('button', {name: 'Collapse sidebar'}));
 
     const link = screen.getByRole('link', {name: 'Home'});
+    const [tooltip] = screen.getAllByRole('tooltip', {hidden: true});
     expect(link).toHaveAttribute('aria-label', 'Home');
+    expect(link).toHaveAttribute('aria-describedby', tooltip.id);
     expect(link).not.toHaveTextContent('Home');
+    expect(tooltip).toHaveTextContent('Home');
   });
 
   it('does not set aria-label when expanded', () => {
@@ -913,6 +948,9 @@ describe('SideNav collapsed state', () => {
     const link = screen.getByRole('link', {name: 'Home'});
     expect(link).not.toHaveAttribute('aria-label');
     expect(link).toHaveTextContent('Home');
+    expect(
+      screen.queryByRole('tooltip', {hidden: true, name: 'Home'}),
+    ).not.toBeInTheDocument();
   });
 
   it('hides endContent when collapsed', async () => {

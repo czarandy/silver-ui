@@ -1,7 +1,14 @@
 'use client';
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
-import {useCallback, useMemo, useState, useSyncExternalStore} from 'react';
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import {sideNavRecipe} from 'components/SideNav/SideNav.recipe';
 import {
   SideNavCollapseContext,
@@ -14,6 +21,8 @@ import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
 export type SideNavCollapseBreakpoint = 'sm' | 'md' | 'lg' | 'none';
+
+const SCROLLBAR_HIDE_DELAY = 600;
 
 export interface SideNavFooter {
   /**
@@ -98,6 +107,8 @@ export function SideNav({
   topContent,
 }: SideNavProps): React.JSX.Element {
   const renderMode = useSideNavRenderMode();
+  const scrollEndTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [isScrolling, setIsScrolling] = useState(false);
   // Hydrate from an expanded server snapshot, then cache the first browser
   // match so later viewport changes cannot override the user's toggle state.
   const [getInitialCollapseSnapshot] = useState(() => {
@@ -126,6 +137,20 @@ export function SideNav({
       setUserIsCollapsed(current => !(current ?? isInitiallyCollapsed));
     }
   }, [isCollapsible, isInitiallyCollapsed]);
+  const handleScroll = useCallback(() => {
+    setIsScrolling(true);
+    clearTimeout(scrollEndTimeoutRef.current);
+    scrollEndTimeoutRef.current = setTimeout(() => {
+      setIsScrolling(false);
+    }, SCROLLBAR_HIDE_DELAY);
+  }, []);
+
+  useEffect(
+    () => () => {
+      clearTimeout(scrollEndTimeoutRef.current);
+    },
+    [],
+  );
   const collapseContext = useMemo(
     () => ({isCollapsed: resolvedIsCollapsed, isCollapsible, toggle}),
     [resolvedIsCollapsed, isCollapsible, toggle],
@@ -208,7 +233,15 @@ export function SideNav({
             {!resolvedIsCollapsed ? topContent : null}
           </div>
         ) : null}
-        <div className={classes.scrollable}>{children}</div>
+        <div
+          className={classes.scrollable}
+          data-scroll-state={isScrolling ? 'scrolling' : 'idle'}
+          data-testid={
+            dataTestId == null ? undefined : `${dataTestId}-scrollable`
+          }
+          onScroll={handleScroll}>
+          {children}
+        </div>
         {footerContentNode || footerActionsNode || isCollapsible ? (
           <div className={classes.stickyBottom}>
             <div className={classes.footerRow}>

@@ -57,7 +57,7 @@ export const Collapsible: Story = {
     docs: {
       description: {
         story:
-          'The collapse control stays in the footer: trailing while expanded and bottom-anchored when collapsed.',
+          'The collapse control stays in the footer: trailing while expanded and bottom-anchored when collapsed. Collapsed items show their labels in tooltips.',
       },
     },
   },
@@ -390,10 +390,14 @@ export const Scrollable: Story = {
   render: () => (
     <div style={{height: 420}}>
       <SideNav
+        collapseBreakpoint="none"
         footer={{
           content: <SideNavItem icon={Settings} label="Settings" />,
         }}
-        header={<SideNavHeading heading="Silver" subheading="Workspace" />}>
+        header={
+          <SideNavHeading heading="Silver" logo={logo} subheading="Workspace" />
+        }
+        isCollapsible>
         <SideNavSection title="Pages">
           {Array.from({length: 20}, (_, i) => (
             <SideNavItem
