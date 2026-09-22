@@ -3,6 +3,7 @@ import type {ReactElement, ReactNode} from 'react';
 import {RelayEnvironmentProvider, type EntryPointProps} from 'react-relay';
 import {Environment, Network, RecordSource, Store} from 'relay-runtime';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {preloadedSurfaceLoadingFallbackRecipe} from 'relay/PreloadedSurfaceLoadingFallback.recipe';
 import {createJSResourceReference} from 'relay/createJSResourceReference';
 import {usePreloadedDialog} from 'relay/usePreloadedDialog';
 import {usePreloadedDrawer} from 'relay/usePreloadedDrawer';
@@ -213,7 +214,11 @@ describe('preloaded Relay surfaces', () => {
     fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
 
     expect(screen.getByTestId('test-drawer')).toBeVisible();
-    expect(screen.getByLabelText('Loading content')).toBeVisible();
+    const loadingFallback = screen.getByLabelText('Loading...');
+    expect(loadingFallback).toBeVisible();
+    expect(screen.getByTestId('preloaded-drawer-loading')).toHaveClass(
+      preloadedSurfaceLoadingFallbackRecipe({surface: 'drawer'}),
+    );
     expect(getPreloadProps).toHaveBeenCalledOnce();
 
     await act(async () => {
@@ -276,6 +281,23 @@ describe('preloaded Relay surfaces', () => {
     expect(screen.getByRole('dialog', {name: 'Test dialog'})).toBeVisible();
   });
 
+  it('gives the dialog loading fallback a stable height', () => {
+    const {entryPoint} = createTestEntryPoint(
+      vi.fn(async () => {
+        await Promise.resolve();
+        return new Promise<{default: typeof TestEntryPointRoot}>(() => {});
+      }),
+    );
+    renderWithRelay(<DialogFixture entryPoint={entryPoint} />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show dialog'}));
+
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument();
+    expect(screen.getByTestId('preloaded-dialog-loading')).toHaveClass(
+      preloadedSurfaceLoadingFallbackRecipe({surface: 'dialog'}),
+    );
+  });
+
   it('renders a preloaded popover', async () => {
     const {entryPoint} = createTestEntryPoint();
     await entryPoint.root.load();
@@ -287,6 +309,23 @@ describe('preloaded Relay surfaces', () => {
     expect(screen.getByRole('dialog', {hidden: true})).toHaveAttribute(
       'aria-label',
       'Test popover',
+    );
+  });
+
+  it('gives the popover loading fallback stable dimensions', () => {
+    const {entryPoint} = createTestEntryPoint(
+      vi.fn(async () => {
+        await Promise.resolve();
+        return new Promise<{default: typeof TestEntryPointRoot}>(() => {});
+      }),
+    );
+    renderWithRelay(<PopoverFixture entryPoint={entryPoint} />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show popover'}));
+
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument();
+    expect(screen.getByTestId('preloaded-popover-loading')).toHaveClass(
+      preloadedSurfaceLoadingFallbackRecipe({surface: 'popover'}),
     );
   });
 

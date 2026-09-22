@@ -11,16 +11,20 @@ import {usePreloadedDialog} from 'relay/usePreloadedDialog';
 import {usePreloadedDrawer} from 'relay/usePreloadedDrawer';
 import {usePreloadedHoverCard} from 'relay/usePreloadedHoverCard';
 import {usePreloadedPopover} from 'relay/usePreloadedPopover';
+import {cva} from 'styled-system/css';
 
 const MODULE_DELAY_MS = 1500;
 
 interface DemoParams {
+  surface: 'dialog' | 'drawer' | 'hover-card' | 'popover';
   title: string;
 }
 
 function createDelayedEntryPoint(moduleId: string) {
   return {
-    getPreloadProps: ({title}: DemoParams) => ({extraProps: {title}}),
+    getPreloadProps: ({surface, title}: DemoParams) => ({
+      extraProps: {surface, title},
+    }),
     root: createJSResourceReference(
       moduleId,
       async (): Promise<{
@@ -37,6 +41,12 @@ const drawerEntryPoint = createDelayedEntryPoint('PreloadedDrawerStory');
 const dialogEntryPoint = createDelayedEntryPoint('PreloadedDialogStory');
 const popoverEntryPoint = createDelayedEntryPoint('PreloadedPopoverStory');
 const hoverCardEntryPoint = createDelayedEntryPoint('PreloadedHoverCardStory');
+
+const popoverStoryContentRecipe = cva({
+  base: {
+    w: '320px',
+  },
+});
 
 const environment = new Environment({
   network: Network.create(async () => {
@@ -98,7 +108,7 @@ export const Drawer: Story = {
           label="Open preloaded drawer"
           onClick={() =>
             drawer.show(
-              {title: 'Preloaded drawer'},
+              {surface: 'drawer', title: 'Preloaded drawer'},
               {message: 'Drawer content loaded through a Relay EntryPoint.'},
             )
           }
@@ -122,7 +132,7 @@ export const Dialog: Story = {
           label="Open preloaded dialog"
           onClick={() =>
             dialog.show(
-              {title: 'Preloaded dialog'},
+              {surface: 'dialog', title: 'Preloaded dialog'},
               {message: 'Dialog content loaded through a Relay EntryPoint.'},
             )
           }
@@ -136,6 +146,7 @@ export const Dialog: Story = {
 export const Popover: Story = {
   render: () => {
     const popover = usePreloadedPopover(popoverEntryPoint, {
+      className: popoverStoryContentRecipe(),
       label: 'Preloaded popover example',
       placement: 'below',
     });
@@ -147,7 +158,7 @@ export const Popover: Story = {
           label="Open preloaded popover"
           onClick={() =>
             popover.show(
-              {title: 'Preloaded popover'},
+              {surface: 'popover', title: 'Preloaded popover'},
               {message: 'Popover content loaded through a Relay EntryPoint.'},
             )
           }
@@ -163,7 +174,10 @@ export const HoverCard: Story = {
   render: () => {
     const hoverCard = usePreloadedHoverCard(hoverCardEntryPoint, {
       delay: 250,
-      entryPointParams: {title: 'Preloaded hover card'},
+      entryPointParams: {
+        surface: 'hover-card',
+        title: 'Preloaded hover card',
+      },
       label: 'Preloaded hover card example',
       placement: 'below',
       runtimeProps: {

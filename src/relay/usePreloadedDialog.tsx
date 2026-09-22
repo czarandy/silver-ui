@@ -2,6 +2,7 @@
 
 import type {ReactNode} from 'react';
 import {Dialog, type DialogProps} from 'components/Dialog';
+import {PreloadedSurfaceLoadingFallback} from 'relay/PreloadedSurfaceLoadingFallback';
 import {
   type EntryPointParams,
   type PreloadedContentOptions,
@@ -35,7 +36,12 @@ export function usePreloadedDialog<TEntryPoint>(
 ): PreloadedDialogController<TEntryPoint> {
   const controller = usePreloadedEntryPoint(entryPoint, {
     errorFallback,
-    loadingFallback,
+    loadingFallback:
+      loadingFallback === undefined ? (
+        <PreloadedSurfaceLoadingFallback surface="dialog" />
+      ) : (
+        loadingFallback
+      ),
   });
   const {hide, isOpen} = controller;
   const element = (

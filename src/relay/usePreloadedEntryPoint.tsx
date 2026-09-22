@@ -122,7 +122,7 @@ class PreloadedEntryPointErrorBoundary extends Component<
 function DefaultLoadingFallback(): React.JSX.Element {
   return (
     <VStack align="center" gap={3}>
-      <Spinner label="Loading content" />
+      <Spinner label="Loading..." />
     </VStack>
   );
 }

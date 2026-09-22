@@ -2,6 +2,7 @@
 
 import type {ReactNode} from 'react';
 import {Drawer, type DrawerProps} from 'components/Drawer';
+import {PreloadedSurfaceLoadingFallback} from 'relay/PreloadedSurfaceLoadingFallback';
 import {
   type EntryPointParams,
   type PreloadedContentOptions,
@@ -35,7 +36,12 @@ export function usePreloadedDrawer<TEntryPoint>(
 ): PreloadedDrawerController<TEntryPoint> {
   const controller = usePreloadedEntryPoint(entryPoint, {
     errorFallback,
-    loadingFallback,
+    loadingFallback:
+      loadingFallback === undefined ? (
+        <PreloadedSurfaceLoadingFallback surface="drawer" />
+      ) : (
+        loadingFallback
+      ),
   });
   const {hide, isOpen} = controller;
   const element = (

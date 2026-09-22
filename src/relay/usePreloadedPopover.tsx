@@ -7,6 +7,7 @@ import {
   type UsePopoverOptions,
   type UsePopoverReturn,
 } from 'components/Popover/usePopover';
+import {PreloadedSurfaceLoadingFallback} from 'relay/PreloadedSurfaceLoadingFallback';
 import {
   type EntryPointParams,
   type PreloadedContentOptions,
@@ -56,7 +57,12 @@ export function usePreloadedPopover<TEntryPoint>(
 ): PreloadedPopoverController<TEntryPoint> {
   const controller = usePreloadedEntryPoint(entryPoint, {
     errorFallback,
-    loadingFallback,
+    loadingFallback:
+      loadingFallback === undefined ? (
+        <PreloadedSurfaceLoadingFallback surface="popover" />
+      ) : (
+        loadingFallback
+      ),
   });
   const popover = usePopover({
     ...popoverOptions,
