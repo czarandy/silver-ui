@@ -59,6 +59,20 @@ describe('rewriteDeclarationSpecifiers', () => {
     );
   });
 
+  it('rewrites a Relay integration alias to a .js specifier', async () => {
+    await writeDeclaration('relay/usePreloadedDrawer.d.ts', 'export {};\n');
+    await writeDeclaration(
+      'relay/index.d.ts',
+      "export { usePreloadedDrawer } from 'relay/usePreloadedDrawer';\n",
+    );
+
+    await rewriteDeclarationSpecifiers(distDir);
+
+    expect(await readDeclaration('relay/index.d.ts')).toBe(
+      "export { usePreloadedDrawer } from './usePreloadedDrawer.js';\n",
+    );
+  });
+
   it('rewrites the bare internal alias to the internal barrel', async () => {
     await writeDeclaration('internal/index.d.ts', 'export {};\n');
     await writeDeclaration(

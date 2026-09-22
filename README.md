@@ -274,6 +274,27 @@ editable content, or textbox roles unless `isEnabledOnFormElements: true` is
 set. Sequences and priority
 arbitration between duplicate registrations are not supported.
 
+## Relay integration
+
+Relay EntryPoint-backed controllers for Drawer, Dialog, Popover, and HoverCard
+are available from the opt-in `silver-ui/relay` entry. Relay is an optional peer
+dependency, so applications that do not import this entry do not need to
+install it.
+
+```bash
+pnpm add react-relay relay-runtime
+```
+
+```tsx
+import {createJSResourceReference, usePreloadedDrawer} from 'silver-ui/relay';
+```
+
+The controllers own EntryPoint loading, retry, visibility, and reference
+lifetime. Use `preload(params)` for pointer or focus intent, `show(params,
+runtimeProps)` to open the surface, and render the returned `element` alongside
+the trigger. The application remains responsible for its Relay environment,
+compiler, generated artifacts, and EntryPoint definitions.
+
 ---
 
 ## Contributing

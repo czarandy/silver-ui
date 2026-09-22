@@ -20,6 +20,7 @@
       "hooks/*": ["./src/hooks/*"],
       "internal": ["./src/internal/index"],
       "internal/*": ["./src/internal/*"],
+      "relay/*": ["./src/relay/*"],
       "themes/*": ["./src/themes/*"],
       "utils/*": ["./src/utils/*"],
       "styled-system/*": ["./styled-system/*"]

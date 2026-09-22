@@ -24,6 +24,7 @@ export async function rewriteDeclarationSpecifiers(distDir) {
     ['components/', join(distDir, 'components')],
     ['hooks/', join(distDir, 'hooks')],
     ['internal/', join(distDir, 'internal')],
+    ['relay/', join(distDir, 'relay')],
     ['themes/', join(distDir, 'themes')],
     ['utils/', join(distDir, 'utils')],
   ];
@@ -120,7 +121,7 @@ async function verifyDeclarationSpecifiers(declarationFiles) {
       }
 
       if (
-        /^(?:components|hooks|internal|themes|utils|styled-system)(?:\/|$)/.test(
+        /^(?:components|hooks|internal|relay|themes|utils|styled-system)(?:\/|$)/.test(
           specifier,
         )
       ) {

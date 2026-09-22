@@ -41,6 +41,16 @@
         "default": "./dist/hooks/index.cjs"
       }
     },
+    "./relay": {
+      "import": {
+        "types": "./dist/relay/index.d.ts",
+        "default": "./dist/relay/index.js"
+      },
+      "require": {
+        "types": "./dist/relay/index.d.cts",
+        "default": "./dist/relay/index.cjs"
+      }
+    },
     "./*": {
       "import": {
         "types": "./dist/components/*/index.d.ts",
@@ -70,7 +80,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "check:exports": "pnpm build && publint && attw --pack . --profile node16 --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks",
+    "check:exports": "pnpm build && publint && attw --pack . --profile node16 --exclude-entrypoints ./styles.css --include-entrypoints ./Button ./hooks ./relay",
     "clean": "rm -rf dist storybook-static",
     "theme": "npx tsx scripts/generate-theme.ts",
     "version": "node scripts/generate-version.mjs && git add src/utils/version.ts",
@@ -90,7 +100,17 @@
   },
   "peerDependencies": {
     "react": ">=19",
-    "react-dom": ">=19"
+    "react-dom": ">=19",
+    "react-relay": "^21.0.1",
+    "relay-runtime": "^21.0.1"
+  },
+  "peerDependenciesMeta": {
+    "react-relay": {
+      "optional": true
+    },
+    "relay-runtime": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
@@ -127,6 +147,8 @@
     "publint": "^0.3.21",
     "react": "19.2.7",
     "react-dom": "19.2.7",
+    "react-relay": "21.0.1",
+    "relay-runtime": "21.0.1",
     "storybook": "^10.4.6",
     "tsup": "^8.5.0",
     "typescript": "^6.0.3",
