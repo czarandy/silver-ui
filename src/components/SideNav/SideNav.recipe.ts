@@ -6,6 +6,7 @@ export const sideNavRecipe = sva({
     'stickyTop',
     'headerArea',
     'scrollable',
+    'bottomContent',
     'stickyBottom',
     'footerRow',
     'footerContent',
@@ -35,6 +36,8 @@ export const sideNavRecipe = sva({
     },
     scrollable: {
       '--side-nav-scrollbar-color': 'transparent',
+      display: 'flex',
+      flexDirection: 'column',
       flex: 1,
       minH: 0,
       overflowY: 'auto',
@@ -55,6 +58,10 @@ export const sideNavRecipe = sva({
       '&[data-scroll-state="scrolling"]': {
         '--side-nav-scrollbar-color': 'token(colors.fg.muted)',
       },
+    },
+    bottomContent: {
+      flexShrink: 0,
+      mt: 'auto',
     },
     stickyBottom: {
       display: 'flex',
@@ -101,8 +108,6 @@ export const sideNavRecipe = sva({
           w: '14',
         },
         scrollable: {
-          display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           scrollbarGutter: 'stable both-edges',
         },

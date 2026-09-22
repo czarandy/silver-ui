@@ -199,6 +199,25 @@ describe('SideNav', () => {
     expect(screen.getByTestId('top-content')).toBeInTheDocument();
   });
 
+  it('renders bottomContent after items inside the scrollable area', () => {
+    render(
+      <SideNav
+        bottomContent={<span data-testid="bottom-content">Help</span>}
+        data-testid="side-nav">
+        <SideNavItem data-testid="home-item" icon={Home} label="Home" />
+      </SideNav>,
+    );
+
+    const scrollable = screen.getByTestId('side-nav-scrollable');
+    const item = screen.getByTestId('home-item');
+    const bottomContent = screen.getByTestId('bottom-content');
+
+    expect(scrollable).toContainElement(item);
+    expect(scrollable).toContainElement(bottomContent);
+    expect(areElementsInDocumentOrder([item, bottomContent])).toBe(true);
+    expect(sideNavRecipe().bottomContent).toContain('silver-mt_auto');
+  });
+
   it('applies className, style, data-testid, and ref', () => {
     const ref = vi.fn<(el: HTMLElement | null) => void>();
     render(
@@ -224,6 +243,7 @@ describe('SideNav render modes', () => {
     render(
       <SideNavRenderContext value="topbar">
         <SideNav
+          bottomContent={<span data-testid="bottom-content">Help</span>}
           data-testid="side-nav"
           footer={{
             actions: <span data-testid="footer-actions">Actions</span>,
@@ -244,6 +264,7 @@ describe('SideNav render modes', () => {
     expect(screen.getByTestId('footer-content')).toBeInTheDocument();
     expect(screen.getByTestId('footer-actions')).toBeInTheDocument();
     expect(screen.queryByRole('link', {name: 'Home'})).not.toBeInTheDocument();
+    expect(screen.queryByTestId('bottom-content')).not.toBeInTheDocument();
     expect(ref).toHaveBeenCalledWith(screen.getByTestId('side-nav'));
   });
 
@@ -252,6 +273,7 @@ describe('SideNav render modes', () => {
     render(
       <SideNavRenderContext value="drawer">
         <SideNav
+          bottomContent={<span data-testid="bottom-content">Help</span>}
           data-testid="side-nav"
           footer={{
             actions: <span data-testid="footer-actions">Actions</span>,
@@ -277,6 +299,7 @@ describe('SideNav render modes', () => {
     expect(screen.getByTestId('drawer-header')).toBeInTheDocument();
     expect(screen.getByTestId('top-content')).toBeInTheDocument();
     expect(screen.getByTestId('home-item')).toBeInTheDocument();
+    expect(screen.getByTestId('bottom-content')).toBeInTheDocument();
     expect(screen.getByTestId('footer-content')).toBeInTheDocument();
     expect(screen.getByTestId('footer-actions')).toBeInTheDocument();
     // ref is forwarded to the underlying drawer dialog.
@@ -287,6 +310,7 @@ describe('SideNav render modes', () => {
     render(
       <SideNavRenderContext value="drawer-content">
         <SideNav
+          bottomContent={<span data-testid="bottom-content">Help</span>}
           footer={{
             actions: <span data-testid="footer-actions">Actions</span>,
             content: <span data-testid="footer-content">Footer</span>,
@@ -308,6 +332,7 @@ describe('SideNav render modes', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByTestId('top-content')).toBeInTheDocument();
     expect(screen.getByTestId('home-item')).toBeInTheDocument();
+    expect(screen.getByTestId('bottom-content')).toBeInTheDocument();
     expect(screen.getByTestId('footer-content')).toBeInTheDocument();
     expect(screen.getByTestId('footer-actions')).toBeInTheDocument();
   });

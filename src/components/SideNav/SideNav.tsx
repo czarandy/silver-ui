@@ -45,6 +45,10 @@ function subscribeToInitialCollapse(): () => void {
 
 export interface SideNavProps {
   /**
+   * Content rendered at the bottom of the scrollable area.
+   */
+  bottomContent?: ReactNode;
+  /**
    * Navigation item children rendered in the scrollable area.
    */
   children: ReactNode;
@@ -95,6 +99,7 @@ export interface SideNavProps {
  * Adapts to AppShell render modes (inline, drawer, topbar).
  */
 export function SideNav({
+  bottomContent,
   children,
   className,
   collapseBreakpoint = 'lg',
@@ -184,6 +189,7 @@ export function SideNav({
         ref={ref as Ref<HTMLDialogElement>}>
         {topContent}
         {children}
+        {bottomContent}
         {footer?.content}
         {footer?.actions}
       </MobileNav>
@@ -195,6 +201,7 @@ export function SideNav({
       <>
         {topContent}
         {children}
+        {bottomContent}
         {footer?.content}
         {footer?.actions}
       </>
@@ -202,6 +209,9 @@ export function SideNav({
   }
 
   const classes = sideNavRecipe({isCollapsed: resolvedIsCollapsed});
+  const bottomContentNode = isNonEmptyReactNode(bottomContent) ? (
+    <div className={classes.bottomContent}>{bottomContent}</div>
+  ) : null;
   const footerContent = footer?.content;
   const footerActions = footer?.actions;
   const footerContentNode = isNonEmptyReactNode(footerContent) ? (
@@ -241,6 +251,7 @@ export function SideNav({
           }
           onScroll={handleScroll}>
           {children}
+          {bottomContentNode}
         </div>
         {footerContentNode || footerActionsNode || isCollapsible ? (
           <div className={classes.stickyBottom}>

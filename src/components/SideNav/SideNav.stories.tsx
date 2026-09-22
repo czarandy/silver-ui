@@ -234,6 +234,28 @@ export const WithTopContent: Story = {
   },
 };
 
+export const WithBottomContent: Story = {
+  render: () => (
+    <div style={{height: 420}}>
+      <SideNav
+        bottomContent={
+          <SideNavSection isHeaderHidden title="Support">
+            <SideNavItem href="/help" icon={HelpCircle} label="Help center" />
+          </SideNavSection>
+        }
+        header={
+          <SideNavHeading heading="Silver" logo={logo} subheading="Workspace" />
+        }>
+        <SideNavSection title="Main">
+          <SideNavItem href="/" icon={Home} isSelected label="Home" />
+          <SideNavItem href="/inbox" icon={Inbox} label="Inbox" />
+          <SideNavItem href="/settings" icon={Settings} label="Settings" />
+        </SideNavSection>
+      </SideNav>
+    </div>
+  ),
+};
+
 export const DisabledItems: Story = {
   render: () => (
     <div style={{height: 420}}>
