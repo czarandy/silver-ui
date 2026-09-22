@@ -39,7 +39,7 @@ type TestEntryPointProps = EntryPointProps<
   Record<string, never>,
   Record<string, never>,
   TestRuntimeProps,
-  {id: string}
+  {id: string; loadCount: number}
 >;
 
 function TestEntryPointRoot({
@@ -49,6 +49,7 @@ function TestEntryPointRoot({
   return (
     <div>
       <span>{`${extraProps.id}:${props.label}`}</span>
+      <span>EntryPoint load: {extraProps.loadCount}</span>
       <button onClick={props.close} type="button">
         Close loaded content
       </button>
@@ -62,8 +63,9 @@ function createTestEntryPoint(
     return {default: TestEntryPointRoot};
   }),
 ) {
+  let loadCount = 0;
   const getPreloadProps = vi.fn((params: TestParams) => ({
-    extraProps: {id: params.id},
+    extraProps: {id: params.id, loadCount: ++loadCount},
   }));
 
   return {
@@ -167,6 +169,7 @@ function PopoverFixture({
       <button
         {...popover.triggerProps}
         onClick={() => popover.show(alphaParams, {label: 'popover'})}
+        onPointerEnter={() => popover.preload(alphaParams)}
         ref={popover.triggerRef}
         type="button">
         Show popover
@@ -250,6 +253,52 @@ describe('preloaded Relay surfaces', () => {
     expect(getPreloadProps).toHaveBeenCalledOnce();
   });
 
+  it('loads again when a drawer reopens with the same parameters', async () => {
+    const {entryPoint, getPreloadProps} = createTestEntryPoint();
+    await entryPoint.root.load();
+    renderWithRelay(<DrawerFixture entryPoint={entryPoint} />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
+    expect(await screen.findByText('alpha:drawer')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', {name: 'Close loaded content'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
+
+    expect(getPreloadProps).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText('EntryPoint load: 2')).toBeVisible();
+  });
+
+  it('refreshes on intent after hide, then reuses that load on show', async () => {
+    const {entryPoint, getPreloadProps} = createTestEntryPoint();
+    await entryPoint.root.load();
+    renderWithRelay(<DrawerFixture entryPoint={entryPoint} />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Preload drawer'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
+    expect(await screen.findByText('alpha:drawer')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', {name: 'Close loaded content'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Preload drawer'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Preload drawer'}));
+    fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
+
+    expect(getPreloadProps).toHaveBeenCalledTimes(2);
+  });
+
+  it('refreshes a long-unused preload before the first show', () => {
+    const now = vi.spyOn(performance, 'now').mockReturnValue(0);
+    try {
+      const {entryPoint, getPreloadProps} = createTestEntryPoint();
+      renderWithRelay(<DrawerFixture entryPoint={entryPoint} />);
+
+      fireEvent.click(screen.getByRole('button', {name: 'Preload drawer'}));
+      now.mockReturnValue(30_000);
+      fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
+
+      expect(getPreloadProps).toHaveBeenCalledTimes(2);
+    } finally {
+      now.mockRestore();
+    }
+  });
+
   it('renders the error fallback and retries a failed module import', async () => {
     const importModule = vi
       .fn<() => Promise<{default: typeof TestEntryPointRoot}>>()
@@ -310,6 +359,25 @@ describe('preloaded Relay surfaces', () => {
       'aria-label',
       'Test popover',
     );
+  });
+
+  it('refreshes a popover on the next intent after close', async () => {
+    const {entryPoint, getPreloadProps} = createTestEntryPoint();
+    await entryPoint.root.load();
+    renderWithRelay(<PopoverFixture entryPoint={entryPoint} />);
+    const trigger = screen.getByRole('button', {name: 'Show popover'});
+
+    fireEvent.pointerEnter(trigger);
+    fireEvent.click(trigger);
+    expect(await screen.findByText('EntryPoint load: 1')).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole('button', {hidden: true, name: 'Close loaded content'}),
+    );
+    fireEvent.pointerEnter(trigger);
+    fireEvent.click(trigger);
+
+    expect(getPreloadProps).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText('EntryPoint load: 2')).toBeInTheDocument();
   });
 
   it('gives the popover loading fallback stable dimensions', () => {

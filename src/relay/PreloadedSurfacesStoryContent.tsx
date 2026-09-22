@@ -22,6 +22,7 @@ export type PreloadedSurfaceStoryEntryPointProps = EntryPointProps<
   Record<string, never>,
   PreloadedSurfaceStoryRuntimeProps,
   {
+    loadCount?: number;
     surface: 'dialog' | 'drawer' | 'hover-card' | 'popover';
     title: string;
   }
@@ -60,6 +61,9 @@ export default function PreloadedSurfacesStoryContent({
             <Text as="p" color="secondary">
               {props.message}
             </Text>
+            {extraProps.loadCount === undefined ? null : (
+              <Text as="p">EntryPoint loads: {extraProps.loadCount}</Text>
+            )}
             <Text as="p">
               The EntryPoint module has finished loading. Reload the story to
               replay the intentional delay.

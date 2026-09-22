@@ -26,6 +26,9 @@ import {Button} from 'components/Button';
 import {Spinner} from 'components/Spinner';
 import {VStack} from 'components/Stack';
 
+// Keep intent preloads through an immediate open, but refresh old unused data.
+const MAX_UNUSED_PRELOAD_AGE_MS = 30_000;
+
 export type EntryPointParams<TEntryPoint> = TEntryPoint extends {
   getPreloadProps: (params: infer TParams) => unknown;
 }
@@ -209,16 +212,20 @@ export function usePreloadedEntryPoint<TEntryPoint>(
     value: EntryPointParams<TEntryPoint>;
   } | null>(null);
   const currentParamsKeyRef = useRef<string | null>(null);
+  const loadedAtRef = useRef<number | null>(null);
+  const loadGenerationRef = useRef(0);
+  const isOpenRef = useRef(false);
+  const reloadAfterHideRef = useRef(false);
 
   const monitorRootLoad = useCallback(
-    (key: string): void => {
+    (generation: number): void => {
       const root = (
         entryPoint as {
           root: {load: () => Promise<unknown>};
         }
       ).root;
       void root.load().catch((error: unknown) => {
-        if (currentParamsKeyRef.current === key) {
+        if (loadGenerationRef.current === generation) {
           setModuleError(
             error instanceof Error
               ? error
@@ -233,15 +240,28 @@ export function usePreloadedEntryPoint<TEntryPoint>(
   const preload = useCallback(
     (params: EntryPointParams<TEntryPoint>): void => {
       const nextKey = paramsKey(params);
-      if (currentParamsKeyRef.current === nextKey) {
+      const now = performance.now();
+      const loadedAt = loadedAtRef.current;
+      const unusedPreloadExpired =
+        !isOpenRef.current &&
+        loadedAt !== null &&
+        now - loadedAt >= MAX_UNUSED_PRELOAD_AGE_MS;
+      if (
+        currentParamsKeyRef.current === nextKey &&
+        !reloadAfterHideRef.current &&
+        !unusedPreloadExpired
+      ) {
         return;
       }
 
       currentParamsKeyRef.current = nextKey;
       currentParamsRef.current = {value: params};
+      loadedAtRef.current = now;
+      reloadAfterHideRef.current = false;
+      const generation = ++loadGenerationRef.current;
       setModuleError(null);
       loadEntryPoint(params);
-      monitorRootLoad(nextKey);
+      monitorRootLoad(generation);
     },
     [loadEntryPoint, monitorRootLoad],
   );
@@ -252,18 +272,28 @@ export function usePreloadedEntryPoint<TEntryPoint>(
     ): void => {
       preload(params);
       setRuntimeProps(nextRuntimeProps);
+      isOpenRef.current = true;
       setIsOpen(true);
     },
     [preload],
   );
-  const hide = useCallback((): void => setIsOpen(false), []);
+  const hide = useCallback((): void => {
+    if (isOpenRef.current) {
+      reloadAfterHideRef.current = true;
+      isOpenRef.current = false;
+    }
+    setIsOpen(false);
+  }, []);
   const retry = useCallback((): void => {
     const currentParams = currentParamsRef.current;
     const currentKey = currentParamsKeyRef.current;
     if (currentParams !== null && currentKey !== null) {
+      loadedAtRef.current = performance.now();
+      reloadAfterHideRef.current = false;
+      const generation = ++loadGenerationRef.current;
       setModuleError(null);
       loadEntryPoint(currentParams.value);
-      monitorRootLoad(currentKey);
+      monitorRootLoad(generation);
     }
   }, [loadEntryPoint, monitorRootLoad]);
   const content = useCallback(
@@ -282,7 +312,7 @@ export function usePreloadedEntryPoint<TEntryPoint>(
       return (
         <PreloadedEntryPointErrorBoundary
           fallback={errorFallback}
-          key={currentParamsKeyRef.current}
+          key={loadGenerationRef.current}
           onRetry={retry}>
           <Suspense fallback={loadingFallback}>
             <LoadedEntryPoint<TEntryPoint>

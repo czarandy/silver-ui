@@ -41,6 +41,13 @@ const drawerEntryPoint = createDelayedEntryPoint('PreloadedDrawerStory');
 const dialogEntryPoint = createDelayedEntryPoint('PreloadedDialogStory');
 const popoverEntryPoint = createDelayedEntryPoint('PreloadedPopoverStory');
 const hoverCardEntryPoint = createDelayedEntryPoint('PreloadedHoverCardStory');
+let refreshingPopoverLoadCount = 0;
+const refreshingPopoverEntryPoint = {
+  getPreloadProps: (params: DemoParams) => ({
+    extraProps: {...params, loadCount: ++refreshingPopoverLoadCount},
+  }),
+  root: popoverEntryPoint.root,
+};
 
 const popoverStoryContentRecipe = cva({
   base: {
@@ -164,6 +171,44 @@ export const Popover: Story = {
           }
           ref={popover.triggerRef}
         />
+        {popover.element}
+      </StoryFrame>
+    );
+  },
+};
+
+export const PopoverRefreshOnReopen: Story = {
+  render: () => {
+    const popover = usePreloadedPopover(refreshingPopoverEntryPoint, {
+      className: popoverStoryContentRecipe(),
+      label: 'Refreshing preloaded popover example',
+      placement: 'below',
+    });
+    const params: DemoParams = {
+      surface: 'popover',
+      title: 'Refreshing preloaded popover',
+    };
+
+    return (
+      <StoryFrame>
+        <Text as="p" color="secondary">
+          Point to or focus the trigger, open the popover, close it, and open it
+          again. The load count increases once per opening cycle.
+        </Text>
+        <Button
+          {...popover.triggerProps}
+          label="Open refreshing popover"
+          onClick={() =>
+            popover.show(params, {
+              message:
+                'A recent intent preload is reused when the popover opens.',
+            })
+          }
+          onFocus={() => popover.preload(params)}
+          onPointerEnter={() => popover.preload(params)}
+          ref={popover.triggerRef}
+        />
+        <Button label="Close refreshing popover" onClick={popover.hide} />
         {popover.element}
       </StoryFrame>
     );
