@@ -194,6 +194,102 @@ export type PublicHookOptions =
       {stdio: 'inherit'},
     );
   }
+
+  // Exercise both runtime conditions before Relay exists in node_modules. A
+  // root entry that accidentally reached the optional integration would fail.
+  execFileSync(
+    process.execPath,
+    ['--input-type=module', '--eval', "await import('silver-ui');"],
+    {cwd: consumerDir, stdio: 'inherit'},
+  );
+  execFileSync(
+    process.execPath,
+    ['--input-type=commonjs', '--eval', "require('silver-ui');"],
+    {cwd: consumerDir, stdio: 'inherit'},
+  );
+
+  // Relay is an optional peer: the base consumer above must compile before
+  // these packages are present. Link them only for the opt-in subpath checks.
+  await linkPackage('react-relay', nodeModulesDir);
+  await linkPackage('relay-runtime', nodeModulesDir);
+  const relayConsumer = `
+import {
+  createJSResourceReference,
+  usePreloadedDialog,
+  usePreloadedDrawer,
+  usePreloadedEntryPoint,
+  usePreloadedHoverCard,
+  usePreloadedPopover,
+  type PreloadedContentOptions,
+} from 'silver-ui/relay';
+
+const root = () => null;
+export const resource = createJSResourceReference('SmokeRoot', async () => ({
+  default: root,
+}));
+export const hooks = [
+  usePreloadedDialog,
+  usePreloadedDrawer,
+  usePreloadedEntryPoint,
+  usePreloadedHoverCard,
+  usePreloadedPopover,
+] as const;
+export type Options = PreloadedContentOptions;
+`.trimStart();
+  await writeFile(join(consumerDir, 'relay.ts'), relayConsumer);
+  await writeFile(join(consumerDir, 'relay.cts'), relayConsumer);
+
+  for (const [moduleKind, moduleResolution, include] of [
+    ['ESNext', 'bundler', ['relay.ts']],
+    ['NodeNext', 'NodeNext', ['relay.ts', 'relay.cts']],
+  ]) {
+    const tsconfigPath = join(
+      consumerDir,
+      `tsconfig.relay.${moduleResolution.toLowerCase()}.json`,
+    );
+    await writeFile(
+      tsconfigPath,
+      JSON.stringify(
+        {
+          compilerOptions: {
+            allowSyntheticDefaultImports: true,
+            jsx: 'react-jsx',
+            lib: ['DOM', 'DOM.Iterable', 'ES2022'],
+            module: moduleKind,
+            moduleResolution,
+            noEmit: true,
+            // Relay 21's first-party declarations do not pass TypeScript 6's
+            // own-library validation. The base package remains checked above
+            // with skipLibCheck disabled; this opt-in pass verifies silver-ui's
+            // emitted Relay declarations and both export conditions.
+            skipLibCheck: true,
+            strict: true,
+            target: 'ES2022',
+          },
+          include,
+        },
+        null,
+        2,
+      ) + '\n',
+    );
+
+    execFileSync(
+      join(rootDir, 'node_modules', '.bin', 'tsc'),
+      ['-p', tsconfigPath],
+      {stdio: 'inherit'},
+    );
+  }
+
+  execFileSync(
+    process.execPath,
+    ['--input-type=module', '--eval', "await import('silver-ui/relay');"],
+    {cwd: consumerDir, stdio: 'inherit'},
+  );
+  execFileSync(
+    process.execPath,
+    ['--input-type=commonjs', '--eval', "require('silver-ui/relay');"],
+    {cwd: consumerDir, stdio: 'inherit'},
+  );
 } finally {
   await rm(tempDir, {force: true, recursive: true});
 }

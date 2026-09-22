@@ -19,6 +19,7 @@ const config: StorybookConfig = {
       components: resolve(__dirname, '../src/components'),
       hooks: resolve(__dirname, '../src/hooks'),
       internal: resolve(__dirname, '../src/internal'),
+      relay: resolve(__dirname, '../src/relay'),
       'styled-system': resolve(__dirname, '../styled-system'),
       themes: resolve(__dirname, '../src/themes'),
       utils: resolve(__dirname, '../src/utils'),
