@@ -2,13 +2,11 @@
 
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useAvatarSize} from 'components/Avatar/AvatarSizeContext';
+import type {BadgeColor} from 'components/Badge/Badge';
 import {StatusDot} from 'components/StatusDot/StatusDot';
-import type {
-  StatusDotSize,
-  StatusDotVariant,
-} from 'components/StatusDot/StatusDot.types';
+import type {StatusDotSize} from 'components/StatusDot/StatusDot.types';
 
-export type AvatarStatusDotVariant = StatusDotVariant;
+export type AvatarStatusDotColor = BadgeColor;
 
 /**
  * Size-aware status indicator intended for Avatar's `status` prop.
@@ -18,6 +16,11 @@ export interface AvatarStatusDotProps {
    * Additional CSS class names applied to the root element.
    */
   className?: string;
+  /**
+   * Visual color. Accepts the same colors as Badge.
+   * @default 'success'
+   */
+  color?: AvatarStatusDotColor;
   /**
    * Test ID applied to the root element.
    */
@@ -38,10 +41,6 @@ export interface AvatarStatusDotProps {
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
-  /**
-   * Semantic dot color. Default is `success`.
-   */
-  variant?: AvatarStatusDotVariant;
 }
 
 function resolveStatusDotSize(avatarSize: number): StatusDotSize {
@@ -66,13 +65,14 @@ export function AvatarStatusDot({
   label,
   ref,
   style,
-  variant = 'success',
+  color = 'success',
 }: AvatarStatusDotProps): React.JSX.Element {
   const avatarSize = useAvatarSize();
 
   return (
     <StatusDot
       className={className}
+      color={color}
       data-testid={dataTestId}
       hasRing
       icon={icon}
@@ -80,7 +80,6 @@ export function AvatarStatusDot({
       ref={ref}
       size={resolveStatusDotSize(avatarSize)}
       style={style}
-      variant={variant}
     />
   );
 }

@@ -83,11 +83,7 @@ export const WithStatus: Story = {
         name="Katherine Johnson"
         size="large"
         status={
-          <AvatarStatusDot
-            icon={<Check />}
-            label="Unavailable"
-            variant="error"
-          />
+          <AvatarStatusDot color="error" icon={<Check />} label="Unavailable" />
         }
       />
     </div>

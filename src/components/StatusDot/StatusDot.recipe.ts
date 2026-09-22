@@ -52,10 +52,22 @@ export const statusDotRecipe = sva({
         },
       },
     },
-    variant: {
-      success: {root: {bg: 'presence.success'}},
+    color: {
       neutral: {root: {bg: 'presence.neutral'}},
+      info: {root: {bg: 'status.info.solid'}},
+      success: {root: {bg: 'presence.success'}},
+      warning: {root: {bg: 'status.warning.solid'}},
       error: {root: {bg: 'presence.error'}},
+      blue: {root: {bg: 'surface.blue'}},
+      cyan: {root: {bg: 'surface.cyan'}},
+      gray: {root: {bg: 'surface.gray'}},
+      green: {root: {bg: 'surface.green'}},
+      orange: {root: {bg: 'surface.orange'}},
+      pink: {root: {bg: 'surface.pink'}},
+      purple: {root: {bg: 'surface.purple'}},
+      red: {root: {bg: 'surface.red'}},
+      teal: {root: {bg: 'surface.teal'}},
+      yellow: {root: {bg: 'surface.yellow'}},
     },
     hasRing: {
       true: {
@@ -69,7 +81,7 @@ export const statusDotRecipe = sva({
   },
   defaultVariants: {
     size: 'md',
-    variant: 'success',
+    color: 'success',
     hasRing: false,
   },
 });

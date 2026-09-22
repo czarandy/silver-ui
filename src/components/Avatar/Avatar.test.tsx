@@ -146,7 +146,7 @@ describe('Avatar', () => {
     render(
       <Avatar
         name="Ada Lovelace"
-        status={<AvatarStatusDot label="Online" variant="success" />}
+        status={<AvatarStatusDot color="success" label="Online" />}
       />,
     );
 

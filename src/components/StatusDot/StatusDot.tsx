@@ -1,9 +1,7 @@
 import type {CSSProperties, ReactNode, Ref} from 'react';
+import type {BadgeColor} from 'components/Badge/Badge';
 import {statusDotRecipe} from 'components/StatusDot/StatusDot.recipe';
-import type {
-  StatusDotSize,
-  StatusDotVariant,
-} from 'components/StatusDot/StatusDot.types';
+import type {StatusDotSize} from 'components/StatusDot/StatusDot.types';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {cx} from 'utils/cx';
 
@@ -16,6 +14,11 @@ export interface StatusDotProps {
    * Additional CSS class names applied to the root element.
    */
   className?: string;
+  /**
+   * Visual color. Accepts the same colors as Badge.
+   * @default 'success'
+   */
+  color?: BadgeColor;
   /**
    * Test ID applied to the root element.
    */
@@ -47,10 +50,6 @@ export interface StatusDotProps {
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
-  /**
-   * Semantic dot color. Default is `success`.
-   */
-  variant?: StatusDotVariant;
 }
 
 /**
@@ -58,6 +57,7 @@ export interface StatusDotProps {
  */
 export function StatusDot({
   className,
+  color = 'success',
   'data-testid': dataTestId,
   hasRing = false,
   icon,
@@ -65,9 +65,8 @@ export function StatusDot({
   ref,
   size = 'md',
   style,
-  variant = 'success',
 }: StatusDotProps): React.JSX.Element {
-  const classes = statusDotRecipe({hasRing, size, variant});
+  const classes = statusDotRecipe({hasRing, size, color});
   const isIconVisible = size !== 'sm';
   const hasVisibleIcon = isNonEmptyReactNode(icon) && isIconVisible;
 
