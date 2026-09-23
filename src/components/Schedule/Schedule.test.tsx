@@ -64,6 +64,7 @@ import type {
   CalendarEvent,
   Instant,
   ScheduleCategory,
+  ScheduleEventBorderStyle,
   ScheduleHeight,
   SchedulePlugin,
   ScheduleView,
@@ -533,6 +534,78 @@ describe('Schedule', () => {
       scheduleEventRecipe({color: 'yellow', isPast: true}).event as string,
     );
   });
+
+  it('defines each event border style', () => {
+    expect(
+      scheduleEventRecipe.raw({eventBorderStyle: 'border'}).event,
+    ).toMatchObject({
+      borderRadius: 'sm',
+      borderWidth: 'default',
+    });
+    expect(
+      scheduleEventRecipe.raw({eventBorderStyle: 'none'}).event,
+    ).toMatchObject({
+      borderRadius: 'sm',
+      borderWidth: 0,
+    });
+    expect(
+      scheduleEventRecipe.raw({eventBorderStyle: 'left'}).event,
+    ).toMatchObject({
+      borderLeftWidth: '3px',
+      borderRadius: 0,
+      borderWidth: 0,
+    });
+  });
+
+  describe.each<ScheduleEventBorderStyle>(['border', 'none', 'left'])(
+    '%s event border style',
+    eventBorderStyle => {
+      it.each([
+        {
+          event: events[1],
+          recipeOptions: {color: 'purple' as const, isPast: true},
+          view: createScheduleDayView({maxHour: 17, minHour: 15}),
+        },
+        {
+          event: events[0],
+          recipeOptions: {
+            color: 'blue' as const,
+            isPast: true,
+            layout: 'block' as const,
+          },
+          view: createScheduleDayView({maxHour: 17, minHour: 15}),
+        },
+        {
+          event: events[0],
+          recipeOptions: {
+            color: 'blue' as const,
+            isFullWidth: true,
+            isPast: true,
+          },
+          view: createScheduleMonthlyView(),
+        },
+      ])('applies to $event.id pills', ({event, recipeOptions, view}) => {
+        mockCurrentTime('2026-05-14T00:00:00.000Z');
+        render(
+          <Schedule
+            categories={categories}
+            eventBorderStyle={eventBorderStyle}
+            events={[event]}
+            timezoneID="UTC"
+            view={view}
+            viewDate={instantUTC(2026, 4, 13)}
+          />,
+        );
+
+        expect(screen.getByTestId(`schedule-event-${event.id}`)).toHaveClass(
+          ...(scheduleEventRecipe({
+            eventBorderStyle,
+            ...recipeOptions,
+          }).event?.split(' ') ?? []),
+        );
+      });
+    },
+  );
 
   it.each([
     {
