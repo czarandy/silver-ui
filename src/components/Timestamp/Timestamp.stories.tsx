@@ -113,9 +113,28 @@ export const Relative: Story = {
 
 export const WithTimezone: Story = {
   args: {
-    format: 'dateTime',
     isTimezoneShown: true,
   },
+  argTypes: {
+    format: {control: false},
+  },
+  render: args => (
+    <div
+      style={{
+        display: 'grid',
+        gap: '0.75rem',
+        gridTemplateColumns: 'auto 1fr',
+      }}>
+      {formats.map(format => (
+        <div key={format} style={{display: 'contents'}}>
+          <Text color="secondary" size="sm">
+            {format}
+          </Text>
+          <Timestamp {...args} format={format} />
+        </div>
+      ))}
+    </div>
+  ),
 };
 
 export const TooltipOnHover: Story = {

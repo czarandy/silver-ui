@@ -67,6 +67,18 @@ describe('Timestamp.utils', () => {
   });
 
   describe('formatAbsolute', () => {
+    it('joins the date and time with "at" in dateTime format', () => {
+      expect(formatAbsolute(REFERENCE, 'dateTime', 'UTC', false)).toBe(
+        'Mar 21, 2025 at 2:51 PM',
+      );
+    });
+
+    it('appends the timezone abbreviation to dateTime format', () => {
+      expect(formatAbsolute(REFERENCE, 'dateTime', 'UTC', true)).toMatch(
+        /^Mar 21, 2025 at 2:51 PM (UTC|GMT)$/,
+      );
+    });
+
     it('renders ISO formats as fixed ISO-like strings', () => {
       expect(formatAbsolute(REFERENCE, 'isoDate', 'UTC', false)).toBe(
         '2025-03-21',
@@ -102,7 +114,7 @@ describe('Timestamp.utils', () => {
           false,
           REFERENCE_MS,
         ),
-      ).toBe('Fri, March 21 at 2:51 PM');
+      ).toBe('Fri, Mar 21 at 2:51 PM');
     });
 
     it('includes the year outside the current year', () => {
@@ -111,7 +123,7 @@ describe('Timestamp.utils', () => {
       ).epochMilliseconds;
       expect(
         formatAbsolute(REFERENCE, 'weekdayDateTime', 'UTC', false, nextYear),
-      ).toBe('Fri, March 21, 2025 at 2:51 PM');
+      ).toBe('Fri, Mar 21, 2025 at 2:51 PM');
     });
 
     it('honors the display timezone', () => {
@@ -124,7 +136,7 @@ describe('Timestamp.utils', () => {
           false,
           REFERENCE_MS,
         ),
-      ).toBe('Fri, March 21 at 10:51 AM');
+      ).toBe('Fri, Mar 21 at 10:51 AM');
     });
 
     it('compares years in the display timezone, not UTC', () => {
@@ -144,7 +156,7 @@ describe('Timestamp.utils', () => {
           false,
           newYearsDay,
         ),
-      ).toBe('Wed, January 1 at 8:30 AM');
+      ).toBe('Wed, Jan 1 at 8:30 AM');
       expect(
         formatAbsolute(
           newYearsEve,
@@ -153,7 +165,7 @@ describe('Timestamp.utils', () => {
           false,
           newYearsDay,
         ),
-      ).toBe('Tue, December 31, 2024 at 11:30 PM');
+      ).toBe('Tue, Dec 31, 2024 at 11:30 PM');
     });
 
     it('still appends a timezone abbreviation when requested', () => {
@@ -241,7 +253,7 @@ describe('Timestamp', () => {
     // The year is present or absent depending on when the suite runs, so match
     // the parts that do not move.
     expect(screen.getByTestId('ts')).toHaveTextContent(
-      /^Fri, March 21(, 2025)? at 2:51 PM$/,
+      /^Fri, Mar 21(, 2025)? at 2:51 PM$/,
     );
   });
 

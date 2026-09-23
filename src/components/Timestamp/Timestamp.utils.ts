@@ -1,4 +1,5 @@
 import {Temporal} from '@js-temporal/polyfill';
+import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
 
 export type TimestampValue =
@@ -26,6 +27,8 @@ type AbsoluteFormat = Exclude<TimestampFormat, 'auto' | 'relative'>;
  * The fixed, locale-independent formats.
  */
 type IsoFormat = 'isoDate' | 'isoTime' | 'isoDateTime';
+
+type LocaleComponentFormat = 'date' | 'time';
 
 interface ResolvedInstant {
   /**
@@ -64,29 +67,12 @@ export function resolveInstant(value: TimestampValue): ResolvedInstant {
   };
 }
 
-const LOCALE_OPTIONS: Record<AbsoluteFormat, Intl.DateTimeFormatOptions> = {
+const LOCALE_OPTIONS: Record<
+  LocaleComponentFormat,
+  Intl.DateTimeFormatOptions
+> = {
   date: {year: 'numeric', month: 'short', day: 'numeric'},
   time: {hour: 'numeric', minute: '2-digit'},
-  dateTime: {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  },
-  // The year is added at format time only when it is not the current year
-  // (see `formatAbsolute`).
-  weekdayDateTime: {
-    weekday: 'short',
-    month: 'long',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  },
-  // ISO formats are handled separately (see `formatIso`).
-  isoDate: {},
-  isoTime: {},
-  isoDateTime: {},
 };
 
 const ISO_FORMATS: ReadonlySet<AbsoluteFormat> = new Set<IsoFormat>([
@@ -143,13 +129,84 @@ function isCurrentYear(
   return instant.toZonedDateTimeISO(timeZone).year === nowYear;
 }
 
+function formatDateTime(
+  instant: Temporal.Instant,
+  timeZone: string,
+  isTimezoneShown: boolean,
+): string {
+  const date = getCachedDateTimeFormat({
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone,
+  }).format(instant);
+  const time = getCachedDateTimeFormat({
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone,
+  }).format(instant);
+  return appendTimeZoneName(
+    `${date} at ${time}`,
+    instant,
+    timeZone,
+    isTimezoneShown,
+  );
+}
+
+function appendTimeZoneName(
+  formatted: string,
+  instant: Temporal.Instant,
+  timeZone: string,
+  isTimezoneShown: boolean,
+): string {
+  if (!isTimezoneShown) {
+    return formatted;
+  }
+
+  const timeZoneName = getCachedDateTimeFormat({
+    timeZone,
+    timeZoneName: 'short',
+  })
+    .formatToParts(instant)
+    .find(part => part.type === 'timeZoneName')?.value;
+
+  return timeZoneName == null ? formatted : `${formatted} ${timeZoneName}`;
+}
+
+function formatWeekdayDateTime(
+  instant: Temporal.Instant,
+  timeZone: string,
+  isTimezoneShown: boolean,
+  nowMs: number,
+): string {
+  const date = getCachedDateTimeFormat({
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    timeZone,
+    ...(!isCurrentYear(instant, timeZone, nowMs) ? {year: 'numeric'} : {}),
+  }).format(instant);
+  const time = getCachedDateTimeFormat({
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone,
+  }).format(instant);
+
+  return appendTimeZoneName(
+    `${date} at ${time}`,
+    instant,
+    timeZone,
+    isTimezoneShown,
+  );
+}
+
 /**
- * Renders an absolute format. Locale formats use `Intl.DateTimeFormat` (via
- * `Instant.toLocaleString`); ISO formats use fixed, locale-independent strings.
+ * Renders an absolute format. Locale formats use `Intl.DateTimeFormat`; ISO
+ * formats use fixed, locale-independent strings.
  * `isTimezoneShown` appends the timezone abbreviation to locale formats.
  *
- * `weekdayDateTime` drops the year within the current year ("Sat, July 8 at
- * 9:30 AM") and keeps it otherwise ("Sat, July 8, 2023 at 9:30 AM"), so the
+ * `weekdayDateTime` drops the year within the current year ("Sat, Jul 8 at 9:30
+ * AM") and keeps it otherwise ("Sat, Jul 8, 2023 at 9:30 AM"), so the
  * common case stays short without making older moments ambiguous.
  */
 export function formatAbsolute(
@@ -162,15 +219,18 @@ export function formatAbsolute(
   if (isIsoFormat(format)) {
     return formatIso(instant, format, timeZone);
   }
-  const isYearShown =
-    format === 'weekdayDateTime' && !isCurrentYear(instant, timeZone, nowMs);
+  if (format === 'dateTime') {
+    return formatDateTime(instant, timeZone, isTimezoneShown);
+  }
+  if (format === 'weekdayDateTime') {
+    return formatWeekdayDateTime(instant, timeZone, isTimezoneShown, nowMs);
+  }
   const options: Intl.DateTimeFormatOptions = {
     ...LOCALE_OPTIONS[format],
     timeZone,
-    ...(isYearShown ? {year: 'numeric'} : {}),
     ...(isTimezoneShown ? {timeZoneName: 'short'} : {}),
   };
-  return instant.toLocaleString(undefined, options);
+  return getCachedDateTimeFormat(options).format(instant);
 }
 
 // Thresholds (in seconds) for choosing the coarsest relative unit, largest
