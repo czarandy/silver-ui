@@ -1,8 +1,7 @@
 /* eslint-disable silver-ui/require-component-props -- schedule views are internal view renderers */
 'use client';
 
-import {useMemo} from 'react';
-import type {CSSProperties} from 'react';
+import {useMemo, type CSSProperties, type ReactNode} from 'react';
 import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
@@ -697,6 +696,18 @@ function ScheduleMonthlyView({
                       {day.day}
                     </Text>
                   </span>
+                  {plugins.reduce<ReactNode>(
+                    (content, plugin) => (
+                      <>
+                        {content}
+                        {plugin.renderMonthCellContent?.({
+                          date: day,
+                          timezoneID,
+                        })}
+                      </>
+                    ),
+                    null,
+                  )}
                 </div>
               );
             })}

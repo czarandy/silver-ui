@@ -4930,3 +4930,102 @@ describe('scheduleZonedInstant', () => {
     expect(end.instant).toBe(range.end);
   });
 });
+
+describe('month event creation', () => {
+  beforeEach(() => {
+    vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+  });
+
+  function MonthCreateSchedule({
+    onCreate,
+    timezoneID = 'UTC',
+  }: {
+    onCreate: (draft: ScheduleEventDraft) => void;
+    timezoneID?: string;
+  }): React.JSX.Element {
+    const createPlugin = useScheduleEventCreatePlugin({
+      renderContent: ({close, draft}) => (
+        <button
+          data-testid="save-month-draft"
+          onClick={() => {
+            onCreate(draft);
+            close();
+          }}
+          type="button">
+          Save month draft
+        </button>
+      ),
+    });
+    return (
+      <Schedule
+        events={[
+          createEventFromISO({
+            end: '2026-05-13',
+            id: 'existing-month-event',
+            start: '2026-05-13',
+            title: 'Existing event',
+          }),
+        ]}
+        plugins={[createPlugin]}
+        timezoneID={timezoneID}
+        view={createScheduleMonthlyView()}
+        viewDate={instantUTC(2026, 4, 13)}
+      />
+    );
+  }
+
+  it('opens a full-day draft from a month cell and saves the local day', () => {
+    const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+    render(
+      <MonthCreateSchedule
+        onCreate={onCreate}
+        timezoneID="America/Los_Angeles"
+      />,
+    );
+
+    const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
+    fireEvent.pointerDown(within(cell).getByText('13'), {
+      button: 0,
+      clientX: 4,
+      clientY: 4,
+    });
+    fireEvent.pointerUp(window, {clientX: 4, clientY: 4});
+
+    const ghost = screen.getByTestId('schedule-event-create-ghost');
+    expect(ghost).toHaveAccessibleName('New all-day event, 2026-05-13');
+    expect(ghost).toHaveAttribute('aria-expanded', 'true');
+    fireEvent.click(screen.getByTestId('save-month-draft'));
+
+    expect(onCreate).toHaveBeenCalledWith({
+      end: instantUTC(2026, 4, 14, 7),
+      isAllDay: true,
+      start: instantUTC(2026, 4, 13, 7),
+    });
+    expect(ghost).not.toBeInTheDocument();
+  });
+
+  it('ignores month drags and non-primary buttons', () => {
+    render(<MonthCreateSchedule onCreate={vi.fn()} />);
+    const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
+
+    fireEvent.pointerDown(cell, {button: 2, clientX: 0, clientY: 0});
+    fireEvent.pointerUp(window, {clientX: 0, clientY: 0});
+    fireEvent.pointerDown(cell, {button: 0, clientX: 0, clientY: 0});
+    fireEvent.pointerUp(window, {clientX: 20, clientY: 0});
+
+    expect(
+      screen.queryByTestId('schedule-event-create-ghost'),
+    ).not.toBeInTheDocument();
+  });
+
+  it('does not start a draft from a month event', () => {
+    render(<MonthCreateSchedule onCreate={vi.fn()} />);
+
+    fireEvent.pointerDown(screen.getByText('Existing event'), {button: 0});
+    fireEvent.pointerUp(window);
+
+    expect(
+      screen.queryByTestId('schedule-event-create-ghost'),
+    ).not.toBeInTheDocument();
+  });
+});

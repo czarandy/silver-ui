@@ -34,6 +34,7 @@ export const scheduleMonthlyViewRecipe = sva({
       borderBlockEndColor: 'border',
     },
     cell: {
+      position: 'relative',
       minH: '24',
       p: '0.5',
       borderInlineEndWidth: 'default',
