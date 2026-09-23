@@ -27,6 +27,7 @@ import type {
 import {useCurrentTime} from 'components/Schedule/useCurrentTime';
 import {Heading, Text} from 'components/Text';
 import type {DayOfWeek} from 'internal/dateTypes';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
   DATE_FORMAT_WITH_WEEKDAY,
   plainDateDayOfWeek,
@@ -230,8 +231,21 @@ function getEventsByDate(
   return eventsByDate;
 }
 
-function getAvailableLevel(levels: number[], columnStart: number): number {
-  const level = levels.findIndex(columnEnd => columnStart > columnEnd);
+interface MonthColumnSpan {
+  columnEnd: number;
+  columnStart: number;
+}
+
+function getAvailableLevel(
+  levels: MonthColumnSpan[][],
+  columnStart: number,
+  columnEnd: number,
+): number {
+  const level = levels.findIndex(spans =>
+    spans.every(
+      span => columnEnd < span.columnStart || columnStart > span.columnEnd,
+    ),
+  );
   return level >= 0 ? level : levels.length;
 }
 
@@ -239,14 +253,22 @@ function getMonthEventSegments(
   events: ReadonlyArray<CalendarEvent>,
   days: ReadonlyArray<PlainDate>,
   timezoneID: string,
+  reservedDayIndexes: ReadonlySet<number>,
 ): MonthEventSegment[] {
   const segments: MonthEventSegment[] = [];
-  const levelsByWeek: number[][] = [];
+  const levelsByWeek: MonthColumnSpan[][][] = [];
   if (days.length === 0) {
     return segments;
   }
   const firstDay = days[0];
   const lastDay = days[days.length - 1];
+
+  reservedDayIndexes.forEach(dayIndex => {
+    const week = Math.floor(dayIndex / 7);
+    const column = dayIndex % 7;
+    const weekLevels = (levelsByWeek[week] ??= []);
+    (weekLevels[0] ??= []).push({columnEnd: column, columnStart: column});
+  });
 
   const monthEvents = events
     .map(event => {
@@ -304,8 +326,8 @@ function getMonthEventSegments(
         week === Math.floor(startIndex / 7) ? startIndex % 7 : 0;
       const columnEnd = week === Math.floor(endIndex / 7) ? endIndex % 7 : 6;
       const weekLevels = (levelsByWeek[week] ??= []);
-      const level = getAvailableLevel(weekLevels, columnStart);
-      weekLevels[level] = columnEnd;
+      const level = getAvailableLevel(weekLevels, columnStart, columnEnd);
+      (weekLevels[level] ??= []).push({columnEnd, columnStart});
       segments.push({
         columnEnd,
         columnStart,
@@ -406,33 +428,27 @@ function segmentCoversDay(
   segment: MonthEventSegment,
   dayIndex: number,
 ): boolean {
-  return segment.startIndex <= dayIndex && segment.endIndex >= dayIndex;
-}
-
-function shouldReserveSeeMoreLevel({
-  dayEvents,
-  levelCount,
-}: {
-  dayEvents: ReadonlyArray<CalendarEvent>;
-  levelCount: number;
-}): boolean {
-  return dayEvents.length > levelCount;
+  return (
+    dayIndex >= segment.week * 7 + segment.columnStart &&
+    dayIndex <= segment.week * 7 + segment.columnEnd
+  );
 }
 
 function isSegmentVisible({
-  dayEventsByIndex,
   levelCount,
+  seeMoreDays,
   segment,
 }: {
-  dayEventsByIndex: ReadonlyArray<ReadonlyArray<CalendarEvent>>;
   levelCount: number;
+  seeMoreDays: ReadonlySet<number>;
   segment: MonthEventSegment;
 }): boolean {
-  for (let index = segment.startIndex; index <= segment.endIndex; index += 1) {
-    const visibleLevelCount = shouldReserveSeeMoreLevel({
-      dayEvents: dayEventsByIndex[index] ?? [],
-      levelCount,
-    })
+  for (
+    let index = segment.week * 7 + segment.columnStart;
+    index <= segment.week * 7 + segment.columnEnd;
+    index += 1
+  ) {
+    const visibleLevelCount = seeMoreDays.has(index)
       ? levelCount - 1
       : levelCount;
     if (segment.level >= visibleLevelCount) {
@@ -440,6 +456,62 @@ function isSegmentVisible({
     }
   }
   return true;
+}
+
+function getVisibleMonthEventSegments({
+  dayEventsByIndex,
+  days,
+  levelCount,
+  reservedDayIndexes,
+  segments,
+}: {
+  dayEventsByIndex: ReadonlyArray<ReadonlyArray<CalendarEvent>>;
+  days: ReadonlyArray<PlainDate>;
+  levelCount: number;
+  reservedDayIndexes: ReadonlySet<number>;
+  segments: ReadonlyArray<MonthEventSegment>;
+}): MonthEventSegment[] {
+  const seeMoreDays = new Set<number>();
+  dayEventsByIndex.forEach((dayEvents, index) => {
+    if (dayEvents.length + Number(reservedDayIndexes.has(index)) > levelCount) {
+      seeMoreDays.add(index);
+    }
+  });
+  segments.forEach(segment => {
+    if (segment.level >= levelCount) {
+      for (
+        let index = segment.week * 7 + segment.columnStart;
+        index <= segment.week * 7 + segment.columnEnd;
+        index += 1
+      ) {
+        seeMoreDays.add(index);
+      }
+    }
+  });
+
+  // A spanning event hidden on one date must also have a see-more affordance
+  // on every other date it covers. Reserving that affordance can hide another
+  // segment, so repeat until the visible set stops changing.
+  let previousSeeMoreDayCount = -1;
+  let visibleSegments: MonthEventSegment[] = [];
+  while (previousSeeMoreDayCount !== seeMoreDays.size) {
+    previousSeeMoreDayCount = seeMoreDays.size;
+    visibleSegments = segments.filter(segment =>
+      isSegmentVisible({levelCount, seeMoreDays, segment}),
+    );
+    const hiddenEventsByDate = getHiddenEventsByDate({
+      dayEventsByIndex,
+      days,
+      segments,
+      visibleSegments,
+    });
+    days.forEach((day, index) => {
+      if (hiddenEventsByDate.has(day.toString()) && !seeMoreDays.has(index)) {
+        seeMoreDays.add(index);
+      }
+    });
+  }
+  return visibleSegments;
 }
 
 function getHiddenEventsByDate({
@@ -531,11 +603,36 @@ function ScheduleMonthlyView({
     () => getMonthDays(month, weekStartsOn, weekCount),
     [month, weekCount, weekStartsOn],
   );
+  const topEventsByDay = useMemo(
+    () =>
+      days.map((day): ReactNode => {
+        for (const plugin of plugins) {
+          const content = plugin.renderMonthCellTopEvent?.({
+            date: day,
+            timezoneID,
+          });
+          if (isNonEmptyReactNode(content)) {
+            return content;
+          }
+        }
+        return null;
+      }),
+    [days, plugins, timezoneID],
+  );
+  const reservedDayIndexes = useMemo(
+    () =>
+      new Set(
+        topEventsByDay.flatMap((content, index) =>
+          isNonEmptyReactNode(content) ? [index] : [],
+        ),
+      ),
+    [topEventsByDay],
+  );
   // The event bucketing/stacking below is O(events) and reruns only when the
-  // events, visible days, or timezone change — not on every render.
+  // events, visible days, draft, or timezone change.
   const eventSegments = useMemo(
-    () => getMonthEventSegments(events, days, timezoneID),
-    [events, days, timezoneID],
+    () => getMonthEventSegments(events, days, timezoneID, reservedDayIndexes),
+    [events, days, reservedDayIndexes, timezoneID],
   );
   const eventsByDate = useMemo(
     () => getEventsByDate(events, days, timezoneID),
@@ -552,14 +649,21 @@ function ScheduleMonthlyView({
     () =>
       isAutoRowHeight
         ? eventSegments
-        : eventSegments.filter(segment =>
-            isSegmentVisible({
-              dayEventsByIndex,
-              levelCount: monthEventLevelCount,
-              segment,
-            }),
-          ),
-    [dayEventsByIndex, eventSegments, isAutoRowHeight, monthEventLevelCount],
+        : getVisibleMonthEventSegments({
+            dayEventsByIndex,
+            days,
+            levelCount: monthEventLevelCount,
+            reservedDayIndexes,
+            segments: eventSegments,
+          }),
+    [
+      dayEventsByIndex,
+      days,
+      eventSegments,
+      isAutoRowHeight,
+      monthEventLevelCount,
+      reservedDayIndexes,
+    ],
   );
   const hiddenEventsByDate = useMemo(
     () =>
@@ -696,18 +800,6 @@ function ScheduleMonthlyView({
                       {day.day}
                     </Text>
                   </span>
-                  {plugins.reduce<ReactNode>(
-                    (content, plugin) => (
-                      <>
-                        {content}
-                        {plugin.renderMonthCellContent?.({
-                          date: day,
-                          timezoneID,
-                        })}
-                      </>
-                    ),
-                    null,
-                  )}
                 </div>
               );
             })}
@@ -716,6 +808,17 @@ function ScheduleMonthlyView({
             className={styles.monthEventOverlay}
             data-testid="schedule-month-event-overlay"
             style={monthGridStyle}>
+            {topEventsByDay.map((content, dayIndex) =>
+              isNonEmptyReactNode(content) ? (
+                <div
+                  className={styles.monthTopEventSpan}
+                  data-testid={`schedule-month-top-event-${days[dayIndex].toString()}`}
+                  key={days[dayIndex].toString()}
+                  style={getMonthSeeMoreStyle({dayIndex, level: 0})}>
+                  {content}
+                </div>
+              ) : null,
+            )}
             {visibleEventSegments.map(segment => (
               <div
                 // The overlay is decorative when pills are static, but becomes

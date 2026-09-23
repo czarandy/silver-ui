@@ -4937,9 +4937,11 @@ describe('month event creation', () => {
   });
 
   function MonthCreateSchedule({
+    monthEvents,
     onCreate,
     timezoneID = 'UTC',
   }: {
+    monthEvents?: CalendarEvent[];
     onCreate: (draft: ScheduleEventDraft) => void;
     timezoneID?: string;
   }): React.JSX.Element {
@@ -4958,14 +4960,16 @@ describe('month event creation', () => {
     });
     return (
       <Schedule
-        events={[
-          createEventFromISO({
-            end: '2026-05-13',
-            id: 'existing-month-event',
-            start: '2026-05-13',
-            title: 'Existing event',
-          }),
-        ]}
+        events={
+          monthEvents ?? [
+            createEventFromISO({
+              end: '2026-05-13',
+              id: 'existing-month-event',
+              start: '2026-05-13',
+              title: 'Existing event',
+            }),
+          ]
+        }
         plugins={[createPlugin]}
         timezoneID={timezoneID}
         view={createScheduleMonthlyView()}
@@ -4994,6 +4998,16 @@ describe('month event creation', () => {
     const ghost = screen.getByTestId('schedule-event-create-ghost');
     expect(ghost).toHaveAccessibleName('New all-day event, 2026-05-13');
     expect(ghost).toHaveAttribute('aria-expanded', 'true');
+    expect(
+      screen.getByTestId('schedule-month-top-event-2026-05-13'),
+    ).toHaveStyle({
+      marginBlockStart: '30px',
+    });
+    expect(
+      screen.getByTestId('schedule-event-span-existing-month-event'),
+    ).toHaveStyle({
+      marginBlockStart: '52px',
+    });
     fireEvent.click(screen.getByTestId('save-month-draft'));
 
     expect(onCreate).toHaveBeenCalledWith({
@@ -5002,6 +5016,88 @@ describe('month event creation', () => {
       start: instantUTC(2026, 4, 13, 7),
     });
     expect(ghost).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('schedule-event-span-existing-month-event'),
+    ).toHaveStyle({
+      marginBlockStart: '30px',
+    });
+  });
+
+  it('keeps the draft first when a busy day needs an overflow pill', () => {
+    const monthEvents = Array.from({length: 4}, (_, index) =>
+      createEventFromISO({
+        end: '2026-05-13',
+        id: `busy-month-event-${index}`,
+        start: '2026-05-13',
+        title: `Busy event ${index}`,
+      }),
+    );
+    render(
+      <MonthCreateSchedule monthEvents={monthEvents} onCreate={vi.fn()} />,
+    );
+
+    const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
+    fireEvent.pointerDown(cell, {button: 0, clientX: 0, clientY: 0});
+    fireEvent.pointerUp(window, {clientX: 0, clientY: 0});
+
+    expect(
+      screen.getByTestId('schedule-month-top-event-2026-05-13'),
+    ).toHaveStyle({
+      marginBlockStart: '30px',
+    });
+    expect(
+      screen.getByTestId('schedule-event-span-busy-month-event-0'),
+    ).toHaveStyle({
+      marginBlockStart: '52px',
+    });
+    expect(
+      screen.getByTestId('schedule-event-span-busy-month-event-1'),
+    ).toHaveStyle({
+      marginBlockStart: '74px',
+    });
+    expect(
+      screen.queryByTestId('schedule-event-span-busy-month-event-2'),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', {
+        name: 'Show 2 more events for Wednesday, May 13, 2026',
+      }),
+    ).toHaveTextContent('+2 more');
+  });
+
+  it('keeps neighboring days at their usual level when a spanning event shifts', () => {
+    render(
+      <MonthCreateSchedule
+        monthEvents={[
+          createEventFromISO({
+            end: '2026-05-14',
+            id: 'spanning-draft-day',
+            start: '2026-05-12',
+            title: 'Spanning event',
+          }),
+          createEventFromISO({
+            end: '2026-05-14',
+            id: 'neighbor-day',
+            start: '2026-05-14',
+            title: 'Neighbor event',
+          }),
+        ]}
+        onCreate={vi.fn()}
+      />,
+    );
+
+    const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
+    fireEvent.pointerDown(cell, {button: 0, clientX: 0, clientY: 0});
+    fireEvent.pointerUp(window, {clientX: 0, clientY: 0});
+
+    expect(
+      screen.getByTestId('schedule-event-span-spanning-draft-day'),
+    ).toHaveStyle({
+      marginBlockStart: '52px',
+    });
+    expect(screen.getByTestId('schedule-event-span-neighbor-day')).toHaveStyle({
+      marginBlockStart: '30px',
+    });
   });
 
   it('ignores month drags and non-primary buttons', () => {

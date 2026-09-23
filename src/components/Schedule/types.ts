@@ -168,9 +168,10 @@ export interface SchedulePlugin {
     endContent: ReactNode,
   ) => ScheduleHeaderContent;
   /**
-   * Appends content inside a month day cell.
+   * Renders the first event in a month day cell. The month view reserves a
+   * stacking level for the first non-nullish result from the plugins.
    */
-  renderMonthCellContent?: (
+  renderMonthCellTopEvent?: (
     props: ScheduleMonthCellPropsRenderProps,
   ) => ReactNode;
   /**

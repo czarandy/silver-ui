@@ -104,10 +104,8 @@ const ghostRecipe = sva({
     isMonth: {
       true: {
         event: {
-          bottom: '1',
-          left: '1',
-          right: '1',
-          zIndex: 3,
+          position: 'relative',
+          w: 'full',
           minH: '5',
           flexDirection: 'row',
           alignItems: 'center',
@@ -427,7 +425,6 @@ function ScheduleEventCreateGhost({
             : `New event, ${timeLabel}`
         }
         className={classes.event}
-        data-schedule-event-create-ghost=""
         data-testid="schedule-event-create-ghost"
         ref={setGhostElement}
         style={
@@ -490,7 +487,7 @@ function createScheduleEventCreatePlugin({
         },
       };
     },
-    renderMonthCellContent({date, timezoneID}): ReactNode {
+    renderMonthCellTopEvent({date, timezoneID}): ReactNode {
       if (draft?.layout !== 'month' || !plainDateIsEqual(draft.date, date)) {
         return null;
       }
