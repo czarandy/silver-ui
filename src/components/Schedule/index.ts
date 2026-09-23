@@ -1,4 +1,5 @@
 export {createEventFromISO} from 'components/Schedule/CalendarEvent';
+export {getScheduleRange} from 'components/Schedule/dateMath';
 export {
   createScheduleDayView,
   type ScheduleDayViewOptions,

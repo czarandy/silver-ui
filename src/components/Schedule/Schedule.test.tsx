@@ -36,6 +36,7 @@ import {
   enumerateDates,
   eventOccursOnDate,
   eventOverlapsRange,
+  getScheduleRange,
   getScheduleRangeFromDates,
   sortEvents,
 } from 'components/Schedule/dateMath';
@@ -4889,6 +4890,27 @@ describe('sortEvents', () => {
 });
 
 describe('dateMath', () => {
+  it('resolves a view range in the requested timezone', () => {
+    const viewDate = Temporal.Instant.from(
+      '2026-03-08T12:00:00Z',
+    ).epochMilliseconds;
+
+    const range = getScheduleRange(
+      createScheduleDayView(),
+      viewDate,
+      'America/Los_Angeles',
+    );
+
+    expect(range.start).toBe(
+      Temporal.Instant.from('2026-03-08T08:00:00Z').epochMilliseconds,
+    );
+    expect(range.end).toBe(
+      Temporal.Instant.from('2026-03-09T07:00:00Z').epochMilliseconds,
+    );
+    expect(range.startDate.toString()).toBe('2026-03-08');
+    expect(range.endDate.toString()).toBe('2026-03-09');
+  });
+
   it('enumerates dates in an exclusive range', () => {
     const start = Temporal.PlainDate.from('2026-03-07');
     const end = Temporal.PlainDate.from('2026-03-10');

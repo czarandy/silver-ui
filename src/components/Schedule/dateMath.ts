@@ -3,7 +3,13 @@ import type {
   CalendarDayEvent,
   CalendarEvent,
 } from 'components/Schedule/CalendarEvent';
-import type {Instant, ScheduleRange} from 'components/Schedule/types';
+import {createScheduleZonedInstant} from 'components/Schedule/scheduleZonedInstant';
+import type {
+  Instant,
+  ScheduleDate,
+  ScheduleRange,
+  ScheduleViewBase,
+} from 'components/Schedule/types';
 import {
   plainDateFromInstant,
   plainDateIsAfter,
@@ -42,6 +48,24 @@ export function instantFromDateAndMinutes(
       }),
     )
     .toZonedDateTime(timezoneID).epochMilliseconds;
+}
+
+/**
+ * Resolves the visible range for a schedule view, date, and timezone.
+ */
+export function getScheduleRange(
+  view: ScheduleViewBase,
+  viewDate: ScheduleDate,
+  timezoneID: string,
+): ScheduleRange {
+  const date = createScheduleZonedInstant(viewDate, timezoneID);
+  const [start, end] = view.getDateRange(date);
+  return {
+    end: end.instant,
+    endDate: plainDateFromInstant(end.instant, end.timezoneID),
+    start: start.instant,
+    startDate: plainDateFromInstant(start.instant, start.timezoneID),
+  };
 }
 
 export function getScheduleRangeFromDates({

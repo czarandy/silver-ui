@@ -279,6 +279,7 @@ export {
   createScheduleMonthlyView,
   createScheduleWeeklyView,
   defaultSchedulePlugins,
+  getScheduleRange,
   Schedule,
   ScheduleContext,
   ScheduleEventPopoverContent,

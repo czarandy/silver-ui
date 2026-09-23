@@ -11,7 +11,11 @@ import {
 } from 'react';
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {ScheduleContext} from 'components/Schedule/context';
-import {eventOverlapsRange, sortEvents} from 'components/Schedule/dateMath';
+import {
+  eventOverlapsRange,
+  getScheduleRange,
+  sortEvents,
+} from 'components/Schedule/dateMath';
 import {
   createScheduleInteractionState,
   ScheduleInteractionContext,
@@ -33,7 +37,6 @@ import type {
   ScheduleViewOptions,
   ScheduleZonedInstant,
 } from 'components/Schedule/types';
-import {plainDateFromInstant} from 'internal/plainDate';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
 import {cx} from 'utils/cx';
 
@@ -182,18 +185,9 @@ function useRange<Options extends ScheduleViewOptions>(
   view: ScheduleView<Options>,
   date: ScheduleZonedInstant,
 ): ScheduleRange {
-  // The range value below is keyed on the resolved instants so an inline
-  // (unstable) view object still yields a stable range; this inner memo just
-  // skips re-running the view's date math when identities are stable.
-  const [start, end] = useMemo(() => view.getDateRange(date), [date, view]);
   return useMemo(
-    () => ({
-      end: end.instant,
-      endDate: plainDateFromInstant(end.instant, end.timezoneID),
-      start: start.instant,
-      startDate: plainDateFromInstant(start.instant, start.timezoneID),
-    }),
-    [start.instant, end.instant, start.timezoneID, end.timezoneID],
+    () => getScheduleRange(view, date.instant, date.timezoneID),
+    [date.instant, date.timezoneID, view],
   );
 }
 
