@@ -361,15 +361,23 @@ function CreateEventForm({
   onCreate: (title: string) => void;
 }): React.JSX.Element {
   const [title, setTitle] = useState('');
-  const timeLabel = `${Temporal.Instant.fromEpochMilliseconds(draft.start)
-    .toZonedDateTimeISO(localTimezoneID)
-    .toLocaleString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-      weekday: 'short',
-    })} – ${Temporal.Instant.fromEpochMilliseconds(draft.end)
-    .toZonedDateTimeISO(localTimezoneID)
-    .toLocaleString(undefined, {hour: 'numeric', minute: '2-digit'})}`;
+  const timeLabel = draft.isAllDay
+    ? `${Temporal.Instant.fromEpochMilliseconds(draft.start)
+        .toZonedDateTimeISO(localTimezoneID)
+        .toLocaleString(undefined, {
+          day: 'numeric',
+          month: 'short',
+          weekday: 'short',
+        })} · All day`
+    : `${Temporal.Instant.fromEpochMilliseconds(draft.start)
+        .toZonedDateTimeISO(localTimezoneID)
+        .toLocaleString(undefined, {
+          hour: 'numeric',
+          minute: '2-digit',
+          weekday: 'short',
+        })} – ${Temporal.Instant.fromEpochMilliseconds(draft.end)
+        .toZonedDateTimeISO(localTimezoneID)
+        .toLocaleString(undefined, {hour: 'numeric', minute: '2-digit'})}`;
 
   return (
     <form
@@ -420,7 +428,7 @@ function CreateEventForm({
   );
 }
 
-function CreatableEventsStory(): React.JSX.Element {
+function CreatableEventsStory({view}: {view: ScheduleView}): React.JSX.Element {
   const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
   const [storyEvents, setStoryEvents] = useState<CalendarEvent[]>(() => events);
   const paginationPlugin = useSchedulePaginationPlugin({
@@ -434,16 +442,27 @@ function CreatableEventsStory(): React.JSX.Element {
         draft={draft}
         onCancel={close}
         onCreate={title => {
-          setStoryEvents(currentEvents => [
-            ...currentEvents,
-            {
-              category: 'Sync',
-              end: draft.end,
-              id: `created-${draft.start}`,
-              start: draft.start,
-              title,
-            },
-          ]);
+          const createdEvent: CalendarEvent = draft.isAllDay
+            ? {
+                category: 'Sync',
+                end: Temporal.Instant.fromEpochMilliseconds(draft.end)
+                  .toZonedDateTimeISO(localTimezoneID)
+                  .toPlainDate()
+                  .subtract({days: 1}),
+                id: `created-${draft.start}`,
+                start: Temporal.Instant.fromEpochMilliseconds(draft.start)
+                  .toZonedDateTimeISO(localTimezoneID)
+                  .toPlainDate(),
+                title,
+              }
+            : {
+                category: 'Sync',
+                end: draft.end,
+                id: `created-${draft.start}`,
+                start: draft.start,
+                title,
+              };
+          setStoryEvents(currentEvents => [...currentEvents, createdEvent]);
           close();
         }}
       />
@@ -458,7 +477,7 @@ function CreatableEventsStory(): React.JSX.Element {
       highlightDate={defaultHighlightDate}
       plugins={[paginationPlugin, createPlugin, popoverPlugin]}
       timezoneID={localTimezoneID}
-      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+      view={view}
       viewDate={viewDate}
     />
   );
@@ -738,7 +757,15 @@ export const MovableEvents: Story = {
 };
 
 export const CreatableEvents: Story = {
-  render: () => <CreatableEventsStory />,
+  render: () => (
+    <CreatableEventsStory
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+    />
+  ),
+};
+
+export const CreatableMonthEvents: Story = {
+  render: () => <CreatableEventsStory view={createScheduleMonthlyView()} />,
 };
 
 export const MondayStartWeek: Story = {

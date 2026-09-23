@@ -26,6 +26,7 @@ import type {
   PlainDate,
   SchedulePlugin,
   SchedulePluginElementProps,
+  ScheduleMonthCellPropsRenderProps,
   ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
 import useHotkey from 'hooks/useHotkey';
@@ -100,15 +101,31 @@ const ghostRecipe = sva({
       true: {event: {cursor: 'pointer'}},
       false: {event: {pointerEvents: 'none'}},
     },
+    isMonth: {
+      true: {
+        event: {
+          display: 'inline-flex',
+          position: 'relative',
+          w: 'full',
+          minH: '5',
+          flexDirection: 'row',
+          alignItems: 'baseline',
+        },
+      },
+    },
   },
   defaultVariants: {isCommitted: false},
 });
 
 /**
- * The time range drafted by a create gesture, as epoch instants.
+ * The range drafted by a create gesture, as epoch instants.
  */
 export interface ScheduleEventDraft {
   end: Instant;
+  /**
+   * Month-cell drafts cover the clicked calendar day; `end` is the next day's midnight.
+   */
+  isAllDay?: true;
   start: Instant;
 }
 
@@ -126,7 +143,7 @@ export interface ScheduleEventCreateRenderProps {
 
 export interface ScheduleEventCreatePluginOptions {
   /**
-   * Duration, in minutes, of the draft created by a click without a drag.
+   * Duration, in minutes, of a draft created by clicking a time-grid cell.
    * @default 60
    */
   defaultDurationMinutes?: number;
@@ -138,7 +155,7 @@ export interface ScheduleEventCreatePluginOptions {
    */
   renderContent: (props: ScheduleEventCreateRenderProps) => ReactNode;
   /**
-   * Snap interval, in minutes, applied to the drafted range.
+   * Snap interval, in minutes, applied to time-grid drafts.
    * @default 15
    */
   snapMinutes?: number;
@@ -157,6 +174,7 @@ interface DraftState extends DraftRange {
    */
   id: number;
   isCommitted: boolean;
+  layout: 'month' | 'timeGrid';
 }
 
 interface CellGeometry {
@@ -188,6 +206,13 @@ interface DragState extends CellGeometry {
   id: number;
   previewedRange: DraftRange | null;
   timezoneID: string;
+}
+
+interface MonthPressState {
+  clientX: number;
+  clientY: number;
+  date: PlainDate;
+  id: number;
 }
 
 function normalizeMinutes(value: number | undefined, fallback: number): number {
@@ -315,22 +340,23 @@ function applyGhostPreview(
 
 function ScheduleEventCreateGhost({
   draft,
-  hour,
-  hourHeight,
+  hour = 0,
+  hourHeight = 0,
   onDismiss,
   onGhostElement,
   renderContent,
   timezoneID,
 }: {
   draft: DraftState;
-  hour: number;
-  hourHeight: number;
+  hour?: number;
+  hourHeight?: number;
   onDismiss: (draftID: number) => void;
   onGhostElement: RefCallback<HTMLElement>;
   renderContent: (props: ScheduleEventCreateRenderProps) => ReactNode;
   timezoneID: string;
 }): React.JSX.Element {
-  const {date, endMinutes, id, isCommitted, startMinutes} = draft;
+  const {date, endMinutes, id, isCommitted, layout, startMinutes} = draft;
+  const isMonth = layout === 'month';
   const hasOpenedRef = useRef(false);
   const interactionState = useScheduleInteractionState();
   const interactionTokenRef = useRef(Symbol('schedule-create-popover'));
@@ -369,9 +395,10 @@ function ScheduleEventCreateGhost({
   const eventDraft = useMemo(
     (): ScheduleEventDraft => ({
       end: instantFromDateAndMinutes(date, endMinutes, timezoneID),
+      ...(isMonth ? {isAllDay: true as const} : {}),
       start: instantFromDateAndMinutes(date, startMinutes, timezoneID),
     }),
-    [date, endMinutes, startMinutes, timezoneID],
+    [date, endMinutes, isMonth, startMinutes, timezoneID],
   );
   const close = useCallback(() => {
     hide();
@@ -385,26 +412,34 @@ function ScheduleEventCreateGhost({
     [onGhostElement, triggerRef],
   );
 
-  const classes = ghostRecipe({isCommitted});
-  const timeLabel = formatTimeRange(
-    eventDraft.start,
-    eventDraft.end,
-    timezoneID,
-  );
+  const classes = ghostRecipe({isCommitted, isMonth});
+  const timeLabel = isMonth
+    ? date.toString()
+    : formatTimeRange(eventDraft.start, eventDraft.end, timezoneID);
   return (
     <>
       <button
-        aria-label={`New event, ${timeLabel}`}
+        aria-label={
+          isMonth
+            ? `New all-day event, ${timeLabel}`
+            : `New event, ${timeLabel}`
+        }
         className={classes.event}
         data-testid="schedule-event-create-ghost"
         ref={setGhostElement}
-        style={getGhostStyle({endMinutes, hour, hourHeight, startMinutes})}
+        style={
+          isMonth
+            ? undefined
+            : getGhostStyle({endMinutes, hour, hourHeight, startMinutes})
+        }
         type="button"
         {...popover.triggerProps}>
         <span className={classes.title}>New event</span>
-        <span {...{[GHOST_TIME_ATTRIBUTE]: ''}} className={classes.time}>
-          {timeLabel}
-        </span>
+        {isMonth ? null : (
+          <span {...{[GHOST_TIME_ATTRIBUTE]: ''}} className={classes.time}>
+            {timeLabel}
+          </span>
+        )}
       </button>
       {popover.render(renderContent({close, draft: eventDraft, timezoneID}), {
         alignment: 'start',
@@ -420,12 +455,17 @@ function createScheduleEventCreatePlugin({
   draft,
   onDismiss,
   onGhostElement,
+  onMonthPointerDown,
   onPointerDown,
   renderContent,
 }: {
   draft: DraftState | null;
   onDismiss: (draftID: number) => void;
   onGhostElement: RefCallback<HTMLElement>;
+  onMonthPointerDown: (
+    pointerEvent: PointerEvent<HTMLElement>,
+    cell: ScheduleMonthCellPropsRenderProps,
+  ) => void;
   onPointerDown: (
     pointerEvent: PointerEvent<HTMLElement>,
     cell: ScheduleTimeGridCellPropsRenderProps,
@@ -433,6 +473,11 @@ function createScheduleEventCreatePlugin({
   renderContent: (props: ScheduleEventCreateRenderProps) => ReactNode;
 }): SchedulePlugin {
   return {
+    getMonthCellProps(cell): SchedulePluginElementProps {
+      return {
+        onPointerDown: pointerEvent => onMonthPointerDown(pointerEvent, cell),
+      };
+    },
     getTimeGridCellProps(
       cell: ScheduleTimeGridCellPropsRenderProps,
     ): SchedulePluginElementProps {
@@ -442,6 +487,22 @@ function createScheduleEventCreatePlugin({
         },
       };
     },
+    renderMonthCellTopEvent({date, timezoneID}): ReactNode {
+      if (draft?.layout !== 'month' || !plainDateIsEqual(draft.date, date)) {
+        return null;
+      }
+
+      return (
+        <ScheduleEventCreateGhost
+          draft={draft}
+          key={draft.id}
+          onDismiss={onDismiss}
+          onGhostElement={onGhostElement}
+          renderContent={renderContent}
+          timezoneID={timezoneID}
+        />
+      );
+    },
     renderTimeGridCellContent({
       date,
       hour,
@@ -449,7 +510,7 @@ function createScheduleEventCreatePlugin({
       timezoneID,
     }: ScheduleTimeGridCellPropsRenderProps): ReactNode {
       if (
-        draft == null ||
+        draft?.layout !== 'timeGrid' ||
         !plainDateIsEqual(draft.date, date) ||
         Math.floor(draft.startMinutes / MINUTES_PER_HOUR) !== hour
       ) {
@@ -475,10 +536,11 @@ function createScheduleEventCreatePlugin({
 }
 
 /**
- * Lets users draft a new event in the day/week time-grid views by clicking an
- * empty hour cell, or by pressing and dragging to sweep out a time range. The
- * draft renders as a ghost event and opens a popover whose content the consumer
- * supplies through `renderContent`.
+ * Lets users draft a new event by clicking a month day cell or a day/week hour
+ * cell. Pressing and dragging in a time grid sweeps out a time range. Month
+ * drafts cover the entire clicked calendar day. The draft renders as a ghost
+ * event and opens a popover whose content the consumer supplies through
+ * `renderContent`.
  *
  * The plugin owns only the transient draft: it never creates an event. The
  * consumer's popover content is responsible for persisting the new event and
@@ -494,12 +556,17 @@ export function useScheduleEventCreatePlugin(
   const optionsRef = useLatest(options);
   const [draft, setDraft] = useState<DraftState | null>(null);
   const dragRef = useRef<DragState | null>(null);
+  const monthPressRef = useRef<MonthPressState | null>(null);
   const draftIDRef = useRef(0);
   const ghostElementRef = useRef<HTMLElement | null>(null);
   const windowHasFocus = useWindowHasFocus();
   const listenersRef = useRef<{
     cancel: (event: globalThis.PointerEvent) => void;
     move: (event: globalThis.PointerEvent) => void;
+    up: (event: globalThis.PointerEvent) => void;
+  } | null>(null);
+  const monthListenersRef = useRef<{
+    cancel: () => void;
     up: (event: globalThis.PointerEvent) => void;
   } | null>(null);
 
@@ -538,6 +605,87 @@ export function useScheduleEventCreatePlugin(
     listenersRef.current = null;
   }, []);
 
+  const removeMonthListeners = useCallback(() => {
+    const listeners = monthListenersRef.current;
+    if (listeners == null) {
+      return;
+    }
+    window.removeEventListener('pointerup', listeners.up);
+    window.removeEventListener('pointercancel', listeners.cancel);
+    monthListenersRef.current = null;
+    monthPressRef.current = null;
+  }, []);
+
+  const handleMonthPointerCancel = useCallback(() => {
+    removeMonthListeners();
+  }, [removeMonthListeners]);
+
+  const handleMonthPointerUp = useCallback(
+    (event: globalThis.PointerEvent) => {
+      const press = monthPressRef.current;
+      removeMonthListeners();
+      if (
+        press == null ||
+        Math.hypot(
+          event.clientX - press.clientX,
+          event.clientY - press.clientY,
+        ) > 5
+      ) {
+        return;
+      }
+      setDraft({
+        date: press.date,
+        endMinutes: 24 * MINUTES_PER_HOUR,
+        id: press.id,
+        isCommitted: true,
+        layout: 'month',
+        startMinutes: 0,
+      });
+    },
+    [removeMonthListeners],
+  );
+
+  const handleMonthPointerDown = useCallback(
+    (
+      pointerEvent: PointerEvent<HTMLElement>,
+      cell: ScheduleMonthCellPropsRenderProps,
+    ) => {
+      if (
+        !windowHasFocus ||
+        isSchedulePopoverDismissPointerEvent(pointerEvent.nativeEvent) ||
+        pointerEvent.button !== 0 ||
+        pointerEvent.pointerType === 'touch' ||
+        (pointerEvent.target instanceof Element &&
+          pointerEvent.target.closest('button, a, [role="button"]') != null)
+      ) {
+        return;
+      }
+
+      pointerEvent.preventDefault();
+      removeMonthListeners();
+      draftIDRef.current += 1;
+      monthPressRef.current = {
+        clientX: pointerEvent.clientX,
+        clientY: pointerEvent.clientY,
+        date: cell.date,
+        id: draftIDRef.current,
+      };
+      setDraft(null);
+      monthListenersRef.current = {
+        cancel: handleMonthPointerCancel,
+        up: handleMonthPointerUp,
+      };
+      window.addEventListener('pointerup', handleMonthPointerUp);
+      window.addEventListener('pointercancel', handleMonthPointerCancel);
+    },
+    [
+      handleMonthPointerCancel,
+      handleMonthPointerUp,
+      removeMonthListeners,
+      windowHasFocus,
+    ],
+  );
+
   const endDrag = useCallback((): DragState | null => {
     const drag = dragRef.current;
     removeListeners();
@@ -568,7 +716,13 @@ export function useScheduleEventCreatePlugin(
     drag.hasDragged = true;
     drag.ghostHour = Math.floor(range.startMinutes / MINUTES_PER_HOUR);
     drag.previewedRange = range;
-    setDraft({...range, date: drag.date, id: drag.id, isCommitted: false});
+    setDraft({
+      ...range,
+      date: drag.date,
+      id: drag.id,
+      isCommitted: false,
+      layout: 'timeGrid',
+    });
   }, []);
 
   const handlePointerUp = useCallback(
@@ -583,7 +737,13 @@ export function useScheduleEventCreatePlugin(
       const range = isDrag
         ? getDragRange(drag, pointerMinutes)
         : getDefaultRange(drag);
-      setDraft({...range, date: drag.date, id: drag.id, isCommitted: true});
+      setDraft({
+        ...range,
+        date: drag.date,
+        id: drag.id,
+        isCommitted: true,
+        layout: 'timeGrid',
+      });
     },
     [endDrag],
   );
@@ -596,6 +756,10 @@ export function useScheduleEventCreatePlugin(
   }, [dismiss, endDrag]);
 
   useHotkey('escape', handlePointerCancel, {
+    isEnabledOnFormElements: true,
+    target: 'window',
+  });
+  useHotkey('escape', handleMonthPointerCancel, {
     isEnabledOnFormElements: true,
     target: 'window',
   });
@@ -665,7 +829,12 @@ export function useScheduleEventCreatePlugin(
     ],
   );
 
-  useEffect(() => removeListeners, [removeListeners]);
+  useEffect(() => {
+    return () => {
+      removeListeners();
+      removeMonthListeners();
+    };
+  }, [removeListeners, removeMonthListeners]);
 
   return useMemo(
     () =>
@@ -673,9 +842,17 @@ export function useScheduleEventCreatePlugin(
         draft,
         onDismiss: dismiss,
         onGhostElement: setGhostElement,
+        onMonthPointerDown: handleMonthPointerDown,
         onPointerDown: handlePointerDown,
         renderContent,
       }),
-    [dismiss, draft, handlePointerDown, renderContent, setGhostElement],
+    [
+      dismiss,
+      draft,
+      handleMonthPointerDown,
+      handlePointerDown,
+      renderContent,
+      setGhostElement,
+    ],
   );
 }

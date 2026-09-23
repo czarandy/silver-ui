@@ -16,6 +16,7 @@ export const scheduleMonthlyViewRecipe = sva({
     'monthCellGrid',
     'monthEventOverlay',
     'monthEventSpan',
+    'monthTopEventSpan',
     'monthSeeMoreSpan',
     'monthSeeMoreButton',
     'monthPopoverContent',
@@ -75,6 +76,13 @@ export const scheduleMonthlyViewRecipe = sva({
       mx: '0.5',
       pointerEvents: 'auto',
       zIndex: 1,
+    },
+    monthTopEventSpan: {
+      alignSelf: 'start',
+      minW: 0,
+      mx: '0.5',
+      pointerEvents: 'auto',
+      zIndex: 3,
     },
     monthSeeMoreSpan: {
       alignSelf: 'start',
