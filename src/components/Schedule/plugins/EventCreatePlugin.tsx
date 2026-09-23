@@ -104,12 +104,12 @@ const ghostRecipe = sva({
     isMonth: {
       true: {
         event: {
+          display: 'inline-flex',
           position: 'relative',
           w: 'full',
           minH: '5',
           flexDirection: 'row',
-          alignItems: 'center',
-          py: 0,
+          alignItems: 'baseline',
         },
       },
     },

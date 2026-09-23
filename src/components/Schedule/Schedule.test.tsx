@@ -4998,6 +4998,11 @@ describe('month event creation', () => {
     const ghost = screen.getByTestId('schedule-event-create-ghost');
     expect(ghost).toHaveAccessibleName('New all-day event, 2026-05-13');
     expect(ghost).toHaveAttribute('aria-expanded', 'true');
+    expect(ghost).toHaveClass(
+      'silver-d_inline-flex',
+      'silver-py_0.5',
+      'silver-ai_baseline',
+    );
     expect(
       screen.getByTestId('schedule-month-top-event-2026-05-13'),
     ).toHaveStyle({
