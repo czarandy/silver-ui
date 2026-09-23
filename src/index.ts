@@ -304,6 +304,7 @@ export {
   type ScheduleDate,
   type ScheduleDayViewOptions,
   type ScheduleEventColor,
+  type ScheduleEventBorderStyle,
   type ScheduleEventCreatePluginOptions,
   type ScheduleEventCreateRenderProps,
   type ScheduleEventDraft,

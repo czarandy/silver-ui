@@ -39,6 +39,7 @@ import type {
   CalendarEvent,
   Instant,
   ScheduleCategory,
+  ScheduleEventBorderStyle,
   ScheduleEventSource,
   ScheduleHeight,
   SchedulePlugin,
@@ -549,6 +550,7 @@ function MovableEventsStory(): React.JSX.Element {
 
 function ScheduleStory({
   categories: storyCategories = categories,
+  eventBorderStyle,
   events: storyEvents = events,
   height,
   highlightDate = defaultHighlightDate,
@@ -558,6 +560,7 @@ function ScheduleStory({
   viewDate: initialViewDate = defaultViewDate,
 }: {
   categories?: ReadonlyArray<ScheduleCategory>;
+  eventBorderStyle?: ScheduleEventBorderStyle;
   events?: ScheduleEventSource;
   height?: ScheduleHeight;
   highlightDate?: Instant;
@@ -573,6 +576,7 @@ function ScheduleStory({
   return (
     <Schedule
       categories={storyCategories}
+      eventBorderStyle={eventBorderStyle}
       events={storyEvents}
       height={height}
       highlightDate={highlightDate}
@@ -677,6 +681,26 @@ const weekEvents = [
 export const Week: Story = {
   render: () => (
     <ScheduleStory
+      events={weekEvents}
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+    />
+  ),
+};
+
+export const BorderlessEvents: Story = {
+  render: () => (
+    <ScheduleStory
+      eventBorderStyle="none"
+      events={weekEvents}
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+    />
+  ),
+};
+
+export const LeftBorderEvents: Story = {
+  render: () => (
+    <ScheduleStory
+      eventBorderStyle="left"
       events={weekEvents}
       view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
     />

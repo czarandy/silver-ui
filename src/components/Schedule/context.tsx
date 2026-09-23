@@ -5,6 +5,7 @@ import type {
   CalendarEvent,
   ScheduleCategory,
   ScheduleCategoryMap,
+  ScheduleEventBorderStyle,
   SchedulePlugin,
   ScheduleRange,
   ScheduleViewBase,
@@ -14,6 +15,7 @@ import type {
 export interface ScheduleContextValue {
   categories: ReadonlyArray<ScheduleCategory>;
   categoryMap: ScheduleCategoryMap;
+  eventBorderStyle: ScheduleEventBorderStyle;
   events: ReadonlyArray<CalendarEvent>;
   highlightDate: ScheduleZonedInstant;
   isLoading: boolean;

@@ -284,7 +284,8 @@ function TimeGridEvent({
   minHour: number;
   overlapBehavior: ScheduleTimeGridOverlapBehavior;
 }): React.JSX.Element {
-  const {categoryMap, plugins, timezoneID} = useScheduleContext();
+  const {categoryMap, eventBorderStyle, plugins, timezoneID} =
+    useScheduleContext();
   const {event} = layout;
   const {popover, triggerProps} = useScheduleEventPopover(event);
   const eventPluginProps = useScheduleEventPluginProps({
@@ -322,6 +323,7 @@ function TimeGridEvent({
   const classes = scheduleEventRecipe({
     layout: 'block',
     color: category.color,
+    eventBorderStyle,
     isCanceled: event.isCanceled,
     isCompact:
       hasLocation &&

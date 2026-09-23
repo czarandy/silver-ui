@@ -5,8 +5,9 @@ import {sva, type RecipeVariantProps} from 'styled-system/css';
  * compact baseline pill used by list/all-day cells and the month overlay; the
  * `block` layout renders the stacked pill used by the time grid (positioned via
  * inline styles). The `color` variant defines the `--schedule-event-*` custom
- * properties consumed by every slot, `isCanceled` strikes through the title,
- * and `isPast` mutes the event surface.
+ * properties consumed by every slot, `eventBorderStyle` controls the event
+ * border, `isCanceled` strikes through the title, and `isPast` mutes the event
+ * surface.
  */
 export const scheduleEventRecipe = sva({
   slots: ['event', 'dot', 'endContent', 'location', 'time', 'title'],
@@ -79,6 +80,17 @@ export const scheduleEventRecipe = sva({
     },
   },
   variants: {
+    eventBorderStyle: {
+      border: {},
+      left: {
+        event: {
+          borderWidth: 0,
+          borderLeftWidth: '3px',
+          borderRadius: 0,
+        },
+      },
+      none: {event: {borderWidth: 0}},
+    },
     layout: {
       inline: {
         event: {
@@ -280,12 +292,13 @@ export const scheduleEventRecipe = sva({
     },
   },
   defaultVariants: {
-    layout: 'inline',
     color: 'blue',
+    eventBorderStyle: 'border',
     isCanceled: false,
     isFullWidth: false,
     isInteractive: false,
     isPast: false,
+    layout: 'inline',
   },
 });
 

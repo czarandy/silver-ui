@@ -24,6 +24,7 @@ import type {
   CalendarEvent,
   Instant,
   ScheduleCategory,
+  ScheduleEventBorderStyle,
   ScheduleEventSource,
   ScheduleHeight,
   SchedulePlugin,
@@ -38,7 +39,10 @@ import {cx} from 'utils/cx';
 
 const EMPTY_CATEGORIES: ReadonlyArray<ScheduleCategory> = [];
 
-export type {ScheduleHeight} from 'components/Schedule/types';
+export type {
+  ScheduleEventBorderStyle,
+  ScheduleHeight,
+} from 'components/Schedule/types';
 
 export interface ScheduleProps<
   Options extends ScheduleViewOptions = ScheduleViewOptions,
@@ -55,6 +59,13 @@ export interface ScheduleProps<
    * Test ID applied to the schedule root.
    */
   'data-testid'?: string;
+  /**
+   * Border treatment applied to event pills. `border` renders the default
+   * border, `none` removes it, and `left` renders a square pill with only a
+   * 3px left border.
+   * @default 'border'
+   */
+  eventBorderStyle?: ScheduleEventBorderStyle;
   /**
    * Static events or an async event loader.
    */
@@ -188,6 +199,7 @@ function useRange<Options extends ScheduleViewOptions>(
 
 function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories,
+  eventBorderStyle,
   eventSource,
   height,
   highlightDate,
@@ -197,6 +209,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   viewDate,
 }: {
   categories: ReadonlyArray<ScheduleCategory>;
+  eventBorderStyle: ScheduleEventBorderStyle;
   eventSource: ScheduleEventSource;
   height: ScheduleHeight;
   highlightDate: ScheduleZonedInstant;
@@ -229,6 +242,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
     () => ({
       categoryMap,
       categories,
+      eventBorderStyle,
       events,
       highlightDate,
       isLoading,
@@ -241,6 +255,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
     [
       categories,
       categoryMap,
+      eventBorderStyle,
       events,
       highlightDate,
       isLoading,
@@ -267,6 +282,7 @@ export function Schedule({
   categories = EMPTY_CATEGORIES,
   className,
   'data-testid': dataTestId,
+  eventBorderStyle = 'border',
   events,
   height = 'auto',
   highlightDate: highlightDateFromProps,
@@ -306,6 +322,7 @@ export function Schedule({
       style={style}>
       <ScheduleViewContent
         categories={categories}
+        eventBorderStyle={eventBorderStyle}
         eventSource={events}
         height={height}
         highlightDate={highlightScheduleZonedInstant}

@@ -548,12 +548,13 @@ export function CalendarEventPill({
   isFullWidth?: boolean;
   isPast?: boolean;
 }): React.JSX.Element {
-  const {categoryMap, timezoneID} = useScheduleContext();
+  const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
   const {popover, triggerProps} = useScheduleEventPopover(event);
   const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});
   const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({
     color: category.color,
+    eventBorderStyle,
     isCanceled: event.isCanceled,
     isFullWidth,
     isPast,
@@ -590,13 +591,14 @@ export function CalendarMonthEventPill({
   event: CalendarEvent;
   isPast?: boolean;
 }): React.JSX.Element {
-  const {categoryMap, timezoneID} = useScheduleContext();
+  const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
   const {popover, triggerProps} = useScheduleEventPopover(event);
   const pluginProps = useScheduleEventPluginProps({event, layout: 'month'});
   const category = getCategory(categoryMap, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);
   const classes = scheduleEventRecipe({
     color: category.color,
+    eventBorderStyle,
     isCanceled: event.isCanceled,
     isPast,
     isFullWidth: true,

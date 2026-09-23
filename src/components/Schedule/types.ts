@@ -35,6 +35,8 @@ export type ScheduleCategoryMap = ReadonlyMap<string, ScheduleCategory>;
 
 export type ScheduleHeight = 'auto' | 'fill';
 
+export type ScheduleEventBorderStyle = 'border' | 'left' | 'none';
+
 export type ScheduleTimeGridOverlapBehavior = 'indented' | 'sideBySide';
 
 export interface ScheduleRange {

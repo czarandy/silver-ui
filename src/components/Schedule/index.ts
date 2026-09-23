@@ -11,11 +11,7 @@ export {
   createScheduleMonthlyView,
   type ScheduleMonthlyViewOptions,
 } from 'components/Schedule/MonthlyView';
-export {
-  Schedule,
-  type ScheduleHeight,
-  type ScheduleProps,
-} from 'components/Schedule/Schedule';
+export {Schedule, type ScheduleProps} from 'components/Schedule/Schedule';
 export {
   createScheduleWeeklyView,
   type ScheduleWeeklyViewOptions,
@@ -72,6 +68,8 @@ export type {
   ScheduleCategoryMap,
   ScheduleDate,
   ScheduleEventColor,
+  ScheduleEventBorderStyle,
+  ScheduleHeight,
   ScheduleEventPropsRenderProps,
   ScheduleEventSource,
   ScheduleHeaderContent,
