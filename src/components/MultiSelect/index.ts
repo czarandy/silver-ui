@@ -1,6 +1,7 @@
 export {
   MultiSelect,
   type MultiSelectDivider,
+  type MultiSelectIndicatorPosition,
   type MultiSelectOption,
   type MultiSelectOptionData,
   type MultiSelectProps,

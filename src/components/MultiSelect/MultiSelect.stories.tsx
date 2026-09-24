@@ -209,6 +209,32 @@ export const TriggerVariants: Story = {
   },
   render: (args: MultiSelectProps) => <TriggerVariantsStory {...args} />,
 };
+export const IndicatorPosition: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The selection checkbox renders before the option content by default. `indicatorPosition="end"` moves it after the content, including on the select-all row. Both positions are logical, so they flip in right-to-left layouts.',
+      },
+    },
+  },
+  render: (args: MultiSelectProps) => (
+    <VStack gap={4}>
+      <MultiSelectStory
+        {...args}
+        hasSelectAll
+        label="Checkbox at start (default)"
+      />
+      <MultiSelectStory
+        {...args}
+        hasSelectAll
+        indicatorPosition="end"
+        label="Checkbox at end"
+      />
+    </VStack>
+  ),
+};
+
 export const Badges: Story = {
   args: {triggerDisplay: 'badges'},
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,

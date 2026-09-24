@@ -96,6 +96,8 @@ export type MultiSelectTriggerDisplay = 'count' | 'labels' | 'badges';
 
 export type MultiSelectVariant = 'button' | 'ghost' | 'outline';
 
+export type MultiSelectIndicatorPosition = 'end' | 'start';
+
 export type MultiSelectProps = {
   /**
    * Custom render function for selectable options.
@@ -134,6 +136,11 @@ export type MultiSelectProps = {
    * @default false
    */
   hasSearch?: boolean;
+  /**
+   * Which logical edge of each option shows the selection checkbox.
+   * @default 'start'
+   */
+  indicatorPosition?: MultiSelectIndicatorPosition;
   /**
    * Whether to show a select-all option.
    * @default false
@@ -253,6 +260,7 @@ export function MultiSelect({
   hasEntriesOnFocus = false,
   hasSearch = false,
   hasSelectAll = false,
+  indicatorPosition = 'start',
   htmlName,
   isDefaultOpen = false,
   isDisabled: isDisabledFromProps = false,
@@ -482,6 +490,11 @@ export function MultiSelect({
     const isSelected = selectedValues.has(option.value);
     const isHighlighted = highlightedValue === option.value;
     const optionClasses = multiSelectMenuRecipe({isHighlighted, isSelected});
+    const checkbox = (
+      <span aria-hidden="true" className={optionClasses.checkbox}>
+        {isSelected ? <Icon icon={Check} size="sm" /> : null}
+      </span>
+    );
     return (
       // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
       <div
@@ -495,9 +508,7 @@ export function MultiSelect({
         onMouseEnter={handleOptionMouseEnter}
         role="option"
         tabIndex={isHighlighted ? 0 : -1}>
-        <span aria-hidden="true" className={optionClasses.checkbox}>
-          {isSelected ? <Icon icon={Check} size="sm" /> : null}
-        </span>
+        {indicatorPosition === 'start' ? checkbox : null}
         <span className={optionClasses.optionContent}>
           {children == null ? (
             <>
@@ -512,6 +523,7 @@ export function MultiSelect({
             children(option)
           )}
         </span>
+        {indicatorPosition === 'end' ? checkbox : null}
       </div>
     );
   };
@@ -525,6 +537,11 @@ export function MultiSelect({
   });
 
   const selectAllClasses = multiSelectMenuRecipe({isSelected: allSelected});
+  const selectAllCheckbox = (
+    <span aria-hidden="true" className={selectAllClasses.checkbox}>
+      {allSelected ? <Icon icon={Check} size="sm" /> : null}
+    </span>
+  );
 
   const menu = (
     <>
@@ -562,12 +579,11 @@ export function MultiSelect({
             onClick={toggleAll}
             role="option"
             tabIndex={-1}>
-            <span aria-hidden="true" className={selectAllClasses.checkbox}>
-              {allSelected ? <Icon icon={Check} size="sm" /> : null}
-            </span>
+            {indicatorPosition === 'start' ? selectAllCheckbox : null}
             <span className={selectAllClasses.optionContent}>
               {selectAllLabel}
             </span>
+            {indicatorPosition === 'end' ? selectAllCheckbox : null}
           </div>
         ) : null}
         {optionNodes}

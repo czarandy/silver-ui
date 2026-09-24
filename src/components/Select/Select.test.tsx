@@ -13,6 +13,7 @@ import {
   type SelectVariant,
 } from 'components/Select/Select';
 import {
+  selectMenuRecipe,
   selectOptionItemRecipe,
   selectTriggerRecipe,
 } from 'components/Select/Select.recipe';
@@ -22,6 +23,10 @@ import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 import {assertNonNull} from 'internal/testHelpers';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
+
+function getOptionParts(option: HTMLElement): HTMLElement[] {
+  return Array.from(option.children) as HTMLElement[];
+}
 
 async function nextAnimationFrame(): Promise<void> {
   await act(async () => {
@@ -153,6 +158,73 @@ describe('Select', () => {
       label: 'Banana',
       value: 'Banana',
     });
+  });
+
+  it('renders the selected check after the option content by default', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <Select
+        label="Fruit"
+        onChange={vi.fn()}
+        options={['Apple', 'Banana']}
+        value="Apple"
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
+    const selectedParts = getOptionParts(
+      screen.getByRole('option', {hidden: true, name: 'Apple'}),
+    );
+    const unselectedParts = getOptionParts(
+      screen.getByRole('option', {hidden: true, name: 'Banana'}),
+    );
+
+    expect(selectedParts).toHaveLength(2);
+    expect(selectedParts[0]).toHaveTextContent('Apple');
+    expect(selectedParts[1]).toHaveAttribute('aria-hidden', 'true');
+    expect(selectedParts[1]).not.toBeEmptyDOMElement();
+    expect(unselectedParts).toHaveLength(1);
+    expect(unselectedParts[0]).toHaveTextContent('Banana');
+  });
+
+  it('renders the check before the option content and reserves its column with indicatorPosition="start"', async () => {
+    const user = userEvent.setup();
+    const startClasses = selectMenuRecipe({indicatorPosition: 'start'});
+
+    render(
+      <Select
+        indicatorPosition="start"
+        label="Fruit"
+        onChange={vi.fn()}
+        options={['Apple', 'Banana']}
+        value="Apple"
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
+    const selected = screen.getByRole('option', {hidden: true, name: 'Apple'});
+    const selectedParts = getOptionParts(selected);
+    const unselectedParts = getOptionParts(
+      screen.getByRole('option', {hidden: true, name: 'Banana'}),
+    );
+
+    expect(selected).toHaveClass(...(startClasses.option ?? '').split(' '));
+    expect(selectedParts).toHaveLength(2);
+    expect(selectedParts[0]).toHaveAttribute('aria-hidden', 'true');
+    expect(selectedParts[0]).toHaveClass(
+      ...(startClasses.check ?? '').split(' '),
+    );
+    expect(selectedParts[0]).not.toBeEmptyDOMElement();
+    expect(selectedParts[1]).toHaveTextContent('Apple');
+
+    expect(unselectedParts).toHaveLength(2);
+    expect(unselectedParts[0]).toHaveAttribute('aria-hidden', 'true');
+    expect(unselectedParts[0]).toHaveClass(
+      ...(startClasses.check ?? '').split(' '),
+    );
+    expect(unselectedParts[0]).toBeEmptyDOMElement();
+    expect(unselectedParts[1]).toHaveTextContent('Banana');
   });
 
   it('provides typed auxiliary data with the selected option', async () => {

@@ -300,6 +300,23 @@ export const TriggerVariants: Story = {
   render: (args: SelectProps) => <TriggerVariantsStory {...args} />,
 };
 
+export const IndicatorPosition: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The selected check renders after the option content by default. `indicatorPosition="start"` moves it before the content and reserves the check column on every option so labels stay aligned. Both positions are logical, so they flip in right-to-left layouts.',
+      },
+    },
+  },
+  render: (args: SelectProps) => (
+    <VStack gap={4}>
+      <SelectStory {...args} label="Check at end (default)" />
+      <SelectStory {...args} indicatorPosition="start" label="Check at start" />
+    </VStack>
+  ),
+};
+
 export const CustomOptions: Story = {
   render: (args: SelectProps) => <CustomOptionsStory {...args} />,
 };
