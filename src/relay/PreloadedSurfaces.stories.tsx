@@ -4,7 +4,10 @@ import type {Meta, StoryObj} from '@storybook/react-vite';
 import {RelayEnvironmentProvider} from 'react-relay';
 import {Environment, Network, RecordSource, Store} from 'relay-runtime';
 import {Button} from 'components/Button';
-import {createEventFromISO} from 'components/Schedule/CalendarEvent';
+import {
+  createEventFromISO,
+  type CalendarEvent,
+} from 'components/Schedule/CalendarEvent';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {HStack, VStack} from 'components/Stack';
@@ -18,6 +21,7 @@ import {usePreloadedPopover} from 'relay/usePreloadedPopover';
 import {
   scheduleEventEntryPoint,
   useSchedulePreloadedEventPopoverPlugin,
+  type ScheduleEventEntryPoint,
 } from 'relay/useSchedulePreloadedEventPopoverPlugin';
 import {cva} from 'styled-system/css';
 
@@ -273,16 +277,19 @@ const scheduleViewDate = Temporal.Instant.from(
   '2026-05-12T00:00:00Z',
 ).epochMilliseconds;
 
+function resolveScheduleEvent(event: CalendarEvent): ScheduleEventEntryPoint {
+  return scheduleEventEntryPoint(
+    refreshingPopoverEntryPoint,
+    {surface: 'popover', title: event.title},
+    {message: 'Loaded when the pointer rested on the event.'},
+  );
+}
+
 export const SchedulePopover: Story = {
   render: () => {
     const plugin = useSchedulePreloadedEventPopoverPlugin({
       hasCloseButton: true,
-      resolve: event =>
-        scheduleEventEntryPoint(
-          refreshingPopoverEntryPoint,
-          {surface: 'popover', title: event.title},
-          {message: 'Loaded when the pointer rested on the event.'},
-        ),
+      resolve: resolveScheduleEvent,
     });
 
     return (

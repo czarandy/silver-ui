@@ -4325,36 +4325,106 @@ describe('Schedule', () => {
       expect(timed).toHaveAttribute('aria-expanded', 'true');
     });
 
-    it('notifies plugins when an event popover opens and closes', () => {
-      const onEventPopoverHide = vi.fn();
-      const onEventPopoverShow = vi.fn();
-      function ScheduleWithLifecycle(): React.JSX.Element {
+    describe('popover lifecycle callbacks', () => {
+      const onEventPopoverHide =
+        vi.fn<NonNullable<SchedulePlugin['onEventPopoverHide']>>();
+      const onEventPopoverShow =
+        vi.fn<NonNullable<SchedulePlugin['onEventPopoverShow']>>();
+      const lifecyclePlugin: SchedulePlugin = {
+        onEventPopoverHide,
+        onEventPopoverShow,
+      };
+
+      function ScheduleWithLifecycle({
+        eventsList = popoverEvents,
+      }: {
+        eventsList?: CalendarEvent[];
+      }): React.JSX.Element {
         const popoverPlugin = useScheduleEventPopoverPlugin();
         return (
           <Schedule
             categories={categories}
-            events={popoverEvents}
+            events={eventsList}
             highlightDate={instantUTC(2026, 4, 13)}
-            plugins={[popoverPlugin, {onEventPopoverHide, onEventPopoverShow}]}
+            plugins={[popoverPlugin, lifecyclePlugin]}
             timezoneID="UTC"
             view={createScheduleMonthlyView()}
             viewDate={instantUTC(2026, 4, 13)}
           />
         );
       }
-      render(<ScheduleWithLifecycle />);
-      const pill = screen.getByTestId('schedule-event-visible');
 
-      fireEvent.click(pill);
-      expect(onEventPopoverShow).toHaveBeenCalledExactlyOnceWith(
-        popoverEvents[0],
-      );
-      expect(onEventPopoverHide).not.toHaveBeenCalled();
+      beforeEach(() => {
+        onEventPopoverHide.mockReset();
+        onEventPopoverShow.mockReset();
+      });
 
-      fireEvent.click(pill);
-      expect(onEventPopoverHide).toHaveBeenCalledExactlyOnceWith(
-        popoverEvents[0],
-      );
+      it('reports the same popover id when opening and closing', () => {
+        render(<ScheduleWithLifecycle />);
+        const pill = screen.getByTestId('schedule-event-visible');
+
+        fireEvent.click(pill);
+        expect(onEventPopoverShow).toHaveBeenCalledExactlyOnceWith(
+          popoverEvents[0],
+          expect.any(String),
+        );
+        expect(onEventPopoverHide).not.toHaveBeenCalled();
+
+        fireEvent.click(pill);
+        expect(onEventPopoverHide).toHaveBeenCalledExactlyOnceWith(
+          popoverEvents[0],
+          onEventPopoverShow.mock.calls[0]?.[1],
+        );
+      });
+
+      it('reports a close by Escape', () => {
+        render(<ScheduleWithLifecycle />);
+
+        fireEvent.click(screen.getByTestId('schedule-event-visible'));
+        fireEvent.keyDown(document, {key: 'Escape'});
+
+        expect(onEventPopoverHide).toHaveBeenCalledOnce();
+      });
+
+      it('reports a close when the open pill unmounts', () => {
+        const {rerender} = render(<ScheduleWithLifecycle />);
+
+        fireEvent.click(screen.getByTestId('schedule-event-visible'));
+        rerender(<ScheduleWithLifecycle eventsList={[]} />);
+
+        expect(onEventPopoverHide).toHaveBeenCalledExactlyOnceWith(
+          popoverEvents[0],
+          onEventPopoverShow.mock.calls[0]?.[1],
+        );
+      });
+
+      it('does not report a close when a closed pill unmounts', () => {
+        const {rerender} = render(<ScheduleWithLifecycle />);
+
+        rerender(<ScheduleWithLifecycle eventsList={[]} />);
+
+        expect(onEventPopoverHide).not.toHaveBeenCalled();
+      });
+
+      it('gives each segment of a multi-week event its own popover id', () => {
+        const spanningEvent = createEventFromISO({
+          category: 'Sync',
+          end: '2026-05-19T16:00:00.000Z',
+          id: 'spanning',
+          start: '2026-05-15T16:00:00.000Z',
+          title: 'Spanning',
+        });
+        render(<ScheduleWithLifecycle eventsList={[spanningEvent]} />);
+        const segments = screen.getAllByTestId('schedule-event-spanning');
+        expect(segments).toHaveLength(2);
+
+        fireEvent.click(segments[0]);
+        fireEvent.click(segments[1]);
+
+        const ids = onEventPopoverShow.mock.calls.map(call => call[1]);
+        expect(ids).toHaveLength(2);
+        expect(ids[0]).not.toBe(ids[1]);
+      });
     });
 
     it('opens a popover in the list view', () => {

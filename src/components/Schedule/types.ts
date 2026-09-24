@@ -90,6 +90,11 @@ export interface ScheduleEventPopoverControls {
    * Closes the open event popover.
    */
   close: () => void;
+  /**
+   * Identifies this popover, matching the id passed to `onEventPopoverShow`
+   * and `onEventPopoverHide`.
+   */
+  popoverId: string;
 }
 
 export interface ScheduleTimeGridEventRenderProps {
@@ -148,13 +153,17 @@ export interface SchedulePlugin {
     props: ScheduleTimeGridCellPropsRenderProps,
   ) => SchedulePluginElementProps;
   /**
-   * Called when an event popover closes, however it was dismissed.
+   * Called when an event popover closes, however it was dismissed, including
+   * when its event pill unmounts while open. `popoverId` matches the one passed
+   * to `onEventPopoverShow`.
    */
-  onEventPopoverHide?: (event: CalendarEvent) => void;
+  onEventPopoverHide?: (event: CalendarEvent, popoverId: string) => void;
   /**
    * Called when an event popover opens, in the same update that opens it.
+   * `popoverId` identifies the popover; an event split across several pills
+   * (e.g. month-view week segments) has one popover per pill.
    */
-  onEventPopoverShow?: (event: CalendarEvent) => void;
+  onEventPopoverShow?: (event: CalendarEvent, popoverId: string) => void;
   /**
    * Appends content at the logical inline end of compact event renderers. This
    * is invoked for month events and inline events such as list rows and all-day

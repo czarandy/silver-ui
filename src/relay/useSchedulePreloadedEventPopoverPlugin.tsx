@@ -27,7 +27,7 @@ import {
   type SurfaceRuntimeProps,
 } from 'relay/usePreloadedEntryPoint';
 
-const DEFAULT_HOVER_INTENT_MS = 100;
+const HOVER_INTENT_MS = 100;
 
 // The plugin mixes EntryPoints, so it cannot name one component type.
 const loadAnyEntryPoint = loadEntryPoint as unknown as (
@@ -70,16 +70,10 @@ export interface UseSchedulePreloadedEventPopoverPluginOptions<
    */
   hasCloseButton?: boolean;
   /**
-   * How long the pointer must rest on an event before its EntryPoint preloads.
-   * Focus preloads immediately.
-   *
-   * @default 100
-   */
-  hoverIntentMs?: number;
-  /**
    * Chooses the EntryPoint for an event, or `null` for no popover. Called while
    * rendering and on pointer intent, so it must be cheap and pure; the runtime
-   * props it returns while the popover is open are the ones rendered.
+   * props it returns while the popover is open are the ones rendered. Memoize
+   * it, since a new function rebuilds the plugin.
    */
   resolve: (
     event: CalendarEvent<TAuxiliaryData>,
@@ -90,28 +84,39 @@ interface LoadedEntry {
   readonly entryPoint: object;
   readonly error: Error | null;
   readonly generation: number;
-  readonly key: string;
   readonly loadedAt: number;
   readonly params: object;
+  readonly paramsKey: string;
   // Rendered through `LoadedEntryPoint`, which knows the component type.
   readonly reference: {dispose: () => void};
 }
 
 interface StoreSnapshot {
-  readonly open: {readonly entry: LoadedEntry; readonly eventId: string} | null;
+  readonly open: {
+    readonly entry: LoadedEntry;
+    readonly popoverId: string;
+  } | null;
   readonly preloaded: LoadedEntry | null;
 }
 
-const entryPointIds = new WeakMap<object, number>();
-let nextEntryPointId = 0;
+function isSameLoad(
+  entry: LoadedEntry,
+  {entryPoint, params}: ScheduleEventEntryPoint,
+): boolean {
+  return (
+    entry.entryPoint === entryPoint && entry.paramsKey === paramsKey(params)
+  );
+}
 
-function entryPointKey({entryPoint, params}: ScheduleEventEntryPoint): string {
-  let id = entryPointIds.get(entryPoint);
-  if (id === undefined) {
-    id = nextEntryPointId++;
-    entryPointIds.set(entryPoint, id);
-  }
-  return `${id}:${paramsKey(params)}`;
+function isReusable(
+  entry: LoadedEntry,
+  descriptor: ScheduleEventEntryPoint,
+): boolean {
+  return (
+    entry.error === null &&
+    performance.now() - entry.loadedAt < MAX_UNUSED_PRELOAD_AGE_MS &&
+    isSameLoad(entry, descriptor)
+  );
 }
 
 /**
@@ -156,24 +161,22 @@ class ScheduleEventEntryPointStore {
     }
   }
 
-  public show(eventId: string, descriptor: ScheduleEventEntryPoint): void {
+  public show(popoverId: string, descriptor: ScheduleEventEntryPoint): void {
     this.cancelIntent();
     const {open, preloaded} = this.snapshot;
-    const key = entryPointKey(descriptor);
-    const reusable = preloaded !== null && isReusable(preloaded, key);
-    const entry = reusable
-      ? preloaded
-      : this.load(descriptor.entryPoint, descriptor.params, key);
-    if (!reusable && preloaded !== null) {
-      preloaded.reference.dispose();
+    const reusable = preloaded !== null && isReusable(preloaded, descriptor);
+    const entry = reusable ? preloaded : this.load(descriptor);
+    if (!reusable) {
+      preloaded?.reference.dispose();
     }
     open?.entry.reference.dispose();
-    this.update({open: {entry, eventId}, preloaded: null});
+    this.update({open: {entry, popoverId}, preloaded: null});
   }
 
-  public hide(eventId: string): void {
+  public hide(popoverId: string): void {
     const {open, preloaded} = this.snapshot;
-    if (open?.eventId !== eventId) {
+    // A popover's close can arrive after another popover has opened.
+    if (open?.popoverId !== popoverId) {
       return;
     }
     // Release the data so the next open reflects anything that changed.
@@ -187,9 +190,8 @@ class ScheduleEventEntryPointStore {
       return;
     }
     open.entry.reference.dispose();
-    const {entryPoint, key, params} = open.entry;
-    const entry = this.load(entryPoint, params, key);
-    this.update({open: {entry, eventId: open.eventId}, preloaded});
+    const entry = this.load({...open.entry, runtimeProps: {}});
+    this.update({open: {entry, popoverId: open.popoverId}, preloaded});
   };
 
   public dispose(): void {
@@ -202,21 +204,17 @@ class ScheduleEventEntryPointStore {
 
   private preload(descriptor: ScheduleEventEntryPoint): void {
     const {open, preloaded} = this.snapshot;
-    const key = entryPointKey(descriptor);
     if (
-      open?.entry.key === key ||
-      (preloaded !== null && isReusable(preloaded, key))
+      (open !== null && isSameLoad(open.entry, descriptor)) ||
+      (preloaded !== null && isReusable(preloaded, descriptor))
     ) {
       return;
     }
     preloaded?.reference.dispose();
-    this.update({
-      open,
-      preloaded: this.load(descriptor.entryPoint, descriptor.params, key),
-    });
+    this.update({open, preloaded: this.load(descriptor)});
   }
 
-  private load(entryPoint: object, params: object, key: string): LoadedEntry {
+  private load({entryPoint, params}: ScheduleEventEntryPoint): LoadedEntry {
     const generation = ++this.generation;
     const reference = loadAnyEntryPoint(
       this.environmentProvider,
@@ -235,9 +233,9 @@ class ScheduleEventEntryPointStore {
       entryPoint,
       error: null,
       generation,
-      key,
       loadedAt: performance.now(),
       params,
+      paramsKey: paramsKey(params),
       reference,
     };
   }
@@ -257,29 +255,21 @@ class ScheduleEventEntryPointStore {
   }
 }
 
-function isReusable(entry: LoadedEntry, key: string): boolean {
-  return (
-    entry.key === key &&
-    entry.error === null &&
-    performance.now() - entry.loadedAt < MAX_UNUSED_PRELOAD_AGE_MS
-  );
-}
-
 interface PreloadedEventPopoverContentProps {
   close: () => void;
+  descriptor: ScheduleEventEntryPoint;
   errorFallback: NonNullable<PreloadedContentOptions['errorFallback']>;
-  event: CalendarEvent;
   loadingFallback: ReactNode;
-  resolve: (event: CalendarEvent) => ScheduleEventEntryPoint | null;
+  popoverId: string;
   store: ScheduleEventEntryPointStore;
 }
 
 function PreloadedEventPopoverContent({
   close,
+  descriptor,
   errorFallback,
-  event,
   loadingFallback,
-  resolve,
+  popoverId,
   store,
 }: PreloadedEventPopoverContentProps): ReactNode {
   const {open} = useSyncExternalStore(
@@ -288,8 +278,7 @@ function PreloadedEventPopoverContent({
     store.getSnapshot,
   );
   // Popover content stays mounted after it closes; only the open one renders.
-  const descriptor = open?.eventId === event.id ? resolve(event) : null;
-  if (open === null || descriptor === null) {
+  if (open?.popoverId !== popoverId) {
     return null;
   }
   const {entry} = open;
@@ -322,7 +311,6 @@ export function useSchedulePreloadedEventPopoverPlugin<
 >({
   errorFallback = defaultErrorFallback,
   hasCloseButton = false,
-  hoverIntentMs = DEFAULT_HOVER_INTENT_MS,
   loadingFallback,
   resolve,
 }: UseSchedulePreloadedEventPopoverPluginOptions<TAuxiliaryData>): SchedulePlugin {
@@ -352,34 +340,29 @@ export function useSchedulePreloadedEventPopoverPlugin<
       eventPopoverHasCloseButton: hasCloseButton,
       getEventProps: ({event}) => ({
         onFocus: () => intend(event, 0),
-        onPointerEnter: () => intend(event, hoverIntentMs),
+        onPointerEnter: () => intend(event, HOVER_INTENT_MS),
         onPointerLeave: () => store.cancelIntent(),
       }),
-      onEventPopoverHide: event => store.hide(event.id),
-      onEventPopoverShow: event => {
+      onEventPopoverHide: (_event, popoverId) => store.hide(popoverId),
+      onEventPopoverShow: (event, popoverId) => {
         const descriptor = resolveEvent(event);
         if (descriptor !== null) {
-          store.show(event.id, descriptor);
+          store.show(popoverId, descriptor);
         }
       },
-      renderEventPopover: (event, {close}) =>
-        resolveEvent(event) === null ? null : (
+      renderEventPopover: (event, {close, popoverId}) => {
+        const descriptor = resolveEvent(event);
+        return descriptor === null ? null : (
           <PreloadedEventPopoverContent
             close={close}
+            descriptor={descriptor}
             errorFallback={errorFallback}
-            event={event}
             loadingFallback={resolvedLoadingFallback}
-            resolve={resolveEvent}
+            popoverId={popoverId}
             store={store}
           />
-        ),
+        );
+      },
     };
-  }, [
-    errorFallback,
-    hasCloseButton,
-    hoverIntentMs,
-    resolve,
-    resolvedLoadingFallback,
-    store,
-  ]);
+  }, [errorFallback, hasCloseButton, resolve, resolvedLoadingFallback, store]);
 }
