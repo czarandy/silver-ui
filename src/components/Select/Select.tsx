@@ -28,6 +28,7 @@ import {
   selectTriggerRecipe,
 } from 'components/Select/Select.recipe';
 import {Spinner} from 'components/Spinner';
+import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import {useResolvedSize} from 'internal/SizeContext';
 import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
@@ -114,6 +115,16 @@ export type SelectProps<TAuxiliaryData = unknown> = {
    * Supporting text displayed below the label.
    */
   description?: ReactNode;
+  /**
+   * Text shown in the menu when there are no options at all.
+   * @default 'No options'
+   */
+  emptyOptionsText?: string;
+  /**
+   * Text shown in the menu when the search query matches no options.
+   * @default 'No results found'
+   */
+  emptySearchResultsText?: string;
   /**
    * Whether to show a clear button when a value is selected.
    * @default false
@@ -237,6 +248,8 @@ export function Select<TAuxiliaryData = unknown>({
   className,
   'data-testid': dataTestId,
   description,
+  emptyOptionsText = 'No options',
+  emptySearchResultsText = 'No results found',
   hasClear = false,
   hasEntriesOnFocus = false,
   hasSearch = false,
@@ -334,6 +347,7 @@ export function Select<TAuxiliaryData = unknown>({
     setQuery,
     statusMessageID,
     triggerRef,
+    visibleSelectableOptions,
   } = useSelectListbox({
     description,
     hasEntriesOnFocus,
@@ -437,6 +451,7 @@ export function Select<TAuxiliaryData = unknown>({
     sectionHeadingClassName: menuClasses.sectionHeading ?? '',
   });
 
+  const isEmpty = visibleSelectableOptions.length === 0;
   const menu = (
     <>
       {hasSearch ? (
@@ -462,9 +477,20 @@ export function Select<TAuxiliaryData = unknown>({
       <div
         aria-label={`${label} options`}
         className={menuClasses.menu}
+        hidden={isEmpty}
         id={listboxId}
         role="listbox">
         {optionNodes}
+      </div>
+      {/* Outside the listbox: a message is not a valid listbox child. */}
+      <div className={isEmpty ? menuClasses.empty : undefined} role="status">
+        {isEmpty ? (
+          <Text as="span" color="secondary" type="supporting">
+            {selectableOptions.length === 0
+              ? emptyOptionsText
+              : emptySearchResultsText}
+          </Text>
+        ) : null}
       </div>
     </>
   );

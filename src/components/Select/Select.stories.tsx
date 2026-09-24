@@ -275,6 +275,32 @@ export const Searchable: Story = {
   render: (args: SelectProps) => <SelectStory {...args} />,
 };
 
+export const EmptySearchResults: Story = {
+  args: {hasSearch: true},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Open the menu and type a query that matches nothing, such as "zzz". The menu shows "No results found" (customizable with `emptySearchResultsText`) instead of a blank panel. The message sits outside the listbox in a status region, so screen readers announce it.',
+      },
+    },
+  },
+  render: (args: SelectProps) => <SelectStory {...args} />,
+};
+
+export const NoOptions: Story = {
+  args: {emptyOptionsText: 'No teammates to assign yet', options: []},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With an empty `options` array, the menu shows `emptyOptionsText` (default "No options").',
+      },
+    },
+  },
+  render: (args: SelectProps) => <EmptySelectStory {...args} />,
+};
+
 export const EntriesOnFocus: Story = {
   args: {hasEntriesOnFocus: true},
   parameters: {

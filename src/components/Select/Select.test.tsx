@@ -51,6 +51,18 @@ beforeAll(() => {
   });
 });
 
+function getEmptyStateStatus(message: string): HTMLElement {
+  const regions = screen
+    .getAllByRole('status', {hidden: true})
+    .filter(region => region.textContent === message);
+  if (regions.length !== 1) {
+    throw new Error(
+      `Expected one status region reading "${message}", found ${regions.length}.`,
+    );
+  }
+  return regions[0];
+}
+
 describe('Select', () => {
   it('attaches its positioning anchor before parent layout effects run', () => {
     const observedAnchorNames: string[] = [];
@@ -642,6 +654,88 @@ describe('Select', () => {
 
     fireEvent.keyDown(trigger, {isComposing: true, key: 'Escape'});
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  describe('empty state', () => {
+    it('shows the empty search message outside the listbox when nothing matches', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <Select
+          hasSearch
+          label="Fruit"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          value={null}
+        />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
+      const listbox = screen.getByRole('listbox', {
+        hidden: true,
+        name: 'Fruit options',
+      });
+      expect(listbox).not.toHaveAttribute('hidden');
+      expect(screen.queryByText('No results found')).not.toBeInTheDocument();
+
+      await user.type(screen.getByLabelText('Search Fruit'), 'zzz');
+
+      const status = getEmptyStateStatus('No results found');
+      expect(listbox).not.toContainElement(status);
+      expect(listbox).toHaveAttribute('hidden');
+
+      await user.clear(screen.getByLabelText('Search Fruit'));
+      expect(screen.queryByText('No results found')).not.toBeInTheDocument();
+      expect(listbox).not.toHaveAttribute('hidden');
+    });
+
+    it('shows the empty options message when there are no options', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <Select label="Fruit" onChange={() => {}} options={[]} value={null} />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
+      expect(getEmptyStateStatus('No options')).toBeInTheDocument();
+      // A `hidden` listbox has no computed accessible name to query by.
+      expect(screen.getByRole('listbox', {hidden: true})).toHaveAttribute(
+        'hidden',
+      );
+    });
+
+    it('supports custom empty messages', async () => {
+      const user = userEvent.setup();
+
+      const {rerender} = render(
+        <Select
+          emptyOptionsText="Nothing to pick"
+          emptySearchResultsText="No fruit matches"
+          hasSearch
+          label="Fruit"
+          onChange={() => {}}
+          options={['Apple']}
+          value={null}
+        />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Fruit'}));
+      await user.type(screen.getByLabelText('Search Fruit'), 'zzz');
+      expect(getEmptyStateStatus('No fruit matches')).toBeInTheDocument();
+
+      rerender(
+        <Select
+          emptyOptionsText="Nothing to pick"
+          emptySearchResultsText="No fruit matches"
+          hasSearch
+          label="Fruit"
+          onChange={() => {}}
+          options={[]}
+          value={null}
+        />,
+      );
+      expect(getEmptyStateStatus('Nothing to pick')).toBeInTheDocument();
+    });
   });
 
   it('filters options when search is enabled', async () => {

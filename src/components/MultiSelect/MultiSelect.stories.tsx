@@ -243,6 +243,32 @@ export const IndicatorPosition: Story = {
   ),
 };
 
+export const EmptySearchResults: Story = {
+  args: {hasSearch: true, hasSelectAll: true},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Open the menu and type a query that matches nothing, such as "zzz". The menu shows "No results found" (customizable with `emptySearchResultsText`) and hides the select-all row, since there is nothing to select.',
+      },
+    },
+  },
+  render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
+};
+
+export const NoOptions: Story = {
+  args: {emptyOptionsText: 'No columns available', options: []},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'With an empty `options` array, the menu shows `emptyOptionsText` (default "No options").',
+      },
+    },
+  },
+  render: (args: MultiSelectProps) => <EmptyMultiSelectStory {...args} />,
+};
+
 export const Badges: Story = {
   args: {triggerDisplay: 'badges'},
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
