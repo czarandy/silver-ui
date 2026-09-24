@@ -1,8 +1,12 @@
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Edit, Trash2} from 'lucide-react';
+import {createRef} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
-import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
+import {
+  DropdownMenu,
+  type DropdownMenuButtonProps,
+} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
 import {assertNonNull} from 'internal/testHelpers';
 
@@ -510,21 +514,54 @@ describe('DropdownMenu', () => {
     );
   });
 
-  it('renders button endContent alongside the chevron', () => {
+  it('applies the top-level ref and data-testid to the trigger', () => {
+    const ref = createRef<HTMLButtonElement>();
+
     render(
       <DropdownMenu
-        button={{
-          endContent: <span data-testid="btn-end">99</span>,
-          label: 'Inbox',
-        }}
+        button={{'data-track': 'menu', label: 'Actions'}}
+        data-testid="menu-trigger"
+        items={[{label: 'Edit'}]}
+        ref={ref}
+      />,
+    );
+
+    const trigger = screen.getByRole('button', {name: 'Actions'});
+    expect(screen.getByTestId('menu-trigger')).toBe(trigger);
+    expect(ref.current).toBe(trigger);
+    // Other data attributes still pass through the button props.
+    expect(trigger).toHaveAttribute('data-track', 'menu');
+  });
+
+  it('excludes trigger fields that DropdownMenu owns from button props', () => {
+    const ref = createRef<HTMLButtonElement>();
+    const withTestId: DropdownMenuButtonProps = {
+      // @ts-expect-error Use DropdownMenu's own `data-testid` prop.
+      'data-testid': 'ignored-testid',
+      label: 'Actions',
+    };
+    const withEndContent: DropdownMenuButtonProps = {
+      // @ts-expect-error The trigger's end content is reserved for the chevron.
+      endContent: <span data-testid="ignored-end">99</span>,
+      label: 'Actions',
+    };
+    const withRef: DropdownMenuButtonProps = {
+      label: 'Actions',
+      // @ts-expect-error Use DropdownMenu's own `ref` prop.
+      ref,
+    };
+
+    render(
+      <DropdownMenu
+        button={{...withTestId, ...withEndContent, ...withRef}}
         items={[{label: 'Edit'}]}
       />,
     );
 
-    const button = screen.getByRole('button', {name: 'Inbox'});
-    expect(screen.getByTestId('btn-end')).toBeInTheDocument();
-    // eslint-disable-next-line testing-library/no-node-access -- verifying chevron SVG is also present
-    expect(button.querySelector('svg')).toBeInTheDocument();
+    // Untyped callers passing them anyway get no half-applied behavior.
+    expect(screen.queryByTestId('ignored-testid')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ignored-end')).not.toBeInTheDocument();
+    expect(ref.current).toBeNull();
   });
 
   it('throws when both items and children are provided', () => {

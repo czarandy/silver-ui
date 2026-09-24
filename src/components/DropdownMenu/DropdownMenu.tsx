@@ -37,7 +37,19 @@ type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
   ? Omit<T, K>
   : never;
 
-export type DropdownMenuButtonProps = DistributiveOmit<ButtonProps, 'onClick'>;
+/**
+ * Trigger button props. `ref` and `data-testid` are set with DropdownMenu's own
+ * top-level props, and the trigger's end content is reserved for the chevron,
+ * so those fields are excluded rather than silently overwritten.
+ */
+export type DropdownMenuButtonProps = DistributiveOmit<
+  ButtonProps,
+  'data-testid' | 'endContent' | 'onClick' | 'ref'
+> & {
+  // Button accepts arbitrary `data-*` attributes through an index signature,
+  // which would otherwise still admit `data-testid` after the omit.
+  'data-testid'?: never;
+};
 
 export interface DropdownMenuProps {
   /**
@@ -224,10 +236,7 @@ export function DropdownMenu({
         {...button}
         data-testid={dataTestId}
         endContent={
-          <>
-            {button.endContent}
-            {hasChevron ? <Icon icon={ChevronDown} size="sm" /> : null}
-          </>
+          hasChevron ? <Icon icon={ChevronDown} size="sm" /> : undefined
         }
         onClick={onClick}
         ref={mergeRefs(ref, triggerRef)}

@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Archive, Check, Edit, Inbox, MoreVertical, Trash2} from 'lucide-react';
+import {Archive, Check, Edit, MoreVertical, Trash2} from 'lucide-react';
 import {useState} from 'react';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
@@ -246,22 +246,6 @@ export const GhostTrigger: Story = {
     items: [
       {icon: Edit, label: 'Edit'},
       {icon: Archive, label: 'Archive'},
-    ],
-  },
-};
-
-export const TriggerWithEndContent: Story = {
-  args: {
-    button: {
-      endContent: <Icon icon={Inbox} />,
-      label: 'Inbox',
-      variant: 'secondary',
-    },
-    items: [
-      {icon: Edit, label: 'Edit'},
-      {icon: Archive, label: 'Archive'},
-      {type: 'divider'},
-      {icon: Trash2, label: 'Delete'},
     ],
   },
 };
