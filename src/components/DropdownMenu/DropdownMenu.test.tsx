@@ -318,6 +318,99 @@ describe('DropdownMenu', () => {
     expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
+  describe('hasCloseOnSelect', () => {
+    it('keeps the menu open and focus on a compound item set to false', async () => {
+      const user = userEvent.setup();
+      const onToggle = vi.fn();
+
+      render(
+        <DropdownMenu button={{label: 'Columns'}}>
+          <DropdownMenuItem
+            hasCloseOnSelect={false}
+            label="Email"
+            onClick={onToggle}
+          />
+          <DropdownMenuItem label="Reset" />
+        </DropdownMenu>,
+      );
+
+      const trigger = screen.getByRole('button', {name: 'Columns'});
+      await user.click(trigger);
+
+      const item = screen.getByRole('menuitem', {hidden: true, name: 'Email'});
+      await user.click(item);
+      await user.click(item);
+
+      expect(onToggle).toHaveBeenCalledTimes(2);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      expect(item).toHaveFocus();
+
+      // Items without the opt-out still close the menu.
+      await user.click(
+        screen.getByRole('menuitem', {hidden: true, name: 'Reset'}),
+      );
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('keeps the menu open for keyboard activation', async () => {
+      const user = userEvent.setup();
+      const onToggle = vi.fn();
+
+      render(
+        <DropdownMenu
+          button={{label: 'Columns'}}
+          items={[{hasCloseOnSelect: false, label: 'Email', onClick: onToggle}]}
+        />,
+      );
+
+      const trigger = screen.getByRole('button', {name: 'Columns'});
+      await user.click(trigger);
+      const item = screen.getByRole('menuitem', {hidden: true, name: 'Email'});
+      item.focus();
+
+      await user.keyboard('{Enter}');
+      await user.keyboard(' ');
+
+      expect(onToggle).toHaveBeenCalledTimes(2);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      expect(item).toHaveFocus();
+    });
+
+    it('threads the option through data-driven sections', async () => {
+      const user = userEvent.setup();
+      const onToggle = vi.fn();
+
+      render(
+        <DropdownMenu
+          button={{label: 'Columns'}}
+          items={[
+            {
+              items: [
+                {hasCloseOnSelect: false, label: 'Email', onClick: onToggle},
+                {label: 'Done'},
+              ],
+              title: 'Visible columns',
+              type: 'section',
+            },
+          ]}
+        />,
+      );
+
+      const trigger = screen.getByRole('button', {name: 'Columns'});
+      await user.click(trigger);
+      await user.click(
+        screen.getByRole('menuitem', {hidden: true, name: 'Email'}),
+      );
+      expect(onToggle).toHaveBeenCalledTimes(1);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+      await user.click(
+        screen.getByRole('menuitem', {hidden: true, name: 'Done'}),
+      );
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+  });
+
   it('hides popover on Escape key via light-dismiss', async () => {
     const user = userEvent.setup();
 

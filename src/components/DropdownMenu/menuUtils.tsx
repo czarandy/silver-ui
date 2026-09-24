@@ -69,6 +69,7 @@ export function renderMenuItems(
           {item.items.map(sectionItem => (
             <DropdownMenuItem
               description={sectionItem.description}
+              hasCloseOnSelect={sectionItem.hasCloseOnSelect}
               icon={sectionItem.icon}
               isDisabled={sectionItem.isDisabled}
               key={sectionItem.label}
@@ -84,6 +85,7 @@ export function renderMenuItems(
     return (
       <DropdownMenuItem
         description={item.description}
+        hasCloseOnSelect={item.hasCloseOnSelect}
         icon={item.icon}
         isDisabled={item.isDisabled}
         key={item.label}

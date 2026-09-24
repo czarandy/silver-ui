@@ -7,6 +7,13 @@ export interface DropdownMenuItemData {
    */
   description?: ReactNode;
   /**
+   * Whether activating the item closes the menu. Set to `false` for items
+   * users flip repeatedly, such as toggles, so the menu stays open with focus
+   * on the item.
+   * @default true
+   */
+  hasCloseOnSelect?: boolean;
+  /**
    * Icon rendered before the label.
    */
   icon?: IconComponent;
