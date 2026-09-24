@@ -1,8 +1,9 @@
-import {act, fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {afterEach, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
+import {Dialog} from 'components/Dialog/Dialog';
 import {Toast} from 'components/Toast/Toast';
 import {ToastViewport} from 'components/Toast/ToastViewport';
 import type {ToastDismissFn, ToastOptions} from 'components/Toast/types';
@@ -12,6 +13,22 @@ beforeAll(() => {
   Object.defineProperty(HTMLElement.prototype, 'showPopover', {
     configurable: true,
     value: vi.fn(),
+  });
+  Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
+    configurable: true,
+    value: vi.fn(),
+  });
+  Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+    configurable: true,
+    value(this: HTMLDialogElement) {
+      this.setAttribute('open', '');
+    },
+  });
+  Object.defineProperty(HTMLDialogElement.prototype, 'close', {
+    configurable: true,
+    value(this: HTMLDialogElement) {
+      this.removeAttribute('open');
+    },
   });
 });
 
@@ -533,5 +550,550 @@ describe('Toast', () => {
 
     const viewport = screen.getByTestId('viewport');
     expect(viewport).toHaveStyle({top: '64px', insetInlineEnd: '16px'});
+  });
+});
+
+describe('ToastViewport top layer ordering', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function spyOnPopover() {
+    const events: string[] = [];
+    const show = vi
+      .spyOn(HTMLElement.prototype, 'showPopover')
+      .mockImplementation(() => {
+        events.push('show');
+      });
+    const hide = vi
+      .spyOn(HTMLElement.prototype, 'hidePopover')
+      .mockImplementation(() => {
+        events.push('hide');
+      });
+    return {events, hide, show};
+  }
+
+  // The top layer stacks in insertion order, so re-entering it is the only way
+  // to get above a modal dialog that opened after the viewport mounted.
+  it('re-enters the top layer when a new toast is shown', async () => {
+    const user = userEvent.setup();
+    const {events} = spyOnPopover();
+
+    render(
+      <ToastViewport>
+        <ShowToastFixture body="Saved" isAutoHide={false} />
+      </ToastViewport>,
+    );
+    expect(events.at(-1)).toBe('show');
+    events.length = 0;
+
+    await user.click(screen.getByRole('button', {name: 'Show'}));
+    expect(events).toEqual(['hide', 'show']);
+
+    await user.click(screen.getByRole('button', {name: 'Show'}));
+    expect(events).toEqual(['hide', 'show', 'hide', 'show']);
+  });
+
+  it('keeps its place when a toast is dismissed', async () => {
+    const user = userEvent.setup();
+    const {events} = spyOnPopover();
+
+    render(
+      <ToastViewport>
+        <ShowToastFixture body="Saved" isAutoHide={false} />
+      </ToastViewport>,
+    );
+    await user.click(screen.getByRole('button', {name: 'Show'}));
+    events.length = 0;
+
+    // jsdom never marks the mocked popover open, so its UA stylesheet hides
+    // the viewport from role queries.
+    await user.click(
+      screen.getByRole('button', {hidden: true, name: 'Dismiss notification'}),
+    );
+    await act(async () => {
+      await new Promise(resolve => globalThis.setTimeout(resolve, 250));
+    });
+
+    expect(screen.queryByText('Saved')).not.toBeInTheDocument();
+    expect(events).toEqual([]);
+  });
+
+  it('keeps its place when a colliding toast is ignored', async () => {
+    const user = userEvent.setup();
+    const {events} = spyOnPopover();
+
+    render(
+      <ToastViewport>
+        <IgnoreFixture />
+      </ToastViewport>,
+    );
+    await user.click(screen.getByRole('button', {name: 'Add first'}));
+    events.length = 0;
+
+    await user.click(screen.getByRole('button', {name: 'Add second'}));
+    expect(screen.getByText('First toast')).toBeInTheDocument();
+    expect(events).toEqual([]);
+  });
+
+  it('re-enters the top layer when a toast is overwritten', async () => {
+    const user = userEvent.setup();
+    const {events} = spyOnPopover();
+
+    render(
+      <ToastViewport>
+        <OverwriteFixture />
+      </ToastViewport>,
+    );
+    await user.click(screen.getByRole('button', {name: 'First'}));
+    events.length = 0;
+
+    await user.click(screen.getByRole('button', {name: 'Second'}));
+    expect(screen.getByText('Second message')).toBeInTheDocument();
+    expect(events).toEqual(['hide', 'show']);
+  });
+
+  it('does not touch the top layer when isTopLayer is false', async () => {
+    const user = userEvent.setup();
+    const {events} = spyOnPopover();
+
+    render(
+      <ToastViewport isTopLayer={false}>
+        <ShowToastFixture body="Saved" />
+      </ToastViewport>,
+    );
+    await user.click(screen.getByRole('button', {name: 'Show'}));
+
+    expect(screen.getByText('Saved')).toBeInTheDocument();
+    expect(events).toEqual([]);
+  });
+
+  it('restores focus inside the viewport after re-entering the top layer', async () => {
+    const user = userEvent.setup();
+    // Hiding a popover blurs whatever was focused inside it.
+    vi.spyOn(HTMLElement.prototype, 'hidePopover').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      // eslint-disable-next-line testing-library/no-node-access -- the mock stands in for the browser's own blur on hide
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && this.contains(active)) {
+        active.blur();
+      }
+    });
+
+    function Fixture(): React.JSX.Element {
+      const toast = useToast();
+      return (
+        <Button
+          label="Show"
+          onClick={() =>
+            toast({
+              body: 'Item deleted',
+              endContent: (
+                <Button
+                  label="Undo"
+                  onClick={() =>
+                    toast({body: 'Item restored', isAutoHide: false})
+                  }
+                  size="sm"
+                  variant="onSolid"
+                />
+              ),
+              isAutoHide: false,
+            })
+          }
+        />
+      );
+    }
+
+    render(
+      <ToastViewport>
+        <Fixture />
+      </ToastViewport>,
+    );
+    await user.click(screen.getByRole('button', {name: 'Show'}));
+    const undo = screen.getByRole('button', {hidden: true, name: 'Undo'});
+    await user.click(undo);
+
+    expect(screen.getByText('Item restored')).toBeInTheDocument();
+    expect(undo).toHaveFocus();
+  });
+});
+
+describe('ToastViewport modal hosting', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  /**
+   * An app with a toast trigger and two dialogs, the second opened from inside
+   * the first. Every control stays reachable from the test even though a real
+   * modal would make the page behind it inert.
+   */
+  function ModalApp({
+    toastOptions,
+  }: {
+    toastOptions?: Partial<ToastOptions>;
+  }): React.JSX.Element {
+    const toast = useToast();
+    const [isOuterOpen, setIsOuterOpen] = useState(false);
+    const [isInnerOpen, setIsInnerOpen] = useState(false);
+    const showToast = (body: string): void => {
+      toast({body, isAutoHide: false, ...toastOptions});
+    };
+    return (
+      <>
+        <Button label="Show before" onClick={() => showToast('Before')} />
+        <Button label="Open outer" onClick={() => setIsOuterOpen(true)} />
+        <Button label="Close outer" onClick={() => setIsOuterOpen(false)} />
+        <Button label="Open inner" onClick={() => setIsInnerOpen(true)} />
+        <Button label="Close inner" onClick={() => setIsInnerOpen(false)} />
+        <Dialog
+          data-testid="outer"
+          isOpen={isOuterOpen}
+          label="Outer"
+          onOpenChange={setIsOuterOpen}>
+          <Button label="Show inside" onClick={() => showToast('Inside')} />
+          <Dialog
+            data-testid="inner"
+            isOpen={isInnerOpen}
+            label="Inner"
+            onOpenChange={setIsInnerOpen}>
+            Inner content
+          </Dialog>
+        </Dialog>
+      </>
+    );
+  }
+
+  function click(name: string): void {
+    fireEvent.click(screen.getByRole('button', {hidden: true, name}));
+  }
+
+  function getViewport(): HTMLElement {
+    return screen.getByTestId('viewport');
+  }
+
+  function spyOnPopoverEvents(): {events: string[]} {
+    const events: string[] = [];
+    vi.spyOn(HTMLElement.prototype, 'hidePopover').mockImplementation(() => {
+      events.push('hide');
+    });
+    vi.spyOn(HTMLElement.prototype, 'showPopover').mockImplementation(() => {
+      events.push('show');
+    });
+    return {events};
+  }
+
+  async function openAndWaitForHost(name: string, hostTestId: string) {
+    click(name);
+    await waitFor(() =>
+      expect(screen.getByTestId(hostTestId)).toContainElement(getViewport()),
+    );
+  }
+
+  // jsdom has no inertness, so containment in the active modal is the
+  // observable part of staying operable above it.
+  it('moves into the active modal and back out as dialogs open and close', async () => {
+    render(
+      <ToastViewport data-testid="viewport">
+        <ModalApp />
+      </ToastViewport>,
+    );
+    expect(screen.getByTestId('outer')).not.toContainElement(getViewport());
+
+    await openAndWaitForHost('Open outer', 'outer');
+    await openAndWaitForHost('Open inner', 'inner');
+
+    click('Close inner');
+    await waitFor(() =>
+      expect(screen.getByTestId('inner')).not.toContainElement(getViewport()),
+    );
+    expect(screen.getByTestId('outer')).toContainElement(getViewport());
+
+    click('Close outer');
+    await waitFor(() =>
+      expect(screen.getByTestId('outer')).not.toContainElement(getViewport()),
+    );
+  });
+
+  it('keeps its element and toasts, and re-shows the popover, when it moves', async () => {
+    const show = vi.spyOn(HTMLElement.prototype, 'showPopover');
+    render(
+      <ToastViewport data-testid="viewport">
+        <ModalApp />
+      </ToastViewport>,
+    );
+    click('Show before');
+    const viewport = getViewport();
+    show.mockClear();
+
+    await openAndWaitForHost('Open outer', 'outer');
+
+    expect(getViewport()).toBe(viewport);
+    expect(viewport).toHaveTextContent('Before');
+    expect(show.mock.contexts).toContain(viewport);
+  });
+
+  it('does not remount toast content when it moves', async () => {
+    const onMount = vi.fn();
+    function MountProbe(): React.JSX.Element {
+      useEffect(() => {
+        onMount();
+      }, []);
+      return <span>probe</span>;
+    }
+    render(
+      <ToastViewport data-testid="viewport">
+        <ModalApp toastOptions={{endContent: <MountProbe />}} />
+      </ToastViewport>,
+    );
+    click('Show before');
+    expect(onMount).toHaveBeenCalledTimes(1);
+
+    await openAndWaitForHost('Open outer', 'outer');
+    click('Close outer');
+    await waitFor(() =>
+      expect(screen.getByTestId('outer')).not.toContainElement(getViewport()),
+    );
+
+    expect(onMount).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps counting down a toast through a move', async () => {
+    vi.useFakeTimers();
+    render(
+      <ToastViewport data-testid="viewport">
+        <ModalApp toastOptions={{autoHideDuration: 5000, isAutoHide: true}} />
+      </ToastViewport>,
+    );
+
+    click('Show before');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3000);
+    });
+    click('Open outer');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(screen.getByTestId('outer')).toContainElement(getViewport());
+    expect(getViewport()).toHaveTextContent('Before');
+
+    // A restarted timer would keep the toast for another 5000ms.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2500);
+    });
+    expect(getViewport()).not.toHaveTextContent('Before');
+  });
+
+  // Hiding the popover to re-raise it blurs whatever was focused inside it.
+  it('keeps focus on a toast action inside a dialog that shows another toast', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(HTMLElement.prototype, 'hidePopover').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      // eslint-disable-next-line testing-library/no-node-access -- the mock stands in for the browser's own blur on hide
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && this.contains(active)) {
+        active.blur();
+      }
+    });
+    function App(): React.JSX.Element {
+      const toast = useToast();
+      return (
+        <Dialog isOpen label="Edit" onOpenChange={() => {}}>
+          <Button
+            label="Delete"
+            onClick={() =>
+              toast({
+                body: 'Item deleted',
+                endContent: (
+                  <Button
+                    label="Undo"
+                    onClick={() =>
+                      toast({body: 'Item restored', isAutoHide: false})
+                    }
+                    size="sm"
+                    variant="onSolid"
+                  />
+                ),
+                isAutoHide: false,
+              })
+            }
+          />
+        </Dialog>
+      );
+    }
+    render(
+      <ToastViewport data-testid="viewport">
+        <App />
+      </ToastViewport>,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('dialog', {hidden: true})).toContainElement(
+        getViewport(),
+      ),
+    );
+
+    await user.click(
+      screen.getByRole('button', {hidden: true, name: 'Delete'}),
+    );
+    const undo = screen.getByRole('button', {hidden: true, name: 'Undo'});
+    await user.click(undo);
+
+    expect(screen.getByText('Item restored')).toBeInTheDocument();
+    expect(undo).toHaveFocus();
+  });
+
+  // A moved node restarts from @starting-style. The Toast recipe skips its
+  // entry under [data-toast-skip-entry], which must be present while the
+  // browser resolves the moved toasts' styles and gone afterwards.
+  it('skips the entry transition for toasts it moves', async () => {
+    render(
+      <ToastViewport data-testid="viewport">
+        <ModalApp />
+      </ToastViewport>,
+    );
+    click('Show before');
+    const viewport = getViewport();
+    const skipEntryDuringLayout: boolean[] = [];
+    vi.spyOn(viewport, 'getBoundingClientRect').mockImplementation(() => {
+      skipEntryDuringLayout.push(
+        // eslint-disable-next-line testing-library/no-node-access -- the attribute sits on the viewport's untracked container
+        viewport.closest('[data-toast-skip-entry]') != null,
+      );
+      return new DOMRect();
+    });
+
+    await openAndWaitForHost('Open outer', 'outer');
+
+    expect(skipEntryDuringLayout).toEqual([true]);
+    // ...and the Toast recipe carries the rule that the attribute switches on.
+    expect(
+      screen
+        .getAllByRole('status', {hidden: true})
+        .find(element => element.textContent.includes('Before'))?.className,
+    ).toContain('[[data-toast-skip-entry]_&]:[@starting-style]:silver-op_1');
+    // eslint-disable-next-line testing-library/no-node-access -- the attribute sits on the viewport's untracked container
+    expect(viewport.closest('[data-toast-skip-entry]')).toBeNull();
+  });
+
+  it('stays put, and below, when a dialog opened from inside a toast becomes active', async () => {
+    function ShowFromDetails(): React.JSX.Element {
+      const toast = useToast();
+      return (
+        <Button
+          label="Show from details"
+          onClick={() => toast({body: 'From details', isAutoHide: false})}
+        />
+      );
+    }
+    function DetailsAction(): React.JSX.Element {
+      const [isOpen, setIsOpen] = useState(false);
+      return (
+        <>
+          <Button label="Details" onClick={() => setIsOpen(true)} size="sm" />
+          <Dialog
+            data-testid="details"
+            isOpen={isOpen}
+            label="Details"
+            onOpenChange={setIsOpen}>
+            <ShowFromDetails />
+          </Dialog>
+        </>
+      );
+    }
+    render(
+      <ToastViewport data-testid="viewport">
+        <ModalApp toastOptions={{endContent: <DetailsAction />}} />
+      </ToastViewport>,
+    );
+    await openAndWaitForHost('Open outer', 'outer');
+    click('Show inside');
+
+    const {events} = spyOnPopoverEvents();
+
+    // The viewport cannot move into its own descendant; it stays in the outer
+    // dialog, where the details dialog it contains is not inert.
+    click('Details');
+    await waitFor(() =>
+      expect(screen.getByTestId('details')).toHaveAttribute('open'),
+    );
+    expect(screen.getByTestId('outer')).toContainElement(getViewport());
+    expect(getViewport()).toContainElement(screen.getByTestId('details'));
+
+    // Nor does it re-raise above the details dialog, which the user is using,
+    // when the stack changes or a new toast is shown.
+    click('Show from details');
+    expect(getViewport()).toHaveTextContent('From details');
+    expect(events).toEqual([]);
+  });
+
+  // Dialog answers a platform close it did not initiate by reopening, which
+  // puts the dialog back above everything, including the viewport inside it.
+  it('re-enters the top layer when its host dialog reopens', async () => {
+    render(
+      <ToastViewport data-testid="viewport">
+        <ModalApp />
+      </ToastViewport>,
+    );
+    await openAndWaitForHost('Open outer', 'outer');
+    const outer = screen.getByTestId<HTMLDialogElement>('outer');
+    const {events} = spyOnPopoverEvents();
+
+    outer.close();
+    fireEvent(outer, new Event('close'));
+
+    await waitFor(() => expect(events).toEqual(['hide', 'show']));
+    expect(outer).toContainElement(getViewport());
+  });
+
+  it('does not dismiss the dialog when a toast inside it is clicked', async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    function App(): React.JSX.Element {
+      const toast = useToast();
+      return (
+        <Dialog isOpen label="Edit" onOpenChange={onOpenChange}>
+          <Button
+            label="Show inside"
+            onClick={() => toast({body: 'Inside', isAutoHide: false})}
+          />
+        </Dialog>
+      );
+    }
+    render(
+      <ToastViewport data-testid="viewport">
+        <App />
+      </ToastViewport>,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole('dialog', {hidden: true})).toContainElement(
+        getViewport(),
+      ),
+    );
+
+    await user.click(
+      screen.getByRole('button', {hidden: true, name: 'Show inside'}),
+    );
+    await user.click(
+      screen.getByRole('button', {hidden: true, name: 'Dismiss notification'}),
+    );
+
+    expect(onOpenChange).not.toHaveBeenCalled();
+  });
+
+  it('stays in place when isTopLayer is false', async () => {
+    render(
+      <ToastViewport data-testid="viewport" isTopLayer={false}>
+        <ModalApp />
+      </ToastViewport>,
+    );
+
+    click('Open outer');
+    await waitFor(() =>
+      expect(screen.getByTestId('outer')).toHaveAttribute('open'),
+    );
+    expect(screen.getByTestId('outer')).not.toContainElement(getViewport());
   });
 });

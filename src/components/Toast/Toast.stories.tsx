@@ -1,7 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {Button} from 'components/Button';
+import {Dialog} from 'components/Dialog/Dialog';
+import {Layout, LayoutContent, LayoutFooter} from 'components/Layout';
 import {HStack} from 'components/Stack';
+import {Text} from 'components/Text';
 import {Toast} from 'components/Toast/Toast';
 import {ToastViewport} from 'components/Toast/ToastViewport';
 import type {ToastPosition} from 'components/Toast/types';
@@ -74,6 +77,112 @@ function WithEndContentStory(): React.JSX.Element {
         })
       }
     />
+  );
+}
+
+function useActionToast(): (body: string) => void {
+  const toast = useToast();
+  return (body: string) => {
+    toast({
+      body,
+      endContent: (
+        <Button
+          label="Undo"
+          onClick={() => toast({body: 'Undo clicked', type: 'success'})}
+          size="sm"
+          variant="onSolid"
+        />
+      ),
+      isAutoHide: false,
+    });
+  };
+}
+
+function ToastDemoDialog({
+  depth,
+  isOpen,
+  onOpenChange,
+}: {
+  depth: number;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
+}): React.JSX.Element {
+  const toast = useToast();
+  const showActionToast = useActionToast();
+  const [isNestedOpen, setIsNestedOpen] = useState(false);
+  const name = depth === 1 ? 'dialog' : 'nested dialog';
+  return (
+    <Dialog
+      isOpen={isOpen}
+      label={depth === 1 ? 'Edit item' : 'Confirm'}
+      onOpenChange={onOpenChange}
+      width={depth === 1 ? 560 : 440}>
+      <Layout
+        content={
+          <LayoutContent>
+            <Text as="p" color="secondary">
+              Toasts render inside the topmost open modal, so they stay above it
+              and their actions stay clickable. Toasts shown earlier move with
+              them without restarting their timers.
+            </Text>
+            <HStack gap={2} wrap="wrap">
+              <Button
+                label="Show toast"
+                onClick={() => toast({body: `Shown from the ${name}`})}
+              />
+              <Button
+                label="Show toast with action"
+                onClick={() => showActionToast(`Deleted from the ${name}`)}
+              />
+              {depth === 1 ? (
+                <Button
+                  label="Open nested dialog"
+                  onClick={() => setIsNestedOpen(true)}
+                />
+              ) : null}
+            </HStack>
+            {depth === 1 ? (
+              <ToastDemoDialog
+                depth={2}
+                isOpen={isNestedOpen}
+                onOpenChange={setIsNestedOpen}
+              />
+            ) : null}
+          </LayoutContent>
+        }
+        footer={
+          <LayoutFooter
+            primaryButton={
+              <Button label="Close" onClick={() => onOpenChange(false)} />
+            }
+          />
+        }
+      />
+    </Dialog>
+  );
+}
+
+function OverDialogStory(): React.JSX.Element {
+  const toast = useToast();
+  const showActionToast = useActionToast();
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <HStack gap={2}>
+        <Button
+          label="Show toast with action"
+          onClick={() => showActionToast('Shown before the dialog')}
+        />
+        <Button
+          label="Show 8s toast"
+          onClick={() =>
+            toast({body: 'Hides 8s after it was shown', autoHideDuration: 8000})
+          }
+        />
+        <Button label="Open dialog" onClick={() => setIsOpen(true)} />
+      </HStack>
+      <ToastDemoDialog depth={1} isOpen={isOpen} onOpenChange={setIsOpen} />
+    </>
   );
 }
 
@@ -156,6 +265,14 @@ export const WithEndContent: Story = {
   render: (): React.JSX.Element => (
     <ToastViewport>
       <WithEndContentStory />
+    </ToastViewport>
+  ),
+};
+
+export const OverDialog: Story = {
+  render: (): React.JSX.Element => (
+    <ToastViewport>
+      <OverDialogStory />
     </ToastViewport>
   ),
 };

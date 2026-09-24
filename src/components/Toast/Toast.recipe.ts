@@ -33,6 +33,17 @@ export const toastRecipe = sva({
         opacity: 0,
         transform: 'translateY(8px)',
       },
+      // Set by ToastViewport for the one style pass after it moves its toasts
+      // into or out of a modal dialog. A moved node restarts from
+      // @starting-style, which would replay the entry for a toast already on
+      // screen. The ancestor attribute also outranks the single-class rule
+      // above regardless of stylesheet order.
+      '[data-toast-skip-entry] &': {
+        '@starting-style': {
+          opacity: 1,
+          transform: 'none',
+        },
+      },
       '@media (prefers-reduced-motion: reduce)': {
         transitionDuration: '0.01ms',
       },

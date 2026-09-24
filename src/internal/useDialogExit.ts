@@ -3,6 +3,7 @@
 import {useEffect, useRef, useState, type RefObject} from 'react';
 import {getExitDurationMs} from 'internal/motion';
 import useLatest from 'internal/useLatest';
+import {useModalHost} from 'internal/useModalHost';
 
 interface UseDialogExitOptions {
   dialogRef: RefObject<HTMLDialogElement | null>;
@@ -47,6 +48,7 @@ export function useDialogExit({
   const onAfterEnterRef = useLatest(onAfterEnter);
   const onAfterExitRef = useLatest(onAfterExit);
   const onBeforeEnterRef = useLatest(onBeforeEnter);
+  useModalHost(dialogRef);
 
   useEffect(() => {
     const dialog = dialogRef.current;
