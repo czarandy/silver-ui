@@ -61,6 +61,24 @@ function FillLayoutStory(args: SegmentedControlProps): React.JSX.Element {
   );
 }
 
+function LongLabelsStory(args: SegmentedControlProps): React.JSX.Element {
+  const [value, setValue] = useState(args.value);
+
+  return (
+    <div style={{maxWidth: 250}}>
+      <SegmentedControl
+        {...args}
+        layout="fill"
+        onChange={setValue}
+        value={value}>
+        <SegmentedControlItem label="Monthly recurring revenue" value="mrr" />
+        <SegmentedControlItem label="Annual contract value" value="acv" />
+        <SegmentedControlItem label="Net revenue retention" value="nrr" />
+      </SegmentedControl>
+    </div>
+  );
+}
+
 function DisabledItemStory(args: SegmentedControlProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);
 
@@ -196,6 +214,24 @@ export const FillLayout: Story = {
   },
   render: (args: SegmentedControlProps): React.JSX.Element => (
     <FillLayoutStory {...args} />
+  ),
+};
+
+export const LongLabels: Story = {
+  args: {
+    label: 'Revenue metric',
+    value: 'mrr',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'When a fill layout squeezes segments below their label width, labels stay on one line and truncate with an ellipsis instead of wrapping out of the control. The full label remains the accessible name.',
+      },
+    },
+  },
+  render: (args: SegmentedControlProps): React.JSX.Element => (
+    <LongLabelsStory {...args} />
   ),
 };
 
