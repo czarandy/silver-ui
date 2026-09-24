@@ -1,4 +1,10 @@
-import {paddingVariants} from 'internal/spacingTokens';
+import {
+  paddingBlockEndVariants,
+  paddingBlockStartVariants,
+  paddingInlineEndVariants,
+  paddingInlineStartVariants,
+  paddingVariants,
+} from 'internal/spacingTokens';
 import {cva, type RecipeVariantProps} from 'styled-system/css';
 
 export const centerRecipe = cva({
@@ -24,6 +30,10 @@ export const centerRecipe = cva({
       },
     },
     padding: paddingVariants,
+    paddingBlockEnd: paddingBlockEndVariants,
+    paddingBlockStart: paddingBlockStartVariants,
+    paddingInlineEnd: paddingInlineEndVariants,
+    paddingInlineStart: paddingInlineStartVariants,
   },
   defaultVariants: {
     axis: 'both',

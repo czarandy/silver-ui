@@ -193,7 +193,7 @@ export const VerticalWithForm: Story = {
             label: 'Account',
             description: 'Enter your email',
             content: (
-              <VStack gap={3} style={{maxWidth: 320, paddingBlock: 8}}>
+              <VStack gap={3} paddingBlock={2} style={{maxWidth: 320}}>
                 <TextInput label="Email" onChange={() => {}} value="" />
                 <HStack gap={2}>
                   <Button
@@ -211,7 +211,7 @@ export const VerticalWithForm: Story = {
             label: 'Profile',
             description: 'Add your name',
             content: (
-              <VStack gap={3} style={{maxWidth: 320, paddingBlock: 8}}>
+              <VStack gap={3} paddingBlock={2} style={{maxWidth: 320}}>
                 <TextInput label="Name" onChange={() => {}} value="" />
                 <HStack gap={2}>
                   <Button
@@ -235,7 +235,7 @@ export const VerticalWithForm: Story = {
             label: 'Review',
             description: 'Confirm details',
             content: (
-              <VStack gap={3} style={{paddingBlock: 8}}>
+              <VStack gap={3} paddingBlock={2}>
                 <Text as="p">Everything looks good!</Text>
                 <HStack gap={2}>
                   <Button

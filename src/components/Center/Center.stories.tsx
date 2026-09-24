@@ -47,6 +47,21 @@ export const Padding: Story = {
   ),
 };
 
+export const AxisAndEdgePadding: Story = {
+  args: {
+    height: 'auto',
+    padding: 2,
+    paddingBlockEnd: 8,
+    paddingInline: 6,
+    width: 'fit-content',
+  },
+  render: args => (
+    <Center {...args} className={containerStyle}>
+      <Text type="body">Edge beats axis beats uniform padding</Text>
+    </Center>
+  ),
+};
+
 export const Horizontal: Story = {
   args: {
     axis: 'horizontal',

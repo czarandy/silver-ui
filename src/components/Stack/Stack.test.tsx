@@ -71,6 +71,75 @@ describe('Stack', () => {
     expect(screen.getByTestId('vstack')).toHaveClass('silver-p_6');
   });
 
+  it('applies axis padding to both edges of each axis', () => {
+    render(
+      <HStack data-testid="stack" paddingBlock={2} paddingInline={6}>
+        Content
+      </HStack>,
+    );
+
+    const stack = screen.getByTestId('stack');
+    expect(stack).toHaveClass(
+      'silver-pbs_2',
+      'silver-pbe_2',
+      'silver-ps_6',
+      'silver-pe_6',
+    );
+  });
+
+  it('resolves padding edge > axis > uniform', () => {
+    render(
+      <VStack
+        data-testid="stack"
+        padding={1}
+        paddingBlock={3}
+        paddingBlockEnd={10}
+        paddingInlineStart={8}>
+        Content
+      </VStack>,
+    );
+
+    const stack = screen.getByTestId('stack');
+    expect(stack).toHaveClass(
+      'silver-pbs_3',
+      'silver-pbe_10',
+      'silver-ps_8',
+      'silver-pe_1',
+    );
+  });
+
+  it('does not layer the padding shorthand over per-edge longhands', () => {
+    render(
+      <VStack data-testid="stack" padding={4} paddingBlockEnd={0}>
+        Content
+      </VStack>,
+    );
+
+    const classList = Array.from(screen.getByTestId('stack').classList);
+    expect(classList.some(c => c.startsWith('silver-p_'))).toBe(false);
+    expect(classList).toEqual(
+      expect.arrayContaining([
+        'silver-pbs_4',
+        'silver-pbe_0',
+        'silver-ps_4',
+        'silver-pe_4',
+      ]),
+    );
+  });
+
+  it('applies only the edges that are set when there is no uniform padding', () => {
+    render(
+      <VStack data-testid="stack" paddingBlockEnd={5}>
+        Content
+      </VStack>,
+    );
+
+    const paddingClasses = Array.from(
+      screen.getByTestId('stack').classList,
+    ).filter(c => /^silver-p[a-z]*_/.test(c));
+    expect(paddingClasses).toEqual(['silver-pbe_5']);
+  });
+
   it('applies numeric width and height as pixels', () => {
     render(
       <VStack data-testid="stack" height={200} width={300}>

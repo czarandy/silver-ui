@@ -59,6 +59,27 @@ describe('Center', () => {
     expect(screen.getByTestId('center')).toHaveClass('silver-p_4');
   });
 
+  it('resolves padding edge > axis > uniform', () => {
+    render(
+      <Center
+        data-testid="center"
+        padding={2}
+        paddingBlockEnd={8}
+        paddingInline={6}>
+        Content
+      </Center>,
+    );
+
+    const center = screen.getByTestId('center');
+    expect(center).toHaveClass(
+      'silver-pbs_2',
+      'silver-pbe_8',
+      'silver-ps_6',
+      'silver-pe_6',
+    );
+    expect(center).not.toHaveClass('silver-p_2');
+  });
+
   it('applies numeric width and height as pixels', () => {
     render(
       <Center data-testid="center" height={200} width={300}>
