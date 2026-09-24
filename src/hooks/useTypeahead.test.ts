@@ -127,6 +127,21 @@ describe('useTypeahead', () => {
     expect(onMatch).toHaveBeenLastCalledWith('Cherry', 3);
   });
 
+  it('calls onReset once the search buffer times out', () => {
+    const onReset = vi.fn();
+    const {type} = setup({onReset});
+
+    type('a');
+    type('p');
+    vi.advanceTimersByTime(TYPEAHEAD_TIMEOUT_MS - 1);
+    expect(onReset).not.toHaveBeenCalled();
+
+    // Each keystroke restarts the timer, so one reset ends the whole search.
+    type('p');
+    vi.advanceTimersByTime(TYPEAHEAD_TIMEOUT_MS);
+    expect(onReset).toHaveBeenCalledTimes(1);
+  });
+
   it('honors a custom timeout', () => {
     const {onMatch, type} = setup({
       getItems: () => ['Apple', 'Apricot', 'Peach'],

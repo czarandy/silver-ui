@@ -41,6 +41,12 @@ export interface UseTypeaheadOptions<TItem> {
    */
   onMatch: (item: TItem, index: number) => void;
   /**
+   * Called when the search buffer resets after `timeout` of inactivity, ending
+   * the current search. Every `onMatch` since the previous reset belongs to
+   * the same search.
+   */
+  onReset?: () => void;
+  /**
    * Milliseconds of inactivity after which the search buffer resets.
    * @default 500
    */
@@ -98,9 +104,11 @@ const useTypeahead = <TItem>({
   getItems,
   getLabel,
   onMatch,
+  onReset,
   timeout = TYPEAHEAD_TIMEOUT_MS,
 }: UseTypeaheadOptions<TItem>): TypeaheadKeyDownHandler => {
   const optionsRef = useLatest({getActiveIndex, getItems, getLabel, onMatch});
+  const onResetRef = useLatest(onReset);
   const timeoutRef = useLatest(timeout);
   const searchRef = useRef('');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -133,6 +141,7 @@ const useTypeahead = <TItem>({
       timerRef.current = setTimeout(() => {
         searchRef.current = '';
         timerRef.current = null;
+        onResetRef.current?.();
       }, timeoutRef.current);
 
       const {getActiveIndex, getItems, getLabel, onMatch} = optionsRef.current;
@@ -166,7 +175,7 @@ const useTypeahead = <TItem>({
       }
       return false;
     },
-    [optionsRef, timeoutRef],
+    [onResetRef, optionsRef, timeoutRef],
   );
 };
 

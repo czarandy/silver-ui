@@ -8,10 +8,12 @@ import {InputGroup} from 'components/InputGroup';
 import {InputGroupText} from 'components/InputGroup/InputGroupText';
 import {
   MultiSelect,
+  type MultiSelectProps,
   type MultiSelectVariant,
 } from 'components/MultiSelect/MultiSelect';
 import {multiSelectTriggerRecipe} from 'components/MultiSelect/MultiSelect.recipe';
 import {SelectOption} from 'components/Select';
+import {TYPEAHEAD_TIMEOUT_MS} from 'hooks/useTypeahead';
 import {SizeContext} from 'internal/SizeContext';
 import {statusMessageRecipe} from 'internal/StatusMessage.recipe';
 import {assertNonNull} from 'internal/testHelpers';
@@ -354,6 +356,171 @@ describe('MultiSelect', () => {
     await user.click(screen.getByRole('button', {name: 'Clear Columns'}));
 
     expect(onChange).toHaveBeenCalledWith([]);
+  });
+
+  describe('closed-trigger typeahead', () => {
+    async function waitForTypeaheadReset(): Promise<void> {
+      await new Promise(resolve => {
+        setTimeout(resolve, TYPEAHEAD_TIMEOUT_MS + 50);
+      });
+    }
+
+    const noValues: string[] = [];
+
+    function StatefulMultiSelect({
+      initialValue = noValues,
+      label,
+      onChange,
+      options,
+    }: {
+      initialValue?: string[];
+      label: string;
+      onChange: (value: string[]) => void;
+      options: MultiSelectProps['options'];
+    }) {
+      const [value, setValue] = useState(initialValue);
+      return (
+        <MultiSelect
+          label={label}
+          onChange={nextValue => {
+            onChange(nextValue);
+            setValue(nextValue);
+          }}
+          options={options}
+          value={value}
+        />
+      );
+    }
+
+    it('toggles the matching option without opening, refining as more characters are typed', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <StatefulMultiSelect
+          label="State"
+          onChange={onChange}
+          options={[
+            {label: 'Colorado', value: 'CO'},
+            {isDisabled: true, label: 'California disabled', value: 'x'},
+            {label: 'California', value: 'CA'},
+          ]}
+        />,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'State'});
+      trigger.focus();
+
+      await user.keyboard('c');
+      expect(onChange).toHaveBeenLastCalledWith(['CO']);
+
+      // "ca" refines the same search to California, undoing Colorado rather
+      // than leaving both selected, and skipping the disabled option.
+      await user.keyboard('a');
+      expect(onChange).toHaveBeenLastCalledWith(['CA']);
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('cycles through options starting with the same typed character', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <StatefulMultiSelect
+          initialValue={['January']}
+          label="Month"
+          onChange={onChange}
+          options={['January', 'March', 'May']}
+        />,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Month'});
+      trigger.focus();
+
+      await user.keyboard('m');
+      expect(onChange).toHaveBeenLastCalledWith(['January', 'March']);
+
+      await user.keyboard('m');
+      expect(onChange).toHaveBeenLastCalledWith(['January', 'May']);
+
+      await user.keyboard('m');
+      expect(onChange).toHaveBeenLastCalledWith(['January', 'March']);
+      expect(onChange).toHaveBeenCalledTimes(3);
+    });
+
+    it('keeps each finished search and deselects already selected matches', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <StatefulMultiSelect
+          initialValue={['Banana']}
+          label="Fruits"
+          onChange={onChange}
+          options={['Apple', 'Banana', 'Cherry']}
+        />,
+      );
+
+      const trigger = screen.getByRole('combobox', {name: 'Fruits'});
+      trigger.focus();
+
+      await user.keyboard('a');
+      expect(onChange).toHaveBeenLastCalledWith(['Banana', 'Apple']);
+
+      await waitForTypeaheadReset();
+      await user.keyboard('c');
+      expect(onChange).toHaveBeenLastCalledWith(['Banana', 'Apple', 'Cherry']);
+
+      await waitForTypeaheadReset();
+      await user.keyboard('b');
+      expect(onChange).toHaveBeenLastCalledWith(['Apple', 'Cherry']);
+    });
+
+    it('does not run typeahead while open or from the search field', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <MultiSelect
+          hasSearch
+          label="Fruits"
+          onChange={onChange}
+          options={['Apple', 'Banana']}
+          value={[]}
+        />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Fruits'}));
+      await user.type(
+        screen.getByRole('searchbox', {hidden: true, name: 'Search Fruits'}),
+        'b',
+      );
+
+      expect(onChange).not.toHaveBeenCalled();
+      expect(
+        screen.queryByRole('option', {hidden: true, name: 'Apple'}),
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not run typeahead when read-only', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <MultiSelect
+          isReadOnly
+          label="Fruits"
+          onChange={onChange}
+          options={['Apple', 'Banana']}
+          value={[]}
+        />,
+      );
+
+      screen.getByRole('combobox', {name: 'Fruits'}).focus();
+      await user.keyboard('a');
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
   });
 
   it('supports keyboard navigation and selection', async () => {

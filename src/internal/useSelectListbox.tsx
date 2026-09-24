@@ -79,6 +79,19 @@ export type UseSelectListboxOptions<TOption extends SelectListboxOptionData> = {
   onClose: () => void;
   onCommitOption: (option: TOption) => unknown;
   onOpen: () => void;
+  /**
+   * Value typeahead searches onward from. Defaults to the first selected
+   * option.
+   */
+  getTypeaheadActiveValue?: () => string | null;
+  /**
+   * Called for a typeahead match. Defaults to `onCommitOption`.
+   */
+  onTypeaheadMatch?: (option: TOption) => unknown;
+  /**
+   * Called when the typeahead search buffer resets.
+   */
+  onTypeaheadReset?: () => void;
   options: ReadonlyArray<SelectListboxOption<TOption>>;
   selectedValues: ReadonlySet<string>;
   status: InputStatus | undefined;
@@ -127,6 +140,9 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   onClose,
   onCommitOption,
   onOpen,
+  getTypeaheadActiveValue,
+  onTypeaheadMatch,
+  onTypeaheadReset,
   options,
   selectedValues,
   status,
@@ -245,13 +261,21 @@ export function useSelectListbox<TOption extends SelectListboxOptionData>({
   });
 
   const handleTypeahead = useTypeahead<TOption>({
-    getActiveIndex: () =>
-      enabledSelectableOptions.findIndex(option =>
+    getActiveIndex: () => {
+      if (getTypeaheadActiveValue != null) {
+        const activeValue = getTypeaheadActiveValue();
+        return enabledSelectableOptions.findIndex(
+          option => option.value === activeValue,
+        );
+      }
+      return enabledSelectableOptions.findIndex(option =>
         selectedValues.has(option.value),
-      ),
+      );
+    },
     getItems: () => enabledSelectableOptions,
     getLabel: option => option.label ?? option.value,
-    onMatch: onCommitOption,
+    onMatch: onTypeaheadMatch ?? onCommitOption,
+    onReset: onTypeaheadReset,
   });
 
   const handleKeyboardNavigation = useCallback(
