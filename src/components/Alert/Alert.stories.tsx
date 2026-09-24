@@ -40,6 +40,24 @@ export const WithDescription: Story = {
   },
 };
 
+export const LongUnbrokenContent: Story = {
+  args: {
+    title:
+      'Webhook failed for https://hooks.example.com/services/T0000000/B0000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+    description:
+      'Request id req_01HZX3Q9K7M2N4P6R8T0V2W4Y6A8C0E2G4J6L8N0Q2S4U6W8Y0B2D4F6H8K0M2 could not be delivered.',
+    status: 'error',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Long unbroken tokens such as URLs and request ids wrap inside the card instead of overflowing it, at any viewport width.',
+      },
+    },
+  },
+};
+
 export const BlockDescription: Story = {
   args: {
     title: 'Before you continue',

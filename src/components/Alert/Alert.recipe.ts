@@ -104,6 +104,7 @@ export const alertRecipe = sva({
       flex: 1,
       flexDirection: 'column',
       minW: 0,
+      overflowWrap: 'break-word',
     },
     endArea: {
       display: 'flex',
