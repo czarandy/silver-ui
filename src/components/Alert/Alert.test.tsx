@@ -99,6 +99,19 @@ describe('Alert', () => {
     consoleError.mockRestore();
   });
 
+  // A long unbroken token (URL, id) used to paint past the card and force
+  // page-wide horizontal scroll, because title and description are <div>s that
+  // preflight's overflow-wrap rule does not reach.
+  it('wraps long unbroken title and description tokens inside the card', () => {
+    const token = 'x'.repeat(80);
+    render(<Alert description={token} status="info" title={`T${token}`} />);
+
+    // eslint-disable-next-line testing-library/no-node-access -- the content slot has no semantic role of its own
+    const content = screen.getByText(`T${token}`).parentElement;
+    expect(content).toHaveClass('silver-ov-wrap_break-word', 'silver-min-w_0');
+    expect(content).toContainElement(screen.getByText(token));
+  });
+
   it('does not render description when omitted', () => {
     render(<Alert status="info" title="Title only" />);
 

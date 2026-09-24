@@ -130,6 +130,38 @@ describe('Text', () => {
     expect(el).toHaveAttribute('aria-label', 'description');
   });
 
+  // Untruncated text used to discard `wordBreak`, so a long unbroken token in
+  // a non-<p> element (outside preflight's overflow-wrap rule) overflowed.
+  it('applies wordBreak without truncation', () => {
+    render(
+      <>
+        <Text as="div" data-testid="break-word" wordBreak="break-word">
+          https://example.com/an/extremely/long/unbroken/path
+        </Text>
+        <Text data-testid="break-all" wordBreak="break-all">
+          unbroken-token
+        </Text>
+      </>,
+    );
+
+    expect(screen.getByTestId('break-word')).toHaveClass(
+      'silver-wb_normal',
+      'silver-ov-wrap_break-word',
+    );
+    expect(screen.getByTestId('break-all')).toHaveClass('silver-wb_break-all');
+  });
+
+  it('applies no word-break styles to untruncated text by default', () => {
+    render(<Text data-testid="text">Body copy</Text>);
+
+    const classList = Array.from(screen.getByTestId('text').classList);
+    expect(
+      classList.some(
+        c => c.startsWith('silver-wb_') || c.startsWith('silver-ov-wrap_'),
+      ),
+    ).toBe(false);
+  });
+
   it('applies textWrap variant', () => {
     render(
       <Text data-testid="text" textWrap="balance">
