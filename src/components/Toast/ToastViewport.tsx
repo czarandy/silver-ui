@@ -6,11 +6,13 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type FocusEvent,
   type ReactNode,
   type Ref,
 } from 'react';
+import {createPortal} from 'react-dom';
 import {Toast} from 'components/Toast/Toast';
 import {
   ToastContext,
@@ -22,7 +24,10 @@ import type {
   ToastPosition,
 } from 'components/Toast/types';
 import useHotkey from 'hooks/useHotkey';
+import {inheritanceReset} from 'internal/inheritanceReset';
 import {mergeRefs} from 'internal/mergeRefs';
+import {getActiveModalHost, subscribeModalHosts} from 'internal/modalHostStack';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -51,7 +56,9 @@ export interface ToastViewportProps {
    */
   inset?: Readonly<ToastViewportInset>;
   /**
-   * Whether to promote the viewport to the CSS top layer using popover.
+   * Whether to promote the viewport to the CSS top layer using popover. While
+   * a modal dialog is open, a top-layer viewport moves inside it so its toasts
+   * stay visible and operable above the modal.
    * @default true
    */
   isTopLayer?: boolean;
@@ -75,8 +82,68 @@ export interface ToastViewportProps {
   style?: CSSProperties;
 }
 
+/**
+ * Re-enters the top layer, which stacks in insertion order and ignores
+ * z-index, so the viewport ends up above everything open at this moment.
+ * Hiding blurs focus inside the viewport, so it is restored.
+ */
+function raiseToTopLayer(viewport: HTMLElement): void {
+  const focused = viewport.ownerDocument.activeElement;
+  const shouldRestoreFocus =
+    focused instanceof HTMLElement && viewport.contains(focused);
+  // Current engines ignore a redundant hide or show; older ones threw.
+  try {
+    viewport.hidePopover();
+  } catch {
+    // Ignore.
+  }
+  try {
+    viewport.showPopover();
+  } catch {
+    // Ignore.
+  }
+  if (shouldRestoreFocus && focused !== viewport.ownerDocument.activeElement) {
+    focused.focus({preventScroll: true});
+  }
+}
+
+/**
+ * Moves the viewport's container into `target` without React re-rendering
+ * it, so toasts keep their state, timers, and user content. The move takes
+ * the viewport out of the document, which closes its popover.
+ *
+ * Focus is not carried across: a move only follows `showModal()` or `close()`,
+ * which move focus themselves, or a dialog unmounting, which has already
+ * dropped it.
+ */
+function moveViewport(
+  container: HTMLElement,
+  target: HTMLElement,
+  viewport: HTMLElement | null,
+  isTopLayer: boolean,
+): void {
+  container.setAttribute('data-toast-skip-entry', '');
+  target.append(container);
+  if (viewport != null && isTopLayer) {
+    raiseToTopLayer(viewport);
+  }
+  // Resolve styles while the attribute is set, so toasts already on screen
+  // take their final style as their starting style instead of re-entering.
+  viewport?.getBoundingClientRect();
+  container.removeAttribute('data-toast-skip-entry');
+}
+
+function subscribeToNothing(): () => void {
+  return () => {};
+}
+
 const styles = {
+  // The anchor marks the viewport's home in the tree (keeping theme scopes and
+  // tab order); the container holds the viewport and moves between the anchor
+  // and the active modal. Neither generates a box.
+  contents: css({display: 'contents'}),
   viewport: css({
+    ...inheritanceReset,
     position: 'fixed',
     zIndex: 500,
     display: 'flex',
@@ -166,7 +233,26 @@ export function ToastViewport({
   const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set());
   const [isFocusWithinViewport, setIsFocusWithinViewport] = useState(false);
   const toastsRef = useRef(toasts);
+  const shownToastIdsRef = useRef<ReadonlySet<string>>(new Set());
+  const anchorRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  // Portals cannot render on the server, and the first client render must
+  // match it.
+  const isClient = useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
+  // Created by us rather than rendered by React, so it can move between hosts
+  // without React noticing: the toasts inside are never remounted.
+  const [container] = useState(() => {
+    if (typeof document === 'undefined') {
+      return null;
+    }
+    const element = document.createElement('div');
+    element.className = styles.contents;
+    return element;
+  });
   const exitTimeoutsRef = useRef(
     new Map<string, ReturnType<typeof globalThis.setTimeout>>(),
   );
@@ -229,16 +315,62 @@ export function ToastViewport({
     [addToast, findByUniqueID, removeToast],
   );
 
-  useEffect(() => {
-    if (!isTopLayer) {
+  // An open modal dialog makes everything outside it inert, so a top-layer
+  // viewport lives inside the active modal and otherwise at its anchor.
+  // `isClient` is a dependency because the viewport only exists once the
+  // portal renders after hydration, and must then be placed and shown.
+  useIsomorphicLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    if (container == null || anchor == null) {
       return;
     }
-    try {
-      viewportRef.current?.showPopover();
-    } catch {
-      // Already showing.
+    const place = (): void => {
+      // A dialog rendered inside a toast hosts nothing: the viewport cannot
+      // move into its own descendant, and is not inert to that dialog anyway.
+      const target =
+        (isTopLayer
+          ? getActiveModalHost(host => !container.contains(host))
+          : null) ?? anchor;
+      const viewport = viewportRef.current;
+      if (container.parentNode !== target) {
+        moveViewport(container, target, viewport, isTopLayer);
+      } else if (
+        isTopLayer &&
+        viewport != null &&
+        target !== anchor &&
+        getActiveModalHost() === target
+      ) {
+        // The host re-ran showModal() and re-entered the top layer above us.
+        // A dialog opened from a toast is left above the viewport.
+        raiseToTopLayer(viewport);
+      }
+    };
+    place();
+    const unsubscribe = isTopLayer ? subscribeModalHosts(place) : undefined;
+    return () => {
+      unsubscribe?.();
+      container.remove();
+    };
+  }, [container, isClient, isTopLayer]);
+
+  // A newly shown toast re-enters the top layer, so it appears above popovers
+  // opened after the viewport (and modals that do not register as hosts). A
+  // dialog opened from a toast stays on top: it is what the user is using.
+  useIsomorphicLayoutEffect(() => {
+    const previousIds = shownToastIdsRef.current;
+    shownToastIdsRef.current = new Set(toasts.map(toast => toast.id));
+    const viewport = viewportRef.current;
+    const activeHost = getActiveModalHost();
+    if (
+      !isTopLayer ||
+      viewport == null ||
+      toasts.every(toast => previousIds.has(toast.id)) ||
+      (activeHost != null && viewport.contains(activeHost))
+    ) {
+      return;
     }
-  }, [isTopLayer]);
+    raiseToTopLayer(viewport);
+  }, [isTopLayer, toasts]);
 
   useEffect(() => {
     const exitTimeouts = exitTimeoutsRef.current;
@@ -270,48 +402,53 @@ export function ToastViewport({
   };
   const visibleToasts = toasts.slice(-maxVisible);
 
+  const viewport = (
+    <div
+      aria-keyshortcuts="F6"
+      aria-label="Notifications"
+      className={cx(styles.viewport, styles.position[position], className)}
+      data-testid={dataTestId}
+      onBlurCapture={handleBlurCapture}
+      onFocusCapture={() => setIsFocusWithinViewport(true)}
+      popover={isTopLayer ? 'manual' : undefined}
+      ref={mergeRefs(viewportRef, ref)}
+      role="region"
+      style={insetStyle}
+      tabIndex={visibleToasts.length > 0 ? 0 : -1}>
+      {visibleToasts.map(entry => {
+        const type = entry.options.type ?? 'info';
+        const isAutoHide =
+          entry.options.isAutoHide ?? (type === 'error' ? false : true);
+        return (
+          <div
+            className={cx(
+              styles.wrapper,
+              exitingIds.has(entry.id) ? styles.wrapperExiting : undefined,
+            )}
+            key={entry.id}>
+            <div className={styles.wrapperInner}>
+              <Toast
+                autoHideDuration={entry.options.autoHideDuration ?? 5000}
+                body={entry.options.body}
+                endContent={entry.options.endContent}
+                isAutoHide={isAutoHide}
+                isExiting={exitingIds.has(entry.id)}
+                isPaused={isFocusWithinViewport}
+                onDismiss={reason => removeToast(entry.id, reason)}
+                type={type}
+              />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <ToastContext value={contextValue}>
       {children}
-      <div
-        aria-keyshortcuts="F6"
-        aria-label="Notifications"
-        className={cx(styles.viewport, styles.position[position], className)}
-        data-testid={dataTestId}
-        onBlurCapture={handleBlurCapture}
-        onFocusCapture={() => setIsFocusWithinViewport(true)}
-        popover={isTopLayer ? 'manual' : undefined}
-        ref={mergeRefs(viewportRef, ref)}
-        role="region"
-        style={insetStyle}
-        tabIndex={visibleToasts.length > 0 ? 0 : -1}>
-        {visibleToasts.map(entry => {
-          const type = entry.options.type ?? 'info';
-          const isAutoHide =
-            entry.options.isAutoHide ?? (type === 'error' ? false : true);
-          return (
-            <div
-              className={cx(
-                styles.wrapper,
-                exitingIds.has(entry.id) ? styles.wrapperExiting : undefined,
-              )}
-              key={entry.id}>
-              <div className={styles.wrapperInner}>
-                <Toast
-                  autoHideDuration={entry.options.autoHideDuration ?? 5000}
-                  body={entry.options.body}
-                  endContent={entry.options.endContent}
-                  isAutoHide={isAutoHide}
-                  isExiting={exitingIds.has(entry.id)}
-                  isPaused={isFocusWithinViewport}
-                  onDismiss={reason => removeToast(entry.id, reason)}
-                  type={type}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      <div className={styles.contents} ref={anchorRef} />
+      {isClient && container != null ? createPortal(viewport, container) : null}
     </ToastContext>
   );
 }

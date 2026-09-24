@@ -21,6 +21,7 @@ import {mergeRefs} from 'internal/mergeRefs';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
+import {useModalHost} from 'internal/useModalHost';
 import {useScrollLock} from 'internal/useScrollLock';
 import {cx} from 'utils/cx';
 
@@ -128,6 +129,7 @@ export function Lightbox({
   style,
 }: LightboxProps): React.JSX.Element {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useModalHost(dialogRef);
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<Element | null>(null);
   const [uncontrolledIndex, setUncontrolledIndex] = useState(defaultIndex);

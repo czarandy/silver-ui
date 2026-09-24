@@ -8,6 +8,7 @@ import {Button} from 'components/Button';
 import {mobileNavRecipe} from 'internal/MobileNav/MobileNav.recipe';
 import {mergeRefs} from 'internal/mergeRefs';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
+import {useModalHost} from 'internal/useModalHost';
 import {useScrollLock} from 'internal/useScrollLock';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -147,6 +148,7 @@ export function MobileNav({
     [openMobileNav, closeMobileNav, onOpenChangeFromProps],
   );
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useModalHost(dialogRef);
 
   useEffect(() => {
     const dialog = dialogRef.current;
