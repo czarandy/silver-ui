@@ -110,7 +110,11 @@ export function SegmentedControlItem<TValue extends string = string>({
           <Icon icon={icon} size={context.size} />
         </span>
       ) : null}
-      {isLabelHidden ? <VisuallyHidden>{label}</VisuallyHidden> : label}
+      {isLabelHidden ? (
+        <VisuallyHidden>{label}</VisuallyHidden>
+      ) : (
+        <span className={classes.label}>{label}</span>
+      )}
     </button>
   );
 }

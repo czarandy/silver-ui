@@ -1,7 +1,7 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const segmentedControlRecipe = sva({
-  slots: ['root', 'item', 'icon'],
+  slots: ['root', 'item', 'icon', 'label'],
   base: {
     root: {
       display: 'inline-flex',
@@ -16,6 +16,8 @@ export const segmentedControlRecipe = sva({
       alignItems: 'center',
       justifyContent: 'center',
       gap: '1',
+      minW: 0,
+      whiteSpace: 'nowrap',
       borderWidth: 0,
       borderStyle: 'none',
       bg: 'transparent',
@@ -42,6 +44,14 @@ export const segmentedControlRecipe = sva({
       alignItems: 'center',
       justifyContent: 'center',
       flexShrink: 0,
+    },
+    // Items have a fixed height, so a label that wrapped would paint outside
+    // the control. `text-overflow` needs a block container, hence the wrapper.
+    label: {
+      minW: 0,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
     },
   },
   variants: {

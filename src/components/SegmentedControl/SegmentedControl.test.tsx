@@ -276,6 +276,34 @@ describe('SegmentedControl', () => {
     );
   });
 
+  // Items have a fixed height, so a label that wrapped under a narrow fill
+  // layout painted outside the control. Labels now stay on one line and
+  // truncate with an ellipsis.
+  it('keeps item labels on one line and truncates them', () => {
+    render(
+      <SegmentedControl
+        label="Report"
+        layout="fill"
+        onChange={() => {}}
+        value="revenue">
+        <SegmentedControlItem
+          data-testid="item"
+          label="Monthly recurring revenue"
+          value="revenue"
+        />
+      </SegmentedControl>,
+    );
+
+    const item = screen.getByRole('radio', {name: 'Monthly recurring revenue'});
+    expect(item).toHaveClass('silver-min-w_0', 'silver-white-space_nowrap');
+    expect(screen.getByText('Monthly recurring revenue')).toHaveClass(
+      'silver-min-w_0',
+      'silver-ov_hidden',
+      'silver-tov_ellipsis',
+      'silver-white-space_nowrap',
+    );
+  });
+
   it('applies size styling to items', () => {
     render(
       <>
