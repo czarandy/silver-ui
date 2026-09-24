@@ -44,8 +44,6 @@ import {
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
-const menuClasses = selectMenuRecipe();
-
 export interface SelectOptionData<
   TAuxiliaryData = unknown,
 > extends SelectListboxOptionData {
@@ -101,6 +99,8 @@ export type SelectOptionDefinition<TAuxiliaryData = unknown> =
 
 export type SelectVariant = 'button' | 'ghost' | 'outline';
 
+export type SelectIndicatorPosition = 'end' | 'start';
+
 export type SelectProps<TAuxiliaryData = unknown> = {
   /**
    * Additional CSS class names applied to the field root.
@@ -134,6 +134,12 @@ export type SelectProps<TAuxiliaryData = unknown> = {
    * @default false
    */
   hasSearch?: boolean;
+  /**
+   * Which logical edge of each option shows the selected check. `start`
+   * reserves the check column on every option so labels stay aligned.
+   * @default 'end'
+   */
+  indicatorPosition?: SelectIndicatorPosition;
   /**
    * Whether the selector is disabled.
    * @default false
@@ -235,6 +241,7 @@ export function Select<TAuxiliaryData = unknown>({
   hasEntriesOnFocus = false,
   hasSearch = false,
   htmlName,
+  indicatorPosition = 'end',
   isDisabled = false,
   isLabelHidden = false,
   isLoading = false,
@@ -259,6 +266,10 @@ export function Select<TAuxiliaryData = unknown>({
 }: SelectProps<TAuxiliaryData>): React.JSX.Element {
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
+  const menuClasses = useMemo(
+    () => selectMenuRecipe({indicatorPosition}),
+    [indicatorPosition],
+  );
   const effectiveDisabled =
     isDisabled ||
     inputGroup?.isDisabled === true ||
@@ -364,14 +375,21 @@ export function Select<TAuxiliaryData = unknown>({
       if (!filteredValues.has(option.value)) {
         return null;
       }
+      const isSelected = option.value === value;
+      const check =
+        isSelected || indicatorPosition === 'start' ? (
+          <span aria-hidden="true" className={menuClasses.check}>
+            {isSelected ? <Icon color="accent" icon={Check} size="sm" /> : null}
+          </span>
+        ) : null;
       return (
         // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
         <div
           aria-disabled={option.isDisabled ?? undefined}
-          aria-selected={option.value === value || undefined}
+          aria-selected={isSelected || undefined}
           className={menuClasses.option}
           data-highlighted={option.value === highlightedValue ? '' : undefined}
-          data-selected={option.value === value ? '' : undefined}
+          data-selected={isSelected ? '' : undefined}
           data-value={option.value}
           id={getOptionId(option.value)}
           key={option.value}
@@ -379,6 +397,7 @@ export function Select<TAuxiliaryData = unknown>({
           onMouseEnter={handleOptionMouseEnter}
           role="option"
           tabIndex={option.value === highlightedValue ? 0 : -1}>
+          {indicatorPosition === 'start' ? check : null}
           <span className={menuClasses.optionContent}>
             {renderOptionProp == null ? (
               <>
@@ -393,11 +412,7 @@ export function Select<TAuxiliaryData = unknown>({
               renderOptionProp(option)
             )}
           </span>
-          {option.value === value ? (
-            <span className={menuClasses.check}>
-              <Icon color="accent" icon={Check} size="sm" />
-            </span>
-          ) : null}
+          {indicatorPosition === 'end' ? check : null}
         </div>
       );
     },
@@ -407,6 +422,8 @@ export function Select<TAuxiliaryData = unknown>({
       handleOptionClick,
       handleOptionMouseEnter,
       highlightedValue,
+      indicatorPosition,
+      menuClasses,
       renderOptionProp,
       value,
     ],

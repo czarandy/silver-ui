@@ -84,6 +84,21 @@ export const selectMenuRecipe = sva({
       my: '1',
     },
   },
+  variants: {
+    indicatorPosition: {
+      start: {
+        option: {justifyContent: 'flex-start'},
+        optionContent: {flex: 1},
+        // Reserve the indicator column on every row so labels stay aligned
+        // whether or not the option is selected.
+        check: {flexShrink: 0, w: 'icon.sm', h: 'icon.sm'},
+      },
+      end: {},
+    },
+  },
+  defaultVariants: {
+    indicatorPosition: 'end',
+  },
 });
 
 export type SelectMenuVariants = RecipeVariantProps<typeof selectMenuRecipe>;

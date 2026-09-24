@@ -680,6 +680,7 @@ export {
   Select,
   SelectOption,
   type SelectDivider,
+  type SelectIndicatorPosition,
   type SelectOptionData,
   type SelectOptionDefinition,
   type SelectOptionProps,
@@ -689,6 +690,7 @@ export {
 export {
   MultiSelect,
   type MultiSelectDivider,
+  type MultiSelectIndicatorPosition,
   type MultiSelectOption,
   type MultiSelectOptionData,
   type MultiSelectProps,

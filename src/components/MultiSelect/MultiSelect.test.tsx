@@ -18,6 +18,10 @@ import {assertNonNull} from 'internal/testHelpers';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
 
+function getOptionParts(option: HTMLElement): HTMLElement[] {
+  return Array.from(option.children) as HTMLElement[];
+}
+
 async function nextAnimationFrame(): Promise<void> {
   await act(async () => {
     await new Promise(resolve => {
@@ -155,6 +159,69 @@ describe('MultiSelect', () => {
     await user.click(screen.getByText('Email'));
 
     expect(onChange).toHaveBeenCalledWith(['Name', 'Email']);
+  });
+
+  it('renders the checkbox before the option content by default', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MultiSelect
+        hasSelectAll
+        label="Fruits"
+        onChange={vi.fn()}
+        options={['Apple', 'Banana']}
+        value={['Apple']}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Fruits'}));
+    for (const name of ['Select all', 'Apple', 'Banana']) {
+      const parts = getOptionParts(
+        screen.getByRole('option', {hidden: true, name}),
+      );
+      expect(parts).toHaveLength(2);
+      expect(parts[0]).toHaveAttribute('aria-hidden', 'true');
+      expect(parts[1]).toHaveTextContent(name);
+    }
+  });
+
+  it('renders the checkbox after the option content with indicatorPosition="end"', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <MultiSelect
+        hasSelectAll
+        indicatorPosition="end"
+        label="Fruits"
+        onChange={onChange}
+        options={['Apple', 'Banana']}
+        value={['Apple']}
+      />,
+    );
+
+    await user.click(screen.getByRole('combobox', {name: 'Fruits'}));
+    for (const name of ['Select all', 'Apple', 'Banana']) {
+      const parts = getOptionParts(
+        screen.getByRole('option', {hidden: true, name}),
+      );
+      expect(parts).toHaveLength(2);
+      expect(parts[0]).toHaveTextContent(name);
+      expect(parts[1]).toHaveAttribute('aria-hidden', 'true');
+    }
+    expect(
+      getOptionParts(
+        screen.getByRole('option', {hidden: true, name: 'Apple'}),
+      )[1],
+    ).not.toBeEmptyDOMElement();
+    expect(
+      getOptionParts(
+        screen.getByRole('option', {hidden: true, name: 'Banana'}),
+      )[1],
+    ).toBeEmptyDOMElement();
+
+    await user.click(screen.getByText('Banana'));
+    expect(onChange).toHaveBeenCalledWith(['Apple', 'Banana']);
   });
 
   it('uses the existing outline trigger by default', () => {

@@ -1,6 +1,7 @@
 export {
   Select,
   type SelectDivider,
+  type SelectIndicatorPosition,
   type SelectOptionData,
   type SelectOptionDefinition,
   type SelectProps,
