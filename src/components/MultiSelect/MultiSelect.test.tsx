@@ -47,6 +47,18 @@ beforeAll(() => {
   });
 });
 
+function getEmptyStateStatus(message: string): HTMLElement {
+  const regions = screen
+    .getAllByRole('status', {hidden: true})
+    .filter(region => region.textContent === message);
+  if (regions.length !== 1) {
+    throw new Error(
+      `Expected one status region reading "${message}", found ${regions.length}.`,
+    );
+  }
+  return regions[0];
+}
+
 describe('MultiSelect', () => {
   it('attaches its positioning anchor before parent layout effects run', () => {
     const observedAnchorNames: string[] = [];
@@ -727,6 +739,89 @@ describe('MultiSelect', () => {
 
     fireEvent.keyDown(trigger, {isComposing: true, key: 'Escape'});
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  describe('empty state', () => {
+    it('shows the empty search message and hides select-all when nothing matches', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <MultiSelect
+          hasSearch
+          hasSelectAll
+          label="Fruits"
+          onChange={() => {}}
+          options={['Apple', 'Banana']}
+          value={[]}
+        />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Fruits'}));
+      const listbox = screen.getByRole('listbox', {
+        hidden: true,
+        name: 'Fruits options',
+      });
+      expect(
+        screen.getByRole('option', {hidden: true, name: 'Select all'}),
+      ).toBeInTheDocument();
+
+      await user.type(screen.getByLabelText('Search Fruits'), 'zzz');
+
+      const status = getEmptyStateStatus('No results found');
+      expect(listbox).not.toContainElement(status);
+      expect(listbox).toHaveAttribute('hidden');
+      expect(
+        screen.queryByRole('option', {hidden: true, name: 'Select all'}),
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides select-all when every visible option is disabled', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <MultiSelect
+          hasSelectAll
+          label="Fruits"
+          onChange={() => {}}
+          options={[{isDisabled: true, label: 'Apple', value: 'apple'}]}
+          value={[]}
+        />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Fruits'}));
+      expect(
+        screen.getByRole('option', {hidden: true, name: 'Apple'}),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole('option', {hidden: true, name: 'Select all'}),
+      ).not.toBeInTheDocument();
+      expect(screen.queryByText('No options')).not.toBeInTheDocument();
+    });
+
+    it('shows a custom empty options message when there are no options', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <MultiSelect
+          emptyOptionsText="No columns available"
+          hasSelectAll
+          label="Columns"
+          onChange={() => {}}
+          options={[]}
+          value={[]}
+        />,
+      );
+
+      await user.click(screen.getByRole('combobox', {name: 'Columns'}));
+      expect(getEmptyStateStatus('No columns available')).toBeInTheDocument();
+      // A `hidden` listbox has no computed accessible name to query by.
+      expect(screen.getByRole('listbox', {hidden: true})).toHaveAttribute(
+        'hidden',
+      );
+      expect(
+        screen.queryByRole('option', {hidden: true, name: 'Select all'}),
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('filters options when search is enabled', async () => {

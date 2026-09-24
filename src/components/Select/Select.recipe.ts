@@ -10,6 +10,7 @@ export const selectMenuRecipe = sva({
     'iconSlot',
     'sectionHeading',
     'divider',
+    'empty',
   ],
   base: {
     menu: {
@@ -82,6 +83,10 @@ export const selectMenuRecipe = sva({
       h: '1px',
       bg: 'border',
       my: '1',
+    },
+    empty: {
+      p: '3',
+      textAlign: 'center',
     },
   },
   variants: {

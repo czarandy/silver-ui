@@ -116,6 +116,16 @@ export type MultiSelectProps = {
    */
   description?: ReactNode;
   /**
+   * Text shown in the menu when there are no options at all.
+   * @default 'No options'
+   */
+  emptyOptionsText?: string;
+  /**
+   * Text shown in the menu when the search query matches no options.
+   * @default 'No results found'
+   */
+  emptySearchResultsText?: string;
+  /**
    * Whether to show a clear button when values are selected.
    * @default false
    */
@@ -256,6 +266,8 @@ export function MultiSelect({
   className,
   'data-testid': dataTestId,
   description,
+  emptyOptionsText = 'No options',
+  emptySearchResultsText = 'No results found',
   hasClear = false,
   hasEntriesOnFocus = false,
   hasSearch = false,
@@ -580,6 +592,7 @@ export function MultiSelect({
     </span>
   );
 
+  const isEmpty = visibleSelectableOptions.length === 0;
   const menu = (
     <>
       {hasSearch ? (
@@ -606,9 +619,10 @@ export function MultiSelect({
         aria-label={`${label} options`}
         aria-multiselectable="true"
         className={menuClasses.menu}
+        hidden={isEmpty}
         id={listboxId}
         role="listbox">
-        {hasSelectAll ? (
+        {hasSelectAll && enabledVisibleOptions.length > 0 ? (
           // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
           <div
             aria-selected={allSelected}
@@ -624,6 +638,16 @@ export function MultiSelect({
           </div>
         ) : null}
         {optionNodes}
+      </div>
+      {/* Outside the listbox: a message is not a valid listbox child. */}
+      <div className={isEmpty ? menuClasses.empty : undefined} role="status">
+        {isEmpty ? (
+          <Text as="span" color="secondary" type="supporting">
+            {selectableOptions.length === 0
+              ? emptyOptionsText
+              : emptySearchResultsText}
+          </Text>
+        ) : null}
       </div>
     </>
   );
