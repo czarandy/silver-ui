@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Archive, Edit, Inbox, MoreVertical, Trash2} from 'lucide-react';
+import {Archive, Check, Edit, Inbox, MoreVertical, Trash2} from 'lucide-react';
+import {useState} from 'react';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
 import {Icon} from 'components/Icon';
@@ -33,6 +34,61 @@ export const Compound: Story = {
       <DropdownMenuItem icon={Trash2} label="Delete" />
     </DropdownMenu>
   ),
+};
+
+const columns = ['Name', 'Email', 'Role', 'Status'];
+
+function KeepOpenOnSelectStory(
+  args: React.ComponentProps<typeof DropdownMenu>,
+): React.JSX.Element {
+  const [visible, setVisible] = useState<ReadonlySet<string>>(
+    () => new Set(['Name', 'Email']),
+  );
+  const toggle = (column: string): void => {
+    setVisible(current => {
+      const next = new Set(current);
+      if (next.has(column)) {
+        next.delete(column);
+      } else {
+        next.add(column);
+      }
+      return next;
+    });
+  };
+
+  return (
+    <DropdownMenu {...args} button={{label: 'Columns'}}>
+      {columns.map(column => (
+        <DropdownMenuItem
+          endContent={
+            visible.has(column) ? (
+              <Icon color="secondary" icon={Check} size="sm" />
+            ) : null
+          }
+          hasCloseOnSelect={false}
+          key={column}
+          label={column}
+          onClick={() => toggle(column)}
+        />
+      ))}
+      <DropdownMenuItem
+        label="Show all"
+        onClick={() => setVisible(new Set(columns))}
+      />
+    </DropdownMenu>
+  );
+}
+
+export const KeepOpenOnSelect: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Items with `hasCloseOnSelect={false}` run `onClick` and leave the menu open with focus on the item, so users can flip several toggles, such as column visibility, in one visit. Other items, like "Show all" here, still close the menu.',
+      },
+    },
+  },
+  render: (args): React.JSX.Element => <KeepOpenOnSelectStory {...args} />,
 };
 
 export const EndAligned: Story = {

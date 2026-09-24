@@ -173,6 +173,30 @@ describe('ContextMenu', () => {
     expect(hidePopover).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps the menu open for items with hasCloseOnSelect={false}', async () => {
+    const user = userEvent.setup();
+    const handleClick = vi.fn();
+    render(
+      <ContextMenu
+        items={[
+          {hasCloseOnSelect: false, label: 'Show grid', onClick: handleClick},
+        ]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+    const item = screen.getByRole('menuitem', {
+      hidden: true,
+      name: 'Show grid',
+    });
+    await user.click(item);
+
+    expect(handleClick).toHaveBeenCalledTimes(1);
+    expect(hidePopover).not.toHaveBeenCalled();
+    expect(item).toHaveFocus();
+  });
+
   it('renders compound menu content', async () => {
     const user = userEvent.setup();
     const handleClick = vi.fn();
