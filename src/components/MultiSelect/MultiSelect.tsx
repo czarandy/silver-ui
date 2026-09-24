@@ -322,6 +322,37 @@ export function MultiSelect({
     [isReadOnly, onChange, value],
   );
 
+  // Value the in-progress typeahead search last toggled. Typing refines or
+  // cycles a single match, so each new match within one search undoes the
+  // previous match's toggle instead of accumulating selections.
+  const typeaheadValueRef = useRef<string | null>(null);
+
+  const toggleTypeaheadMatch = useCallback(
+    (option: MultiSelectOptionData): void => {
+      if (isReadOnly) {
+        return;
+      }
+      const previous = typeaheadValueRef.current;
+      if (previous === option.value) {
+        return;
+      }
+
+      const nextValues = new Set(value);
+      for (const toggled of previous == null
+        ? [option.value]
+        : [previous, option.value]) {
+        if (nextValues.has(toggled)) {
+          nextValues.delete(toggled);
+        } else {
+          nextValues.add(toggled);
+        }
+      }
+      typeaheadValueRef.current = option.value;
+      onChange(Array.from(nextValues));
+    },
+    [isReadOnly, onChange, value],
+  );
+
   const {
     hide: hidePopover,
     isOpen,
@@ -361,13 +392,19 @@ export function MultiSelect({
     description,
     hasEntriesOnFocus,
     isDisabled,
+    getTypeaheadActiveValue: () => typeaheadValueRef.current,
     isHighlightClearedOnCommit: false,
     isLoading,
     isReadOnly,
     isOpen,
+    isTypeaheadEnabled: true,
     onClose: hidePopover,
     onCommitOption: toggleValue,
     onOpen: showPopover,
+    onTypeaheadMatch: toggleTypeaheadMatch,
+    onTypeaheadReset: () => {
+      typeaheadValueRef.current = null;
+    },
     options,
     selectedValues,
     status,

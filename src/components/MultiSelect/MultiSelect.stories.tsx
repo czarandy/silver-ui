@@ -172,6 +172,14 @@ function TriggerVariantsStory(args: React.ComponentProps<typeof MultiSelect>) {
 }
 
 export const Default: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'When the MultiSelect is focused and closed, type the beginning of an option label to toggle it without opening the menu. Typing more characters refines the match, and repeating a character cycles through the options that start with it.',
+      },
+    },
+  },
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
 };
 export const Searchable: Story = {
