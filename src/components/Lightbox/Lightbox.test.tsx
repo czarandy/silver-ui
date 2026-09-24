@@ -239,6 +239,149 @@ describe('Lightbox', () => {
     expect(screen.getByRole('img', {name: 'Second image'})).toBeInTheDocument();
   });
 
+  describe('navigation announcements', () => {
+    // Each Button carries its own loading status region; the gallery
+    // announcer is the atomic one.
+    function getPoliteRegion(): HTMLElement {
+      const region = screen
+        .getAllByRole('status', {hidden: true})
+        .find(element => element.getAttribute('aria-atomic') === 'true');
+      if (region == null) {
+        throw new Error('Expected the lightbox to render a polite announcer.');
+      }
+      return region;
+    }
+
+    it('announces the new image alt and position when navigating', async () => {
+      const user = userEvent.setup();
+      render(<Lightbox isOpen media={media} onOpenChange={() => {}} />);
+
+      // Opening is not announced; the dialog and image speak for themselves.
+      expect(getPoliteRegion()).toBeEmptyDOMElement();
+      expect(getPoliteRegion()).toHaveAttribute('aria-live', 'polite');
+
+      await user.click(screen.getByRole('button', {name: 'Next'}));
+      await waitFor(() => {
+        expect(getPoliteRegion()).toHaveTextContent('Second image, 2 of 3');
+      });
+
+      fireEvent.keyDown(screen.getByRole('dialog'), {key: 'ArrowRight'});
+      await waitFor(() => {
+        expect(getPoliteRegion()).toHaveTextContent('Third image, 3 of 3');
+      });
+
+      fireEvent.keyDown(screen.getByRole('dialog'), {key: 'ArrowLeft'});
+      await waitFor(() => {
+        expect(getPoliteRegion()).toHaveTextContent('Second image, 2 of 3');
+      });
+
+      // The visual counter is unchanged.
+      expect(screen.getByText('2 / 3')).toBeInTheDocument();
+    });
+
+    it('announces what a controlled gallery actually shows', async () => {
+      const user = userEvent.setup();
+
+      function ControlledLightbox() {
+        const [index, setIndex] = useState(0);
+        return (
+          <Lightbox
+            index={index}
+            isOpen
+            media={media}
+            // Skip ahead two, e.g. a parent enforcing its own paging.
+            onIndexChange={nextIndex => setIndex(Math.min(nextIndex + 1, 2))}
+            onOpenChange={() => {}}
+          />
+        );
+      }
+
+      render(<ControlledLightbox />);
+
+      await user.click(screen.getByRole('button', {name: 'Next'}));
+      await waitFor(() => {
+        expect(getPoliteRegion()).toHaveTextContent('Third image, 3 of 3');
+      });
+    });
+
+    it('does not announce when a rejected navigation leaves the index unchanged', async () => {
+      const user = userEvent.setup();
+      render(
+        <Lightbox
+          index={0}
+          isOpen
+          media={media}
+          onIndexChange={() => {}}
+          onOpenChange={() => {}}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', {name: 'Next'}));
+      await new Promise(resolve => {
+        requestAnimationFrame(() => resolve(undefined));
+      });
+      expect(getPoliteRegion()).toBeEmptyDOMElement();
+    });
+
+    it('announces only the position when the alt text is empty', async () => {
+      const user = userEvent.setup();
+      render(
+        <Lightbox
+          isOpen
+          media={[
+            {alt: 'First image', src: '/first.jpg'},
+            {alt: '', src: '/decorative.jpg'},
+          ]}
+          onOpenChange={() => {}}
+        />,
+      );
+
+      await user.click(screen.getByRole('button', {name: 'Next'}));
+      await waitFor(() => {
+        expect(getPoliteRegion()).toHaveTextContent(/^2 of 2$/);
+      });
+    });
+
+    it('clears the announcement when closed and does not announce on reopen', async () => {
+      const user = userEvent.setup();
+
+      function ToggleLightbox() {
+        const [isOpen, setIsOpen] = useState(true);
+        const [index, setIndex] = useState(0);
+        return (
+          <>
+            <Button label="Toggle" onClick={() => setIsOpen(open => !open)} />
+            <Lightbox
+              index={index}
+              isOpen={isOpen}
+              media={media}
+              onIndexChange={setIndex}
+              onOpenChange={setIsOpen}
+            />
+          </>
+        );
+      }
+
+      render(<ToggleLightbox />);
+
+      await user.click(screen.getByRole('button', {name: 'Next'}));
+      await waitFor(() => {
+        expect(getPoliteRegion()).toHaveTextContent('Second image, 2 of 3');
+      });
+
+      await user.click(screen.getByRole('button', {name: 'Close'}));
+      expect(getPoliteRegion()).toBeEmptyDOMElement();
+
+      await user.click(
+        screen.getByRole('button', {hidden: true, name: 'Toggle'}),
+      );
+      await new Promise(resolve => {
+        requestAnimationFrame(() => resolve(undefined));
+      });
+      expect(getPoliteRegion()).toBeEmptyDOMElement();
+    });
+  });
+
   it('clamps controlled indexes to available media bounds', () => {
     const {rerender} = render(
       <Lightbox
