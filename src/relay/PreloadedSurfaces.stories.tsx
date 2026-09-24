@@ -1,8 +1,15 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
+import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {RelayEnvironmentProvider} from 'react-relay';
 import {Environment, Network, RecordSource, Store} from 'relay-runtime';
 import {Button} from 'components/Button';
+import {
+  createEventFromISO,
+  type CalendarEvent,
+} from 'components/Schedule/CalendarEvent';
+import {Schedule} from 'components/Schedule/Schedule';
+import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {HStack, VStack} from 'components/Stack';
 import {Text} from 'components/Text';
 import type {PreloadedSurfaceStoryEntryPointProps} from 'relay/PreloadedSurfacesStoryContent';
@@ -11,6 +18,11 @@ import {usePreloadedDialog} from 'relay/usePreloadedDialog';
 import {usePreloadedDrawer} from 'relay/usePreloadedDrawer';
 import {usePreloadedHoverCard} from 'relay/usePreloadedHoverCard';
 import {usePreloadedPopover} from 'relay/usePreloadedPopover';
+import {
+  scheduleEventEntryPoint,
+  useSchedulePreloadedEventPopoverPlugin,
+  type ScheduleEventEntryPoint,
+} from 'relay/useSchedulePreloadedEventPopoverPlugin';
 import {cva} from 'styled-system/css';
 
 const MODULE_DELAY_MS = 1500;
@@ -241,6 +253,58 @@ export const HoverCard: Story = {
           />
         </HStack>
         {hoverCard.element}
+      </StoryFrame>
+    );
+  },
+};
+
+const scheduleEvents = [
+  createEventFromISO({
+    end: '2026-05-12T15:00:00.000Z',
+    id: 'intake',
+    start: '2026-05-12T14:00:00.000Z',
+    title: 'Intake session',
+  }),
+  createEventFromISO({
+    end: '2026-05-14T18:30:00.000Z',
+    id: 'follow-up',
+    start: '2026-05-14T17:30:00.000Z',
+    title: 'Follow-up',
+  }),
+];
+
+const scheduleViewDate = Temporal.Instant.from(
+  '2026-05-12T00:00:00Z',
+).epochMilliseconds;
+
+function resolveScheduleEvent(event: CalendarEvent): ScheduleEventEntryPoint {
+  return scheduleEventEntryPoint(
+    refreshingPopoverEntryPoint,
+    {surface: 'popover', title: event.title},
+    {message: 'Loaded when the pointer rested on the event.'},
+  );
+}
+
+export const SchedulePopover: Story = {
+  render: () => {
+    const plugin = useSchedulePreloadedEventPopoverPlugin({
+      hasCloseButton: true,
+      resolve: resolveScheduleEvent,
+    });
+
+    return (
+      <StoryFrame>
+        <Text as="p" color="secondary">
+          Point to an event to preload its EntryPoint, then click it. Reopening
+          an event loads it again.
+        </Text>
+        <Schedule
+          events={scheduleEvents}
+          plugins={[plugin]}
+          timezoneID="UTC"
+          view={createScheduleWeeklyView({maxHour: 20, minHour: 8})}
+          viewDate={scheduleViewDate}
+        />
       </StoryFrame>
     );
   },

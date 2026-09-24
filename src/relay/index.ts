@@ -27,3 +27,9 @@ export {
   type PreloadedPopoverController,
   type UsePreloadedPopoverOptions,
 } from 'relay/usePreloadedPopover';
+export {
+  scheduleEventEntryPoint,
+  useSchedulePreloadedEventPopoverPlugin,
+  type ScheduleEventEntryPoint,
+  type UseSchedulePreloadedEventPopoverPluginOptions,
+} from 'relay/useSchedulePreloadedEventPopoverPlugin';

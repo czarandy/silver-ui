@@ -5,6 +5,7 @@ import {
   Fragment,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   type CSSProperties,
@@ -44,6 +45,7 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from 'internal/plainDate';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cva} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -335,18 +337,44 @@ export function useScheduleEventPopover(
   const {categoryMap, plugins, timezoneID} = useScheduleContext();
   const interactionState = useScheduleInteractionState();
   const interactionTokenRef = useRef(Symbol('schedule-event-popover'));
+  const popoverId = useId();
+  // Read at show/hide time so the popover's handlers stay stable across
+  // renders; plugins are commonly recreated whenever their options change.
+  const latestRef = useRef({event, plugins});
+  useIsomorphicLayoutEffect(() => {
+    latestRef.current = {event, plugins};
+  }, [event, plugins]);
+  const isShownRef = useRef(false);
+  const notifyHide = useCallback(() => {
+    if (!isShownRef.current) {
+      return;
+    }
+    isShownRef.current = false;
+    const latest = latestRef.current;
+    latest.plugins.forEach(plugin =>
+      plugin.onEventPopoverHide?.(latest.event, popoverId),
+    );
+  }, [popoverId]);
   const handleShow = useCallback(() => {
     interactionState.markPopoverShown(interactionTokenRef.current);
-  }, [interactionState]);
+    isShownRef.current = true;
+    const latest = latestRef.current;
+    latest.plugins.forEach(plugin =>
+      plugin.onEventPopoverShow?.(latest.event, popoverId),
+    );
+  }, [interactionState, popoverId]);
   const handleHide = useCallback(() => {
     interactionState.markPopoverHidden(interactionTokenRef.current);
-  }, [interactionState]);
+    notifyHide();
+  }, [interactionState, notifyHide]);
   useEffect(
     () => () => {
       interactionState.unregisterPopover(interactionTokenRef.current);
     },
     [interactionState],
   );
+  // An open popover removed with its pill never fires `onHide`.
+  useEffect(() => notifyHide, [notifyHide]);
   const eventPopoverPlugin = plugins.find(
     plugin => plugin.renderEventPopover != null,
   );
@@ -359,8 +387,8 @@ export function useScheduleEventPopover(
   });
   const {hide} = popover;
   const controls = useMemo(
-    (): ScheduleEventPopoverControls => ({close: hide}),
-    [hide],
+    (): ScheduleEventPopoverControls => ({close: hide, popoverId}),
+    [hide, popoverId],
   );
   const content = useMemo((): ReactNode => {
     for (const plugin of plugins) {

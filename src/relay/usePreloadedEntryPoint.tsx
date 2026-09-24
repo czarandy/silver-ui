@@ -27,7 +27,7 @@ import {Spinner} from 'components/Spinner';
 import {VStack} from 'components/Stack';
 
 // Keep intent preloads through an immediate open, but refresh old unused data.
-const MAX_UNUSED_PRELOAD_AGE_MS = 30_000;
+export const MAX_UNUSED_PRELOAD_AGE_MS = 30_000;
 
 export type EntryPointParams<TEntryPoint> = TEntryPoint extends {
   getPreloadProps: (params: infer TParams) => unknown;
@@ -98,7 +98,7 @@ interface PreloadedEntryPointErrorBoundaryState {
   error: Error | null;
 }
 
-class PreloadedEntryPointErrorBoundary extends Component<
+export class PreloadedEntryPointErrorBoundary extends Component<
   PreloadedEntryPointErrorBoundaryProps,
   PreloadedEntryPointErrorBoundaryState
 > {
@@ -130,7 +130,7 @@ function DefaultLoadingFallback(): React.JSX.Element {
   );
 }
 
-function defaultErrorFallback(
+export function defaultErrorFallback(
   _error: Error,
   retry: () => void,
 ): React.JSX.Element {
@@ -146,11 +146,11 @@ function defaultErrorFallback(
   );
 }
 
-function paramsKey(params: object): string {
+export function paramsKey(params: object): string {
   return JSON.stringify(stableCopy(params));
 }
 
-function LoadedEntryPoint<TEntryPoint>({
+export function LoadedEntryPoint<TEntryPoint>({
   close,
   entryPointReference,
   runtimeProps,
