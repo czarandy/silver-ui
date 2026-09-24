@@ -165,6 +165,14 @@ export const Default: Story = {
 };
 
 export const Gallery: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Moving between images with the Previous and Next buttons or the arrow keys announces the new image to screen readers through a polite live region, for example "Sunset over the bay, 3 of 12". The visual counter is unchanged.',
+      },
+    },
+  },
   render: args => <LightboxStory {...args} media={imageMedia} />,
 };
 

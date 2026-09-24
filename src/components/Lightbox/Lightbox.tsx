@@ -14,6 +14,7 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {lightboxRecipe} from 'components/Lightbox/Lightbox.recipe';
+import useAnnounce from 'hooks/useAnnounce';
 import {LayerContext} from 'internal/LayerContext';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
@@ -168,6 +169,40 @@ export function Lightbox({
   const classes = lightboxRecipe({cursor, isDragging});
 
   useScrollLock(isOpen);
+
+  const {announce, announcer, clear: clearAnnouncement} = useAnnounce();
+  const announcedIndexRef = useRef<number | null>(null);
+  const currentAlt = currentItem?.alt;
+  // Focus stays on the Previous/Next button while the media swaps, so the new
+  // item's alt text is never read. Announce it with its position instead of
+  // exposing the visual "3 / 12" counter, which would be read as "3 slash 12".
+  // Keyed off the displayed index so controlled galleries announce what is
+  // actually shown; opening the lightbox is not itself announced.
+  useEffect(() => {
+    if (!isOpen) {
+      announcedIndexRef.current = null;
+      clearAnnouncement();
+      return;
+    }
+    const previousIndex = announcedIndexRef.current;
+    announcedIndexRef.current = currentIndex;
+    if (previousIndex == null || previousIndex === currentIndex) {
+      return;
+    }
+    const position = `${currentIndex + 1} of ${mediaItems.length}`;
+    announce(
+      currentAlt != null && currentAlt !== ''
+        ? `${currentAlt}, ${position}`
+        : position,
+    );
+  }, [
+    announce,
+    clearAnnouncement,
+    currentAlt,
+    currentIndex,
+    isOpen,
+    mediaItems.length,
+  ]);
 
   const setIndex = useCallback(
     (nextIndex: number) => {
@@ -381,6 +416,7 @@ export function Lightbox({
             </div>
           ) : null}
         </div>
+        {announcer}
       </LayerContext>
     </dialog>
   );
