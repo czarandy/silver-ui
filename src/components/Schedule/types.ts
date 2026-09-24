@@ -148,6 +148,14 @@ export interface SchedulePlugin {
     props: ScheduleTimeGridCellPropsRenderProps,
   ) => SchedulePluginElementProps;
   /**
+   * Called when an event popover closes, however it was dismissed.
+   */
+  onEventPopoverHide?: (event: CalendarEvent) => void;
+  /**
+   * Called when an event popover opens, in the same update that opens it.
+   */
+  onEventPopoverShow?: (event: CalendarEvent) => void;
+  /**
    * Appends content at the logical inline end of compact event renderers. This
    * is invoked for month events and inline events such as list rows and all-day
    * pills, but not for timed day/week event blocks.

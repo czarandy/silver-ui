@@ -4325,6 +4325,38 @@ describe('Schedule', () => {
       expect(timed).toHaveAttribute('aria-expanded', 'true');
     });
 
+    it('notifies plugins when an event popover opens and closes', () => {
+      const onEventPopoverHide = vi.fn();
+      const onEventPopoverShow = vi.fn();
+      function ScheduleWithLifecycle(): React.JSX.Element {
+        const popoverPlugin = useScheduleEventPopoverPlugin();
+        return (
+          <Schedule
+            categories={categories}
+            events={popoverEvents}
+            highlightDate={instantUTC(2026, 4, 13)}
+            plugins={[popoverPlugin, {onEventPopoverHide, onEventPopoverShow}]}
+            timezoneID="UTC"
+            view={createScheduleMonthlyView()}
+            viewDate={instantUTC(2026, 4, 13)}
+          />
+        );
+      }
+      render(<ScheduleWithLifecycle />);
+      const pill = screen.getByTestId('schedule-event-visible');
+
+      fireEvent.click(pill);
+      expect(onEventPopoverShow).toHaveBeenCalledExactlyOnceWith(
+        popoverEvents[0],
+      );
+      expect(onEventPopoverHide).not.toHaveBeenCalled();
+
+      fireEvent.click(pill);
+      expect(onEventPopoverHide).toHaveBeenCalledExactlyOnceWith(
+        popoverEvents[0],
+      );
+    });
+
     it('opens a popover in the list view', () => {
       render(
         <ScheduleWithPopover

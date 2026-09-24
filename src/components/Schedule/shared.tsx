@@ -337,10 +337,12 @@ export function useScheduleEventPopover(
   const interactionTokenRef = useRef(Symbol('schedule-event-popover'));
   const handleShow = useCallback(() => {
     interactionState.markPopoverShown(interactionTokenRef.current);
-  }, [interactionState]);
+    plugins.forEach(plugin => plugin.onEventPopoverShow?.(event));
+  }, [event, interactionState, plugins]);
   const handleHide = useCallback(() => {
     interactionState.markPopoverHidden(interactionTokenRef.current);
-  }, [interactionState]);
+    plugins.forEach(plugin => plugin.onEventPopoverHide?.(event));
+  }, [event, interactionState, plugins]);
   useEffect(
     () => () => {
       interactionState.unregisterPopover(interactionTokenRef.current);
