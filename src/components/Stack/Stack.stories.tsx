@@ -76,6 +76,48 @@ export const Padding: Story = {
   ),
 };
 
+export const AxisAndEdgePadding: Story = {
+  render: () => (
+    <HStack align="start" gap={4} wrap="wrap">
+      <VStack
+        className={boxStyle}
+        gap={2}
+        paddingBlock={2}
+        paddingInline={6}
+        width="fit-content">
+        <Text color="secondary" type="supporting">
+          paddingBlock=&#123;2&#125; paddingInline=&#123;6&#125;
+        </Text>
+        <Box>Axis padding</Box>
+      </VStack>
+      <VStack
+        className={boxStyle}
+        gap={2}
+        padding={3}
+        paddingBlockEnd={10}
+        width="fit-content">
+        <Text color="secondary" type="supporting">
+          padding=&#123;3&#125; paddingBlockEnd=&#123;10&#125;
+        </Text>
+        <Box>Room for a scroll fade</Box>
+      </VStack>
+      <VStack
+        className={boxStyle}
+        gap={2}
+        padding={3}
+        paddingInline={2}
+        paddingInlineStart={8}
+        width="fit-content">
+        <Text color="secondary" type="supporting">
+          padding=&#123;3&#125; paddingInline=&#123;2&#125;
+          paddingInlineStart=&#123;8&#125;
+        </Text>
+        <Box>Aligned with a gutter</Box>
+      </VStack>
+    </HStack>
+  ),
+};
+
 export const GapScale: Story = {
   render: () => (
     <VStack gap={6}>

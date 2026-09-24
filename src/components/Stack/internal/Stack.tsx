@@ -6,7 +6,11 @@ import type {
   Ref,
 } from 'react';
 import {stackRecipe} from 'components/Stack/internal/Stack.recipe';
-import type {SpacingToken} from 'internal/spacingTokens';
+import {
+  resolvePadding,
+  type PaddingProps,
+  type SpacingToken,
+} from 'internal/spacingTokens';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
@@ -23,7 +27,7 @@ export type StackGap = SpacingToken;
  * @internal
  * Props for the base `Stack` component.
  */
-export interface StackProps extends HTMLAttributes<HTMLElement> {
+export interface StackProps extends HTMLAttributes<HTMLElement>, PaddingProps {
   /**
    * Cross-axis alignment.
    */
@@ -60,10 +64,6 @@ export interface StackProps extends HTMLAttributes<HTMLElement> {
    * Main-axis alignment.
    */
   justify?: StackMainAlignment;
-  /**
-   * Inner padding step.
-   */
-  padding?: SpacingToken;
   /**
    * Ref forwarded to the root element.
    */
@@ -116,6 +116,12 @@ export function Stack({
   height,
   justify,
   padding,
+  paddingBlock,
+  paddingBlockEnd,
+  paddingBlockStart,
+  paddingInline,
+  paddingInlineEnd,
+  paddingInlineStart,
   ref,
   style,
   vAlign,
@@ -148,7 +154,23 @@ export function Stack({
   return (
     <Element
       {...htmlProps}
-      className={cx(stackRecipe({direction, gap, padding, wrap}), className)}
+      className={cx(
+        stackRecipe({
+          direction,
+          gap,
+          wrap,
+          ...resolvePadding({
+            padding,
+            paddingBlock,
+            paddingBlockEnd,
+            paddingBlockStart,
+            paddingInline,
+            paddingInlineEnd,
+            paddingInlineStart,
+          }),
+        }),
+        className,
+      )}
       data-testid={dataTestId}
       ref={ref}
       style={stackStyle}>

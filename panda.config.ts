@@ -1,7 +1,14 @@
 import {defineConfig, defineRecipe} from '@pandacss/dev';
 import {generateColorScale} from './scripts/generate-color-scale';
 import {inheritanceReset} from './src/internal/inheritanceReset';
-import {gapVariants} from './src/internal/spacingTokens';
+import {
+  gapVariants,
+  paddingBlockEndVariants,
+  paddingBlockStartVariants,
+  paddingInlineEndVariants,
+  paddingInlineStartVariants,
+  paddingVariants,
+} from './src/internal/spacingTokens';
 
 const gray = {
   ...generateColorScale('#6a7b8c'),
@@ -44,6 +51,25 @@ export default defineConfig({
         // while some other file happens to use the same value inline. Force
         // every spacing-scale gap utility so the shared map always resolves.
         properties: {gap: Object.values(gapVariants).map(({gap}) => gap)},
+      },
+      {
+        // Same for the shared padding maps backing the uniform, axis, and
+        // per-edge padding props on Stack and Center.
+        properties: {
+          p: Object.values(paddingVariants).map(({p}) => p),
+          paddingBlockStart: Object.values(paddingBlockStartVariants).map(
+            v => v.paddingBlockStart,
+          ),
+          paddingBlockEnd: Object.values(paddingBlockEndVariants).map(
+            v => v.paddingBlockEnd,
+          ),
+          paddingInlineStart: Object.values(paddingInlineStartVariants).map(
+            v => v.paddingInlineStart,
+          ),
+          paddingInlineEnd: Object.values(paddingInlineEndVariants).map(
+            v => v.paddingInlineEnd,
+          ),
+        },
       },
     ],
   },

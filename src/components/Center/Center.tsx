@@ -1,12 +1,13 @@
 import type {HTMLAttributes, ReactNode, Ref} from 'react';
 import {centerRecipe} from 'components/Center/Center.recipe';
-import type {SpacingToken} from 'internal/spacingTokens';
+import {resolvePadding, type PaddingProps} from 'internal/spacingTokens';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
 
 export type CenterAxis = 'both' | 'horizontal' | 'vertical';
 
-export interface CenterProps extends HTMLAttributes<HTMLDivElement> {
+export interface CenterProps
+  extends HTMLAttributes<HTMLDivElement>, PaddingProps {
   /**
    * Which axes to center content along.
    */
@@ -28,10 +29,6 @@ export interface CenterProps extends HTMLAttributes<HTMLDivElement> {
    */
   isInline?: boolean;
   /**
-   * Inner padding step.
-   */
-  padding?: SpacingToken;
-  /**
    * Ref forwarded to the root element.
    */
   ref?: Ref<HTMLDivElement>;
@@ -49,6 +46,12 @@ export function Center({
   height,
   isInline = false,
   padding,
+  paddingBlock,
+  paddingBlockEnd,
+  paddingBlockStart,
+  paddingInline,
+  paddingInlineEnd,
+  paddingInlineStart,
   ref,
   style,
   width,
@@ -57,7 +60,22 @@ export function Center({
   return (
     <div
       {...htmlProps}
-      className={cx(centerRecipe({axis, isInline, padding}), className)}
+      className={cx(
+        centerRecipe({
+          axis,
+          isInline,
+          ...resolvePadding({
+            padding,
+            paddingBlock,
+            paddingBlockEnd,
+            paddingBlockStart,
+            paddingInline,
+            paddingInlineEnd,
+            paddingInlineStart,
+          }),
+        }),
+        className,
+      )}
       data-testid={dataTestId}
       ref={ref}
       style={{
