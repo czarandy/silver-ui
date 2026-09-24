@@ -104,9 +104,6 @@ export const alertRecipe = sva({
       flex: 1,
       flexDirection: 'column',
       minW: 0,
-      // Title and description render as <div>s, which preflight's
-      // overflow-wrap rule (h1-h6, p only) does not reach. Without this a long
-      // unbroken token (URL, id) paints past the card and scrolls the page.
       overflowWrap: 'break-word',
     },
     endArea: {
