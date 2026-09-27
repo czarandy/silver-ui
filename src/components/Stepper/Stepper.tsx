@@ -1,6 +1,6 @@
 'use client';
 
-import type {CSSProperties, ReactNode, Ref} from 'react';
+import {useState, type CSSProperties, type ReactNode, type Ref} from 'react';
 import {Step} from 'components/Stepper/internal/Step';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -128,6 +128,36 @@ export function Stepper({
   const isNonLinear = onStepClick != null;
   const activeIndex = steps.findIndex(step => step.id === activeStep);
 
+  // Compare render snapshots so non-adjacent changes disable transitions in the
+  // same commit. Equivalent step arrays from parent renders preserve progress.
+  const sequence = JSON.stringify(
+    steps.map(step => [step.id, step.isCompleted]),
+  );
+  const [progress, setProgress] = useState({
+    activeIndex,
+    sequence,
+    orientation,
+    animatedIndex: -1,
+  });
+  if (
+    progress.activeIndex !== activeIndex ||
+    progress.sequence !== sequence ||
+    progress.orientation !== orientation
+  ) {
+    setProgress({
+      activeIndex,
+      sequence,
+      orientation,
+      animatedIndex:
+        progress.sequence === sequence &&
+        progress.orientation === orientation &&
+        progress.activeIndex >= 0 &&
+        activeIndex === progress.activeIndex + 1
+          ? progress.activeIndex
+          : -1,
+    });
+  }
+
   return (
     <nav
       aria-label={label}
@@ -160,6 +190,9 @@ export function Stepper({
               isActive={isActive}
               isClickable={isClickable}
               isCompleted={isCompleted}
+              isConnectorAnimated={
+                isCompleted && index === progress.animatedIndex
+              }
               isDisabled={isDisabled}
               key={step.id}
               label={step.label}

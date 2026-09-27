@@ -28,6 +28,7 @@ export interface StepProps {
   isActive: boolean;
   isClickable: boolean;
   isCompleted: boolean;
+  isConnectorAnimated: boolean;
   isDisabled: boolean;
   label: string;
   /**
@@ -76,6 +77,7 @@ export function Step({
   isActive,
   isClickable,
   isCompleted,
+  isConnectorAnimated,
   isDisabled,
   label,
   onClick,
@@ -84,7 +86,13 @@ export function Step({
   const isVertical = orientation === 'vertical';
   const state = getStepState({hasError, isActive, isCompleted, isDisabled});
 
-  const classes = stepRecipe({orientation, state, isClickable, isCompleted});
+  const classes = stepRecipe({
+    orientation,
+    state,
+    isClickable,
+    isCompleted,
+    isConnectorAnimated,
+  });
 
   const defaultIndicatorContent = isCompleted ? (
     <Icon color="inherit" icon={Check} size="sm" />
@@ -141,7 +149,9 @@ export function Step({
         <div className={classes.indicatorColumn}>
           {indicator}
           <div className={classes.connectorWrapper} data-step-connector="">
-            <div className={classes.connector} />
+            <div className={classes.connector}>
+              <div className={classes.connectorFill} />
+            </div>
           </div>
         </div>
         <div className={classes.content}>
@@ -164,7 +174,9 @@ export function Step({
         {labelNode}
       </div>
       <div className={classes.connectorWrapper} data-step-connector="">
-        <div className={classes.connector} />
+        <div className={classes.connector}>
+          <div className={classes.connectorFill} />
+        </div>
       </div>
     </li>
   );

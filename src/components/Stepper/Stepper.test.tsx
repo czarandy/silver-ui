@@ -303,3 +303,148 @@ describe('stepRecipe', () => {
     ).toContain('silver-pt_3px');
   });
 });
+
+describe.each(['horizontal', 'vertical'] as const)(
+  '%s connector progress',
+  orientation => {
+    function getAnimatedConnectors() {
+      return screen.getAllByRole('listitem').flatMap((step, index) => {
+        // Connectors are decorative and deliberately have no accessible role.
+        // eslint-disable-next-line testing-library/no-node-access
+        const fill = step.querySelector('[data-step-connector] > div > div');
+        return fill?.classList.contains('silver-trs-prop_transform')
+          ? [index]
+          : [];
+      });
+    }
+
+    it('animates only the newly completed connector on adjacent forward movement', () => {
+      const {rerender} = render(
+        <Stepper
+          activeStep="account"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([]);
+      rerender(
+        <Stepper
+          activeStep="profile"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([0]);
+      rerender(
+        <Stepper
+          activeStep="review"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([1]);
+      rerender(
+        <Stepper
+          activeStep="account"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([]);
+      rerender(
+        <Stepper
+          activeStep="profile"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([0]);
+    });
+
+    it('settles mounting mid-flow, backward movement, jumps and unknown steps immediately', () => {
+      const {rerender} = render(
+        <Stepper
+          activeStep="profile"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([]);
+      for (const activeStep of ['account', 'review', 'missing', 'account']) {
+        rerender(
+          <Stepper
+            activeStep={activeStep}
+            orientation={orientation}
+            steps={threeSteps}
+          />,
+        );
+        expect(getAnimatedConnectors()).toEqual([]);
+      }
+    });
+
+    it('preserves animation on equivalent rerenders and settles sequence changes', () => {
+      const {rerender} = render(
+        <Stepper
+          activeStep="account"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      rerender(
+        <Stepper
+          activeStep="profile"
+          orientation={orientation}
+          steps={threeSteps}
+        />,
+      );
+      rerender(
+        <Stepper
+          activeStep="profile"
+          orientation={orientation}
+          steps={[...threeSteps]}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([0]);
+      rerender(
+        <Stepper
+          activeStep="profile"
+          orientation={orientation}
+          steps={[threeSteps[1], threeSteps[0], threeSteps[2]]}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([]);
+    });
+
+    it('keeps explicitly incomplete connectors unanimated', () => {
+      const steps = threeSteps.map(step => ({...step, isCompleted: false}));
+      const {rerender} = render(
+        <Stepper
+          activeStep="account"
+          orientation={orientation}
+          steps={steps}
+        />,
+      );
+      rerender(
+        <Stepper
+          activeStep="profile"
+          orientation={orientation}
+          steps={steps}
+        />,
+      );
+      expect(getAnimatedConnectors()).toEqual([]);
+    });
+
+    it('disables connector transitions for reduced motion while retaining the completed fill', () => {
+      const styles = stepRecipe.raw({
+        orientation,
+        isCompleted: true,
+        isConnectorAnimated: true,
+      });
+      expect(styles.connectorFill).toMatchObject({
+        transform: 'scale(1)',
+        transitionProperty: 'transform',
+        _motionReduce: {transitionProperty: 'none'},
+      });
+    });
+  },
+);

@@ -268,3 +268,37 @@ export const ManySteps: Story = {
     ],
   },
 };
+
+export const ConnectorProgress: Story = {
+  args: {activeStep: 'account', steps: baseSteps},
+  render: args => {
+    const [index, setIndex] = useState(0);
+    return (
+      <VStack gap={6}>
+        <Stepper {...args} activeStep={baseSteps[index].id} />
+        <HStack gap={2}>
+          <Button
+            isDisabled={index === 0}
+            label="Back"
+            onClick={() => setIndex(index - 1)}
+          />
+          <Button
+            isDisabled={index === baseSteps.length - 1}
+            label="Next"
+            onClick={() => setIndex(index + 1)}
+          />
+          <Button
+            label="Jump to last"
+            onClick={() => setIndex(baseSteps.length - 1)}
+          />
+          <Button label="Reset" onClick={() => setIndex(0)} />
+        </HStack>
+      </VStack>
+    );
+  },
+};
+
+export const VerticalConnectorProgress: Story = {
+  ...ConnectorProgress,
+  args: {...ConnectorProgress.args, orientation: 'vertical'},
+};

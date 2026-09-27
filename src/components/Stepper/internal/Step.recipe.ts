@@ -12,6 +12,7 @@ export const stepRecipe = sva({
     'description',
     'connectorWrapper',
     'connector',
+    'connectorFill',
     'childrenContent',
   ],
   base: {
@@ -60,9 +61,18 @@ export const stepRecipe = sva({
     },
     connector: {
       borderRadius: 'full',
-      transitionProperty: 'background-color',
-      transitionDuration: 'fast',
-      transitionTimingFunction: 'default',
+      bg: 'track.emphasized',
+      overflow: 'hidden',
+    },
+    connectorFill: {
+      w: 'full',
+      h: 'full',
+      bg: 'primary',
+      borderRadius: 'inherit',
+      transformOrigin: 'left',
+      transform: 'scaleX(0)',
+      transitionProperty: 'none',
+      _rtl: {transformOrigin: 'right'},
     },
     childrenContent: {
       pt: '3',
@@ -125,6 +135,11 @@ export const stepRecipe = sva({
           py: '1',
         },
         connector: {w: '0.5', h: 'full'},
+        connectorFill: {
+          transform: 'scaleY(0)',
+          transformOrigin: 'top',
+          _rtl: {transformOrigin: 'top'},
+        },
       },
     },
     state: {
@@ -187,9 +202,20 @@ export const stepRecipe = sva({
       },
       false: {},
     },
+    isConnectorAnimated: {
+      true: {
+        connectorFill: {
+          transitionProperty: 'transform',
+          transitionDuration: '300ms',
+          transitionTimingFunction: 'default',
+          _motionReduce: {transitionProperty: 'none'},
+        },
+      },
+      false: {},
+    },
     isCompleted: {
-      true: {connector: {bg: 'primary'}},
-      false: {connector: {bg: 'track.emphasized'}},
+      true: {connectorFill: {transform: 'scale(1)'}},
+      false: {},
     },
   },
   defaultVariants: {
