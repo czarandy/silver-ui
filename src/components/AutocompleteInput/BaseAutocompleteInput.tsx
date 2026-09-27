@@ -244,6 +244,8 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       setIsOpen(isNextOpen);
       onOpenChange?.(isNextOpen);
       if (!isNextOpen) {
+        generationRef.current++;
+        setIsLoading(false);
         searchSource.cancel?.();
         setHighlightedIndex(-1);
       }
@@ -262,15 +264,20 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       }
       const generation = ++generationRef.current;
       searchSource.cancel?.();
-      setIsLoading(true);
       setHasSearched(true);
       setHasError(false);
 
       try {
-        const nextResults =
+        const result =
           kind === 'bootstrap'
-            ? await searchSource.bootstrap()
-            : await searchSource.search(nextQuery);
+            ? searchSource.bootstrap()
+            : searchSource.search(nextQuery);
+        // Bootstrap arrays can be committed in the focus event without a
+        // loading render or a microtask delay. Searches keep their semantics.
+        const isSynchronousBootstrap =
+          kind === 'bootstrap' && Array.isArray(result);
+        setIsLoading(!isSynchronousBootstrap);
+        const nextResults = isSynchronousBootstrap ? result : await result;
         if (generationRef.current !== generation) {
           return;
         }
@@ -364,7 +371,13 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
       inputRef.current?.focus();
       selectingRef.current = false;
       if (hasReopenOnSelect && hasEntriesOnFocus) {
-        void runSearch('', 'bootstrap');
+        const generation = generationRef.current;
+        // Let the controlled selection commit before filtering bootstrap items.
+        queueMicrotask(() => {
+          if (generationRef.current === generation) {
+            void runSearch('', 'bootstrap');
+          }
+        });
       } else {
         setOpen(false);
       }
@@ -383,6 +396,9 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
 
   useEffect(() => {
     return () => {
+      // eslint-disable-next-line silver-ui/exhaustive-deps -- invalidate the current request, not the generation captured at setup
+      generationRef.current++;
+      setIsLoading(false);
       if (timeoutRef.current != null) {
         clearTimeout(timeoutRef.current);
       }

@@ -14,6 +14,7 @@ import {
   type SearchableItem,
   type SearchSource,
 } from 'components/AutocompleteInput/types';
+import {VStack} from 'components/Stack';
 
 const people: SearchableItem<{role: string}>[] = [
   {id: 'ada', label: 'Ada Lovelace', auxiliaryData: {role: 'Mathematician'}},
@@ -420,5 +421,44 @@ export const ReadOnly: Story = {
       searchSource={createStaticSearchSource(people)}
       value={people[0]}
     />
+  ),
+};
+
+function InitialSuggestionsComparisonStory(args: AutocompleteInputProps) {
+  const [syncValue, setSyncValue] = useState<SearchableItem | null>(null);
+  const [asyncValue, setAsyncValue] = useState<SearchableItem | null>(null);
+  const syncSource = useMemo(() => createStaticSearchSource(people), []);
+  const asyncSource = useMemo(() => {
+    const source = createAsyncSource(people, 1000);
+    return {...source, bootstrap: async () => source.search('')};
+  }, []);
+
+  return (
+    <VStack gap={4}>
+      <AutocompleteInput
+        {...args}
+        description="Focus to show in-memory suggestions immediately."
+        hasEntriesOnFocus
+        label="Synchronous initial suggestions"
+        onChange={setSyncValue}
+        searchSource={syncSource}
+        value={syncValue}
+      />
+      <AutocompleteInput
+        {...args}
+        description="Focus to load suggestions after a one-second delay."
+        hasEntriesOnFocus
+        label="Asynchronous initial suggestions"
+        onChange={setAsyncValue}
+        searchSource={asyncSource}
+        value={asyncValue}
+      />
+    </VStack>
+  );
+}
+
+export const InitialSuggestionsComparison: Story = {
+  render: (args: AutocompleteInputProps) => (
+    <InitialSuggestionsComparisonStory {...args} />
   ),
 };
