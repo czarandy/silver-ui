@@ -443,6 +443,8 @@ describe.each(['horizontal', 'vertical'] as const)(
       expect(styles.connectorFill).toMatchObject({
         transform: 'scale(1)',
         transitionProperty: 'transform',
+        transitionDuration: '410ms',
+        transitionTimingFunction: 'linear',
         _motionReduce: {transitionProperty: 'none'},
       });
     });
