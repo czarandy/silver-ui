@@ -1,16 +1,16 @@
 'use client';
 
-const specialKeyValues: Readonly<Record<string, string>> = {
-  backspace: 'Backspace',
-  down: 'ArrowDown',
-  enter: 'Enter',
-  escape: 'Escape',
-  left: 'ArrowLeft',
-  plus: '+',
-  right: 'ArrowRight',
-  tab: 'Tab',
-  up: 'ArrowUp',
-};
+const specialKeyValues = new Map<string, string>([
+  ['backspace', 'Backspace'],
+  ['down', 'ArrowDown'],
+  ['enter', 'Enter'],
+  ['escape', 'Escape'],
+  ['left', 'ArrowLeft'],
+  ['plus', '+'],
+  ['right', 'ArrowRight'],
+  ['tab', 'Tab'],
+  ['up', 'ArrowUp'],
+]);
 
 export const keyboardModifierTokens = new Set(['alt', 'ctrl', 'mod', 'shift']);
 
@@ -47,5 +47,5 @@ export function isApplePlatform(): boolean {
  * Resolves a descriptor's primary-key token to KeyboardEvent.key.
  */
 export function getKeyboardEventKey(token: string): string {
-  return specialKeyValues[token] ?? token;
+  return specialKeyValues.get(token) ?? token;
 }
