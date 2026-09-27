@@ -22,6 +22,16 @@ type Story = StoryObj<TextAreaProps>;
 
 export const Default: Story = {};
 
+export const AutoComplete: Story = {
+  args: {
+    autoComplete: 'street-address',
+    htmlName: 'street-address',
+    label: 'Street address',
+    placeholder: 'Street and apartment number',
+    description: 'Allows the browser to suggest a saved street address.',
+  },
+};
+
 export const WithCounter: Story = {
   args: {maxLength: 120, value: 'Draft note'},
 };
