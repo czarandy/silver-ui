@@ -1,7 +1,8 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import {useRef} from 'react';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {Button} from 'components/Button';
+import {useDialogContext} from 'components/Dialog/DialogContext';
 import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {Popover} from 'components/Popover/Popover';
 import {usePopover} from 'components/Popover/usePopover';
@@ -836,4 +837,100 @@ describe('usePopover isLazy', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getByTestId('harness-content')).toBeInTheDocument();
   });
+});
+
+describe('usePopover dismissal protection', () => {
+  function ContextOpener() {
+    const dialog = useDialogContext();
+    return (
+      <button onClick={() => dialog?.onOpenChange(true)} type="button">
+        Context open
+      </button>
+    );
+  }
+
+  function Fixture({
+    isAutoFocusSkipped = false,
+  }: {
+    isAutoFocusSkipped?: boolean;
+  }) {
+    const popover = usePopover({isLazy: false, label: 'Actions'});
+    return (
+      <>
+        <button
+          onClick={() => popover.show({isAutoFocusSkipped})}
+          ref={popover.triggerRef}
+          type="button"
+          {...popover.triggerProps}>
+          Show
+        </button>
+        <button onClick={popover.toggle} type="button">
+          Toggle
+        </button>
+        {popover.render(<ContextOpener />)}
+      </>
+    );
+  }
+
+  it.each(['Show', 'Toggle', 'Context open'])(
+    'blocks %s during dismissal and allows it after the next frame',
+    async name => {
+      showPopoverMock.mockClear();
+      render(<Fixture />);
+      const trigger = screen.getByRole('button', {name: 'Show'});
+      const opener = screen.getByRole('button', {hidden: true, name});
+      fireEvent.click(trigger);
+      expect(showPopoverMock).toHaveBeenCalledTimes(1);
+
+      act(() => {
+        getPopoverElement().dispatchEvent(closeToggleEvent());
+        opener.click();
+      });
+      expect(showPopoverMock).toHaveBeenCalledTimes(1);
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+      // Also exercise the updated callbacks after React commits the close.
+      fireEvent.click(opener);
+      expect(showPopoverMock).toHaveBeenCalledTimes(1);
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+      await nextAnimationFrame();
+      fireEvent.click(opener);
+      expect(showPopoverMock).toHaveBeenCalledTimes(2);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    },
+  );
+
+  it.each([false, true])(
+    'preserves isAutoFocusSkipped=%s on a later show after dismissal',
+    async isAutoFocusSkipped => {
+      showPopoverMock.mockClear();
+      const {rerender} = render(
+        <Fixture isAutoFocusSkipped={!isAutoFocusSkipped} />,
+      );
+      const trigger = screen.getByRole('button', {name: 'Show'});
+      trigger.focus();
+      fireEvent.click(trigger);
+      await nextAnimationFrame();
+
+      act(() => {
+        getPopoverElement().dispatchEvent(closeToggleEvent());
+        trigger.click();
+      });
+      expect(showPopoverMock).toHaveBeenCalledTimes(1);
+
+      await nextAnimationFrame();
+      rerender(<Fixture isAutoFocusSkipped={isAutoFocusSkipped} />);
+      trigger.focus();
+      fireEvent.click(trigger);
+      await nextAnimationFrame();
+
+      expect(showPopoverMock).toHaveBeenCalledTimes(2);
+      const contentButton = screen.getByRole('button', {
+        hidden: true,
+        name: 'Context open',
+      });
+      expect(isAutoFocusSkipped ? trigger : contentButton).toHaveFocus();
+    },
+  );
 });

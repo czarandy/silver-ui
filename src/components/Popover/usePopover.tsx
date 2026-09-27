@@ -169,7 +169,7 @@ export function usePopover({
   // Guards against a light-dismiss close immediately re-opening the popover.
   // When the trigger is clicked while the popover is open, the browser's native
   // light dismiss closes it (firing `onHide`) *before* the trigger's own click
-  // handler runs `toggle()` — which would otherwise re-open it. The flag is
+  // handler opens it again via `show()` or `toggle()`. The flag is
   // cleared on the next animation frame: the browser never paints mid-gesture,
   // so it is reliably still set when the spurious click arrives, yet cleared
   // before any genuine later click.
@@ -233,6 +233,10 @@ export function usePopover({
 
   const show = useCallback(
     (options?: {isAutoFocusSkipped?: boolean}) => {
+      if (isDismissingRef.current) {
+        return;
+      }
+
       skipAutoFocusRef.current = options?.isAutoFocusSkipped ?? false;
       layer.show();
     },
@@ -254,10 +258,6 @@ export function usePopover({
   );
 
   const toggle = useCallback(() => {
-    if (isDismissingRef.current) {
-      return;
-    }
-
     if (layer.isOpen) {
       layer.hide();
       return;
