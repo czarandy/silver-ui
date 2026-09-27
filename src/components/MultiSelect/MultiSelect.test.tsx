@@ -972,6 +972,119 @@ describe('MultiSelect', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it.each(['count', 'labels'] as const)(
+    'formats %s summaries from selected items and updates with values and options',
+    triggerDisplay => {
+      const formatSelectedValue = vi.fn<
+        NonNullable<MultiSelectProps['formatSelectedValue']>
+      >(items =>
+        items.map(item => `${item.label} (${item.value})`).join(' / '),
+      );
+      const props: MultiSelectProps = {
+        formatSelectedValue,
+        label: 'Columns',
+        onChange: () => {},
+        options: [
+          'Name',
+          {type: 'divider'},
+          {
+            type: 'section',
+            options: [
+              {value: 'email'},
+              {label: 'Role', value: 'role', isDisabled: true},
+            ],
+          },
+        ],
+        triggerDisplay,
+        value: ['role', 'email', 'missing'],
+      };
+      const {rerender} = render(<MultiSelect {...props} />);
+      expect(screen.getByRole('combobox', {name: 'Columns'})).toHaveTextContent(
+        'email (email) / Role (role)',
+      );
+      expect(formatSelectedValue).toHaveBeenLastCalledWith([
+        {label: 'email', value: 'email'},
+        {label: 'Role', value: 'role', isDisabled: true},
+      ]);
+
+      rerender(<MultiSelect {...props} value={['Name']} />);
+      expect(screen.getByRole('combobox', {name: 'Columns'})).toHaveTextContent(
+        'Name (Name)',
+      );
+
+      rerender(
+        <MultiSelect
+          {...props}
+          options={[{label: 'Updated email', value: 'email'}]}
+        />,
+      );
+      expect(screen.getByRole('combobox', {name: 'Columns'})).toHaveTextContent(
+        'Updated email (email)',
+      );
+    },
+  );
+
+  it.each(['count', 'labels', 'badges'] as const)(
+    'shows the placeholder without formatting empty selections in %s mode',
+    triggerDisplay => {
+      const formatSelectedValue = vi.fn(() => 'Custom summary');
+      const props: MultiSelectProps = {
+        formatSelectedValue,
+        label: 'Columns',
+        onChange: () => {},
+        options: ['Name'],
+        placeholder: 'Choose columns',
+        triggerDisplay,
+        value: [],
+      };
+      const {rerender} = render(<MultiSelect {...props} />);
+      expect(screen.getByRole('combobox', {name: 'Columns'})).toHaveTextContent(
+        'Choose columns',
+      );
+      rerender(<MultiSelect {...props} value={['missing']} />);
+      expect(screen.getByRole('combobox', {name: 'Columns'})).toHaveTextContent(
+        'Choose columns',
+      );
+      expect(formatSelectedValue).not.toHaveBeenCalled();
+    },
+  );
+
+  it('keeps badges and overflow independent of the formatter', () => {
+    const formatSelectedValue = vi.fn(() => 'Custom summary');
+    render(
+      <MultiSelect
+        formatSelectedValue={formatSelectedValue}
+        label="Columns"
+        maxBadges={1}
+        onChange={() => {}}
+        options={['Name', 'Email']}
+        triggerDisplay="badges"
+        value={['Name', 'Email']}
+      />,
+    );
+    const trigger = screen.getByRole('combobox', {name: 'Columns'});
+    expect(within(trigger).getByText('Name')).toBeInTheDocument();
+    expect(within(trigger).getByText('+1')).toBeInTheDocument();
+    expect(formatSelectedValue).not.toHaveBeenCalled();
+  });
+
+  it('preserves the accessible name for a custom summary in an input group', () => {
+    render(
+      <InputGroup label="Column settings">
+        <MultiSelect
+          formatSelectedValue={items => `${items.length} columns selected`}
+          label="Columns"
+          onChange={() => {}}
+          options={['Name']}
+          value={['Name']}
+        />
+      </InputGroup>,
+    );
+    expect(screen.getByRole('combobox', {name: 'Columns'})).toHaveTextContent(
+      '1 columns selected',
+    );
+  });
+
   it('renders trigger display modes', () => {
     const options = [
       {label: 'Name', value: 'name'},

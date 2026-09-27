@@ -126,6 +126,14 @@ export type MultiSelectProps = {
    */
   emptySearchResultsText?: string;
   /**
+   * Formats selected items in count and labels trigger modes. Items follow
+   * option order, with missing labels defaulting to their values; selected
+   * values absent from options are excluded. Not called for badges or when
+   * no items match the selection (the placeholder is shown instead).
+   * The field label remains the trigger's accessible name.
+   */
+  formatSelectedValue?: (items: ReadonlyArray<MultiSelectOptionData>) => string;
+  /**
    * Whether to show a clear button when values are selected.
    * @default false
    */
@@ -268,6 +276,7 @@ export function MultiSelect({
   description,
   emptyOptionsText = 'No options',
   emptySearchResultsText = 'No results found',
+  formatSelectedValue,
   hasClear = false,
   hasEntriesOnFocus = false,
   hasSearch = false,
@@ -500,6 +509,13 @@ export function MultiSelect({
   const renderTriggerValue = (): ReactNode => {
     if (selectedOptions.length === 0) {
       return <span className={triggerClasses.triggerText}>{placeholder}</span>;
+    }
+    if (triggerDisplay !== 'badges' && formatSelectedValue != null) {
+      return (
+        <span className={triggerClasses.triggerText}>
+          {formatSelectedValue(selectedOptions)}
+        </span>
+      );
     }
     if (triggerDisplay === 'labels') {
       const labels = selectedOptions.map(
