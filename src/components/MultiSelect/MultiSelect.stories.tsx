@@ -331,3 +331,28 @@ export const ReadOnly: Story = {
   args: {isReadOnly: true},
   render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
 };
+
+export const CustomCount: Story = {
+  args: {
+    formatSelectedValue: items => `${items.length} columns selected`,
+    triggerDisplay: 'count',
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'formatSelectedValue customizes count and labels summaries. Clearing the selection shows the placeholder without calling the formatter. Badge mode ignores the formatter, and the field label remains the accessible name.',
+      },
+    },
+  },
+  render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
+};
+
+export const CustomLabelSummary: Story = {
+  args: {
+    formatSelectedValue: items =>
+      items.map(item => `${item.label} (${item.value})`).join(' • '),
+    triggerDisplay: 'labels',
+  },
+  render: (args: MultiSelectProps) => <MultiSelectStory {...args} />,
+};
