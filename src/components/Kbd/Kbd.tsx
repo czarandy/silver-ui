@@ -50,35 +50,35 @@ export interface KbdProps {
   style?: CSSProperties;
 }
 
-const keyDisplay: Record<string, string> = {
-  alt: '⌥',
-  backspace: '⌫',
-  ctrl: '⌃',
-  down: '↓',
-  enter: '↵',
-  escape: 'Esc',
-  left: '←',
-  plus: '+',
-  right: '→',
-  shift: '⇧',
-  tab: '⇥',
-  up: '↑',
-};
+const keyDisplay = new Map<string, string>([
+  ['alt', '⌥'],
+  ['backspace', '⌫'],
+  ['ctrl', '⌃'],
+  ['down', '↓'],
+  ['enter', '↵'],
+  ['escape', 'Esc'],
+  ['left', '←'],
+  ['plus', '+'],
+  ['right', '→'],
+  ['shift', '⇧'],
+  ['tab', '⇥'],
+  ['up', '↑'],
+]);
 
-const keyLabel: Record<string, string> = {
-  alt: 'Alt',
-  backspace: 'Backspace',
-  ctrl: 'Control',
-  down: 'Down Arrow',
-  enter: 'Enter',
-  escape: 'Escape',
-  left: 'Left Arrow',
-  plus: 'Plus',
-  right: 'Right Arrow',
-  shift: 'Shift',
-  tab: 'Tab',
-  up: 'Up Arrow',
-};
+const keyLabel = new Map<string, string>([
+  ['alt', 'Alt'],
+  ['backspace', 'Backspace'],
+  ['ctrl', 'Control'],
+  ['down', 'Down Arrow'],
+  ['enter', 'Enter'],
+  ['escape', 'Escape'],
+  ['left', 'Left Arrow'],
+  ['plus', 'Plus'],
+  ['right', 'Right Arrow'],
+  ['shift', 'Shift'],
+  ['tab', 'Tab'],
+  ['up', 'Up Arrow'],
+]);
 
 const subscribePlatform = (): (() => void) => () => {};
 
@@ -98,14 +98,14 @@ function getKeyDisplay(key: string, isMac: boolean): string {
   if (key === 'mod') {
     return isMac ? '⌘' : 'Ctrl';
   }
-  return keyDisplay[key] ?? key.toUpperCase();
+  return keyDisplay.get(key) ?? key.toUpperCase();
 }
 
 function getKeyLabel(key: string, isMac: boolean): string {
   if (key === 'mod') {
     return isMac ? 'Command' : 'Control';
   }
-  return keyLabel[key] ?? key.toUpperCase();
+  return keyLabel.get(key) ?? key.toUpperCase();
 }
 
 /**

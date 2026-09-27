@@ -18,6 +18,22 @@ describe('Kbd', () => {
     expect(screen.getByText('K').tagName).toBe('KBD');
   });
 
+  it.each([
+    ['__proto__', '__PROTO__'],
+    ['constructor', 'CONSTRUCTOR'],
+    ['custom-key', 'CUSTOM-KEY'],
+  ])('renders %s with literal text and an accessible name', (keys, label) => {
+    const {rerender} = render(<Kbd keys={keys} />);
+
+    expect(screen.getByRole('img', {name: label})).toHaveTextContent(label);
+
+    rerender(<Kbd keys={`shift+${keys}`} />);
+
+    expect(screen.getByRole('img', {name: `Shift+${label}`})).toHaveTextContent(
+      `⇧${label}`,
+    );
+  });
+
   it('renders multiple keys separated by plus signs', () => {
     render(<Kbd keys="mod+k" />);
 
