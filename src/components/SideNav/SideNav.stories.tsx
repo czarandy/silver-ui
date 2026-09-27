@@ -4,6 +4,8 @@ import {
   Bell,
   Box,
   ChevronDown,
+  Edit,
+  MoreVertical,
   File,
   Folder,
   HelpCircle,
@@ -21,6 +23,7 @@ import {useState} from 'react';
 import {Avatar} from 'components/Avatar';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
+import {DropdownMenu} from 'components/DropdownMenu';
 import {NavIcon} from 'components/NavIcon';
 import {SideNav} from 'components/SideNav/SideNav';
 import {SideNavHeading} from 'components/SideNav/SideNavHeading';
@@ -434,4 +437,95 @@ export const Scrollable: Story = {
       </SideNav>
     </div>
   ),
+};
+
+export const WithActions: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Independent actions follow the primary target and expand/collapse toggle in tab order, before nested items. Actions own their disabled state and are hidden in the collapsed rail. Use compact buttons to preserve row sizing.',
+      },
+    },
+  },
+  render: function WithActions() {
+    const [activity, setActivity] = useState(
+      'Choose a navigation target or action',
+    );
+    return (
+      <div style={{height: 420}}>
+        <SideNav
+          bottomContent={
+            <p aria-label="Last action" role="status">
+              {activity}
+            </p>
+          }
+          collapseBreakpoint="none"
+          isCollapsible>
+          <SideNavItem
+            actions={
+              <Button
+                icon={Edit}
+                isIconOnly
+                label="Edit projects"
+                onClick={() => setActivity('Edit projects')}
+                size="sm"
+                variant="ghost"
+              />
+            }
+            href="#projects"
+            icon={Folder}
+            isCollapsible
+            label="Projects"
+            onClick={event => {
+              event.preventDefault();
+              setActivity('Navigate to projects');
+            }}>
+            <SideNavItem
+              label="Active projects"
+              onClick={() => setActivity('Active projects')}
+            />
+          </SideNavItem>
+          <SideNavItem
+            actions={
+              <DropdownMenu
+                button={{
+                  icon: MoreVertical,
+                  isIconOnly: true,
+                  label: 'Inbox actions',
+                  size: 'sm',
+                  variant: 'ghost',
+                }}
+                items={[
+                  {
+                    icon: Archive,
+                    label: 'Archive inbox',
+                    onClick: () => setActivity('Archive inbox'),
+                  },
+                ]}
+              />
+            }
+            icon={Inbox}
+            label="Inbox"
+            onClick={() => setActivity('Open inbox')}
+          />
+          <SideNavItem
+            actions={
+              <Button
+                icon={Edit}
+                isIconOnly
+                label="Edit archived projects"
+                onClick={() => setActivity('Edit archived projects')}
+                size="sm"
+                variant="ghost"
+              />
+            }
+            icon={Archive}
+            isDisabled
+            label="Archived projects"
+          />
+        </SideNav>
+      </div>
+    );
+  },
 };

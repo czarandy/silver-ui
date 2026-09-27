@@ -18,6 +18,8 @@ const expandedLabelBase = {
 
 export const sideNavItemRecipe = sva({
   slots: [
+    'row',
+    'actions',
     'item',
     'icon',
     'collapsed',
@@ -29,6 +31,18 @@ export const sideNavItemRecipe = sva({
     'childrenInner',
   ],
   base: {
+    row: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1',
+      minW: 0,
+    },
+    actions: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '1',
+      flexShrink: 0,
+    },
     item: expandedLabelBase,
     toggleLabel: expandedLabelBase,
     icon: {
@@ -112,6 +126,12 @@ export const sideNavItemRecipe = sva({
     },
   },
   variants: {
+    hasActions: {
+      true: {
+        item: {flex: '1', minW: 0},
+        toggleRow: {flex: '1', minW: 0},
+      },
+    },
     isSelected: {
       true: {
         item: {bg: 'bg.hover', color: 'fg', fontWeight: 'semibold'},
