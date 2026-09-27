@@ -384,6 +384,9 @@ describe('AutocompleteInput', () => {
   });
 
   it('navigates results with the keyboard and closes with Escape', async () => {
+    vi.useFakeTimers({
+      toFake: ['requestAnimationFrame', 'cancelAnimationFrame'],
+    });
     const user = userEvent.setup();
     const onChange = vi.fn();
     const onOpenChange = vi.fn();
@@ -413,8 +416,15 @@ describe('AutocompleteInput', () => {
     await user.keyboard('{Enter}');
 
     expect(onChange).toHaveBeenCalledWith(items[1]);
+    expect(input).toHaveAttribute('aria-expanded', 'false');
 
+    // Typing again is a later activation, after the selection's dismissal
+    // guard clears. userEvent alone does not guarantee a frame between calls.
+    act(() => {
+      vi.advanceTimersToNextFrame();
+    });
     await user.type(input, 'a');
+    expect(input).toHaveAttribute('aria-expanded', 'true');
     await user.keyboard('{Escape}');
     expect(input).toHaveAttribute('aria-expanded', 'false');
     expect(onOpenChange).toHaveBeenCalledWith(false);
