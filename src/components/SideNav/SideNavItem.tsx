@@ -16,6 +16,13 @@ import {cx} from 'utils/cx';
 
 export interface SideNavItemProps {
   /**
+   * Independent controls beside the primary target and expand/collapse toggle.
+   * Tab order is primary target, toggle (if separate), actions, then children.
+   * Hidden in the collapsed rail. Each action owns its disabled state.
+   * Use compact controls (for example, Button size="sm") to match row sizing.
+   */
+  actions?: ReactNode;
+  /**
    * Custom link component used when href is set.
    */
   as?: LinkComponent;
@@ -87,6 +94,7 @@ export interface SideNavItemProps {
  * via `children` with optional expand/collapse behavior.
  */
 export function SideNavItem({
+  actions,
   as,
   children,
   className,
@@ -115,6 +123,7 @@ export function SideNavItem({
   const classes = sideNavItemRecipe({
     isSelected,
     isDisabled,
+    hasActions: isNonEmptyReactNode(actions),
     // Only expandable items animate their children open/closed and rotate a
     // chevron; non-expandable items keep their children fully shown.
     isExpanded: !isExpandable || isExpanded,
@@ -177,9 +186,23 @@ export function SideNavItem({
     </span>
   ) : null;
 
+  const wrapRow = (row: React.JSX.Element): React.JSX.Element =>
+    isNonEmptyReactNode(actions) ? (
+      <div className={classes.row}>
+        {row}
+        <div className={classes.actions}>{actions}</div>
+      </div>
+    ) : (
+      row
+    );
+
   const childrenContainer = isNonEmptyReactNode(children) ? (
     <div className={classes.childrenContainer} id={childrenId} role="group">
-      <div className={classes.childrenInner}>{children}</div>
+      <div
+        className={classes.childrenInner}
+        hidden={isExpandable && !isExpanded}>
+        {children}
+      </div>
     </div>
   ) : null;
 
@@ -187,24 +210,26 @@ export function SideNavItem({
   if (isExpandable && !hasPrimaryAction) {
     return (
       <>
-        <button
-          aria-controls={childrenId}
-          aria-expanded={isExpanded}
-          className={cx(classes.toggleRow, className)}
-          data-testid={dataTestId}
-          disabled={isDisabled}
-          onClick={toggleExpanded}
-          ref={ref as Ref<HTMLButtonElement>}
-          style={style}
-          type="button">
-          <Item
-            as="span"
-            className={classes.toggleLabel}
-            endContent={chevronSlot}
-            label={label}
-            startContent={iconSlot}
-          />
-        </button>
+        {wrapRow(
+          <button
+            aria-controls={childrenId}
+            aria-expanded={isExpanded}
+            className={cx(classes.toggleRow, className)}
+            data-testid={dataTestId}
+            disabled={isDisabled}
+            onClick={toggleExpanded}
+            ref={ref as Ref<HTMLButtonElement>}
+            style={style}
+            type="button">
+            <Item
+              as="span"
+              className={classes.toggleLabel}
+              endContent={chevronSlot}
+              label={label}
+              startContent={iconSlot}
+            />
+          </button>,
+        )}
         {childrenContainer}
       </>
     );
@@ -214,6 +239,45 @@ export function SideNavItem({
   if (isExpandable && hasPrimaryAction) {
     return (
       <>
+        {wrapRow(
+          <Item
+            aria-current={isSelected ? 'page' : undefined}
+            className={cx(classes.item, className)}
+            data-testid={dataTestId}
+            endContent={endContent}
+            href={isDisabled ? undefined : href}
+            isDisabled={isDisabled}
+            label={label}
+            linkComponent={as}
+            onClick={handleClick}
+            ref={ref}
+            startContent={iconSlot}
+            style={style}
+            trailingContent={
+              <button
+                aria-controls={childrenId}
+                aria-expanded={isExpanded}
+                aria-label={
+                  isExpanded ? `Collapse ${label}` : `Expand ${label}`
+                }
+                className={classes.toggleButton}
+                disabled={isDisabled}
+                onClick={toggleExpanded}
+                type="button">
+                {chevronSlot}
+              </button>
+            }
+          />,
+        )}
+        {childrenContainer}
+      </>
+    );
+  }
+
+  // Leaf item (no collapsible children): compose Item directly
+  return (
+    <>
+      {wrapRow(
         <Item
           aria-current={isSelected ? 'page' : undefined}
           className={cx(classes.item, className)}
@@ -227,40 +291,8 @@ export function SideNavItem({
           ref={ref}
           startContent={iconSlot}
           style={style}
-          trailingContent={
-            <button
-              aria-controls={childrenId}
-              aria-expanded={isExpanded}
-              aria-label={isExpanded ? `Collapse ${label}` : `Expand ${label}`}
-              className={classes.toggleButton}
-              onClick={toggleExpanded}
-              type="button">
-              {chevronSlot}
-            </button>
-          }
-        />
-        {childrenContainer}
-      </>
-    );
-  }
-
-  // Leaf item (no collapsible children): compose Item directly
-  return (
-    <>
-      <Item
-        aria-current={isSelected ? 'page' : undefined}
-        className={cx(classes.item, className)}
-        data-testid={dataTestId}
-        endContent={endContent}
-        href={isDisabled ? undefined : href}
-        isDisabled={isDisabled}
-        label={label}
-        linkComponent={as}
-        onClick={handleClick}
-        ref={ref}
-        startContent={iconSlot}
-        style={style}
-      />
+        />,
+      )}
       {childrenContainer}
     </>
   );
