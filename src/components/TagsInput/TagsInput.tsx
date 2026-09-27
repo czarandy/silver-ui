@@ -413,9 +413,13 @@ export function TagsInput<T extends SearchableItem>({
   const filteredSource = useMemo<SearchSource<T>>(
     () => ({
       cancel: () => searchSource.cancel?.(),
-      async bootstrap() {
-        const results = await searchSource.bootstrap();
-        return results.filter(item => !selectedIDsRef.current.has(item.id));
+      bootstrap(): T[] | Promise<T[]> {
+        const results = searchSource.bootstrap();
+        const filterSelected = (items: T[]): T[] =>
+          items.filter(item => !selectedIDsRef.current.has(item.id));
+        return Array.isArray(results)
+          ? filterSelected(results)
+          : results.then(filterSelected);
       },
       async search(searchQuery) {
         const results = await searchSource.search(searchQuery);

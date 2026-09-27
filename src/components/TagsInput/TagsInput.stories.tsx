@@ -6,6 +6,7 @@ import {
   type SearchableItem,
   type SearchSource,
 } from 'components/AutocompleteInput';
+import {VStack} from 'components/Stack';
 import {TagsInput, type TagsInputProps} from 'components/TagsInput/TagsInput';
 
 const people: SearchableItem[] = [
@@ -265,5 +266,44 @@ function OverflowBehaviorsStory(
 export const OverflowBehaviors: Story = {
   render: (args: TagsInputProps): React.JSX.Element => (
     <OverflowBehaviorsStory {...args} />
+  ),
+};
+
+function InitialSuggestionsComparisonStory(args: TagsInputProps) {
+  const [syncValue, setSyncValue] = useState<SearchableItem[]>([people[0]]);
+  const [asyncValue, setAsyncValue] = useState<SearchableItem[]>([people[0]]);
+  const syncSource = useMemo(() => createStaticSearchSource(people), []);
+  const asyncSource = useMemo(() => {
+    const source = createAsyncSource(people, 1000);
+    return {...source, bootstrap: async () => source.search('')};
+  }, []);
+
+  return (
+    <VStack gap={4}>
+      <TagsInput
+        {...args}
+        description="Focus to show in-memory suggestions immediately."
+        hasEntriesOnFocus
+        label="Synchronous initial suggestions"
+        onChange={setSyncValue}
+        searchSource={syncSource}
+        value={syncValue}
+      />
+      <TagsInput
+        {...args}
+        description="Focus to load suggestions after a one-second delay."
+        hasEntriesOnFocus
+        label="Asynchronous initial suggestions"
+        onChange={setAsyncValue}
+        searchSource={asyncSource}
+        value={asyncValue}
+      />
+    </VStack>
+  );
+}
+
+export const InitialSuggestionsComparison: Story = {
+  render: (args: TagsInputProps) => (
+    <InitialSuggestionsComparisonStory {...args} />
   ),
 };
