@@ -206,8 +206,8 @@ export const stepRecipe = sva({
       true: {
         connectorFill: {
           transitionProperty: 'transform',
-          transitionDuration: '410ms',
-          transitionTimingFunction: 'linear',
+          transitionDuration: '300ms',
+          transitionTimingFunction: 'default',
           _motionReduce: {transitionProperty: 'none'},
         },
       },
