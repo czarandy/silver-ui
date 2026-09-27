@@ -8,6 +8,7 @@ import {
   type FocusEvent,
   type ReactNode,
   type Ref,
+  type TextareaHTMLAttributes,
 } from 'react';
 import {
   Field,
@@ -36,6 +37,10 @@ import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 export type TextAreaProps = {
+  /**
+   * Native browser autofill hint. Omitted by default.
+   */
+  autoComplete?: TextareaHTMLAttributes<HTMLTextAreaElement>['autoComplete'];
   /**
    * Additional CSS class names applied to the textarea wrapper.
    */
@@ -187,6 +192,7 @@ export function TextArea({
   hasSpellCheck = true,
   hasAutoFocus = false,
   htmlName,
+  autoComplete,
   status,
   labelIcon,
   labelTooltip,
@@ -264,6 +270,7 @@ export function TextArea({
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || isOverLimit || undefined}
           aria-required={isRequired ?? undefined}
+          autoComplete={autoComplete}
           autoFocus={hasAutoFocus && !effectiveReadOnly}
           className={cx(inputStyles.control, styles.textarea)}
           data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}

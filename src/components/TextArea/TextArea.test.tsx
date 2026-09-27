@@ -12,6 +12,81 @@ function MessageIcon(props: LucideProps): React.JSX.Element {
 }
 
 describe('TextArea', () => {
+  it.each([
+    'on',
+    'off',
+    'street-address',
+    'section-home shipping street-address',
+  ])('forwards autoComplete=%s unchanged', autoComplete => {
+    render(
+      <TextArea
+        autoComplete={autoComplete}
+        label="Address"
+        onChange={() => {}}
+        value=""
+      />,
+    );
+
+    expect(screen.getByRole('textbox', {name: 'Address'})).toHaveAttribute(
+      'autocomplete',
+      autoComplete,
+    );
+  });
+
+  it('omits autocomplete when no hint is supplied and removes a previous hint', () => {
+    const {rerender} = render(
+      <TextArea label="Notes" onChange={() => {}} value="" />,
+    );
+    expect(screen.getByRole('textbox')).not.toHaveAttribute('autocomplete');
+
+    rerender(
+      <TextArea
+        autoComplete="off"
+        label="Notes"
+        onChange={() => {}}
+        value=""
+      />,
+    );
+    expect(screen.getByRole('textbox')).toHaveAttribute('autocomplete', 'off');
+
+    rerender(<TextArea label="Notes" onChange={() => {}} value="" />);
+    expect(screen.getByRole('textbox')).not.toHaveAttribute('autocomplete');
+  });
+
+  it.each([
+    {isDisabled: false, isReadOnly: false},
+    {isDisabled: true, isReadOnly: false},
+    {isDisabled: false, isReadOnly: true},
+  ])(
+    'preserves editing and form behavior with autocomplete and %o',
+    async props => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <form aria-label="Delivery">
+          <TextArea
+            {...props}
+            autoComplete="street-address"
+            htmlName="address"
+            label="Address"
+            onChange={onChange}
+            value="123 Main St"
+          />
+        </form>,
+      );
+      const textarea = screen.getByRole('textbox', {name: 'Address'});
+      expect(textarea).toHaveAttribute('autocomplete', 'street-address');
+      await user.type(textarea, 'A');
+      const expectedCall = ['123 Main StA', expect.anything()];
+      expect(onChange.mock.calls).toEqual(
+        props.isDisabled || props.isReadOnly ? [] : [expectedCall],
+      );
+      expect(
+        new FormData(screen.getByRole<HTMLFormElement>('form')).get('address'),
+      ).toBe(props.isDisabled ? null : '123 Main St');
+    },
+  );
+
   it('inherits the ambient size', () => {
     render(
       <SizeContext value="lg">
