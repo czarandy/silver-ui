@@ -28,6 +28,12 @@ const video: LightboxMedia = {
   type: 'video',
 };
 
+const pdf: LightboxMedia = {
+  alt: 'Insurance card',
+  src: '/card.pdf',
+  type: 'pdf',
+};
+
 let showModalSpy: MockInstance<() => void>;
 let closeSpy: MockInstance<() => void>;
 
@@ -593,6 +599,93 @@ describe('Lightbox', () => {
       'src',
       '/captions.vtt',
     );
+  });
+
+  it('embeds PDFs with a link fallback', () => {
+    render(<Lightbox isOpen media={pdf} onOpenChange={() => {}} />);
+
+    const embed = screen.getByLabelText('Insurance card', {
+      selector: 'object',
+    });
+    expect(embed).toHaveAttribute('data', '/card.pdf');
+    expect(embed).toHaveAttribute('type', 'application/pdf');
+    expect(screen.getByRole('link', {name: 'Insurance card'})).toHaveAttribute(
+      'href',
+      '/card.pdf',
+    );
+  });
+
+  it('shows a spinner for loading media and swaps in the source when ready', () => {
+    const {rerender} = render(
+      <Lightbox
+        isOpen
+        media={[
+          {alt: 'Front of card', isLoading: true},
+          {alt: 'Back of card', isLoading: true, type: 'pdf'},
+        ]}
+        onOpenChange={() => {}}
+      />,
+    );
+
+    expect(
+      screen.getByRole('status', {name: 'Loading Front of card'}),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('img')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', {name: 'Next'})).toBeInTheDocument();
+
+    rerender(
+      <Lightbox
+        isOpen
+        media={[
+          {alt: 'Front of card', src: '/front.jpg'},
+          {alt: 'Back of card', src: '/back.pdf', type: 'pdf'},
+        ]}
+        onOpenChange={() => {}}
+      />,
+    );
+
+    expect(
+      screen.queryByRole('status', {name: 'Loading Front of card'}),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('img', {name: 'Front of card'})).toHaveAttribute(
+      'src',
+      '/front.jpg',
+    );
+  });
+
+  it('shows a spinner when an item has no source', () => {
+    render(
+      <Lightbox isOpen media={{alt: 'Pending'}} onOpenChange={() => {}} />,
+    );
+
+    expect(
+      screen.getByRole('status', {name: 'Loading Pending'}),
+    ).toBeInTheDocument();
+  });
+
+  it('does not preload loading or PDF slides', () => {
+    const preloadedSources: string[] = [];
+    class MockImage {
+      set src(value: string) {
+        preloadedSources.push(value);
+      }
+    }
+    vi.stubGlobal('Image', MockImage);
+
+    render(
+      <Lightbox
+        index={1}
+        isOpen
+        media={[
+          {alt: 'Loading', isLoading: true, src: '/stale.jpg'},
+          media[1],
+          pdf,
+        ]}
+        onOpenChange={() => {}}
+      />,
+    );
+
+    expect(preloadedSources).toEqual([]);
   });
 
   it('forwards ref, className, style, and data-testid to the dialog', () => {
