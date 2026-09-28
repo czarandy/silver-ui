@@ -131,6 +131,15 @@ function closeToggleEvent(): Event {
   return event;
 }
 
+// Releases the pointer, then runs the task that opens a create popover once
+// the committing `pointerup` has finished dispatching.
+function releasePointer(init?: PointerEventInit): void {
+  fireEvent.pointerUp(window, init);
+  act(() => {
+    vi.runOnlyPendingTimers();
+  });
+}
+
 async function nextAnimationFrame(): Promise<void> {
   await new Promise(resolve => {
     requestAnimationFrame(() => resolve(undefined));
@@ -3705,6 +3714,7 @@ describe('Schedule', () => {
   describe('event create plugin', () => {
     beforeEach(() => {
       vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+      vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout']});
     });
 
     // Cells report a zero `top` in jsdom, so with `hourHeight: 60` the drafted
@@ -3788,7 +3798,7 @@ describe('Schedule', () => {
       render(<ScheduleWithEventCreate onCreate={onCreate} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
 
       const ghost = screen.getByTestId('schedule-event-create-ghost');
       expect(ghost).toHaveAccessibleName('New event, 10:00 AM - 11:00 AM');
@@ -3814,7 +3824,7 @@ describe('Schedule', () => {
         clientY: 0,
         pointerId: 1,
       });
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
 
       expect(
         screen.queryByTestId('schedule-event-create-ghost'),
@@ -3826,7 +3836,7 @@ describe('Schedule', () => {
         clientY: 0,
         pointerId: 2,
       });
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+      releasePointer({clientY: 0, pointerId: 2});
 
       expect(
         screen.getByTestId('schedule-event-create-ghost'),
@@ -3843,7 +3853,7 @@ describe('Schedule', () => {
       );
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
       saveDraft();
 
       expect(onCreate.mock.calls[0]?.[0].end).toBe(
@@ -3886,7 +3896,7 @@ describe('Schedule', () => {
       expect(ghost).toHaveAccessibleName('New event, 10:00 AM - 11:30 AM');
       expect(ghost).toHaveTextContent('10:00 AM - 11:30 AM');
 
-      fireEvent.pointerUp(window, {clientY: 90, pointerId: 1});
+      releasePointer({clientY: 90, pointerId: 1});
       saveDraft();
 
       expect(onCreate.mock.calls[0]?.[0].start).toBe(
@@ -3908,7 +3918,7 @@ describe('Schedule', () => {
         height: '85px',
         top: '32px',
       });
-      fireEvent.pointerUp(window, {clientY: -90, pointerId: 1});
+      releasePointer({clientY: -90, pointerId: 1});
       saveDraft();
 
       expect(onCreate.mock.calls[0]?.[0].start).toBe(
@@ -3926,7 +3936,7 @@ describe('Schedule', () => {
         clientY: 30,
         pointerId: 1,
       });
-      fireEvent.pointerUp(window, {clientY: 300, pointerId: 1});
+      releasePointer({clientY: 300, pointerId: 1});
       saveDraft();
 
       expect(onCreate.mock.calls[0]?.[0].start).toBe(
@@ -3940,7 +3950,7 @@ describe('Schedule', () => {
       render(<ScheduleWithEventCreate onCreate={onCreate} snapMinutes={5} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 5, pointerId: 1});
+      releasePointer({clientY: 5, pointerId: 1});
       saveDraft();
 
       expect(onCreate.mock.calls[0]?.[0].start).toBe(
@@ -4015,7 +4025,7 @@ describe('Schedule', () => {
       render(<ScheduleWithEventCreate onCreate={onCreate} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
       saveDraft();
 
       expect(onCreate).toHaveBeenCalledTimes(1);
@@ -4033,7 +4043,7 @@ describe('Schedule', () => {
       );
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
 
       fireEvent.click(
         screen.getByRole('button', {hidden: true, name: 'Close'}),
@@ -4044,14 +4054,37 @@ describe('Schedule', () => {
       ).not.toBeInTheDocument();
     });
 
+    it('keeps the create popover open through the light dismiss of its own pointerup', () => {
+      const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
+      render(<ScheduleWithEventCreate onCreate={onCreate} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      fireEvent.pointerUp(window, {clientY: 60, pointerId: 1});
+      // After dispatching a pointerup whose gesture began outside every open
+      // popover, the browser light-dismisses them all.
+      // eslint-disable-next-line testing-library/no-node-access -- the native layers have no accessible role or test ID
+      document.querySelectorAll('[popover-open]').forEach(layer => {
+        (layer as HTMLElement).hidePopover();
+        fireEvent(layer, closeToggleEvent());
+      });
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+
+      const ghost = screen.getByTestId('schedule-event-create-ghost');
+      expect(ghost).toHaveAttribute('aria-expanded', 'true');
+      saveDraft();
+      expect(onCreate).toHaveBeenCalledTimes(1);
+    });
+
     it('does not replace a draft while its create popover is open', () => {
       const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
       render(<ScheduleWithEventCreate onCreate={onCreate} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
       fireEvent.pointerDown(getCell(14), {button: 0, clientY: 0, pointerId: 2});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+      releasePointer({clientY: 0, pointerId: 2});
 
       expect(screen.getAllByTestId('schedule-event-create-ghost')).toHaveLength(
         1,
@@ -4066,7 +4099,7 @@ describe('Schedule', () => {
       render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
 
       const ghost = screen.getByTestId('schedule-event-create-ghost');
       const layerId = ghost.getAttribute('aria-controls');
@@ -4082,7 +4115,7 @@ describe('Schedule', () => {
         clientY: 0,
         pointerId: 2,
       });
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+      releasePointer({clientY: 0, pointerId: 2});
 
       expect(
         screen.queryByTestId('schedule-event-create-ghost'),
@@ -4094,7 +4127,7 @@ describe('Schedule', () => {
         clientY: 0,
         pointerId: 3,
       });
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 3});
+      releasePointer({clientY: 0, pointerId: 3});
 
       expect(
         screen.getByTestId('schedule-event-create-ghost'),
@@ -4111,7 +4144,7 @@ describe('Schedule', () => {
       );
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
 
       expect(
         screen.getByTestId('schedule-event-create-ghost'),
@@ -4138,7 +4171,7 @@ describe('Schedule', () => {
         clientY: 0,
         pointerId: 1,
       });
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
 
       expect(eventTrigger).toHaveAttribute('aria-expanded', 'false');
       expect(
@@ -4151,7 +4184,7 @@ describe('Schedule', () => {
         clientY: 0,
         pointerId: 2,
       });
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 2});
+      releasePointer({clientY: 0, pointerId: 2});
 
       expect(
         screen.getByTestId('schedule-event-create-ghost'),
@@ -4183,7 +4216,7 @@ describe('Schedule', () => {
         clientY: 0,
         pointerId: 1,
       });
-      fireEvent.pointerUp(window, {clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
 
       expect(
         screen.getByTestId('schedule-event-create-ghost'),
@@ -5131,6 +5164,7 @@ describe('scheduleZonedInstant', () => {
 describe('month event creation', () => {
   beforeEach(() => {
     vi.spyOn(document, 'hasFocus').mockReturnValue(true);
+    vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout']});
   });
 
   function MonthCreateSchedule({
@@ -5190,7 +5224,7 @@ describe('month event creation', () => {
       clientX: 4,
       clientY: 4,
     });
-    fireEvent.pointerUp(window, {clientX: 4, clientY: 4});
+    releasePointer({clientX: 4, clientY: 4});
 
     const ghost = screen.getByTestId('schedule-event-create-ghost');
     expect(ghost).toHaveAccessibleName('New all-day event, 2026-05-13');
@@ -5240,7 +5274,7 @@ describe('month event creation', () => {
 
     const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
     fireEvent.pointerDown(cell, {button: 0, clientX: 0, clientY: 0});
-    fireEvent.pointerUp(window, {clientX: 0, clientY: 0});
+    releasePointer({clientX: 0, clientY: 0});
 
     expect(
       screen.getByTestId('schedule-month-top-event-2026-05-13'),
@@ -5290,7 +5324,7 @@ describe('month event creation', () => {
 
     const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
     fireEvent.pointerDown(cell, {button: 0, clientX: 0, clientY: 0});
-    fireEvent.pointerUp(window, {clientX: 0, clientY: 0});
+    releasePointer({clientX: 0, clientY: 0});
 
     expect(
       screen.getByTestId('schedule-event-span-spanning-draft-day'),
@@ -5307,9 +5341,9 @@ describe('month event creation', () => {
     const cell = screen.getByTestId('schedule-month-cell-2026-05-13');
 
     fireEvent.pointerDown(cell, {button: 2, clientX: 0, clientY: 0});
-    fireEvent.pointerUp(window, {clientX: 0, clientY: 0});
+    releasePointer({clientX: 0, clientY: 0});
     fireEvent.pointerDown(cell, {button: 0, clientX: 0, clientY: 0});
-    fireEvent.pointerUp(window, {clientX: 20, clientY: 0});
+    releasePointer({clientX: 20, clientY: 0});
 
     expect(
       screen.queryByTestId('schedule-event-create-ghost'),
@@ -5320,7 +5354,7 @@ describe('month event creation', () => {
     render(<MonthCreateSchedule onCreate={vi.fn()} />);
 
     fireEvent.pointerDown(screen.getByText('Existing event'), {button: 0});
-    fireEvent.pointerUp(window);
+    releasePointer();
 
     expect(
       screen.queryByTestId('schedule-event-create-ghost'),

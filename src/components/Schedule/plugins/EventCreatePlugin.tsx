@@ -384,12 +384,20 @@ function ScheduleEventCreateGhost({
 
   // Opening from an effect rather than a click keeps the popover clear of the
   // gesture that created it: binding `toggle` to the ghost would let the click
-  // synthesized after the committing `pointerup` close it immediately.
+  // synthesized after the committing `pointerup` close it immediately. The
+  // open also waits for a later task, because React can commit this effect
+  // while that `pointerup` is still dispatching, and the browser's popover
+  // light dismiss then treats the gesture, which began outside the new
+  // popover, as an outside click and closes it at once.
   useEffect(() => {
-    if (isCommitted && !hasOpenedRef.current) {
+    if (!isCommitted || hasOpenedRef.current) {
+      return;
+    }
+    const timeout = setTimeout(() => {
       hasOpenedRef.current = true;
       show();
-    }
+    }, 0);
+    return () => clearTimeout(timeout);
   }, [isCommitted, show]);
 
   const eventDraft = useMemo(
