@@ -1,5 +1,5 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Button} from 'components/Button';
 import {
   Lightbox,
@@ -37,6 +37,12 @@ const videoMedia: LightboxMedia = {
     'https://interactive-examples.mdn.mozilla.net/media/examples/friday.vtt',
   src: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
   type: 'video',
+};
+
+const pdfMedia: LightboxMedia = {
+  alt: 'Sample PDF',
+  src: 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf',
+  type: 'pdf',
 };
 
 const mixedMedia: ReadonlyArray<LightboxMedia> = [
@@ -104,6 +110,45 @@ function ControlledIndexStory(args: LightboxStoryArgs): React.JSX.Element {
         isOpen={isOpen}
         media={imageMedia}
         onIndexChange={setIndex}
+        onOpenChange={setIsOpen}
+      />
+    </>
+  );
+}
+
+function LoadingStory(args: LightboxStoryArgs): React.JSX.Element {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Simulates resolving signed URLs after the lightbox opens.
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const timeout = setTimeout(() => setIsLoading(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [isOpen]);
+
+  const media: ReadonlyArray<LightboxMedia> = isLoading
+    ? [
+        {alt: imageMedia[0].alt, isLoading: true},
+        {alt: pdfMedia.alt, isLoading: true, type: 'pdf'},
+      ]
+    : [imageMedia[0], pdfMedia];
+
+  return (
+    <>
+      <Button
+        label="Open lightbox"
+        onClick={() => {
+          setIsLoading(true);
+          setIsOpen(true);
+        }}
+      />
+      <Lightbox
+        {...args}
+        isOpen={isOpen}
+        media={media}
         onOpenChange={setIsOpen}
       />
     </>
@@ -178,6 +223,22 @@ export const Gallery: Story = {
 
 export const Video: Story = {
   render: args => <LightboxStory {...args} media={videoMedia} />,
+};
+
+export const Pdf: Story = {
+  render: args => <LightboxStory {...args} media={pdfMedia} />,
+};
+
+export const Loading: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Set `isLoading` on an item, and omit `src`, while its source is still being resolved (for example, a signed URL). A spinner is shown in its place until the item is updated.',
+      },
+    },
+  },
+  render: args => <LoadingStory {...args} />,
 };
 
 export const MixedMedia: Story = {

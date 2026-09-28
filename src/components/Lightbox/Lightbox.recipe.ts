@@ -8,6 +8,7 @@ export const lightboxRecipe = sva({
     'mediaWrap',
     'image',
     'video',
+    'pdf',
     'caption',
     'close',
     'nav',
@@ -76,6 +77,13 @@ export const lightboxRecipe = sva({
       maxH: 'calc(100dvh - 7rem)',
       objectFit: 'contain',
       outline: 'none',
+    },
+    pdf: {
+      display: 'block',
+      w: 'min(90dvw, 64rem)',
+      h: 'calc(100dvh - 7rem)',
+      borderWidth: 0,
+      bg: 'bg',
     },
     caption: {
       w: 'full',

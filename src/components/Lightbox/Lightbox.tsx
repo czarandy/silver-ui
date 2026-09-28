@@ -14,6 +14,7 @@ import {
 } from 'react';
 import {Button} from 'components/Button';
 import {lightboxRecipe} from 'components/Lightbox/Lightbox.recipe';
+import {Spinner} from 'components/Spinner';
 import useAnnounce from 'hooks/useAnnounce';
 import {LayerContext} from 'internal/LayerContext';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
@@ -26,11 +27,11 @@ import {useModalHost} from 'internal/useModalHost';
 import {useScrollLock} from 'internal/useScrollLock';
 import {cx} from 'utils/cx';
 
-export type LightboxMediaType = 'image' | 'video';
+export type LightboxMediaType = 'image' | 'pdf' | 'video';
 
 export interface LightboxMedia {
   /**
-   * Accessible image alt text, or video label.
+   * Accessible image alt text, or video or PDF label.
    */
   alt: string;
   /**
@@ -42,9 +43,15 @@ export interface LightboxMedia {
    */
   captionsSrc?: string;
   /**
-   * Media source URL.
+   * Whether the media is still loading, such as while a signed URL is being
+   * fetched. A spinner is shown in place of the media.
+   * @default false
    */
-  src: string;
+  isLoading?: boolean;
+  /**
+   * Media source URL. May be omitted while `isLoading` is true.
+   */
+  src?: string;
   /**
    * Media type.
    * @default 'image'
@@ -113,7 +120,7 @@ function isMediaArray(
 }
 
 /**
- * Fullscreen dialog for viewing image or video media, with optional gallery navigation.
+ * Fullscreen dialog for viewing image, video, or PDF media, with optional gallery navigation.
  */
 export function Lightbox({
   className,
@@ -152,7 +159,9 @@ export function Lightbox({
     mediaItems.length === 0 ? undefined : mediaItems[currentIndex];
   const hasMedia = currentItem != null;
   const isGallery = mediaItems.length > 1;
-  const isVideo = (currentItem?.type ?? 'image') === 'video';
+  const mediaType = currentItem?.type ?? 'image';
+  const isLoading = currentItem?.isLoading === true || currentItem?.src == null;
+  const isZoomable = hasZoom && !isLoading && mediaType === 'image';
   const canPrev = isGallery && currentIndex > 0;
   const canNext = isGallery && currentIndex < mediaItems.length - 1;
   const imageTransform =
@@ -161,9 +170,9 @@ export function Lightbox({
       : `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`;
   const cursor = isDragging
     ? 'dragging'
-    : !isVideo && zoom > 1
+    : isZoomable && zoom > 1
       ? 'zoomed'
-      : !isVideo && hasZoom && zoom === 1
+      : isZoomable && zoom === 1
         ? 'zoomable'
         : 'default';
   const classes = lightboxRecipe({cursor, isDragging});
@@ -231,7 +240,11 @@ export function Lightbox({
         continue;
       }
       const item = mediaItems[nextIndex];
-      if (item.type === 'video') {
+      if (
+        (item.type ?? 'image') !== 'image' ||
+        item.isLoading === true ||
+        item.src == null
+      ) {
         continue;
       }
 
@@ -350,14 +363,14 @@ export function Lightbox({
               <div
                 className={classes.mediaWrap}
                 onDoubleClick={() => {
-                  if (!hasZoom || isVideo) {
+                  if (!isZoomable) {
                     return;
                   }
                   setZoom(zoom === 1 ? 2 : 1);
                   setPan({x: 0, y: 0});
                 }}
                 onPointerDown={event => {
-                  if (!hasZoom || isVideo || zoom <= 1) {
+                  if (!isZoomable || zoom <= 1) {
                     return;
                   }
                   setIsDragging(true);
@@ -368,7 +381,25 @@ export function Lightbox({
                     panY: pan.y,
                   };
                 }}>
-                {isVideo ? (
+                {isLoading ? (
+                  <Spinner
+                    aria-label={`Loading ${currentItem.alt}`}
+                    size={36}
+                    variant="onMedia"
+                  />
+                ) : mediaType === 'pdf' ? (
+                  // An <object> rather than an <iframe>: Chrome refuses to
+                  // render PDFs in any sandboxed iframe.
+                  <object
+                    aria-label={currentItem.alt}
+                    className={classes.pdf}
+                    data={currentItem.src}
+                    type="application/pdf">
+                    <a href={currentItem.src} rel="noreferrer" target="_blank">
+                      {currentItem.alt}
+                    </a>
+                  </object>
+                ) : mediaType === 'video' ? (
                   // eslint-disable-next-line jsx-a11y-x/media-has-caption -- captions are rendered only when callers provide a real WebVTT source
                   <video
                     aria-label={currentItem.alt}
