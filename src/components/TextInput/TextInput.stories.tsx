@@ -100,11 +100,6 @@ export const Required: Story = {
   render: args => <ControlledTextInput {...args} />,
 };
 
-export const RequiredWithoutMarker: Story = {
-  args: {'aria-required': true, label: 'Electronic signature'},
-  render: args => <ControlledTextInput {...args} />,
-};
-
 export const Optional: Story = {
   args: {isOptional: true},
   render: args => <ControlledTextInput {...args} />,
