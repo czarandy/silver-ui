@@ -56,6 +56,16 @@ describe('TextInput', () => {
     expect(input).toHaveAttribute('aria-controls', 'search-results');
   });
 
+  it('announces aria-required without the Required marker', () => {
+    render(
+      <TextInput aria-required label="Signature" onChange={noop} value="" />,
+    );
+
+    const input = screen.getByRole('textbox', {name: 'Signature'});
+    expect(input).toBeRequired();
+    expect(screen.queryByText(/Required/)).not.toBeInTheDocument();
+  });
+
   it('forwards arbitrary data attributes to the input', () => {
     render(
       <TextInput

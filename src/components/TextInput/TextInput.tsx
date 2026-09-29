@@ -62,6 +62,12 @@ export type TextInputProps = {
    */
   'aria-controls'?: AriaAttributes['aria-controls'];
   /**
+   * Announces the input as required to assistive technology without showing
+   * the Required marker, for fields whose requirement is already obvious.
+   * `isRequired` implies it.
+   */
+  'aria-required'?: boolean;
+  /**
    * HTML autocomplete hint for the browser.
    */
   autoComplete?: string;
@@ -197,6 +203,7 @@ export function TextInput({
   'aria-activedescendant': ariaActiveDescendant,
   'aria-autocomplete': ariaAutocomplete,
   'aria-controls': ariaControls,
+  'aria-required': ariaRequired,
   autoComplete,
   label,
   value,
@@ -287,7 +294,9 @@ export function TextInput({
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
         aria-label={inputGroup != null ? label : undefined}
-        aria-required={isRequired ?? undefined}
+        aria-required={
+          isRequired === true || ariaRequired === true || undefined
+        }
         autoComplete={autoComplete}
         autoFocus={hasAutoFocus && !effectiveReadOnly}
         className={inputStyles.control}
