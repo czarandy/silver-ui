@@ -36,6 +36,14 @@ function resize(
   const lineHeight = Number.isFinite(computedLineHeight)
     ? computedLineHeight
     : DEFAULT_LINE_HEIGHT;
+  // Measuring collapses the textarea to `auto` for a moment. Pin the parent's
+  // height meanwhile so the page does not shrink, or a scroll container
+  // scrolled to the bottom clamps its position and jumps on every keystroke.
+  const parent = textarea.parentElement;
+  const parentMinHeight = parent?.style.minHeight ?? '';
+  if (parent != null) {
+    parent.style.minHeight = `${parent.offsetHeight}px`;
+  }
   textarea.style.height = 'auto';
   const height = computeInputHeight(
     textarea.scrollHeight,
@@ -44,6 +52,9 @@ function resize(
     maxRows,
   );
   textarea.style.height = `${height}px`;
+  if (parent != null) {
+    parent.style.minHeight = parentMinHeight;
+  }
   textarea.style.overflowY =
     textarea.scrollHeight > maxRows * lineHeight ? 'auto' : 'hidden';
 }
