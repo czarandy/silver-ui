@@ -36,6 +36,8 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
+      # The `browser` Vitest project runs layout tests in Playwright Chromium.
+      - run: pnpm exec playwright install --with-deps chromium-headless-shell
       - run: pnpm test
 
       # Builds the docs/marketing site (including the doc generators) so

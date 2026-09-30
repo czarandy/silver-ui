@@ -96,7 +96,8 @@ describe('ContextMenu', () => {
       'block-end span-inline-end',
     );
     expect(getStyleProperty(layer, 'positionTryFallbacks')).toBe(
-      'flip-block, flip-inline, flip-block flip-inline',
+      'flip-block, flip-inline, flip-block flip-inline, ' +
+        '--silver-layer-below-span-all, --silver-layer-below-span-all flip-block',
     );
     expect(screen.getByTestId('context-trigger')).toHaveAttribute(
       'aria-controls',

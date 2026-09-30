@@ -1,6 +1,7 @@
 import {defineConfig, defineRecipe} from '@pandacss/dev';
 import {generateColorScale} from './scripts/generate-color-scale';
 import {inheritanceReset} from './src/internal/inheritanceReset';
+import {layerPositionTryGlobalCss} from './src/internal/layerPositionTry';
 import {
   gapVariants,
   paddingBlockEndVariants,
@@ -89,6 +90,8 @@ export default defineConfig({
     },
   },
   cssVarRoot: ':where(:root, :host)',
+  // `position-try-fallbacks` targets for `useLayer`; see layerPositionTry.ts.
+  globalCss: layerPositionTryGlobalCss,
   conditions: {
     extend: {
       // `_dark` is the *explicit* opt-in: it applies only when a `data-theme`
