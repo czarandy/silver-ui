@@ -4095,6 +4095,34 @@ describe('Schedule', () => {
       );
     });
 
+    it('anchors the create popover beside the ghost, falling back off it', () => {
+      // Real placement is covered in Schedule.browser.test.tsx; this pins the
+      // CSS that drives it.
+      render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
+
+      fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
+      releasePointer({clientY: 0, pointerId: 1});
+
+      const ghost = screen.getByTestId('schedule-event-create-ghost');
+      // eslint-disable-next-line testing-library/no-node-access -- the native layer has no accessible role or test ID
+      const layer = document.getElementById(
+        ghost.getAttribute('aria-controls') ?? '',
+      );
+      expect(layer).not.toBeNull();
+      const style = (layer as HTMLElement).style as unknown as Record<
+        string,
+        string | undefined
+      >;
+      expect(style.positionArea).toBe('inline-end span-block-end');
+      // A form taller than the space above or below the draft fits no flip,
+      // so the span-all fallbacks keep it beside the draft, not on top of it.
+      expect(style.positionTryFallbacks).toBe(
+        'flip-block, flip-inline, flip-block flip-inline, ' +
+          '--silver-layer-end-span-all, --silver-layer-end-span-all flip-inline',
+      );
+      expect(style.marginInlineStart).toBe('8px');
+    });
+
     it('does not create through a create popover light-dismiss gesture', async () => {
       render(<ScheduleWithEventCreate onCreate={vi.fn()} />);
 

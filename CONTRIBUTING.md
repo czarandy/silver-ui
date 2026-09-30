@@ -51,6 +51,21 @@ Commits automatically run:
 - **Prettier** on staged `.ts`, `.tsx`, `.json`, `.css`, and `.md` files
 - **TypeScript** type-checking on the full project
 
+## Browser tests
+
+Tests run in jsdom by default, which has no layout engine. Behavior that depends
+on real layout, such as CSS anchor positioning and `position-try` fallbacks,
+goes in `*.browser.test.tsx` files instead, which the `browser` Vitest project
+runs in headless Chromium via Playwright. `pnpm test` runs both projects;
+install the browser once with:
+
+```bash
+pnpm exec playwright install chromium-headless-shell
+```
+
+Run only one project with `pnpm test --project unit` or
+`pnpm test --project browser`.
+
 Before submitting a change, ensure you also run all tests and the smoke test:
 
 ```bash

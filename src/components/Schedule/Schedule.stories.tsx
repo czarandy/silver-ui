@@ -47,6 +47,7 @@ import type {
   ScheduleView,
 } from 'components/Schedule/types';
 import {Text} from 'components/Text';
+import {TextArea} from 'components/TextArea';
 import {TextInput} from 'components/TextInput';
 import {ToastViewport, useToast} from 'components/Toast';
 import {Tooltip} from 'components/Tooltip';
@@ -354,14 +355,23 @@ function ResizableEventsStory(): React.JSX.Element {
 
 function CreateEventForm({
   draft,
+  hasDetails = false,
   onCancel,
   onCreate,
 }: {
   draft: ScheduleEventDraft;
+  /**
+   * Adds location, attendee, and notes fields, making the popover taller than
+   * the space above or below most drafted events.
+   */
+  hasDetails?: boolean;
   onCancel: () => void;
   onCreate: (title: string) => void;
 }): React.JSX.Element {
   const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [attendees, setAttendees] = useState('');
+  const [notes, setNotes] = useState('');
   const timeLabel = draft.isAllDay
     ? `${Temporal.Instant.fromEpochMilliseconds(draft.start)
         .toZonedDateTimeISO(localTimezoneID)
@@ -400,6 +410,29 @@ function CreateEventForm({
             <Text color="secondary" type="supporting">
               {timeLabel}
             </Text>
+            {hasDetails ? (
+              <>
+                <TextInput
+                  label="Location"
+                  onChange={setLocation}
+                  placeholder="Add a location"
+                  value={location}
+                />
+                <TextInput
+                  label="Attendees"
+                  onChange={setAttendees}
+                  placeholder="Add attendees"
+                  value={attendees}
+                />
+                <TextArea
+                  label="Notes"
+                  onChange={setNotes}
+                  placeholder="Add notes"
+                  rows={8}
+                  value={notes}
+                />
+              </>
+            ) : null}
           </LayoutContent>
         }
         footer={
@@ -429,7 +462,13 @@ function CreateEventForm({
   );
 }
 
-function CreatableEventsStory({view}: {view: ScheduleView}): React.JSX.Element {
+function CreatableEventsStory({
+  hasDetails,
+  view,
+}: {
+  hasDetails?: boolean;
+  view: ScheduleView;
+}): React.JSX.Element {
   const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);
   const [storyEvents, setStoryEvents] = useState<CalendarEvent[]>(() => events);
   const paginationPlugin = useSchedulePaginationPlugin({
@@ -441,6 +480,7 @@ function CreatableEventsStory({view}: {view: ScheduleView}): React.JSX.Element {
     renderContent: ({close, draft}) => (
       <CreateEventForm
         draft={draft}
+        hasDetails={hasDetails}
         onCancel={close}
         onCreate={title => {
           const createdEvent: CalendarEvent = draft.isAllDay
@@ -783,6 +823,20 @@ export const MovableEvents: Story = {
 export const CreatableEvents: Story = {
   render: () => (
     <CreatableEventsStory
+      view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
+    />
+  ),
+};
+
+/**
+ * A create form taller than the space above or below most drafted events.
+ * Draft an event in the afternoon of one of the rightmost days: the popover
+ * flips to the left of the draft instead of covering it.
+ */
+export const CreatableEventsTallForm: Story = {
+  render: () => (
+    <CreatableEventsStory
+      hasDetails
       view={createScheduleWeeklyView({maxHour: 18, minHour: 8})}
     />
   ),

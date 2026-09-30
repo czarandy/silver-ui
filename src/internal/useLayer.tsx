@@ -12,6 +12,7 @@ import {
 import {LayerContext} from 'internal/LayerContext';
 import {SizeContext} from 'internal/SizeContext';
 import {addAnchorName, removeAnchorName} from 'internal/anchorName';
+import {LAYER_SPAN_ALL_POSITION_TRY} from 'internal/layerPositionTry';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {layerReset} from 'styled-system/recipes';
 import {cx} from 'utils/cx';
@@ -184,6 +185,25 @@ function getPositionArea(
 }
 
 /**
+ * Fallback positions tried, in order, when the preferred position overflows:
+ * the three flips of the preferred position, then the placement's side with
+ * the alignment relaxed to span the whole viewport, then the opposite side
+ * relaxed the same way. The relaxed options only apply once no flip fits, and
+ * keep a layer that is large relative to the space beside its anchor off the
+ * anchor instead of being shifted on top of it.
+ */
+export function getPositionTryFallbacks(placement: LayerPlacement): string {
+  const {flip, name} = LAYER_SPAN_ALL_POSITION_TRY[placement];
+  return [
+    'flip-block',
+    'flip-inline',
+    'flip-block flip-inline',
+    name,
+    `${name} ${flip}`,
+  ].join(', ');
+}
+
+/**
  * Applies the offset as a logical margin on the edge that faces the anchor for
  * the given placement. Using logical margins (rather than `translate`) means the
  * `position-try` flip tactics flip the gap along with the layer, so it stays on
@@ -321,7 +341,7 @@ export function useLayer({
         border: 'none',
         positionAnchor: anchorId,
         positionArea: getPositionArea(placement, alignment),
-        positionTryFallbacks: 'flip-block, flip-inline, flip-block flip-inline',
+        positionTryFallbacks: getPositionTryFallbacks(placement),
       };
       const offsetStyle = getOffsetStyle(placement, offsetX, offsetY);
 
