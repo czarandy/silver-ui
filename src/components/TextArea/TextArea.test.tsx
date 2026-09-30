@@ -1,11 +1,11 @@
-import {render, screen} from '@testing-library/react';
+import {act, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {MessageSquare, type LucideProps} from 'lucide-react';
-import {describe, expect, it, vi} from 'vitest';
+import {afterEach, describe, expect, it, vi} from 'vitest';
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {TextArea} from 'components/TextArea/TextArea';
 import {SizeContext} from 'internal/SizeContext';
-import {assertNonNull} from 'internal/testHelpers';
+import {assertNonNull, createResizeObserverStub} from 'internal/testHelpers';
 
 function MessageIcon(props: LucideProps): React.JSX.Element {
   return <MessageSquare {...props} data-testid="message-icon" />;
@@ -295,5 +295,153 @@ describe('TextArea', () => {
       'spellcheck',
       'false',
     );
+  });
+
+  describe('auto-grow', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    });
+
+    function mockTextareaSize({
+      scrollHeight,
+      width = () => 300,
+    }: {
+      scrollHeight: () => number;
+      width?: () => number;
+    }): void {
+      vi.spyOn(
+        HTMLTextAreaElement.prototype,
+        'scrollHeight',
+        'get',
+      ).mockImplementation(scrollHeight);
+      vi.spyOn(
+        HTMLTextAreaElement.prototype,
+        'clientWidth',
+        'get',
+      ).mockImplementation(width);
+    }
+
+    it('leaves a fixed-rows textarea resizable and unsized', () => {
+      render(<TextArea label="Notes" onChange={() => {}} value="" />);
+
+      const textarea = screen.getByRole('textbox', {name: 'Notes'});
+      expect(textarea).toHaveAttribute('rows', '3');
+      expect(textarea).not.toHaveAttribute('style');
+    });
+
+    it('sizes to its content and starts at minRows', () => {
+      mockTextareaSize({scrollHeight: () => 120});
+      render(
+        <TextArea label="Notes" minRows={2} onChange={() => {}} value="Long" />,
+      );
+
+      const textarea = screen.getByRole('textbox', {name: 'Notes'});
+      expect(textarea).toHaveAttribute('rows', '2');
+      // jsdom has no computed line height, so rows are 24px each.
+      expect(textarea).toHaveStyle({height: '120px'});
+      expect(textarea).toHaveStyle({overflowY: 'hidden'});
+    });
+
+    it('never shrinks below minRows', () => {
+      mockTextareaSize({scrollHeight: () => 10});
+      render(
+        <TextArea label="Notes" minRows={4} onChange={() => {}} value="" />,
+      );
+
+      expect(screen.getByRole('textbox', {name: 'Notes'})).toHaveStyle({
+        height: '96px',
+      });
+    });
+
+    it('turns on auto-grow with only maxRows, defaulting to three rows', () => {
+      mockTextareaSize({scrollHeight: () => 10});
+      render(
+        <TextArea label="Notes" maxRows={6} onChange={() => {}} value="" />,
+      );
+
+      const textarea = screen.getByRole('textbox', {name: 'Notes'});
+      expect(textarea).toHaveAttribute('rows', '3');
+      expect(textarea).toHaveStyle({height: '72px'});
+    });
+
+    it('stops at maxRows and scrolls the rest', () => {
+      mockTextareaSize({scrollHeight: () => 500});
+      render(
+        <TextArea
+          label="Notes"
+          maxRows={5}
+          minRows={2}
+          onChange={() => {}}
+          value="Long"
+        />,
+      );
+
+      const textarea = screen.getByRole('textbox', {name: 'Notes'});
+      expect(textarea).toHaveStyle({height: '120px'});
+      expect(textarea).toHaveStyle({overflowY: 'auto'});
+    });
+
+    it('re-measures when the value changes', () => {
+      let scrollHeight = 72;
+      mockTextareaSize({scrollHeight: () => scrollHeight});
+      const {rerender} = render(
+        <TextArea label="Notes" minRows={3} onChange={() => {}} value="" />,
+      );
+      const textarea = screen.getByRole('textbox', {name: 'Notes'});
+      expect(textarea).toHaveStyle({height: '72px'});
+
+      scrollHeight = 240;
+      rerender(
+        <TextArea
+          label="Notes"
+          minRows={3}
+          onChange={() => {}}
+          value="Pasted note"
+        />,
+      );
+
+      expect(textarea).toHaveStyle({height: '240px'});
+    });
+
+    it('re-measures when its width changes', () => {
+      const stub = createResizeObserverStub();
+      vi.stubGlobal('ResizeObserver', stub.ResizeObserverStub);
+      let scrollHeight = 72;
+      let width = 300;
+      mockTextareaSize({scrollHeight: () => scrollHeight, width: () => width});
+      render(
+        <TextArea label="Notes" minRows={3} onChange={() => {}} value="Note" />,
+      );
+      const textarea = screen.getByRole('textbox', {name: 'Notes'});
+
+      // A height-only resize (the hook setting the height) is ignored.
+      scrollHeight = 240;
+      act(() => stub.resize(textarea));
+      expect(textarea).toHaveStyle({height: '72px'});
+
+      width = 150;
+      act(() => stub.resize(textarea));
+      expect(textarea).toHaveStyle({height: '240px'});
+      stub.reset();
+    });
+
+    it('rejects rows combined with minRows or maxRows', () => {
+      render(
+        // @ts-expect-error -- rows is fixed-height; minRows turns on auto-grow
+        <TextArea
+          label="Notes"
+          minRows={2}
+          onChange={() => {}}
+          rows={4}
+          value=""
+        />,
+      );
+
+      expect(screen.getByRole('textbox', {name: 'Notes'})).toHaveAttribute(
+        'rows',
+        '2',
+      );
+    });
   });
 });

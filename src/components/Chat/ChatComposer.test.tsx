@@ -4,7 +4,6 @@ import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {ChatComposer} from 'components/Chat/ChatComposer';
 import {ChatComposerInput} from 'components/Chat/ChatComposerInput';
-import {computeInputHeight} from 'components/Chat/ChatComposerInput.utils';
 import {ChatSendButton} from 'components/Chat/ChatSendButton';
 
 describe('ChatComposer', () => {
@@ -338,20 +337,6 @@ describe('ChatComposerInput', () => {
     await user.paste('pasted text');
 
     expect(onPaste).toHaveBeenCalledOnce();
-  });
-});
-
-describe('computeInputHeight', () => {
-  it('clamps to the minimum row height', () => {
-    expect(computeInputHeight(0, 24, 2, 8)).toBe(48);
-  });
-
-  it('uses the content height between the bounds', () => {
-    expect(computeInputHeight(100, 24, 1, 8)).toBe(100);
-  });
-
-  it('clamps to the maximum row height', () => {
-    expect(computeInputHeight(500, 24, 1, 8)).toBe(192);
   });
 });
 

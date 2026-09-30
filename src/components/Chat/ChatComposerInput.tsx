@@ -12,15 +12,11 @@ import type {
 } from 'react';
 import {useRef, useState} from 'react';
 import {chatComposerInputRecipe} from 'components/Chat/ChatComposerInput.recipe';
-import {
-  computeInputHeight,
-  DEFAULT_LINE_HEIGHT,
-} from 'components/Chat/ChatComposerInput.utils';
 import {useChatComposerContext} from 'components/Chat/ChatContext';
 import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import {mergeRefs} from 'internal/mergeRefs';
-import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
+import {useAutoGrowTextArea} from 'internal/useAutoGrowTextArea';
 import {cx} from 'utils/cx';
 
 const rootClass = chatComposerInputRecipe();
@@ -160,28 +156,7 @@ export function ChatComposerInput({
     }
   };
 
-  useIsomorphicLayoutEffect(() => {
-    const textarea = textareaRef.current;
-    if (textarea == null) {
-      return;
-    }
-    const computedLineHeight = Number.parseFloat(
-      getComputedStyle(textarea).lineHeight,
-    );
-    const lineHeight = Number.isFinite(computedLineHeight)
-      ? computedLineHeight
-      : DEFAULT_LINE_HEIGHT;
-    textarea.style.height = 'auto';
-    const height = computeInputHeight(
-      textarea.scrollHeight,
-      lineHeight,
-      minRows,
-      maxRows,
-    );
-    textarea.style.height = `${height}px`;
-    textarea.style.overflowY =
-      textarea.scrollHeight > maxRows * lineHeight ? 'auto' : 'hidden';
-  }, [currentValue, maxRows, minRows]);
+  useAutoGrowTextArea(textareaRef, currentValue, minRows, maxRows);
 
   return (
     <textarea
