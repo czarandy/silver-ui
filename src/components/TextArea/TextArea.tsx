@@ -2,6 +2,7 @@
 
 import {
   useId,
+  useRef,
   type ChangeEvent,
   type CSSProperties,
   type ClipboardEvent,
@@ -29,10 +30,12 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
+import {useAutoGrowTextArea} from 'internal/useAutoGrowTextArea';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -128,11 +131,6 @@ export type TextAreaProps = {
    */
   ref?: Ref<HTMLTextAreaElement>;
   /**
-   * Number of visible text rows.
-   * @default 3
-   */
-  rows?: number;
-  /**
    * Visual size.
    * @default 'md'
    */
@@ -153,7 +151,37 @@ export type TextAreaProps = {
    * Controlled textarea value.
    */
   value: string;
-} & FieldNecessity;
+} & FieldNecessity &
+  TextAreaRows;
+
+/**
+ * Either a fixed height (`rows`) or a height that grows with the content
+ * (`minRows` / `maxRows`), never both.
+ */
+type TextAreaRows =
+  | {
+      /**
+       * Number of visible text rows. The user can resize the textarea
+       * vertically.
+       * @default 3
+       */
+      rows?: number;
+      minRows?: never;
+      maxRows?: never;
+    }
+  | {
+      rows?: never;
+      /**
+       * Grows the textarea with its content, starting at this many rows.
+       * Setting `minRows` or `maxRows` turns on auto-grow.
+       * @default 3
+       */
+      minRows?: number;
+      /**
+       * Rows the textarea grows to before it scrolls. Unbounded by default.
+       */
+      maxRows?: number;
+    };
 
 const styles = {
   wrapper: css({
@@ -163,6 +191,9 @@ const styles = {
   textarea: css({
     resize: 'vertical',
     minH: '20',
+  }),
+  autoGrowTextarea: css({
+    resize: 'none',
   }),
   counter: css({
     alignSelf: 'flex-end',
@@ -181,6 +212,8 @@ export function TextArea({
   value,
   onChange,
   rows = 3,
+  minRows,
+  maxRows,
   size: sizeProp,
   description,
   isLabelHidden = false,
@@ -222,6 +255,17 @@ export function TextArea({
     !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
 
   const necessity = getNecessity(isOptional, isRequired);
+
+  const isAutoGrow = minRows != null || maxRows != null;
+  const autoGrowMinRows = minRows ?? 3;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  useAutoGrowTextArea(
+    textareaRef,
+    value,
+    autoGrowMinRows,
+    maxRows ?? Infinity,
+    isAutoGrow,
+  );
 
   return (
     <Field
@@ -272,7 +316,10 @@ export function TextArea({
           aria-required={isRequired ?? undefined}
           autoComplete={autoComplete}
           autoFocus={hasAutoFocus && !effectiveReadOnly}
-          className={cx(inputStyles.control, styles.textarea)}
+          className={cx(
+            inputStyles.control,
+            isAutoGrow ? styles.autoGrowTextarea : styles.textarea,
+          )}
           data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
           data-testid={dataTestId}
           disabled={effectiveDisabled}
@@ -289,8 +336,8 @@ export function TextArea({
           onPaste={onPaste}
           placeholder={placeholder}
           readOnly={effectiveReadOnly}
-          ref={ref}
-          rows={rows}
+          ref={mergeRefs(textareaRef, ref)}
+          rows={isAutoGrow ? autoGrowMinRows : rows}
           spellCheck={hasSpellCheck}
           tabIndex={effectiveReadOnly ? -1 : undefined}
           value={value}

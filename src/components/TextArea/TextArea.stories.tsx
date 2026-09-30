@@ -93,3 +93,29 @@ export const ReadOnly: Story = {
     value: 'This content can be reviewed but not edited.',
   },
 };
+
+const LONG_NOTE = [
+  'Client reported improved sleep since the last session.',
+  'Discussed strategies for managing work stress, including scheduled breaks.',
+  'Reviewed the thought record from last week; identified two recurring themes.',
+  'Plan: continue weekly sessions and revisit the sleep log next time.',
+].join('\n\n');
+
+export const AutoGrow: Story = {
+  args: {
+    rows: undefined,
+    minRows: 3,
+    value: LONG_NOTE,
+    description: 'Grows with its content instead of scrolling.',
+  },
+};
+
+export const AutoGrowWithMaxRows: Story = {
+  args: {
+    rows: undefined,
+    minRows: 2,
+    maxRows: 5,
+    value: LONG_NOTE,
+    description: 'Grows up to five rows, then scrolls.',
+  },
+};
