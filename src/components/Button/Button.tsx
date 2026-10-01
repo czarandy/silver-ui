@@ -288,7 +288,7 @@ export function Button({
   isIconOnly = false,
   endContent,
   startContent,
-  tooltip,
+  tooltip: tooltipFromProps,
   onClick,
   onFocus,
   onKeyDown,
@@ -306,11 +306,11 @@ export function Button({
     isDisabled || buttonGroup?.isDisabled === true || isLoading;
   // Icon-only buttons have no visible text, so default their tooltip to the
   // accessible `label` unless an explicit tooltip is provided.
-  const effectiveTooltip = tooltip ?? (isIconOnly ? label : undefined);
+  const tooltip = tooltipFromProps ?? (isIconOnly ? label : undefined);
   // Only an explicit tooltip swaps native `disabled` for `aria-disabled` (to
   // keep the tooltip hoverable while disabled); the icon-only default must not
   // change disabled semantics.
-  const useAriaDisabled = tooltip != null && buttonDisabled;
+  const useAriaDisabled = tooltipFromProps != null && buttonDisabled;
   const renderAsLink = href != null && !buttonDisabled;
   const opensInNewTab = renderAsLink && target === '_blank';
   const ariaLabel =
@@ -442,8 +442,8 @@ export function Button({
     </ActionElement>
   );
 
-  if (effectiveTooltip != null) {
-    return <Tooltip content={effectiveTooltip}>{element}</Tooltip>;
+  if (tooltip != null) {
+    return <Tooltip content={tooltip}>{element}</Tooltip>;
   }
 
   return element;

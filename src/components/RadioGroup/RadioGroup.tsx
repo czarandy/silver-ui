@@ -115,9 +115,9 @@ export function RadioGroup({
   'data-testid': dataTestId,
   description,
   htmlName,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
-  isReadOnly = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isOptional,
   isRequired,
   label,
@@ -140,17 +140,17 @@ export function RadioGroup({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const fieldset = useFieldset();
   const groupRef = useRef<HTMLDivElement>(null);
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
   const contextValue = useMemo(
     () => ({
-      isDisabled: effectiveDisabled,
-      isReadOnly: effectiveReadOnly,
+      isDisabled,
+      isReadOnly,
       isRequired,
       name: htmlName ?? nameId,
       onChange: (nextValue: string) => {
-        if (!effectiveReadOnly) {
+        if (!isReadOnly) {
           onChange(nextValue);
         }
       },
@@ -160,8 +160,8 @@ export function RadioGroup({
     }),
     [
       htmlName,
-      effectiveDisabled,
-      effectiveReadOnly,
+      isDisabled,
+      isReadOnly,
       isRequired,
       nameId,
       onChange,
@@ -172,12 +172,12 @@ export function RadioGroup({
   );
 
   useEffect(() => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       groupRef.current
         ?.querySelectorAll<HTMLInputElement>('input[type="radio"]')
         .forEach(input => input.blur());
     }
-  }, [effectiveReadOnly]);
+  }, [isReadOnly]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -186,9 +186,9 @@ export function RadioGroup({
       className={className}
       data-testid={dataTestId}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelAs="span"
@@ -205,7 +205,7 @@ export function RadioGroup({
         aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
         aria-orientation={orientation}
-        aria-readonly={effectiveReadOnly || undefined}
+        aria-readonly={isReadOnly || undefined}
         aria-required={isRequired ?? undefined}
         className={radioGroupRecipe({orientation})}
         id={inputId}

@@ -374,16 +374,13 @@ export function Calendar({
   onViewDateChange,
   ref,
   style,
-  timezoneID,
-  value,
+  timezoneID: timezoneIDFromProps,
+  value: valueFromProps,
   viewDate: viewDateFromProps,
   weekStartsOn = 0,
 }: CalendarProps): React.JSX.Element {
-  const effectiveTimezoneID = timezoneID ?? getBrowserTimezoneID();
-  const today = useMemo(
-    () => plainDateToday(effectiveTimezoneID),
-    [effectiveTimezoneID],
-  );
+  const timezoneID = timezoneIDFromProps ?? getBrowserTimezoneID();
+  const today = useMemo(() => plainDateToday(timezoneID), [timezoneID]);
   const [internalValue, setInternalValue] = useState<
     DateRange | PlainDate | undefined
   >(defaultValue);
@@ -392,7 +389,7 @@ export function Calendar({
   const [hoveredDate, setHoveredDate] = useState<PlainDate | null>(null);
   const [pendingFocus, setPendingFocus] = useState<PlainDate | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const effectiveValue = value ?? internalValue;
+  const value = valueFromProps ?? internalValue;
   const isViewDateControlled =
     viewDateFromProps != null && onViewDateChange != null;
   const [internalViewDate, setInternalViewDate] = useState(() => {
@@ -400,12 +397,12 @@ export function Calendar({
       return viewDateFromProps;
     }
 
-    if (effectiveValue != null && 'year' in effectiveValue) {
-      return effectiveValue;
+    if (value != null && 'year' in value) {
+      return value;
     }
 
-    if (effectiveValue != null && 'start' in effectiveValue) {
-      return effectiveValue.start;
+    if (value != null && 'start' in value) {
+      return value.start;
     }
 
     return today;
@@ -583,7 +580,7 @@ export function Calendar({
             rangeSelectionStart={rangeSelectionStart}
             rangeSpanBounds={rangeSpanBounds}
             today={today}
-            value={effectiveValue}
+            value={value}
             weekStartsOn={weekStartsOn}
           />
         ))}
@@ -858,7 +855,7 @@ const DayCell = memo(function DayCell({
   previewEnd,
   today,
   hasOutsideDays,
-  isDisabled,
+  isDisabled: isDisabledFromProps,
   isNextDayUnavailable,
   isPreviousDayUnavailable,
   isSelectingRange,
@@ -870,14 +867,14 @@ const DayCell = memo(function DayCell({
     return <div className={outsideDayCellClass} />;
   }
 
-  const effectivelyDisabled = isDisabled || day.isOutside;
+  const isDisabled = isDisabledFromProps || day.isOutside;
   const isToday = plainDateIsEqual(day.date, today);
   const isSelected =
     mode === 'single' &&
     selectedDate != null &&
     plainDateIsEqual(day.date, selectedDate);
   const isInRange =
-    !effectivelyDisabled &&
+    !isDisabled &&
     mode === 'range' &&
     rangeStart != null &&
     rangeEnd != null &&
@@ -892,25 +889,23 @@ const DayCell = memo(function DayCell({
     mode === 'range' &&
     rangeStart != null &&
     plainDateIsEqual(day.date, rangeStart) &&
-    (!effectivelyDisabled || isPendingRangeStart);
+    (!isDisabled || isPendingRangeStart);
   const isRangeEnd =
-    !effectivelyDisabled &&
+    !isDisabled &&
     mode === 'range' &&
     rangeEnd != null &&
     plainDateIsEqual(day.date, rangeEnd);
   const isInPreview =
-    !effectivelyDisabled &&
+    !isDisabled &&
     previewStart != null &&
     previewEnd != null &&
     plainDateIsInRange(day.date, [previewStart, previewEnd]);
   const isPreviewStart =
-    !effectivelyDisabled &&
+    !isDisabled &&
     previewStart != null &&
     plainDateIsEqual(day.date, previewStart);
   const isPreviewEnd =
-    !effectivelyDisabled &&
-    previewEnd != null &&
-    plainDateIsEqual(day.date, previewEnd);
+    !isDisabled && previewEnd != null && plainDateIsEqual(day.date, previewEnd);
   const isFirstColumn = dayIndex === 0;
   const isLastColumn = dayIndex === 6;
 
@@ -919,7 +914,7 @@ const DayCell = memo(function DayCell({
     isToday,
     isSelected: isSelected || isRangeStart || isRangeEnd,
     isInRange,
-    isDisabled: effectivelyDisabled,
+    isDisabled,
   });
   const rangeBackgroundClass = calendarRecipe({
     rangeTone: 'range',
@@ -938,7 +933,7 @@ const DayCell = memo(function DayCell({
       {isInPreview ? <div className={previewBackgroundClass} /> : null}
       <button
         aria-current={isToday ? 'date' : undefined}
-        aria-disabled={effectivelyDisabled || undefined}
+        aria-disabled={isDisabled || undefined}
         aria-label={plainDateFormat(day.date, DATE_FORMAT_WITH_WEEKDAY)}
         aria-selected={
           isSelected || isInRange || isPendingRangeStart || undefined
@@ -946,16 +941,16 @@ const DayCell = memo(function DayCell({
         className={styles.day}
         data-date={day.date.toString()}
         data-range-span-disabled={
-          (isPendingRangeStart && isDisabled) || undefined
+          (isPendingRangeStart && isDisabledFromProps) || undefined
         }
-        disabled={isDisabled && !isPendingRangeStart}
+        disabled={isDisabledFromProps && !isPendingRangeStart}
         onClick={() => {
-          if (!effectivelyDisabled) {
+          if (!isDisabled) {
             onDayClick(day.date);
           }
         }}
         onMouseEnter={() => {
-          if (isSelectingRange && !effectivelyDisabled) {
+          if (isSelectingRange && !isDisabled) {
             onDayHover(day.date);
           }
         }}

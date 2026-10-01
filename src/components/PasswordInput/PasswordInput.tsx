@@ -28,8 +28,8 @@ export type PasswordInputProps = Omit<
 export function PasswordInput({
   className,
   'data-testid': dataTestId,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isOptional,
   isRequired,
   ref,
@@ -39,13 +39,13 @@ export function PasswordInput({
   const [isVisible, setIsVisible] = useState(false);
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
-  const effectiveDisabled =
-    isDisabled ||
+  const isDisabled =
+    isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled &&
-    (isReadOnly ||
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
       inputGroup?.isReadOnly === true ||
       fieldset?.isReadOnly === true);
   const toggleVisibility = useCallback(() => setIsVisible(v => !v), []);
@@ -57,10 +57,10 @@ export function PasswordInput({
       className={className}
       data-testid={dataTestId}
       endContent={
-        effectiveReadOnly ? undefined : (
+        isReadOnly ? undefined : (
           <Button
             icon={isVisible ? EyeOff : Eye}
-            isDisabled={effectiveDisabled}
+            isDisabled={isDisabled}
             isIconOnly
             label={isVisible ? 'Hide password' : 'Show password'}
             onClick={toggleVisibility}
@@ -69,8 +69,8 @@ export function PasswordInput({
           />
         )
       }
-      isDisabled={isDisabled}
-      isReadOnly={isReadOnly}
+      isDisabled={isDisabledFromProps}
+      isReadOnly={isReadOnlyFromProps}
       ref={ref}
       style={style}
       type={isVisible ? 'text' : 'password'}

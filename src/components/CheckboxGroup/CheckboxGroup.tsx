@@ -112,8 +112,8 @@ export function CheckboxGroup({
   'data-testid': dataTestId,
   description,
   htmlName,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -135,12 +135,12 @@ export function CheckboxGroup({
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const fieldset = useFieldset();
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
   const handleItemChange = useCallback(
     (itemValue: string, isChecked: boolean) => {
-      if (effectiveReadOnly) {
+      if (isReadOnly) {
         return;
       }
       if (isChecked) {
@@ -150,22 +150,22 @@ export function CheckboxGroup({
 
       onChange(value.filter(currentValue => currentValue !== itemValue));
     },
-    [effectiveReadOnly, onChange, value],
+    [isReadOnly, onChange, value],
   );
   const selectedValues = useMemo(() => new Set(value), [value]);
   const contextValue = useMemo(
     () => ({
       htmlName,
-      isDisabled: effectiveDisabled,
-      isReadOnly: effectiveReadOnly,
+      isDisabled,
+      isReadOnly,
       onChange: handleItemChange,
       orientation,
       selectedValues,
       size,
     }),
     [
-      effectiveDisabled,
-      effectiveReadOnly,
+      isDisabled,
+      isReadOnly,
       handleItemChange,
       htmlName,
       orientation,
@@ -181,9 +181,9 @@ export function CheckboxGroup({
       className={className}
       data-testid={dataTestId}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...necessity}
       description={description}
       descriptionID={descriptionID}

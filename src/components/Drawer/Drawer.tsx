@@ -99,7 +99,7 @@ export function Drawer({
   label,
   onOpenChange,
   placement = 'end',
-  size,
+  size: sizeFromProps,
   dismissBehavior,
   children,
   className,
@@ -156,8 +156,8 @@ export function Drawer({
 
   useScrollLock(isOpen);
 
-  const effectiveSize = size ?? DEFAULT_SIZES[placement];
-  const sizeStyle = getSizeStyle(placement, effectiveSize);
+  const size = sizeFromProps ?? DEFAULT_SIZES[placement];
+  const sizeStyle = getSizeStyle(placement, size);
   const classes = drawerRecipe({
     state: isOpen ? 'open' : isClosing ? 'closing' : 'closed',
     placement,

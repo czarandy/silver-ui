@@ -194,8 +194,8 @@ export function PinInput({
   hasAutoFocus = false,
   hasMask = false,
   htmlName,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -235,13 +235,13 @@ export function PinInput({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
-  const effectiveDisabled =
-    isDisabled ||
+  const isDisabled =
+    isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled &&
-    (isReadOnly ||
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
       inputGroup?.isReadOnly === true ||
       fieldset?.isReadOnly === true);
   const size = inputGroup?.size ?? sizeProp;
@@ -274,8 +274,8 @@ export function PinInput({
     inputRecipe.raw({
       size,
       status: effectiveStatusType,
-      isDisabled: effectiveDisabled,
-      isReadOnly: effectiveReadOnly,
+      isDisabled,
+      isReadOnly,
     }),
     slots.wrapper,
   );
@@ -283,7 +283,7 @@ export function PinInput({
   const statusIconClassName = cx(inputStyles.iconSlot, css(slots.statusIcon));
 
   const focusCell = (index: number): void => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       return;
     }
     const cell = cellsRef.current[Math.max(0, Math.min(index, length - 1))];
@@ -348,7 +348,7 @@ export function PinInput({
     nextValue: string,
     event: ChangeEvent<HTMLInputElement> | null,
   ): void => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       return;
     }
     onChange(nextValue, event);
@@ -472,10 +472,10 @@ export function PinInput({
   };
 
   useEffect(() => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       cellsRef.current.forEach(cell => cell?.blur());
     }
-  }, [effectiveReadOnly]);
+  }, [isReadOnly]);
 
   const inputWrapper = (
     <div
@@ -488,16 +488,10 @@ export function PinInput({
       )}
       data-testid={dataTestId}
       id={inputId}
-      onClickCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
-      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
-      onKeyDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
-      onPointerDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
+      onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       ref={inputGroup != null ? ref : undefined}
       role="group"
       style={inputGroup != null ? style : undefined}>
@@ -507,16 +501,14 @@ export function PinInput({
           aria-label={`${type === 'numeric' ? 'Digit' : 'Character'} ${index + 1} of ${length}`}
           aria-required={isRequired ?? undefined}
           autoComplete={index === 0 ? 'one-time-code' : 'off'}
-          autoFocus={
-            hasAutoFocus && !effectiveReadOnly && index === activeCellIndex
-          }
+          autoFocus={hasAutoFocus && !isReadOnly && index === activeCellIndex}
           className={cellClassName}
           data-autofocus={
-            hasAutoFocus && !effectiveReadOnly && index === activeCellIndex
+            hasAutoFocus && !isReadOnly && index === activeCellIndex
               ? true
               : undefined
           }
-          disabled={effectiveDisabled}
+          disabled={isDisabled}
           inputMode={type === 'numeric' ? 'numeric' : 'text'}
           key={index}
           onBlur={handleBlur}
@@ -526,17 +518,17 @@ export function PinInput({
           onKeyDown={event => handleKeyDown(index, event)}
           onPaste={event => handlePaste(index, event)}
           pattern={type === 'numeric' ? '[0-9]*' : undefined}
-          readOnly={effectiveReadOnly}
+          readOnly={isReadOnly}
           ref={element => {
             cellsRef.current[index] = element;
           }}
-          tabIndex={effectiveReadOnly ? -1 : index === activeCellIndex ? 0 : -1}
+          tabIndex={isReadOnly ? -1 : index === activeCellIndex ? 0 : -1}
           type={hasMask ? 'password' : 'text'}
           value={displayedValue[index] ?? ''}
         />
       ))}
       <input
-        disabled={effectiveDisabled}
+        disabled={isDisabled}
         name={htmlName}
         type="hidden"
         value={displayedValue}
@@ -559,9 +551,9 @@ export function PinInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...getNecessity(isOptional, isRequired)}
       label={label}
       labelAs="span"

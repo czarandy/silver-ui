@@ -330,8 +330,8 @@ export function NumberInput({
   isLabelHidden = false,
   isOptional,
   isRequired,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isIntegerOnly = false,
   isWheelEnabled = false,
   isLoading = false,
@@ -366,13 +366,13 @@ export function NumberInput({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
-  const effectiveDisabled =
-    isDisabled ||
+  const isDisabled =
+    isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled &&
-    (isReadOnly ||
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
       inputGroup?.isReadOnly === true ||
       fieldset?.isReadOnly === true);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
@@ -462,13 +462,13 @@ export function NumberInput({
     step,
   });
   const isDecrementDisabled =
-    effectiveDisabled ||
-    effectiveReadOnly ||
+    isDisabled ||
+    isReadOnly ||
     decrementValue == null ||
     decrementValue === valueForStepping;
   const isIncrementDisabled =
-    effectiveDisabled ||
-    effectiveReadOnly ||
+    isDisabled ||
+    isReadOnly ||
     incrementValue == null ||
     incrementValue === valueForStepping;
 
@@ -480,8 +480,8 @@ export function NumberInput({
 
     const handleWheel = (event: WheelEvent): void => {
       if (
-        effectiveDisabled ||
-        effectiveReadOnly ||
+        isDisabled ||
+        isReadOnly ||
         document.activeElement !== input ||
         event.deltaY === 0 ||
         event.altKey ||
@@ -499,10 +499,10 @@ export function NumberInput({
     return () => {
       input.removeEventListener('wheel', handleWheel);
     };
-  }, [effectiveDisabled, effectiveReadOnly, isWheelEnabled, stepValue]);
+  }, [isDisabled, isReadOnly, isWheelEnabled, stepValue]);
 
   useEffect(() => {
-    if (!effectiveReadOnly) {
+    if (!isReadOnly) {
       return;
     }
     inputRef.current?.blur();
@@ -510,7 +510,7 @@ export function NumberInput({
       setPendingInput(null);
     });
     return () => cancelAnimationFrame(animationFrame);
-  }, [effectiveReadOnly]);
+  }, [isReadOnly]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -520,21 +520,15 @@ export function NumberInput({
         inputRecipe({
           size,
           status: effectiveStatusType,
-          isDisabled: effectiveDisabled,
-          isReadOnly: effectiveReadOnly,
+          isDisabled,
+          isReadOnly,
         }),
         inputGroup != null ? className : undefined,
       )}
-      onClickCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
-      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
-      onKeyDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
-      onPointerDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
+      onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={inputStyles.iconSlot}>
@@ -551,22 +545,22 @@ export function NumberInput({
         aria-valuemin={min ?? undefined}
         aria-valuenow={parsedDisplayValue ?? undefined}
         autoComplete={autoComplete}
-        autoFocus={hasAutoFocus && !effectiveReadOnly}
+        autoFocus={hasAutoFocus && !isReadOnly}
         className={inputStyles.control}
-        data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
+        data-autofocus={(hasAutoFocus && !isReadOnly) || undefined}
         data-testid={dataTestId}
-        disabled={effectiveDisabled}
+        disabled={isDisabled}
         id={inputId}
         inputMode={isIntegerOnly ? 'numeric' : 'decimal'}
         name={htmlName}
         onBlur={event => {
-          if (!effectiveReadOnly) {
+          if (!isReadOnly) {
             commitPendingInput();
           }
           onBlur?.(event);
         }}
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
-          if (effectiveReadOnly) {
+          if (isReadOnly) {
             return;
           }
           const nextValue = event.target.value;
@@ -612,19 +606,16 @@ export function NumberInput({
           onKeyDown?.(event);
         }}
         placeholder={placeholder}
-        readOnly={effectiveReadOnly}
+        readOnly={isReadOnly}
         ref={mergeRefs(ref, inputRef)}
         required={isRequired ?? undefined}
         role="spinbutton"
-        tabIndex={effectiveReadOnly ? -1 : undefined}
+        tabIndex={isReadOnly ? -1 : undefined}
         type="text"
         value={displayValue}
       />
       {units != null ? <span className={styles.units}>{units}</span> : null}
-      {hasClear === true &&
-      value != null &&
-      !effectiveDisabled &&
-      !effectiveReadOnly ? (
+      {hasClear === true && value != null && !isDisabled && !isReadOnly ? (
         <Button
           icon={X}
           isIconOnly
@@ -641,7 +632,7 @@ export function NumberInput({
           {getStatusIcon(status.type)}
         </span>
       ) : null}
-      {effectiveReadOnly ? null : (
+      {isReadOnly ? null : (
         <span className={numberInputStyles.stepper}>
           <button
             aria-label="Increment value"
@@ -688,9 +679,9 @@ export function NumberInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}

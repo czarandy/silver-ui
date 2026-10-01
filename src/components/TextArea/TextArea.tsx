@@ -219,9 +219,9 @@ export function TextArea({
   isLabelHidden = false,
   isOptional,
   isRequired,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLoading = false,
-  isReadOnly = false,
+  isReadOnly: isReadOnlyFromProps = false,
   hasSpellCheck = true,
   hasAutoFocus = false,
   htmlName,
@@ -250,9 +250,9 @@ export function TextArea({
   const describedBy = getDescribedBy(descriptionID, statusMessageID, counterID);
   const isOverLimit = maxLength != null && value.length > maxLength;
   const fieldset = useFieldset();
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -273,9 +273,9 @@ export function TextArea({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}
@@ -289,20 +289,16 @@ export function TextArea({
           inputRecipe({
             size,
             status: status?.type,
-            isDisabled: effectiveDisabled,
-            isReadOnly: effectiveReadOnly,
+            isDisabled,
+            isReadOnly,
           }),
           styles.wrapper,
         )}
-        onClickCapture={
-          effectiveReadOnly ? preventReadOnlyInteraction : undefined
-        }
-        onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
-        onKeyDownCapture={
-          effectiveReadOnly ? preventReadOnlyInteraction : undefined
-        }
+        onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+        onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
         onPointerDownCapture={
-          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+          isReadOnly ? preventReadOnlyInteraction : undefined
         }>
         {startIcon != null ? (
           <span className={inputStyles.iconSlot}>
@@ -315,31 +311,31 @@ export function TextArea({
           aria-invalid={status?.type === 'error' || isOverLimit || undefined}
           aria-required={isRequired ?? undefined}
           autoComplete={autoComplete}
-          autoFocus={hasAutoFocus && !effectiveReadOnly}
+          autoFocus={hasAutoFocus && !isReadOnly}
           className={cx(
             inputStyles.control,
             isAutoGrow ? styles.autoGrowTextarea : styles.textarea,
           )}
-          data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
+          data-autofocus={(hasAutoFocus && !isReadOnly) || undefined}
           data-testid={dataTestId}
-          disabled={effectiveDisabled}
+          disabled={isDisabled}
           id={inputId}
           maxLength={maxLength}
           name={htmlName}
           onBlur={onBlur}
           onChange={event => {
-            if (!effectiveReadOnly) {
+            if (!isReadOnly) {
               onChange(event.target.value, event);
             }
           }}
           onFocus={onFocus}
           onPaste={onPaste}
           placeholder={placeholder}
-          readOnly={effectiveReadOnly}
+          readOnly={isReadOnly}
           ref={mergeRefs(textareaRef, ref)}
           rows={isAutoGrow ? autoGrowMinRows : rows}
           spellCheck={hasSpellCheck}
-          tabIndex={effectiveReadOnly ? -1 : undefined}
+          tabIndex={isReadOnly ? -1 : undefined}
           value={value}
         />
         {isLoading ? <Spinner size="sm" /> : null}
