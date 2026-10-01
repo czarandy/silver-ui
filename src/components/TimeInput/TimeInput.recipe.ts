@@ -44,8 +44,13 @@ export const timeInputRecipe = sva({
       fontSize: 'sm',
       fontVariantNumeric: 'tabular-nums',
       cursor: 'pointer',
-      _hover: {bg: 'bg.subtle'},
-      '&[aria-selected=true]': {bg: 'primary', color: 'fg.onPrimary'},
+      '&:not([aria-selected=true])': {_hover: {bg: 'bg.subtle'}},
+      '&[aria-selected=true]': {
+        bg: 'primary',
+        color: 'fg.onPrimary',
+        _hover: {bg: 'primary.hover'},
+        _active: {bg: 'primary.active'},
+      },
       _focusVisible: {
         outlineWidth: 'focus',
         outlineStyle: 'solid',

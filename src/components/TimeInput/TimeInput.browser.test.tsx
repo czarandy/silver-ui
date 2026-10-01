@@ -3,6 +3,7 @@ import {act, render, screen, waitFor, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it} from 'vitest';
+import {Button} from 'components/Button';
 import {TimeInput} from 'components/TimeInput/TimeInput';
 
 function Example(): React.JSX.Element {
@@ -53,4 +54,43 @@ describe('TimeInput native popover', () => {
       screen.queryByRole('listbox', {name: 'Hours'}),
     ).not.toBeInTheDocument();
   });
+});
+
+describe('TimeInput selected option styling', () => {
+  it.each(['light', 'dark'])(
+    'matches primary button hover colors in %s mode',
+    async theme => {
+      document.documentElement.dataset.theme = theme;
+      try {
+        render(
+          <>
+            <Example />
+            <Button label="Primary reference" variant="primary" />
+          </>,
+        );
+        const reference = screen.getByRole('button', {
+          name: 'Primary reference',
+        });
+        // Panda's data-hover selector applies the same styles as pointer hover.
+        reference.setAttribute('data-hover', '');
+        await Promise.all(
+          reference.getAnimations().map(async animation => animation.finished),
+        );
+        const expectedBackground = getComputedStyle(reference).backgroundColor;
+        const expectedColor = getComputedStyle(reference).color;
+        const user = userEvent.setup();
+        await user.click(screen.getByRole('button', {name: 'Choose Start'}));
+        const selected = within(
+          screen.getByRole('listbox', {name: 'Minutes'}),
+        ).getByRole('option', {selected: true});
+        selected.setAttribute('data-hover', '');
+        expect(getComputedStyle(selected).backgroundColor).toBe(
+          expectedBackground,
+        );
+        expect(getComputedStyle(selected).color).toBe(expectedColor);
+      } finally {
+        delete document.documentElement.dataset.theme;
+      }
+    },
+  );
 });
