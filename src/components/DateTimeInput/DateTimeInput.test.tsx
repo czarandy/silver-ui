@@ -114,6 +114,22 @@ describe('DateTimeInput', () => {
     expect(result.minute).toBe(30);
   });
 
+  it('passes step through to the time input', () => {
+    render(
+      <DateTimeInput
+        label="Meeting"
+        onChange={() => {}}
+        step={900}
+        value={null}
+      />,
+    );
+
+    expect(screen.getByLabelText('Meeting time')).toHaveAttribute(
+      'step',
+      '900',
+    );
+  });
+
   it('disables both inputs when isDisabled is true', () => {
     render(
       <DateTimeInput
