@@ -1,0 +1,60 @@
+import {sva} from 'styled-system/css';
+
+export const timeInputRecipe = sva({
+  slots: ['input', 'panel', 'columns', 'column', 'list', 'option', 'footer'],
+  base: {
+    input: {'&::-webkit-calendar-picker-indicator': {display: 'none'}},
+    panel: {color: 'fg', fontFamily: 'body'},
+    columns: {display: 'flex'},
+    column: {
+      flex: '1 1 0',
+      minW: '64px',
+      borderInlineEndWidth: '1px',
+      borderColor: 'border',
+      _last: {borderInlineEndWidth: 0},
+    },
+    list: {
+      height: '224px',
+      overflowY: 'auto',
+      overscrollBehavior: 'contain',
+      p: '1',
+      scrollbarWidth: 'thin',
+    },
+    option: {
+      display: 'block',
+      w: 'full',
+      minH: 'component.md',
+      px: '3',
+      py: '1',
+      border: 0,
+      borderRadius: 'md',
+      bg: 'transparent',
+      color: 'fg',
+      fontFamily: 'inherit',
+      fontSize: 'sm',
+      fontVariantNumeric: 'tabular-nums',
+      cursor: 'pointer',
+      '&:not([aria-selected=true])': {_hover: {bg: 'bg.subtle'}},
+      '&[aria-selected=true]': {
+        bg: 'primary',
+        color: 'fg.onPrimary',
+        _hover: {bg: 'primary.hover'},
+        _active: {bg: 'primary.active'},
+      },
+      _focusVisible: {
+        outlineWidth: 'focus',
+        outlineStyle: 'solid',
+        outlineColor: 'primary',
+        outlineOffset: '-2px',
+      },
+      _disabled: {opacity: 0.4, cursor: 'not-allowed'},
+    },
+    footer: {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      p: '2',
+      borderTopWidth: '1px',
+      borderColor: 'border',
+    },
+  },
+});
