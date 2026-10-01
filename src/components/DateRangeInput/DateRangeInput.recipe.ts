@@ -9,7 +9,8 @@ export const dateRangeInputRecipe = sva({
     trigger: {
       display: 'flex',
       alignItems: 'center',
-      gap: '2',
+      // Matches the icon-to-text distance of DateInput's leading icon button.
+      gap: '2.5',
       flex: 1,
       minW: 0,
       p: 0,

@@ -270,6 +270,7 @@ export function TimeInput({
         className={inputRecipe({
           size,
           status: status?.type,
+          hasStartButton: true,
           isDisabled,
           isReadOnly,
         })}

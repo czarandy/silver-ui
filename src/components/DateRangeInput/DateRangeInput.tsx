@@ -282,6 +282,7 @@ export function DateRangeInput({
           inputRecipe({
             size,
             status: status?.type,
+            hasStartIcon: true,
             isDisabled,
             isReadOnly,
           }),

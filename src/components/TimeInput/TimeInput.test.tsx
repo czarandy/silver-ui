@@ -2,13 +2,25 @@ import {Temporal} from '@js-temporal/polyfill';
 import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
-import {inputStyles} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {TimeInput} from 'components/TimeInput/TimeInput';
 import {assertNonNull} from 'internal/testHelpers';
 
 const T = (s: string) => Temporal.PlainTime.from(s);
 
 describe('TimeInput', () => {
+  it('insets the clock button to match its block inset', () => {
+    render(<TimeInput label="Start time" onChange={vi.fn()} value={null} />);
+
+    const input = screen.getByLabelText('Start time');
+    // eslint-disable-next-line testing-library/no-node-access -- verifying CSS classes on the input wrapper
+    const wrapper = input.parentElement;
+    expect(wrapper).toHaveClass(
+      ...inputRecipe({hasStartButton: true, size: 'md'}).split(' '),
+    );
+    expect(wrapper).not.toHaveClass('silver-ps_3');
+  });
+
   it('calls onChange with PlainTime values', () => {
     const onChange = vi.fn();
 

@@ -7,7 +7,7 @@ import {
   type DateFormat,
   type PlainDate,
 } from 'components/DateInput/DateInput';
-import {inputStyles} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {
   DATE_FORMAT_LONG,
   plainDateCreate,
@@ -71,6 +71,18 @@ function ControlledDateInput({
 }
 
 describe('DateInput', () => {
+  it('insets the calendar button to match its block inset', () => {
+    render(<DateInput label="Due date" onChange={vi.fn()} value={null} />);
+
+    const input = screen.getByRole('combobox', {name: 'Due date'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying CSS classes on the input wrapper
+    const wrapper = input.parentElement;
+    expect(wrapper).toHaveClass(
+      ...inputRecipe({hasStartButton: true, size: 'md'}).split(' '),
+    );
+    expect(wrapper).not.toHaveClass('silver-ps_3');
+  });
+
   it('renders a formatted date and clears it', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

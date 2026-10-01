@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {DateRangeInput} from 'components/DateRangeInput/DateRangeInput';
 import {dateRangeInputRecipe} from 'components/DateRangeInput/DateRangeInput.recipe';
-import {inputStyles} from 'components/Field/inputStyles';
+import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {plainDateCreate} from 'internal/plainDate';
 import {assertNonNull} from 'internal/testHelpers';
 
@@ -30,6 +30,19 @@ const defaultRange = {
 };
 
 describe('DateRangeInput', () => {
+  it('insets the calendar icon to match its block inset', () => {
+    render(<DateRangeInput label="Dates" onChange={vi.fn()} value={null} />);
+
+    const trigger = screen.getByRole('combobox', {name: 'Dates'});
+    // eslint-disable-next-line testing-library/no-node-access -- verifying CSS classes on the input wrapper
+    const wrapper = trigger.parentElement;
+    expect(wrapper).toHaveClass(
+      ...inputRecipe({hasStartIcon: true, size: 'md'}).split(' '),
+    );
+    expect(wrapper).not.toHaveClass('silver-ps_3');
+    expect(trigger).toHaveClass('silver-gap_2.5');
+  });
+
   it('renders a formatted range and clears it', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

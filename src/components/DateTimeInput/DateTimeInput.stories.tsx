@@ -43,6 +43,13 @@ export const WithSeconds: Story = {
   },
 };
 
+export const FifteenMinuteStep: Story = {
+  args: {
+    step: 900,
+    value: Temporal.PlainDateTime.from('2026-05-21T09:30'),
+  },
+};
+
 export const WithConstraints: Story = {
   args: {
     min: Temporal.PlainDateTime.from('2026-05-01T08:00'),
