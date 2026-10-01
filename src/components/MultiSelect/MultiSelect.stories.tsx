@@ -19,7 +19,12 @@ const options = [
 
 const optionsWithDisabled = [
   {label: 'Name', value: 'name'},
-  {isDisabled: true, label: 'Email', value: 'email'},
+  {
+    isDisabled: true,
+    label: 'Email',
+    tooltip: 'Email is required and cannot be hidden.',
+    value: 'email',
+  },
   {label: 'Role', value: 'role'},
   {isDisabled: true, label: 'Status', value: 'status'},
 ];

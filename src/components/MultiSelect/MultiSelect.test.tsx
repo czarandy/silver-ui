@@ -1,4 +1,11 @@
-import {act, fireEvent, render, screen, within} from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
@@ -11,7 +18,10 @@ import {
   type MultiSelectProps,
   type MultiSelectVariant,
 } from 'components/MultiSelect/MultiSelect';
-import {multiSelectTriggerRecipe} from 'components/MultiSelect/MultiSelect.recipe';
+import {
+  multiSelectMenuRecipe,
+  multiSelectTriggerRecipe,
+} from 'components/MultiSelect/MultiSelect.recipe';
 import {SelectOption} from 'components/Select';
 import {TYPEAHEAD_TIMEOUT_MS} from 'hooks/useTypeahead';
 import {SizeContext} from 'internal/SizeContext';
@@ -950,6 +960,58 @@ describe('MultiSelect', () => {
 
     await user.click(screen.getByText('Select all'));
     expect(onChange).toHaveBeenLastCalledWith(['user']);
+  });
+
+  it('keeps a disabled option with a tooltip hoverable but not selectable', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <MultiSelect
+        label="Columns"
+        onChange={onChange}
+        options={[
+          {
+            isDisabled: true,
+            label: 'Email',
+            tooltip: 'Not available on your plan.',
+            value: 'email',
+          },
+          {label: 'Role', value: 'role'},
+        ]}
+        value={[]}
+      />,
+    );
+
+    const combobox = screen.getByRole('combobox', {name: 'Columns'});
+    await user.click(combobox);
+
+    const option = screen.getByRole('option', {hidden: true, name: 'Email'});
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    expect(tooltip).toHaveTextContent('Not available on your plan.');
+    expect(option).toHaveAttribute('aria-disabled', 'true');
+    expect(option).toHaveAttribute('aria-describedby', tooltip.id);
+
+    fireEvent.mouseEnter(option);
+    await waitFor(() => {
+      expect(tooltip).toHaveAttribute('popover-open');
+    });
+
+    await user.click(option);
+    expect(onChange).not.toHaveBeenCalled();
+
+    // Keyboard navigation still skips the disabled option.
+    combobox.focus();
+    await user.keyboard('{Home}{Enter}');
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0]?.[0]).toEqual(['role']);
+  });
+
+  it('leaves disabled options open to pointer events', () => {
+    expect(multiSelectMenuRecipe.raw().option).not.toHaveProperty([
+      '&[aria-disabled="true"]',
+      'pointerEvents',
+    ]);
   });
 
   it('does not select disabled options', () => {
