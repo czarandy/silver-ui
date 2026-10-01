@@ -33,6 +33,9 @@ describe('TimeInput native popover', () => {
     expect(minutes.getByRole('option', {selected: true})).toHaveTextContent(
       '30',
     );
+    expect(screen.getByLabelText<HTMLInputElement>('Start').value).toBe(
+      '09:30',
+    );
     await user.keyboard('{Escape}');
     await waitFor(() => expect(trigger).toHaveFocus());
     expect(screen.getByLabelText<HTMLInputElement>('Start').value).toBe(

@@ -1,16 +1,7 @@
 import {sva} from 'styled-system/css';
 
 export const timeInputRecipe = sva({
-  slots: [
-    'input',
-    'panel',
-    'columns',
-    'column',
-    'heading',
-    'list',
-    'option',
-    'footer',
-  ],
+  slots: ['input', 'panel', 'columns', 'column', 'list', 'option', 'footer'],
   base: {
     input: {'&::-webkit-calendar-picker-indicator': {display: 'none'}},
     panel: {color: 'fg', fontFamily: 'body'},
@@ -22,7 +13,6 @@ export const timeInputRecipe = sva({
       borderColor: 'border',
       _last: {borderInlineEndWidth: 0},
     },
-    heading: {fontSize: 'xs', color: 'fg.muted', textAlign: 'center', p: '2'},
     list: {
       height: '224px',
       overflowY: 'auto',

@@ -399,6 +399,7 @@ describe('TimeInput picker', () => {
     await user.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await user.click(screen.getByRole('option', {hidden: true, name: '15'}));
+    expect(screen.getByLabelText('Start')).toHaveValue('09:15');
     expect(onChange).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', {hidden: true, name: 'Done'}));
     expect(onChange).toHaveBeenCalledWith(
@@ -421,12 +422,14 @@ describe('TimeInput picker', () => {
     const trigger = screen.getByRole('button', {name: 'Choose Start'});
     await user.click(trigger);
     await user.click(screen.getByRole('option', {hidden: true, name: '15'}));
+    expect(screen.getByLabelText('Start')).toHaveValue('09:15');
     await user.keyboard('{Escape}');
     await act(async () => {
       await new Promise(resolve => requestAnimationFrame(resolve));
     });
     expect(onChange).not.toHaveBeenCalled();
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByLabelText('Start')).toHaveValue('09:00');
     await user.click(trigger);
     expect(
       screen.getByRole('option', {hidden: true, name: '00', selected: true}),

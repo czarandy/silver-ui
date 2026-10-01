@@ -168,7 +168,7 @@ export const QuarterHourPicker: Story = {
   args: {
     step: 900,
     description:
-      'Click the clock to choose a time. Done saves; Escape cancels.',
+      'Click the clock to preview a time. Done saves; Escape cancels.',
   },
   render: (args: TimeInputProps) => {
     const [value, setValue] = useState<PlainTime | null>(TIME_0900);

@@ -42,7 +42,6 @@ function TimeColumn({
 
   return (
     <div className={styles.column}>
-      <div className={styles.heading}>{label}</div>
       <div
         aria-label={label}
         className={styles.list}
@@ -101,6 +100,7 @@ export function TimePickerPanel({
   step,
   hasSeconds,
   onConfirm,
+  onPreviewChange,
 }: {
   value: Temporal.PlainTime | null;
   min?: Temporal.PlainTime;
@@ -108,6 +108,7 @@ export function TimePickerPanel({
   step?: number;
   hasSeconds: boolean;
   onConfirm: (value: Temporal.PlainTime) => void;
+  onPreviewChange?: (value: Temporal.PlainTime) => void;
 }): React.JSX.Element {
   const lower = min == null ? 0 : seconds(min);
   const upper = max == null ? 86399 : seconds(max);
@@ -163,6 +164,13 @@ export function TimePickerPanel({
     const next = closest(times, target);
     if (next !== undefined) {
       setDraft(next);
+      onPreviewChange?.(
+        Temporal.PlainTime.from({
+          hour: Math.floor(next / 3600),
+          minute: Math.floor(next / 60) % 60,
+          second: next % 60,
+        }),
+      );
     }
   };
   const padded = (n: number): string => String(n).padStart(2, '0');

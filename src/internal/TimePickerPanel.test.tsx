@@ -32,6 +32,9 @@ describe('TimePickerPanel', () => {
       />,
     );
     expect(column('Minutes').getAllByRole('option')).toHaveLength(4);
+    expect(screen.queryByText('Hours')).not.toBeInTheDocument();
+    expect(screen.queryByText('Minutes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Period')).not.toBeInTheDocument();
     await user.click(column('Hours').getByRole('option', {name: '09'}));
     await user.click(column('Minutes').getByRole('option', {name: '15'}));
     await user.click(column('Period').getByRole('option', {name: 'PM'}));

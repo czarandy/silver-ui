@@ -191,7 +191,8 @@ function fromInputString(value: string): PlainTime | null {
 
 /**
  * Editable time field with a clock-triggered column picker and optional seconds.
- * Picker changes are committed with Done; dismissal discards pending changes.
+ * Picker changes preview in the field and are committed with Done; dismissal
+ * discards pending changes.
  */
 export function TimeInput({
   label,
@@ -225,6 +226,7 @@ export function TimeInput({
 }: TimeInputProps): React.JSX.Element {
   const inputId = useId();
   const [isOpen, setIsOpen] = useState(false);
+  const [previewTime, setPreviewTime] = useState<PlainTime | null>(null);
   const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
@@ -293,6 +295,7 @@ export function TimeInput({
                   setIsOpen(false);
                   pickerTriggerRef.current?.focus();
                 }}
+                onPreviewChange={setPreviewTime}
                 step={step}
                 value={value}
               />
@@ -302,7 +305,10 @@ export function TimeInput({
           isEnabled={!effectiveDisabled && !effectiveReadOnly}
           isOpen={isOpen}
           label={`Choose ${label}`}
-          onOpenChange={setIsOpen}>
+          onOpenChange={open => {
+            setIsOpen(open);
+            setPreviewTime(null);
+          }}>
           {/* Avoid a focus-triggered tooltip opening during native popover focus restoration. */}
           <button
             aria-label={`Choose ${label}`}
@@ -340,7 +346,10 @@ export function TimeInput({
           step={step ?? (hasSeconds ? 1 : 60)}
           tabIndex={effectiveReadOnly ? -1 : undefined}
           type="time"
-          value={toInputString(value, hasSeconds)}
+          value={toInputString(
+            isOpen ? (previewTime ?? value) : value,
+            hasSeconds,
+          )}
         />
         {hasClear &&
         value != null &&
