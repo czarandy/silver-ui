@@ -91,7 +91,9 @@ function TimeColumn({
 }
 
 /**
- * Column picker with a draft value that is committed only by Done.
+ * Controlled column picker that reports every selection immediately. Done
+ * dismisses the picker, first applying the highlighted time if it is not
+ * already the value.
  */
 export function TimePickerPanel({
   value,
@@ -99,16 +101,16 @@ export function TimePickerPanel({
   max,
   step,
   hasSeconds,
-  onConfirm,
-  onPreviewChange,
+  onChange,
+  onDone,
 }: {
   value: Temporal.PlainTime | null;
   min?: Temporal.PlainTime;
   max?: Temporal.PlainTime;
   step?: number;
   hasSeconds: boolean;
-  onConfirm: (value: Temporal.PlainTime) => void;
-  onPreviewChange?: (value: Temporal.PlainTime) => void;
+  onChange: (value: Temporal.PlainTime) => void;
+  onDone: () => void;
 }): React.JSX.Element {
   const lower = min == null ? 0 : seconds(min);
   const upper = max == null ? 86399 : seconds(max);
@@ -142,10 +144,10 @@ export function TimePickerPanel({
       secondOptions: [...seconds].sort((a, b) => a - b),
     };
   }, [lower, upper, increment, hasSeconds]);
-  const [draft, setDraft] = useState(() =>
-    seconds(value ?? Temporal.Now.plainTimeISO()),
-  );
-  const selected = closest(validTimes, draft) ?? draft;
+  // Highlighted while there is no value; captured once so it stays put.
+  const [now] = useState(() => seconds(Temporal.Now.plainTimeISO()));
+  const target = value == null ? now : seconds(value);
+  const selected = closest(validTimes, target) ?? target;
   const hour = Math.floor(selected / 3600);
   const minute = Math.floor(selected / 60) % 60;
   const second = selected % 60;
@@ -163,8 +165,7 @@ export function TimePickerPanel({
   const choose = (times: number[], target: number): void => {
     const next = closest(times, target);
     if (next !== undefined) {
-      setDraft(next);
-      onPreviewChange?.(
+      onChange(
         Temporal.PlainTime.from({
           hour: Math.floor(next / 3600),
           minute: Math.floor(next / 60) % 60,
@@ -248,11 +249,18 @@ export function TimePickerPanel({
       </div>
       <div className={styles.footer}>
         <Button
-          isDisabled={validTimes.length === 0}
           label="Done"
-          onClick={() =>
-            onConfirm(Temporal.PlainTime.from({hour, minute, second}))
-          }
+          onClick={() => {
+            // An empty or off-step value shows a highlighted time that was
+            // never selected; apply it so the field matches the picker.
+            if (
+              validTimes.length > 0 &&
+              (value == null || seconds(value) !== selected)
+            ) {
+              onChange(Temporal.PlainTime.from({hour, minute, second}));
+            }
+            onDone();
+          }}
           size="sm"
         />
       </div>

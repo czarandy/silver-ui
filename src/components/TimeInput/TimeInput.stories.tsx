@@ -162,13 +162,13 @@ export const ReadOnly: Story = {
 };
 
 /**
- * Pick hours, quarter-hour minutes, and AM/PM, then commit with Done.
+ * Pick hours, quarter-hour minutes, and AM/PM, applied as you pick.
  */
 export const QuarterHourPicker: Story = {
   args: {
     step: 900,
     description:
-      'Click the clock to preview a time. Done saves; Escape cancels.',
+      'Click the clock to pick a time. Selections apply immediately.',
   },
   render: (args: TimeInputProps) => {
     const [value, setValue] = useState<PlainTime | null>(TIME_0900);

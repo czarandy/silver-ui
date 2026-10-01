@@ -1,6 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {useState, type ComponentProps} from 'react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {TimePickerPanel} from 'internal/TimePickerPanel';
 
@@ -15,20 +16,41 @@ beforeEach(() => {
 });
 afterEach(() => vi.restoreAllMocks());
 
+function Panel({
+  initial,
+  onChange,
+  ...props
+}: Omit<ComponentProps<typeof TimePickerPanel>, 'value'> & {
+  initial: Temporal.PlainTime | null;
+}): React.JSX.Element {
+  const [value, setValue] = useState(initial);
+  return (
+    <TimePickerPanel
+      {...props}
+      onChange={time => {
+        setValue(time);
+        onChange(time);
+      }}
+      value={value}
+    />
+  );
+}
+
 function column(label: string) {
   return within(screen.getByRole('listbox', {name: label}));
 }
 
 describe('TimePickerPanel', () => {
-  it('edits a draft, switches AM/PM, and commits only on Done', async () => {
+  it('applies each selection immediately, including AM/PM', async () => {
     const user = userEvent.setup();
-    const onConfirm = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
     render(
-      <TimePickerPanel
+      <Panel
         hasSeconds={false}
-        onConfirm={onConfirm}
+        initial={T('08:00')}
+        onChange={onChange}
+        onDone={vi.fn()}
         step={900}
-        value={T('08:00')}
       />,
     );
     expect(column('Minutes').getAllByRole('option')).toHaveLength(4);
@@ -36,42 +58,43 @@ describe('TimePickerPanel', () => {
     expect(screen.queryByText('Minutes')).not.toBeInTheDocument();
     expect(screen.queryByText('Period')).not.toBeInTheDocument();
     await user.click(column('Hours').getByRole('option', {name: '09'}));
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('09:00:00');
     await user.click(column('Minutes').getByRole('option', {name: '15'}));
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('09:15:00');
     await user.click(column('Period').getByRole('option', {name: 'PM'}));
-    expect(onConfirm).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('button', {name: 'Done'}));
-    expect(onConfirm.mock.calls[0]?.[0].toString()).toBe('21:15:00');
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('21:15:00');
   });
 
   it('handles noon and midnight without confusing 12 AM and 12 PM', async () => {
     const user = userEvent.setup();
-    const onConfirm = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
     render(
-      <TimePickerPanel
+      <Panel
         hasSeconds={false}
-        onConfirm={onConfirm}
-        value={T('00:00')}
+        initial={T('00:00')}
+        onChange={onChange}
+        onDone={vi.fn()}
       />,
     );
     expect(
       column('Hours').getByRole('option', {name: '12', selected: true}),
     ).toBeInTheDocument();
     await user.click(column('Period').getByRole('option', {name: 'PM'}));
-    await user.click(screen.getByRole('button', {name: 'Done'}));
-    expect(onConfirm.mock.calls[0]?.[0].toString()).toBe('12:00:00');
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('12:00:00');
   });
 
   it('disables unavailable times and moves to a valid minute when the hour changes', async () => {
     const user = userEvent.setup();
-    const onConfirm = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
     render(
-      <TimePickerPanel
+      <Panel
         hasSeconds={false}
+        initial={T('09:45')}
         max={T('10:15')}
         min={T('09:30')}
-        onConfirm={onConfirm}
+        onChange={onChange}
+        onDone={vi.fn()}
         step={900}
-        value={T('09:45')}
       />,
     );
     expect(column('Hours').getByRole('option', {name: '08'})).toBeDisabled();
@@ -81,21 +104,21 @@ describe('TimePickerPanel', () => {
     expect(
       column('Minutes').getByRole('option', {name: '15', selected: true}),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole('button', {name: 'Done'}));
-    expect(onConfirm.mock.calls[0]?.[0].toString()).toBe('10:15:00');
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('10:15:00');
   });
 
   it('supports overnight limits and step increments based on min', async () => {
     const user = userEvent.setup();
-    const onConfirm = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
     render(
-      <TimePickerPanel
+      <Panel
         hasSeconds={false}
+        initial={T('23:10')}
         max={T('02:10')}
         min={T('22:10')}
-        onConfirm={onConfirm}
+        onChange={onChange}
+        onDone={vi.fn()}
         step={900}
-        value={T('23:10')}
       />,
     );
     expect(
@@ -105,18 +128,18 @@ describe('TimePickerPanel', () => {
     ).toEqual(['10', '25', '40', '55']);
     await user.click(column('Period').getByRole('option', {name: 'AM'}));
     expect(column('Hours').getByRole('option', {name: '03'})).toBeDisabled();
-    await user.click(screen.getByRole('button', {name: 'Done'}));
-    expect(onConfirm.mock.calls[0]?.[0].toString()).toBe('02:10:00');
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('02:10:00');
   });
 
   it('supports arrow, Home and End navigation with one tab stop per column', async () => {
     const user = userEvent.setup();
     render(
-      <TimePickerPanel
+      <Panel
         hasSeconds={false}
-        onConfirm={vi.fn()}
+        initial={T('09:15')}
+        onChange={vi.fn()}
+        onDone={vi.fn()}
         step={900}
-        value={T('09:15')}
       />,
     );
     await user.click(column('Minutes').getByRole('option', {name: '15'}));
@@ -138,13 +161,14 @@ describe('TimePickerPanel', () => {
       hour12: false,
     });
     const user = userEvent.setup();
-    const onConfirm = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
     render(
-      <TimePickerPanel
+      <Panel
         hasSeconds
-        onConfirm={onConfirm}
+        initial={T('23:59:15')}
+        onChange={onChange}
+        onDone={vi.fn()}
         step={15}
-        value={T('23:59:15')}
       />,
     );
     expect(
@@ -153,33 +177,88 @@ describe('TimePickerPanel', () => {
     expect(column('Hours').getAllByRole('option')).toHaveLength(24);
     expect(column('Seconds').getAllByRole('option')).toHaveLength(4);
     await user.click(column('Seconds').getByRole('option', {name: '45'}));
-    await user.click(screen.getByRole('button', {name: 'Done'}));
-    expect(onConfirm.mock.calls[0]?.[0].toString()).toBe('23:59:45');
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('23:59:45');
   });
 
-  it('initializes empty values within bounds and prevents confirmation when there is no representable time', async () => {
+  it('applies the highlighted time on Done only when it differs from the value', async () => {
     const user = userEvent.setup();
-    const onConfirm = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onDone = vi.fn();
+    const {unmount} = render(
+      <Panel
+        hasSeconds={false}
+        initial={T('09:15')}
+        onChange={onChange}
+        onDone={onDone}
+        step={900}
+      />,
+    );
+    await user.click(screen.getByRole('button', {name: 'Done'}));
+    expect(onDone).toHaveBeenCalledOnce();
+    expect(onChange).not.toHaveBeenCalled();
+    unmount();
+    render(
+      <Panel
+        hasSeconds={false}
+        initial={null}
+        max={T('09:00')}
+        min={T('09:00')}
+        onChange={onChange}
+        onDone={onDone}
+      />,
+    );
+    await user.click(screen.getByRole('button', {name: 'Done'}));
+    expect(onDone).toHaveBeenCalledTimes(2);
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('09:00:00');
+  });
+
+  it('follows its value rather than keeping its own selection', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
     const {rerender} = render(
       <TimePickerPanel
         hasSeconds={false}
-        max={T('09:00')}
-        min={T('09:00')}
-        onConfirm={onConfirm}
-        value={null}
+        onChange={onChange}
+        onDone={vi.fn()}
+        step={900}
+        value={T('09:00')}
       />,
     );
-    await user.click(screen.getByRole('button', {name: 'Done'}));
-    expect(onConfirm.mock.calls[0]?.[0].toString()).toBe('09:00:00');
+    await user.click(column('Minutes').getByRole('option', {name: '15'}));
+    expect(onChange.mock.lastCall?.[0].toString()).toBe('09:15:00');
+    expect(
+      column('Minutes').getByRole('option', {name: '00', selected: true}),
+    ).toBeInTheDocument();
     rerender(
       <TimePickerPanel
         hasSeconds={false}
-        max={T('09:00:02')}
-        min={T('09:00:01')}
-        onConfirm={onConfirm}
-        value={null}
+        onChange={onChange}
+        onDone={vi.fn()}
+        step={900}
+        value={T('10:30')}
       />,
     );
-    expect(screen.getByRole('button', {name: 'Done'})).toBeDisabled();
+    expect(
+      column('Minutes').getByRole('option', {name: '30', selected: true}),
+    ).toBeInTheDocument();
+  });
+
+  it('closes without a change when there is no representable time', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn<(time: Temporal.PlainTime) => void>();
+    const onDone = vi.fn();
+    render(
+      <Panel
+        hasSeconds={false}
+        initial={null}
+        max={T('09:00:02')}
+        min={T('09:00:01')}
+        onChange={onChange}
+        onDone={onDone}
+      />,
+    );
+    await user.click(screen.getByRole('button', {name: 'Done'}));
+    expect(onDone).toHaveBeenCalledOnce();
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

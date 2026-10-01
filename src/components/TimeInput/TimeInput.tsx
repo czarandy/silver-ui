@@ -191,8 +191,7 @@ function fromInputString(value: string): PlainTime | null {
 
 /**
  * Editable time field with a clock-triggered column picker and optional seconds.
- * Picker changes preview in the field and are committed with Done; dismissal
- * discards pending changes.
+ * Picker selections apply immediately; Done just closes the picker.
  */
 export function TimeInput({
   label,
@@ -226,7 +225,6 @@ export function TimeInput({
 }: TimeInputProps): React.JSX.Element {
   const inputId = useId();
   const [isOpen, setIsOpen] = useState(false);
-  const [previewTime, setPreviewTime] = useState<PlainTime | null>(null);
   const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
@@ -287,12 +285,11 @@ export function TimeInput({
                 hasSeconds={hasSeconds}
                 max={max}
                 min={min}
-                onConfirm={time => {
-                  onChange(time);
+                onChange={onChange}
+                onDone={() => {
                   setIsOpen(false);
                   pickerTriggerRef.current?.focus();
                 }}
-                onPreviewChange={setPreviewTime}
                 step={step}
                 value={value}
               />
@@ -303,10 +300,7 @@ export function TimeInput({
           isOpen={isOpen}
           label={`Choose ${label}`}
           offsetY={8}
-          onOpenChange={open => {
-            setIsOpen(open);
-            setPreviewTime(null);
-          }}>
+          onOpenChange={setIsOpen}>
           {/* Avoid a focus-triggered tooltip opening during native popover focus restoration. */}
           <button
             aria-label={`Choose ${label}`}
@@ -344,10 +338,7 @@ export function TimeInput({
           step={step ?? (hasSeconds ? 1 : 60)}
           tabIndex={isReadOnly ? -1 : undefined}
           type="time"
-          value={toInputString(
-            isOpen ? (previewTime ?? value) : value,
-            hasSeconds,
-          )}
+          value={toInputString(value, hasSeconds)}
         />
         {hasClear && value != null && !isDisabled && !isReadOnly ? (
           <Button
