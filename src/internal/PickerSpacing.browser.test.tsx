@@ -34,7 +34,7 @@ describe('Picker popover spacing', () => {
         const gap =
           dialog.getBoundingClientRect().top -
           (field?.getBoundingClientRect().bottom ?? 0);
-        expect(gap).toBeCloseTo(kind === 'range' ? 6 : 2, 0);
+        expect(gap).toBeCloseTo(kind === 'range' ? 8 : 4, 0);
       });
     },
   );
