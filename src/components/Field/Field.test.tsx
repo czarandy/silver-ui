@@ -167,6 +167,24 @@ describe('Field', () => {
       expect(inputRecipe()).toContain('silver-pe_3');
       expect(inputStyles.clearButton).toContain('silver-me_-2');
     });
+
+    it('insets a leading icon button by its block inset at every size', () => {
+      const classesFor = (size: 'sm' | 'md' | 'lg') =>
+        inputRecipe({hasStartButton: true, size}).split(' ');
+
+      expect(classesFor('sm')).toContain('silver-ps_0');
+      expect(classesFor('md')).toContain(
+        'silver-ps_calc(({sizes.component.md}_-_{sizes.component.sm})_/_2_-_{borderWidths.default})',
+      );
+      expect(classesFor('lg')).toContain(
+        'silver-ps_calc(({sizes.component.lg}_-_{sizes.component.sm})_/_2_-_{borderWidths.default})',
+      );
+      for (const size of ['sm', 'md', 'lg'] as const) {
+        expect(classesFor(size)).not.toContain('silver-ps_3');
+        expect(classesFor(size)).toContain('silver-gap_1');
+        expect(classesFor(size)).not.toContain('silver-gap_2');
+      }
+    });
   });
 
   describe('focus border color', () => {

@@ -46,14 +46,8 @@ import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
-import {css} from 'styled-system/css';
-import {cx} from 'utils/cx';
 
 export type {DateFormat, PlainDate} from 'internal/plainDate';
-
-const styles = {
-  wrapper: css({ps: '1', gap: '1'}),
-} as const;
 
 export type DateInputProps = {
   /**
@@ -368,15 +362,13 @@ export function DateInput({
       }
       style={style}>
       <div
-        className={cx(
-          inputRecipe({
-            size,
-            status: status?.type,
-            isDisabled: effectiveDisabled,
-            isReadOnly: effectiveReadOnly,
-          }),
-          styles.wrapper,
-        )}
+        className={inputRecipe({
+          size,
+          status: status?.type,
+          hasStartButton: true,
+          isDisabled: effectiveDisabled,
+          isReadOnly: effectiveReadOnly,
+        })}
         onClickCapture={
           effectiveReadOnly ? preventReadOnlyInteraction : undefined
         }

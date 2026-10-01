@@ -89,6 +89,13 @@ export const inputRecipe = cva({
       },
       false: {},
     },
+    // For inputs that lead with a `sm` icon button (DateInput, TimeInput). The
+    // compound variants below inset the button from the inline-start edge by
+    // the same distance the wrapper's height leaves above it.
+    hasStartButton: {
+      true: {gap: '1'},
+      false: {},
+    },
     isReadOnly: {
       true: {
         cursor: 'default',
@@ -103,6 +110,27 @@ export const inputRecipe = cva({
     },
   },
   compoundVariants: [
+    {
+      hasStartButton: true,
+      size: 'sm',
+      css: {paddingInlineStart: '0'},
+    },
+    {
+      hasStartButton: true,
+      size: 'md',
+      css: {
+        paddingInlineStart:
+          'calc(({sizes.component.md} - {sizes.component.sm}) / 2 - {borderWidths.default})',
+      },
+    },
+    {
+      hasStartButton: true,
+      size: 'lg',
+      css: {
+        paddingInlineStart:
+          'calc(({sizes.component.lg} - {sizes.component.sm}) / 2 - {borderWidths.default})',
+      },
+    },
     {
       status: 'warning',
       isDisabled: true,
@@ -157,6 +185,7 @@ export const inputRecipe = cva({
   ],
   defaultVariants: {
     size: 'md',
+    hasStartButton: false,
     isDisabled: false,
     isReadOnly: false,
   },
