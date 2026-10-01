@@ -47,7 +47,12 @@ const peopleOptionsWithAuxiliaryData: SelectOptionData<PersonAuxiliaryData>[] =
 
 const disabledOptions: SelectProps['options'] = [
   {label: 'Ada Lovelace', value: 'ada'},
-  {isDisabled: true, label: 'Grace Hopper (unavailable)', value: 'grace'},
+  {
+    isDisabled: true,
+    label: 'Grace Hopper (unavailable)',
+    tooltip: 'Grace is out of office until Monday.',
+    value: 'grace',
+  },
   {label: 'Katherine Johnson', value: 'katherine'},
   {isDisabled: true, label: 'Hedy Lamarr (unavailable)', value: 'hedy'},
 ];

@@ -31,7 +31,9 @@ import {usePopover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
+import {Tooltip} from 'components/Tooltip';
 import {useResolvedSize} from 'internal/SizeContext';
+import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
 import {mergeRefs} from 'internal/mergeRefs';
 import {
@@ -61,6 +63,11 @@ export interface MultiSelectOptionData extends SelectListboxOptionData {
    * Option label. Defaults to `value`.
    */
   label?: string;
+  /**
+   * Tooltip content shown when the option is hovered. Disabled options stay
+   * hoverable, so this can explain why an option is unavailable.
+   */
+  tooltip?: ReactNode;
   /**
    * Option value.
    */
@@ -560,7 +567,7 @@ export function MultiSelect({
         {isSelected ? <Icon icon={Check} size="sm" /> : null}
       </span>
     );
-    return (
+    const optionNode = (
       // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard navigation is handled by the combobox input, not individual options
       <div
         aria-disabled={option.isDisabled ?? undefined}
@@ -590,6 +597,13 @@ export function MultiSelect({
         </span>
         {indicatorPosition === 'end' ? checkbox : null}
       </div>
+    );
+    return isNonEmptyReactNode(option.tooltip) ? (
+      <Tooltip content={option.tooltip} key={option.value}>
+        {optionNode}
+      </Tooltip>
+    ) : (
+      optionNode
     );
   };
 

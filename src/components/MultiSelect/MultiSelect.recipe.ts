@@ -45,7 +45,9 @@ export const multiSelectMenuRecipe = sva({
       '&[aria-disabled="true"]': {
         opacity: 0.55,
         cursor: 'not-allowed',
-        pointerEvents: 'none',
+        // Disabled options stay hoverable so a tooltip can explain why they
+        // are unavailable; selection is blocked in the click handler.
+        _hover: {bg: 'transparent'},
       },
     },
     optionContent: {

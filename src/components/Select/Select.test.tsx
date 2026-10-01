@@ -1094,6 +1094,58 @@ describe('Select', () => {
     expect(screen.getByText('Pick fruit')).toBeInTheDocument();
   });
 
+  it('keeps a disabled option with a tooltip hoverable but not selectable', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <Select
+        label="Fruit"
+        onChange={onChange}
+        options={[
+          {
+            isDisabled: true,
+            label: 'Banana',
+            tooltip: 'Not available on your plan.',
+            value: 'banana',
+          },
+          {label: 'Cherry', value: 'cherry'},
+        ]}
+        value={null}
+      />,
+    );
+
+    const combobox = screen.getByRole('combobox', {name: 'Fruit'});
+    await user.click(combobox);
+
+    const option = screen.getByRole('option', {hidden: true, name: 'Banana'});
+    const tooltip = screen.getByRole('tooltip', {hidden: true});
+    expect(tooltip).toHaveTextContent('Not available on your plan.');
+    expect(option).toHaveAttribute('aria-disabled', 'true');
+    expect(option).toHaveAttribute('aria-describedby', tooltip.id);
+
+    fireEvent.mouseEnter(option);
+    await waitFor(() => {
+      expect(tooltip).toHaveAttribute('popover-open');
+    });
+
+    await user.click(option);
+    expect(onChange).not.toHaveBeenCalled();
+
+    // Keyboard navigation still skips the disabled option.
+    combobox.focus();
+    await user.keyboard('{Home}{Enter}');
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0]?.[0]).toEqual('cherry');
+  });
+
+  it('leaves disabled options open to pointer events', () => {
+    expect(selectMenuRecipe.raw().option).not.toHaveProperty([
+      '&[aria-disabled="true"]',
+      'pointerEvents',
+    ]);
+  });
+
   it('does not select disabled options', () => {
     const onChange = vi.fn();
 

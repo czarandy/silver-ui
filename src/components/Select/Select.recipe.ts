@@ -46,7 +46,9 @@ export const selectMenuRecipe = sva({
       '&[aria-disabled="true"]': {
         opacity: 0.5,
         cursor: 'not-allowed',
-        pointerEvents: 'none',
+        // Disabled options stay hoverable so a tooltip can explain why they
+        // are unavailable; selection is blocked in the click handler.
+        _hover: {bg: 'transparent'},
       },
       '&[data-highlighted]': {
         bg: 'bg.subtle',
