@@ -406,6 +406,7 @@ export function DateInput({
           isEnabled={!effectiveDisabled && !effectiveReadOnly}
           isOpen={isOpen}
           label={`Choose ${label}`}
+          offsetY={6}
           onOpenChange={setIsOpen}
           padding={3}>
           <Button

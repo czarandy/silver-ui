@@ -305,6 +305,7 @@ export function TimeInput({
           isEnabled={!effectiveDisabled && !effectiveReadOnly}
           isOpen={isOpen}
           label={`Choose ${label}`}
+          offsetY={6}
           onOpenChange={open => {
             setIsOpen(open);
             setPreviewTime(null);

@@ -379,6 +379,7 @@ export function DateRangeInput({
         isEnabled={false}
         isOpen={isOpen}
         label={`Choose ${label}`}
+        offsetY={6}
         onOpenChange={setIsOpen}
         padding={3}
       />
