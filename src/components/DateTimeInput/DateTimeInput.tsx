@@ -116,6 +116,10 @@ export type DateTimeInputProps = {
    */
   status?: InputStatus;
   /**
+   * Step increment in seconds for the time input and its picker.
+   */
+  step?: number;
+  /**
    * Inline styles applied to the root element.
    */
   style?: CSSProperties;
@@ -193,6 +197,7 @@ export function DateTimeInput({
   isLoading = false,
   isReadOnly = false,
   status,
+  step,
   labelIcon,
   labelTooltip,
   className,
@@ -290,6 +295,7 @@ export function DateTimeInput({
           }
           onChange={handleTimeChange}
           size={size}
+          step={step}
           value={time ?? null}
         />
       </div>
