@@ -472,6 +472,90 @@ describe('TagsInput', () => {
     expect(call[1].item.id).toBe('new-tag');
   });
 
+  it('adds the typed text and clears it when focus leaves with createItemOnBlur', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    const onQueryChange = vi.fn();
+
+    render(
+      <>
+        <TagsInput
+          createItemOnBlur={rawValue => ({id: rawValue, label: rawValue})}
+          debounceMs={0}
+          label="Tags"
+          onChange={onChange}
+          onQueryChange={onQueryChange}
+          searchSource={emptySource}
+          value={[]}
+        />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Tags'});
+    await user.type(input, ' new-tag ');
+    await user.click(screen.getByRole('button', {name: 'Elsewhere'}));
+
+    expect(onChange).toHaveBeenCalledWith([{id: 'new-tag', label: 'new-tag'}], {
+      item: {id: 'new-tag', label: 'new-tag'},
+      type: 'create',
+    });
+    expect(input).toHaveValue('');
+    expect(onQueryChange).toHaveBeenLastCalledWith('');
+  });
+
+  it('keeps the typed text when createItemOnBlur returns null', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <>
+        <TagsInput
+          createItemOnBlur={() => null}
+          debounceMs={0}
+          label="Tags"
+          onChange={onChange}
+          searchSource={emptySource}
+          value={[]}
+        />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Tags'});
+    await user.type(input, 'not valid');
+    await user.click(screen.getByRole('button', {name: 'Elsewhere'}));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input).toHaveValue('not valid');
+  });
+
+  it('clears an already-selected entry on blur without adding it again', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+
+    render(
+      <>
+        <TagsInput
+          createItemOnBlur={rawValue => ({id: rawValue, label: rawValue})}
+          debounceMs={0}
+          label="Tags"
+          onChange={onChange}
+          searchSource={emptySource}
+          value={[{id: 'new-tag', label: 'new-tag'}]}
+        />
+        <button type="button">Elsewhere</button>
+      </>,
+    );
+
+    const input = screen.getByRole('combobox', {name: 'Tags'});
+    await user.type(input, 'new-tag');
+    await user.click(screen.getByRole('button', {name: 'Elsewhere'}));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(input).toHaveValue('');
+  });
+
   it('uses createItem to build the committed item when provided', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

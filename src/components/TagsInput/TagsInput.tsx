@@ -131,6 +131,14 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    */
   'data-testid'?: string;
   /**
+   * Builds a tag from text still typed when focus leaves the tags-input, so
+   * an entry the user forgot to commit is not silently dropped. Return `null`
+   * to leave the text in place, for example when it is not a valid entry.
+   * When an item is returned it is added (unless already selected) and the
+   * typed text is cleared. Independent of `hasCreate`.
+   */
+  createItemOnBlur?: (rawValue: string) => T | null;
+  /**
    * Debounce delay in milliseconds before search runs.
    * @default 150
    */
@@ -300,6 +308,7 @@ export function TagsInput<T extends SearchableItem>({
   emptySearchResultsText,
   endContent,
   createItem,
+  createItemOnBlur,
   hasAutoFocus = false,
   hasClear = false,
   hasCreate = false,
@@ -493,6 +502,31 @@ export function TagsInput<T extends SearchableItem>({
     [isFocusInTagsInput, isLayerMode, layer, onFocus],
   );
 
+  const queryValueRef = useLatest(queryValue);
+  const createItemOnBlurRef = useLatest(createItemOnBlur);
+  const onQueryChangeRef = useLatest(onQueryChange);
+
+  const commitTypedText = useCallback(() => {
+    const rawValue = queryValueRef.current.trim();
+    if (rawValue === '' || isAtMaxRef.current) {
+      return;
+    }
+    const createdItem = createItemOnBlurRef.current?.(rawValue);
+    if (createdItem == null) {
+      return;
+    }
+    setQueryValue('');
+    onQueryChangeRef.current?.('');
+    if (selectedIDsRef.current.has(createdItem.id)) {
+      return;
+    }
+    onChangeRef.current([...valueRef.current, createdItem], {
+      item: createdItem,
+      type: 'create',
+    });
+    announce(`Added ${createdItem.label}`);
+  }, [announce]);
+
   const handleBlur = useCallback(
     (event: FocusEvent<HTMLDivElement>) => {
       if (!isFocusInTagsInput(event.relatedTarget)) {
@@ -500,10 +534,11 @@ export function TagsInput<T extends SearchableItem>({
         if (isLayerMode) {
           layer.hide();
         }
+        commitTypedText();
         onBlur?.(event);
       }
     },
-    [isFocusInTagsInput, isLayerMode, layer, onBlur],
+    [commitTypedText, isFocusInTagsInput, isLayerMode, layer, onBlur],
   );
 
   const handleWrapperPointerDown = useCallback(() => {

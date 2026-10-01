@@ -115,6 +115,13 @@ export const Creatable: Story = {
   args: {hasCreate: true},
 };
 
+export const CreateOnBlur: Story = {
+  args: {
+    createItemOnBlur: rawValue => ({id: rawValue, label: rawValue}),
+    placeholder: 'Type a name, then click away',
+  },
+};
+
 export const WithClear: Story = {
   args: {hasClear: true},
 };
