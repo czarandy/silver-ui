@@ -185,6 +185,16 @@ describe('Field', () => {
         expect(classesFor(size)).not.toContain('silver-gap_2');
       }
     });
+
+    it('insets a leading icon by its block inset at every size', () => {
+      for (const size of ['sm', 'md', 'lg'] as const) {
+        const classes = inputRecipe({hasStartIcon: true, size}).split(' ');
+        expect(classes).toContain(
+          `silver-ps_calc(({sizes.component.${size}}_-_{sizes.icon.sm})_/_2_-_{borderWidths.default})`,
+        );
+        expect(classes).not.toContain('silver-ps_3');
+      }
+    });
   });
 
   describe('focus border color', () => {
