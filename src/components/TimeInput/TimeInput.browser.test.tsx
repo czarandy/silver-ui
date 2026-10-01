@@ -18,7 +18,7 @@ function Example(): React.JSX.Element {
 // Native popover focus restoration can synchronously focus its trigger during
 // hidePopover(). Exercise this in Chromium to catch competing tooltip layers.
 describe('TimeInput native popover', () => {
-  it('focuses the selected hour and restores the trigger on Escape without committing', async () => {
+  it('focuses the selected hour and restores the trigger on Escape keeping the selection', async () => {
     const user = userEvent.setup();
     render(<Example />);
     const trigger = screen.getByRole('button', {name: 'Choose Start'});
@@ -39,7 +39,7 @@ describe('TimeInput native popover', () => {
     await user.keyboard('{Escape}');
     await waitFor(() => expect(trigger).toHaveFocus());
     expect(screen.getByLabelText<HTMLInputElement>('Start').value).toBe(
-      '09:00',
+      '09:30',
     );
     await act(async () => {
       await new Promise(resolve => requestAnimationFrame(resolve));
@@ -50,7 +50,7 @@ describe('TimeInput native popover', () => {
         'option',
         {selected: true},
       ),
-    ).toHaveTextContent('00');
+    ).toHaveTextContent('30');
     await user.click(screen.getByRole('button', {name: 'Done'}));
     await waitFor(() => expect(trigger).toHaveFocus());
     expect(

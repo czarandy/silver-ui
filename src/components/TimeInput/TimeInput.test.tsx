@@ -1,6 +1,7 @@
 import {Temporal} from '@js-temporal/polyfill';
 import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {useState} from 'react';
 import {describe, expect, it, vi} from 'vitest';
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {TimeInput} from 'components/TimeInput/TimeInput';
@@ -395,56 +396,64 @@ describe('TimeInput', () => {
   });
 });
 
+function Controlled({
+  onChange,
+}: {
+  onChange: (value: Temporal.PlainTime | null) => void;
+}): React.JSX.Element {
+  const [value, setValue] = useState<Temporal.PlainTime | null>(() =>
+    T('09:00'),
+  );
+  return (
+    <TimeInput
+      label="Start"
+      onChange={next => {
+        setValue(next);
+        onChange(next);
+      }}
+      step={900}
+      value={value}
+    />
+  );
+}
+
 describe('TimeInput picker', () => {
-  it('opens from the clock and commits the draft on Done', async () => {
+  it('opens from the clock, applies selections immediately, and closes on Done', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
-    render(
-      <TimeInput
-        label="Start"
-        onChange={onChange}
-        step={900}
-        value={T('09:00')}
-      />,
-    );
+    render(<Controlled onChange={onChange} />);
     const trigger = screen.getByRole('button', {name: 'Choose Start'});
     await user.click(trigger);
     expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await user.click(screen.getByRole('option', {hidden: true, name: '15'}));
-    expect(screen.getByLabelText('Start')).toHaveValue('09:15');
-    expect(onChange).not.toHaveBeenCalled();
-    await user.click(screen.getByRole('button', {hidden: true, name: 'Done'}));
-    expect(onChange).toHaveBeenCalledWith(
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(
       expect.objectContaining({hour: 9, minute: 15}),
     );
+    expect(screen.getByLabelText('Start')).toHaveValue('09:15');
+    await user.click(screen.getByRole('button', {hidden: true, name: 'Done'}));
+    expect(onChange).toHaveBeenCalledOnce();
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('discards a draft when dismissed and resets it on reopening', async () => {
+  it('keeps a selection when dismissed without Done', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();
-    render(
-      <TimeInput
-        label="Start"
-        onChange={onChange}
-        step={900}
-        value={T('09:00')}
-      />,
-    );
+    render(<Controlled onChange={onChange} />);
     const trigger = screen.getByRole('button', {name: 'Choose Start'});
     await user.click(trigger);
     await user.click(screen.getByRole('option', {hidden: true, name: '15'}));
-    expect(screen.getByLabelText('Start')).toHaveValue('09:15');
     await user.keyboard('{Escape}');
     await act(async () => {
       await new Promise(resolve => requestAnimationFrame(resolve));
     });
-    expect(onChange).not.toHaveBeenCalled();
     expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByLabelText('Start')).toHaveValue('09:00');
+    expect(onChange).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({hour: 9, minute: 15}),
+    );
+    expect(screen.getByLabelText('Start')).toHaveValue('09:15');
     await user.click(trigger);
     expect(
-      screen.getByRole('option', {hidden: true, name: '00', selected: true}),
+      screen.getByRole('option', {hidden: true, name: '15', selected: true}),
     ).toBeInTheDocument();
   });
 
