@@ -171,8 +171,8 @@ export function ColorSwatchPicker({
   colors = COLOR_NAMES,
   'data-testid': dataTestId,
   description,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isLabelHidden = false,
   isOptional,
   isRequired,
@@ -194,19 +194,19 @@ export function ColorSwatchPicker({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const containerRef = useRef<HTMLDivElement>(null);
   const fieldset = useFieldset();
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
   const selectedIndex = colors.indexOf(value);
   const tabStopIndex = selectedIndex === -1 ? 0 : selectedIndex;
 
   const handleChange = useCallback(
     (nextValue: ColorName) => {
-      if (!effectiveReadOnly && nextValue !== value) {
+      if (!isReadOnly && nextValue !== value) {
         onChange(nextValue);
       }
     },
-    [effectiveReadOnly, onChange, value],
+    [isReadOnly, onChange, value],
   );
 
   const getItems = useCallback(
@@ -229,26 +229,26 @@ export function ColorSwatchPicker({
     orientation: 'both',
   });
   const hint = useKeyboardHint({
-    isEnabled: !effectiveDisabled && !effectiveReadOnly,
+    isEnabled: !isDisabled && !isReadOnly,
     orientation: 'horizontal',
   });
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       hint.onKeyDown(event);
-      if (effectiveDisabled || effectiveReadOnly) {
+      if (isDisabled || isReadOnly) {
         return;
       }
       handleListKeyDown(event);
     },
-    [effectiveDisabled, effectiveReadOnly, handleListKeyDown, hint],
+    [isDisabled, isReadOnly, handleListKeyDown, hint],
   );
 
   useEffect(() => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       getItems().forEach(item => item.blur());
     }
-  }, [effectiveReadOnly, getItems]);
+  }, [isReadOnly, getItems]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -259,9 +259,9 @@ export function ColorSwatchPicker({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelAs="span"
@@ -275,11 +275,11 @@ export function ColorSwatchPicker({
       style={style}>
       <div
         aria-describedby={describedBy}
-        aria-disabled={effectiveDisabled || undefined}
+        aria-disabled={isDisabled || undefined}
         aria-invalid={status?.type === 'error' || undefined}
         aria-labelledby={labelId}
         aria-orientation="horizontal"
-        aria-readonly={effectiveReadOnly || undefined}
+        aria-readonly={isReadOnly || undefined}
         aria-required={isRequired ?? undefined}
         className={pickerClass}
         id={inputId}
@@ -292,8 +292,8 @@ export function ColorSwatchPicker({
         {colors.map((color, index) => (
           <ColorSwatch
             color={color}
-            isDisabled={effectiveDisabled}
-            isReadOnly={effectiveReadOnly}
+            isDisabled={isDisabled}
+            isReadOnly={isReadOnly}
             isSelected={color === value}
             isTabbable={index === tabStopIndex}
             key={color}

@@ -156,8 +156,8 @@ export function Field({
   descriptionID,
   isOptional = false,
   isRequired = false,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   labelAs: LabelComponent = 'label',
   labelIcon,
   labelId,
@@ -171,13 +171,13 @@ export function Field({
 }: FieldProps): React.JSX.Element {
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
-  const effectiveDisabled =
-    isDisabled ||
+  const isDisabled =
+    isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled &&
-    (isReadOnly ||
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
       inputGroup?.isReadOnly === true ||
       fieldset?.isReadOnly === true);
   const resolvedDescriptionID =
@@ -187,8 +187,8 @@ export function Field({
     status?.messageID ??
     (status?.message != null ? `${inputId}-status` : undefined);
   const classes = fieldRecipe({
-    isDisabled: effectiveDisabled,
-    isReadOnly: effectiveReadOnly,
+    isDisabled,
+    isReadOnly,
   });
   const labelNode = (
     <LabelComponent

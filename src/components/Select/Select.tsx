@@ -255,10 +255,10 @@ export function Select<TAuxiliaryData = unknown>({
   hasSearch = false,
   htmlName,
   indicatorPosition = 'end',
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isLoading = false,
-  isReadOnly = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isOptional,
   isRequired,
   label,
@@ -283,13 +283,13 @@ export function Select<TAuxiliaryData = unknown>({
     () => selectMenuRecipe({indicatorPosition}),
     [indicatorPosition],
   );
-  const effectiveDisabled =
-    isDisabled ||
+  const isDisabled =
+    isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled &&
-    (isReadOnly ||
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
       inputGroup?.isReadOnly === true ||
       fieldset?.isReadOnly === true);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -303,14 +303,14 @@ export function Select<TAuxiliaryData = unknown>({
 
   const commitOption = useCallback(
     (option: SelectOptionData<TAuxiliaryData>): boolean => {
-      if (effectiveReadOnly || option.isDisabled) {
+      if (isReadOnly || option.isDisabled) {
         return false;
       }
 
       onChange(option.value, option);
       return true;
     },
-    [effectiveReadOnly, onChange],
+    [isReadOnly, onChange],
   );
 
   const {
@@ -351,11 +351,11 @@ export function Select<TAuxiliaryData = unknown>({
   } = useSelectListbox({
     description,
     hasEntriesOnFocus,
-    isDisabled: effectiveDisabled,
+    isDisabled,
     isLoading,
     isListboxClosedOnCommit: true,
     isQueryClearedOnCommit: true,
-    isReadOnly: effectiveReadOnly,
+    isReadOnly,
     isTypeaheadEnabled: true,
     isOpen,
     onClose: hidePopover,
@@ -372,12 +372,12 @@ export function Select<TAuxiliaryData = unknown>({
   );
 
   useEffect(() => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       hidePopover();
       setQuery('');
       buttonRef.current?.blur();
     }
-  }, [effectiveReadOnly, hidePopover, setQuery]);
+  }, [isReadOnly, hidePopover, setQuery]);
 
   const selectedOption = useMemo(
     () => selectableOptions.find(option => option.value === value),
@@ -499,20 +499,20 @@ export function Select<TAuxiliaryData = unknown>({
   const triggerClasses = selectTriggerRecipe({
     variant,
     isDisabled: isInteractionDisabled,
-    isReadOnly: effectiveReadOnly,
+    isReadOnly,
     isPlaceholder: selectedOption == null,
   });
   const triggerWrapperClassName = css(
     inputRecipe.raw({
       size,
       status: effectiveStatusType,
-      isDisabled: effectiveDisabled,
-      isReadOnly: effectiveReadOnly,
+      isDisabled,
+      isReadOnly,
     }),
     selectTriggerRecipe.raw({
       variant,
       isDisabled: isInteractionDisabled,
-      isReadOnly: effectiveReadOnly,
+      isReadOnly,
       isPlaceholder: selectedOption == null,
     }).wrapper,
   );
@@ -525,17 +525,11 @@ export function Select<TAuxiliaryData = unknown>({
         inputGroup != null ? className : undefined,
       )}
       onClick={handleTriggerClick}
-      onClickCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
-      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
-      onKeyDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
+      onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       onPointerDown={handleTriggerPointerDown}
-      onPointerDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
+      onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       ref={combinedTriggerRef}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
@@ -552,7 +546,7 @@ export function Select<TAuxiliaryData = unknown>({
         aria-haspopup="listbox"
         aria-invalid={status?.type === 'error' || undefined}
         aria-label={inputGroup != null ? label : undefined}
-        aria-readonly={effectiveReadOnly || undefined}
+        aria-readonly={isReadOnly || undefined}
         className={triggerClasses.trigger}
         data-testid={dataTestId}
         disabled={isInteractionDisabled}
@@ -562,17 +556,14 @@ export function Select<TAuxiliaryData = unknown>({
         onKeyDown={handleKeyboardNavigation}
         ref={mergeRefs(ref, buttonRef)}
         role="combobox"
-        tabIndex={effectiveReadOnly ? -1 : undefined}
+        tabIndex={isReadOnly ? -1 : undefined}
         type="button">
         <span className={triggerClasses.label}>
           {selectedOption?.label ?? placeholder}
         </span>
       </button>
       {isLoading ? <Spinner size="sm" /> : null}
-      {hasClear &&
-      selectedOption != null &&
-      !effectiveDisabled &&
-      !effectiveReadOnly ? (
+      {hasClear && selectedOption != null && !isDisabled && !isReadOnly ? (
         <Button
           icon={X}
           isIconOnly
@@ -613,9 +604,9 @@ export function Select<TAuxiliaryData = unknown>({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}
@@ -627,7 +618,7 @@ export function Select<TAuxiliaryData = unknown>({
       style={style}>
       {htmlName == null || value == null ? null : (
         <input
-          disabled={effectiveDisabled}
+          disabled={isDisabled}
           name={htmlName}
           type="hidden"
           value={value}

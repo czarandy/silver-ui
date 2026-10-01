@@ -132,10 +132,10 @@ export function Switch({
   'data-testid': dataTestId,
   description,
   htmlName,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLabelHidden = false,
   isLoading = false,
-  isReadOnly = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isOptional,
   isRequired,
   label,
@@ -161,65 +161,65 @@ export function Switch({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputRef = useRef<HTMLInputElement>(null);
   const fieldset = useFieldset();
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
   const classes = switchRecipe({
     size,
     labelSpacing: hasVisibleLabelContent ? labelSpacing : 'default',
     isSelected,
-    isDisabled: effectiveDisabled,
-    isReadOnly: effectiveReadOnly,
+    isDisabled,
+    isReadOnly,
     status: status?.type,
   });
   useEffect(() => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       inputRef.current?.blur();
     }
-  }, [effectiveReadOnly]);
+  }, [isReadOnly]);
   const control = (
     <span className={classes.control}>
       <input
         aria-busy={isLoading || undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
-        aria-readonly={effectiveReadOnly || undefined}
+        aria-readonly={isReadOnly || undefined}
         aria-required={isRequired ?? undefined}
         checked={isSelected}
         className={classes.input}
         data-testid={dataTestId}
-        disabled={effectiveDisabled}
+        disabled={isDisabled}
         id={inputId}
         name={htmlName}
         onBlur={onBlur}
         onChange={event => {
-          if (effectiveReadOnly) {
+          if (isReadOnly) {
             event.preventDefault();
             return;
           }
           onChange(event.target.checked, event);
         }}
         onClick={event => {
-          if (effectiveReadOnly) {
+          if (isReadOnly) {
             event.preventDefault();
           }
         }}
         onFocus={event => {
-          if (effectiveReadOnly) {
+          if (isReadOnly) {
             event.currentTarget.blur();
             return;
           }
           onFocus?.(event);
         }}
         onPointerDown={event => {
-          if (effectiveReadOnly) {
+          if (isReadOnly) {
             event.preventDefault();
           }
         }}
         ref={mergeRefs(ref, inputRef)}
-        required={isRequired && !effectiveReadOnly}
+        required={isRequired && !isReadOnly}
         role="switch"
-        tabIndex={effectiveReadOnly ? -1 : undefined}
+        tabIndex={isReadOnly ? -1 : undefined}
         type="checkbox"
       />
       <span

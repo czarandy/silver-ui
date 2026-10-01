@@ -110,8 +110,8 @@ export function Rating({
   filledColor = 'yellow',
   htmlName,
   size = 'md',
-  isReadOnly = false,
-  isDisabled = false,
+  isReadOnly: isReadOnlyFromProps = false,
+  isDisabled: isDisabledFromProps = false,
   label = 'Rating',
   className,
   'data-testid': dataTestId,
@@ -140,15 +140,14 @@ export function Rating({
   const groupId = useId();
   const [hoverValue, setHoverValue] = useState<number | null>(null);
   const fieldset = useFieldset();
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
-  const isInteractive =
-    !effectiveReadOnly && !effectiveDisabled && onChange != null;
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
+  const isInteractive = !isReadOnly && !isDisabled && onChange != null;
   const displayValue = isInteractive ? (hoverValue ?? value) : value;
   const classes = ratingRecipe({
-    isDisabled: effectiveDisabled || undefined,
-    isReadOnly: effectiveReadOnly || undefined,
+    isDisabled: isDisabled || undefined,
+    isReadOnly: isReadOnly || undefined,
   });
 
   if (!isInteractive) {
@@ -171,7 +170,7 @@ export function Rating({
             </span>
           ))}
         </div>
-        {effectiveReadOnly && htmlName != null ? (
+        {isReadOnly && htmlName != null ? (
           <input name={htmlName} type="hidden" value={value} />
         ) : null}
       </>

@@ -528,9 +528,9 @@ export function SearchFilterInputValueEditor({
   isDisabled,
   onChange,
   operatorValue,
-  timezoneID,
+  timezoneID: timezoneIDFromProps,
 }: SearchFilterInputValueEditorProps): React.JSX.Element | null {
-  const effectiveTimezoneID = timezoneID ?? getBrowserTimezoneID();
+  const timezoneID = timezoneIDFromProps ?? getBrowserTimezoneID();
 
   switch (operatorValue.type) {
     case 'empty':
@@ -581,7 +581,7 @@ export function SearchFilterInputValueEditor({
         <DateAbsoluteEditor
           filterValue={filterValue}
           onChange={onChange}
-          timezoneID={effectiveTimezoneID}
+          timezoneID={timezoneID}
         />
       );
     case 'date_relative':
@@ -597,7 +597,7 @@ export function SearchFilterInputValueEditor({
         <DateRangeEditor
           filterValue={filterValue}
           onChange={onChange}
-          timezoneID={effectiveTimezoneID}
+          timezoneID={timezoneID}
         />
       );
     case 'enum':

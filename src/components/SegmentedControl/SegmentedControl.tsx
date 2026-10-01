@@ -109,8 +109,8 @@ export function SegmentedControl<TValue extends string = string>({
   children,
   className,
   'data-testid': dataTestId,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   label,
   layout = 'hug',
   onChange,
@@ -122,19 +122,19 @@ export function SegmentedControl<TValue extends string = string>({
   const size = useResolvedSize(sizeProp);
   const containerRef = useRef<HTMLDivElement>(null);
   const fieldset = useFieldset();
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
   const handleChange = useCallback(
     (nextValue: string) => {
-      if (!effectiveReadOnly) {
+      if (!isReadOnly) {
         onChange(nextValue as TValue);
       }
     },
-    [effectiveReadOnly, onChange],
+    [isReadOnly, onChange],
   );
   const tabStopValue = useMemo(() => {
-    if (effectiveDisabled || effectiveReadOnly) {
+    if (isDisabled || isReadOnly) {
       return undefined;
     }
 
@@ -143,30 +143,22 @@ export function SegmentedControl<TValue extends string = string>({
       enabledItemValues.find(itemValue => itemValue === value) ??
       enabledItemValues[0]
     );
-  }, [children, effectiveDisabled, effectiveReadOnly, value]);
+  }, [children, isDisabled, isReadOnly, value]);
   const contextValue = useMemo(
     () => ({
-      isDisabled: effectiveDisabled,
-      isReadOnly: effectiveReadOnly,
+      isDisabled,
+      isReadOnly,
       layout,
       onChange: handleChange,
       size,
       tabStopValue,
       value,
     }),
-    [
-      effectiveDisabled,
-      effectiveReadOnly,
-      handleChange,
-      layout,
-      size,
-      tabStopValue,
-      value,
-    ],
+    [isDisabled, isReadOnly, handleChange, layout, size, tabStopValue, value],
   );
   const classes = segmentedControlRecipe({
-    isDisabled: effectiveDisabled,
-    isReadOnly: effectiveReadOnly,
+    isDisabled,
+    isReadOnly,
     layout,
     size,
   });
@@ -197,7 +189,7 @@ export function SegmentedControl<TValue extends string = string>({
   // reads as a horizontal row, and drawing all four arrows is noise for an
   // affordance the user only has to be shown once.
   const hint = useKeyboardHint({
-    isEnabled: !effectiveDisabled && !effectiveReadOnly,
+    isEnabled: !isDisabled && !isReadOnly,
     orientation: 'horizontal',
   });
 
@@ -205,27 +197,27 @@ export function SegmentedControl<TValue extends string = string>({
     (event: KeyboardEvent<HTMLDivElement>) => {
       // Dismissing is safe even while disabled — the hint cannot be showing.
       hint.onKeyDown(event);
-      if (effectiveDisabled || effectiveReadOnly) {
+      if (isDisabled || isReadOnly) {
         return;
       }
       handleListKeyDown(event);
     },
-    [effectiveDisabled, effectiveReadOnly, handleListKeyDown, hint],
+    [isDisabled, isReadOnly, handleListKeyDown, hint],
   );
 
   useEffect(() => {
-    if (effectiveReadOnly) {
+    if (isReadOnly) {
       getItems().forEach(item => item.blur());
     }
-  }, [effectiveReadOnly, getItems]);
+  }, [isReadOnly, getItems]);
 
   return (
     <SegmentedControlContext value={contextValue}>
       <div
-        aria-disabled={effectiveDisabled || undefined}
+        aria-disabled={isDisabled || undefined}
         aria-label={label}
         aria-orientation="horizontal"
-        aria-readonly={effectiveReadOnly || undefined}
+        aria-readonly={isReadOnly || undefined}
         className={cx(classes.root, className)}
         data-testid={dataTestId}
         onBlur={hint.onBlur}

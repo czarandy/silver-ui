@@ -82,8 +82,8 @@ export function Fieldset({
   'data-testid': dataTestId,
   description,
   hidden,
-  isDisabled = false,
-  isReadOnly = false,
+  isDisabled: isDisabledFromProps = false,
+  isReadOnly: isReadOnlyFromProps = false,
   isOptional = false,
   isRequired = false,
   legend,
@@ -94,21 +94,21 @@ export function Fieldset({
 }: FieldsetProps): React.JSX.Element {
   const fieldsetId = useId();
   const parentFieldset = useFieldset();
-  const effectiveDisabled = isDisabled || parentFieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || parentFieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || parentFieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || parentFieldset?.isReadOnly === true);
   const descriptionId = isNonEmptyReactNode(description)
     ? `${fieldsetId}-description`
     : undefined;
   const statusId = getStatusMessageID(fieldsetId, status);
   const describedBy = getDescribedBy(ariaDescribedBy, descriptionId, statusId);
   const classes = fieldsetRecipe({
-    isDisabled: effectiveDisabled,
+    isDisabled,
     statusType: status?.type,
   });
   const contextValue = useMemo(
-    () => ({isDisabled: effectiveDisabled, isReadOnly: effectiveReadOnly}),
-    [effectiveDisabled, effectiveReadOnly],
+    () => ({isDisabled, isReadOnly}),
+    [isDisabled, isReadOnly],
   );
 
   return (
@@ -121,7 +121,7 @@ export function Fieldset({
         aria-describedby={describedBy}
         className={classes.root}
         data-testid={dataTestId}
-        disabled={effectiveDisabled}
+        disabled={isDisabled}
         ref={ref}>
         <legend className={classes.legend}>
           <span className={classes.legendContent}>

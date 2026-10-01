@@ -211,9 +211,9 @@ export function TimeInput({
   isLabelHidden = false,
   isOptional,
   isRequired,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLoading = false,
-  isReadOnly = false,
+  isReadOnly: isReadOnlyFromProps = false,
   htmlName,
   status,
   labelIcon,
@@ -235,17 +235,17 @@ export function TimeInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const pickerTriggerRef = useRef<HTMLButtonElement>(null);
   const fieldset = useFieldset();
-  const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
+  const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
+  const isReadOnly =
+    !isDisabled && (isReadOnlyFromProps || fieldset?.isReadOnly === true);
 
   useEffect(() => {
-    if (effectiveDisabled || effectiveReadOnly) {
+    if (isDisabled || isReadOnly) {
       inputRef.current?.blur();
       const frame = requestAnimationFrame(() => setIsOpen(false));
       return () => cancelAnimationFrame(frame);
     }
-  }, [effectiveDisabled, effectiveReadOnly]);
+  }, [isDisabled, isReadOnly]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -255,9 +255,9 @@ export function TimeInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...necessity}
       label={label}
       labelIcon={labelIcon}
@@ -271,18 +271,14 @@ export function TimeInput({
           size,
           status: status?.type,
           hasStartButton: true,
-          isDisabled: effectiveDisabled,
-          isReadOnly: effectiveReadOnly,
+          isDisabled,
+          isReadOnly,
         })}
-        onClickCapture={
-          effectiveReadOnly ? preventReadOnlyInteraction : undefined
-        }
-        onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
-        onKeyDownCapture={
-          effectiveReadOnly ? preventReadOnlyInteraction : undefined
-        }
+        onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+        onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+        onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
         onPointerDownCapture={
-          effectiveReadOnly ? preventReadOnlyInteraction : undefined
+          isReadOnly ? preventReadOnlyInteraction : undefined
         }>
         <Popover
           content={
@@ -303,7 +299,7 @@ export function TimeInput({
             ) : null
           }
           hasCloseButton={false}
-          isEnabled={!effectiveDisabled && !effectiveReadOnly}
+          isEnabled={!isDisabled && !isReadOnly}
           isOpen={isOpen}
           label={`Choose ${label}`}
           offsetY={8}
@@ -315,7 +311,7 @@ export function TimeInput({
           <button
             aria-label={`Choose ${label}`}
             className={triggerStyles.root}
-            disabled={effectiveDisabled || effectiveReadOnly}
+            disabled={isDisabled || isReadOnly}
             ref={pickerTriggerRef}
             type="button">
             <Icon icon={Clock} size="sm" />
@@ -326,37 +322,34 @@ export function TimeInput({
           aria-describedby={describedBy}
           aria-invalid={status?.type === 'error' || undefined}
           aria-required={isRequired ?? undefined}
-          autoFocus={hasAutoFocus && !effectiveReadOnly}
+          autoFocus={hasAutoFocus && !isReadOnly}
           className={cx(inputStyles.control, styles.input)}
-          data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
+          data-autofocus={(hasAutoFocus && !isReadOnly) || undefined}
           data-testid={dataTestId}
-          disabled={effectiveDisabled}
+          disabled={isDisabled}
           id={inputId}
           max={toInputString(max, hasSeconds)}
           min={toInputString(min, hasSeconds)}
           name={htmlName}
           onBlur={onBlur}
           onChange={event => {
-            if (!effectiveReadOnly) {
+            if (!isReadOnly) {
               onChange(fromInputString(event.target.value));
             }
           }}
           onFocus={onFocus}
           placeholder={placeholder}
-          readOnly={effectiveReadOnly}
+          readOnly={isReadOnly}
           ref={mergeRefs(ref, inputRef)}
           step={step ?? (hasSeconds ? 1 : 60)}
-          tabIndex={effectiveReadOnly ? -1 : undefined}
+          tabIndex={isReadOnly ? -1 : undefined}
           type="time"
           value={toInputString(
             isOpen ? (previewTime ?? value) : value,
             hasSeconds,
           )}
         />
-        {hasClear &&
-        value != null &&
-        !effectiveDisabled &&
-        !effectiveReadOnly ? (
+        {hasClear && value != null && !isDisabled && !isReadOnly ? (
           <Button
             className={
               !isLoading && status == null ? inputStyles.clearButton : undefined

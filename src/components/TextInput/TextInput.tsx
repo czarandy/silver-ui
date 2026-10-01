@@ -218,9 +218,9 @@ export function TextInput({
   isLabelHidden = false,
   isOptional,
   isRequired,
-  isDisabled = false,
+  isDisabled: isDisabledFromProps = false,
   isLoading = false,
-  isReadOnly = false,
+  isReadOnly: isReadOnlyFromProps = false,
   hasClear = false,
   hasAutoFocus = false,
   htmlName,
@@ -246,13 +246,13 @@ export function TextInput({
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputGroup = useInputGroup();
   const fieldset = useFieldset();
-  const effectiveDisabled =
-    isDisabled ||
+  const isDisabled =
+    isDisabledFromProps ||
     inputGroup?.isDisabled === true ||
     fieldset?.isDisabled === true;
-  const effectiveReadOnly =
-    !effectiveDisabled &&
-    (isReadOnly ||
+  const isReadOnly =
+    !isDisabled &&
+    (isReadOnlyFromProps ||
       inputGroup?.isReadOnly === true ||
       fieldset?.isReadOnly === true);
   const size = useResolvedSize(inputGroup?.size, sizeProp);
@@ -264,21 +264,15 @@ export function TextInput({
         inputRecipe({
           size,
           status: effectiveStatusType,
-          isDisabled: effectiveDisabled,
-          isReadOnly: effectiveReadOnly,
+          isDisabled,
+          isReadOnly,
         }),
         inputGroup != null ? className : undefined,
       )}
-      onClickCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
-      onFocusCapture={effectiveReadOnly ? blurReadOnlyInteraction : undefined}
-      onKeyDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
-      onPointerDownCapture={
-        effectiveReadOnly ? preventReadOnlyInteraction : undefined
-      }
+      onClickCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onFocusCapture={isReadOnly ? blurReadOnlyInteraction : undefined}
+      onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
+      onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={inputStyles.iconSlot}>
@@ -298,16 +292,16 @@ export function TextInput({
           isRequired === true || ariaRequired === true || undefined
         }
         autoComplete={autoComplete}
-        autoFocus={hasAutoFocus && !effectiveReadOnly}
+        autoFocus={hasAutoFocus && !isReadOnly}
         className={inputStyles.control}
-        data-autofocus={(hasAutoFocus && !effectiveReadOnly) || undefined}
+        data-autofocus={(hasAutoFocus && !isReadOnly) || undefined}
         data-testid={dataTestId}
-        disabled={effectiveDisabled}
+        disabled={isDisabled}
         id={inputId}
         name={htmlName}
         onBlur={onBlur}
         onChange={event => {
-          if (!effectiveReadOnly) {
+          if (!isReadOnly) {
             onChange(event.target.value, event);
           }
         }}
@@ -319,15 +313,15 @@ export function TextInput({
           onKeyDown?.(event);
         }}
         placeholder={placeholder}
-        readOnly={effectiveReadOnly}
+        readOnly={isReadOnly}
         ref={mergeRefs(ref, inputRef)}
         required={isRequired ?? undefined}
         role={role}
-        tabIndex={effectiveReadOnly ? -1 : undefined}
+        tabIndex={isReadOnly ? -1 : undefined}
         type={type}
         value={value}
       />
-      {hasClear && value !== '' && !effectiveDisabled && !effectiveReadOnly ? (
+      {hasClear && value !== '' && !isDisabled && !isReadOnly ? (
         <Button
           className={
             !isNonEmptyReactNode(endContent) && !isLoading && status == null
@@ -365,9 +359,9 @@ export function TextInput({
       description={description}
       descriptionID={descriptionID}
       inputId={inputId}
-      isDisabled={effectiveDisabled}
+      isDisabled={isDisabled}
       isLabelHidden={isLabelHidden}
-      isReadOnly={effectiveReadOnly}
+      isReadOnly={isReadOnly}
       {...getNecessity(isOptional, isRequired)}
       label={label}
       labelIcon={labelIcon}
