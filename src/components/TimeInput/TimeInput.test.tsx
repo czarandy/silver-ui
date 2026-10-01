@@ -1,5 +1,5 @@
 import {Temporal} from '@js-temporal/polyfill';
-import {fireEvent, render, screen} from '@testing-library/react';
+import {act, fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
 import {inputStyles} from 'components/Field/inputStyles';
@@ -208,7 +208,7 @@ describe('TimeInput', () => {
     );
 
     expect(screen.getByLabelText('Time')).not.toHaveAttribute('aria-invalid');
-    expect(screen.getByRole('status')).toHaveTextContent(
+    expect(screen.getByText('Outside office hours')).toHaveTextContent(
       'Outside office hours',
     );
   });
@@ -273,7 +273,7 @@ describe('TimeInput', () => {
     );
 
     expect(screen.getByText('Required')).toBeInTheDocument();
-    expect(screen.getByLabelText(/Time/)).toBeRequired();
+    expect(screen.getByLabelText(/Time/, {selector: 'input'})).toBeRequired();
   });
 
   it('applies placeholder text', () => {
@@ -381,4 +381,76 @@ describe('TimeInput', () => {
     await user.click(screen.getByLabelText('Time'));
     expect(onFocus).toHaveBeenCalledOnce();
   });
+});
+
+describe('TimeInput picker', () => {
+  it('opens from the clock and commits the draft on Done', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <TimeInput
+        label="Start"
+        onChange={onChange}
+        step={900}
+        value={T('09:00')}
+      />,
+    );
+    const trigger = screen.getByRole('button', {name: 'Choose Start'});
+    await user.click(trigger);
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    await user.click(screen.getByRole('option', {hidden: true, name: '15'}));
+    expect(onChange).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', {hidden: true, name: 'Done'}));
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({hour: 9, minute: 15}),
+    );
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('discards a draft when dismissed and resets it on reopening', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <TimeInput
+        label="Start"
+        onChange={onChange}
+        step={900}
+        value={T('09:00')}
+      />,
+    );
+    const trigger = screen.getByRole('button', {name: 'Choose Start'});
+    await user.click(trigger);
+    await user.click(screen.getByRole('option', {hidden: true, name: '15'}));
+    await user.keyboard('{Escape}');
+    await act(async () => {
+      await new Promise(resolve => requestAnimationFrame(resolve));
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    await user.click(trigger);
+    expect(
+      screen.getByRole('option', {hidden: true, name: '00', selected: true}),
+    ).toBeInTheDocument();
+  });
+
+  it.each([{isDisabled: true}, {isReadOnly: true}])(
+    'prevents opening when %j',
+    async props => {
+      const user = userEvent.setup();
+      render(
+        <TimeInput
+          {...props}
+          label="Start"
+          onChange={vi.fn()}
+          value={T('09:00')}
+        />,
+      );
+      const trigger = screen.getByRole('button', {name: 'Choose Start'});
+      expect(trigger).toBeDisabled();
+      await user.click(trigger);
+      expect(
+        screen.queryByRole('listbox', {hidden: true, name: 'Hours'}),
+      ).not.toBeInTheDocument();
+    },
+  );
 });

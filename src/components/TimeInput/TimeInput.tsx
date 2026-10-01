@@ -6,12 +6,14 @@ import {
   useId,
   useEffect,
   useRef,
+  useState,
   type CSSProperties,
   type FocusEvent,
   type ReactNode,
   type Ref,
 } from 'react';
 import {Button} from 'components/Button';
+import {buttonRecipe} from 'components/Button/Button.recipe';
 import {
   Field,
   getNecessity,
@@ -27,23 +29,24 @@ import {
 } from 'components/Field/inputUtils';
 import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
+import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
+import {timeInputRecipe} from 'components/TimeInput/TimeInput.recipe';
+import {TimePickerPanel} from 'internal/TimePickerPanel';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
-import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
-const styles = {
-  input: css({
-    '&::-webkit-calendar-picker-indicator': {
-      display: 'none',
-    },
-  }),
-} as const;
+const styles = timeInputRecipe();
+const triggerStyles = buttonRecipe({
+  variant: 'ghost',
+  size: 'sm',
+  iconOnly: true,
+});
 
 export type PlainTime = Temporal.PlainTime;
 
@@ -187,7 +190,8 @@ function fromInputString(value: string): PlainTime | null {
 }
 
 /**
- * Time picker input field with optional seconds granularity.
+ * Editable time field with a clock-triggered column picker and optional seconds.
+ * Picker changes are committed with Done; dismissal discards pending changes.
  */
 export function TimeInput({
   label,
@@ -220,22 +224,26 @@ export function TimeInput({
   ref,
 }: TimeInputProps): React.JSX.Element {
   const inputId = useId();
+  const [isOpen, setIsOpen] = useState(false);
   const descriptionID = isNonEmptyReactNode(description)
     ? `${inputId}-description`
     : undefined;
   const statusMessageID = getStatusMessageID(inputId, status);
   const describedBy = getDescribedBy(descriptionID, statusMessageID);
   const inputRef = useRef<HTMLInputElement>(null);
+  const pickerTriggerRef = useRef<HTMLButtonElement>(null);
   const fieldset = useFieldset();
   const effectiveDisabled = isDisabled || fieldset?.isDisabled === true;
   const effectiveReadOnly =
     !effectiveDisabled && (isReadOnly || fieldset?.isReadOnly === true);
 
   useEffect(() => {
-    if (effectiveReadOnly) {
+    if (effectiveDisabled || effectiveReadOnly) {
       inputRef.current?.blur();
+      const frame = requestAnimationFrame(() => setIsOpen(false));
+      return () => cancelAnimationFrame(frame);
     }
-  }, [effectiveReadOnly]);
+  }, [effectiveDisabled, effectiveReadOnly]);
 
   const necessity = getNecessity(isOptional, isRequired);
 
@@ -273,9 +281,38 @@ export function TimeInput({
         onPointerDownCapture={
           effectiveReadOnly ? preventReadOnlyInteraction : undefined
         }>
-        <span className={inputStyles.iconSlot}>
-          <Icon icon={Clock} size="sm" />
-        </span>
+        <Popover
+          content={
+            isOpen ? (
+              <TimePickerPanel
+                hasSeconds={hasSeconds}
+                max={max}
+                min={min}
+                onConfirm={time => {
+                  onChange(time);
+                  setIsOpen(false);
+                  pickerTriggerRef.current?.focus();
+                }}
+                step={step}
+                value={value}
+              />
+            ) : null
+          }
+          hasCloseButton={false}
+          isEnabled={!effectiveDisabled && !effectiveReadOnly}
+          isOpen={isOpen}
+          label={`Choose ${label}`}
+          onOpenChange={setIsOpen}>
+          {/* Avoid a focus-triggered tooltip opening during native popover focus restoration. */}
+          <button
+            aria-label={`Choose ${label}`}
+            className={triggerStyles.root}
+            disabled={effectiveDisabled || effectiveReadOnly}
+            ref={pickerTriggerRef}
+            type="button">
+            <Icon icon={Clock} size="sm" />
+          </button>
+        </Popover>
         <input
           aria-busy={isLoading || undefined}
           aria-describedby={describedBy}

@@ -160,3 +160,38 @@ export const ReadOnly: Story = {
     <TimeInput {...args} onChange={() => {}} value={TIME_0900} />
   ),
 };
+
+/**
+ * Pick hours, quarter-hour minutes, and AM/PM, then commit with Done.
+ */
+export const QuarterHourPicker: Story = {
+  args: {
+    step: 900,
+    description:
+      'Click the clock to choose a time. Done saves; Escape cancels.',
+  },
+  render: (args: TimeInputProps) => {
+    const [value, setValue] = useState<PlainTime | null>(TIME_0900);
+    return <TimeInput {...args} onChange={setValue} value={value} />;
+  },
+};
+
+export const Overnight: Story = {
+  args: {
+    min: time('22:00'),
+    max: time('02:00'),
+    step: 900,
+    description: 'Available from 10 PM to 2 AM.',
+  },
+  render: (args: TimeInputProps) => {
+    const [value, setValue] = useState<PlainTime | null>(TIME_2200);
+    return <TimeInput {...args} onChange={setValue} value={value} />;
+  },
+};
+
+export const Empty: Story = {
+  render: (args: TimeInputProps) => {
+    const [value, setValue] = useState<PlainTime | null>(null);
+    return <TimeInput {...args} hasClear onChange={setValue} value={value} />;
+  },
+};
