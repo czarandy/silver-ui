@@ -70,6 +70,12 @@ export type RadioGroupProps = {
    */
   label: string;
   /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Tooltip content shown next to the label.
    */
   labelTooltip?: ReactNode;
@@ -121,6 +127,7 @@ export function RadioGroup({
   isOptional,
   isRequired,
   label,
+  labelEnd,
   labelTooltip,
   onChange,
   orientation = 'vertical',
@@ -192,6 +199,7 @@ export function RadioGroup({
       {...necessity}
       label={label}
       labelAs="span"
+      labelEnd={labelEnd}
       labelId={labelId}
       labelTooltip={labelTooltip}
       ref={ref}

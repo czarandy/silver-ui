@@ -153,4 +153,25 @@ describe('PasswordInput', () => {
     expect(wrapper).toBeInTheDocument();
     expect(wrapper).toHaveStyle({maxWidth: '300px'});
   });
+
+  it('renders labelEnd beside the label without changing the label behavior', async () => {
+    const user = userEvent.setup();
+    render(
+      <PasswordInput
+        label="Password"
+        labelEnd={<a href="#reset">Forgot password?</a>}
+        onChange={noop}
+        value=""
+      />,
+    );
+
+    const input = screen.getByLabelText('Password');
+    expect(input).toHaveAccessibleName('Password');
+    expect(
+      screen.getByRole('link', {name: 'Forgot password?'}),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByText('Password'));
+    expect(input).toHaveFocus();
+  });
 });

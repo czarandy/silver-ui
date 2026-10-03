@@ -183,6 +183,12 @@ export type SelectProps<TAuxiliaryData = unknown> = {
    */
   label: string;
   /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Icon shown before the label.
    */
   labelIcon?: IconComponent;
@@ -269,6 +275,7 @@ export function Select<TAuxiliaryData = unknown>({
   isOptional,
   isRequired,
   label,
+  labelEnd,
   labelIcon,
   labelTooltip,
   onChange,
@@ -623,6 +630,7 @@ export function Select<TAuxiliaryData = unknown>({
       isReadOnly={isReadOnly}
       {...necessity}
       label={label}
+      labelEnd={labelEnd}
       labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={

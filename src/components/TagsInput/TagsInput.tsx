@@ -201,6 +201,12 @@ export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
    */
   label: string;
   /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Icon shown before the label.
    */
   labelIcon?: IconComponent;
@@ -321,6 +327,7 @@ export function TagsInput<T extends SearchableItem>({
   isOptional,
   isRequired,
   label,
+  labelEnd,
   labelIcon,
   labelTooltip,
   maxEntries,
@@ -820,6 +827,7 @@ export function TagsInput<T extends SearchableItem>({
       isReadOnly={isReadOnly}
       {...necessity}
       label={label}
+      labelEnd={labelEnd}
       labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       ref={ref}

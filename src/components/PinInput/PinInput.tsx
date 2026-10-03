@@ -94,6 +94,12 @@ export type PinInputProps = {
    */
   label: string;
   /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Icon shown before the label.
    */
   labelIcon?: IconComponent;
@@ -200,6 +206,7 @@ export function PinInput({
   isOptional,
   isRequired,
   label,
+  labelEnd,
   labelIcon,
   labelTooltip,
   length: lengthProp = DEFAULT_LENGTH,
@@ -557,6 +564,7 @@ export function PinInput({
       {...getNecessity(isOptional, isRequired)}
       label={label}
       labelAs="span"
+      labelEnd={labelEnd}
       labelIcon={labelIcon}
       labelId={labelId}
       labelTooltip={labelTooltip}

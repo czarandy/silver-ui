@@ -423,4 +423,21 @@ describe('RadioGroup', () => {
       });
     },
   );
+
+  it('renders labelEnd without changing the group name', () => {
+    render(
+      <RadioGroup
+        label="Plan"
+        labelEnd={<a href="#compare">Compare plans</a>}
+        onChange={() => {}}
+        value="basic">
+        <RadioGroupItem label="Basic" value="basic" />
+      </RadioGroup>,
+    );
+
+    expect(screen.getByRole('radiogroup', {name: 'Plan'})).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {name: 'Compare plans'}),
+    ).toBeInTheDocument();
+  });
 });

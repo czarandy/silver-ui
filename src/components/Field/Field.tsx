@@ -83,6 +83,13 @@ interface FieldBaseProps {
    */
   labelAs?: 'label' | 'span';
   /**
+   * Content shown at the end of the label row, such as a "Forgot password?"
+   * link. It renders outside the label element, so interacting with it does
+   * not focus the control and it is not part of the control's accessible
+   * name. It stays visible when `isLabelHidden` is true, on a row of its own.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Optional icon shown before the label.
    */
   labelIcon?: IconComponent;
@@ -159,6 +166,7 @@ export function Field({
   isDisabled: isDisabledFromProps = false,
   isReadOnly: isReadOnlyFromProps = false,
   labelAs: LabelComponent = 'label',
+  labelEnd,
   labelIcon,
   labelId,
   labelTooltip,
@@ -220,6 +228,9 @@ export function Field({
       ) : null}
     </LabelComponent>
   );
+  const labelEndNode = isNonEmptyReactNode(labelEnd) ? (
+    <div className={classes.labelEnd}>{labelEnd}</div>
+  ) : null;
   const descriptionNode = isNonEmptyReactNode(description) ? (
     <Text
       as="span"
@@ -244,13 +255,23 @@ export function Field({
       ref={ref}
       style={style}>
       {isLabelHidden ? (
-        <VisuallyHidden>
-          {labelNode}
-          {descriptionNode}
-        </VisuallyHidden>
+        <>
+          <VisuallyHidden>
+            {labelNode}
+            {descriptionNode}
+          </VisuallyHidden>
+          {labelEndNode}
+        </>
       ) : (
         <>
-          {labelNode}
+          {labelEndNode == null ? (
+            labelNode
+          ) : (
+            <div className={classes.labelRow}>
+              {labelNode}
+              {labelEndNode}
+            </div>
+          )}
           {descriptionNode}
         </>
       )}

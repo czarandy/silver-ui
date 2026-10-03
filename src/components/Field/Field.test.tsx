@@ -1,4 +1,5 @@
 import {render, screen} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {Mail} from 'lucide-react';
 import {describe, expect, it, vi} from 'vitest';
 import {Field, getNecessity} from 'components/Field/Field';
@@ -128,6 +129,96 @@ describe('Field', () => {
     expect(classes.label).toContain('silver-ai_baseline');
     expect(classes.labelIcon).toContain('silver-as_center');
     expect(classes.tooltipIcon).toContain('silver-as_center');
+  });
+
+  describe('labelEnd', () => {
+    it('renders at the end of the label row, outside the label', () => {
+      const classes = fieldRecipe();
+      render(
+        <Field
+          description="Helpful copy"
+          inputId="password"
+          label="Password"
+          labelEnd={<a href="#reset">Forgot password?</a>}>
+          <input id="password" />
+        </Field>,
+      );
+
+      const link = screen.getByRole('link', {name: 'Forgot password?'});
+      // eslint-disable-next-line testing-library/no-node-access -- verifying the label row structure
+      const labelEnd = assertNonNull(link.parentElement);
+      // eslint-disable-next-line testing-library/no-node-access -- verifying the label row structure
+      const labelRow = assertNonNull(labelEnd.parentElement);
+      const label = assertNonNull(
+        // eslint-disable-next-line testing-library/no-node-access -- the label element wraps the label text
+        screen.getByText('Password').closest('label'),
+      );
+
+      expect(labelEnd).toHaveClass(classes.labelEnd ?? '');
+      expect(labelRow).toHaveClass(classes.labelRow ?? '');
+      // eslint-disable-next-line testing-library/no-node-access -- checking the row holds the label then the end content
+      expect(Array.from(labelRow.children)).toEqual([label, labelEnd]);
+      expect(label).not.toContainElement(link);
+      expect(labelRow).not.toContainElement(screen.getByText('Helpful copy'));
+      expect(classes.labelRow).toContain('silver-ai_baseline');
+      expect(classes.labelEnd).toContain('silver-ms_auto');
+    });
+
+    it('keeps the label accessible name and click-to-focus', async () => {
+      const user = userEvent.setup();
+      render(
+        <Field
+          inputId="password"
+          label="Password"
+          labelEnd={<a href="#reset">Forgot password?</a>}>
+          <input id="password" />
+        </Field>,
+      );
+
+      const input = screen.getByRole('textbox', {name: 'Password'});
+      await user.click(screen.getByText('Password'));
+      expect(input).toHaveFocus();
+
+      await user.click(screen.getByRole('link', {name: 'Forgot password?'}));
+      expect(input).not.toHaveFocus();
+    });
+
+    it('stays visible on its own row when the label is hidden', () => {
+      const classes = fieldRecipe();
+      render(
+        <Field
+          data-testid="field"
+          inputId="password"
+          isLabelHidden
+          label="Password"
+          labelEnd={<a href="#reset">Forgot password?</a>}>
+          <input id="password" />
+        </Field>,
+      );
+
+      const link = screen.getByRole('link', {name: 'Forgot password?'});
+      // eslint-disable-next-line testing-library/no-node-access -- verifying the end content is a direct child of the root
+      const labelEnd = assertNonNull(link.parentElement);
+      expect(labelEnd).toHaveClass(classes.labelEnd ?? '');
+      // eslint-disable-next-line testing-library/no-node-access -- verifying the end content is outside the visually hidden wrapper
+      expect(labelEnd.parentElement).toBe(screen.getByTestId('field'));
+      expect(
+        screen.getByRole('textbox', {name: 'Password'}),
+      ).toBeInTheDocument();
+    });
+
+    it('does not wrap the label in a row without end content', () => {
+      render(
+        <Field data-testid="field" inputId="email" label="Email">
+          <input id="email" />
+        </Field>,
+      );
+
+      // eslint-disable-next-line testing-library/no-node-access -- the label stays a direct child of the root
+      expect(screen.getByText('Email').closest('label')?.parentElement).toBe(
+        screen.getByTestId('field'),
+      );
+    });
   });
 
   describe('getNecessity', () => {

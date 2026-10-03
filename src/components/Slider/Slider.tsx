@@ -9,6 +9,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
   type Ref,
 } from 'react';
 import {
@@ -79,6 +80,12 @@ export type SliderBaseProps = {
    * Field label.
    */
   label: string;
+  /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
   /**
    * Tooltip content shown next to the label.
    */
@@ -217,6 +224,7 @@ export function Slider({
   isOptional,
   isRequired,
   label,
+  labelEnd,
   labelTooltip,
   marks,
   max = 100,
@@ -544,6 +552,7 @@ export function Slider({
       {...necessity}
       label={label}
       labelAs="span"
+      labelEnd={labelEnd}
       labelTooltip={labelTooltip}
       ref={ref}
       status={

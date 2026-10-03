@@ -1,6 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Mail} from 'lucide-react';
 import {Field, type FieldProps} from 'components/Field/Field';
+import {Link} from 'components/Link';
 
 const meta = {
   title: 'Components/Field',
@@ -89,6 +90,39 @@ export const WithLabelTooltip: Story = {
   render: (args: FieldProps) => (
     <Field {...args}>
       <input id="field-story" />
+    </Field>
+  ),
+};
+
+export const WithLabelEnd: Story = {
+  args: {
+    label: 'Password',
+    labelEnd: (
+      <Link href="#forgot-password" size="sm">
+        Forgot password?
+      </Link>
+    ),
+  },
+  render: (args: FieldProps) => (
+    <Field {...args}>
+      <input id="field-story" type="password" />
+    </Field>
+  ),
+};
+
+export const LabelEndWithHiddenLabel: Story = {
+  args: {
+    isLabelHidden: true,
+    label: 'Password',
+    labelEnd: (
+      <Link href="#forgot-password" size="sm">
+        Forgot password?
+      </Link>
+    ),
+  },
+  render: (args: FieldProps) => (
+    <Field {...args}>
+      <input id="field-story" placeholder="Password" type="password" />
     </Field>
   ),
 };

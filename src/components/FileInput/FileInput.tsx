@@ -83,6 +83,12 @@ interface FileInputBaseProps {
    */
   label: string;
   /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Icon shown before the label.
    */
   labelIcon?: IconComponent;
@@ -250,6 +256,7 @@ export function FileInput({
   isLoading = false,
   size = 'md',
   status: statusFromProps,
+  labelEnd,
   labelIcon,
   labelTooltip,
   className,
@@ -378,6 +385,7 @@ export function FileInput({
       isReadOnly={isReadOnly}
       {...necessity}
       label={label}
+      labelEnd={labelEnd}
       labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={

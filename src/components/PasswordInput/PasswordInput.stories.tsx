@@ -1,5 +1,6 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
+import {Link} from 'components/Link';
 import {
   PasswordInput,
   type PasswordInputProps,
@@ -113,6 +114,17 @@ export const HiddenLabel: Story = {
 
 export const WithLabelTooltip: Story = {
   args: {labelTooltip: 'Your account password. Never share this with anyone.'},
+  render: args => <ControlledPasswordInput {...args} />,
+};
+
+export const WithForgotPasswordLink: Story = {
+  args: {
+    labelEnd: (
+      <Link href="#forgot-password" size="sm">
+        Forgot password?
+      </Link>
+    ),
+  },
   render: args => <ControlledPasswordInput {...args} />,
 };
 
