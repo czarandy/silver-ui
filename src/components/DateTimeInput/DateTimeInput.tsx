@@ -83,6 +83,12 @@ export type DateTimeInputProps = {
    */
   label: string;
   /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Icon shown before the label.
    */
   labelIcon?: IconComponent;
@@ -198,6 +204,7 @@ export function DateTimeInput({
   isReadOnly = false,
   status,
   step,
+  labelEnd,
   labelIcon,
   labelTooltip,
   className,
@@ -249,6 +256,7 @@ export function DateTimeInput({
       isReadOnly={isReadOnly}
       {...necessity}
       label={label}
+      labelEnd={labelEnd}
       labelIcon={labelIcon}
       labelTooltip={labelTooltip}
       status={status}>

@@ -58,6 +58,12 @@ export type InputGroupProps = {
    */
   label: string;
   /**
+   * Content shown at the end of the label row, such as a link. It renders
+   * outside the label, so it does not focus the control or change its
+   * accessible name. It stays visible when `isLabelHidden` is true.
+   */
+  labelEnd?: ReactNode;
+  /**
    * Tooltip content shown next to the label.
    */
   labelTooltip?: ReactNode;
@@ -100,6 +106,7 @@ export function InputGroup({
   size: sizeProp,
   status,
   statusVariant = 'attached',
+  labelEnd,
   labelTooltip,
   className,
   'data-testid': dataTestId,
@@ -142,6 +149,7 @@ export function InputGroup({
         labelId={labelId}
         {...necessity}
         label={label}
+        labelEnd={labelEnd}
         labelTooltip={labelTooltip}
         status={status == null ? undefined : {...status, messageID: statusID}}
         statusVariant={statusVariant}>

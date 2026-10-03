@@ -848,4 +848,18 @@ describe('PinInput', () => {
       expect(ref).toHaveBeenCalledWith(pin);
     });
   });
+
+  it('renders labelEnd without changing the group name', () => {
+    render(
+      <PinInput
+        label="Code"
+        labelEnd={<a href="#resend">Resend code</a>}
+        onChange={noop}
+        value=""
+      />,
+    );
+
+    expect(screen.getByRole('group', {name: 'Code'})).toBeInTheDocument();
+    expect(screen.getByRole('link', {name: 'Resend code'})).toBeInTheDocument();
+  });
 });

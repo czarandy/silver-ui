@@ -444,4 +444,20 @@ describe('TextArea', () => {
       );
     });
   });
+
+  it('renders labelEnd without changing the accessible name', () => {
+    render(
+      <TextArea
+        label="Notes"
+        labelEnd={<a href="#help">Formatting help</a>}
+        onChange={() => {}}
+        value=""
+      />,
+    );
+
+    expect(screen.getByRole('textbox', {name: 'Notes'})).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', {name: 'Formatting help'}),
+    ).toBeInTheDocument();
+  });
 });

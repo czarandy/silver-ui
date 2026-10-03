@@ -1240,6 +1240,21 @@ describe('Select', () => {
       'Pick one fruit from the list',
     );
   });
+
+  it('renders labelEnd without changing the accessible name', () => {
+    render(
+      <Select
+        label="Fruit"
+        labelEnd={<a href="#help">Help</a>}
+        onChange={() => {}}
+        options={['Apple', 'Banana']}
+        value={null}
+      />,
+    );
+
+    expect(screen.getByRole('combobox', {name: 'Fruit'})).toBeInTheDocument();
+    expect(screen.getByRole('link', {name: 'Help'})).toBeInTheDocument();
+  });
 });
 
 describe('SelectOption', () => {

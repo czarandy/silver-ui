@@ -1,12 +1,26 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
 export const fieldRecipe = sva({
-  slots: ['root', 'label', 'labelIcon', 'tooltipIcon', 'inputWrapper'],
+  slots: [
+    'root',
+    'labelRow',
+    'label',
+    'labelIcon',
+    'tooltipIcon',
+    'labelEnd',
+    'inputWrapper',
+  ],
   base: {
     root: {
       display: 'flex',
       flexDirection: 'column',
       gap: '1',
+    },
+    labelRow: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'baseline',
+      gap: '2',
     },
     label: {
       display: 'inline-flex',
@@ -23,6 +37,12 @@ export const fieldRecipe = sva({
       display: 'inline-flex',
       alignSelf: 'center',
       color: 'fg.muted',
+    },
+    // `marginInlineStart: auto` pushes the content to the inline end both
+    // inside the label row and, when the label is hidden, as a direct child
+    // of the column root (where it also stops the item from stretching).
+    labelEnd: {
+      marginInlineStart: 'auto',
     },
     inputWrapper: {
       display: 'flex',

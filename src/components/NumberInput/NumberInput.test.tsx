@@ -763,4 +763,18 @@ describe('NumberInput', () => {
     expect(wrapper).toHaveStyle({maxWidth: '200px'});
     expect(wrapper).toContainElement(screen.getByRole('spinbutton'));
   });
+
+  it('renders labelEnd without changing the accessible name', () => {
+    render(
+      <NumberInput
+        label="Count"
+        labelEnd={<a href="#help">Help</a>}
+        onChange={() => {}}
+        value={null}
+      />,
+    );
+
+    expect(screen.getByRole('spinbutton', {name: 'Count'})).toBeInTheDocument();
+    expect(screen.getByRole('link', {name: 'Help'})).toBeInTheDocument();
+  });
 });
