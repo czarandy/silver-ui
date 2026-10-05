@@ -44,6 +44,17 @@ export const MultipleActions: Story = {
   },
 };
 
+export const FullWidthActions: Story = {
+  args: {
+    actions: (
+      <>
+        <Button label="Create project" variant="primary" width="full" />
+        <Button label="Import" variant="secondary" width="full" />
+      </>
+    ),
+  },
+};
+
 export const Compact: Story = {
   args: {isCompact: true},
 };

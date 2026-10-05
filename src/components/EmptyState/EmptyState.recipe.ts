@@ -31,6 +31,8 @@ export const emptyStateRecipe = sva({
       gap: '1',
       maxW: '420px',
     },
+    // As wide as the text column, so an action decides its own width: a
+    // full-width button fills the column, while others stay centered.
     actions: {
       display: 'flex',
       alignItems: 'center',
@@ -38,6 +40,8 @@ export const emptyStateRecipe = sva({
       flexWrap: 'wrap',
       gap: '2',
       mt: '1',
+      w: 'full',
+      maxW: '420px',
     },
   },
   variants: {
