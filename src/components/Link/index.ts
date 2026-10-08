@@ -1,4 +1,4 @@
-export {Link, type LinkProps} from 'components/Link/Link';
+export {Link, type LinkDisplay, type LinkProps} from 'components/Link/Link';
 export {
   LinkProvider,
   type LinkProviderProps,

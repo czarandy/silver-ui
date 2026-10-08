@@ -33,6 +33,13 @@ export const linkRecipe = cva({
     },
   },
   variants: {
+    // `inline-flex` keeps the external-link icon centered beside the text but
+    // makes the whole link one unbreakable box. `inline` lets a link inside a
+    // sentence wrap mid-link like the words around it.
+    display: {
+      'inline-flex': {},
+      inline: {display: 'inline'},
+    },
     size: {
       xs: {fontSize: 'xs'},
       sm: {fontSize: 'sm'},
@@ -81,9 +88,28 @@ export const linkRecipe = cva({
     },
   },
   defaultVariants: {
+    display: 'inline-flex',
     color: 'active',
     size: 'inherit',
     hasUnderline: false,
+  },
+});
+
+export const externalLinkIconRecipe = cva({
+  base: {
+    display: 'inline-flex',
+    flexShrink: 0,
+    fontSize: '0.875em',
+    lineHeight: 1,
+  },
+  variants: {
+    display: {
+      'inline-flex': {},
+      inline: {verticalAlign: '-0.125em'},
+    },
+  },
+  defaultVariants: {
+    display: 'inline-flex',
   },
 });
 

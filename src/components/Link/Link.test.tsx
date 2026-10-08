@@ -512,6 +512,20 @@ describe('Link', () => {
     expect(link).not.toHaveAttribute('aria-label');
   });
 
+  it.each([
+    [{isExternalLink: true}, 'Read the docs (opens in new tab)'],
+    [{target: '_blank'}, 'Read the docs (opens in new tab)'],
+    [{isExternalLink: true, target: '_self'}, 'Read the docs'],
+  ])('keeps the accessible name of an inline link with %o', (props, name) => {
+    render(
+      <Link display="inline" href="https://example.com" {...props}>
+        Read the docs
+      </Link>,
+    );
+
+    expect(screen.getByRole('link', {name})).toBeInTheDocument();
+  });
+
   it('passes href and to to custom link components for router compatibility', () => {
     render(
       <Link as={ToBasedRouterLink} href="/custom">

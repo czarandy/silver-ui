@@ -3,7 +3,7 @@
 import {ExternalLink} from 'lucide-react';
 import type {CSSProperties, MouseEventHandler, ReactNode, Ref} from 'react';
 import {Icon} from 'components/Icon';
-import {linkRecipe} from 'components/Link/Link.recipe';
+import {externalLinkIconRecipe, linkRecipe} from 'components/Link/Link.recipe';
 import type {LinkComponent} from 'components/Link/types';
 import type {TextColor, TextSize, TextWeight} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
@@ -12,6 +12,14 @@ import {ActionElement} from 'internal/ActionElement';
 import {getAriaLabel, useRel} from 'internal/linkAccessibility';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
+
+/**
+ * How a Link lays out. `inline-flex` (the default) keeps the link on one line,
+ * which suits standalone links. `inline` lets a link inside running text wrap
+ * across lines; when the link text is a plain string, the external-link icon
+ * stays attached to its last word.
+ */
+export type LinkDisplay = 'inline-flex' | 'inline';
 
 /**
  * A polymorphic link component with built-in accessibility, external link handling,
@@ -88,6 +96,12 @@ export interface LinkProps {
    * Test id applied to the root element.
    */
   'data-testid'?: string;
+  /**
+   * Layout of the link. Default is `inline-flex`, which never breaks the link
+   * across lines. Use `inline` for links inside sentences so they wrap with the
+   * surrounding text.
+   */
+  display?: LinkDisplay;
   /**
    * Show a persistent underline on the link text.
    */
@@ -169,6 +183,7 @@ export function Link({
   size,
   tooltip,
   color,
+  display = 'inline-flex',
   weight,
   className,
   'data-testid': dataTestId,
@@ -181,6 +196,23 @@ export function Link({
   const target = targetFromProps ?? (isExternalLink ? '_blank' : undefined);
   const opensInNewTab = renderAsLink && target === '_blank';
   const rel = useRel({isExternalLink, target, rel: relFromProps});
+  const hasHiddenSuffix = opensInNewTab && label == null;
+  // Flex `gap` does not apply to an inline link, so a space separates the icon.
+  const spacesIcon = display === 'inline' && isExternalLink;
+
+  const suffix = (
+    <>
+      {hasHiddenSuffix || spacesIcon ? ' ' : null}
+      {hasHiddenSuffix ? (
+        <VisuallyHidden>(opens in new tab)</VisuallyHidden>
+      ) : null}
+      {isExternalLink ? (
+        <span aria-hidden="true" className={externalLinkIconRecipe({display})}>
+          <Icon icon={ExternalLink} size="sm" />
+        </span>
+      ) : null}
+    </>
+  );
 
   const ariaAttrs = {
     'aria-controls': ariaControls,
@@ -212,7 +244,10 @@ export function Link({
       aria-disabled={isDisabled || undefined}
       aria-label={getAriaLabel(label, opensInNewTab)}
       as={as}
-      className={cx(linkRecipe({color, hasUnderline, size, weight}), className)}
+      className={cx(
+        linkRecipe({color, display, hasUnderline, size, weight}),
+        className,
+      )}
       data-testid={dataTestId}
       href={isDisabled ? undefined : hrefFromProps}
       isDisabled={!renderAsLink ? isDisabled : undefined}
@@ -223,18 +258,14 @@ export function Link({
       style={style}
       tabIndex={isDisabled ? -1 : undefined}
       target={!isDisabled && renderAsLink ? target : undefined}>
-      {children}
-      {opensInNewTab && label == null ? (
+      {spacesIcon && typeof children === 'string' ? (
+        <InlineLinkText suffix={suffix} text={children} />
+      ) : (
         <>
-          {' '}
-          <VisuallyHidden>(opens in new tab)</VisuallyHidden>
+          {children}
+          {suffix}
         </>
-      ) : null}
-      {isExternalLink ? (
-        <span aria-hidden="true" className={styles.externalLink}>
-          <Icon icon={ExternalLink} size="sm" />
-        </span>
-      ) : null}
+      )}
     </ActionElement>
   );
 
@@ -247,11 +278,30 @@ export function Link({
 
 Link.displayName = 'Link';
 
+/**
+ * Keeps the last word of an inline link on the same line as its icon. Browsers
+ * may break before an inline-flex box even after a non-breaking space, so only
+ * `white-space: nowrap` around both holds them together.
+ */
+function InlineLinkText({
+  suffix,
+  text,
+}: {
+  suffix: ReactNode;
+  text: string;
+}): React.JSX.Element {
+  const lastWordStart = text.trimEnd().search(/\S+$/);
+  return (
+    <>
+      {text.slice(0, lastWordStart)}
+      <span className={styles.lastWord}>
+        {text.slice(lastWordStart).trimEnd()}
+        {suffix}
+      </span>
+    </>
+  );
+}
+
 const styles = {
-  externalLink: css({
-    display: 'inline-flex',
-    flexShrink: 0,
-    fontSize: '0.875em',
-    lineHeight: 1,
-  }),
+  lastWord: css({whiteSpace: 'nowrap'}),
 };

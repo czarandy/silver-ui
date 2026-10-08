@@ -189,6 +189,23 @@ export const InlineWithText: Story = {
   ),
 };
 
+export const InlineDisplay: Story = {
+  render: () => (
+    <Text as="p" display="block" style={{maxWidth: 320}}>
+      I agree to the{' '}
+      <Link display="inline" href="https://example.com/terms" isExternalLink>
+        Terms of Service
+      </Link>{' '}
+      and{' '}
+      <Link display="inline" href="https://example.com/baa" isExternalLink>
+        Business Associate Agreement
+      </Link>
+      . Inline links wrap with the sentence instead of moving to the next line
+      whole.
+    </Text>
+  ),
+};
+
 export const InheritsSurroundingTextSize: Story = {
   render: () => (
     <>
