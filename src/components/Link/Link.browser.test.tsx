@@ -75,4 +75,23 @@ describe('Link display', () => {
       ).toBeLessThan(8);
     }
   });
+
+  it.each([
+    ['inline-flex', undefined, 'none'],
+    ['inline', undefined, 'underline'],
+    ['inline', false, 'none'],
+  ] as const)(
+    'with display %s and hasUnderline %s, underlines: %s',
+    (display, hasUnderline, decoration) => {
+      render(
+        <Link display={display} hasUnderline={hasUnderline} href="/docs">
+          Docs
+        </Link>,
+      );
+
+      expect(
+        getComputedStyle(screen.getByRole('link')).textDecorationLine,
+      ).toBe(decoration);
+    },
+  );
 });

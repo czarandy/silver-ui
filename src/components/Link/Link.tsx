@@ -99,11 +99,13 @@ export interface LinkProps {
   /**
    * Layout of the link. Default is `inline-flex`, which never breaks the link
    * across lines. Use `inline` for links inside sentences so they wrap with the
-   * surrounding text.
+   * surrounding text; inline links are underlined by default.
    */
   display?: LinkDisplay;
   /**
-   * Show a persistent underline on the link text.
+   * Show a persistent underline on the link text. Default is `true` for
+   * `display="inline"` and `false` otherwise: a link inside a sentence needs a
+   * cue besides color to stand out from the text around it (WCAG 1.4.1).
    */
   hasUnderline?: boolean;
   /**
@@ -175,7 +177,7 @@ export function Link({
   as,
   label,
   href: hrefFromProps,
-  hasUnderline = false,
+  hasUnderline: hasUnderlineFromProps,
   isDisabled = false,
   isExternalLink = false,
   target: targetFromProps,
@@ -196,6 +198,7 @@ export function Link({
   const target = targetFromProps ?? (isExternalLink ? '_blank' : undefined);
   const opensInNewTab = renderAsLink && target === '_blank';
   const rel = useRel({isExternalLink, target, rel: relFromProps});
+  const hasUnderline = hasUnderlineFromProps ?? display === 'inline';
   const hasHiddenSuffix = opensInNewTab && label == null;
   const isInlineExternalLink = display === 'inline' && isExternalLink;
 

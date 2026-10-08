@@ -201,7 +201,7 @@ export const InlineDisplay: Story = {
         Business Associate Agreement
       </Link>
       . Inline links wrap with the sentence instead of moving to the next line
-      whole.
+      whole, and are underlined so they stand out without relying on color.
     </Text>
   ),
 };
