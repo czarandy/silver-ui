@@ -526,6 +526,20 @@ describe('Link', () => {
     expect(screen.getByRole('link', {name})).toBeInTheDocument();
   });
 
+  it('adds no whitespace to the text of an inline external link', () => {
+    render(
+      <Link
+        display="inline"
+        href="https://example.com"
+        isExternalLink
+        label="Read the docs">
+        Read the docs
+      </Link>,
+    );
+
+    expect(screen.getByRole('link')).toHaveTextContent('Read the docs');
+  });
+
   it('passes href and to to custom link components for router compatibility', () => {
     render(
       <Link as={ToBasedRouterLink} href="/custom">

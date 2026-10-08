@@ -197,12 +197,11 @@ export function Link({
   const opensInNewTab = renderAsLink && target === '_blank';
   const rel = useRel({isExternalLink, target, rel: relFromProps});
   const hasHiddenSuffix = opensInNewTab && label == null;
-  // Flex `gap` does not apply to an inline link, so a space separates the icon.
-  const spacesIcon = display === 'inline' && isExternalLink;
+  const isInlineExternalLink = display === 'inline' && isExternalLink;
 
   const suffix = (
     <>
-      {hasHiddenSuffix || spacesIcon ? ' ' : null}
+      {hasHiddenSuffix ? ' ' : null}
       {hasHiddenSuffix ? (
         <VisuallyHidden>(opens in new tab)</VisuallyHidden>
       ) : null}
@@ -258,7 +257,7 @@ export function Link({
       style={style}
       tabIndex={isDisabled ? -1 : undefined}
       target={!isDisabled && renderAsLink ? target : undefined}>
-      {spacesIcon && typeof children === 'string' ? (
+      {isInlineExternalLink && typeof children === 'string' ? (
         <InlineLinkText suffix={suffix} text={children} />
       ) : (
         <>
