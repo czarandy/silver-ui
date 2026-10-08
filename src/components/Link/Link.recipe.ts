@@ -105,7 +105,9 @@ export const externalLinkIconRecipe = cva({
   variants: {
     display: {
       'inline-flex': {},
-      inline: {verticalAlign: '-0.125em'},
+      // Flex `gap` does not apply to an inline link. A margin, unlike a space
+      // character, keeps the link text free of stray whitespace.
+      inline: {marginInlineStart: '1', verticalAlign: '-0.125em'},
     },
   },
   defaultVariants: {
