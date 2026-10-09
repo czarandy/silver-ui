@@ -1,9 +1,9 @@
-import type {Temporal} from '@js-temporal/polyfill';
 import type {CSSProperties, ReactNode, Ref} from 'react';
 import {Text} from 'components/Text';
 import {timelineRecipe} from 'components/Timeline/Timeline.recipe';
 import {Timestamp, type TimestampFormat} from 'components/Timestamp';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
+import type {Temporal} from 'internal/temporal';
 import {cx} from 'utils/cx';
 
 const classes = timelineRecipe();

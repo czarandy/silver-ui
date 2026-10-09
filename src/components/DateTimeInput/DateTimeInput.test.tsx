@@ -1,8 +1,8 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
 import {DateTimeInput} from 'components/DateTimeInput/DateTimeInput';
+import {Temporal} from 'internal/temporal';
 
 beforeAll(() => {
   // jsdom has no native popover support. Toggle display so opened content is

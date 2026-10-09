@@ -1,10 +1,10 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {useScheduleEventCreatePlugin} from 'components/Schedule/plugins/EventCreatePlugin';
+import {Temporal} from 'internal/temporal';
 
 // Real-layout placement tests for the create popover, reproducing a tall
 // create form opened beside a drafted event. jsdom cannot resolve CSS anchor

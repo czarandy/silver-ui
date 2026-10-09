@@ -1,3 +1,5 @@
+// Before anything renders: the landing page's date components need Temporal.
+import '../../../src/internal/installTemporalPolyfill';
 import {useState, type JSX} from 'react';
 import {
   Alert,

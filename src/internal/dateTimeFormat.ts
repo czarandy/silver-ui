@@ -1,6 +1,6 @@
-import {Intl as TemporalIntl} from '@js-temporal/polyfill';
+import {getTemporal} from 'internal/temporal';
 
-const formatterCache = new Map<string, TemporalIntl.DateTimeFormat>();
+const formatterCache = new Map<string, Intl.DateTimeFormat>();
 
 function getCacheKey(options: Intl.DateTimeFormatOptions): string {
   return Object.keys(options)
@@ -22,17 +22,22 @@ function getCacheKey(options: Intl.DateTimeFormatOptions): string {
  * The cache is keyed by the option values, so it stays bounded by the small
  * set of formats the library uses (times a handful of timezone IDs).
  *
- * The returned formatter is the Temporal polyfill's wrapper, so `format`
+ * The returned formatter is the global `Intl.DateTimeFormat`, whose `format`
  * accepts Temporal objects (`PlainDate`, `PlainTime`, `Instant`) as well as
- * epoch milliseconds.
+ * epoch milliseconds: natively where Temporal is native, and via the
+ * polyfill's `DateTimeFormat`, which the README's install snippet puts on
+ * `Intl`, elsewhere.
  */
 export function getCachedDateTimeFormat(
   options: Intl.DateTimeFormatOptions,
-): TemporalIntl.DateTimeFormat {
+): Intl.DateTimeFormat {
+  // Fail with the install instructions rather than an opaque formatting
+  // error when no Temporal is installed.
+  getTemporal();
   const key = getCacheKey(options);
   let formatter = formatterCache.get(key);
   if (formatter == null) {
-    formatter = new TemporalIntl.DateTimeFormat(undefined, options);
+    formatter = new Intl.DateTimeFormat(undefined, options);
     formatterCache.set(key, formatter);
   }
   return formatter;

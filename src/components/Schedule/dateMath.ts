@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import type {
   CalendarDayEvent,
   CalendarEvent,
@@ -17,6 +16,7 @@ import {
   plainDateToInstant,
   type PlainDate,
 } from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 
 const MINUTES_PER_DAY = 24 * 60;
 

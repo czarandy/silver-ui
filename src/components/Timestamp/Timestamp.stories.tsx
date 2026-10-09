@@ -1,7 +1,7 @@
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Text} from 'components/Text';
 import {Timestamp} from 'components/Timestamp/Timestamp';
+import {Temporal} from 'internal/temporal';
 
 const SAMPLE = Temporal.Instant.from('2025-03-21T14:51:53Z');
 

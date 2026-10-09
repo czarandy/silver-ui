@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {describe, expect, it, vi} from 'vitest';
@@ -32,6 +31,7 @@ import {TextArea} from 'components/TextArea';
 import {TextInput} from 'components/TextInput';
 import {TimeInput} from 'components/TimeInput';
 import {plainDateCreate} from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 
 const items = [
   {id: 'one', label: 'One'},

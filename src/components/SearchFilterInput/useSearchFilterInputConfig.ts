@@ -1,6 +1,5 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {useMemo} from 'react';
 import type {
   DateTimeRangePart,
@@ -9,6 +8,7 @@ import type {
   SearchFilterInputFilter,
   SearchFilterInputOperator,
 } from 'components/SearchFilterInput/types';
+import {Temporal} from 'internal/temporal';
 import {nowEpochMilliseconds} from 'internal/time';
 
 type FieldType =

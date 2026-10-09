@@ -1,6 +1,5 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {
@@ -14,6 +13,7 @@ import {
   type SearchFilterInputTagProps,
 } from 'components/SearchFilterInput/index';
 import type {EnumItem} from 'components/SearchFilterInput/types';
+import {Temporal} from 'internal/temporal';
 
 const meta = {
   title: 'Components/SearchFilterInput',

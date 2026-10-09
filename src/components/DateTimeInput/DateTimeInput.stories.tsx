@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {
@@ -6,6 +5,7 @@ import {
   type DateTimeInputProps,
   type PlainDateTime,
 } from 'components/DateTimeInput/DateTimeInput';
+import {Temporal} from 'internal/temporal';
 
 function DateTimeStory(args: DateTimeInputProps): React.JSX.Element {
   const [value, setValue] = useState<PlainDateTime | null>(args.value);

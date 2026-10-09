@@ -1,11 +1,11 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {useCallback, useMemo, useState} from 'react';
 import type {
   TableSortState,
   UseTableSortableConfig,
 } from 'components/Table/plugins/sortable/useTableSortable';
+import {Temporal} from 'internal/temporal';
 
 export type TableSortComparator<T> = (a: T, b: T) => number;
 

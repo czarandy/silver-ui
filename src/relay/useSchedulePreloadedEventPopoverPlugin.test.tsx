@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {act, fireEvent, render, screen, within} from '@testing-library/react';
 import {useCallback, useEffect, type ReactElement} from 'react';
 import {RelayEnvironmentProvider, type EntryPointProps} from 'react-relay';
@@ -11,6 +10,7 @@ import {
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {Schedule} from 'components/Schedule/Schedule';
 import type {SchedulePlugin} from 'components/Schedule/types';
+import {Temporal} from 'internal/temporal';
 import {createJSResourceReference} from 'relay/createJSResourceReference';
 import {
   scheduleEventEntryPoint,

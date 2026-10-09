@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {render, screen} from '@testing-library/react';
 import {useMemo} from 'react';
 import {expect, it, vi} from 'vitest';
@@ -12,6 +11,7 @@ import type {
   SchedulePlugin,
   ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
+import {Temporal} from 'internal/temporal';
 
 const VIEW_DATE = Temporal.Instant.from(
   '2026-08-12T12:00:00Z',

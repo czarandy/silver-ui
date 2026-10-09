@@ -1,5 +1,4 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {CircleCheck, Repeat2, TriangleAlert} from 'lucide-react';
 import {useMemo, useState} from 'react';
@@ -51,6 +50,7 @@ import {TextArea} from 'components/TextArea';
 import {TextInput} from 'components/TextInput';
 import {ToastViewport, useToast} from 'components/Toast';
 import {Tooltip} from 'components/Tooltip';
+import {Temporal} from 'internal/temporal';
 import {css} from 'styled-system/css';
 
 // Anchor every story to the current date in the viewer's local timezone so the

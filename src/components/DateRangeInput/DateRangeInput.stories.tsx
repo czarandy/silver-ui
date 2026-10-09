@@ -1,6 +1,5 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryContext, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {userEvent, within} from 'storybook/test';
@@ -10,6 +9,7 @@ import {
 } from 'components/DateRangeInput/DateRangeInput';
 import type {DateRange} from 'internal/dateTypes';
 import {plainDateCreate} from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 
 const meta = {
   title: 'Components/DateRangeInput',

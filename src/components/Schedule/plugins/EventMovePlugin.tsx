@@ -1,6 +1,5 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {
   useCallback,
   useMemo,
@@ -21,6 +20,7 @@ import type {
   SchedulePluginElementProps,
   ScheduleTimeGridCellPropsRenderProps,
 } from 'components/Schedule/types';
+import {Temporal} from 'internal/temporal';
 import useLatest from 'internal/useLatest';
 
 const DEFAULT_SNAP_MINUTES = 15;

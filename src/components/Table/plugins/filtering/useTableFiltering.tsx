@@ -1,6 +1,5 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {Filter} from 'lucide-react';
 import {
   createContext,
@@ -44,6 +43,7 @@ import {TagsInput} from 'components/TagsInput';
 import {TextInput} from 'components/TextInput';
 import {TimeInput} from 'components/TimeInput';
 import {plainDateToUnixSeconds, type PlainDate} from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {getBrowserTimezoneID} from 'internal/time';
 import {css} from 'styled-system/css';
 

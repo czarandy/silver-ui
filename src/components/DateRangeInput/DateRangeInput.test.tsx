@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterAll, beforeAll, describe, expect, it, vi} from 'vitest';
@@ -6,6 +5,7 @@ import {DateRangeInput} from 'components/DateRangeInput/DateRangeInput';
 import {dateRangeInputRecipe} from 'components/DateRangeInput/DateRangeInput.recipe';
 import {inputRecipe, inputStyles} from 'components/Field/inputStyles';
 import {plainDateCreate} from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {assertNonNull} from 'internal/testHelpers';
 
 beforeAll(() => {

@@ -1,9 +1,9 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState, type ComponentProps} from 'react';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {TimePickerPanel} from 'internal/TimePickerPanel';
+import {Temporal} from 'internal/temporal';
 
 const T = (value: string): Temporal.PlainTime => Temporal.PlainTime.from(value);
 const resolved = new Intl.DateTimeFormat().resolvedOptions();

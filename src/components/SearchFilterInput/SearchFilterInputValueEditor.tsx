@@ -1,7 +1,6 @@
 /* eslint-disable silver-ui/require-component-props */
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {useCallback, useMemo} from 'react';
 import {
   AutocompleteInput,
@@ -27,6 +26,7 @@ import {
   plainDateToUnixSeconds,
   type PlainDate,
 } from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {getBrowserTimezoneID} from 'internal/time';
 
 export interface SearchFilterInputValueEditorProps {

@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {
   act,
   createEvent,
@@ -71,6 +70,7 @@ import type {
   ScheduleView,
 } from 'components/Schedule/types';
 import type {DayOfWeek} from 'internal/dateTypes';
+import {Temporal} from 'internal/temporal';
 
 class ErrorBoundary extends Component<
   {children: ReactNode},

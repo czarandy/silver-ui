@@ -1,9 +1,9 @@
 /* eslint-disable testing-library/no-container, testing-library/no-node-access -- the decorative timeline rail is hidden from accessibility queries */
 
-import {Temporal} from '@js-temporal/polyfill';
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {Timeline, type TimelineItemConfig} from 'components/Timeline/Timeline';
+import {Temporal} from 'internal/temporal';
 
 const CREATED = Temporal.Instant.from(
   '2026-07-15T16:30:00Z',

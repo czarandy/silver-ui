@@ -1,6 +1,6 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {describe, expect, it} from 'vitest';
 import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
+import {Temporal} from 'internal/temporal';
 
 describe('getCachedDateTimeFormat', () => {
   it('returns the same formatter for equal options regardless of key order', () => {

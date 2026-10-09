@@ -1,6 +1,5 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {
   memo,
   useCallback,
@@ -32,6 +31,7 @@ import {
   plainDateToday,
   type PlainDate,
 } from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {getBrowserTimezoneID} from 'internal/time';
 import {useGridFocus} from 'internal/useGridFocus';
 import {cx} from 'utils/cx';

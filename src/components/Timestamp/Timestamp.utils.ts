@@ -1,5 +1,5 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
+import {Temporal} from 'internal/temporal';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
 
 export type TimestampValue =
