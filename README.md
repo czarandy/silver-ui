@@ -83,10 +83,13 @@ ship with TypeScript 6. Add them to `lib` in your `tsconfig.json`:
 ```json
 {
   "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ES2022", "ESNext.Intl", "ESNext.Temporal"]
+    "lib": ["DOM", "DOM.Iterable", "ES2022", "ESNext.Temporal"]
   }
 }
 ```
+
+Leave out `ESNext.Intl`: its Temporal-aware `Intl.DateTimeFormat` types
+conflict with the polyfill's own declarations unless `skipLibCheck` is on.
 
 Top-level `await` needs an ES2022 module target, which Vite and other modern
 bundlers support by default. If your `package.json` declares `"sideEffects"`,

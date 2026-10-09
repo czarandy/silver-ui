@@ -174,13 +174,7 @@ export type PublicHookOptions =
             allowSyntheticDefaultImports: true,
             jsx: 'react-jsx',
             // Consumers need Temporal's types (README: "Temporal").
-            lib: [
-              'DOM',
-              'DOM.Iterable',
-              'ES2022',
-              'ESNext.Intl',
-              'ESNext.Temporal',
-            ],
+            lib: ['DOM', 'DOM.Iterable', 'ES2022', 'ESNext.Temporal'],
             module: moduleKind,
             moduleResolution,
             noEmit: true,
@@ -262,13 +256,7 @@ export type Options = PreloadedContentOptions;
             allowSyntheticDefaultImports: true,
             jsx: 'react-jsx',
             // Consumers need Temporal's types (README: "Temporal").
-            lib: [
-              'DOM',
-              'DOM.Iterable',
-              'ES2022',
-              'ESNext.Intl',
-              'ESNext.Temporal',
-            ],
+            lib: ['DOM', 'DOM.Iterable', 'ES2022', 'ESNext.Temporal'],
             module: moduleKind,
             moduleResolution,
             noEmit: true,
