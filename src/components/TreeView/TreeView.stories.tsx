@@ -19,6 +19,37 @@ import {HStack, VStack} from 'components/Stack';
 import {Text} from 'components/Text';
 import {TreeView} from 'components/TreeView/TreeView';
 import type {TreeViewItemData} from 'components/TreeView/types';
+import {cva} from 'styled-system/css';
+
+const rowStatusRecipe = cva({
+  base: {
+    transitionDuration: 'fast',
+    transitionProperty: 'box-shadow',
+    transitionTimingFunction: 'default',
+  },
+  variants: {
+    status: {
+      error: {
+        boxShadow: 'inset 3px 0 0 {colors.status.error.border}',
+        _hover: {
+          boxShadow: 'inset 3px 0 0 {colors.status.error.borderHover}',
+        },
+      },
+      success: {
+        boxShadow: 'inset 3px 0 0 {colors.status.success.border}',
+        _hover: {
+          boxShadow: 'inset 3px 0 0 {colors.status.success.borderHover}',
+        },
+      },
+      warning: {
+        boxShadow: 'inset 3px 0 0 {colors.status.warning.border}',
+        _hover: {
+          boxShadow: 'inset 3px 0 0 {colors.status.warning.borderHover}',
+        },
+      },
+    },
+  },
+});
 
 const basicItems: TreeViewItemData[] = [
   {id: 'overview', label: 'Overview'},
@@ -326,6 +357,68 @@ export const MixedInteractive: Story = {
         label: 'preferences',
         startContent: <Icon color="secondary" icon={Settings} size="sm" />,
         onClick: fn(),
+      },
+    ],
+  },
+};
+
+export const RowStyling: Story = {
+  args: {
+    items: [
+      {
+        className: rowStatusRecipe({status: 'error'}),
+        description: '2 failing tests',
+        id: 'suite-auth',
+        isExpanded: true,
+        label: 'auth.test.ts',
+        onClick: fn(),
+        children: [
+          {
+            className: rowStatusRecipe({status: 'error'}),
+            id: 'suite-auth-expired',
+            label: 'rejects expired tokens',
+            onClick: fn(),
+          },
+          {
+            className: rowStatusRecipe({status: 'success'}),
+            id: 'suite-auth-login',
+            label: 'logs in with valid credentials',
+            onClick: fn(),
+          },
+          {
+            className: rowStatusRecipe({status: 'error'}),
+            id: 'suite-auth-refresh',
+            label: 'refreshes the session',
+            onClick: fn(),
+          },
+        ],
+      },
+      {
+        className: rowStatusRecipe({status: 'warning'}),
+        description: '1 flaky test',
+        id: 'suite-billing',
+        label: 'billing.test.ts',
+        onClick: fn(),
+        children: [
+          {
+            className: rowStatusRecipe({status: 'warning'}),
+            id: 'suite-billing-invoice',
+            label: 'generates an invoice',
+            onClick: fn(),
+          },
+        ],
+      },
+      {
+        className: rowStatusRecipe({status: 'success'}),
+        id: 'suite-search',
+        label: 'search.test.ts',
+        onClick: fn(),
+      },
+      {
+        id: 'suite-legacy',
+        label: 'legacy.test.ts',
+        onClick: fn(),
+        style: {fontStyle: 'italic', opacity: 0.6},
       },
     ],
   },

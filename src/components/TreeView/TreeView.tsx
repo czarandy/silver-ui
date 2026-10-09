@@ -382,6 +382,7 @@ export function TreeView({
           <TreeViewItem
             ancestorsIsLast={ancestorsIsLast}
             ariaLabel={item.ariaLabel}
+            className={item.className}
             density={density}
             description={item.description}
             endContent={item.endContent}
@@ -414,6 +415,7 @@ export function TreeView({
             }}
             renderedChildren={renderedChildren}
             startContent={item.startContent}
+            style={item.style}
             tabIndex={activeFocusedId === item.id ? 0 : -1}
             target={item.target}
           />

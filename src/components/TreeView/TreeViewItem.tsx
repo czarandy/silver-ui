@@ -2,7 +2,14 @@
 'use client';
 
 import {ChevronRight} from 'lucide-react';
-import {useCallback, useId, useRef, type ReactNode, type Ref} from 'react';
+import {
+  useCallback,
+  useId,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+  type Ref,
+} from 'react';
 import {Icon} from 'components/Icon';
 import {TreeViewBranches} from 'components/TreeView/TreeViewBranches';
 import {treeViewItemRecipe} from 'components/TreeView/TreeViewItem.recipe';
@@ -20,6 +27,10 @@ interface TreeViewItemProps {
    * Plain-text label used for generated control labels.
    */
   ariaLabel?: string;
+  /**
+   * Class name applied to this item's row.
+   */
+  className?: string;
   /**
    * Spacing density for the item.
    */
@@ -109,6 +120,10 @@ interface TreeViewItemProps {
    */
   startContent?: React.ReactNode;
   /**
+   * Inline styles applied to this item's row.
+   */
+  style?: CSSProperties;
+  /**
    * Roving tab index for this treeitem.
    */
   tabIndex: 0 | -1;
@@ -124,6 +139,7 @@ interface TreeViewItemProps {
 export function TreeViewItem({
   ariaLabel,
   ancestorsIsLast,
+  className,
   density,
   description,
   endContent,
@@ -145,6 +161,7 @@ export function TreeViewItem({
   ref,
   renderedChildren,
   startContent,
+  style,
   tabIndex,
   target,
 }: TreeViewItemProps): React.JSX.Element {
@@ -344,10 +361,14 @@ export function TreeViewItem({
       <div className={styles.rowWrapper}>
         {/* eslint-disable-next-line jsx-a11y-x/click-events-have-key-events -- keyboard interaction is handled by the parent treeitem for roving focus. */}
         <div
-          className={cx('silver-tree-view-item', styles.contentWrapper)}
+          className={cx(
+            'silver-tree-view-item',
+            styles.contentWrapper,
+            className,
+          )}
           onClick={handleRowClick}
           onPointerDown={handlePointerDown}
-          style={{marginLeft}}>
+          style={{...style, marginLeft}}>
           {content}
         </div>
       </div>
