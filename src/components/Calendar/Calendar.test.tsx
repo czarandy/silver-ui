@@ -1,10 +1,10 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {act, render, screen, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {Calendar, type CalendarHandle} from 'components/Calendar/Calendar';
 import {calendarRecipe} from 'components/Calendar/Calendar.recipe';
 import {plainDateCreate} from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {assertNonNull} from 'internal/testHelpers';
 
 function getRangeBackground(day: HTMLElement): Element | null {

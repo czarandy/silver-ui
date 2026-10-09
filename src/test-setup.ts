@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest';
+import 'internal/installTemporalPolyfill';
 
 import {afterEach, vi} from 'vitest';
 import {resetLayerStack} from 'internal/layerStack';

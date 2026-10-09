@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {
   act,
   fireEvent,
@@ -56,6 +55,7 @@ import {
 } from 'components/Table/plugins/sortable';
 import type {TableColumn, TablePlugin} from 'components/Table/types';
 import {useBaseTablePlugins} from 'components/Table/useBaseTablePlugins';
+import {Temporal} from 'internal/temporal';
 
 interface PersonRow extends Record<string, unknown> {
   age: number;

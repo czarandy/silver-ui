@@ -1,3 +1,6 @@
+// Every generated demo module imports this file, so installing Temporal here
+// makes each demo wait for it before rendering (prerender and hydration).
+import '../../../src/internal/installTemporalPolyfill';
 import {composeStories} from '@storybook/react';
 import type {ComponentType, JSX} from 'react';
 

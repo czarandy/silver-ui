@@ -4,7 +4,7 @@
     "declaration": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": ["DOM", "DOM.Iterable", "ES2022", "ESNext.Intl", "ESNext.Temporal"],
     "noEmit": false,
     "outDir": "dist",
     "rootDir": "src"
@@ -15,6 +15,7 @@
     "src/**/*.stories.tsx",
     "src/**/*.test.ts",
     "src/**/*.test.tsx",
+    "src/internal/installTemporalPolyfill.ts",
     "src/internal/testHelpers.ts",
     "src/test-setup.ts"
   ]

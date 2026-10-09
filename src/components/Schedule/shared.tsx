@@ -1,6 +1,5 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {
   Fragment,
   useCallback,
@@ -45,6 +44,7 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cva} from 'styled-system/css';
 import {cx} from 'utils/cx';

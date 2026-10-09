@@ -1,6 +1,5 @@
 'use client';
 
-import type {Temporal} from '@js-temporal/polyfill';
 import {CalendarIcon, X} from 'lucide-react';
 import {
   useCallback,
@@ -47,6 +46,7 @@ import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
+import type {Temporal} from 'internal/temporal';
 import {cx} from 'utils/cx';
 
 export type {DateRange} from 'internal/dateTypes';

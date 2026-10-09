@@ -1,10 +1,10 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {act, render, screen, waitFor, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {useState} from 'react';
 import {describe, expect, it} from 'vitest';
 import {Button} from 'components/Button';
 import {TimeInput} from 'components/TimeInput/TimeInput';
+import {Temporal} from 'internal/temporal';
 
 function Example(): React.JSX.Element {
   const [value, setValue] = useState<Temporal.PlainTime | null>(

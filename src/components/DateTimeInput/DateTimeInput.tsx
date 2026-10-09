@@ -1,6 +1,5 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {
   useCallback,
   useId,
@@ -24,6 +23,7 @@ import {
   type DateFormat,
   type PlainDate,
 } from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 

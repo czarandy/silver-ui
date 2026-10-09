@@ -1,19 +1,22 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {useSyncExternalStore} from 'react';
 import type {Instant} from 'components/Schedule/types';
+import {Temporal} from 'internal/temporal';
 
 const UPDATE_INTERVAL_MS = 60 * 1000;
 const listeners = new Set<() => void>();
 let interval: ReturnType<typeof setInterval> | null = null;
-let currentTime = getCurrentTime();
+// Read lazily rather than at module load: silver-ui must be importable before
+// the app installs a Temporal polyfill (README: "Temporal").
+let currentTime: Instant | null = null;
 
 function getCurrentTime(): Instant {
   return Temporal.Now.instant().epochMilliseconds;
 }
 
 function getSnapshot(): Instant {
+  currentTime ??= getCurrentTime();
   return currentTime;
 }
 

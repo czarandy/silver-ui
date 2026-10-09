@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "lib": ["DOM", "DOM.Iterable", "ES2022", "ESNext.Intl", "ESNext.Temporal"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
@@ -21,6 +21,7 @@
       "internal": ["./src/internal/index"],
       "internal/*": ["./src/internal/*"],
       "relay/*": ["./src/relay/*"],
+      "silver-ui": ["./src/index.ts"],
       "themes/*": ["./src/themes/*"],
       "utils/*": ["./src/utils/*"],
       "styled-system/*": ["./styled-system/*"]

@@ -1,7 +1,7 @@
-import {Temporal} from '@js-temporal/polyfill';
 import type {Instant} from 'components/Schedule/types';
 import type {ColorName} from 'internal/colorNames';
 import type {PlainDate} from 'internal/dateTypes';
+import {Temporal} from 'internal/temporal';
 
 const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
 

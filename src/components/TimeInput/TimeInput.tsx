@@ -1,6 +1,5 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {Clock, X} from 'lucide-react';
 import {
   useId,
@@ -39,6 +38,7 @@ import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
 } from 'internal/readOnlyInteraction';
+import {Temporal} from 'internal/temporal';
 import {cx} from 'utils/cx';
 
 const styles = timeInputRecipe();

@@ -19,7 +19,83 @@ pnpm add silver-ui
 yarn add silver-ui
 ```
 
-silver-ui requires **React 19+** as a peer dependency.
+silver-ui requires **React 19+** as a peer dependency, and the **Temporal**
+API (see [Temporal](#temporal) below).
+
+## Temporal
+
+silver-ui's date and time components use the
+[Temporal API](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Temporal).
+silver-ui does not bundle a polyfill: it uses the global `Temporal`, which is
+built into Chrome/Edge (144+) and Firefox (139+). Where it is missing — Safari
+(including every browser on iOS), and Node — your app installs
+[`@js-temporal/polyfill`](https://www.npmjs.com/package/@js-temporal/polyfill)
+as the global. Rendering a silver-ui component that needs Temporal without one
+throws an error pointing here.
+
+**1. Add the polyfill:**
+
+```bash
+npm install @js-temporal/polyfill
+```
+
+**2. Create a module that installs it only when needed.** Browsers with native
+Temporal skip the download entirely; elsewhere the polyfill loads as a separate
+chunk.
+
+```ts
+// src/temporal.ts
+if (!('Temporal' in globalThis)) {
+  const polyfill = await import('@js-temporal/polyfill');
+  Object.assign(globalThis, {Temporal: polyfill.Temporal});
+  // Lets Intl.DateTimeFormat#format accept the polyfill's Temporal objects.
+  Object.assign(Intl, {DateTimeFormat: polyfill.Intl.DateTimeFormat});
+}
+
+export {};
+```
+
+**3. Import it in the entry file that renders your app:**
+
+```tsx
+// src/main.tsx
+import './temporal';
+import {createRoot} from 'react-dom/client';
+import App from './App';
+
+createRoot(document.getElementById('root')!).render(<App />);
+```
+
+How the `await` makes this safe: a module with a top-level `await` delays
+every module that imports it, so `main.tsx`'s own code — and therefore the
+first render — runs only once the polyfill is installed. silver-ui reads
+`Temporal` when components render, never at import time, so nothing else is
+needed for silver-ui itself.
+
+Note that sibling imports are _not_ delayed: in the example above, `App`'s
+module code may run before the polyfill is installed. If one of your own
+modules uses `Temporal` at its top level (outside any function or component),
+add `import './temporal';` to that module too.
+
+**4. TypeScript:** silver-ui's types use the global `Temporal` types that
+ship with TypeScript 6. Add them to `lib` in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ES2022", "ESNext.Temporal"]
+  }
+}
+```
+
+Leave out `ESNext.Intl`: its Temporal-aware `Intl.DateTimeFormat` types
+conflict with the polyfill's own declarations unless `skipLibCheck` is on.
+
+Top-level `await` needs an ES2022 module target, which Vite and other modern
+bundlers support by default. If your `package.json` declares `"sideEffects"`,
+list `src/temporal.ts` there too, or bundlers will drop the side-effect-only
+`import './temporal'`. Once every browser you support ships Temporal,
+delete `src/temporal.ts` and its imports.
 
 ## Usage
 

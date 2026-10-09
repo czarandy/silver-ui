@@ -1,5 +1,4 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {RelayEnvironmentProvider} from 'react-relay';
 import {Environment, Network, RecordSource, Store} from 'relay-runtime';
@@ -12,6 +11,7 @@ import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {HStack, VStack} from 'components/Stack';
 import {Text} from 'components/Text';
+import {Temporal} from 'internal/temporal';
 import type {PreloadedSurfaceStoryEntryPointProps} from 'relay/PreloadedSurfacesStoryContent';
 import {createJSResourceReference} from 'relay/createJSResourceReference';
 import {usePreloadedDialog} from 'relay/usePreloadedDialog';

@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Check, PackageCheck, Truck} from 'lucide-react';
 import {Badge} from 'components/Badge';
@@ -9,6 +8,7 @@ import {
   type TimelineItemConfig,
   type TimelineProps,
 } from 'components/Timeline/Timeline';
+import {Temporal} from 'internal/temporal';
 
 const shippingItems: TimelineItemConfig[] = [
   {

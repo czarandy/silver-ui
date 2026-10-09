@@ -1,9 +1,9 @@
 'use client';
 
-import {Temporal} from '@js-temporal/polyfill';
 import {useEffect, useMemo, useRef, useState} from 'react';
 import {Button} from 'components/Button';
 import {timeInputRecipe} from 'components/TimeInput/TimeInput.recipe';
+import {Temporal} from 'internal/temporal';
 
 const styles = timeInputRecipe();
 const range = (length: number): number[] => Array.from({length}, (_, i) => i);

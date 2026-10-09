@@ -1,6 +1,5 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {useState} from 'react';
 import {
@@ -8,6 +7,7 @@ import {
   type PlainTime,
   type TimeInputProps,
 } from 'components/TimeInput/TimeInput';
+import {Temporal} from 'internal/temporal';
 
 function time(value: string): PlainTime {
   return Temporal.PlainTime.from(value);

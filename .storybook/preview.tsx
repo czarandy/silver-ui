@@ -2,6 +2,7 @@ import type {ReactRenderer} from '@storybook/react-vite';
 import type {DecoratorFunction, Preview} from 'storybook/internal/types';
 import {css} from 'styled-system/css';
 import '../src/index.css';
+import '../src/internal/installTemporalPolyfill';
 
 const canvasClassName = css({
   bg: 'bg',

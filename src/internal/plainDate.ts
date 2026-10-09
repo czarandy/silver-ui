@@ -1,6 +1,6 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
 import type {PlainDate} from 'internal/dateTypes';
+import {Temporal} from 'internal/temporal';
 
 export type {PlainDate} from 'internal/dateTypes';
 

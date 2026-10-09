@@ -93,7 +93,7 @@ export default tseslint.config(
         {
           name: 'Date',
           message:
-            'Use Temporal from @js-temporal/polyfill instead of raw JavaScript Date.',
+            "Use Temporal (from 'internal/temporal') instead of raw JavaScript Date.",
         },
       ],
     },

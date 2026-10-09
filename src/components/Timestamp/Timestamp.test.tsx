@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import {render, screen} from '@testing-library/react';
 import {describe, expect, it, vi} from 'vitest';
 import {Timestamp} from 'components/Timestamp/Timestamp';
@@ -8,6 +7,7 @@ import {
   formatTimestamp,
   resolveInstant,
 } from 'components/Timestamp/Timestamp.utils';
+import {Temporal} from 'internal/temporal';
 
 // A fixed reference moment used across the deterministic unit tests.
 const REFERENCE_ISO = '2025-03-21T14:51:53Z';

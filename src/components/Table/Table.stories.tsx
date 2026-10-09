@@ -1,4 +1,3 @@
-import {Temporal} from '@js-temporal/polyfill';
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {RotateCcw, Settings2} from 'lucide-react';
 import {useMemo, useState} from 'react';
@@ -40,6 +39,7 @@ import {
   useTableSortableState,
 } from 'components/Table/plugins/sortable';
 import type {TableColumn, TableDividers} from 'components/Table/types';
+import {Temporal} from 'internal/temporal';
 
 interface TaskRow extends Record<string, unknown> {
   budget: number;
