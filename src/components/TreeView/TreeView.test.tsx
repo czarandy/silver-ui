@@ -793,6 +793,174 @@ describe('TreeView', () => {
     expect(screen.getByTestId('tree')).toHaveStyle({maxWidth: '320px'});
   });
 
+  describe('per-item row styling', () => {
+    /* eslint-disable testing-library/no-node-access -- row styling is applied to the visual row wrapper */
+    function getRow(label: string): HTMLElement | null {
+      return screen.getByText(label).closest('.silver-tree-view-item');
+    }
+    /* eslint-enable testing-library/no-node-access */
+
+    const styledItems: TreeViewItemData[] = [
+      {
+        children: [
+          {
+            className: 'child-row',
+            id: 'child-1',
+            label: 'Child 1',
+            style: {color: 'rgb(0, 0, 255)'},
+          },
+          {id: 'child-2', label: 'Child 2'},
+        ],
+        className: 'parent-row',
+        id: 'parent',
+        isExpanded: true,
+        label: 'Parent',
+        style: {backgroundColor: 'rgb(255, 0, 0)'},
+      },
+      {
+        className: 'sibling-row',
+        id: 'sibling',
+        label: 'Sibling',
+      },
+    ];
+
+    it('forwards className and style to the item row', () => {
+      render(<TreeView items={styledItems} />);
+
+      const parentRow = getRow('Parent');
+      expect(parentRow).toHaveClass('silver-tree-view-item', 'parent-row');
+      expect(parentRow).toHaveStyle({backgroundColor: 'rgb(255, 0, 0)'});
+      expect(screen.getByRole('treeitem', {name: /Parent/})).not.toHaveClass(
+        'parent-row',
+      );
+    });
+
+    it('keeps the internal row classes alongside consumer classes', () => {
+      const {rerender} = render(<TreeView items={simpleItems} />);
+      const defaultClasses = getRow('Item A')?.className.split(' ') ?? [];
+
+      rerender(
+        <TreeView
+          items={[{className: 'custom-row', id: 'a', label: 'Item A'}]}
+        />,
+      );
+
+      const row = getRow('Item A');
+      expect(defaultClasses.length).toBeGreaterThan(1);
+      expect(row).toHaveClass(...defaultClasses, 'custom-row');
+    });
+
+    it('applies row styling independently to siblings and nested rows', () => {
+      render(<TreeView items={styledItems} />);
+
+      const parentRow = getRow('Parent');
+      const childOneRow = getRow('Child 1');
+      const childTwoRow = getRow('Child 2');
+      const siblingRow = getRow('Sibling');
+
+      expect(childOneRow).toHaveClass('child-row');
+      expect(childOneRow).not.toHaveClass('parent-row');
+      expect(childOneRow).toHaveStyle({color: 'rgb(0, 0, 255)'});
+      expect(childOneRow?.style.backgroundColor).toBe('');
+
+      expect(childTwoRow).not.toHaveClass('parent-row');
+      expect(childTwoRow).not.toHaveClass('child-row');
+      expect(childTwoRow?.style).toHaveLength(1);
+      expect(childTwoRow?.style.marginLeft).not.toBe('');
+
+      expect(siblingRow).toHaveClass('sibling-row');
+      expect(siblingRow).not.toHaveClass('parent-row');
+      expect(siblingRow?.style.backgroundColor).toBe('');
+
+      expect(parentRow).not.toHaveClass('child-row');
+      expect(parentRow).not.toHaveClass('sibling-row');
+      expect(parentRow?.style.color).toBe('');
+    });
+
+    it('preserves row indentation when the style sets a margin', () => {
+      render(
+        <TreeView
+          items={[
+            {
+              children: [
+                {
+                  id: 'child',
+                  label: 'Child',
+                  style: {marginLeft: '100px', paddingTop: '4px'},
+                },
+              ],
+              id: 'parent',
+              isExpanded: true,
+              label: 'Parent',
+              style: {marginLeft: '100px'},
+            },
+          ]}
+        />,
+      );
+
+      expect(getRow('Parent')).toHaveStyle({marginLeft: 'calc(0 * 16px)'});
+      expect(getRow('Child')).toHaveStyle({
+        marginLeft: 'calc(1 * 16px + 24px)',
+        paddingTop: '4px',
+      });
+    });
+
+    it('keeps selection, expansion, and keyboard behavior for styled rows', async () => {
+      const user = userEvent.setup();
+      const onSelectionChange = vi.fn();
+      const onChildClick = vi.fn();
+      render(
+        <TreeView
+          items={[
+            {
+              children: [
+                {
+                  className: 'child-row',
+                  id: 'child',
+                  label: 'Child',
+                  onClick: onChildClick,
+                  style: {color: 'rgb(0, 0, 255)'},
+                },
+              ],
+              className: 'parent-row',
+              id: 'parent',
+              label: 'Parent',
+              style: {backgroundColor: 'rgb(255, 0, 0)'},
+            },
+            {className: 'sibling-row', id: 'sibling', label: 'Sibling'},
+          ]}
+          onSelectionChange={onSelectionChange}
+          selectedKey="sibling"
+        />,
+      );
+
+      const parent = screen.getByRole('treeitem', {name: /Parent/});
+      expect(parent).toHaveAttribute('aria-expanded', 'false');
+      const sibling = screen.getByRole('treeitem', {name: /Sibling/});
+      expect(sibling).toHaveAttribute('aria-selected', 'true');
+      expect(sibling).toHaveAttribute('tabindex', '0');
+
+      await user.click(screen.getByText('Parent'));
+      expect(onSelectionChange).toHaveBeenCalledExactlyOnceWith('parent');
+
+      await user.click(
+        screen.getByRole('button', {name: 'Toggle Parent children'}),
+      );
+      expect(parent).toHaveAttribute('aria-expanded', 'true');
+
+      act(() => {
+        parent.focus();
+      });
+      await user.keyboard('{ArrowDown}');
+      const child = screen.getByRole('treeitem', {name: /Child/});
+      expect(child).toHaveFocus();
+
+      await user.keyboard('{Enter}');
+      expect(onChildClick).toHaveBeenCalledOnce();
+      expect(onSelectionChange).toHaveBeenLastCalledWith('child');
+    });
+  });
+
   it('separates item click from child toggle when both exist', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();

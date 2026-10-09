@@ -1,4 +1,4 @@
-import type {MouseEvent, ReactNode} from 'react';
+import type {CSSProperties, MouseEvent, ReactNode} from 'react';
 
 export type TreeViewDensity = 'balanced' | 'compact' | 'spacious';
 
@@ -12,6 +12,11 @@ export interface TreeViewItemData {
    * Nested child items. Items with children can be expanded or collapsed.
    */
   children?: TreeViewItemData[];
+  /**
+   * Class name applied to this item's row. It does not apply to the item's
+   * nested child rows.
+   */
+  className?: string;
   /**
    * Secondary description text displayed below the label.
    */
@@ -50,6 +55,12 @@ export interface TreeViewItemData {
    * Content rendered before the label.
    */
   startContent?: ReactNode;
+  /**
+   * Inline styles applied to this item's row. It does not apply to the item's
+   * nested child rows. Row indentation is preserved, so `marginLeft` is
+   * ignored.
+   */
+  style?: CSSProperties;
   /**
    * Link target. Only used with `href`.
    */
