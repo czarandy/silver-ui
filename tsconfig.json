@@ -21,6 +21,7 @@
       "internal": ["./src/internal/index"],
       "internal/*": ["./src/internal/*"],
       "relay/*": ["./src/relay/*"],
+      "silver-ui": ["./src/index.ts"],
       "themes/*": ["./src/themes/*"],
       "utils/*": ["./src/utils/*"],
       "styled-system/*": ["./styled-system/*"]
