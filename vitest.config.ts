@@ -42,8 +42,8 @@ export default defineConfig({
         },
       },
       {
-        // Layout-dependent behavior (CSS anchor positioning, `position-try`
-        // fallbacks) that jsdom cannot compute runs in real Chromium.
+        // Layout-dependent behavior that jsdom cannot compute runs in real
+        // Chromium, with checkbox hit-area regressions also covered in WebKit.
         extends: true,
         // Pre-bundle up front: dependencies discovered mid-run make Vite
         // reload the page, which can load a second copy of React.
@@ -68,7 +68,16 @@ export default defineConfig({
             enabled: true,
             headless: true,
             provider: playwright(),
-            instances: [{browser: 'chromium'}],
+            instances: [
+              {browser: 'chromium'},
+              {
+                browser: 'webkit',
+                name: 'browser-webkit',
+                include: [
+                  'src/components/CheckboxInput/CheckboxInput.browser.test.tsx',
+                ],
+              },
+            ],
             viewport: {width: 1280, height: 720},
             screenshotFailures: false,
           },

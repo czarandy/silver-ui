@@ -270,26 +270,22 @@ describe('Item', () => {
       />,
     );
 
-    expect(screen.getByText('A long label')).toHaveStyle({
-      WebkitLineClamp: '2',
-    });
-    expect(screen.getByText('A long description')).toHaveStyle({
-      WebkitLineClamp: '3',
-    });
+    expect(screen.getByText('A long label')).toHaveStyle(
+      '-webkit-line-clamp: 2',
+    );
+    expect(screen.getByText('A long description')).toHaveStyle(
+      '-webkit-line-clamp: 3',
+    );
   });
 
   it('auto-truncates string label and description to one line', () => {
     render(<Item description="Description" label="Label" />);
 
-    expect(screen.getByText('Label')).not.toHaveStyle({
-      WebkitLineClamp: '2',
-    });
-    expect(screen.getByText('Description')).not.toHaveStyle({
-      WebkitLineClamp: '2',
-    });
-    expect(screen.getByText('Label')).not.toHaveStyle({
-      WebkitLineClamp: '3',
-    });
+    expect(screen.getByText('Label')).not.toHaveStyle('-webkit-line-clamp: 2');
+    expect(screen.getByText('Description')).not.toHaveStyle(
+      '-webkit-line-clamp: 2',
+    );
+    expect(screen.getByText('Label')).not.toHaveStyle('-webkit-line-clamp: 3');
   });
 
   it('forwards aria-current to the link element', () => {
