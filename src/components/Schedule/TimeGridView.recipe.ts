@@ -224,7 +224,7 @@ export const scheduleTimeGridViewRecipe = sva({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       _hover: {
-        bg: 'bg.muted',
+        bg: 'bg.hover',
       },
     },
     rowContents: {

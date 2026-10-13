@@ -68,6 +68,7 @@ import type {
 } from 'components/Schedule/types';
 import type {DayOfWeek} from 'internal/dateTypes';
 import {Temporal} from 'internal/temporal';
+import {token, type Token} from 'styled-system/tokens';
 
 class ErrorBoundary extends Component<
   {children: ReactNode},
@@ -2196,6 +2197,18 @@ describe('Schedule', () => {
       }),
     ).toHaveAttribute('aria-colindex', '2');
   });
+
+  it.each([
+    ['month', scheduleMonthlyViewRecipe().monthSeeMoreButton],
+    ['time grid all-day', scheduleTimeGridViewRecipe().allDaySeeMoreButton],
+  ])(
+    'gives the %s see-more button a defined hover background token',
+    (_view, className) => {
+      const hoverToken = /hover:silver-bg_(\S+)/.exec(className ?? '')?.[1];
+      expect(hoverToken).toBeDefined();
+      expect(token(`colors.${hoverToken}` as Token)).toBeDefined();
+    },
+  );
 
   it('baseline-aligns the weekday and date number in time grid headers', () => {
     render(

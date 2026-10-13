@@ -107,7 +107,7 @@ export const scheduleMonthlyViewRecipe = sva({
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
       _hover: {
-        bg: 'bg.muted',
+        bg: 'bg.hover',
       },
     },
     monthPopoverContent: {
