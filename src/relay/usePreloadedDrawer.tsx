@@ -16,13 +16,15 @@ export type UsePreloadedDrawerOptions = Omit<
 > &
   PreloadedContentOptions & {
     /**
-     * Consulted once, synchronously, each time the user tries to dismiss the
-     * drawer: Escape, a backdrop click, or the close button that `LayoutHeader`
-     * renders. Return `false` to keep the drawer open, for example after
-     * asking whether to discard unsaved changes. Calling `hide()` or the
-     * EntryPoint's `close` prop always closes the drawer without consulting it.
+     * Called once, synchronously, before the drawer hides in response to the
+     * user: Escape, a backdrop click, or the close button that `LayoutHeader`
+     * renders. Its return value can veto the hide: return `false` to keep the
+     * drawer open, for example after asking whether to discard unsaved
+     * changes. Returning `true`, or omitting this option, lets it close.
+     * Calling `hide()` or the EntryPoint's `close` prop always closes the
+     * drawer without calling it.
      */
-    shouldDismiss?: () => boolean;
+    onHide?: () => boolean;
   };
 
 export interface PreloadedDrawerController<TEntryPoint> {
@@ -44,7 +46,7 @@ export function usePreloadedDrawer<TEntryPoint>(
   {
     errorFallback,
     loadingFallback,
-    shouldDismiss,
+    onHide,
     ...drawerProps
   }: UsePreloadedDrawerOptions,
 ): PreloadedDrawerController<TEntryPoint> {
@@ -63,7 +65,7 @@ export function usePreloadedDrawer<TEntryPoint>(
       {...drawerProps}
       isOpen={isOpen}
       onOpenChange={open => {
-        if (!open && isOpen && shouldDismiss?.() !== false) {
+        if (!open && isOpen && onHide?.() !== false) {
           hide();
         }
       }}>
