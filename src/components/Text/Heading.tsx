@@ -11,6 +11,7 @@ import {
 import type {
   TextColor,
   TextDisplay,
+  TextWeight,
   TextWordBreak,
   TextWrap,
 } from 'components/Text/Text';
@@ -96,6 +97,10 @@ export interface HeadingProps extends NativeHeadingProps {
    */
   truncateTooltip?: false | HeadingTruncateTooltipPlacement;
   /**
+   * Font weight override. When omitted, preserves the heading's default weight.
+   */
+  weight?: TextWeight;
+  /**
    * Word-break strategy.
    */
   wordBreak?: TextWordBreak;
@@ -114,6 +119,7 @@ function BaseHeading({
   level,
   accessibilityLevel,
   color = 'primary',
+  weight,
   display = 'block',
   maxLines: _maxLines,
   truncateTooltip: _truncateTooltip,
@@ -136,6 +142,7 @@ function BaseHeading({
         headingRecipe({
           level,
           color,
+          weight,
           display,
           textWrap,
           hasStrikethrough,
@@ -155,6 +162,7 @@ function TruncatedHeading({
   level,
   accessibilityLevel,
   color = 'primary',
+  weight,
   display: _display,
   maxLines = 1,
   truncateTooltip = 'above',
@@ -216,6 +224,7 @@ function TruncatedHeading({
           headingRecipe({
             level,
             color,
+            weight,
             display: 'block',
             wordBreak: resolvedWordBreak,
             textWrap,

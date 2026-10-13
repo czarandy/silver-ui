@@ -4,6 +4,14 @@ import {token} from 'styled-system/tokens';
 const textColorPrimary = `var(--silver-text-color, ${token.var('colors.fg')})`;
 const textColorMuted = `var(--silver-text-color-muted, ${token.var('colors.fg.muted')})`;
 
+const weightVariants = {
+  normal: {fontWeight: 'normal'},
+  medium: {fontWeight: 'medium'},
+  semibold: {fontWeight: 'semibold'},
+  bold: {fontWeight: 'bold'},
+  inherit: {fontWeight: 'inherit'},
+} as const;
+
 export const textRecipe = cva({
   base: {
     m: 0,
@@ -80,13 +88,7 @@ export const textRecipe = cva({
       active: {color: 'primary'},
       inherit: {color: 'inherit'},
     },
-    weight: {
-      normal: {fontWeight: 'normal'},
-      medium: {fontWeight: 'medium'},
-      semibold: {fontWeight: 'semibold'},
-      bold: {fontWeight: 'bold'},
-      inherit: {fontWeight: 'inherit'},
-    },
+    weight: weightVariants,
     display: {
       inline: {display: 'inline'},
       block: {display: 'block'},
@@ -155,6 +157,7 @@ export const headingRecipe = cva({
       5: {fontSize: 'lg', lineHeight: 'snug'},
       6: {fontSize: 'md', lineHeight: 'snug'},
     },
+    weight: weightVariants,
     color: {
       primary: {color: textColorPrimary},
       secondary: {color: textColorMuted},

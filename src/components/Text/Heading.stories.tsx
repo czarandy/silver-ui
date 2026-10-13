@@ -1,5 +1,6 @@
 import type {Decorator, Meta, StoryObj} from '@storybook/react-vite';
 import type {JSX} from 'react';
+import {VStack} from 'components/Stack';
 import {Heading} from 'components/Text/Heading';
 
 const constrainWidth =
@@ -37,6 +38,10 @@ const meta: Meta<typeof Heading> = {
       control: {type: 'select'},
       options: ['inline', 'block'],
     },
+    weight: {
+      control: {type: 'select'},
+      options: ['normal', 'medium', 'semibold', 'bold', 'inherit'],
+    },
     hasStrikethrough: {control: 'boolean'},
     children: {control: 'text'},
   },
@@ -68,6 +73,23 @@ export const Muted: Story = {
     color: 'secondary',
     children: 'Secondary heading',
   },
+};
+
+export const Weights: Story = {
+  render: ({level, weight: _weight, ...args}): JSX.Element => (
+    <VStack align="start" gap={3}>
+      <Heading {...args} level={level}>
+        Default heading weight
+      </Heading>
+      {(['normal', 'medium', 'semibold', 'bold', 'inherit'] as const).map(
+        weight => (
+          <Heading key={weight} {...args} level={level} weight={weight}>
+            {weight} heading weight
+          </Heading>
+        ),
+      )}
+    </VStack>
+  ),
 };
 
 export const AccessibilityLevel: Story = {
