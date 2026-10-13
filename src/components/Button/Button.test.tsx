@@ -57,6 +57,9 @@ describe('Button', () => {
     const {rerender} = render(<Button label="Primary" variant="primary" />);
     expect(screen.getByRole('button', {name: 'Primary'})).toBeInTheDocument();
 
+    rerender(<Button label="Outline" variant="outline" />);
+    expect(screen.getByRole('button', {name: 'Outline'})).toBeInTheDocument();
+
     rerender(<Button label="Secondary" variant="secondary" />);
     expect(screen.getByRole('button', {name: 'Secondary'})).toBeInTheDocument();
 
@@ -66,6 +69,49 @@ describe('Button', () => {
     rerender(<Button label="Destructive" variant="destructive" />);
     expect(
       screen.getByRole('button', {name: 'Destructive'}),
+    ).toBeInTheDocument();
+  });
+
+  it('supports outline link buttons', () => {
+    render(
+      <Button href="/privacy" label="Your Privacy Choices" variant="outline" />,
+    );
+
+    expect(
+      screen.getByRole('link', {name: 'Your Privacy Choices'}),
+    ).toHaveAttribute('href', '/privacy');
+  });
+
+  it.each(['disabled', 'loading'] as const)(
+    'prevents interaction with an outline button that is %s',
+    async state => {
+      const user = userEvent.setup();
+      const onClick = vi.fn();
+      render(
+        <Button
+          isDisabled={state === 'disabled'}
+          isLoading={state === 'loading'}
+          label="Your Privacy Choices"
+          onClick={onClick}
+          variant="outline"
+        />,
+      );
+
+      const button = screen.getByRole('button', {name: 'Your Privacy Choices'});
+      expect(button).toBeDisabled();
+      await user.click(button);
+      expect(onClick).not.toHaveBeenCalled();
+    },
+  );
+
+  it('announces loading on an outline button', () => {
+    render(<Button isLoading label="Your Privacy Choices" variant="outline" />);
+
+    expect(
+      screen.getByRole('button', {name: 'Your Privacy Choices'}),
+    ).toHaveAttribute('aria-busy', 'true');
+    expect(
+      screen.getByRole('status', {hidden: true, name: 'Loading'}),
     ).toBeInTheDocument();
   });
 
