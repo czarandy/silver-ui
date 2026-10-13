@@ -3,6 +3,7 @@ import type {ReactElement, ReactNode} from 'react';
 import {RelayEnvironmentProvider, type EntryPointProps} from 'react-relay';
 import {Environment, Network, RecordSource, Store} from 'relay-runtime';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
 import {preloadedSurfaceLoadingFallbackRecipe} from 'relay/PreloadedSurfaceLoadingFallback.recipe';
 import {createJSResourceReference} from 'relay/createJSResourceReference';
 import {usePreloadedDialog} from 'relay/usePreloadedDialog';
@@ -57,6 +58,25 @@ function TestEntryPointRoot({
   );
 }
 
+function GuardedTestEntryPointRoot({
+  extraProps,
+  props,
+}: TestEntryPointProps): React.JSX.Element {
+  return (
+    <Layout
+      content={
+        <LayoutContent>
+          <span>{`${extraProps.id}:${props.label}`}</span>
+          <button onClick={props.close} type="button">
+            Close loaded content
+          </button>
+        </LayoutContent>
+      }
+      header={<LayoutHeader title="Guarded content" />}
+    />
+  );
+}
+
 function createTestEntryPoint(
   importModule = vi.fn(async () => {
     await Promise.resolve();
@@ -105,13 +125,16 @@ function renderWithRelay(children: ReactNode): ReturnType<typeof render> {
 
 function DrawerFixture({
   entryPoint,
+  onBeforeHide,
 }: {
   entryPoint: TestEntryPoint;
+  onBeforeHide?: () => boolean;
 }): ReactElement {
   const drawer = usePreloadedDrawer(entryPoint, {
     'data-testid': 'test-drawer',
     label: 'Test drawer',
     placement: 'end',
+    onBeforeHide,
     size: 420,
   });
 
@@ -140,10 +163,15 @@ function DrawerFixture({
 
 function DialogFixture({
   entryPoint,
+  onBeforeHide,
 }: {
   entryPoint: TestEntryPoint;
+  onBeforeHide?: () => boolean;
 }): ReactElement {
-  const dialog = usePreloadedDialog(entryPoint, {label: 'Test dialog'});
+  const dialog = usePreloadedDialog(entryPoint, {
+    label: 'Test dialog',
+    onBeforeHide,
+  });
 
   return (
     <>
@@ -317,6 +345,83 @@ describe('preloaded Relay surfaces', () => {
 
     expect(await screen.findByText('alpha:drawer')).toBeVisible();
     expect(importModule).toHaveBeenCalledTimes(2);
+  });
+
+  it('calls onBeforeHide once per user dismiss of a drawer', async () => {
+    const {entryPoint} = createTestEntryPoint(
+      vi.fn(async () => {
+        await Promise.resolve();
+        return {default: GuardedTestEntryPointRoot};
+      }),
+    );
+    const onBeforeHide = vi.fn(() => false);
+    renderWithRelay(
+      <DrawerFixture entryPoint={entryPoint} onBeforeHide={onBeforeHide} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
+    expect(await screen.findByText('alpha:drawer')).toBeVisible();
+    const drawer = screen.getByTestId('test-drawer');
+
+    fireEvent.keyDown(document, {key: 'Escape'});
+    expect(onBeforeHide).toHaveBeenCalledTimes(1);
+    expect(drawer).toHaveAttribute('open');
+
+    // jsdom has no layout, so a zero-size rect puts any positive point on the
+    // backdrop.
+    fireEvent.pointerDown(drawer, {clientX: 5, clientY: 5});
+    fireEvent.click(drawer, {clientX: 5, clientY: 5, detail: 1});
+    expect(onBeforeHide).toHaveBeenCalledTimes(2);
+    expect(drawer).toHaveAttribute('open');
+
+    fireEvent.click(screen.getByRole('button', {name: 'Close'}));
+    expect(onBeforeHide).toHaveBeenCalledTimes(3);
+    expect(drawer).toHaveAttribute('open');
+
+    onBeforeHide.mockReturnValue(true);
+    fireEvent.click(screen.getByRole('button', {name: 'Close'}));
+    expect(onBeforeHide).toHaveBeenCalledTimes(4);
+    await waitFor(() => expect(drawer).not.toHaveAttribute('open'));
+  });
+
+  it('closes a drawer programmatically without calling onBeforeHide', async () => {
+    const {entryPoint} = createTestEntryPoint();
+    await entryPoint.root.load();
+    const onBeforeHide = vi.fn(() => false);
+    renderWithRelay(
+      <DrawerFixture entryPoint={entryPoint} onBeforeHide={onBeforeHide} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
+    expect(await screen.findByText('alpha:drawer')).toBeVisible();
+    fireEvent.click(screen.getByRole('button', {name: 'Close loaded content'}));
+
+    expect(onBeforeHide).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(screen.getByTestId('test-drawer')).not.toHaveAttribute('open'),
+    );
+  });
+
+  it('lets onBeforeHide veto hiding a preloaded dialog', async () => {
+    const {entryPoint} = createTestEntryPoint();
+    await entryPoint.root.load();
+    const onBeforeHide = vi.fn(() => false);
+    renderWithRelay(
+      <DialogFixture entryPoint={entryPoint} onBeforeHide={onBeforeHide} />,
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Show dialog'}));
+    expect(await screen.findByText('alpha:dialog')).toBeVisible();
+    const dialog = screen.getByRole('dialog', {name: 'Test dialog'});
+
+    fireEvent.keyDown(document, {key: 'Escape'});
+    expect(onBeforeHide).toHaveBeenCalledTimes(1);
+    expect(dialog).toHaveAttribute('open');
+
+    onBeforeHide.mockReturnValue(true);
+    fireEvent.keyDown(document, {key: 'Escape'});
+    expect(onBeforeHide).toHaveBeenCalledTimes(2);
+    await waitFor(() => expect(dialog).not.toHaveAttribute('open'));
   });
 
   it('renders a preloaded dialog', async () => {

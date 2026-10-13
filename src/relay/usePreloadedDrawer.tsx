@@ -14,7 +14,18 @@ export type UsePreloadedDrawerOptions = Omit<
   DrawerProps,
   'children' | 'isOpen' | 'onOpenChange'
 > &
-  PreloadedContentOptions;
+  PreloadedContentOptions & {
+    /**
+     * Called once, synchronously, before the drawer hides in response to the
+     * user: Escape, a backdrop click, or the close button that `LayoutHeader`
+     * renders. Its return value can veto the hide: return `false` to keep the
+     * drawer open, for example after asking whether to discard unsaved
+     * changes. Returning `true`, or omitting this option, lets it close.
+     * Calling `hide()` or the EntryPoint's `close` prop always closes the
+     * drawer without calling it.
+     */
+    onBeforeHide?: () => boolean;
+  };
 
 export interface PreloadedDrawerController<TEntryPoint> {
   element: ReactNode;
@@ -32,7 +43,12 @@ export interface PreloadedDrawerController<TEntryPoint> {
  */
 export function usePreloadedDrawer<TEntryPoint>(
   entryPoint: TEntryPoint,
-  {errorFallback, loadingFallback, ...drawerProps}: UsePreloadedDrawerOptions,
+  {
+    errorFallback,
+    loadingFallback,
+    onBeforeHide,
+    ...drawerProps
+  }: UsePreloadedDrawerOptions,
 ): PreloadedDrawerController<TEntryPoint> {
   const controller = usePreloadedEntryPoint(entryPoint, {
     errorFallback,
@@ -49,7 +65,7 @@ export function usePreloadedDrawer<TEntryPoint>(
       {...drawerProps}
       isOpen={isOpen}
       onOpenChange={open => {
-        if (!open) {
+        if (!open && isOpen && onBeforeHide?.() !== false) {
           hide();
         }
       }}>
