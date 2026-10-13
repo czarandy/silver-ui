@@ -138,6 +138,37 @@ export const Drawer: Story = {
   },
 };
 
+export const DrawerDismissGuard: Story = {
+  render: () => {
+    const drawer = usePreloadedDrawer(drawerEntryPoint, {
+      label: 'Guarded preloaded drawer example',
+      placement: 'end',
+      shouldDismiss: () => window.confirm('Leave without submitting?'),
+      size: 420,
+    });
+
+    return (
+      <StoryFrame>
+        <Text as="p" color="secondary">
+          Escape, a backdrop click, or the header close button asks before
+          closing. The Done and Cancel buttons call the EntryPoint&apos;s close
+          prop, which never asks.
+        </Text>
+        <Button
+          label="Open guarded drawer"
+          onClick={() =>
+            drawer.show(
+              {surface: 'drawer', title: 'Guarded drawer'},
+              {message: 'Dismissing this drawer asks for confirmation first.'},
+            )
+          }
+        />
+        {drawer.element}
+      </StoryFrame>
+    );
+  },
+};
+
 export const Dialog: Story = {
   render: () => {
     const dialog = usePreloadedDialog(dialogEntryPoint, {

@@ -14,7 +14,16 @@ export type UsePreloadedDialogOptions = Omit<
   DialogProps,
   'children' | 'isOpen' | 'onOpenChange'
 > &
-  PreloadedContentOptions;
+  PreloadedContentOptions & {
+    /**
+     * Consulted once, synchronously, each time the user tries to dismiss the
+     * dialog: Escape, a backdrop click, or the close button that `LayoutHeader`
+     * renders. Return `false` to keep the dialog open, for example after
+     * asking whether to discard unsaved changes. Calling `hide()` or the
+     * EntryPoint's `close` prop always closes the dialog without consulting it.
+     */
+    shouldDismiss?: () => boolean;
+  };
 
 export interface PreloadedDialogController<TEntryPoint> {
   element: ReactNode;
@@ -32,7 +41,12 @@ export interface PreloadedDialogController<TEntryPoint> {
  */
 export function usePreloadedDialog<TEntryPoint>(
   entryPoint: TEntryPoint,
-  {errorFallback, loadingFallback, ...dialogProps}: UsePreloadedDialogOptions,
+  {
+    errorFallback,
+    loadingFallback,
+    shouldDismiss,
+    ...dialogProps
+  }: UsePreloadedDialogOptions,
 ): PreloadedDialogController<TEntryPoint> {
   const controller = usePreloadedEntryPoint(entryPoint, {
     errorFallback,
@@ -49,7 +63,7 @@ export function usePreloadedDialog<TEntryPoint>(
       {...dialogProps}
       isOpen={isOpen}
       onOpenChange={open => {
-        if (!open) {
+        if (!open && isOpen && shouldDismiss?.() !== false) {
           hide();
         }
       }}>
