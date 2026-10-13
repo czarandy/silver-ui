@@ -8,6 +8,7 @@ import {
   type RadioGroupProps,
 } from 'components/RadioGroup/RadioGroup';
 import {RadioGroupItem} from 'components/RadioGroup/RadioGroupItem';
+import {HStack} from 'components/Stack';
 
 function RadioGroupStory(
   args: React.ComponentProps<typeof RadioGroup>,
@@ -79,6 +80,38 @@ function WithIconsStory(args: RadioGroupProps): React.JSX.Element {
   );
 }
 
+function RichLabelsStory(args: RadioGroupProps): React.JSX.Element {
+  const [value, setValue] = useState(args.value);
+
+  return (
+    <RadioGroup {...args} onChange={setValue} value={value}>
+      <RadioGroupItem
+        description="Best for detailed updates."
+        label={
+          <HStack align="center" as="span" gap={2}>
+            <strong>Email</strong> <Badge color="blue" label="Recommended" />
+          </HStack>
+        }
+        value="email"
+      />
+      <RadioGroupItem
+        label={
+          <HStack align="center" as="span" gap={2}>
+            <Icon icon={MessageSquare} size="sm" /> <em>SMS</em>
+          </HStack>
+        }
+        value="sms"
+      />
+      <RadioGroupItem
+        aria-label="Push notifications"
+        description="Notifications on this device."
+        label={<Icon icon={Bell} />}
+        value="push"
+      />
+    </RadioGroup>
+  );
+}
+
 const meta = {
   title: 'Components/RadioGroup',
   component: RadioGroup,
@@ -135,6 +168,20 @@ export const WithIcons: Story = {
     <WithIconsStory {...args} />
   ),
 };
+
+export const RichLabels = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use noninteractive formatting, decorative icons, and badges in labels. Keep links and buttons in startContent or endContent. Label text supplies the accessible name; provide aria-label when useful text is absent, retaining any visible wording.',
+      },
+    },
+  },
+  render: (args: RadioGroupProps): React.JSX.Element => (
+    <RichLabelsStory {...args} />
+  ),
+} satisfies Story;
 
 export const Warning: Story = {
   args: {

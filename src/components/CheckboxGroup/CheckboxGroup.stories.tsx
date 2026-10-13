@@ -8,6 +8,7 @@ import {
 } from 'components/CheckboxGroup/CheckboxGroup';
 import {CheckboxGroupItem} from 'components/CheckboxGroup/CheckboxGroupItem';
 import {Icon} from 'components/Icon';
+import {HStack} from 'components/Stack';
 
 function CheckboxGroupStory(args: CheckboxGroupProps): React.JSX.Element {
   const [value, setValue] = useState(args.value);
@@ -71,6 +72,38 @@ function WithIconsStory(args: CheckboxGroupProps): React.JSX.Element {
       <CheckboxGroupItem
         label="Push"
         startContent={<Icon color="secondary" icon={Bell} size="sm" />}
+        value="push"
+      />
+    </CheckboxGroup>
+  );
+}
+
+function RichLabelsStory(args: CheckboxGroupProps): React.JSX.Element {
+  const [value, setValue] = useState(args.value);
+
+  return (
+    <CheckboxGroup {...args} onChange={setValue} value={value}>
+      <CheckboxGroupItem
+        description="Best for detailed updates."
+        label={
+          <HStack align="center" as="span" gap={2}>
+            <strong>Email</strong> <Badge color="blue" label="Recommended" />
+          </HStack>
+        }
+        value="email"
+      />
+      <CheckboxGroupItem
+        label={
+          <HStack align="center" as="span" gap={2}>
+            <Icon icon={MessageSquare} size="sm" /> <em>SMS</em>
+          </HStack>
+        }
+        value="sms"
+      />
+      <CheckboxGroupItem
+        aria-label="Push notifications"
+        description="Notifications on this device."
+        label={<Icon icon={Bell} />}
         value="push"
       />
     </CheckboxGroup>
@@ -164,6 +197,20 @@ export const WithIcons: Story = {
     <WithIconsStory {...args} />
   ),
 };
+
+export const RichLabels = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Use noninteractive formatting, decorative icons, and badges in labels. Keep links and buttons in startContent or endContent. Label text supplies the accessible name; provide aria-label when useful text is absent, retaining any visible wording.',
+      },
+    },
+  },
+  render: (args: CheckboxGroupProps): React.JSX.Element => (
+    <RichLabelsStory {...args} />
+  ),
+} satisfies Story;
 
 export const Warning: Story = {
   args: {
