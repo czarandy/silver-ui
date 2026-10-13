@@ -1,7 +1,7 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {CircleCheck, Repeat2, TriangleAlert} from 'lucide-react';
-import {useMemo, useState} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
@@ -524,14 +524,16 @@ function CreatableEventsStory({
   );
 }
 
+/**
+ * Saves each move after a short delay, as a network round trip would, so the
+ * silhouette's saving state is visible. The customer escalation is locked.
+ */
 function MovableEventsStory(): React.JSX.Element {
   const views = useMemo(
     (): {label: string; view: ScheduleView}[] => [
       {label: 'Month', view: createScheduleMonthlyView()},
-      {
-        label: 'Week',
-        view: createScheduleWeeklyView({maxHour: 18, minHour: 8}),
-      },
+      {label: 'Week', view: createScheduleWeeklyView({minHour: 6})},
+      {label: 'Day', view: createScheduleDayView({minHour: 6})},
     ],
     [],
   );
@@ -544,8 +546,14 @@ function MovableEventsStory(): React.JSX.Element {
   const viewSelectorPlugin = useScheduleViewSelectorPlugin(views, {
     onChangeView: setView,
   });
+  const getIsMovable = useCallback(
+    (event: CalendarEvent) => event.id !== 'customer-escalation',
+    [],
+  );
   const movePlugin = useScheduleEventMovePlugin({
-    onMove: ({end, event, start}) => {
+    getIsMovable,
+    onMove: async ({end, event, start}) => {
+      await new Promise(resolve => setTimeout(resolve, 600));
       setStoryEvents(currentEvents =>
         currentEvents.map(currentEvent => {
           if (currentEvent.id !== event.id) {
@@ -572,19 +580,22 @@ function MovableEventsStory(): React.JSX.Element {
         }),
       );
     },
-    snapMinutes: 5,
+    snapMinutes: 15,
   });
 
   return (
-    <Schedule
-      categories={categories}
-      events={storyEvents}
-      highlightDate={defaultHighlightDate}
-      plugins={[paginationPlugin, viewSelectorPlugin, movePlugin]}
-      timezoneID={localTimezoneID}
-      view={view}
-      viewDate={viewDate}
-    />
+    <div className={fillHeightStoryContainer}>
+      <Schedule
+        categories={categories}
+        events={storyEvents}
+        height="fill"
+        highlightDate={defaultHighlightDate}
+        plugins={[paginationPlugin, viewSelectorPlugin, movePlugin]}
+        timezoneID={localTimezoneID}
+        view={view}
+        viewDate={viewDate}
+      />
+    </div>
   );
 }
 

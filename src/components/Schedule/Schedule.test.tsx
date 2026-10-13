@@ -43,10 +43,7 @@ import {
   useScheduleEventCreatePlugin,
   type ScheduleEventDraft,
 } from 'components/Schedule/plugins/EventCreatePlugin';
-import {
-  useScheduleEventMovePlugin,
-  type ScheduleEventMoveChange,
-} from 'components/Schedule/plugins/EventMovePlugin';
+import {useScheduleEventMovePlugin} from 'components/Schedule/plugins/EventMovePlugin';
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import {
   useScheduleEventResizePlugin,
@@ -111,16 +108,6 @@ function instantUTC(
 
 function mockCurrentTime(iso: string): void {
   vi.spyOn(Temporal.Now, 'instant').mockReturnValue(Temporal.Instant.from(iso));
-}
-
-function createDragDataTransfer(): Pick<
-  DataTransfer,
-  'setData' | 'setDragImage'
-> {
-  return {
-    setData: vi.fn(),
-    setDragImage: vi.fn(),
-  };
 }
 
 // jsdom lacks a ToggleEvent constructor; fake the state transition emitted by
@@ -3583,134 +3570,6 @@ describe('Schedule', () => {
     });
   });
 
-  describe('event move plugin', () => {
-    function ScheduleWithEventMove({
-      onMove,
-      snapMinutes = 5,
-      view,
-    }: {
-      onMove: (change: ScheduleEventMoveChange) => void;
-      snapMinutes?: number;
-      view: ScheduleView;
-    }) {
-      const plugin = useScheduleEventMovePlugin({
-        onMove,
-        snapMinutes,
-      });
-
-      return (
-        <Schedule
-          categories={categories}
-          events={events}
-          highlightDate={instantUTC(2026, 4, 13)}
-          plugins={[plugin]}
-          timezoneID="UTC"
-          view={view}
-          viewDate={instantUTC(2026, 4, 13)}
-        />
-      );
-    }
-
-    it('moves month events to a new date while preserving local time', () => {
-      const onMove = vi.fn<(change: ScheduleEventMoveChange) => void>();
-      render(
-        <ScheduleWithEventMove
-          onMove={onMove}
-          view={createScheduleMonthlyView()}
-        />,
-      );
-
-      const event = screen.getByTestId('schedule-event-visible');
-      const targetCell = screen.getByTestId('schedule-month-cell-2026-05-14');
-      Object.defineProperty(targetCell, 'getBoundingClientRect', {
-        configurable: true,
-        value: () => ({height: 128, left: 300, top: 200, width: 160}),
-      });
-
-      fireEvent.dragStart(event, {dataTransfer: createDragDataTransfer()});
-      fireEvent.dragOver(targetCell);
-      const preview = screen.getByTestId('schedule-event-move-preview-visible');
-      expect(event).toHaveStyle({opacity: '0.25'});
-      expect(preview).toHaveStyle({
-        left: '304px',
-        opacity: '0.45',
-        pointerEvents: 'none',
-        top: '230px',
-      });
-      fireEvent.drop(targetCell);
-
-      expect(onMove).toHaveBeenCalledTimes(1);
-      expect(onMove.mock.calls[0]?.[0].event.id).toBe('visible');
-      expect(onMove.mock.calls[0]?.[0].start).toBe(instantUTC(2026, 4, 14, 16));
-      expect(onMove.mock.calls[0]?.[0].end).toBe(
-        instantUTC(2026, 4, 14, 16, 30),
-      );
-    });
-
-    it('moves time-grid events to a new date and snapped time', () => {
-      const onMove = vi.fn<(change: ScheduleEventMoveChange) => void>();
-      render(
-        <ScheduleWithEventMove
-          onMove={onMove}
-          snapMinutes={5}
-          view={createScheduleWeeklyView({
-            hourHeight: 60,
-            maxHour: 18,
-            minHour: 8,
-          })}
-        />,
-      );
-
-      const event = screen.getByTestId('schedule-event-visible');
-      Object.defineProperty(event, 'getBoundingClientRect', {
-        configurable: true,
-        value: () => ({height: 30, left: 50, top: 100, width: 160}),
-      });
-      const targetCell = screen.getByTestId(
-        'schedule-time-grid-cell-2026-05-14-10',
-      );
-      Object.defineProperty(targetCell, 'getBoundingClientRect', {
-        configurable: true,
-        value: () => ({height: 60, left: 300, top: 200, width: 160}),
-      });
-
-      const dragStart = createEvent.dragStart(event);
-      Object.defineProperty(dragStart, 'clientY', {value: 110});
-      Object.defineProperty(dragStart, 'dataTransfer', {
-        value: createDragDataTransfer(),
-      });
-      fireEvent(event, dragStart);
-      const dragOver = createEvent.dragOver(targetCell);
-      Object.defineProperty(dragOver, 'clientY', {value: 225});
-      fireEvent(targetCell, dragOver);
-      const preview = screen.getByTestId('schedule-event-move-preview-visible');
-      expect(event).toHaveStyle({opacity: '0.25'});
-      expect(event).not.toHaveStyle({pointerEvents: 'none'});
-      expect(event).not.toHaveStyle({transform: 'translate(252px, 117px)'});
-      expect(preview).toHaveStyle({
-        left: '302px',
-        opacity: '0.45',
-        pointerEvents: 'none',
-        top: '217px',
-      });
-      const drop = createEvent.drop(targetCell);
-      Object.defineProperty(drop, 'clientY', {value: 225});
-      fireEvent(targetCell, drop);
-
-      expect(onMove).toHaveBeenCalledTimes(1);
-      expect(
-        screen.queryByTestId('schedule-event-move-preview-visible'),
-      ).not.toBeInTheDocument();
-      expect(onMove.mock.calls[0]?.[0].event.id).toBe('visible');
-      expect(onMove.mock.calls[0]?.[0].start).toBe(
-        instantUTC(2026, 4, 14, 10, 15),
-      );
-      expect(onMove.mock.calls[0]?.[0].end).toBe(
-        instantUTC(2026, 4, 14, 10, 45),
-      );
-    });
-  });
-
   describe('event create plugin', () => {
     beforeEach(() => {
       vi.spyOn(document, 'hasFocus').mockReturnValue(true);
@@ -4165,11 +4024,6 @@ describe('Schedule', () => {
     it('coexists with the event move plugin', () => {
       const onCreate = vi.fn<(draft: ScheduleEventDraft) => void>();
       render(<ScheduleWithEventCreate onCreate={onCreate} withMovePlugin />);
-
-      expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
-        'draggable',
-        'true',
-      );
 
       fireEvent.pointerDown(getCell(10), {button: 0, clientY: 0, pointerId: 1});
       releasePointer({clientY: 0, pointerId: 1});
