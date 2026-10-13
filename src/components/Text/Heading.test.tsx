@@ -3,6 +3,62 @@ import {describe, expect, it, vi} from 'vitest';
 import {Heading} from 'components/Text/Heading';
 
 describe('Heading', () => {
+  it.each([0, 1, 2])(
+    'restores the default weight when the override is removed with maxLines=%i',
+    maxLines => {
+      const {rerender} = render(
+        <Heading level={2} maxLines={maxLines} weight="bold">
+          Section
+        </Heading>,
+      );
+
+      expect(screen.getByRole('heading', {name: 'Section'})).toHaveClass(
+        'silver-fw_bold',
+      );
+      rerender(
+        <Heading level={2} maxLines={maxLines}>
+          Section
+        </Heading>,
+      );
+      const heading = screen.getByRole('heading', {name: 'Section'});
+      expect(heading).toHaveClass('silver-fw_semibold');
+      expect(heading).not.toHaveClass('silver-fw_bold');
+    },
+  );
+
+  it.each([0, 1, 2])(
+    'applies an explicit weight while preserving semantic and visual levels with maxLines=%i',
+    maxLines => {
+      render(
+        <Heading
+          accessibilityLevel={4}
+          level={2}
+          maxLines={maxLines}
+          weight="normal">
+          Section
+        </Heading>,
+      );
+
+      const heading = screen.getByRole('heading', {level: 4, name: 'Section'});
+      expect(heading).toHaveProperty('tagName', 'H4');
+      expect(heading).toHaveClass('silver-fw_normal', 'silver-fs_3xl');
+      expect(heading).not.toHaveClass('silver-fw_semibold');
+      expect(heading).not.toHaveAttribute('weight');
+      expect(heading).not.toHaveAttribute('aria-level');
+    },
+  );
+
+  it.each([1, 2, 3, 4, 5, 6] as const)(
+    'preserves the default semibold weight and semantic level %i',
+    level => {
+      render(<Heading level={level}>Section</Heading>);
+
+      expect(screen.getByRole('heading', {level, name: 'Section'})).toHaveClass(
+        'silver-fw_semibold',
+      );
+    },
+  );
+
   it('renders the semantic heading for the requested level', () => {
     render(<Heading level={1}>Page title</Heading>);
     expect(
