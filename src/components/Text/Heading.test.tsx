@@ -71,9 +71,7 @@ describe('Heading', () => {
         A very long heading
       </Heading>,
     );
-    expect(screen.getByTestId('heading')).toHaveStyle({
-      WebkitLineClamp: '2',
-    });
+    expect(screen.getByTestId('heading')).toHaveStyle('-webkit-line-clamp: 2');
   });
 
   it('forwards ref', () => {

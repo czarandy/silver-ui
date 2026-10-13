@@ -114,16 +114,16 @@ describe('CircularProgress', () => {
     const {rerender} = render(
       <CircularProgress data-testid="progress" label="Progress" size={80} />,
     );
-    expect(screen.getByTestId('progress')).toHaveStyle({
-      '--circular-progress-size': '80px',
-    });
+    expect(screen.getByTestId('progress')).toHaveStyle(
+      '--circular-progress-size: 80px',
+    );
 
     rerender(
       <CircularProgress data-testid="progress" label="Progress" size="5rem" />,
     );
-    expect(screen.getByTestId('progress')).toHaveStyle({
-      '--circular-progress-size': '5rem',
-    });
+    expect(screen.getByTestId('progress')).toHaveStyle(
+      '--circular-progress-size: 5rem',
+    );
   });
 
   it('forwards className, style, data-testid, and ref to the root', () => {
@@ -141,10 +141,9 @@ describe('CircularProgress', () => {
 
     const root = screen.getByTestId('progress');
     expect(root).toHaveClass('custom-progress');
-    expect(root).toHaveStyle({
-      '--circular-progress-size': '64px',
-      maxWidth: '120px',
-    });
+    expect(root).toHaveStyle(
+      '--circular-progress-size: 64px; max-width: 120px',
+    );
     expect(ref).toHaveBeenCalledWith(expect.any(HTMLDivElement));
   });
 });

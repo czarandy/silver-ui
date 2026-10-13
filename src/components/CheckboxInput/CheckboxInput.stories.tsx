@@ -81,6 +81,30 @@ export const Small: Story = {args: {size: 'sm'}};
 
 export const Large: Story = {args: {size: 'lg'}};
 
+export const HiddenLabelSizes: Story = {
+  args: {isLabelHidden: true, width: 'auto'},
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Standalone checkboxes in every size. Hover and click near each edge or corner to toggle the full displayed box.',
+      },
+    },
+  },
+  render: (args: CheckboxInputProps) => (
+    <div className={css({display: 'flex', alignItems: 'center', gap: '4'})}>
+      {(['sm', 'md', 'lg'] as const).map(size => (
+        <CheckboxStory
+          key={size}
+          {...args}
+          label={`Accept terms (${size})`}
+          size={size}
+        />
+      ))}
+    </div>
+  ),
+};
+
 export const Disabled: Story = {args: {isDisabled: true, value: true}};
 
 export const ReadOnly: Story = {args: {isReadOnly: true, value: true}};

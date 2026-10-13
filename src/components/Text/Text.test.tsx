@@ -84,9 +84,7 @@ describe('Text', () => {
         A very long paragraph
       </Text>,
     );
-    expect(screen.getByTestId('text')).toHaveStyle({
-      WebkitLineClamp: '2',
-    });
+    expect(screen.getByTestId('text')).toHaveStyle('-webkit-line-clamp: 2');
   });
 
   it('forwards ref', () => {

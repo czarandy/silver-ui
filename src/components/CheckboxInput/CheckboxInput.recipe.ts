@@ -29,6 +29,11 @@ export const checkboxInputRecipe = sva({
     input: {
       position: 'absolute',
       inset: 0,
+      // Safari keeps the native checkbox's intrinsic size with inset alone.
+      // Remove that appearance and fill the displayed box for hit testing.
+      appearance: 'none',
+      w: 'full',
+      h: 'full',
       opacity: 0,
       cursor: 'pointer',
       _disabled: {
