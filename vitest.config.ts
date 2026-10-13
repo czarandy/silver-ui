@@ -50,6 +50,7 @@ export default defineConfig({
         optimizeDeps: {
           include: [
             '@js-temporal/polyfill',
+            '@storybook/react',
             '@testing-library/react',
             'lucide-react',
             'react',

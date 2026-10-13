@@ -34,6 +34,11 @@ export type CheckboxInputValue = boolean | 'indeterminate';
 
 export type CheckboxInputProps = {
   /**
+   * Accessible name applied to the checkbox input, overriding the label text.
+   * Use when a rich label has no useful text. Include any visible label wording.
+   */
+  'aria-label'?: string;
+  /**
    * Additional CSS class names applied to the root element.
    */
   className?: string;
@@ -149,6 +154,7 @@ export type CheckboxInputProps = {
  * A checkbox input with label, description, and validation support.
  */
 export function CheckboxInput({
+  'aria-label': ariaLabel,
   label,
   value,
   onChange,
@@ -224,6 +230,7 @@ export function CheckboxInput({
         aria-checked={isIndeterminate ? 'mixed' : undefined}
         aria-describedby={describedBy}
         aria-invalid={status?.type === 'error' || undefined}
+        aria-label={ariaLabel}
         aria-readonly={isReadOnly || undefined}
         aria-required={isRequired ?? undefined}
         checked={isChecked}

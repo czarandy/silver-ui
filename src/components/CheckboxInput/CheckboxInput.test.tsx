@@ -6,6 +6,41 @@ import {checkboxInputRecipe} from 'components/CheckboxInput/CheckboxInput.recipe
 import {css} from 'styled-system/css';
 
 describe('CheckboxInput', () => {
+  it.each([false, true])(
+    'applies aria-label to the native input with isLabelHidden=%s',
+    isLabelHidden => {
+      const {rerender} = render(
+        <CheckboxInput
+          aria-label="Accept the terms and conditions"
+          isLabelHidden={isLabelHidden}
+          label={<strong>Accept the terms</strong>}
+          onChange={() => {}}
+          value={false}
+        />,
+      );
+
+      const input = screen.getByRole<HTMLInputElement>('checkbox', {
+        name: 'Accept the terms and conditions',
+      });
+      expect(input).toHaveAttribute(
+        'aria-label',
+        'Accept the terms and conditions',
+      );
+      expect(input.labels).toHaveLength(1);
+      rerender(
+        <CheckboxInput
+          isLabelHidden={isLabelHidden}
+          label={<strong>Accept the terms</strong>}
+          onChange={() => {}}
+          value={false}
+        />,
+      );
+      expect(
+        screen.getByRole('checkbox', {name: 'Accept the terms'}),
+      ).not.toHaveAttribute('aria-label');
+    },
+  );
+
   it('calls onChange with checked state', async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

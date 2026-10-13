@@ -9,6 +9,11 @@ import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 
 export interface RadioGroupItemProps {
   /**
+   * Accessible name applied to the radio input, overriding the label text.
+   * Use when a rich label has no useful text. Include any visible label wording.
+   */
+  'aria-label'?: string;
+  /**
    * Additional CSS class names applied to the item root.
    */
   className?: string;
@@ -30,9 +35,11 @@ export interface RadioGroupItemProps {
    */
   isDisabled?: boolean;
   /**
-   * Label text for the radio item.
+   * Label content for the radio item. Supports noninteractive formatting,
+   * decorative icons, and badges. Keep links and buttons in the content slots.
+   * The label's text supplies the accessible name unless `aria-label` is set.
    */
-  label: string;
+  label: ReactNode;
   /**
    * Ref forwarded to the item root.
    */
@@ -55,6 +62,7 @@ export interface RadioGroupItemProps {
  * An individual radio option within a `RadioGroup`.
  */
 export function RadioGroupItem({
+  'aria-label': ariaLabel,
   className,
   'data-testid': dataTestId,
   description,
@@ -89,6 +97,7 @@ export function RadioGroupItem({
         aria-describedby={
           isNonEmptyReactNode(description) ? descriptionId : undefined
         }
+        aria-label={ariaLabel}
         checked={isChecked}
         className={classes.input}
         disabled={isDisabled}
