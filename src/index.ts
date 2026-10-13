@@ -183,6 +183,7 @@ export {
   type AvatarNamedSize,
   type AvatarNumericSize,
   type AvatarProps,
+  type AvatarShape,
   type AvatarSize,
   type AvatarStatusDotProps,
 } from 'components/Avatar';

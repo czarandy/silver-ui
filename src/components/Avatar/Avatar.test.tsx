@@ -22,6 +22,56 @@ afterAll(shim.uninstall);
 beforeEach(shim.reset);
 
 describe('Avatar', () => {
+  it('keeps the default circular appearance', () => {
+    render(<Avatar name="Ada Lovelace" />);
+    const avatar = screen.getByRole('img', {name: 'Ada Lovelace'});
+    expect(avatar).toHaveClass('silver-bdr_full');
+    expect(avatar).not.toHaveAttribute('shape');
+    // eslint-disable-next-line testing-library/no-node-access -- content is the private clipping surface
+    expect(avatar.firstElementChild).toHaveClass('silver-bdr_full');
+  });
+
+  it.each([
+    ['circle', 'silver-bdr_full'],
+    ['rounded', 'silver-bdr_lg'],
+    ['square', 'silver-bdr_0'],
+  ] as const)(
+    'keeps the %s shape through image and fallback transitions',
+    (shape, radiusClass) => {
+      const {rerender} = render(
+        <Avatar
+          alt="Profile photo"
+          fallbackSrc="/fallback.png"
+          name="Ada Lovelace"
+          shape={shape}
+          src="/avatar.png"
+        />,
+      );
+      const avatar = screen.getByRole('img', {name: 'Profile photo'});
+      // eslint-disable-next-line testing-library/no-node-access -- content is the private clipping surface
+      const content = assertNonNull(avatar.firstElementChild);
+      expect(avatar).toHaveClass(radiusClass);
+      expect(content).toHaveClass(radiusClass, 'silver-ov_hidden');
+      expect(avatar).not.toHaveAttribute('shape');
+      expect(screen.getByAltText('')).toHaveAttribute('src', '/avatar.png');
+
+      fireEvent.error(screen.getByAltText(''));
+      expect(screen.getByAltText('')).toHaveAttribute('src', '/fallback.png');
+      fireEvent.error(screen.getByAltText(''));
+      expect(screen.getByText('AL')).toBeInTheDocument();
+      expect(content).toHaveClass(radiusClass);
+      expect(avatar).toHaveAccessibleName('Profile photo');
+
+      rerender(<Avatar alt="Organization placeholder" shape={shape} />);
+      const fallbackAvatar = screen.getByRole('img', {
+        name: 'Organization placeholder',
+      });
+      expect(fallbackAvatar).toHaveClass(radiusClass);
+      // eslint-disable-next-line testing-library/no-node-access -- the fallback icon is decorative
+      expect(fallbackAvatar.querySelector('svg')).toBeInTheDocument();
+    },
+  );
+
   it('renders initials from the provided name', () => {
     render(<Avatar data-testid="avatar" name="Ada Lovelace" />);
 

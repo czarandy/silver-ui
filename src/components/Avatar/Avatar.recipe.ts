@@ -8,13 +8,11 @@ export const avatarRecipe = sva({
       display: 'inline-flex',
       flexShrink: 0,
       verticalAlign: 'middle',
-      borderRadius: 'full',
     },
     content: {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      borderRadius: 'full',
       overflow: 'hidden',
       userSelect: 'none',
     },
@@ -38,6 +36,20 @@ export const avatarRecipe = sva({
     },
   },
   variants: {
+    shape: {
+      circle: {
+        root: {borderRadius: 'full'},
+        content: {borderRadius: 'full'},
+      },
+      rounded: {
+        root: {borderRadius: 'lg'},
+        content: {borderRadius: 'lg'},
+      },
+      square: {
+        root: {borderRadius: 0},
+        content: {borderRadius: 0},
+      },
+    },
     hasInitials: {
       true: {},
       false: {},
@@ -110,7 +122,6 @@ export const avatarRecipe = sva({
     isGrouped: {
       true: {
         root: {
-          borderRadius: 'full',
           borderWidth: 'emphasized',
           borderStyle: 'solid',
           borderColor: 'bg',
@@ -137,6 +148,7 @@ export const avatarRecipe = sva({
     },
   ],
   defaultVariants: {
+    shape: 'circle',
     hasInitials: false,
     hasTooltip: false,
     is24Px: false,

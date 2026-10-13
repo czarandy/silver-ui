@@ -31,6 +31,8 @@ export type AvatarNumericSize =
 
 export type AvatarSize = AvatarNamedSize | AvatarNumericSize;
 
+export type AvatarShape = 'circle' | 'rounded' | 'square';
+
 export type AvatarColor =
   | 'red'
   | 'orange'
@@ -157,6 +159,11 @@ export interface AvatarProps extends Omit<
    */
   ref?: Ref<HTMLDivElement>;
   /**
+   * Shape of the avatar. Rounded uses the theme's large corner radius.
+   * @default 'circle'
+   */
+  shape?: AvatarShape;
+  /**
    * Avatar size. Named sizes map to the same pixel values as the XDS source.
    * Default is `small`.
    */
@@ -212,6 +219,7 @@ export function Avatar({
   hasTooltip = false,
   name,
   ref,
+  shape = 'circle',
   size = 'small',
   src,
   style,
@@ -242,6 +250,7 @@ export function Avatar({
     is24Px: numericSize === 24,
     isGrouped: avatarGroup != null,
     isLarge: numericSize >= 96,
+    shape,
   });
   const normalizedAlt = alt?.trim();
   const accessibleName =
@@ -258,9 +267,11 @@ export function Avatar({
   const fallbackStyle = {
     fontSize: numericSize * INITIALS_FONT_SIZE_RATIO,
   };
+  const statusEdgeOffset =
+    shape === 'circle' ? numericSize * CIRCLE_EDGE_OFFSET_RATIO : 0;
   const statusStyle = {
-    bottom: numericSize * CIRCLE_EDGE_OFFSET_RATIO,
-    right: numericSize * CIRCLE_EDGE_OFFSET_RATIO,
+    bottom: statusEdgeOffset,
+    right: statusEdgeOffset,
     transform: 'translate(50%, 50%)',
   };
 
