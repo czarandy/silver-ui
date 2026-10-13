@@ -2,6 +2,7 @@ import {render, screen} from '@testing-library/react';
 import {Check} from 'lucide-react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {StatusDot} from 'components/StatusDot/StatusDot';
+import {COLOR_NAMES} from 'internal/colorNames';
 
 describe('StatusDot', () => {
   afterEach(() => {
@@ -31,7 +32,7 @@ describe('StatusDot', () => {
 
     rerender(<StatusDot color="blue" label="Blue" />);
 
-    expect(screen.getByRole('img')).toHaveClass('silver-bg_surface.blue');
+    expect(screen.getByRole('img')).toHaveClass('silver-bg_surface.blue.fg');
 
     rerender(<StatusDot color="warning" label="Warning" />);
 
@@ -39,6 +40,17 @@ describe('StatusDot', () => {
       'silver-bg_status.warning.solid',
     );
   });
+
+  it.each(COLOR_NAMES)(
+    'fills the %s dot with its solid foreground tone',
+    color => {
+      render(<StatusDot color={color} label={color} />);
+
+      expect(screen.getByRole('img')).toHaveClass(
+        `silver-bg_surface.${color}.fg`,
+      );
+    },
+  );
 
   it('defaults to the md size', () => {
     render(<StatusDot label="Online" />);
