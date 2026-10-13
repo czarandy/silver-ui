@@ -783,6 +783,9 @@ describe('SearchFilterInput interactions', () => {
     await user.click(await screen.findByText('Name'));
 
     const valueInput = await screen.findByPlaceholderText('Enter value...');
+    // Wait for the editor's deferred autofocus before typing so it cannot
+    // race with the input focus queued by selecting a search suggestion.
+    await waitFor(() => expect(valueInput).toHaveFocus());
     await user.type(valueInput, 'Alice');
     await user.click(screen.getByRole('button', {name: 'Apply'}));
 
