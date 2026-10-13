@@ -125,16 +125,16 @@ function renderWithRelay(children: ReactNode): ReturnType<typeof render> {
 
 function DrawerFixture({
   entryPoint,
-  onHide,
+  onBeforeHide,
 }: {
   entryPoint: TestEntryPoint;
-  onHide?: () => boolean;
+  onBeforeHide?: () => boolean;
 }): ReactElement {
   const drawer = usePreloadedDrawer(entryPoint, {
     'data-testid': 'test-drawer',
     label: 'Test drawer',
     placement: 'end',
-    onHide,
+    onBeforeHide,
     size: 420,
   });
 
@@ -163,14 +163,14 @@ function DrawerFixture({
 
 function DialogFixture({
   entryPoint,
-  onHide,
+  onBeforeHide,
 }: {
   entryPoint: TestEntryPoint;
-  onHide?: () => boolean;
+  onBeforeHide?: () => boolean;
 }): ReactElement {
   const dialog = usePreloadedDialog(entryPoint, {
     label: 'Test dialog',
-    onHide,
+    onBeforeHide,
   });
 
   return (
@@ -347,74 +347,80 @@ describe('preloaded Relay surfaces', () => {
     expect(importModule).toHaveBeenCalledTimes(2);
   });
 
-  it('calls onHide once per user dismiss of a drawer', async () => {
+  it('calls onBeforeHide once per user dismiss of a drawer', async () => {
     const {entryPoint} = createTestEntryPoint(
       vi.fn(async () => {
         await Promise.resolve();
         return {default: GuardedTestEntryPointRoot};
       }),
     );
-    const onHide = vi.fn(() => false);
-    renderWithRelay(<DrawerFixture entryPoint={entryPoint} onHide={onHide} />);
+    const onBeforeHide = vi.fn(() => false);
+    renderWithRelay(
+      <DrawerFixture entryPoint={entryPoint} onBeforeHide={onBeforeHide} />,
+    );
 
     fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
     expect(await screen.findByText('alpha:drawer')).toBeVisible();
     const drawer = screen.getByTestId('test-drawer');
 
     fireEvent.keyDown(document, {key: 'Escape'});
-    expect(onHide).toHaveBeenCalledTimes(1);
+    expect(onBeforeHide).toHaveBeenCalledTimes(1);
     expect(drawer).toHaveAttribute('open');
 
     // jsdom has no layout, so a zero-size rect puts any positive point on the
     // backdrop.
     fireEvent.pointerDown(drawer, {clientX: 5, clientY: 5});
     fireEvent.click(drawer, {clientX: 5, clientY: 5, detail: 1});
-    expect(onHide).toHaveBeenCalledTimes(2);
+    expect(onBeforeHide).toHaveBeenCalledTimes(2);
     expect(drawer).toHaveAttribute('open');
 
     fireEvent.click(screen.getByRole('button', {name: 'Close'}));
-    expect(onHide).toHaveBeenCalledTimes(3);
+    expect(onBeforeHide).toHaveBeenCalledTimes(3);
     expect(drawer).toHaveAttribute('open');
 
-    onHide.mockReturnValue(true);
+    onBeforeHide.mockReturnValue(true);
     fireEvent.click(screen.getByRole('button', {name: 'Close'}));
-    expect(onHide).toHaveBeenCalledTimes(4);
+    expect(onBeforeHide).toHaveBeenCalledTimes(4);
     await waitFor(() => expect(drawer).not.toHaveAttribute('open'));
   });
 
-  it('closes a drawer programmatically without calling onHide', async () => {
+  it('closes a drawer programmatically without calling onBeforeHide', async () => {
     const {entryPoint} = createTestEntryPoint();
     await entryPoint.root.load();
-    const onHide = vi.fn(() => false);
-    renderWithRelay(<DrawerFixture entryPoint={entryPoint} onHide={onHide} />);
+    const onBeforeHide = vi.fn(() => false);
+    renderWithRelay(
+      <DrawerFixture entryPoint={entryPoint} onBeforeHide={onBeforeHide} />,
+    );
 
     fireEvent.click(screen.getByRole('button', {name: 'Show drawer'}));
     expect(await screen.findByText('alpha:drawer')).toBeVisible();
     fireEvent.click(screen.getByRole('button', {name: 'Close loaded content'}));
 
-    expect(onHide).not.toHaveBeenCalled();
+    expect(onBeforeHide).not.toHaveBeenCalled();
     await waitFor(() =>
       expect(screen.getByTestId('test-drawer')).not.toHaveAttribute('open'),
     );
   });
 
-  it('lets onHide veto hiding a preloaded dialog', async () => {
+  it('lets onBeforeHide veto hiding a preloaded dialog', async () => {
     const {entryPoint} = createTestEntryPoint();
     await entryPoint.root.load();
-    const onHide = vi.fn(() => false);
-    renderWithRelay(<DialogFixture entryPoint={entryPoint} onHide={onHide} />);
+    const onBeforeHide = vi.fn(() => false);
+    renderWithRelay(
+      <DialogFixture entryPoint={entryPoint} onBeforeHide={onBeforeHide} />,
+    );
 
     fireEvent.click(screen.getByRole('button', {name: 'Show dialog'}));
     expect(await screen.findByText('alpha:dialog')).toBeVisible();
     const dialog = screen.getByRole('dialog', {name: 'Test dialog'});
 
     fireEvent.keyDown(document, {key: 'Escape'});
-    expect(onHide).toHaveBeenCalledTimes(1);
+    expect(onBeforeHide).toHaveBeenCalledTimes(1);
     expect(dialog).toHaveAttribute('open');
 
-    onHide.mockReturnValue(true);
+    onBeforeHide.mockReturnValue(true);
     fireEvent.keyDown(document, {key: 'Escape'});
-    expect(onHide).toHaveBeenCalledTimes(2);
+    expect(onBeforeHide).toHaveBeenCalledTimes(2);
     await waitFor(() => expect(dialog).not.toHaveAttribute('open'));
   });
 

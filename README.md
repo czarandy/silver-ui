@@ -371,7 +371,7 @@ runtimeProps)` to open the surface, and render the returned `element` alongside
 the trigger. The application remains responsible for its Relay environment,
 compiler, generated artifacts, and EntryPoint definitions.
 
-`usePreloadedDrawer` and `usePreloadedDialog` accept `onHide`, which is
+`usePreloadedDrawer` and `usePreloadedDialog` accept `onBeforeHide`, which is
 called once, synchronously, whenever the user tries to close the surface
 (Escape, a backdrop click, or the `LayoutHeader` close button). Its return
 value can veto the hide: return `false` to keep the surface open, for example
@@ -381,7 +381,7 @@ prop always close without calling it.
 ```tsx
 const drawer = usePreloadedDrawer(requestEntryPoint, {
   label: 'Request credentialing',
-  onHide: () =>
+  onBeforeHide: () =>
     !hasUnsavedChanges() || window.confirm('Leave without submitting?'),
 });
 ```

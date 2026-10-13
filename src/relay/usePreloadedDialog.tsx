@@ -24,7 +24,7 @@ export type UsePreloadedDialogOptions = Omit<
      * Calling `hide()` or the EntryPoint's `close` prop always closes the
      * dialog without calling it.
      */
-    onHide?: () => boolean;
+    onBeforeHide?: () => boolean;
   };
 
 export interface PreloadedDialogController<TEntryPoint> {
@@ -46,7 +46,7 @@ export function usePreloadedDialog<TEntryPoint>(
   {
     errorFallback,
     loadingFallback,
-    onHide,
+    onBeforeHide,
     ...dialogProps
   }: UsePreloadedDialogOptions,
 ): PreloadedDialogController<TEntryPoint> {
@@ -65,7 +65,7 @@ export function usePreloadedDialog<TEntryPoint>(
       {...dialogProps}
       isOpen={isOpen}
       onOpenChange={open => {
-        if (!open && isOpen && onHide?.() !== false) {
+        if (!open && isOpen && onBeforeHide?.() !== false) {
           hide();
         }
       }}>

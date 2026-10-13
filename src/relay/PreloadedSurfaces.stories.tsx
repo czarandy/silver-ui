@@ -143,7 +143,7 @@ export const DrawerDismissGuard: Story = {
     const drawer = usePreloadedDrawer(drawerEntryPoint, {
       label: 'Guarded preloaded drawer example',
       placement: 'end',
-      onHide: () => window.confirm('Leave without submitting?'),
+      onBeforeHide: () => window.confirm('Leave without submitting?'),
       size: 420,
     });
 

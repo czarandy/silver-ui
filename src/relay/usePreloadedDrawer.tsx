@@ -24,7 +24,7 @@ export type UsePreloadedDrawerOptions = Omit<
      * Calling `hide()` or the EntryPoint's `close` prop always closes the
      * drawer without calling it.
      */
-    onHide?: () => boolean;
+    onBeforeHide?: () => boolean;
   };
 
 export interface PreloadedDrawerController<TEntryPoint> {
@@ -46,7 +46,7 @@ export function usePreloadedDrawer<TEntryPoint>(
   {
     errorFallback,
     loadingFallback,
-    onHide,
+    onBeforeHide,
     ...drawerProps
   }: UsePreloadedDrawerOptions,
 ): PreloadedDrawerController<TEntryPoint> {
@@ -65,7 +65,7 @@ export function usePreloadedDrawer<TEntryPoint>(
       {...drawerProps}
       isOpen={isOpen}
       onOpenChange={open => {
-        if (!open && isOpen && onHide?.() !== false) {
+        if (!open && isOpen && onBeforeHide?.() !== false) {
           hide();
         }
       }}>
