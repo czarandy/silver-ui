@@ -25,6 +25,15 @@ export const buttonSurfaceRecipe = cva({
         _hover: {bg: primaryBgHover},
         _active: {bg: primaryBgActive},
       },
+      outline: {
+        bg: 'transparent',
+        color: primaryBg,
+        borderWidth: 'default',
+        borderStyle: 'solid',
+        borderColor: 'currentColor',
+        _hover: {bg: `color-mix(in srgb, ${primaryBg} 8%, transparent)`},
+        _active: {bg: `color-mix(in srgb, ${primaryBg} 12%, transparent)`},
+      },
       secondary: {
         bg: secondaryBg,
         color: secondaryFg,
@@ -65,6 +74,9 @@ export const buttonSurfaceRecipe = cva({
 type ButtonSurfaceStyles = {
   bg: string;
   color: string;
+  borderWidth?: string;
+  borderStyle?: 'solid';
+  borderColor?: string;
   _active: {bg: string};
   _focusVisible?: {outlineColor: string};
   _hover: {bg: string};
@@ -171,6 +183,9 @@ export const buttonRecipe = sva({
     variant: {
       primary: {
         root: getButtonSurfaceStyles('primary'),
+      },
+      outline: {
+        root: getButtonSurfaceStyles('outline'),
       },
       secondary: {
         root: getButtonSurfaceStyles('secondary'),

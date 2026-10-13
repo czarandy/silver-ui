@@ -24,7 +24,14 @@ const meta = {
   argTypes: {
     variant: {
       control: {type: 'select'},
-      options: ['primary', 'secondary', 'ghost', 'destructive', 'onSolid'],
+      options: [
+        'primary',
+        'outline',
+        'secondary',
+        'ghost',
+        'destructive',
+        'onSolid',
+      ],
     },
     size: {
       control: {type: 'select'},
@@ -46,6 +53,10 @@ type Story = StoryObj<typeof Button>;
 
 export const Primary: Story = {
   args: {variant: 'primary'},
+};
+
+export const Outline: Story = {
+  args: {label: 'Your Privacy Choices', variant: 'outline'},
 };
 
 export const Secondary: Story = {
