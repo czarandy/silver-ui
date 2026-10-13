@@ -36,8 +36,8 @@ jobs:
 
       # Re-run the same gates the local driver ran, on a clean checkout.
       - run: pnpm typecheck
-      # The `browser` Vitest project runs layout tests in Playwright Chromium.
-      - run: pnpm exec playwright install --with-deps chromium-headless-shell
+      # Layout tests run in Chromium; checkbox hit areas also run in WebKit.
+      - run: pnpm exec playwright install --with-deps chromium-headless-shell webkit
       - run: pnpm test
       - run: pnpm lint
       - run: pnpm build
