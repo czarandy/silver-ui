@@ -31,10 +31,10 @@ import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Spinner} from 'components/Spinner';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useResolvedSize} from 'internal/SizeContext';
 import {isComposingEvent} from 'internal/isComposingEvent';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -265,6 +265,7 @@ export function TextInput({
   const size = useResolvedSize(inputGroup?.size, sizeProp);
   const effectiveStatusType = status?.type ?? inputGroup?.statusType;
 
+  const mergedRef = useMergeRefs(ref, inputRef);
   const inputWrapper = (
     <div
       className={cx(
@@ -321,7 +322,7 @@ export function TextInput({
         }}
         placeholder={placeholder}
         readOnly={isReadOnly}
-        ref={mergeRefs(ref, inputRef)}
+        ref={mergedRef}
         required={isRequired ?? undefined}
         role={role}
         tabIndex={isReadOnly ? -1 : undefined}

@@ -32,9 +32,9 @@ import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {useInputGroup} from 'components/InputGroup';
 import {Tag} from 'components/Tag';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -314,6 +314,7 @@ export function AutocompleteInput<T extends SearchableItem>({
     return () => cancelAnimationFrame(animationFrame);
   }, [isReadOnly]);
 
+  const mergedRef = useMergeRefs(ref, wrapperRef);
   const wrapper = (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- wrapper delegates focus to the inner input; keyboard users interact with the input directly
     <div
@@ -340,7 +341,7 @@ export function AutocompleteInput<T extends SearchableItem>({
       // Outside a group the ref targets the Field root; in a group there is no
       // Field, so it targets the wrapper -- the component's outermost element
       // either way.
-      ref={inputGroup != null ? mergeRefs(ref, wrapperRef) : wrapperRef}
+      ref={inputGroup != null ? mergedRef : wrapperRef}
       style={inputGroup != null ? style : undefined}>
       {startIcon != null ? (
         <span className={inputStyles.iconSlot}>

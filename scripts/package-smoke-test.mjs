@@ -94,6 +94,7 @@ import {Spinner, type SpinnerProps} from 'silver-ui/Spinner';
 import {
   useClipboard,
   useHotkey,
+  useMergeRefs,
   type UseClipboardOptions,
   type UseHotkeyOptions,
 } from 'silver-ui/hooks';
@@ -103,6 +104,7 @@ export const className = cx('base', 'extra');
 export const hooks = [
   useClipboard,
   useHotkey,
+  useMergeRefs,
   useScheduleAvailabilityPlugin,
   useScheduleAvailabilityPluginFromSubpath,
 ] as const;
@@ -136,6 +138,7 @@ import {Button, type ButtonProps} from 'silver-ui/Button';
 import {
   useClipboard,
   useHotkey,
+  useMergeRefs,
   type UseClipboardOptions,
   type UseHotkeyOptions,
 } from 'silver-ui/hooks';
@@ -145,6 +148,7 @@ export const className = cx('base', 'extra');
 export const hooks = [
   useClipboard,
   useHotkey,
+  useMergeRefs,
   useScheduleAvailabilityPlugin,
 ] as const;
 export type PublicProps = ButtonProps | RootButtonProps;

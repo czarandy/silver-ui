@@ -30,9 +30,9 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {formatFileSize} from 'internal/formatFileSize';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -375,6 +375,7 @@ export function FileInput({
 
   const necessity = getNecessity(isOptional, isRequired);
 
+  const mergedRef = useMergeRefs(ref, inputRef);
   return (
     <Field
       description={description}
@@ -425,7 +426,7 @@ export function FileInput({
               handleFiles(Array.from(event.target.files ?? []));
               event.currentTarget.value = '';
             }}
-            ref={mergeRefs(ref, inputRef)}
+            ref={mergedRef}
             required={isRequired}
             tabIndex={isReadOnly ? -1 : undefined}
             type="file"

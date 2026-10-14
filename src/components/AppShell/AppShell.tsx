@@ -18,10 +18,10 @@ import {
   TopNavMobileContentContext,
   TopNavRenderContext,
 } from 'components/TopNav';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {MobileNavToggle} from 'internal/MobileNav';
 import {getMaxWidthBreakpointQuery} from 'internal/breakpoints';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useMediaQuery} from 'internal/useMediaQuery';
@@ -363,12 +363,13 @@ export function AppShell({
   );
   const rootStyle: AppShellRootStyle = {...style};
 
+  const mergedRef = useMergeRefs(ref, shellRef);
   return (
     <AppShellMobileContext value={mobileContextValue}>
       <div
         className={cx(classes.root, className)}
         data-testid={dataTestId}
-        ref={mergeRefs(ref, shellRef)}
+        ref={mergedRef}
         style={rootStyle}>
         <a
           className={styles.skipLink}

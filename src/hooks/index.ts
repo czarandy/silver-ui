@@ -26,6 +26,7 @@ export type {
   UseListFocusOptions,
   UseListFocusResult,
 } from 'hooks/useListFocus';
+export {default as useMergeRefs} from 'hooks/useMergeRefs';
 export {
   default as useTypeahead,
   TYPEAHEAD_TIMEOUT_MS,

@@ -20,10 +20,10 @@ import {switchRecipe} from 'components/Switch/Switch.recipe';
 import {Text} from 'components/Text';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {useResolvedSize, type ComponentSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export type SwitchLabelPosition = 'end' | 'start';
@@ -177,6 +177,7 @@ export function Switch({
       inputRef.current?.blur();
     }
   }, [isReadOnly]);
+  const mergedRef = useMergeRefs(ref, inputRef);
   const control = (
     <span className={classes.control}>
       <input
@@ -216,7 +217,7 @@ export function Switch({
             event.preventDefault();
           }
         }}
-        ref={mergeRefs(ref, inputRef)}
+        ref={mergedRef}
         required={isRequired && !isReadOnly}
         role="switch"
         tabIndex={isReadOnly ? -1 : undefined}

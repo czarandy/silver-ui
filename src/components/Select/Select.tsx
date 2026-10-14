@@ -31,10 +31,10 @@ import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
 import {TextInput} from 'components/TextInput';
 import {Tooltip} from 'components/Tooltip';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {layerPlacementGapRecipe} from 'internal/layerPlacementGap.recipe';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -380,10 +380,7 @@ export function Select<TAuxiliaryData = unknown>({
     status,
   });
 
-  const combinedTriggerRef = useMemo(
-    () => mergeRefs(triggerRef, popoverTriggerRef),
-    [popoverTriggerRef, triggerRef],
-  );
+  const combinedTriggerRef = useMergeRefs(triggerRef, popoverTriggerRef);
 
   useEffect(() => {
     if (isReadOnly) {
@@ -538,6 +535,7 @@ export function Select<TAuxiliaryData = unknown>({
     }).wrapper,
   );
 
+  const mergedRef = useMergeRefs(ref, buttonRef);
   const trigger = (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- mouse clicks anywhere on the visual input delegate to the inner combobox button; keyboard handling stays on that button.
     <div
@@ -575,7 +573,7 @@ export function Select<TAuxiliaryData = unknown>({
         onBlur={handleTriggerBlur}
         onFocus={handleTriggerFocus}
         onKeyDown={handleKeyboardNavigation}
-        ref={mergeRefs(ref, buttonRef)}
+        ref={mergedRef}
         role="combobox"
         tabIndex={isReadOnly ? -1 : undefined}
         type="button">

@@ -324,6 +324,7 @@ import {
   useClipboard,
   useHotkey,
   useListFocus,
+  useMergeRefs,
   useTypeahead,
 } from 'silver-ui/hooks';
 ```
@@ -332,6 +333,7 @@ import {
 - **useClipboard** — clipboard writes with transient copied state and accessible success or failure announcements
 - **useHotkey** — global, IME-safe keyboard shortcuts with exact modifier matching and automatic listener cleanup
 - **useListFocus** — roving-tabindex keyboard navigation over a list of elements (arrow keys, `Home`/`End`, wrapping, RTL)
+- **useMergeRefs** — combines up to six object or callback refs, stays stable while its inputs are unchanged, and preserves React 19 callback cleanup
 - **useTypeahead** — WAI-ARIA typeahead: multi-character search, repeat-press cycling, and wrap-around matching
 - **useConstant** — computes a value once and returns the same reference for the lifetime of the component
 

@@ -32,8 +32,8 @@ import {useFieldset} from 'components/Fieldset';
 import type {IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
+import useMergeRefs from 'hooks/useMergeRefs';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {parseDateInput} from 'internal/parseDateInput';
 import {
   plainDateFormatWith,
@@ -343,6 +343,7 @@ export function DateInput({
     inputRef.current?.focus();
   }, [isReadOnly, onChange]);
 
+  const mergedRef = useMergeRefs(ref, inputRef);
   return (
     <Field
       className={className}
@@ -425,7 +426,7 @@ export function DateInput({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           readOnly={isReadOnly}
-          ref={mergeRefs(ref, inputRef)}
+          ref={mergedRef}
           role="combobox"
           tabIndex={isReadOnly ? -1 : undefined}
           type="text"

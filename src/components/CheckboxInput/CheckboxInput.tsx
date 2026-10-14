@@ -20,11 +20,11 @@ import {Item} from 'components/Item';
 import {Spinner} from 'components/Spinner';
 import {Tooltip} from 'components/Tooltip';
 import {VisuallyHidden} from 'components/VisuallyHidden';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {NecessityIndicator} from 'internal/NecessityIndicator';
 import {ReadOnlyInteractionBoundary} from 'internal/ReadOnlyInteractionBoundary';
 import {StatusMessage} from 'internal/StatusMessage';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import type {SpacingToken} from 'internal/spacingTokens';
 import type {WidthValue} from 'internal/toPixelSize';
 import {cx} from 'utils/cx';
@@ -223,6 +223,7 @@ export function CheckboxInput({
     }
   }, [isReadOnly]);
 
+  const mergedRef = useMergeRefs(ref, inputRef);
   const control = (
     <span className={classes.boxWrap}>
       <input
@@ -273,7 +274,7 @@ export function CheckboxInput({
           }
         }}
         readOnly={isReadOnly}
-        ref={mergeRefs(ref, inputRef)}
+        ref={mergedRef}
         required={isRequired && !isReadOnly}
         tabIndex={isReadOnly ? -1 : undefined}
         type="checkbox"

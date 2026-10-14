@@ -24,8 +24,8 @@ import type {
   ToastPosition,
 } from 'components/Toast/types';
 import useHotkey from 'hooks/useHotkey';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {inheritanceReset} from 'internal/inheritanceReset';
-import {mergeRefs} from 'internal/mergeRefs';
 import {getActiveModalHost, subscribeModalHosts} from 'internal/modalHostStack';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
@@ -402,6 +402,7 @@ export function ToastViewport({
   };
   const visibleToasts = toasts.slice(-maxVisible);
 
+  const mergedRef = useMergeRefs(viewportRef, ref);
   const viewport = (
     <div
       aria-keyshortcuts="F6"
@@ -411,7 +412,7 @@ export function ToastViewport({
       onBlurCapture={handleBlurCapture}
       onFocusCapture={() => setIsFocusWithinViewport(true)}
       popover={isTopLayer ? 'manual' : undefined}
-      ref={mergeRefs(viewportRef, ref)}
+      ref={mergedRef}
       role="region"
       style={insetStyle}
       tabIndex={visibleToasts.length > 0 ? 0 : -1}>

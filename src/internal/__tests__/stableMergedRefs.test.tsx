@@ -8,6 +8,46 @@ import {TextInput} from 'components/TextInput';
 import {HoverLayerTrigger} from 'internal/HoverLayerTrigger';
 
 describe('merged ref stability in components', () => {
+  it('supports switching between text and element hover triggers', () => {
+    const triggerRef = vi.fn<RefCallback<HTMLElement>>();
+    const wrapperRef = vi.fn<RefCallback<HTMLElement>>();
+    const {rerender} = render(
+      <HoverLayerTrigger
+        describedBy="tooltip"
+        layer={null}
+        triggerRef={triggerRef}
+        wrapperRef={wrapperRef}>
+        Text trigger
+      </HoverLayerTrigger>,
+    );
+    expect(triggerRef).toHaveBeenLastCalledWith(
+      screen.getByText('Text trigger'),
+    );
+    rerender(
+      <HoverLayerTrigger
+        describedBy="tooltip"
+        layer={null}
+        triggerRef={triggerRef}
+        wrapperRef={wrapperRef}>
+        <button type="button">Element trigger</button>
+      </HoverLayerTrigger>,
+    );
+    const button = screen.getByRole('button', {name: 'Element trigger'});
+    expect(triggerRef).toHaveBeenLastCalledWith(button);
+    expect(button).toHaveAttribute('aria-describedby', 'tooltip');
+    rerender(
+      <HoverLayerTrigger
+        describedBy="tooltip"
+        layer={null}
+        triggerRef={triggerRef}
+        wrapperRef={wrapperRef}>
+        Text again
+      </HoverLayerTrigger>,
+    );
+    expect(triggerRef).toHaveBeenLastCalledWith(screen.getByText('Text again'));
+    expect(wrapperRef).toHaveBeenLastCalledWith(screen.getByText('Text again'));
+  });
+
   it('preserves React StrictMode cleanup while avoiding cleanup on ordinary rerenders', () => {
     const cleanup = vi.fn();
     const ref = vi.fn<RefCallback<HTMLElement>>(() => cleanup);

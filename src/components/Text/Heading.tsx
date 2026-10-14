@@ -20,7 +20,7 @@ import {getMaxLinesVariant} from 'components/Text/Text.utils';
 import {useTruncation} from 'components/Text/useTruncation';
 import {useTooltip} from 'components/Tooltip';
 import type {TooltipProps} from 'components/Tooltip';
-import {mergeRefs} from 'internal/mergeRefs';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
 
@@ -216,6 +216,7 @@ function TruncatedHeading({
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
   const Component = levelToElement[accessibilityLevel ?? level];
 
+  const mergedRef = useMergeRefs(ref, truncation.ref, headingRef);
   return (
     <>
       <Component
@@ -234,7 +235,7 @@ function TruncatedHeading({
           className,
         )}
         data-testid={dataTestId}
-        ref={mergeRefs(ref, truncation.ref, headingRef)}
+        ref={mergedRef}
         style={{...style, ...lineClampStyle}}>
         {children}
       </Component>

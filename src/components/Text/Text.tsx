@@ -13,7 +13,7 @@ import {getMaxLinesVariant} from 'components/Text/Text.utils';
 import {useTruncation} from 'components/Text/useTruncation';
 import {useTooltip} from 'components/Tooltip';
 import type {TooltipProps} from 'components/Tooltip';
-import {mergeRefs} from 'internal/mergeRefs';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
 
@@ -251,6 +251,7 @@ function TruncatedText({
   const lineClampStyle: CSSProperties | undefined =
     maxLines > 1 ? {WebkitLineClamp: maxLines} : undefined;
 
+  const mergedRef = useMergeRefs(ref, truncation.ref, textRef);
   return (
     <>
       <Component
@@ -271,7 +272,7 @@ function TruncatedText({
           className,
         )}
         data-testid={dataTestId}
-        ref={mergeRefs(ref, truncation.ref, textRef)}
+        ref={mergedRef}
         style={{...style, ...lineClampStyle}}>
         {children}
       </Component>

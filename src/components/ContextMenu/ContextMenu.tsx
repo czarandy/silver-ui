@@ -28,7 +28,7 @@ import {
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
-import {mergeRefs} from 'internal/mergeRefs';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useLayer, type LayerReturn} from 'internal/useLayer';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -340,6 +340,7 @@ export function ContextMenu({
     [items, menuContent],
   );
 
+  const mergedRef = useMergeRefs(anchorRef, layer.ref);
   return (
     <>
       <div
@@ -359,11 +360,7 @@ export function ContextMenu({
         tabIndex={0}>
         {children}
       </div>
-      <div
-        aria-hidden="true"
-        className={styles.anchor}
-        ref={mergeRefs(anchorRef, layer.ref)}
-      />
+      <div aria-hidden="true" className={styles.anchor} ref={mergedRef} />
       {layer.render(
         <div
           aria-label="Context menu"

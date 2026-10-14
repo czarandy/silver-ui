@@ -5,10 +5,10 @@ import {useRef, type MouseEvent as ReactMouseEvent, type Ref} from 'react';
 import type {ClickableBaseProps} from 'components/Clickable/Clickable';
 import {clickableContainerRecipe} from 'components/Clickable/ClickableContainer.recipe';
 import {useTooltip} from 'components/Tooltip';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {ActionElement} from 'internal/ActionElement';
 import {forwardSurfaceEvent} from 'internal/forwardSurfaceEvent';
 import {useRel} from 'internal/linkAccessibility';
-import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export interface ClickableContainerProps extends ClickableBaseProps {
@@ -54,6 +54,7 @@ export function ClickableContainerInternal({
     focusTrigger: 'always',
     isEnabled: hasDisabledReason,
   });
+  const mergedRef = useMergeRefs(ref, tooltip.ref);
   const classes = clickableContainerRecipe({
     hasInheritedBorderRadius,
     isDisabled: isActionDisabled,
@@ -107,7 +108,7 @@ export function ClickableContainerInternal({
       data-testid={dataTestId}
       onAuxClick={event => handleSurfaceEvent(event, 'auxclick')}
       onClick={event => handleSurfaceEvent(event, 'click')}
-      ref={mergeRefs(ref, tooltip.ref)}
+      ref={mergedRef}
       style={style}>
       <ActionElement
         aria-describedby={hasDisabledReason ? tooltip.describedBy : undefined}

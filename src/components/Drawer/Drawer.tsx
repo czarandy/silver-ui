@@ -4,13 +4,13 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useId, useMemo, useRef} from 'react';
 import {DialogContext} from 'components/Dialog/DialogContext';
 import {drawerRecipe} from 'components/Drawer/Drawer.recipe';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {LayerContext} from 'internal/LayerContext';
 import {SizeContext} from 'internal/SizeContext';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
 } from 'internal/dismissBehavior';
-import {mergeRefs} from 'internal/mergeRefs';
 import {DURATION_NORMAL_MS} from 'internal/motion';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
@@ -163,6 +163,7 @@ export function Drawer({
     placement,
   });
 
+  const mergedRef = useMergeRefs(ref, dialogRef);
   return (
     // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-noninteractive-element-interactions -- native dialog backdrop clicks close the drawer
     <dialog
@@ -183,7 +184,7 @@ export function Drawer({
         }
       }}
       onPointerDown={backdropDismiss.onPointerDown}
-      ref={mergeRefs(ref, dialogRef)}
+      ref={mergedRef}
       style={{...sizeStyle, ...style}}>
       <LayerContext value={layerContextValue}>
         <SizeContext value={null}>

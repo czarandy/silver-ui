@@ -1,4 +1,5 @@
 import eslintReact from '@eslint-react/eslint-plugin';
+import noRawMergeRefs from './no-raw-merge-refs.js';
 
 /**
  * Custom ESLint plugin for silver-ui component conventions.
@@ -11,6 +12,7 @@ import eslintReact from '@eslint-react/eslint-plugin';
  * - silver-ui/prefer-is-non-empty-react-node: ReactNode null checks must use isNonEmptyReactNode
  * - silver-ui/no-recipe-type-imports: Public types must not depend on Panda recipe modules
  * - silver-ui/prefer-hoisted-recipes: Zero-argument recipe calls must be hoisted to module scope
+ * - silver-ui/no-raw-merge-refs: Components and hooks must use useMergeRefs with stable inputs
  */
 
 const reactExhaustiveDeps = eslintReact.rules['exhaustive-deps'];
@@ -1330,6 +1332,7 @@ const plugin = {
     'boolean-prop-naming': booleanPropNaming,
     'exhaustive-deps': exhaustiveDeps,
     'no-direct-color-tokens': noDirectColorTokens,
+    'no-raw-merge-refs': noRawMergeRefs,
     'no-recipe-exports': noRecipeExports,
     'no-recipe-type-imports': noRecipeTypeImports,
     'no-redundant-box-sizing': noRedundantBoxSizing,

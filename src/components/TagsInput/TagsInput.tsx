@@ -34,9 +34,9 @@ import {OverflowList} from 'components/OverflowList';
 import {Tag} from 'components/Tag';
 import {tagsInputRecipe} from 'components/TagsInput/TagsInput.recipe';
 import useAnnounce from 'hooks/useAnnounce';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -607,6 +607,7 @@ export function TagsInput<T extends SearchableItem>({
   // the layer popover. Outside layer mode wrapperContent is itself the item.
   const isWrapperGroupItem = inputGroup != null && !isLayerMode;
 
+  const mergedWrapperRef = useMergeRefs(ref, wrapperRef);
   const wrapperContent = (
     /* eslint-disable-next-line jsx-a11y-x/no-noninteractive-element-interactions -- pointerdown delegates to inner input for focus convenience */
     <div
@@ -629,7 +630,7 @@ export function TagsInput<T extends SearchableItem>({
       onKeyDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
       onPointerDown={handleWrapperPointerDown}
       onPointerDownCapture={isReadOnly ? preventReadOnlyInteraction : undefined}
-      ref={isWrapperGroupItem ? mergeRefs(ref, wrapperRef) : wrapperRef}
+      ref={isWrapperGroupItem ? mergedWrapperRef : wrapperRef}
       role="group"
       style={isWrapperGroupItem ? style : undefined}>
       {startIcon != null ? (
@@ -750,6 +751,7 @@ export function TagsInput<T extends SearchableItem>({
     left: 'anchor(start)',
   };
 
+  const mergedPlaceholderRef = useMergeRefs(ref, placeholderRef);
   const inputContent = isLayerMode ? (
     <>
       <div
@@ -770,9 +772,7 @@ export function TagsInput<T extends SearchableItem>({
         onPointerDownCapture={
           isReadOnly ? preventReadOnlyInteraction : undefined
         }
-        ref={
-          inputGroup != null ? mergeRefs(ref, placeholderRef) : placeholderRef
-        }
+        ref={inputGroup != null ? mergedPlaceholderRef : placeholderRef}
         style={inputGroup != null ? style : undefined}>
         {isTruncated ? (
           <>

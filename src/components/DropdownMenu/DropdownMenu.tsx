@@ -20,8 +20,8 @@ import {
 import type {DropdownMenuOption} from 'components/DropdownMenu/types';
 import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
+import useMergeRefs from 'hooks/useMergeRefs';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -202,6 +202,7 @@ export function DropdownMenu({
     [items, children],
   );
 
+  const mergedRef = useMergeRefs(ref, triggerRef);
   return (
     <Popover
       alignment={alignment}
@@ -239,7 +240,7 @@ export function DropdownMenu({
           hasChevron ? <Icon icon={ChevronDown} size="sm" /> : undefined
         }
         onClick={onClick}
-        ref={mergeRefs(ref, triggerRef)}
+        ref={mergedRef}
       />
     </Popover>
   );

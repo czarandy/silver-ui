@@ -31,9 +31,9 @@ import {Icon, type IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {timeInputRecipe} from 'components/TimeInput/TimeInput.recipe';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {TimePickerPanel} from 'internal/TimePickerPanel';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -254,6 +254,7 @@ export function TimeInput({
 
   const necessity = getNecessity(isOptional, isRequired);
 
+  const mergedRef = useMergeRefs(ref, inputRef);
   return (
     <Field
       className={className}
@@ -342,7 +343,7 @@ export function TimeInput({
           onFocus={onFocus}
           placeholder={placeholder}
           readOnly={isReadOnly}
-          ref={mergeRefs(ref, inputRef)}
+          ref={mergedRef}
           step={step ?? (hasSeconds ? 1 : 60)}
           tabIndex={isReadOnly ? -1 : undefined}
           type="time"

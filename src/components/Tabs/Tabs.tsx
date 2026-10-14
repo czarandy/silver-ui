@@ -17,8 +17,8 @@ import {
 } from 'components/Tabs/TabsContext';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useResolvedSize} from 'internal/SizeContext';
-import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export interface TabsProps {
@@ -145,6 +145,7 @@ export function Tabs({
     handleListKeyDown(event);
   };
 
+  const mergedRef = useMergeRefs(ref as Ref<HTMLDivElement>, tabListRef);
   return (
     <TabsContext value={contextValue}>
       <div
@@ -154,7 +155,7 @@ export function Tabs({
         onBlur={hint.onBlur}
         onFocus={hint.onFocus}
         onKeyDown={handleKeyDown}
-        ref={mergeRefs(ref as Ref<HTMLDivElement>, tabListRef)}
+        ref={mergedRef}
         role="tablist"
         style={style}
         tabIndex={-1}>
