@@ -39,6 +39,13 @@ export type ScheduleEventBorderStyle = 'border' | 'left' | 'none';
 
 export type ScheduleTimeGridOverlapBehavior = 'indented' | 'sideBySide';
 
+/**
+ * Where a day or week time grid scrolls when it mounts. `'now'` places the
+ * current time a third of the way down the hours, and only when the grid shows
+ * today. A time of day is placed at the top of the hours on any date.
+ */
+export type ScheduleInitialScrollTime = 'now' | {hour: number; minute?: number};
+
 export interface ScheduleRange {
   end: Instant;
   endDate: PlainDate;

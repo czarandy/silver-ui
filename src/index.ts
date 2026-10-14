@@ -321,6 +321,7 @@ export {
   type ScheduleEventSource,
   type ScheduleHeaderContent,
   type ScheduleHeight,
+  type ScheduleInitialScrollTime,
   type ScheduleListViewOptions,
   type ScheduleMonthlyViewOptions,
   type ScheduleMonthCellPropsRenderProps,

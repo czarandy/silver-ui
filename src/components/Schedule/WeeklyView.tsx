@@ -11,6 +11,7 @@ import {
 import {scheduleRangeToScheduleZonedInstantRange} from 'components/Schedule/scheduleZonedInstant';
 import {ScheduleFrame, formatWeekTitle} from 'components/Schedule/shared';
 import type {
+  ScheduleInitialScrollTime,
   ScheduleTimeGridOverlapBehavior,
   ScheduleView,
   ScheduleViewComponentProps,
@@ -50,6 +51,12 @@ export interface ScheduleWeeklyViewOptions {
    * @default 100
    */
   hourHeight?: number;
+  /**
+   * Where the grid scrolls when it mounts, when it scrolls vertically (as with
+   * `height="fill"`). Later renders, including paging, keep the user's scroll.
+   * By default the grid opens at its first hour.
+   */
+  initialScrollTime?: ScheduleInitialScrollTime;
   /**
    * Exclusive ending hour shown in the weekly grid (1-24).
    * @default 24
@@ -104,6 +111,7 @@ function ScheduleWeeklyView({
         days={days}
         height={height}
         hourHeight={options.hourHeight}
+        initialScrollTime={options.initialScrollTime}
         maxHour={options.maxHour}
         minHour={options.minHour}
         overlapBehavior={options.overlapBehavior}
@@ -120,6 +128,7 @@ export function createScheduleWeeklyView({
   dayMinWidth = 160,
   hiddenDays = EMPTY_HIDDEN_DAYS,
   hourHeight = 100,
+  initialScrollTime,
   maxHour = 24,
   minHour = 0,
   overlapBehavior = 'sideBySide',
@@ -164,6 +173,7 @@ export function createScheduleWeeklyView({
       dayMinWidth,
       hiddenDays: [...hiddenDaySet],
       hourHeight,
+      initialScrollTime,
       maxHour,
       minHour,
       overlapBehavior,

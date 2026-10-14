@@ -4,6 +4,10 @@ import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {useScheduleEventCreatePlugin} from 'components/Schedule/plugins/EventCreatePlugin';
+import type {
+  Instant,
+  ScheduleInitialScrollTime,
+} from 'components/Schedule/types';
 import {Temporal} from 'internal/temporal';
 
 // Real-layout placement tests for the create popover, reproducing a tall
@@ -104,4 +108,97 @@ describe('Schedule create popover placement (browser)', () => {
       expect(popover.bottom).toBeLessThanOrEqual(window.innerHeight);
     },
   );
+});
+
+// A full-day grid in a short frame, so every case has room to scroll.
+function ScrollingWeek({
+  initialScrollTime,
+  viewDate,
+}: {
+  initialScrollTime: ScheduleInitialScrollTime;
+  viewDate: Instant;
+}) {
+  return (
+    <div style={{height: 400}}>
+      <Schedule
+        events={[]}
+        height="fill"
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({hourHeight: 48, initialScrollTime})}
+        viewDate={viewDate}
+      />
+    </div>
+  );
+}
+
+const SEP_30 = Temporal.Instant.from('2026-09-30T12:00:00Z').epochMilliseconds;
+const OCT_7 = Temporal.Instant.from('2026-10-07T12:00:00Z').epochMilliseconds;
+
+function timeGrid(): HTMLElement {
+  return screen.getByRole('grid', {name: 'Schedule time grid'});
+}
+
+// The top of the hours left visible below the sticky day headers.
+function visibleHoursTop(): number {
+  return screen
+    .getByTestId('schedule-time-grid-fixed-rows')
+    .getBoundingClientRect().bottom;
+}
+
+describe('Schedule initial scroll time (browser)', () => {
+  beforeEach(() => {
+    vi.spyOn(Temporal.Now, 'instant').mockReturnValue(
+      Temporal.Instant.from('2026-09-30T15:30:00Z'),
+    );
+    return () => {
+      vi.restoreAllMocks();
+    };
+  });
+
+  it('places now a third of the way down the visible hours', () => {
+    render(<ScrollingWeek initialScrollTime="now" viewDate={SEP_30} />);
+
+    const visibleHoursHeight =
+      timeGrid().getBoundingClientRect().bottom - visibleHoursTop();
+    const line = screen.getByTestId('schedule-current-time-line');
+    // The line is drawn a couple of pixels below the time it marks.
+    expect(
+      Math.abs(
+        line.getBoundingClientRect().top -
+          visibleHoursTop() -
+          visibleHoursHeight / 3,
+      ),
+    ).toBeLessThanOrEqual(2);
+  });
+
+  it('stays at the first hour when the grid does not show today', () => {
+    render(<ScrollingWeek initialScrollTime="now" viewDate={OCT_7} />);
+
+    expect(timeGrid().scrollTop).toBe(0);
+  });
+
+  it('places a time of day at the top of the visible hours', () => {
+    render(
+      <ScrollingWeek
+        initialScrollTime={{hour: 8, minute: 30}}
+        viewDate={OCT_7}
+      />,
+    );
+
+    const eightOClock = screen
+      .getByTestId('schedule-time-grid-cell-2026-10-07-8')
+      .getBoundingClientRect();
+    expect(visibleHoursTop() - eightOClock.top).toBeCloseTo(24, 0);
+  });
+
+  it("keeps the user's scroll when paging", () => {
+    const {rerender} = render(
+      <ScrollingWeek initialScrollTime="now" viewDate={OCT_7} />,
+    );
+    timeGrid().scrollTop = 100;
+
+    rerender(<ScrollingWeek initialScrollTime="now" viewDate={SEP_30} />);
+
+    expect(timeGrid().scrollTop).toBe(100);
+  });
 });
