@@ -112,6 +112,54 @@ describe('useHotkey', () => {
     expect(handler).toHaveBeenCalledOnce();
   });
 
+  describe('client-hints platform detection', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it.each([
+      ['missing hints', undefined, 'MacIntel', true],
+      ['missing platform', {}, 'MacIntel', true],
+      ['undefined platform', {platform: undefined}, 'MacIntel', true],
+      ['null platform', {platform: null}, 'MacIntel', true],
+      ['empty platform', {platform: ''}, 'MacIntel', true],
+      ['blank platform', {platform: '  \t '}, 'MacIntel', true],
+      ['unknown platform', {platform: 'Unknown'}, 'MacIntel', true],
+      [
+        'normalized unknown platform',
+        {platform: ' unknown '},
+        'MacIntel',
+        true,
+      ],
+      ['unknown non-Apple platform', {platform: 'Unknown'}, 'Win32', false],
+      ['Mac hint', {platform: 'macOS'}, 'Win32', true],
+      ['Windows hint', {platform: 'Windows'}, 'MacIntel', false],
+      ['Linux hint', {platform: 'Linux'}, 'MacIntel', false],
+      ['Android hint', {platform: 'Android'}, 'MacIntel', false],
+    ])(
+      'uses the correct modifier for %s',
+      (_, userAgentData, platform, isApple) => {
+        vi.stubGlobal('navigator', {platform, userAgentData});
+
+        const handler = vi.fn();
+        renderHook(() => useHotkey('mod+k', handler));
+
+        fireEvent.keyDown(document, {
+          ctrlKey: isApple,
+          key: 'k',
+          metaKey: !isApple,
+        });
+        expect(handler).not.toHaveBeenCalled();
+
+        const event = dispatchKey(document, 'k', {
+          ctrlKey: !isApple,
+          metaKey: isApple,
+        });
+        expect(handler).toHaveBeenCalledExactlyOnceWith(event);
+      },
+    );
+  });
+
   it.each([
     ['enter', 'Enter'],
     ['backspace', 'Backspace'],
