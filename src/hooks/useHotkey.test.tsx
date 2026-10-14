@@ -38,12 +38,80 @@ describe('useHotkey', () => {
   const originalPlatform = navigator.platform;
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     Object.defineProperty(navigator, 'platform', {
       configurable: true,
       value: originalPlatform,
     });
     vi.restoreAllMocks();
   });
+
+  describe.each(['MacIntel', 'Win32'])(
+    'with navigator.platform %s',
+    platform => {
+      it.each([
+        undefined,
+        null,
+        {},
+        {platform: undefined},
+        {platform: null},
+        {platform: 42},
+        {platform: ''},
+        {platform: ' \t '},
+        {platform: 'Unknown'},
+        {platform: ' unknown '},
+      ])('falls back when client hints are unavailable: %j', userAgentData => {
+        vi.stubGlobal('navigator', {platform, userAgentData});
+        const handler = vi.fn();
+        renderHook(() => useHotkey('mod+k', handler));
+        const isApple = platform === 'MacIntel';
+
+        fireEvent.keyDown(document, {
+          ctrlKey: isApple,
+          key: 'k',
+          metaKey: !isApple,
+        });
+        expect(handler).not.toHaveBeenCalled();
+
+        fireEvent.keyDown(document, {
+          ctrlKey: !isApple,
+          key: 'k',
+          metaKey: isApple,
+        });
+        expect(handler).toHaveBeenCalledOnce();
+      });
+    },
+  );
+
+  it.each([
+    ['macOS', 'Win32', true],
+    ['Mac', 'Win32', true],
+    ['Windows', 'MacIntel', false],
+    ['Linux', 'MacIntel', false],
+    ['Android', 'MacIntel', false],
+    ['Chrome OS', 'MacIntel', false],
+  ])(
+    'prefers the valid %s client hint over navigator.platform %s',
+    (hint, platform, isApple) => {
+      vi.stubGlobal('navigator', {platform, userAgentData: {platform: hint}});
+      const handler = vi.fn();
+      renderHook(() => useHotkey('mod+k', handler));
+
+      fireEvent.keyDown(document, {
+        ctrlKey: isApple,
+        key: 'k',
+        metaKey: !isApple,
+      });
+      expect(handler).not.toHaveBeenCalled();
+
+      fireEvent.keyDown(document, {
+        ctrlKey: !isApple,
+        key: 'k',
+        metaKey: isApple,
+      });
+      expect(handler).toHaveBeenCalledOnce();
+    },
+  );
 
   it('listens on document by default and normalizes case and whitespace', () => {
     const handler = vi.fn();
