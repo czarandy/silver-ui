@@ -1,6 +1,7 @@
 import {render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
+import {Dialog} from 'components/Dialog/Dialog';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {useScheduleEventCreatePlugin} from 'components/Schedule/plugins/EventCreatePlugin';
@@ -190,6 +191,40 @@ describe('Schedule initial scroll time (browser)', () => {
       .getBoundingClientRect();
     expect(visibleHoursTop() - eightOClock.top).toBeCloseTo(24, 0);
   });
+
+  it.each<ScheduleInitialScrollTime>(['now', {hour: 12}])(
+    'applies initial scroll %j when an initially closed dialog opens',
+    async initialScrollTime => {
+      const calendar = (
+        <ScrollingWeek
+          initialScrollTime={initialScrollTime}
+          viewDate={SEP_30}
+        />
+      );
+      const {rerender} = render(
+        <Dialog isOpen={false} label="Calendar" onOpenChange={() => {}}>
+          {calendar}
+        </Dialog>,
+      );
+
+      rerender(
+        <Dialog isOpen label="Calendar" onOpenChange={() => {}}>
+          {calendar}
+        </Dialog>,
+      );
+
+      await waitFor(() => {
+        const visibleHoursHeight =
+          timeGrid().clientHeight -
+          screen.getByTestId('schedule-time-grid-fixed-rows').offsetHeight;
+        const expectedScrollTop =
+          initialScrollTime === 'now'
+            ? 15.5 * 48 - visibleHoursHeight / 3
+            : 12 * 48;
+        expect(timeGrid().scrollTop).toBeCloseTo(expectedScrollTop, 0);
+      });
+    },
+  );
 
   it("keeps the user's scroll when paging", () => {
     const {rerender} = render(

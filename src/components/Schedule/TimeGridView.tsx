@@ -619,26 +619,55 @@ export function TimeGridView({
     };
   }, [days.length, normalizedDayMinWidth]);
 
-  // Scrolls once, when the grid mounts. Later renders (paging, the
+  // Scrolls once, when the grid first has layout. Later renders (paging, the
   // current-time tick, new events) keep wherever the user has scrolled since.
   const hasAppliedInitialScrollRef = useRef(false);
   useIsomorphicLayoutEffect(() => {
     if (hasAppliedInitialScrollRef.current) {
       return;
     }
-    hasAppliedInitialScrollRef.current = true;
     const grid = gridRef.current;
-    const target = getInitialScrollTarget(initialScrollTime, days, timezoneID);
-    if (grid == null || target == null) {
+    if (grid == null) {
       return;
     }
-    // The sticky day headers cover the top of the grid, so the visible hours
-    // start below them.
-    const visibleHoursHeight =
-      grid.clientHeight - (fixedRowsRef.current?.offsetHeight ?? 0);
-    grid.scrollTop =
-      ((target.minute - normalizedMinHour * 60) / 60) * normalizedHourHeight -
-      target.fraction * visibleHoursHeight;
+    const applyInitialScroll = () => {
+      if (hasAppliedInitialScrollRef.current) {
+        return true;
+      }
+      // Closed dialogs and hidden tabs have no layout, so setting scrollTop
+      // would be ignored. Wait until the grid becomes measurable.
+      if (grid.clientHeight === 0) {
+        return false;
+      }
+      hasAppliedInitialScrollRef.current = true;
+      const target = getInitialScrollTarget(
+        initialScrollTime,
+        days,
+        timezoneID,
+      );
+      if (target == null) {
+        return true;
+      }
+      // The sticky day headers cover the top of the grid, so the visible hours
+      // start below them.
+      const visibleHoursHeight =
+        grid.clientHeight - (fixedRowsRef.current?.offsetHeight ?? 0);
+      grid.scrollTop =
+        ((target.minute - normalizedMinHour * 60) / 60) * normalizedHourHeight -
+        target.fraction * visibleHoursHeight;
+      return true;
+    };
+
+    if (applyInitialScroll() || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    const onResize = () => {
+      if (applyInitialScroll()) {
+        unobserveResize(grid, onResize);
+      }
+    };
+    observeResize(grid, onResize);
+    return () => unobserveResize(grid, onResize);
   }, [
     days,
     initialScrollTime,
