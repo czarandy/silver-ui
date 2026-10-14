@@ -502,6 +502,40 @@ function SortableStory() {
   );
 }
 
+const alignedSortableColumns: TableColumn<TaskRow>[] = [
+  {align: 'start', header: 'Task (start)', key: 'task', sortable: true},
+  {
+    align: 'center',
+    header: 'Progress (center)',
+    key: 'progress',
+    sortable: true,
+  },
+  {align: 'end', header: 'Budget (end)', key: 'budget', sortable: true},
+];
+
+function SortableAlignmentStory({
+  direction,
+}: {
+  direction: 'ltr' | 'rtl';
+}): React.JSX.Element {
+  const sortable = useTableSortableState<TaskRow, string>({
+    data,
+    defaultSort: [{direction: 'descending', sortKey: 'budget'}],
+    isMultiSortEnabled: true,
+  });
+  const sortPlugin = useTableSortable<TaskRow>(sortable.sortConfig);
+  return (
+    <div dir={direction}>
+      <Table
+        columns={alignedSortableColumns}
+        data={sortable.sortedData}
+        idKey="id"
+        plugins={{sortPlugin}}
+      />
+    </div>
+  );
+}
+
 function SelectionStory() {
   const [selectedKeys, setSelectedKeys] = useState(
     () => new Set<string>(['design']),
@@ -1086,6 +1120,16 @@ export const ChildrenModeMinimumWidth: Story = {
 
 export const Sortable: Story = {
   render: () => <SortableStory />,
+};
+
+export const SortableAlignment: Story = {
+  name: 'Sortable / Alignment',
+  render: () => <SortableAlignmentStory direction="ltr" />,
+};
+
+export const SortableAlignmentRTL: Story = {
+  name: 'Sortable / Alignment RTL',
+  render: () => <SortableAlignmentStory direction="rtl" />,
 };
 
 export const Selection: Story = {

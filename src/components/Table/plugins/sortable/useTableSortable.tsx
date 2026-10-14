@@ -8,7 +8,7 @@ import type {
   TableColumn,
   TablePlugin,
 } from 'components/Table/types';
-import {css} from 'styled-system/css';
+import {css, cva} from 'styled-system/css';
 
 export type TableSortDirection = 'ascending' | 'descending';
 
@@ -27,8 +27,8 @@ export interface UseTableSortableConfig<TSortKey extends string = string> {
   sort: TableSortState<TSortKey>;
 }
 
-const styles = {
-  button: css({
+const sortHeaderButtonRecipe = cva({
+  base: {
     display: 'flex',
     alignItems: 'center',
     gap: '1',
@@ -53,7 +53,18 @@ const styles = {
       {
         opacity: 1,
       },
-  }),
+  },
+  variants: {
+    align: {
+      start: {justifyContent: 'start'},
+      center: {justifyContent: 'center'},
+      end: {justifyContent: 'end'},
+    },
+  },
+  defaultVariants: {align: 'start'},
+});
+
+const styles = {
   icon: css({
     display: 'inline-flex',
     flexShrink: 0,
@@ -182,7 +193,7 @@ function SortHeaderButton<T extends Record<string, unknown>>({
   return (
     <button
       aria-label={ariaLabel}
-      className={styles.button}
+      className={sortHeaderButtonRecipe({align: column.align})}
       onClick={handleClick}
       type="button">
       <span className={styles.label}>{children}</span>
