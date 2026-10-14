@@ -53,6 +53,11 @@ export const radioGroupItemRecipe = sva({
     input: {
       position: 'absolute',
       inset: 0,
+      // Safari keeps the native radio's intrinsic size with inset alone.
+      // Remove that appearance and fill the displayed control for hit testing.
+      appearance: 'none',
+      w: 'full',
+      h: 'full',
       m: 0,
       p: 0,
       opacity: 0,
