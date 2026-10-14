@@ -5,6 +5,7 @@ export {
   type AvatarNamedSize,
   type AvatarNumericSize,
   type AvatarProps,
+  type AvatarShape,
   type AvatarSize,
 } from 'components/Avatar/Avatar';
 export {

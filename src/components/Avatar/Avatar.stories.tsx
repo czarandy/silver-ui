@@ -1,8 +1,10 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Check, Home, Settings} from 'lucide-react';
 import {SideNav, SideNavItem} from 'components/SideNav';
+import {HStack, VStack} from 'components/Stack';
+import {Text} from 'components/Text';
 import {css} from 'styled-system/css';
-import type {AvatarColor} from '.';
+import type {AvatarColor, AvatarShape} from '.';
 import {Avatar, AvatarStatusDot} from '.';
 
 const colors: AvatarColor[] = [
@@ -17,6 +19,9 @@ const colors: AvatarColor[] = [
   'pink',
   'gray',
 ];
+
+const shapes: AvatarShape[] = ['circle', 'rounded', 'square'];
+const organizationLogo = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96"><rect width="96" height="96" fill="#30777a"/><path d="M26 28h44v12H38v10h26v12H38v8H26z" fill="white"/></svg>')}`;
 
 const meta: Meta<typeof Avatar> = {
   title: 'Components/Avatar',
@@ -33,6 +38,10 @@ const meta: Meta<typeof Avatar> = {
       control: {type: 'select'},
       options: ['tiny', 'xsmall', 'small', 'medium', 'large'],
     },
+    shape: {
+      control: {type: 'select'},
+      options: shapes,
+    },
   },
 };
 
@@ -40,6 +49,59 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Initials: Story = {};
+
+export const Shapes: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Each row compares a person photo, person initials, and the default icon with an organization logo and organization initials. Rounded avatars use the theme’s large corner radius.',
+      },
+    },
+  },
+  render: () => (
+    <VStack align="start" gap={6}>
+      {shapes.map(shape => (
+        <VStack align="start" gap={3} key={shape}>
+          <Text weight="semibold">{shape}</Text>
+          <HStack align="center" gap={4}>
+            <Avatar
+              name="Ada Lovelace"
+              shape={shape}
+              size="medium"
+              src="https://i.pravatar.cc/256?img=47"
+            />
+            <Avatar name="Grace Hopper" shape={shape} size="medium" />
+            <Avatar alt="Person placeholder" shape={shape} size="medium" />
+            <Avatar
+              alt="Silver organization logo"
+              shape={shape}
+              size="medium"
+              src={organizationLogo}
+            />
+            <Avatar name="Silver Labs" shape={shape} size="medium" />
+          </HStack>
+        </VStack>
+      ))}
+    </VStack>
+  ),
+};
+
+export const ShapesWithStatus: Story = {
+  render: () => (
+    <HStack align="center" gap={6}>
+      {shapes.map(shape => (
+        <Avatar
+          key={shape}
+          name="Ada Lovelace"
+          shape={shape}
+          size="medium"
+          status={<AvatarStatusDot label="Online" />}
+        />
+      ))}
+    </HStack>
+  ),
+};
 
 export const UnicodeInitials: Story = {
   render: () => (
