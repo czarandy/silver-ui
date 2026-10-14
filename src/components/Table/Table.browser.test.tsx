@@ -90,32 +90,29 @@ describe.each(['ltr', 'rtl'] as const)(
             expect(buttonBox.width - (groupRight - groupLeft)).toBeGreaterThan(
               100,
             );
-            if (align === 'center') {
-              expect(
-                Math.abs(
-                  (groupLeft + groupRight) / 2 -
-                    (buttonBox.left + buttonBox.right) / 2,
-                ),
-              ).toBeLessThan(1);
-            } else {
-              const isLeftAligned =
-                (align !== 'end' && direction === 'ltr') ||
-                (align === 'end' && direction === 'rtl');
-              expect(
-                Math.abs(
-                  isLeftAligned
-                    ? groupLeft - buttonBox.left
-                    : groupRight - buttonBox.right,
-                ),
-              ).toBeLessThan(1);
-            }
+            const isLeftAligned =
+              (align !== 'end' && direction === 'ltr') ||
+              (align === 'end' && direction === 'rtl');
+            const groupAnchor =
+              align === 'center'
+                ? (groupLeft + groupRight) / 2
+                : isLeftAligned
+                  ? groupLeft
+                  : groupRight;
+            const buttonAnchor =
+              align === 'center'
+                ? (buttonBox.left + buttonBox.right) / 2
+                : isLeftAligned
+                  ? buttonBox.left
+                  : buttonBox.right;
+            expect(Math.abs(groupAnchor - buttonAnchor)).toBeLessThan(1);
 
             // The icon follows the label in the logical inline direction.
-            if (direction === 'ltr') {
-              expect(iconBox.left).toBeGreaterThan(label.right);
-            } else {
-              expect(iconBox.right).toBeLessThan(label.left);
-            }
+            const iconGap =
+              direction === 'ltr'
+                ? iconBox.left - label.right
+                : label.left - iconBox.right;
+            expect(iconGap).toBeGreaterThan(0);
             expect(icon).toHaveAttribute(
               'data-table-sort-icon-state',
               state === 'unsorted' ? 'inactive' : 'active',
