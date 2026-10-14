@@ -168,19 +168,18 @@ export function useTruncation({
   useIsomorphicLayoutEffect(() => {
     const element = elementRef.current;
     observeElement(element, maxLines);
-    scheduleUpdate(element, maxLines);
 
     return () => {
       cancelPendingFrame();
       disconnectObserver();
     };
-  }, [
-    cancelPendingFrame,
-    disconnectObserver,
-    maxLines,
-    observeElement,
-    scheduleUpdate,
-  ]);
+  }, [cancelPendingFrame, disconnectObserver, maxLines, observeElement]);
+
+  // Text changes can alter overflow without resizing the element. Measure
+  // after each render rather than relying on the ref being detached/attached.
+  useIsomorphicLayoutEffect(() => {
+    scheduleUpdate(elementRef.current, maxLines);
+  });
 
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
