@@ -38,7 +38,13 @@ export function isApplePlatform(): boolean {
     typeof userAgentData === 'object' &&
     'platform' in userAgentData
   ) {
-    return /mac/i.test(String(userAgentData.platform));
+    const platform =
+      typeof userAgentData.platform === 'string'
+        ? userAgentData.platform.trim()
+        : '';
+    if (platform !== '' && platform.toLowerCase() !== 'unknown') {
+      return /mac/i.test(platform);
+    }
   }
   return /Mac|iPhone|iPad|iPod/.test(navigator.platform);
 }
