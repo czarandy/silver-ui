@@ -14,8 +14,8 @@ import {useRef, useState} from 'react';
 import {chatComposerInputRecipe} from 'components/Chat/ChatComposerInput.recipe';
 import {useChatComposerContext} from 'components/Chat/ChatContext';
 import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {isComposingEvent} from 'internal/isComposingEvent';
-import {mergeRefs} from 'internal/mergeRefs';
 import {useAutoGrowTextArea} from 'internal/useAutoGrowTextArea';
 import {cx} from 'utils/cx';
 
@@ -158,6 +158,7 @@ export function ChatComposerInput({
 
   useAutoGrowTextArea(textareaRef, currentValue, minRows, maxRows);
 
+  const mergedRef = useMergeRefs(textareaRef, ref);
   return (
     <textarea
       {...passthrough}
@@ -167,7 +168,7 @@ export function ChatComposerInput({
       onChange={handleChange}
       onKeyDown={handleKeyDown}
       placeholder={currentPlaceholder}
-      ref={mergeRefs(textareaRef, ref)}
+      ref={mergedRef}
       rows={minRows}
       style={style}
       value={currentValue}

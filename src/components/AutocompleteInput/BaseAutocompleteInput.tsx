@@ -28,8 +28,8 @@ import {Icon} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {resolveListboxKeyAction} from 'internal/listboxKeyboard';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -490,6 +490,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
     </div>
   );
 
+  const mergedRef = useMergeRefs(ref, inputRef, fallbackAnchorRef);
   return (
     <>
       <input
@@ -630,7 +631,7 @@ export function BaseAutocompleteInput<T extends SearchableItem>({
         onPointerDown={isReadOnly ? preventReadOnlyInteraction : undefined}
         placeholder={placeholder}
         readOnly={isReadOnly}
-        ref={mergeRefs(ref, inputRef, fallbackAnchorRef)}
+        ref={mergedRef}
         role="combobox"
         style={style}
         tabIndex={isReadOnly ? -1 : undefined}

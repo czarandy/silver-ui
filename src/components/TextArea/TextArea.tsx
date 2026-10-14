@@ -28,9 +28,9 @@ import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Spinner} from 'components/Spinner';
 import {Text} from 'components/Text';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useResolvedSize} from 'internal/SizeContext';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   blurReadOnlyInteraction,
   preventReadOnlyInteraction,
@@ -274,6 +274,7 @@ export function TextArea({
     isAutoGrow,
   );
 
+  const mergedRef = useMergeRefs(textareaRef, ref);
   return (
     <Field
       className={className}
@@ -340,7 +341,7 @@ export function TextArea({
           onPaste={onPaste}
           placeholder={placeholder}
           readOnly={isReadOnly}
-          ref={mergeRefs(textareaRef, ref)}
+          ref={mergedRef}
           rows={isAutoGrow ? autoGrowMinRows : rows}
           spellCheck={hasSpellCheck}
           tabIndex={isReadOnly ? -1 : undefined}

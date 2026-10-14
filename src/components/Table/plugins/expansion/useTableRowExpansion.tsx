@@ -102,6 +102,37 @@ type ExpansionIndentStyle = CSSProperties & {
 const INTERACTIVE_TARGET_SELECTOR =
   'a, button, input, select, textarea, [role="button"], [role="checkbox"]';
 
+// Row transforms run as callback factories, not as React component renders.
+function createExpansionRowRef<T extends Record<string, unknown>>(
+  configRef: {readonly current: UseTableRowExpansionConfig<T>},
+  item: T,
+  ref: BodyRowRenderProps['ref'],
+): RefCallback<HTMLTableRowElement> {
+  let removeClickListener: (() => void) | null = null;
+  const clickRef: RefCallback<HTMLTableRowElement> = element => {
+    removeClickListener?.();
+    removeClickListener = null;
+
+    if (element == null) {
+      return;
+    }
+
+    const handleClick = (event: MouseEvent): void => {
+      const target = event.target as HTMLElement | null;
+      if (target?.closest(INTERACTIVE_TARGET_SELECTOR) != null) {
+        return;
+      }
+      const clickConfig = configRef.current;
+      clickConfig.onToggleRow(clickConfig.getRowKey(item));
+    };
+    element.addEventListener('click', handleClick);
+    removeClickListener = () => {
+      element.removeEventListener('click', handleClick);
+    };
+  };
+  return ref == null ? clickRef : mergeRefs(ref, clickRef);
+}
+
 interface ExpansionStore<T extends Record<string, unknown>> {
   getConfig: () => UseTableRowExpansionConfig<T>;
   notify: () => void;
@@ -480,33 +511,10 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
         // `TableRow` forwards only className/style/ref to the `<tr>`, so the
         // click behavior attaches at the DOM level, mirroring how the
         // selection plugin applies row styling.
-        let removeClickListener: (() => void) | null = null;
-        const clickRef: RefCallback<HTMLTableRowElement> = element => {
-          removeClickListener?.();
-          removeClickListener = null;
-
-          if (element == null) {
-            return;
-          }
-
-          const handleClick = (event: MouseEvent): void => {
-            const target = event.target as HTMLElement | null;
-            if (target?.closest(INTERACTIVE_TARGET_SELECTOR) != null) {
-              return;
-            }
-            const clickConfig = configRef.current;
-            clickConfig.onToggleRow(clickConfig.getRowKey(item));
-          };
-          element.addEventListener('click', handleClick);
-          removeClickListener = () => {
-            element.removeEventListener('click', handleClick);
-          };
-        };
-
         return {
           ...props,
           className: cx(props.className, styles.clickableRow),
-          ref: props.ref == null ? clickRef : mergeRefs(props.ref, clickRef),
+          ref: createExpansionRowRef(configRef, item, props.ref),
         };
       },
     }),

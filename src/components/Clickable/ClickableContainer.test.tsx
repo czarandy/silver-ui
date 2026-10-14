@@ -1,6 +1,10 @@
 import {fireEvent, render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type {ComponentPropsWithRef, MouseEvent as ReactMouseEvent} from 'react';
+import type {
+  ComponentPropsWithRef,
+  MouseEvent as ReactMouseEvent,
+  RefCallback,
+} from 'react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {ClickableContainer} from 'components/Clickable/ClickableContainer';
 import {LinkProvider} from 'components/Link';
@@ -23,6 +27,59 @@ afterEach(() => {
 });
 
 describe('ClickableContainer', () => {
+  it('keeps refs stable on content updates and supports switching interactivity', () => {
+    const cleanup = vi.fn();
+    const ref = vi.fn<RefCallback<HTMLDivElement>>(() => cleanup);
+    const onClick = vi.fn();
+    const {rerender, unmount} = render(
+      <ClickableContainer data-testid="surface" label="Item" ref={ref}>
+        Static content
+      </ClickableContainer>,
+    );
+    expect(ref).toHaveBeenCalledExactlyOnceWith(screen.getByTestId('surface'));
+
+    rerender(
+      <ClickableContainer
+        data-testid="surface"
+        label="Item"
+        onClick={onClick}
+        ref={ref}>
+        Clickable content
+      </ClickableContainer>,
+    );
+    expect(screen.getByRole('button', {name: 'Item'})).toBeInTheDocument();
+    expect(ref).toHaveBeenLastCalledWith(screen.getByTestId('surface'));
+    const callsAfterSwitch = ref.mock.calls.length;
+    const cleanupsAfterSwitch = cleanup.mock.calls.length;
+
+    rerender(
+      <ClickableContainer
+        data-testid="surface"
+        label="Item"
+        onClick={onClick}
+        ref={ref}>
+        Updated content
+      </ClickableContainer>,
+    );
+    expect(ref).toHaveBeenCalledTimes(callsAfterSwitch);
+    expect(cleanup).toHaveBeenCalledTimes(cleanupsAfterSwitch);
+
+    rerender(
+      <ClickableContainer
+        data-testid="surface"
+        isReadOnly
+        label="Item"
+        onClick={onClick}
+        ref={ref}>
+        Read-only content
+      </ClickableContainer>,
+    );
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(ref).toHaveBeenLastCalledWith(screen.getByTestId('surface'));
+    unmount();
+    expect(cleanup).toHaveBeenCalledTimes(ref.mock.calls.length);
+  });
+
   it('keeps the visible root semantic-free and uses a sibling real control', () => {
     render(
       <ClickableContainer

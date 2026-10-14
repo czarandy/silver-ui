@@ -8,8 +8,8 @@ import type {ChatPassthroughProps} from 'components/Chat/ChatPassthroughProps';
 import {ChatScrollButton} from 'components/Chat/ChatScrollButton';
 import {useChatNewMessages} from 'components/Chat/useChatNewMessages';
 import {useChatStreamScroll} from 'components/Chat/useChatStreamScroll';
+import useMergeRefs from 'hooks/useMergeRefs';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
@@ -174,6 +174,7 @@ export function ChatLayout({
     />
   );
 
+  const mergedRef = useMergeRefs(ref, rootRef);
   return (
     <ChatLayoutContext value={layoutContext}>
       <div
@@ -181,7 +182,7 @@ export function ChatLayout({
         className={cx(classes.root, className)}
         data-density={density}
         data-testid={dataTestId}
-        ref={mergeRefs(ref, rootRef)}
+        ref={mergedRef}
         style={style}>
         <div
           className={classes.messageArea}

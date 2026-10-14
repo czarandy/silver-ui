@@ -13,6 +13,7 @@ import {
 import {toolbarRecipe} from 'components/Toolbar/Toolbar.recipe';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {
   SizeContext,
   type ComponentSize,
@@ -20,7 +21,6 @@ import {
 } from 'internal/SizeContext';
 import {FOCUSABLE_SELECTOR} from 'internal/focusable';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {cx} from 'utils/cx';
 
@@ -315,6 +315,7 @@ export function Toolbar({
     size,
   });
 
+  const mergedRef = useMergeRefs(containerRef, ref);
   return (
     <SizeContext value={size}>
       <div
@@ -325,7 +326,7 @@ export function Toolbar({
         onBlur={hint.onBlur}
         onFocus={handleFocus}
         onKeyDown={handleKeyDown}
-        ref={mergeRefs(containerRef, ref)}
+        ref={mergedRef}
         role="toolbar"
         style={style}>
         {hasStartContent || hasCenterContent ? (

@@ -249,6 +249,7 @@ export default tseslint.config(
 
       // React fundamentals
       '@eslint-react/rules-of-hooks': 'error',
+      'silver-ui/no-raw-merge-refs': 'error',
       '@eslint-react/purity': 'error',
       '@eslint-react/immutability': 'error',
       '@eslint-react/refs': 'error',
@@ -473,6 +474,11 @@ export default tseslint.config(
         {assertFunctionNames: ['expect', 'assertNonNull']},
       ],
     },
+  },
+  // The hook itself memoizes the imperative composer with explicit dependencies.
+  {
+    files: ['src/hooks/useMergeRefs.ts'],
+    rules: {'silver-ui/no-raw-merge-refs': 'off'},
   },
   // Storybook — enforce correct story structure
   ...storybook.configs['flat/recommended'],

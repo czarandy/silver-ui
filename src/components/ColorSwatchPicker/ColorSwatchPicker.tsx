@@ -29,7 +29,6 @@ import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
 import {COLOR_LABELS, COLOR_NAMES, type ColorName} from 'internal/colorNames';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 
 const pickerClass = colorSwatchPickerRecipe();
 
@@ -294,7 +293,7 @@ export function ColorSwatchPicker({
         onBlur={hint.onBlur}
         onFocus={hint.onFocus}
         onKeyDown={handleKeyDown}
-        ref={mergeRefs(containerRef)}
+        ref={containerRef}
         role="radiogroup"
         tabIndex={-1}>
         {colors.map((color, index) => (

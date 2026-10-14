@@ -77,6 +77,37 @@ function applyRowSelectionStyle(
   }
 }
 
+// Row transforms run as callback factories, not as React component renders.
+function createSelectionRowRef<T extends Record<string, unknown>>(
+  store: SelectionStore<T>,
+  item: T,
+  ref: BodyRowRenderProps['ref'],
+): RefCallback<HTMLTableRowElement> {
+  let unsubscribe: (() => void) | null = null;
+  const selectionRef: RefCallback<HTMLTableRowElement> = element => {
+    unsubscribe?.();
+    unsubscribe = null;
+
+    if (element == null) {
+      return;
+    }
+
+    applyRowSelectionStyle(element, store.getConfig().getIsItemSelected(item));
+    unsubscribe = store.subscribe(() => {
+      if (!element.isConnected) {
+        unsubscribe?.();
+        unsubscribe = null;
+        return;
+      }
+      applyRowSelectionStyle(
+        element,
+        store.getConfig().getIsItemSelected(item),
+      );
+    });
+  };
+  return ref == null ? selectionRef : mergeRefs(ref, selectionRef);
+}
+
 const ITEM_SELECTED = 1;
 const ITEM_SELECTABLE = 2;
 const ITEM_ENABLED = 4;
@@ -246,38 +277,9 @@ export function useTableSelection<T extends Record<string, unknown>>(
         );
       },
       transformBodyRow(props: BodyRowRenderProps, item: T): BodyRowRenderProps {
-        let unsubscribe: (() => void) | null = null;
-        const selectionRef: RefCallback<HTMLTableRowElement> = element => {
-          unsubscribe?.();
-          unsubscribe = null;
-
-          if (element == null) {
-            return;
-          }
-
-          applyRowSelectionStyle(
-            element,
-            store.getConfig().getIsItemSelected(item),
-          );
-          unsubscribe = store.subscribe(() => {
-            if (!element.isConnected) {
-              unsubscribe?.();
-              unsubscribe = null;
-              return;
-            }
-            applyRowSelectionStyle(
-              element,
-              store.getConfig().getIsItemSelected(item),
-            );
-          });
-        };
-
         return {
           ...props,
-          ref:
-            props.ref == null
-              ? selectionRef
-              : mergeRefs(props.ref, selectionRef),
+          ref: createSelectionRowRef(store, item, props.ref),
         };
       },
       transformBodyCell(

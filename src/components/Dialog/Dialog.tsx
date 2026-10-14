@@ -10,13 +10,13 @@ import {
 } from 'react';
 import {dialogRecipe} from 'components/Dialog/Dialog.recipe';
 import {DialogContext} from 'components/Dialog/DialogContext';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {LayerContext} from 'internal/LayerContext';
 import {SizeContext} from 'internal/SizeContext';
 import {
   resolveDismissBehavior,
   type DismissBehavior,
 } from 'internal/dismissBehavior';
-import {mergeRefs} from 'internal/mergeRefs';
 import {DURATION_FAST_MS} from 'internal/motion';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
@@ -187,6 +187,7 @@ export function Dialog({
         }
       : undefined;
 
+  const mergedRef = useMergeRefs(ref, dialogRef);
   return (
     <dialog
       aria-label={label}
@@ -207,7 +208,7 @@ export function Dialog({
         }
       }}
       onPointerDown={backdropDismiss.onPointerDown}
-      ref={mergeRefs(ref, dialogRef)}
+      ref={mergedRef}
       role={role === 'dialog' ? undefined : role}
       style={{
         width: isFullscreen ? undefined : toPixelSize(width),

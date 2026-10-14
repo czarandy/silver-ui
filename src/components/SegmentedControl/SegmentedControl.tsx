@@ -26,8 +26,8 @@ import {
 } from 'components/SegmentedControl/SegmentedControlItem';
 import useKeyboardHint from 'hooks/useKeyboardHint';
 import useListFocus from 'hooks/useListFocus';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useResolvedSize} from 'internal/SizeContext';
-import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export interface SegmentedControlProps<TValue extends string = string> {
@@ -211,6 +211,7 @@ export function SegmentedControl<TValue extends string = string>({
     }
   }, [isReadOnly, getItems]);
 
+  const mergedRef = useMergeRefs(ref, containerRef);
   return (
     <SegmentedControlContext value={contextValue}>
       <div
@@ -223,7 +224,7 @@ export function SegmentedControl<TValue extends string = string>({
         onBlur={hint.onBlur}
         onFocus={hint.onFocus}
         onKeyDown={handleKeyDown}
-        ref={mergeRefs(ref, containerRef)}
+        ref={mergedRef}
         role="radiogroup"
         style={style}
         tabIndex={-1}>

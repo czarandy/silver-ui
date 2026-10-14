@@ -8,7 +8,7 @@ import {
   type RefCallback,
   type RefObject,
 } from 'react';
-import {mergeRefs} from 'internal/mergeRefs';
+import useMergeRefs from 'hooks/useMergeRefs';
 import useLatest from 'internal/useLatest';
 import {useLayer, type LayerReturn} from 'internal/useLayer';
 
@@ -261,10 +261,7 @@ export function useHoverLayer({
     ],
   );
 
-  const ref = useMemo(
-    () => mergeRefs(layer.ref, interactionRef),
-    [layer.ref, interactionRef],
-  );
+  const ref = useMergeRefs(layer.ref, interactionRef);
 
   useEffect(() => {
     return () => clearTimeouts();

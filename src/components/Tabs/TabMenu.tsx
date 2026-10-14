@@ -15,8 +15,8 @@ import {tabMenuRecipe} from 'components/Tabs/TabMenu.recipe';
 import {tabsRecipe} from 'components/Tabs/Tabs.recipe';
 import {useTabsContext} from 'components/Tabs/TabsContext';
 import useListFocus from 'hooks/useListFocus';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useIsTopLayer} from 'internal/LayerContext';
-import {mergeRefs} from 'internal/mergeRefs';
 import {cx} from 'utils/cx';
 
 export interface TabMenuOption {
@@ -123,6 +123,7 @@ export function TabMenu({
     handleListKeyDown(event);
   };
 
+  const mergedRef = useMergeRefs(triggerRef, ref);
   return (
     <Popover
       content={
@@ -185,7 +186,7 @@ export function TabMenu({
           event.preventDefault();
           setIsOpen(true);
         }}
-        ref={mergeRefs(triggerRef, ref)}
+        ref={mergedRef}
         role="tab"
         style={style}
         tabIndex={hasSelectedOption && !isDisabled ? 0 : -1}

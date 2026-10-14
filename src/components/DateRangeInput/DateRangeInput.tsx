@@ -33,9 +33,9 @@ import {useFieldset} from 'components/Fieldset';
 import {Icon, type IconComponent} from 'components/Icon';
 import {Popover} from 'components/Popover';
 import {Spinner} from 'components/Spinner';
+import useMergeRefs from 'hooks/useMergeRefs';
 import type {DateRange} from 'internal/dateTypes';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {
   plainDateFormatWith,
   plainDateIsEqual,
@@ -266,6 +266,7 @@ export function DateRangeInput({
     return () => cancelAnimationFrame(animationFrame);
   }, [isReadOnly]);
 
+  const mergedRef = useMergeRefs(ref, buttonRef);
   return (
     <Field
       className={className}
@@ -322,7 +323,7 @@ export function DateRangeInput({
           disabled={isDisabled}
           id={inputId}
           onKeyDown={handleKeyDown}
-          ref={mergeRefs(ref, buttonRef)}
+          ref={mergedRef}
           role="combobox"
           tabIndex={isReadOnly ? -1 : undefined}
           type="button">

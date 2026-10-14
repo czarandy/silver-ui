@@ -12,8 +12,8 @@ import {
   type Ref,
 } from 'react';
 import {overflowListRecipe} from 'components/OverflowList/OverflowList.recipe';
+import useMergeRefs from 'hooks/useMergeRefs';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
 import type {SpacingToken} from 'internal/spacingTokens';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
@@ -266,6 +266,7 @@ export function OverflowList({
     gap,
   });
 
+  const mergedRef = useMergeRefs(ref, containerRefCallback);
   return (
     <>
       <div
@@ -290,7 +291,7 @@ export function OverflowList({
       <div
         className={cx(classes.root, className)}
         data-testid={dataTestId}
-        ref={mergeRefs(ref, containerRefCallback)}
+        ref={mergedRef}
         style={style}
         {...htmlProps}>
         {collapseFrom === 'start' && hasOverflow

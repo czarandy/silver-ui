@@ -16,10 +16,10 @@ import {Button} from 'components/Button';
 import {lightboxRecipe} from 'components/Lightbox/Lightbox.recipe';
 import {Spinner} from 'components/Spinner';
 import useAnnounce from 'hooks/useAnnounce';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {LayerContext} from 'internal/LayerContext';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
-import {mergeRefs} from 'internal/mergeRefs';
 import {useBackdropDismiss} from 'internal/useBackdropDismiss';
 import {useEscapeDismiss} from 'internal/useEscapeDismiss';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
@@ -313,6 +313,7 @@ export function Lightbox({
     }
   }, [canNext, currentIndex, setIndex]);
 
+  const mergedRef = useMergeRefs(ref, dialogRef);
   return (
     <dialog
       aria-label="Media lightbox"
@@ -333,7 +334,7 @@ export function Lightbox({
         }
       }}
       onPointerDown={backdropDismiss.onPointerDown}
-      ref={mergeRefs(ref, dialogRef)}
+      ref={mergedRef}
       style={style}>
       <LayerContext value={layerContextValue}>
         <div className={classes.container} ref={containerRef}>

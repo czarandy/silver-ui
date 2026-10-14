@@ -7,7 +7,7 @@ import {
   type Ref,
   type RefCallback,
 } from 'react';
-import {mergeRefs} from 'internal/mergeRefs';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -67,6 +67,11 @@ export function HoverLayerTrigger({
   const textOnly = isTextOnly(children);
   const showHoverIndication =
     hoverIndication === 'always' || (hoverIndication === 'auto' && textOnly);
+  const textWrapperRef = useMergeRefs(
+    triggerRef as Ref<HTMLSpanElement>,
+    wrapperRef,
+  );
+  const mergedWrapperRef = useMergeRefs(ownWrapperRef, wrapperRef);
 
   useIsomorphicLayoutEffect(() => {
     if (textOnly) {
@@ -107,7 +112,7 @@ export function HoverLayerTrigger({
             className,
           )}
           data-testid={dataTestId}
-          ref={mergeRefs(triggerRef as Ref<HTMLSpanElement>, wrapperRef)}
+          ref={textWrapperRef}
           style={style}
           tabIndex={0}>
           {children}
@@ -118,7 +123,7 @@ export function HoverLayerTrigger({
   }
 
   const nonTextWrapperRef = isNonTextWrapperPropsForwarded
-    ? mergeRefs(ownWrapperRef, wrapperRef)
+    ? mergedWrapperRef
     : ownWrapperRef;
   const nonTextWrapperClassName = cx(
     styles.wrapperContents,

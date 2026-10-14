@@ -5,8 +5,8 @@ import type {CSSProperties, ReactNode, Ref} from 'react';
 import {useCallback, useEffect, useRef} from 'react';
 import {useAppShellMobile} from 'components/AppShell/AppShellMobileContext';
 import {Button} from 'components/Button';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {mobileNavRecipe} from 'internal/MobileNav/MobileNav.recipe';
-import {mergeRefs} from 'internal/mergeRefs';
 import {toPixelSize, type SizeValue} from 'internal/toPixelSize';
 import {useModalHost} from 'internal/useModalHost';
 import {useScrollLock} from 'internal/useScrollLock';
@@ -175,6 +175,7 @@ export function MobileNav({
 
   const formattedSize = toPixelSize(size);
 
+  const mergedRef = useMergeRefs(ref, dialogRef);
   return (
     <dialog
       aria-label={label ?? (typeof header === 'string' ? header : 'Navigation')}
@@ -189,7 +190,7 @@ export function MobileNav({
           onOpenChange(false);
         }
       }}
-      ref={mergeRefs(ref, dialogRef)}
+      ref={mergedRef}
       style={style}>
       <div
         className={cx(

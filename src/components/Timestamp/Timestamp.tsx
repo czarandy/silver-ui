@@ -10,7 +10,7 @@ import {
   type TimestampValue,
 } from 'components/Timestamp/Timestamp.utils';
 import {useTooltip} from 'components/Tooltip';
-import {mergeRefs} from 'internal/mergeRefs';
+import useMergeRefs from 'hooks/useMergeRefs';
 
 export type {TimestampFormat, TimestampValue};
 
@@ -106,6 +106,7 @@ function TimestampContent({
     renderTooltip,
   } = useTooltip({isEnabled: isTooltipEnabled});
 
+  const mergedRef = useMergeRefs<HTMLTimeElement>(ref, tooltipRef);
   return (
     <>
       <Text
@@ -116,7 +117,7 @@ function TimestampContent({
         color={color}
         data-testid={dataTestId}
         dateTime={dateTime}
-        ref={mergeRefs<HTMLTimeElement>(ref, tooltipRef)}
+        ref={mergedRef}
         size={size}
         style={style}
         type={type}
