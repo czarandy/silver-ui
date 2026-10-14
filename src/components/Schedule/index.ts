@@ -71,6 +71,7 @@ export type {
   ScheduleEventColor,
   ScheduleEventBorderStyle,
   ScheduleHeight,
+  ScheduleInitialScrollTime,
   ScheduleEventPropsRenderProps,
   ScheduleEventSource,
   ScheduleHeaderContent,

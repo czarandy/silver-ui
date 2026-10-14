@@ -35,6 +35,7 @@ import type {
   CalendarEvent,
   CalendarInstantEvent,
   ScheduleHeight,
+  ScheduleInitialScrollTime,
   SchedulePluginElementProps,
   ScheduleTimeGridCellPropsRenderProps,
   ScheduleTimeGridOverlapBehavior,
@@ -52,6 +53,7 @@ import {
   type PlainDate,
 } from 'internal/plainDate';
 import {observeResize, unobserveResize} from 'internal/sharedResizeObserver';
+import {Temporal} from 'internal/temporal';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
 
@@ -67,6 +69,10 @@ interface InlineOverflow {
 }
 
 const MINUTES_PER_DAY = 24 * 60;
+
+// `initialScrollTime: 'now'` lands this far down the visible hours, so the
+// hour just before now stays in view.
+const NOW_SCROLL_FRACTION = 1 / 3;
 
 /**
  * A timed event's wall-clock extent, resolved to the grid timezone once so the
@@ -417,6 +423,7 @@ export function TimeGridView({
   days,
   height,
   hourHeight = 100,
+  initialScrollTime,
   maxHour = 24,
   minHour = 0,
   overlapBehavior = 'sideBySide',
@@ -445,6 +452,10 @@ export function TimeGridView({
    * @default 100
    */
   hourHeight?: number;
+  /**
+   * Where the grid scrolls when it mounts.
+   */
+  initialScrollTime?: ScheduleInitialScrollTime;
   /**
    * Exclusive ending hour shown in the grid (1-24).
    * @default 24
@@ -607,6 +618,34 @@ export function TimeGridView({
       }
     };
   }, [days.length, normalizedDayMinWidth]);
+
+  // Scrolls once, when the grid mounts. Later renders (paging, the
+  // current-time tick, new events) keep wherever the user has scrolled since.
+  const hasAppliedInitialScrollRef = useRef(false);
+  useIsomorphicLayoutEffect(() => {
+    if (hasAppliedInitialScrollRef.current) {
+      return;
+    }
+    hasAppliedInitialScrollRef.current = true;
+    const grid = gridRef.current;
+    const target = getInitialScrollTarget(initialScrollTime, days, timezoneID);
+    if (grid == null || target == null) {
+      return;
+    }
+    // The sticky day headers cover the top of the grid, so the visible hours
+    // start below them.
+    const visibleHoursHeight =
+      grid.clientHeight - (fixedRowsRef.current?.offsetHeight ?? 0);
+    grid.scrollTop =
+      ((target.minute - normalizedMinHour * 60) / 60) * normalizedHourHeight -
+      target.fraction * visibleHoursHeight;
+  }, [
+    days,
+    initialScrollTime,
+    normalizedHourHeight,
+    normalizedMinHour,
+    timezoneID,
+  ]);
 
   return (
     <div className={styles.container}>
@@ -877,6 +916,36 @@ export function TimeGridView({
       ) : null}
     </div>
   );
+}
+
+/**
+ * Resolves `initialScrollTime` to the minute of the day to scroll to and how
+ * far down the visible hours it lands, or `null` when there is nothing to
+ * scroll to. The current time is read here rather than from `useCurrentTime`,
+ * whose server snapshot is still in place while hydrating.
+ */
+function getInitialScrollTarget(
+  initialScrollTime: ScheduleInitialScrollTime | undefined,
+  days: ReadonlyArray<PlainDate>,
+  timezoneID: string,
+): {fraction: number; minute: number} | null {
+  if (initialScrollTime == null) {
+    return null;
+  }
+  if (initialScrollTime !== 'now') {
+    return {
+      fraction: 0,
+      minute: initialScrollTime.hour * 60 + (initialScrollTime.minute ?? 0),
+    };
+  }
+  const now = Temporal.Now.instant().epochMilliseconds;
+  const today = plainDateFromInstant(now, timezoneID);
+  return days.some(day => plainDateIsEqual(day, today))
+    ? {
+        fraction: NOW_SCROLL_FRACTION,
+        minute: getMinutesSinceStartOfDay(now, timezoneID),
+      }
+    : null;
 }
 
 function getCurrentTimeTopForHour({

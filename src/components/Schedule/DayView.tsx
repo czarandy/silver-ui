@@ -12,6 +12,7 @@ import {
   formatMonthTitle,
 } from 'components/Schedule/shared';
 import type {
+  ScheduleInitialScrollTime,
   ScheduleTimeGridOverlapBehavior,
   ScheduleView,
   ScheduleViewComponentProps,
@@ -30,6 +31,12 @@ export interface ScheduleDayViewOptions {
    * @default 100
    */
   hourHeight?: number;
+  /**
+   * Where the grid scrolls when it mounts, when it scrolls vertically (as with
+   * `height="fill"`). Later renders, including paging, keep the user's scroll.
+   * By default the grid opens at its first hour.
+   */
+  initialScrollTime?: ScheduleInitialScrollTime;
   /**
    * Exclusive ending hour shown in the day grid (1-24).
    * @default 24
@@ -71,6 +78,7 @@ function ScheduleDayView({
         days={days}
         height={height}
         hourHeight={options.hourHeight}
+        initialScrollTime={options.initialScrollTime}
         maxHour={options.maxHour}
         minHour={options.minHour}
         overlapBehavior={options.overlapBehavior}
@@ -85,6 +93,7 @@ function ScheduleDayView({
 export function createScheduleDayView({
   allDayEventLimit = 3,
   hourHeight = 100,
+  initialScrollTime,
   maxHour = 24,
   minHour = 0,
   overlapBehavior = 'sideBySide',
@@ -111,6 +120,7 @@ export function createScheduleDayView({
     options: {
       allDayEventLimit,
       hourHeight,
+      initialScrollTime,
       maxHour,
       minHour,
       overlapBehavior,

@@ -1137,6 +1137,17 @@ export const FillHeightWithSurplusSpace: Story = {
   ),
 };
 
+export const FillHeightScrolledToNow: Story = {
+  render: () => (
+    <div className={fillHeightStoryContainer}>
+      <ScheduleStory
+        height="fill"
+        view={createScheduleWeeklyView({initialScrollTime: 'now'})}
+      />
+    </div>
+  ),
+};
+
 export const CustomPlugin: Story = {
   render: () => {
     const customPlugin = useMemo<SchedulePlugin>(
