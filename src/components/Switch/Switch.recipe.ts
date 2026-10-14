@@ -81,6 +81,11 @@ export const switchRecipe = sva({
     input: {
       position: 'absolute',
       inset: 0,
+      // Safari keeps the native checkbox's intrinsic size with inset alone.
+      // Remove that appearance and fill the displayed track for hit testing.
+      appearance: 'none',
+      w: 'full',
+      h: 'full',
       m: 0,
       p: 0,
       opacity: 0,

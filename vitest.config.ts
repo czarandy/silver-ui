@@ -43,7 +43,7 @@ export default defineConfig({
       },
       {
         // Layout-dependent behavior that jsdom cannot compute runs in real
-        // Chromium, with checkbox hit-area regressions also covered in WebKit.
+        // Chromium, with control hit-area regressions also covered in WebKit.
         extends: true,
         // Pre-bundle up front: dependencies discovered mid-run make Vite
         // reload the page, which can load a second copy of React.
@@ -76,6 +76,8 @@ export default defineConfig({
                 name: 'browser-webkit',
                 include: [
                   'src/components/CheckboxInput/CheckboxInput.browser.test.tsx',
+                  'src/components/Switch/Switch.browser.test.tsx',
+                  'src/components/RadioGroup/RadioGroup.browser.test.tsx',
                 ],
               },
             ],

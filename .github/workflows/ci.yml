@@ -36,7 +36,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
-      # Layout tests run in Chromium; checkbox hit areas also run in WebKit.
+      # Layout tests run in Chromium; control hit areas also run in WebKit.
       - run: pnpm exec playwright install --with-deps chromium-headless-shell webkit
       - run: pnpm test
 
