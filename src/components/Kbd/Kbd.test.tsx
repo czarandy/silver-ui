@@ -6,11 +6,59 @@ describe('Kbd', () => {
   const originalPlatform = navigator.platform;
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     Object.defineProperty(navigator, 'platform', {
       configurable: true,
       value: originalPlatform,
     });
   });
+
+  describe.each(['MacIntel', 'Win32'])(
+    'with navigator.platform %s',
+    platform => {
+      it.each([
+        undefined,
+        null,
+        {},
+        {platform: undefined},
+        {platform: null},
+        {platform: 42},
+        {platform: ''},
+        {platform: ' \t '},
+        {platform: 'Unknown'},
+        {platform: ' unknown '},
+      ])('falls back when client hints are unavailable: %j', userAgentData => {
+        vi.stubGlobal('navigator', {platform, userAgentData});
+
+        render(<Kbd keys="mod+k" />);
+
+        const isApple = platform === 'MacIntel';
+        expect(
+          screen.getByRole('img', {
+            name: isApple ? 'Command+K' : 'Control+K',
+          }),
+        ).toHaveTextContent(isApple ? '⌘K' : 'CtrlK');
+      });
+    },
+  );
+
+  it.each([
+    ['macOS', 'Win32', 'Command+K', '⌘K'],
+    ['Mac', 'Win32', 'Command+K', '⌘K'],
+    ['Windows', 'MacIntel', 'Control+K', 'CtrlK'],
+    ['Linux', 'MacIntel', 'Control+K', 'CtrlK'],
+    ['Android', 'MacIntel', 'Control+K', 'CtrlK'],
+    ['Chrome OS', 'MacIntel', 'Control+K', 'CtrlK'],
+  ])(
+    'prefers the valid %s client hint over navigator.platform %s',
+    (hint, platform, label, text) => {
+      vi.stubGlobal('navigator', {platform, userAgentData: {platform: hint}});
+
+      render(<Kbd keys="mod+k" />);
+
+      expect(screen.getByRole('img', {name: label})).toHaveTextContent(text);
+    },
+  );
 
   it('renders a single key', () => {
     render(<Kbd keys="k" />);
