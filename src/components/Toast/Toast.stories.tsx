@@ -7,7 +7,7 @@ import {HStack} from 'components/Stack';
 import {Text} from 'components/Text';
 import {Toast} from 'components/Toast/Toast';
 import {ToastViewport} from 'components/Toast/ToastViewport';
-import type {ToastPosition} from 'components/Toast/types';
+import type {ToastPosition, ToastType} from 'components/Toast/types';
 import {useToast} from 'components/Toast/useToast';
 
 const meta: Meta<typeof Toast> = {
@@ -319,15 +319,108 @@ export const WithPrimaryAction: Story = {
       description: {
         story:
           'A toast is already the loud element, so a `primary` action inside one ' +
-          'collapses to the same `onSolid` treatment the dismiss button uses — ' +
-          'passing `primary` is safe, it just does not add a second solid fill on ' +
-          'top of a solid toast. Left alone it would paint the global accent on a ' +
-          'fill it was never picked against (teal on teal for `info`).\n\n' +
+          'does not add a second solid fill on top of a solid toast. Left alone ' +
+          'it would paint the global accent on a fill it was never picked ' +
+          'against (teal on teal for `info`), so it is drawn as a ring in the ' +
+          'toast’s own text colour instead — white on the dark fills, dark on ' +
+          '`warning`, exactly as the body copy does.\n\n' +
           'A filled action cannot work here: each type pairs its fill with the ' +
           'one foreground that contrasts against it, so no single button colour ' +
           'clears 3:1 against both the light `warning` amber and the dark `info` ' +
-          'teal. The label follows the toast’s own text instead — white on the ' +
-          'dark fills, dark on `warning`, exactly as the body copy does.',
+          'teal.',
+      },
+    },
+  },
+};
+
+const ACTION_TOASTS: {
+  body: string;
+  primary: string;
+  secondary: string;
+  type: ToastType;
+}[] = [
+  {
+    body: 'A new version is available',
+    primary: 'Update now',
+    secondary: 'Later',
+    type: 'info',
+  },
+  {
+    body: 'Your export is ready',
+    primary: 'Download',
+    secondary: 'View',
+    type: 'success',
+  },
+  {
+    body: 'Storage almost full',
+    primary: 'Upgrade plan',
+    secondary: 'Manage',
+    type: 'warning',
+  },
+  {
+    body: 'Unable to save',
+    primary: 'Retry',
+    secondary: 'Details',
+    type: 'error',
+  },
+];
+
+export const WithPrimaryAndSecondaryActions: Story = {
+  render: (): React.JSX.Element => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+      {ACTION_TOASTS.map(({body, primary, secondary, type}) => (
+        <Toast
+          autoHideDuration={5000}
+          body={body}
+          endContent={
+            <>
+              <Button label={secondary} size="sm" variant="secondary" />
+              <Button label={primary} size="sm" variant="primary" />
+            </>
+          }
+          isAutoHide={false}
+          key={type}
+          onDismiss={() => {}}
+          type={type}
+        />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Every action follows the toast’s text colour, and the rank is carried ' +
+          'by treatment rather than by a fill colour: `primary` gets a crisp ' +
+          'ring, `secondary` a soft tint one step below it, and the dismiss ' +
+          'button stays ghost.',
+      },
+    },
+  },
+};
+
+export const WithOutlineAction: Story = {
+  render: (): React.JSX.Element => (
+    <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+      {ACTION_TOASTS.map(({body, primary, type}) => (
+        <Toast
+          autoHideDuration={5000}
+          body={body}
+          endContent={<Button label={primary} size="sm" variant="outline" />}
+          isAutoHide={false}
+          key={type}
+          onDismiss={() => {}}
+          type={type}
+        />
+      ))}
+    </div>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Inside a toast `outline` renders the same as `primary`: both are ' +
+          'already a ring, so there is no lighter outlined step to fall back to.',
       },
     },
   },

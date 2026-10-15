@@ -6,6 +6,13 @@ const primaryBg = `var(--silver-button-primary-bg, ${token.var('colors.primary')
 const primaryFg = `var(--silver-button-primary-fg, ${token.var('colors.fg.onPrimary')})`;
 const primaryBgHover = `var(--silver-button-primary-bg-hover, ${token.var('colors.primary.hover')})`;
 const primaryBgActive = `var(--silver-button-primary-bg-active, ${token.var('colors.primary.active')})`;
+// Drawn as an inset shadow rather than a border so a surface can ring the
+// primary action without changing its box. Transparent unless retinted.
+const primaryRing = `inset 0 0 0 ${token.var('borderWidths.default')} var(--silver-button-primary-border, transparent)`;
+const outlineFg = `var(--silver-button-outline-fg, ${primaryBg})`;
+const outlineBorder = 'var(--silver-button-outline-border, currentColor)';
+const outlineBgHover = `var(--silver-button-outline-bg-hover, color-mix(in srgb, ${primaryBg} 8%, transparent))`;
+const outlineBgActive = `var(--silver-button-outline-bg-active, color-mix(in srgb, ${primaryBg} 12%, transparent))`;
 const secondaryBg = `var(--silver-button-secondary-bg, ${token.var('colors.surface.gray')})`;
 const secondaryFg = `var(--silver-button-secondary-fg, ${token.var('colors.fg')})`;
 const secondaryBgHover = `var(--silver-button-secondary-bg-hover, ${token.var('colors.surface.gray.hover')})`;
@@ -22,17 +29,18 @@ export const buttonSurfaceRecipe = cva({
       primary: {
         bg: primaryBg,
         color: primaryFg,
+        boxShadow: primaryRing,
         _hover: {bg: primaryBgHover},
         _active: {bg: primaryBgActive},
       },
       outline: {
         bg: 'transparent',
-        color: primaryBg,
+        color: outlineFg,
         borderWidth: 'default',
         borderStyle: 'solid',
-        borderColor: 'currentColor',
-        _hover: {bg: `color-mix(in srgb, ${primaryBg} 8%, transparent)`},
-        _active: {bg: `color-mix(in srgb, ${primaryBg} 12%, transparent)`},
+        borderColor: outlineBorder,
+        _hover: {bg: outlineBgHover},
+        _active: {bg: outlineBgActive},
       },
       secondary: {
         bg: secondaryBg,
@@ -77,6 +85,7 @@ type ButtonSurfaceStyles = {
   borderWidth?: string;
   borderStyle?: 'solid';
   borderColor?: string;
+  boxShadow?: string;
   _active: {bg: string};
   _focusVisible?: {outlineColor: string};
   _hover: {bg: string};

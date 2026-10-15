@@ -1,24 +1,38 @@
 import {sva, type RecipeVariantProps} from 'styled-system/css';
 
+const tint = (percent: number) =>
+  `color-mix(in srgb, currentColor ${percent}%, transparent)`;
+const ring = tint(60);
+
 export const toastRecipe = sva({
   slots: ['root', 'inner', 'content', 'end'],
   base: {
     root: {
       // A toast is already the loud element, and every type is a solid status
-      // fill, so a `primary` action inside one collapses to the same treatment
-      // the dismiss button uses. Left alone it would paint the global accent on
-      // a fill it was never picked against — teal on teal for `info`.
+      // fill, so the global accent and gray surfaces Button actions normally
+      // use were never picked against it — teal on teal for `info`, a stray
+      // gray chip for `secondary`. Actions are retinted from `currentColor`
+      // instead, which resolves to whichever `solidFg` the type sets: white on
+      // the dark fills and dark on the light `warning` one, exactly as the body
+      // copy does, with no per-type values.
       //
-      // These mirror Button's own `onSolid` variant. `currentColor` resolves to
-      // whichever `solidFg` the type sets, so no per-type values are needed:
-      // the label follows the toast's text, white on the dark fills and dark on
-      // the light `warning` one, exactly as the body copy does.
+      // The rank stays legible without a fill colour (none clears 3:1 against
+      // both amber and teal): `primary` (and `outline`, which renders the same
+      // here) gets a crisp ring, `secondary` a soft tint, and the dismiss
+      // button stays ghost.
       '--silver-button-primary-bg': 'transparent',
       '--silver-button-primary-fg': 'currentColor',
-      '--silver-button-primary-bg-hover':
-        'color-mix(in srgb, currentColor 15%, transparent)',
-      '--silver-button-primary-bg-active':
-        'color-mix(in srgb, currentColor 20%, transparent)',
+      '--silver-button-primary-border': ring,
+      '--silver-button-primary-bg-hover': tint(15),
+      '--silver-button-primary-bg-active': tint(20),
+      '--silver-button-outline-fg': 'currentColor',
+      '--silver-button-outline-border': ring,
+      '--silver-button-outline-bg-hover': tint(15),
+      '--silver-button-outline-bg-active': tint(20),
+      '--silver-button-secondary-bg': tint(15),
+      '--silver-button-secondary-fg': 'currentColor',
+      '--silver-button-secondary-bg-hover': tint(22),
+      '--silver-button-secondary-bg-active': tint(28),
       '--silver-button-focus-color': 'currentColor',
       width: '25rem',
       maxW: 'calc(100vw - 32px)',
