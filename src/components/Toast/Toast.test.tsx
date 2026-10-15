@@ -139,7 +139,7 @@ describe('Toast', () => {
 
   // Left alone, a primary action would paint the global accent on a fill it was
   // never picked against — teal on teal for `info`.
-  it('collapses a primary end action to the onSolid treatment', () => {
+  it('rings a primary end action in the toast text colour', () => {
     render(
       <Toast
         autoHideDuration={5000}
@@ -155,6 +155,63 @@ describe('Toast', () => {
     const toast = screen.getByTestId('toast');
     expect(toast).toHaveClass('silver---silver-button-primary-bg_transparent');
     expect(toast).toHaveClass('silver---silver-button-primary-fg_currentColor');
+    expect(toast).toHaveClass(
+      'silver---silver-button-primary-border_color-mix(in_srgb,_currentColor_60%,_transparent)',
+    );
+  });
+
+  // Without this a secondary action keeps the app's neutral gray chip, which
+  // was never picked against a status fill. It sits a step below the ringed
+  // primary as a soft tint of the toast's own text colour.
+  it('tints a secondary end action in the toast text colour', () => {
+    render(
+      <Toast
+        autoHideDuration={5000}
+        body="A new version is available"
+        data-testid="toast"
+        endContent={<Button label="Later" size="sm" variant="secondary" />}
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="info"
+      />,
+    );
+
+    const toast = screen.getByTestId('toast');
+    expect(toast).toHaveClass(
+      'silver---silver-button-secondary-bg_color-mix(in_srgb,_currentColor_15%,_transparent)',
+    );
+    expect(toast).toHaveClass(
+      'silver---silver-button-secondary-fg_currentColor',
+    );
+    expect(toast).toHaveClass(
+      'silver---silver-button-secondary-bg-hover_color-mix(in_srgb,_currentColor_22%,_transparent)',
+    );
+  });
+
+  // `outline` takes its colour from the primary background, which a toast sets
+  // to transparent — left alone its label and border would vanish. It renders
+  // the same as a primary action instead.
+  it('renders an outline end action the same as primary', () => {
+    render(
+      <Toast
+        autoHideDuration={5000}
+        body="A new version is available"
+        data-testid="toast"
+        endContent={<Button label="Update" size="sm" variant="outline" />}
+        isAutoHide={false}
+        onDismiss={vi.fn()}
+        type="info"
+      />,
+    );
+
+    const toast = screen.getByTestId('toast');
+    expect(toast).toHaveClass('silver---silver-button-outline-fg_currentColor');
+    expect(toast).toHaveClass(
+      'silver---silver-button-outline-border_color-mix(in_srgb,_currentColor_60%,_transparent)',
+    );
+    expect(toast).toHaveClass(
+      'silver---silver-button-outline-bg-hover_color-mix(in_srgb,_currentColor_15%,_transparent)',
+    );
   });
 
   // `currentColor` is what keeps this type-agnostic: the label follows the

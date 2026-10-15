@@ -129,6 +129,30 @@ describe('Button', () => {
     );
   });
 
+  // Toast rings its primary action through this var; everywhere else the ring
+  // must stay invisible so primary buttons look exactly as before.
+  it('draws no visible ring on primary unless a surface sets one', () => {
+    render(<Button label="Primary" variant="primary" />);
+
+    expect(screen.getByRole('button', {name: 'Primary'})).toHaveClass(
+      'silver-bx-sh_inset_0_0_0_var(--silver-border-widths-default)_var(--silver-button-primary-border,_transparent)',
+    );
+  });
+
+  // Toast retints outline through its own vars, since the primary background
+  // it otherwise borrows is transparent there.
+  it('falls back to the primary colour when no surface retints outline', () => {
+    render(<Button label="Outline" variant="outline" />);
+
+    const button = screen.getByRole('button', {name: 'Outline'});
+    expect(button).toHaveClass(
+      'silver-c_var(--silver-button-outline-fg,_var(--silver-button-primary-bg,_var(--silver-colors-primary)))',
+    );
+    expect(button).toHaveClass(
+      'silver-bd-c_var(--silver-button-outline-border,_currentColor)',
+    );
+  });
+
   // Alerts can retint this same variant through CSS variables; everywhere else
   // the existing neutral secondary treatment must remain unchanged.
   it('falls back to the neutral surface when no surface retints secondary', () => {
