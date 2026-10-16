@@ -143,6 +143,18 @@ export const itemRecipe = sva({
       true: {},
       false: {},
     },
+    // The end content moves to its own line, at the trailing edge, when the
+    // row is too narrow for it beside 12rem of text. It wraps from whichever
+    // row holds it: the content wrapper, or the root when it is hoisted.
+    hasWrappingEndContent: {
+      true: {
+        root: {flexWrap: 'wrap'},
+        content: {flexWrap: 'wrap'},
+        interactiveContent: {flex: '1 1 12rem'},
+        textContent: {flex: '1 1 12rem'},
+      },
+      false: {},
+    },
   },
   compoundVariants: [
     {
@@ -172,6 +184,7 @@ export const itemRecipe = sva({
     isDisabled: false,
     hasParentRole: false,
     hasHoistedEndContent: false,
+    hasWrappingEndContent: false,
   },
 });
 

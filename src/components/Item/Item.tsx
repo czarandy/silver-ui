@@ -78,6 +78,13 @@ export interface ItemProps {
    */
   endContentPosition?: 'end' | 'inline';
   /**
+   * Whether end content moves below the label and description, at the trailing
+   * edge, when the item is too narrow to show it beside them. Without it, end
+   * content never shrinks and squeezes the text instead.
+   * @default false
+   */
+  hasWrappingEndContent?: boolean;
+  /**
    * Link URL. When set, the content area renders as a link.
    */
   href?: string;
@@ -183,6 +190,7 @@ export function Item({
   descriptionLines,
   endContent,
   endContentPosition = 'end',
+  hasWrappingEndContent = false,
   href,
   isDisabled = false,
   isHighlighted = false,
@@ -230,6 +238,7 @@ export function Item({
     isDisabled,
     hasParentRole,
     hasHoistedEndContent,
+    hasWrappingEndContent,
   });
 
   // Consumer `style` still wins, matching the layout primitives.
