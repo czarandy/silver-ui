@@ -198,6 +198,54 @@ describe('ContextMenu', () => {
     expect(item).toHaveFocus();
   });
 
+  it('renders checkable items and focuses one first on open', () => {
+    render(
+      <ContextMenu
+        items={[
+          {isSelected: true, label: 'Show grid', selectionMode: 'checkbox'},
+          {
+            items: [
+              {isSelected: true, label: 'Small', selectionMode: 'radio'},
+              {label: 'Large', selectionMode: 'radio'},
+            ],
+            title: 'Icon size',
+            type: 'section',
+          },
+        ]}>
+        <div>Right-click me</div>
+      </ContextMenu>,
+    );
+
+    const originalRAF = window.requestAnimationFrame;
+    const pendingCallbacks: FrameRequestCallback[] = [];
+    window.requestAnimationFrame = (cb: FrameRequestCallback) => {
+      pendingCallbacks.push(cb);
+      return pendingCallbacks.length;
+    };
+    fireEvent.contextMenu(screen.getByText('Right-click me'));
+    window.requestAnimationFrame = originalRAF;
+    act(() => {
+      for (const cb of pendingCallbacks) {
+        cb(0);
+      }
+    });
+
+    const grid = screen.getByRole('menuitemcheckbox', {
+      hidden: true,
+      name: 'Show grid',
+    });
+    expect(grid).toBeChecked();
+    expect(grid).toHaveFocus();
+    expect(
+      screen.getByRole('menuitemradio', {hidden: true, name: 'Large'}),
+    ).not.toBeChecked();
+
+    fireEvent.keyDown(grid, {key: 'ArrowDown'});
+    expect(
+      screen.getByRole('menuitemradio', {hidden: true, name: 'Small'}),
+    ).toHaveFocus();
+  });
+
   it('renders compound menu content', async () => {
     const user = userEvent.setup();
     const handleClick = vi.fn();

@@ -1,4 +1,5 @@
 import type {ReactNode} from 'react';
+import type {DropdownMenuItemSelectionMode} from 'components/DropdownMenu/DropdownMenuItem';
 import type {IconComponent} from 'components/Icon';
 
 export interface DropdownMenuItemData {
@@ -10,7 +11,7 @@ export interface DropdownMenuItemData {
    * Whether activating the item closes the menu. Set to `false` for items
    * users flip repeatedly, such as toggles, so the menu stays open with focus
    * on the item.
-   * @default true
+   * @default true, or false when `selectionMode` is `'checkbox'`
    */
   hasCloseOnSelect?: boolean;
   /**
@@ -22,6 +23,11 @@ export interface DropdownMenuItemData {
    */
   isDisabled?: boolean;
   /**
+   * Whether a checkable item is checked. Only applies with `selectionMode`.
+   * @default false
+   */
+  isSelected?: boolean;
+  /**
    * Item label.
    */
   label: string;
@@ -29,6 +35,12 @@ export interface DropdownMenuItemData {
    * Called when the item is selected.
    */
   onClick?: () => void;
+  /**
+   * Makes the item checkable, rendering `menuitemcheckbox` or `menuitemradio`
+   * with `aria-checked` and a leading check or dot. Bound each radio set with
+   * dividers or a section so it is grouped for assistive tech.
+   */
+  selectionMode?: DropdownMenuItemSelectionMode;
   /**
    * Tooltip content shown when the item is hovered or focused.
    */

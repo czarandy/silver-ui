@@ -1,9 +1,16 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
-import {Archive, Check, Edit, MoreVertical, Trash2} from 'lucide-react';
+import {
+  Archive,
+  Edit,
+  MoreVertical,
+  Trash2,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
 import {useState} from 'react';
+import {Divider} from 'components/Divider';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
-import {Icon} from 'components/Icon';
 import {Kbd} from 'components/Kbd';
 
 const meta: Meta<typeof DropdownMenu> = {
@@ -36,45 +43,26 @@ export const Compound: Story = {
   ),
 };
 
-const columns = ['Name', 'Email', 'Role', 'Status'];
-
 function KeepOpenOnSelectStory(
   args: React.ComponentProps<typeof DropdownMenu>,
 ): React.JSX.Element {
-  const [visible, setVisible] = useState<ReadonlySet<string>>(
-    () => new Set(['Name', 'Email']),
-  );
-  const toggle = (column: string): void => {
-    setVisible(current => {
-      const next = new Set(current);
-      if (next.has(column)) {
-        next.delete(column);
-      } else {
-        next.add(column);
-      }
-      return next;
-    });
-  };
+  const [zoom, setZoom] = useState(100);
 
   return (
-    <DropdownMenu {...args} button={{label: 'Columns'}}>
-      {columns.map(column => (
-        <DropdownMenuItem
-          endContent={
-            visible.has(column) ? (
-              <Icon color="secondary" icon={Check} size="sm" />
-            ) : null
-          }
-          hasCloseOnSelect={false}
-          key={column}
-          label={column}
-          onClick={() => toggle(column)}
-        />
-      ))}
+    <DropdownMenu {...args} button={{label: `Zoom ${zoom}%`}}>
       <DropdownMenuItem
-        label="Show all"
-        onClick={() => setVisible(new Set(columns))}
+        hasCloseOnSelect={false}
+        icon={ZoomIn}
+        label="Zoom in"
+        onClick={() => setZoom(current => Math.min(current + 10, 200))}
       />
+      <DropdownMenuItem
+        hasCloseOnSelect={false}
+        icon={ZoomOut}
+        label="Zoom out"
+        onClick={() => setZoom(current => Math.max(current - 10, 50))}
+      />
+      <DropdownMenuItem label="Reset" onClick={() => setZoom(100)} />
     </DropdownMenu>
   );
 }
@@ -84,11 +72,114 @@ export const KeepOpenOnSelect: Story = {
     docs: {
       description: {
         story:
-          'Items with `hasCloseOnSelect={false}` run `onClick` and leave the menu open with focus on the item, so users can flip several toggles, such as column visibility, in one visit. Other items, like "Show all" here, still close the menu.',
+          'Items with `hasCloseOnSelect={false}` run `onClick` and leave the menu open with focus on the item, so users can repeat an action, such as zooming, without reopening the menu. Other items, like "Reset" here, still close the menu.',
       },
     },
   },
   render: (args): React.JSX.Element => <KeepOpenOnSelectStory {...args} />,
+};
+
+const syncOptions = [
+  {label: 'Only busy times', value: 'busy'},
+  {label: 'Full event details', value: 'full'},
+] as const;
+
+function CheckableItemsStory(
+  args: React.ComponentProps<typeof DropdownMenu>,
+): React.JSX.Element {
+  const [isBookingBlocked, setIsBookingBlocked] = useState(true);
+  const [isShared, setIsShared] = useState(false);
+  const [sync, setSync] = useState<string>('busy');
+
+  return (
+    <DropdownMenu {...args} button={{label: 'Calendar options'}}>
+      <DropdownMenuItem
+        isSelected={isBookingBlocked}
+        label="Block client booking"
+        onClick={() => setIsBookingBlocked(current => !current)}
+        selectionMode="checkbox"
+      />
+      <DropdownMenuItem
+        isSelected={isShared}
+        label="Share with team"
+        onClick={() => setIsShared(current => !current)}
+        selectionMode="checkbox"
+      />
+      <Divider />
+      {syncOptions.map(option => (
+        <DropdownMenuItem
+          isSelected={sync === option.value}
+          key={option.value}
+          label={option.label}
+          onClick={() => setSync(option.value)}
+          selectionMode="radio"
+        />
+      ))}
+      <Divider />
+      <DropdownMenuItem icon={Trash2} label="Remove calendar" />
+    </DropdownMenu>
+  );
+}
+
+export const CheckableItems: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`selectionMode="checkbox"` items toggle independently and keep the menu open; `selectionMode="radio"` items pick one option and close it. Both render `menuitemcheckbox`/`menuitemradio` with `aria-checked` and draw a leading check or dot. Plain items in the same menu are indented so every label lines up. A `<Divider />` in compound content gets the same spacing as `{type: \'divider\'}`.',
+      },
+    },
+  },
+  render: (args): React.JSX.Element => <CheckableItemsStory {...args} />,
+};
+
+const sortOptions = ['Name', 'Date modified', 'Size'];
+
+function CheckableItemsDataDrivenStory(
+  args: React.ComponentProps<typeof DropdownMenu>,
+): React.JSX.Element {
+  const [isArchivedShown, setIsArchivedShown] = useState(false);
+  const [sortBy, setSortBy] = useState('Name');
+
+  return (
+    <DropdownMenu
+      {...args}
+      button={{label: 'View options'}}
+      items={[
+        {
+          isSelected: isArchivedShown,
+          label: 'Show archived',
+          onClick: () => setIsArchivedShown(current => !current),
+          selectionMode: 'checkbox',
+        },
+        {type: 'divider'},
+        {
+          items: sortOptions.map(option => ({
+            isSelected: sortBy === option,
+            label: option,
+            onClick: () => setSortBy(option),
+            selectionMode: 'radio',
+          })),
+          title: 'Sort by',
+          type: 'section',
+        },
+      ]}
+    />
+  );
+}
+
+export const CheckableItemsDataDriven: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The same `selectionMode` and `isSelected` fields work on data-driven items. A titled section groups a radio set for assistive tech.',
+      },
+    },
+  },
+  render: (args): React.JSX.Element => (
+    <CheckableItemsDataDrivenStory {...args} />
+  ),
 };
 
 export const EndAligned: Story = {

@@ -4698,7 +4698,7 @@ describe('Schedule', () => {
 
     fireEvent.click(selectorButton);
     fireEvent.click(
-      screen.getByRole('menuitem', {hidden: true, name: 'Month'}),
+      screen.getByRole('menuitemradio', {hidden: true, name: 'Month'}),
     );
     expect(onChangeView).toHaveBeenCalledWith(monthView);
   });
@@ -4741,11 +4741,11 @@ describe('Schedule', () => {
 
     fireEvent.click(selectorButton);
 
-    const selectedItem = screen.getByRole('menuitem', {
+    const selectedItem = screen.getByRole('menuitemradio', {
       hidden: true,
       name: 'Day',
     });
-    const unselectedItem = screen.getByRole('menuitem', {
+    const unselectedItem = screen.getByRole('menuitemradio', {
       hidden: true,
       name: 'Month',
     });
@@ -4753,25 +4753,8 @@ describe('Schedule', () => {
     expect(unselectedItem).toHaveAttribute('aria-keyshortcuts', 'm');
     expect(within(selectedItem).getByLabelText('D')).toBeInTheDocument();
     expect(within(unselectedItem).getByLabelText('M')).toBeInTheDocument();
-    expect(
-      within(selectedItem).getByTestId('schedule-view-selector-selected-icon'),
-    ).toBeInTheDocument();
-    expect(
-      within(unselectedItem).queryByTestId(
-        'schedule-view-selector-selected-icon',
-      ),
-    ).not.toBeInTheDocument();
-
-    // The check renders before the shortcut so hotkeys stay right-aligned
-    // across selected and unselected items.
-    const selectedCheck = within(selectedItem).getByTestId(
-      'schedule-view-selector-selected-icon',
-    );
-    const selectedHotkey = within(selectedItem).getByLabelText('D');
-    expect(
-      selectedCheck.compareDocumentPosition(selectedHotkey) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
+    expect(selectedItem).toBeChecked();
+    expect(unselectedItem).not.toBeChecked();
 
     fireEvent.click(unselectedItem);
     expect(onChangeView).toHaveBeenCalledWith(monthView);

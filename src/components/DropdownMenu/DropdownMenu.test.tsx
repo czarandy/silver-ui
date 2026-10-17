@@ -1,8 +1,15 @@
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Edit, Trash2} from 'lucide-react';
-import {createRef} from 'react';
+import {createRef, useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {Divider} from 'components/Divider';
 import {
   DropdownMenu,
   type DropdownMenuButtonProps,
@@ -411,6 +418,326 @@ describe('DropdownMenu', () => {
       await user.click(
         screen.getByRole('menuitem', {hidden: true, name: 'Done'}),
       );
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+  });
+
+  describe('checkable items', () => {
+    function getIndicatorIcon(item: HTMLElement): SVGElement | null {
+      // eslint-disable-next-line testing-library/no-node-access -- the check is decorative (aria-hidden) and has no accessible handle
+      return item.querySelector('svg');
+    }
+
+    function SettingsMenu({onSync}: {onSync?: (value: string) => void}) {
+      const [isBlocked, setIsBlocked] = useState(true);
+      const [isShared, setIsShared] = useState(false);
+      const [sync, setSync] = useState('busy');
+      return (
+        <DropdownMenu button={{label: 'Calendar options'}}>
+          <DropdownMenuItem
+            isSelected={isBlocked}
+            label="Block client booking"
+            onClick={() => setIsBlocked(value => !value)}
+            selectionMode="checkbox"
+          />
+          <DropdownMenuItem
+            isSelected={isShared}
+            label="Share with team"
+            onClick={() => setIsShared(value => !value)}
+            selectionMode="checkbox"
+          />
+          <Divider />
+          {[
+            {label: 'Only busy times', value: 'busy'},
+            {label: 'Full event details', value: 'full'},
+          ].map(option => (
+            <DropdownMenuItem
+              isSelected={sync === option.value}
+              key={option.value}
+              label={option.label}
+              onClick={() => {
+                setSync(option.value);
+                onSync?.(option.value);
+              }}
+              selectionMode="radio"
+            />
+          ))}
+          <DropdownMenuItem label="Remove calendar" />
+        </DropdownMenu>
+      );
+    }
+
+    it('renders checkbox and radio roles with aria-checked', async () => {
+      const user = userEvent.setup();
+      render(<SettingsMenu />);
+      await user.click(screen.getByRole('button', {name: 'Calendar options'}));
+
+      expect(
+        screen.getByRole('menuitemcheckbox', {
+          hidden: true,
+          name: 'Block client booking',
+        }),
+      ).toBeChecked();
+      expect(
+        screen.getByRole('menuitemcheckbox', {
+          hidden: true,
+          name: 'Share with team',
+        }),
+      ).not.toBeChecked();
+      expect(
+        screen.getByRole('menuitemradio', {
+          hidden: true,
+          name: 'Only busy times',
+        }),
+      ).toBeChecked();
+      expect(
+        screen.getByRole('menuitemradio', {
+          hidden: true,
+          name: 'Full event details',
+        }),
+      ).not.toBeChecked();
+      expect(
+        screen.getByRole('menuitem', {hidden: true, name: 'Remove calendar'}),
+      ).not.toBeChecked();
+      expect(screen.getByRole('separator', {hidden: true})).toBeInTheDocument();
+    });
+
+    it('draws a leading check only on checked checkbox items', async () => {
+      const user = userEvent.setup();
+      render(<SettingsMenu />);
+      await user.click(screen.getByRole('button', {name: 'Calendar options'}));
+
+      const checked = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Block client booking',
+      });
+      const icon = assertNonNull(
+        getIndicatorIcon(checked),
+        'checked item should show a check',
+      );
+      expect(
+        icon.compareDocumentPosition(screen.getByText('Block client booking')) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      const unchecked = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Share with team',
+      });
+      expect(getIndicatorIcon(unchecked)).toBeNull();
+    });
+
+    it('keeps the menu open while checkbox items are toggled', async () => {
+      const user = userEvent.setup();
+      render(<SettingsMenu />);
+      const trigger = screen.getByRole('button', {name: 'Calendar options'});
+      await user.click(trigger);
+
+      const share = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Share with team',
+      });
+      await user.click(share);
+      expect(share).toBeChecked();
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      expect(share).toHaveFocus();
+
+      await user.click(share);
+      expect(share).not.toBeChecked();
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('closes the menu when a radio item is picked', async () => {
+      const user = userEvent.setup();
+      const onSync = vi.fn();
+      render(<SettingsMenu onSync={onSync} />);
+      const trigger = screen.getByRole('button', {name: 'Calendar options'});
+      await user.click(trigger);
+
+      await user.click(
+        screen.getByRole('menuitemradio', {
+          hidden: true,
+          name: 'Full event details',
+        }),
+      );
+      expect(onSync).toHaveBeenCalledWith('full');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+      await user.click(trigger);
+      expect(
+        screen.getByRole('menuitemradio', {
+          hidden: true,
+          name: 'Full event details',
+        }),
+      ).toBeChecked();
+      expect(
+        screen.getByRole('menuitemradio', {
+          hidden: true,
+          name: 'Only busy times',
+        }),
+      ).not.toBeChecked();
+    });
+
+    it('lets hasCloseOnSelect override the default for each mode', async () => {
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu button={{label: 'View'}}>
+          <DropdownMenuItem
+            hasCloseOnSelect={false}
+            label="Compact"
+            selectionMode="radio"
+          />
+          <DropdownMenuItem
+            hasCloseOnSelect
+            label="Show archived"
+            selectionMode="checkbox"
+          />
+        </DropdownMenu>,
+      );
+      const trigger = screen.getByRole('button', {name: 'View'});
+      await user.click(trigger);
+
+      await user.click(
+        screen.getByRole('menuitemradio', {hidden: true, name: 'Compact'}),
+      );
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+      await user.click(
+        screen.getByRole('menuitemcheckbox', {
+          hidden: true,
+          name: 'Show archived',
+        }),
+      );
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('includes checkable items in arrow-key navigation', async () => {
+      const user = userEvent.setup();
+      render(<SettingsMenu />);
+      await user.click(screen.getByRole('button', {name: 'Calendar options'}));
+
+      const block = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Block client booking',
+      });
+      block.focus();
+      fireEvent.keyDown(block, {key: 'ArrowDown'});
+      const share = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Share with team',
+      });
+      expect(share).toHaveFocus();
+
+      fireEvent.keyDown(share, {key: 'ArrowDown'});
+      const busy = screen.getByRole('menuitemradio', {
+        hidden: true,
+        name: 'Only busy times',
+      });
+      expect(busy).toHaveFocus();
+
+      fireEvent.keyDown(busy, {key: 'End'});
+      expect(
+        screen.getByRole('menuitem', {hidden: true, name: 'Remove calendar'}),
+      ).toHaveFocus();
+    });
+
+    it('toggles a focused checkbox item with Space', async () => {
+      const user = userEvent.setup();
+      render(<SettingsMenu />);
+      const trigger = screen.getByRole('button', {name: 'Calendar options'});
+      await user.click(trigger);
+
+      const share = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Share with team',
+      });
+      share.focus();
+      fireEvent.keyDown(share, {key: ' '});
+      expect(share).toBeChecked();
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('does not toggle disabled checkable items', async () => {
+      const user = userEvent.setup();
+      const onClick = vi.fn();
+      render(
+        <DropdownMenu button={{label: 'View'}}>
+          <DropdownMenuItem
+            isDisabled
+            isSelected
+            label="Show archived"
+            onClick={onClick}
+            selectionMode="checkbox"
+            tooltip="Archived items are hidden for this workspace"
+          />
+        </DropdownMenu>,
+      );
+      await user.click(screen.getByRole('button', {name: 'View'}));
+
+      const item = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Show archived',
+      });
+      await user.click(item);
+      expect(onClick).not.toHaveBeenCalled();
+      expect(item).toBeChecked();
+      expect(item).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('renders data-driven checkable items and radio sections', async () => {
+      const user = userEvent.setup();
+      const onSort = vi.fn();
+      render(
+        <DropdownMenu
+          button={{label: 'View options'}}
+          items={[
+            {
+              isSelected: true,
+              label: 'Show archived',
+              selectionMode: 'checkbox',
+            },
+            {type: 'divider'},
+            {
+              items: [
+                {
+                  isSelected: true,
+                  label: 'Name',
+                  selectionMode: 'radio',
+                },
+                {
+                  label: 'Date',
+                  onClick: onSort,
+                  selectionMode: 'radio',
+                },
+              ],
+              title: 'Sort by',
+              type: 'section',
+            },
+          ]}
+        />,
+      );
+      const trigger = screen.getByRole('button', {name: 'View options'});
+      await user.click(trigger);
+
+      const archived = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Show archived',
+      });
+      expect(archived).toBeChecked();
+      await user.click(archived);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+      const group = screen.getByRole('group', {hidden: true, name: 'Sort by'});
+      expect(
+        within(group).getByRole('menuitemradio', {hidden: true, name: 'Name'}),
+      ).toBeChecked();
+      const date = within(group).getByRole('menuitemradio', {
+        hidden: true,
+        name: 'Date',
+      });
+      expect(date).not.toBeChecked();
+
+      await user.click(date);
+      expect(onSort).toHaveBeenCalledTimes(1);
       expect(trigger).toHaveAttribute('aria-expanded', 'false');
     });
   });
