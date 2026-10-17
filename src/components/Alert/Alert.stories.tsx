@@ -127,6 +127,24 @@ export const CenteredEndContent: Story = {
   },
 };
 
+export const NarrowEndContent: Story = {
+  render: () => (
+    <div style={{maxWidth: 320}}>
+      <Alert
+        description="Contact Harbor Therapy."
+        endContent={
+          <>
+            <Button label="Call (415) 555-0100" variant="secondary" />
+            <Button label="Email the practice" variant="secondary" />
+          </>
+        }
+        status="info"
+        title="Need to reschedule?"
+      />
+    </div>
+  ),
+};
+
 export const WithPrimaryAction: Story = {
   render: () => (
     <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>

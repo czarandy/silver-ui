@@ -75,6 +75,7 @@ export const alertRecipe = sva({
     'root',
     'header',
     'icon',
+    'main',
     'content',
     'endArea',
     'chevron',
@@ -99,19 +100,32 @@ export const alertRecipe = sva({
       alignItems: 'center',
       flexShrink: 0,
     },
-    content: {
+    // The text and the end area share a wrapping row beside the icon. When
+    // both fit, the end area sits at the trailing edge as before; when the
+    // alert is too narrow for the end area beside 12rem of text, it moves
+    // under the text, aligned with the title, instead of squeezing the text
+    // to a sliver. The column gap is the old header gap plus end-area margin.
+    main: {
       display: 'flex',
       flex: 1,
+      flexWrap: 'wrap',
+      alignItems: 'flex-start',
+      columnGap: '6',
+      rowGap: '3',
+      minW: 0,
+    },
+    content: {
+      display: 'flex',
+      flex: '1 1 12rem',
       flexDirection: 'column',
       minW: 0,
       overflowWrap: 'break-word',
     },
     endArea: {
       display: 'flex',
+      flexWrap: 'wrap',
       alignItems: 'center',
-      flexShrink: 0,
       gap: '2',
-      ms: '4',
     },
     // The body stays mounted so child state and the `aria-controls` target are
     // preserved; it is collapsed with a `grid-template-rows` 1fr -> 0fr
@@ -232,7 +246,7 @@ export const alertRecipe = sva({
       false: {},
     },
     isCentered: {
-      true: {header: {alignItems: 'center'}},
+      true: {header: {alignItems: 'center'}, main: {alignItems: 'center'}},
       false: {},
     },
     isExpanded: {

@@ -174,47 +174,53 @@ export function Alert({
         <span aria-hidden="true" className={classes.icon}>
           {icon ?? defaultIcons[status]}
         </span>
-        <div className={classes.content}>
-          <Text as="div" type="label" weight="semibold">
-            {title}
-          </Text>
-          {isNonEmptyReactNode(description) ? (
-            <Text as="div" color="secondary" role="paragraph" type="supporting">
-              {description}
+        <div className={classes.main}>
+          <div className={classes.content}>
+            <Text as="div" type="label" weight="semibold">
+              {title}
             </Text>
-          ) : null}
-        </div>
-        {showEndArea ? (
-          <div className={classes.endArea}>
-            {endContent}
-            {hasChildren ? (
-              <Button
-                aria-controls={bodyId}
-                aria-expanded={isExpanded}
-                className={classes.chevron}
-                icon={ChevronDown}
-                isIconOnly
-                label={isExpanded ? 'Collapse' : 'Expand'}
-                onClick={() => setIsExpanded(value => !value)}
-                size="sm"
-                variant="ghost"
-              />
-            ) : null}
-            {isDismissable ? (
-              <Button
-                icon={X}
-                isIconOnly
-                label="Dismiss"
-                onClick={() => {
-                  setIsDismissed(true);
-                  onDismiss?.();
-                }}
-                size="sm"
-                variant="ghost"
-              />
+            {isNonEmptyReactNode(description) ? (
+              <Text
+                as="div"
+                color="secondary"
+                role="paragraph"
+                type="supporting">
+                {description}
+              </Text>
             ) : null}
           </div>
-        ) : null}
+          {showEndArea ? (
+            <div className={classes.endArea}>
+              {endContent}
+              {hasChildren ? (
+                <Button
+                  aria-controls={bodyId}
+                  aria-expanded={isExpanded}
+                  className={classes.chevron}
+                  icon={ChevronDown}
+                  isIconOnly
+                  label={isExpanded ? 'Collapse' : 'Expand'}
+                  onClick={() => setIsExpanded(value => !value)}
+                  size="sm"
+                  variant="ghost"
+                />
+              ) : null}
+              {isDismissable ? (
+                <Button
+                  icon={X}
+                  isIconOnly
+                  label="Dismiss"
+                  onClick={() => {
+                    setIsDismissed(true);
+                    onDismiss?.();
+                  }}
+                  size="sm"
+                  variant="ghost"
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       </div>
       {hasChildren ? (
         <div

@@ -26,7 +26,13 @@ export interface ListItemProps {
    */
   description?: ReactNode;
   /**
-   * Trailing content rendered after the label area.
+   * Maximum number of description lines before truncation. A string
+   * description defaults to one line; other content is not truncated.
+   */
+  descriptionLines?: number;
+  /**
+   * Trailing content rendered after the label area. When the item is too
+   * narrow to show it beside the label, it moves to its own line.
    */
   endContent?: ReactNode;
   /**
@@ -47,6 +53,11 @@ export interface ListItemProps {
    * Primary item label.
    */
   label: ReactNode;
+  /**
+   * Maximum number of label lines before truncation. A string label defaults
+   * to one line; other content is not truncated.
+   */
+  labelLines?: number;
   /**
    * Click handler for interactive items.
    */
@@ -112,11 +123,13 @@ export function ListItem({
   className,
   'data-testid': dataTestId,
   description,
+  descriptionLines,
   endContent,
   href,
   isDisabled = false,
   isSelected = false,
   label,
+  labelLines,
   onClick,
   ref,
   rel,
@@ -137,11 +150,14 @@ export function ListItem({
       className={cx(classes.item, className)}
       data-testid={dataTestId}
       description={description}
+      descriptionLines={descriptionLines}
       endContent={endContent}
+      hasWrappingEndContent
       href={href}
       isDisabled={isDisabled}
       isSelected={isSelected}
       label={label}
+      labelLines={labelLines}
       leadingContent={
         hasMarkers ? (
           <Marker classes={classes} listStyle={listStyle} />

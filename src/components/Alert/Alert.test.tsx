@@ -142,8 +142,10 @@ describe('Alert', () => {
     );
 
     const action = screen.getByRole('button', {name: 'Action'});
-    // eslint-disable-next-line testing-library/no-node-access -- the end-area slot has no semantic role of its own
-    expect(action.parentElement).toHaveClass('silver-ms_4');
+    // The gutter is the column gap of the row that wraps the text and the end
+    // area together, so it disappears when the end area wraps under the text.
+    // eslint-disable-next-line testing-library/no-node-access -- the slots have no semantic role of their own
+    expect(action.parentElement?.parentElement).toHaveClass('silver-cg_6');
   });
 
   it('centers endContent within the header when requested', () => {

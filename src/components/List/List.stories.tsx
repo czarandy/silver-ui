@@ -1,6 +1,7 @@
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {Bell, ChevronRight, Shield, Star, User} from 'lucide-react';
 import {Badge} from 'components/Badge';
+import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
 import {List} from 'components/List/List';
 import {ListItem} from 'components/List/ListItem';
@@ -195,6 +196,26 @@ export const LongContent: Story = {
         <ListItem
           description="Another long description to show consistent behavior"
           label="Medium length label for comparison"
+        />
+      </List>
+    </div>
+  ),
+};
+
+export const NarrowEndContent: Story = {
+  render: () => (
+    <div style={{maxWidth: 320}}>
+      <List hasDividers>
+        <ListItem
+          description="Required · Due Aug 5, 2026"
+          endContent={<Button label="Start form" variant="primary" />}
+          label="Client Intake Form"
+        />
+        <ListItem
+          description="Optional"
+          endContent={<Button label="Continue form" variant="primary" />}
+          label="Progress Questionnaire for returning clients"
+          labelLines={2}
         />
       </List>
     </div>
