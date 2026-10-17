@@ -122,12 +122,12 @@ export function getCategory(
   categoryMap: ScheduleCategoryMap,
   event: CalendarEvent,
 ): ScheduleCategory {
-  return (
+  const category =
     (event.category == null ? undefined : categoryMap.get(event.category)) ??
     (event.category != null
       ? {label: event.category, color: categoryFallback.color}
-      : categoryFallback)
-  );
+      : categoryFallback);
+  return event.color == null ? category : {...category, color: event.color};
 }
 
 export function formatDate(date: PlainDate): string {
