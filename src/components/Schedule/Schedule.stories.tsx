@@ -1461,6 +1461,14 @@ export const ColorAndCategoryFallbacks: Story = {
         start: timedISO(1, 16),
         title: 'Missing category uses default',
       }),
+      createEventFromISO({
+        category: 'Blue',
+        color: 'pink',
+        end: timedISO(1, 17, 30),
+        id: 'event-color',
+        start: timedISO(1, 17),
+        title: 'Event color overrides category',
+      }),
     ];
 
     return (
