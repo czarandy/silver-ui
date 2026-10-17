@@ -15,4 +15,5 @@ export {
 export {
   DropdownMenuItem,
   type DropdownMenuItemProps,
+  type DropdownMenuItemSelectionMode,
 } from 'components/DropdownMenu/DropdownMenuItem';

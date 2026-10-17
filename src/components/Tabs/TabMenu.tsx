@@ -101,8 +101,9 @@ export function TabMenu({
   const getMenuItems = useCallback(
     () =>
       Array.from(
-        menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ??
-          [],
+        menuRef.current?.querySelectorAll<HTMLElement>(
+          '[role="menuitemradio"]',
+        ) ?? [],
       ),
     [],
   );
@@ -132,7 +133,7 @@ export function TabMenu({
             const isSelected = option.value === context.value;
             return (
               <button
-                aria-current={isSelected ? 'true' : undefined}
+                aria-checked={isSelected}
                 className={tabMenuRecipe({isItemSelected: isSelected}).item}
                 key={option.value}
                 onClick={() => {
@@ -140,7 +141,7 @@ export function TabMenu({
                   setIsOpen(false);
                 }}
                 onKeyDown={handleMenuKeyDown}
-                role="menuitem"
+                role="menuitemradio"
                 type="button">
                 <span className={classes.itemContent}>
                   {option.icon != null ? (

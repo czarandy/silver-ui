@@ -1,9 +1,7 @@
 'use client';
 
-import {Check} from 'lucide-react';
 import {useMemo, type ReactNode} from 'react';
 import {DropdownMenu, DropdownMenuItem} from 'components/DropdownMenu';
-import {Icon} from 'components/Icon';
 import {Kbd} from 'components/Kbd';
 import {useScheduleContext} from 'components/Schedule/context';
 import type {
@@ -14,15 +12,6 @@ import type {
   ScheduleViewBase,
 } from 'components/Schedule/types';
 import useHotkey from 'hooks/useHotkey';
-import {css} from 'styled-system/css';
-
-const styles = {
-  optionEndContent: css({
-    alignItems: 'center',
-    display: 'inline-flex',
-    gap: '2',
-  }),
-} as const;
 
 function normalizeHotkey(hotkey: string | undefined): string | null {
   const normalizedHotkey = hotkey?.trim();
@@ -108,25 +97,15 @@ function ScheduleViewSelectorControl<View extends ScheduleViewBase>({
             <DropdownMenuItem
               aria-keyshortcuts={hotkey ?? undefined}
               endContent={
-                hotkey != null || isSelected ? (
-                  <span className={styles.optionEndContent}>
-                    {isSelected ? (
-                      <Icon
-                        color="primary"
-                        data-testid="schedule-view-selector-selected-icon"
-                        icon={Check}
-                        size="sm"
-                      />
-                    ) : null}
-                    {hotkey != null ? (
-                      <Kbd aria-hidden={true} keys={hotkey} size="sm" />
-                    ) : null}
-                  </span>
+                hotkey != null ? (
+                  <Kbd aria-hidden={true} keys={hotkey} size="sm" />
                 ) : null
               }
+              isSelected={isSelected}
               key={option.label}
               label={option.label}
               onClick={() => onChangeView?.(option.view)}
+              selectionMode="radio"
             />
           );
         })}

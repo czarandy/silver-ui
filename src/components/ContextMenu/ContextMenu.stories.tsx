@@ -319,6 +319,60 @@ export const Sections: Story = {
   ),
 };
 
+function CheckableItemsStory(): React.JSX.Element {
+  const [isGridShown, setIsGridShown] = useState(true);
+  const [isSnapping, setIsSnapping] = useState(false);
+  const [iconSize, setIconSize] = useState('Medium');
+
+  return (
+    <ContextMenu
+      items={[
+        {
+          isSelected: isGridShown,
+          label: 'Show grid',
+          onClick: () => setIsGridShown(current => !current),
+          selectionMode: 'checkbox',
+        },
+        {
+          isSelected: isSnapping,
+          label: 'Snap to grid',
+          onClick: () => setIsSnapping(current => !current),
+          selectionMode: 'checkbox',
+        },
+        {
+          items: ['Small', 'Medium', 'Large'].map(size => ({
+            isSelected: iconSize === size,
+            label: size,
+            onClick: () => setIconSize(size),
+            selectionMode: 'radio',
+          })),
+          title: 'Icon size',
+          type: 'section',
+        },
+        {type: 'divider'},
+        {icon: Download, label: 'Export'},
+      ]}>
+      <div className={styles.target}>
+        <Text as="span" type="body">
+          Right-click for view options
+        </Text>
+      </div>
+    </ContextMenu>
+  );
+}
+
+export const CheckableItems: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Checkbox items stay open while toggled; radio items in a titled section pick one option and close the menu.',
+      },
+    },
+  },
+  render: (): React.JSX.Element => <CheckableItemsStory />,
+};
+
 export const PositioningAndScroll: Story = {
   render: (): React.JSX.Element => <PositioningAndScrollExample />,
 };

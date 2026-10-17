@@ -7,8 +7,14 @@ import {
   type RefObject,
 } from 'react';
 import {Divider} from 'components/Divider';
-import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
-import type {DropdownMenuOption} from 'components/DropdownMenu/types';
+import {
+  DropdownMenuItem,
+  MENU_ITEM_SELECTOR,
+} from 'components/DropdownMenu/DropdownMenuItem';
+import type {
+  DropdownMenuItemData,
+  DropdownMenuOption,
+} from 'components/DropdownMenu/types';
 import {Text} from 'components/Text';
 import useListFocus from 'hooks/useListFocus';
 import useTypeahead from 'hooks/useTypeahead';
@@ -26,10 +32,22 @@ const menuStyles = {
     py: '1',
     userSelect: 'none',
   }),
-  divider: css({
-    my: '1',
-  }),
 } as const;
+
+/**
+ * Shared styles for the element that holds a menu's items. Dividers get their
+ * spacing here so a `<Divider />` passed as compound content matches the
+ * data-driven `{type: 'divider'}`.
+ */
+export const menuListStyles = css.raw({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5',
+  maxH: '80',
+  overflowY: 'auto',
+  p: '1',
+  '& [role="separator"]': {my: '1'},
+});
 
 export function formatMenuWidth(
   value: number | string | undefined,
@@ -45,9 +63,7 @@ export function renderMenuItems(
 ): ReactNode {
   return items.map((item, index) => {
     if ('type' in item && item.type === 'divider') {
-      return (
-        <Divider className={menuStyles.divider} key={`divider-${index}`} />
-      );
+      return <Divider key={`divider-${index}`} />;
     }
 
     if ('type' in item) {
@@ -66,35 +82,30 @@ export function renderMenuItems(
               {item.title}
             </Text>
           ) : null}
-          {item.items.map(sectionItem => (
-            <DropdownMenuItem
-              description={sectionItem.description}
-              hasCloseOnSelect={sectionItem.hasCloseOnSelect}
-              icon={sectionItem.icon}
-              isDisabled={sectionItem.isDisabled}
-              key={sectionItem.label}
-              label={sectionItem.label}
-              onClick={sectionItem.onClick}
-              tooltip={sectionItem.tooltip}
-            />
-          ))}
+          {item.items.map(renderMenuItem)}
         </div>
       );
     }
 
-    return (
-      <DropdownMenuItem
-        description={item.description}
-        hasCloseOnSelect={item.hasCloseOnSelect}
-        icon={item.icon}
-        isDisabled={item.isDisabled}
-        key={item.label}
-        label={item.label}
-        onClick={item.onClick}
-        tooltip={item.tooltip}
-      />
-    );
+    return renderMenuItem(item);
   });
+}
+
+function renderMenuItem(item: DropdownMenuItemData): React.JSX.Element {
+  return (
+    <DropdownMenuItem
+      description={item.description}
+      hasCloseOnSelect={item.hasCloseOnSelect}
+      icon={item.icon}
+      isDisabled={item.isDisabled}
+      isSelected={item.isSelected}
+      key={item.label}
+      label={item.label}
+      onClick={item.onClick}
+      selectionMode={item.selectionMode}
+      tooltip={item.tooltip}
+    />
+  );
 }
 
 export function useMenuKeyboard(
@@ -107,9 +118,7 @@ export function useMenuKeyboard(
       return [];
     }
     return Array.from(
-      menuRef.current.querySelectorAll<HTMLElement>(
-        '[role="menuitem"]:not(:disabled):not([aria-disabled="true"])',
-      ),
+      menuRef.current.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR),
     );
   }, [menuRef]);
 

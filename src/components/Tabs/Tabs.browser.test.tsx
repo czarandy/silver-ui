@@ -69,7 +69,7 @@ describe('Tabs wider than their container', () => {
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('tab', {name: /More/}));
-    const item = await screen.findByRole('menuitem', {name: 'Archived'});
+    const item = await screen.findByRole('menuitemradio', {name: 'Archived'});
     const box = item.getBoundingClientRect();
     expect(
       document.elementFromPoint(

@@ -384,11 +384,11 @@ describe('Tabs', () => {
       expect(trigger).toHaveAttribute('aria-expanded', 'true');
     });
 
-    const analytics = screen.getByRole('menuitem', {
+    const analytics = screen.getByRole('menuitemradio', {
       hidden: true,
       name: 'Analytics',
     });
-    const reports = screen.getByRole('menuitem', {
+    const reports = screen.getByRole('menuitemradio', {
       hidden: true,
       name: 'Reports',
     });
@@ -421,11 +421,11 @@ describe('Tabs', () => {
 
     await user.click(screen.getByRole('tab', {name: /More/}));
 
-    const analytics = screen.getByRole('menuitem', {
+    const analytics = screen.getByRole('menuitemradio', {
       hidden: true,
       name: 'Analytics',
     });
-    const audience = screen.getByRole('menuitem', {
+    const audience = screen.getByRole('menuitemradio', {
       hidden: true,
       name: 'Audience',
     });
@@ -457,7 +457,7 @@ describe('Tabs', () => {
 
     await user.click(screen.getByRole('tab', {name: /More/}));
     await user.click(
-      screen.getByRole('menuitem', {hidden: true, name: 'Analytics'}),
+      screen.getByRole('menuitemradio', {hidden: true, name: 'Analytics'}),
     );
 
     expect(onChange).toHaveBeenCalledWith('analytics');
@@ -507,7 +507,7 @@ describe('Tabs', () => {
     expect(trigger).toHaveAttribute('aria-disabled', 'true');
 
     await user.click(trigger);
-    expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitemradio')).not.toBeInTheDocument();
   });
 
   it('forwards refs for Tabs, Tab, and TabMenu', () => {

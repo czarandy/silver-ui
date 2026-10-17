@@ -14,6 +14,7 @@ import {Button, type ButtonProps, type ButtonSize} from 'components/Button';
 import {DropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
 import {
   formatMenuWidth,
+  menuListStyles,
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
@@ -127,14 +128,7 @@ export interface DropdownMenuProps {
 }
 
 const styles = {
-  menu: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    maxH: '80',
-    overflowY: 'auto',
-    p: '1',
-  }),
+  menu: css(menuListStyles),
 } as const;
 
 const defaultButton = {label: 'Menu'} satisfies DropdownMenuButtonProps;

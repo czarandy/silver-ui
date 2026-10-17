@@ -20,11 +20,14 @@ import {
   type DropdownMenuDivider,
   type DropdownMenuItemData,
   type DropdownMenuItemProps,
+  type DropdownMenuItemSelectionMode,
   type DropdownMenuOption,
   type DropdownMenuSection,
 } from 'components/DropdownMenu';
+import {MENU_ITEM_SELECTOR} from 'components/DropdownMenu/DropdownMenuItem';
 import {
   formatMenuWidth,
+  menuListStyles,
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
@@ -36,6 +39,7 @@ import {cx} from 'utils/cx';
 export type ContextMenuSize = ButtonSize;
 export type ContextMenuItemData = DropdownMenuItemData;
 export type ContextMenuItemProps = DropdownMenuItemProps;
+export type ContextMenuItemSelectionMode = DropdownMenuItemSelectionMode;
 export type ContextMenuDivider = DropdownMenuDivider;
 export type ContextMenuSection = DropdownMenuSection;
 export type ContextMenuOption = DropdownMenuOption;
@@ -124,15 +128,9 @@ const styles = {
   trigger: css({
     display: 'contents',
   }),
-  menu: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.5',
-    maxH: '80',
+  menu: css(menuListStyles, {
     minW: '40',
     m: 0,
-    overflowY: 'auto',
-    p: '1',
     borderWidth: 0,
     borderRadius: 'md',
     bg: 'bg',
@@ -187,9 +185,8 @@ export function ContextMenu({
   });
 
   const focusFirstItem = useCallback(() => {
-    const firstItem = menuRef.current?.querySelector<HTMLElement>(
-      '[role="menuitem"]:not(:disabled):not([aria-disabled="true"])',
-    );
+    const firstItem =
+      menuRef.current?.querySelector<HTMLElement>(MENU_ITEM_SELECTOR);
     firstItem?.focus();
   }, []);
 
