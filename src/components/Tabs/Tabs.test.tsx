@@ -161,12 +161,11 @@ describe('Tabs', () => {
     const selectedTabClass = assertNonNull(tabsRecipe({isSelected: true}).tab);
 
     expect(dividerClass.split(' ')).toContain(
-      css({borderBlockEndWidth: 'emphasized'}),
+      css({boxShadow: 'inset 0 -2px 0 token(colors.border)'}),
     );
     expect(selectedTabClass.split(' ')).toContain(
       css({borderBottomColor: 'primary'}),
     );
-    expect(selectedTabClass.split(' ')).toContain(css({mb: '-2px'}));
   });
 
   it('links tabs to consumer-rendered panels with controls', () => {
