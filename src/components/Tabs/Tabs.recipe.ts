@@ -11,11 +11,18 @@ export const tabsRecipe = sva({
     'endContent',
   ],
   base: {
+    // Tabs never wrap, so when they are wider than the space they have, such
+    // as on a phone, the row scrolls sideways instead of overflowing the
+    // page. A scroller clips what sticks out of it, so the selected underline
+    // sits inside the tab rather than overlapping the divider, and the focus
+    // ring is drawn just inside the tab.
     root: {
       display: 'flex',
       alignItems: 'stretch',
       maxW: 'full',
       minW: 0,
+      overflowX: 'auto',
+      scrollbarWidth: 'none',
     },
     tab: {
       position: 'relative',
@@ -23,7 +30,6 @@ export const tabsRecipe = sva({
       alignItems: 'center',
       justifyContent: 'center',
       gap: '1',
-      mb: '-2px',
       px: '3',
       borderWidth: 0,
       borderBottomWidth: 'emphasized',
@@ -51,7 +57,7 @@ export const tabsRecipe = sva({
         outlineWidth: 'focus',
         outlineStyle: 'solid',
         outlineColor: 'primary',
-        outlineOffset: 'focusOffset',
+        outlineOffset: '-2px',
       },
     },
     icon: {
@@ -115,15 +121,19 @@ export const tabsRecipe = sva({
       },
       false: {},
     },
+    // The divider is an inset shadow, under the tabs' own underlines. A
+    // border would sit outside the scroller's clip, below the underlines.
+    // Without a divider, the negative margin lets the underline hang below
+    // the row as before, taking no extra space.
     hasDivider: {
       true: {
         root: {
-          borderBlockEndWidth: 'emphasized',
-          borderBlockEndStyle: 'solid',
-          borderBlockEndColor: 'border',
+          boxShadow: 'inset 0 -2px 0 token(colors.border)',
         },
       },
-      false: {},
+      false: {
+        root: {mb: '-2px'},
+      },
     },
   },
   defaultVariants: {

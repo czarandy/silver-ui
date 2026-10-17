@@ -283,6 +283,18 @@ export const Divider: Story = {
   ),
 };
 
+export const NarrowContainer: Story = {
+  render: args => (
+    <div style={{maxWidth: 240}}>
+      <Tabs {...args} hasDivider onChange={() => {}} value="upcoming">
+        <Tab label="Upcoming (12)" value="upcoming" />
+        <Tab label="Past" value="past" />
+        <Tab label="Canceled" value="canceled" />
+      </Tabs>
+    </div>
+  ),
+};
+
 export const LinkTabs: Story = {
   render: args => (
     <Tabs {...args} onChange={() => {}} value="overview">
