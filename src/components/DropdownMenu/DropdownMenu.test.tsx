@@ -531,6 +531,17 @@ describe('DropdownMenu', () => {
       render(<SettingsMenu />);
       const trigger = screen.getByRole('button', {name: 'Calendar options'});
       await user.click(trigger);
+      // Opening auto-focuses the first item on the next animation frame. Wait
+      // for it, or under load that frame can land after the click below and
+      // steal focus from the toggled item.
+      await waitFor(() => {
+        expect(
+          screen.getByRole('menuitemcheckbox', {
+            hidden: true,
+            name: 'Block client booking',
+          }),
+        ).toHaveFocus();
+      });
 
       const share = screen.getByRole('menuitemcheckbox', {
         hidden: true,
