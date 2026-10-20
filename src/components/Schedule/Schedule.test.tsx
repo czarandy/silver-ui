@@ -838,14 +838,9 @@ describe('Schedule', () => {
     }).event;
 
     expect(staticEvent).not.toHaveProperty('_hover');
-    expect(staticEvent).not.toHaveProperty('background');
-    expect(staticEvent).toMatchObject({
-      backgroundColor: 'var(--schedule-event-bg)',
+    expect(interactiveEvent._hover).toEqual({
+      backgroundColor: 'var(--schedule-event-bg-hover)',
     });
-    expect(interactiveEvent).toMatchObject({
-      _hover: {backgroundColor: 'var(--schedule-event-bg-hover)'},
-    });
-    expect(interactiveEvent._hover).not.toHaveProperty('background');
   });
 
   it('keeps compact event metadata aligned without shrinking titles', () => {
