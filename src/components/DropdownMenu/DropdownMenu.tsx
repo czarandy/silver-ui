@@ -12,9 +12,9 @@ import {
 } from 'react';
 import {Button, type ButtonProps, type ButtonSize} from 'components/Button';
 import {DropdownMenuContext} from 'components/DropdownMenu/DropdownMenuContext';
+import {menuListRecipe} from 'components/DropdownMenu/menuList.recipe';
 import {
   formatMenuWidth,
-  menuListStyles,
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
@@ -24,7 +24,6 @@ import {Popover} from 'components/Popover';
 import useMergeRefs from 'hooks/useMergeRefs';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import type {LayerAlignment, LayerPlacement} from 'internal/useLayer';
-import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 export type {
@@ -128,7 +127,7 @@ export interface DropdownMenuProps {
 }
 
 const styles = {
-  menu: css(menuListStyles),
+  menu: menuListRecipe(),
 } as const;
 
 const defaultButton = {label: 'Menu'} satisfies DropdownMenuButtonProps;

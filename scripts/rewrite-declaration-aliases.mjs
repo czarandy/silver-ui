@@ -1,6 +1,6 @@
 import {existsSync} from 'node:fs';
 import {readdir, readFile, writeFile} from 'node:fs/promises';
-import {dirname, join, relative, resolve, sep} from 'node:path';
+import {dirname, isAbsolute, join, relative, resolve, sep} from 'node:path';
 import process from 'node:process';
 import {fileURLToPath} from 'node:url';
 
@@ -37,7 +37,7 @@ export async function rewriteDeclarationSpecifiers(distDir) {
     const rewritten = source.replace(
       specifierPattern,
       (match, prefix, specifier, suffix) => {
-        const target = resolveSpecifier(specifier, file, aliases);
+        const target = resolveSpecifier(specifier, file, aliases, distDir);
         if (target == null) {
           return match;
         }
@@ -57,7 +57,7 @@ export async function rewriteDeclarationSpecifiers(distDir) {
     }
   }
 
-  await verifyDeclarationSpecifiers(declarationFiles);
+  await verifyDeclarationSpecifiers(declarationFiles, distDir);
 
   return rewriteCount;
 }
@@ -70,9 +70,14 @@ export async function rewriteDeclarationSpecifiers(distDir) {
  * (prune-private-declarations.mjs removes the only legitimate sources of
  * out-of-dist specifiers before this runs.)
  */
-function resolveSpecifier(specifier, file, aliases) {
+function resolveSpecifier(specifier, file, aliases, distDir) {
   if (isRelativeSpecifier(specifier)) {
     const base = resolve(dirname(file), specifier);
+    if (!isInsideDirectory(base, distDir)) {
+      throw new Error(
+        `Relative declaration specifier "${specifier}" in ${file} escapes dist.`,
+      );
+    }
     const withoutJs = specifier.endsWith('.js')
       ? base.slice(0, -'.js'.length)
       : base;
@@ -97,7 +102,7 @@ function resolveSpecifier(specifier, file, aliases) {
   return aliasTarget;
 }
 
-async function verifyDeclarationSpecifiers(declarationFiles) {
+async function verifyDeclarationSpecifiers(declarationFiles, distDir) {
   const problems = [];
 
   for (const file of declarationFiles) {
@@ -106,6 +111,12 @@ async function verifyDeclarationSpecifiers(declarationFiles) {
       const specifier = match[2];
       if (isRelativeSpecifier(specifier)) {
         const base = resolve(dirname(file), specifier);
+        if (!isInsideDirectory(base, distDir)) {
+          problems.push(
+            `${file}: relative specifier "${specifier}" escapes dist`,
+          );
+          continue;
+        }
         if (!specifier.endsWith('.js')) {
           problems.push(
             `${file}: relative specifier "${specifier}" is not fully specified`,
@@ -156,6 +167,16 @@ export async function findDeclarationFiles(directory, extension = '.d.ts') {
   }
 
   return files;
+}
+
+function isInsideDirectory(path, directory) {
+  const relativePath = relative(resolve(directory), path);
+  return (
+    relativePath !== '' &&
+    relativePath !== '..' &&
+    !relativePath.startsWith(`..${sep}`) &&
+    !isAbsolute(relativePath)
+  );
 }
 
 export function isRelativeSpecifier(specifier) {

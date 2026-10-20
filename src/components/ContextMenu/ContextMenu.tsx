@@ -25,9 +25,9 @@ import {
   type DropdownMenuSection,
 } from 'components/DropdownMenu';
 import {MENU_ITEM_SELECTOR} from 'components/DropdownMenu/DropdownMenuItem';
+import {menuListRecipe} from 'components/DropdownMenu/menuList.recipe';
 import {
   formatMenuWidth,
-  menuListStyles,
   renderMenuItems,
   useMenuKeyboard,
 } from 'components/DropdownMenu/menuUtils';
@@ -128,7 +128,7 @@ const styles = {
   trigger: css({
     display: 'contents',
   }),
-  menu: css(menuListStyles, {
+  menu: css(menuListRecipe.raw(), {
     minW: '40',
     m: 0,
     borderWidth: 0,

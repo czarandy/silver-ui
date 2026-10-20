@@ -150,7 +150,23 @@ describe('rewriteDeclarationSpecifiers', () => {
     );
 
     await expect(rewriteDeclarationSpecifiers(distDir)).rejects.toThrow(
-      /Could not resolve relative declaration specifier "\.\.\/\.\.\/\.\.\/styled-system\/types"/,
+      /Relative declaration specifier "\.\.\/\.\.\/\.\.\/styled-system\/types" in .* escapes dist/,
+    );
+  });
+
+  it('throws for an escaping specifier even when the target exists outside dist', async () => {
+    // In the repo, styled-system/ sits next to dist/, so an inferred
+    // SystemStyleObject type resolves locally but not for consumers.
+    const outside = join(fixtureDir, 'styled-system', 'types', 'index.d.ts');
+    await mkdir(dirname(outside), {recursive: true});
+    await writeFile(outside, 'export {};\n');
+    await writeDeclaration(
+      'components/DropdownMenu/menuUtils.d.ts',
+      'export declare const styles: import("../../../styled-system/types/index.js").SystemStyleObject;\n',
+    );
+
+    await expect(rewriteDeclarationSpecifiers(distDir)).rejects.toThrow(
+      /"\.\.\/\.\.\/\.\.\/styled-system\/types\/index\.js" in .* escapes dist/,
     );
   });
 
