@@ -533,6 +533,34 @@ describe('Schedule', () => {
     );
   });
 
+  it('lets an event override its category color', () => {
+    render(
+      <Schedule
+        categories={[{color: 'yellow', label: 'Launch'}]}
+        events={[
+          createEventFromISO({
+            category: 'Launch',
+            color: 'teal',
+            end: '2026-05-13',
+            id: 'event-color',
+            start: '2026-05-13',
+            title: 'Launch review',
+          }),
+        ]}
+        timezoneID="UTC"
+        view={createScheduleDayView({maxHour: 9, minHour: 8})}
+        viewDate={instantUTC(2026, 4, 13)}
+      />,
+    );
+
+    expect(screen.getByTestId('schedule-event-event-color')).toHaveClass(
+      scheduleEventRecipe({color: 'teal', isPast: true}).event as string,
+    );
+    expect(
+      screen.getByRole('gridcell', {name: /Launch review, Launch,/}),
+    ).toBeInTheDocument();
+  });
+
   it('defines each event border style', () => {
     expect(
       scheduleEventRecipe.raw({eventBorderStyle: 'border'}).event,

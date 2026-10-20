@@ -21,6 +21,11 @@ export interface CalendarEventBase<TAuxiliaryData = unknown> {
   auxiliaryData?: TAuxiliaryData;
   category?: string;
   /**
+   * Overrides the category's color for this event alone, for events whose
+   * color the user picks. The category still names the event.
+   */
+  color?: ScheduleEventColor;
+  /**
    * Optional longer-form description shown by the default event popover.
    */
   description?: string;
@@ -57,6 +62,7 @@ export type CalendarEvent<TAuxiliaryData = unknown> =
 
 export function createEventFromISO({
   category,
+  color,
   end,
   id,
   isCanceled,
@@ -64,6 +70,7 @@ export function createEventFromISO({
   title,
 }: {
   category?: CalendarEvent['category'];
+  color?: CalendarEvent['color'];
   end: string;
   id: string;
   isCanceled?: CalendarEvent['isCanceled'];
@@ -73,6 +80,7 @@ export function createEventFromISO({
   if (DATE_ONLY_RE.test(start) && DATE_ONLY_RE.test(end)) {
     return {
       category,
+      color,
       end: Temporal.PlainDate.from(end),
       id,
       isCanceled,
@@ -83,6 +91,7 @@ export function createEventFromISO({
 
   return {
     category,
+    color,
     end: Temporal.Instant.from(end).epochMilliseconds,
     id,
     isCanceled,
