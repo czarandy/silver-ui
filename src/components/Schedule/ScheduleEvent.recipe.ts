@@ -22,11 +22,8 @@ export const scheduleEventRecipe = sva({
       py: '0.5',
       fontSize: 'xs',
       lineHeight: 'tight',
-      bg: 'var(--schedule-event-bg)',
+      bgColor: 'var(--schedule-event-bg)',
       color: 'var(--schedule-event-fg)',
-      _hover: {
-        bg: 'var(--schedule-event-bg-hover)',
-      },
       // Active state: the pill's popover is open. Interactive pills carry
       // `aria-expanded`, so this only matches the open trigger. The outline uses
       // the category accent color and composes cleanly with the color/past
@@ -142,10 +139,15 @@ export const scheduleEventRecipe = sva({
     },
     // Applied when the pill is rendered as a clickable <button> trigger (event
     // popover plugin). Resets user-agent button styling so the pill looks
-    // identical to its static <span> form.
+    // identical to its static <span> form. Only a clickable pill reacts to
+    // hover, and only through its background color, so a background image
+    // from `getEventProps` (a pattern, say) survives the hover.
     isInteractive: {
       true: {
         event: {
+          _hover: {
+            bgColor: 'var(--schedule-event-bg-hover)',
+          },
           appearance: 'none',
           textAlign: 'inherit',
           font: 'inherit',

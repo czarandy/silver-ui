@@ -831,6 +831,18 @@ describe('Schedule', () => {
     },
   );
 
+  it('changes only the background color on hover, and only for clickable events', () => {
+    const staticEvent = scheduleEventRecipe.raw({isInteractive: false}).event;
+    const interactiveEvent = scheduleEventRecipe.raw({
+      isInteractive: true,
+    }).event;
+
+    expect(staticEvent).not.toHaveProperty('_hover');
+    expect(interactiveEvent._hover).toEqual({
+      backgroundColor: 'var(--schedule-event-bg-hover)',
+    });
+  });
+
   it('keeps compact event metadata aligned without shrinking titles', () => {
     const eventStyles = scheduleEventRecipe.raw();
     const listStyles = scheduleListViewRecipe.raw();
