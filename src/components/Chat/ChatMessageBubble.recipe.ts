@@ -6,10 +6,10 @@ export const chatMessageBubbleRecipe = sva({
     nameRow: {
       display: 'flex',
       alignItems: 'center',
-      h: '5',
-      mb: '-1.5',
       fontFamily: 'body',
       fontSize: 'sm',
+      lineHeight: 'tight',
+      pb: '0.5',
       fontWeight: 'semibold',
       color: 'fg.muted',
     },
