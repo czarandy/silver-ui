@@ -13,6 +13,7 @@ import {
 } from 'react';
 import {Icon} from 'components/Icon';
 import {defaultCellRenderer, pixel} from 'components/Table/columnUtils';
+import {markColumnWrapper} from 'components/Table/columnWrapperOrder';
 import {rowExpansionRecipe} from 'components/Table/plugins/expansion/RowExpansion.recipe';
 import {
   clickableRowClassName,
@@ -507,6 +508,7 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
         };
       },
     };
+    markColumnWrapper(plugin, 'expansion');
     return hasRowClickExpansion
       ? registerRowClickPlugin(plugin, 'row expansion (hasRowClickExpansion)')
       : plugin;

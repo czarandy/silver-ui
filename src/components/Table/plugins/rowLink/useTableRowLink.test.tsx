@@ -5,9 +5,9 @@ import {
   useMemo,
   useState,
   type ComponentPropsWithRef,
+  type MouseEvent as ReactMouseEvent,
 } from 'react';
 import {afterEach, describe, expect, it, vi} from 'vitest';
-import {ClickableContainer} from 'components/Clickable/ClickableContainer';
 import {LinkProvider} from 'components/Link';
 import {Popover} from 'components/Popover';
 import {Table} from 'components/Table/Table';
@@ -64,11 +64,13 @@ const NO_KEYS: string[] = [];
 function LinkedTable({
   columns: tableColumns = columns,
   columnKey = 'title',
+  data = rows,
   extraPlugins = NO_PLUGINS,
   ignoredColumnKeys = NO_KEYS,
 }: {
   columnKey?: string;
   columns?: TableColumn<ThreadRow>[];
+  data?: ThreadRow[];
   extraPlugins?: Record<string, TablePlugin<ThreadRow>>;
   ignoredColumnKeys?: string[];
 }): React.JSX.Element {
@@ -80,7 +82,7 @@ function LinkedTable({
   return (
     <Table
       columns={tableColumns}
-      data={rows}
+      data={data}
       idKey="id"
       plugins={{...extraPlugins, rowLink}}
     />
@@ -124,8 +126,18 @@ describe('useTableRowLink', () => {
     expect(link).toHaveAttribute('data-router-link');
     expect(link).toHaveAttribute('data-to', '/threads/1');
     expect(screen.getAllByRole('link')).toHaveLength(1);
-    expect(getRow('Billing')).toHaveClass('silver-cursor_pointer');
-    expect(getRow('Unlinked')).not.toHaveClass('silver-cursor_pointer');
+    expect(link).toHaveAttribute('data-table-row-link');
+  });
+
+  it('renders no link for an empty value', () => {
+    render(
+      <LinkedTable
+        columns={[{header: 'Title', key: 'title'}, columns[1]]}
+        data={[{...rows[0], title: ''}]}
+      />,
+    );
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
   it('forwards a click anywhere on the row to its link exactly once', async () => {
@@ -144,6 +156,7 @@ describe('useTableRowLink', () => {
   });
 
   it('preserves modifier keys and forwards middle-click', () => {
+    vi.spyOn(window, 'open').mockReturnValue(null);
     render(<LinkedTable />);
     const onLinkClick = spyOnLinkClicks();
     const onLinkAuxClick = vi.fn();
@@ -304,10 +317,11 @@ describe('useTableRowLink', () => {
         />
       );
     }
-    render(<ExpandingLinkedTable />);
+    const {rerender} = render(<ExpandingLinkedTable />);
+    rerender(<ExpandingLinkedTable />);
     const onLinkClick = spyOnLinkClicks();
 
-    expect(consoleError).toHaveBeenCalledWith(
+    expect(consoleError).toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining('rows have more than one click action'),
     );
     await user.click(screen.getByText('How do I bill?'));
@@ -315,64 +329,88 @@ describe('useTableRowLink', () => {
     expect(onExpandedKeysChange).not.toHaveBeenCalled();
   });
 
-  it('keeps the expansion chevron outside the link on child rows', () => {
-    function ExpandedLinkedTable(): React.JSX.Element {
-      const expansion = useTableRowExpansionState<ThreadRow>({
-        data: [
-          {
-            ...rows[0],
-            subRows: [
-              {
-                href: '/threads/3',
-                id: '3',
-                question: 'Nested?',
-                subRows: [rows[1]],
-                title: 'Child',
-              },
-            ],
-          },
-        ],
-        defaultExpandedKeys: ['1'],
-        getChildren: row => row.subRows,
-        getRowKey: row => row.id,
-      });
-      const expansionPlugin = useTableRowExpansion<ThreadRow>(
-        expansion.expansionConfig,
-      );
-      const rowLink = useTableRowLink<ThreadRow>({
-        columnKey: 'title',
-        getRowHref: row => row.href,
-      });
-      return (
-        <Table
-          columns={columns}
-          data={expansion.data}
-          idKey="id"
-          plugins={{expansion: expansionPlugin, rowLink}}
-        />
-      );
+  it.each([
+    ['canonical keys', 'named'],
+    ['other keys', 'renamed'],
+    ['an array with expansion first', 'array'],
+  ] as const)(
+    'keeps the expansion chevron outside the link with %s',
+    (_, form) => {
+      function ExpandedLinkedTable(): React.JSX.Element {
+        const expansion = useTableRowExpansionState<ThreadRow>({
+          data: [
+            {
+              ...rows[0],
+              subRows: [
+                {
+                  href: '/threads/3',
+                  id: '3',
+                  question: 'Nested?',
+                  subRows: [rows[1]],
+                  title: 'Child',
+                },
+              ],
+            },
+          ],
+          defaultExpandedKeys: ['1'],
+          getChildren: row => row.subRows,
+          getRowKey: row => row.id,
+        });
+        const expansionPlugin = useTableRowExpansion<ThreadRow>(
+          expansion.expansionConfig,
+        );
+        const rowLink = useTableRowLink<ThreadRow>({
+          columnKey: 'title',
+          getRowHref: row => row.href,
+        });
+        return (
+          <Table
+            columns={columns}
+            data={expansion.data}
+            idKey="id"
+            plugins={
+              form === 'named'
+                ? {expansion: expansionPlugin, rowLink}
+                : form === 'renamed'
+                  ? {expansion: expansionPlugin, link: rowLink}
+                  : [expansionPlugin, rowLink]
+            }
+          />
+        );
+      }
+      render(<ExpandedLinkedTable />);
+
+      const childLink = screen.getByRole('link', {name: 'Child'});
+      expect(
+        within(childLink).queryByRole('button', {hidden: true}),
+      ).not.toBeInTheDocument();
+      expect(
+        within(getRow('Child')).getByRole('button', {name: 'Expand row'}),
+      ).toBeInTheDocument();
+    },
+  );
+
+  it('leaves rows unclickable while the link column is absent', async () => {
+    const user = userEvent.setup();
+    const onRouterClick = vi.fn();
+    function SpyLink(props: ComponentPropsWithRef<'a'>): React.JSX.Element {
+      return <RouterLink {...props} onClick={onRouterClick} />;
     }
-    render(<ExpandedLinkedTable />);
-
-    const childLink = screen.getByRole('link', {name: 'Child'});
-    expect(
-      within(childLink).queryByRole('button', {hidden: true}),
-    ).not.toBeInTheDocument();
-    expect(
-      within(getRow('Child')).getByRole('button', {name: 'Expand row'}),
-    ).toBeInTheDocument();
-  });
-
-  it('leaves rows unclickable while the link column is absent', () => {
-    const {rerender} = render(<LinkedTable columnKey="missing" />);
+    const {rerender} = render(
+      <LinkProvider component={SpyLink}>
+        <LinkedTable columnKey="missing" />
+      </LinkProvider>,
+    );
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
-    expect(getRow('Billing')).not.toHaveClass('silver-cursor_pointer');
 
-    rerender(<LinkedTable columns={[columns[1]]} />);
-    expect(getRow('How do I bill?')).not.toHaveClass('silver-cursor_pointer');
-
-    rerender(<LinkedTable />);
-    expect(getRow('Billing')).toHaveClass('silver-cursor_pointer');
+    rerender(
+      <LinkProvider component={SpyLink}>
+        <LinkedTable columns={[columns[1]]} />
+      </LinkProvider>,
+    );
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    await user.click(screen.getByText('How do I bill?'));
+    expect(onRouterClick).not.toHaveBeenCalled();
   });
 
   it('renders inferred columns without data', () => {
@@ -423,12 +461,24 @@ describe('useTableRowLink', () => {
     );
   });
 
-  it('lets React handlers inside the row run without activating an enclosing surface', async () => {
-    const user = userEvent.setup();
-    const onQuestionClick = vi.fn();
-    const onContainerClick = vi.fn();
-    render(
-      <ClickableContainer label="Card" onClick={onContainerClick}>
+  it.each([
+    ['runs', () => {}, 1],
+    [
+      'opts out with stopPropagation',
+      (event: ReactMouseEvent) => event.stopPropagation(),
+      0,
+    ],
+    [
+      'opts out with preventDefault',
+      (event: ReactMouseEvent) => event.preventDefault(),
+      0,
+    ],
+  ] as const)(
+    'lets a React handler inside the row run first: %s',
+    async (_, handler, expectedLinkClicks) => {
+      const user = userEvent.setup();
+      const onQuestionClick = vi.fn(handler);
+      render(
         <LinkedTable
           columns={[
             columns[0],
@@ -441,16 +491,15 @@ describe('useTableRowLink', () => {
               ),
             },
           ]}
-        />
-      </ClickableContainer>,
-    );
-    const onLinkClick = spyOnLinkClicks();
+        />,
+      );
+      const onLinkClick = spyOnLinkClicks();
 
-    await user.click(screen.getByText('How do I bill?'));
-    expect(onQuestionClick).toHaveBeenCalledOnce();
-    expect(onLinkClick).toHaveBeenCalledOnce();
-    expect(onContainerClick).not.toHaveBeenCalled();
-  });
+      await user.click(screen.getByText('How do I bill?'));
+      expect(onQuestionClick).toHaveBeenCalledOnce();
+      expect(onLinkClick).toHaveBeenCalledTimes(expectedLinkClicks);
+    },
+  );
 
   it('leaves ignored columns, including their padding, to their own content', async () => {
     const user = userEvent.setup();

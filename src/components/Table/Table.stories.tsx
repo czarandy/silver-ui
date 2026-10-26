@@ -678,10 +678,12 @@ function RowExpansionRowClickStory() {
   );
 }
 
+const getTaskHref = (item: TaskRow) => `#task-${item.id}`;
+
 function RowLinksStory() {
   const rowLink = useTableRowLink<TaskRow>({
     columnKey: 'task',
-    getRowHref: item => `#task-${item.id}`,
+    getRowHref: getTaskHref,
     ignoredColumnKeys: ['actions'],
   });
   return (

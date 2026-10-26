@@ -25,20 +25,29 @@ const rows: Row[] = [
   {href: null, id: '2', question: 'Who am I?', title: 'Unlinked'},
 ];
 
+const getRowHref = (row: Row): string | null => row.href;
+
 function LinkedTable({
+  columnKey = 'title',
   data = rows,
+  ignoredColumnKeys,
+  tableColumns = columns,
   textOverflow,
 }: {
+  columnKey?: string;
   data?: Row[];
+  ignoredColumnKeys?: string[];
+  tableColumns?: TableColumn<Row>[];
   textOverflow?: 'truncate' | 'wrap';
 }): React.JSX.Element {
   const rowLink = useTableRowLink<Row>({
-    columnKey: 'title',
-    getRowHref: row => row.href,
+    columnKey,
+    getRowHref,
+    ignoredColumnKeys,
   });
   return (
     <Table
-      columns={columns}
+      columns={tableColumns}
       data={data}
       idKey="id"
       plugins={{rowLink}}
@@ -100,6 +109,26 @@ describe('useTableRowLink', () => {
     expect(getComputedStyle(getRow('Who am I?')).cursor).toBe('auto');
   });
 
+  it('keeps the normal cursor in ignored cells of a linked row', async () => {
+    render(<LinkedTable ignoredColumnKeys={['question']} />);
+    const question = await screen.findByText('How do I bill?');
+    // eslint-disable-next-line testing-library/no-node-access -- the ignored cell
+    const cell = question.closest('td');
+    if (cell == null) {
+      throw new Error('The question is not in a cell');
+    }
+
+    expect(getComputedStyle(getRow('How do I bill?')).cursor).toBe('pointer');
+    expect(getComputedStyle(cell).cursor).toBe('auto');
+  });
+
+  it('shows no pointer while the link column is absent', async () => {
+    render(<LinkedTable columnKey="missing" />);
+    await screen.findByText('How do I bill?');
+
+    expect(getComputedStyle(getRow('How do I bill?')).cursor).toBe('auto');
+  });
+
   it('renders the link without link styling', async () => {
     render(<LinkedTable />);
 
@@ -142,5 +171,29 @@ describe('useTableRowLink', () => {
     );
     expect(getComputedStyle(text).textOverflow).toBe('ellipsis');
     expect(text.scrollWidth).toBeGreaterThan(text.clientWidth);
+  });
+
+  it('truncates custom-rendered link text with an ellipsis', async () => {
+    render(
+      <div style={{width: 320}}>
+        <LinkedTable
+          data={[
+            {
+              ...rows[0],
+              title: 'Billing for a very long thread title that cannot fit',
+            },
+          ]}
+          tableColumns={[
+            {header: 'Title', key: 'title', renderCell: row => row.title},
+            columns[1],
+          ]}
+          textOverflow="truncate"
+        />
+      </div>,
+    );
+
+    const link = await screen.findByRole('link');
+    expect(getComputedStyle(link).textOverflow).toBe('ellipsis');
+    expect(link.scrollWidth).toBeGreaterThan(link.clientWidth);
   });
 });

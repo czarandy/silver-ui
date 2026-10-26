@@ -2,10 +2,12 @@
 
 import {useMemo, useRef, type ReactNode, type RefCallback} from 'react';
 import {useTableContext} from 'components/Table/TableContext';
+import {defaultCellRenderer} from 'components/Table/columnUtils';
+import {markColumnWrapper} from 'components/Table/columnWrapperOrder';
 import {renderDefaultCellContent} from 'components/Table/renderDefaultCellContent';
 import {
-  clickableRowClassName,
   createRowClickRef,
+  linkedRowClassName,
   registerRowClickPlugin,
   rowControlCellClassName,
 } from 'components/Table/rowClick';
@@ -22,22 +24,23 @@ import {
   type SurfaceMouseEventType,
 } from 'internal/forwardSurfaceEvent';
 import useLatest from 'internal/useLatest';
-import {css} from 'styled-system/css';
+import {cva} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
 export interface UseTableRowLinkConfig<T extends Record<string, unknown>> {
   /**
    * Key of the column whose cell content renders as each row's link. Choose a
-   * column whose content contains no other links or controls. While the column
-   * is not shown (for example, hidden through column settings), rows are not
-   * clickable.
+   * column whose content contains no other links or controls and is never
+   * empty, since the link takes its accessible name from it. Rows are not
+   * clickable while the column is not shown (for example, hidden through
+   * column settings), and a row whose value in a column without `renderCell`
+   * is empty renders no link.
    */
   columnKey: string;
   /**
    * Destination for a row. Rows without one render no link and are not
-   * clickable. Rows re-render when this function changes identity, so define it
-   * outside the component or wrap it in `useCallback` when the table's
-   * `plugins` are memoized.
+   * clickable. Rows re-render whenever this function changes identity, so
+   * define it outside the component or wrap it in `useCallback`.
    */
   getRowHref: (item: T) => string | null | undefined;
   /**
@@ -50,16 +53,25 @@ export interface UseTableRowLinkConfig<T extends Record<string, unknown>> {
 
 // The link carries no link styling: the row's pointer cursor and the table's
 // `hasHover` fill already mark it as clickable.
-const linkClassName = css({
-  display: 'block',
-  minWidth: 0,
-  color: 'inherit',
-  textDecoration: 'none',
-  _focusVisible: {
-    outlineWidth: 'focus',
-    outlineStyle: 'solid',
-    outlineColor: 'primary',
-    outlineOffset: 'focusOffset',
+const rowLinkRecipe = cva({
+  base: {
+    display: 'block',
+    minWidth: 0,
+    color: 'inherit',
+    textDecoration: 'none',
+    _focusVisible: {
+      outlineWidth: 'focus',
+      outlineStyle: 'solid',
+      outlineColor: 'primary',
+      outlineOffset: 'focusOffset',
+    },
+  },
+  variants: {
+    // The cell's own ellipsis does not reach text inside a block link.
+    isTruncated: {
+      true: {overflow: 'hidden', textOverflow: 'ellipsis'},
+      false: {},
+    },
   },
 });
 
@@ -72,8 +84,13 @@ function RowLink({
   href: string;
   linkRef: RefCallback<HTMLElement>;
 }): ReactNode {
+  const isTruncated = useTableContext()?.textOverflow === 'truncate';
   return (
-    <ActionElement className={linkClassName} href={href} ref={linkRef}>
+    <ActionElement
+      className={rowLinkRecipe({isTruncated})}
+      data-table-row-link=""
+      href={href}
+      ref={linkRef}>
       {children}
     </ActionElement>
   );
@@ -97,18 +114,22 @@ function DefaultRowLinkContent<T extends Record<string, unknown>>({
  * modifier clicks, and middle clicks behave as they do on the link itself. The
  * link remains the row's keyboard and screen-reader control.
  *
- * Register it under the `rowLink` key so it runs before the table's other
- * plugins. A row has at most one whole-row click action, so this plugin cannot
- * be combined with `hasRowClickExpansion`; doing so throws in development.
+ * A handler inside the row opts out of navigating by calling
+ * `stopPropagation()` or `preventDefault()`. A forwarded click reaches the
+ * table's ancestors twice: once as the original click and once from the link.
+ *
+ * A row has at most one whole-row click action, so this plugin cannot be
+ * combined with `hasRowClickExpansion`; doing so throws in development.
  *
  * ```tsx
- * const rowLink = useTableRowLink<Thread>({
- *   columnKey: 'title',
- *   getRowHref: thread => `/threads/${thread.id}`,
- * });
- * return (
- *   <Table columns={columns} data={threads} hasHover plugins={{rowLink}} />
- * );
+ * const getThreadHref = (thread: Thread) => `/threads/${thread.id}`;
+ *
+ * function Threads({threads}: {threads: Thread[]}) {
+ *   const rowLink = useTableRowLink({columnKey: 'title', getRowHref: getThreadHref});
+ *   return (
+ *     <Table columns={columns} data={threads} hasHover plugins={{rowLink}} />
+ *   );
+ * }
  * ```
  */
 export function useTableRowLink<T extends Record<string, unknown>>(
@@ -127,7 +148,6 @@ export function useTableRowLink<T extends Record<string, unknown>>(
   const wrappedColumnsCacheRef = useRef<{
     columnKey: string;
     getRowHref: UseTableRowLinkConfig<T>['getRowHref'];
-    hasLinkColumn: boolean;
     input: TableColumn<T>[];
     output: TableColumn<T>[];
   } | null>(null);
@@ -136,8 +156,6 @@ export function useTableRowLink<T extends Record<string, unknown>>(
     const ignoredColumns = new Set(
       ignoredColumnKeys === '' ? [] : ignoredColumnKeys.split('\n'),
     );
-    const hasLinkColumn = (): boolean =>
-      wrappedColumnsCacheRef.current?.hasLinkColumn === true;
 
     const createLinkRef =
       (item: T): RefCallback<HTMLElement> =>
@@ -174,14 +192,24 @@ export function useTableRowLink<T extends Record<string, unknown>>(
           return {
             ...column,
             renderCell: (item: T): ReactNode => {
-              const content =
-                renderCell == null ? (
-                  <DefaultRowLinkContent columnKey={column.key} item={item} />
-                ) : (
-                  renderCell(item)
-                );
               const href = getRowHref(item);
-              return href == null ? (
+              if (renderCell != null) {
+                const content = renderCell(item);
+                return href == null ? (
+                  content
+                ) : (
+                  <RowLink href={href} linkRef={createLinkRef(item)}>
+                    {content}
+                  </RowLink>
+                );
+              }
+
+              const content = (
+                <DefaultRowLinkContent columnKey={column.key} item={item} />
+              );
+              // An empty value would make a link with no accessible name.
+              return href == null ||
+                defaultCellRenderer(item, column.key) === '' ? (
                 content
               ) : (
                 <RowLink href={href} linkRef={createLinkRef(item)}>
@@ -194,7 +222,6 @@ export function useTableRowLink<T extends Record<string, unknown>>(
         wrappedColumnsCacheRef.current = {
           columnKey,
           getRowHref,
-          hasLinkColumn: columns.some(column => column.key === columnKey),
           input: columns,
           output,
         };
@@ -204,7 +231,7 @@ export function useTableRowLink<T extends Record<string, unknown>>(
         props: BodyCellRenderProps,
         column: TableColumn<T>,
       ): BodyCellRenderProps {
-        if (!ignoredColumns.has(column.key) || !hasLinkColumn()) {
+        if (!ignoredColumns.has(column.key)) {
           return props;
         }
 
@@ -214,33 +241,38 @@ export function useTableRowLink<T extends Record<string, unknown>>(
         };
       },
       transformBodyRow(props: BodyRowRenderProps, item: T): BodyRowRenderProps {
-        if (!hasLinkColumn() || configRef.current.getRowHref(item) == null) {
+        if (configRef.current.getRowHref(item) == null) {
           return props;
         }
 
-        const forward = (event: MouseEvent, type: SurfaceMouseEventType) => {
+        const forward = (
+          event: MouseEvent,
+          row: HTMLTableRowElement,
+          type: SurfaceMouseEventType,
+        ) => {
           forwardSurfaceEvent({
             allowAuxClick: true,
             control: linkElements.get(item) ?? null,
             event,
-            shouldStopPropagation: false,
+            surface: row,
             type,
           });
         };
         return {
           ...props,
-          className: cx(props.className, clickableRowClassName),
+          className: cx(props.className, linkedRowClassName),
           ref: createRowClickRef(
             'row link (useTableRowLink)',
             () => ({
-              onAuxClick: event => forward(event, 'auxclick'),
-              onClick: event => forward(event, 'click'),
+              onAuxClick: (event, row) => forward(event, row, 'auxclick'),
+              onClick: (event, row) => forward(event, row, 'click'),
             }),
             props.ref,
           ),
         };
       },
     };
+    markColumnWrapper(plugin, 'rowLink');
     return registerRowClickPlugin(plugin, 'row link (useTableRowLink)');
   }, [configRef, ignoredColumnKeys, linkElements]);
 }

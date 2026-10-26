@@ -3,26 +3,37 @@ import type {TablePlugin} from 'components/Table/types';
 import {isIndependentSurfaceEvent} from 'internal/forwardSurfaceEvent';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
-import {cx} from 'utils/cx';
 
 /**
  * Pointer affordance shared by every plugin that makes whole rows clickable.
- * Hover fill stays with the table's `hasHover` option.
+ * Control cells keep the normal cursor. Hover fill stays with the table's
+ * `hasHover` option.
  */
-export const clickableRowClassName = css({cursor: 'pointer'});
+export const clickableRowClassName = css({
+  cursor: 'pointer',
+  '& > .silver-table-row-control-cell': {cursor: 'auto'},
+});
 
-const ROW_CONTROL_CELL_MARKER = 'silver-table-row-control-cell';
+/**
+ * Pointer affordance for rows with a row link. A row shows the pointer only
+ * while it contains the link (marked `data-table-row-link`), so a row whose link
+ * column is hidden or empty looks as inert as it is.
+ */
+export const linkedRowClassName = css({
+  '&:has([data-table-row-link])': {
+    cursor: 'pointer',
+    '& > .silver-table-row-control-cell': {cursor: 'auto'},
+  },
+});
 
 /**
  * Marks a body cell whose clicks, including on the padding around its content,
  * belong to that content rather than to a whole-row click action. Plugins apply
  * it from `transformBodyCell` to their control columns (selection checkbox,
- * expansion chevron) and to consumer-ignored columns.
+ * expansion chevron) and to consumer-ignored columns. It carries no styles of
+ * its own.
  */
-export const rowControlCellClassName = cx(
-  ROW_CONTROL_CELL_MARKER,
-  css({cursor: 'auto'}),
-);
+export const rowControlCellClassName = 'silver-table-row-control-cell';
 
 function isRowControlCellEvent(event: MouseEvent, row: HTMLElement): boolean {
   const target = event.target instanceof Element ? event.target : null;
@@ -30,7 +41,7 @@ function isRowControlCellEvent(event: MouseEvent, row: HTMLElement): boolean {
   return (
     cell != null &&
     row.contains(cell) &&
-    cell.classList.contains(ROW_CONTROL_CELL_MARKER)
+    cell.classList.contains(rowControlCellClassName)
   );
 }
 
@@ -48,11 +59,13 @@ export function registerRowClickPlugin<T extends Record<string, unknown>>(
   return plugin;
 }
 
+const loggedConflicts = new Set<string>();
+
 /**
  * A row can do only one thing when clicked, so combining two whole-row click
  * actions (for example a row link and `hasRowClickExpansion`) is a usage error:
- * it throws in development and logs in production, where each row keeps the
- * first action that claims it.
+ * it throws in development and logs once in production, where each row keeps
+ * the first action that claims it.
  */
 export function assertSingleRowClickPlugin<T extends Record<string, unknown>>(
   plugins: TablePlugin<T>[],
@@ -71,7 +84,10 @@ export function assertSingleRowClickPlugin<T extends Record<string, unknown>>(
   if (process.env.NODE_ENV !== 'production') {
     throw new Error(message);
   }
-  console.error(message);
+  if (!loggedConflicts.has(message)) {
+    loggedConflicts.add(message);
+    console.error(message);
+  }
 }
 
 const ROW_CLICK_OWNER_ATTRIBUTE = 'data-row-click-owner';
@@ -92,23 +108,29 @@ function claimRowClick(row: HTMLElement, owner: string): (() => void) | null {
   };
 }
 
+type RowClickHandler = (event: MouseEvent, row: HTMLTableRowElement) => void;
+
 export interface RowClickHandlers {
   /**
    * Called for a middle-button `auxclick` on the row surface.
    */
-  onAuxClick?: (event: MouseEvent) => void;
+  onAuxClick?: RowClickHandler;
   /**
    * Called for a click on the row surface.
    */
-  onClick: (event: MouseEvent) => void;
+  onClick: RowClickHandler;
 }
 
 /**
  * Creates the row ref through which a plugin makes a whole row clickable.
  * `TableRow` exposes only className/style/ref, so listeners attach at the DOM
  * level. Clicks that belong to nested controls, control cells, layered
- * surfaces, or a text selection are ignored. The event keeps propagating so
- * React handlers inside the row still run.
+ * surfaces, or a text selection are ignored.
+ *
+ * The action runs once the click reaches the window, after React's handlers
+ * (including a React root on the document): a handler inside the row opts out
+ * with `stopPropagation()` or `preventDefault()`, and the row never stops the
+ * click itself.
  *
  * Row transforms run as callback factories, not as React component renders.
  */
@@ -126,18 +148,36 @@ export function createRowClickRef(
       return;
     }
 
-    const isRowEvent = (event: MouseEvent): boolean =>
-      !isIndependentSurfaceEvent(event, row) &&
-      !isRowControlCellEvent(event, row);
-    const handleClick = (event: MouseEvent): void => {
-      if (isRowEvent(event)) {
-        getHandlers().onClick(event);
+    const runAfterBubbling = (
+      event: MouseEvent,
+      getHandler: () => RowClickHandler | undefined,
+    ): void => {
+      const view = row.ownerDocument.defaultView;
+      if (
+        view == null ||
+        isIndependentSurfaceEvent(event, row) ||
+        isRowControlCellEvent(event, row)
+      ) {
+        return;
       }
+      // `once` also discards the listener on the next click when a handler
+      // stopped this one before it reached the window.
+      view.addEventListener(
+        event.type,
+        bubbled => {
+          if (bubbled === event && !event.defaultPrevented) {
+            getHandler()?.(event, row);
+          }
+        },
+        {once: true},
+      );
+    };
+    const handleClick = (event: MouseEvent): void => {
+      runAfterBubbling(event, () => getHandlers().onClick);
     };
     const handleAuxClick = (event: MouseEvent): void => {
-      const {onAuxClick} = getHandlers();
-      if (onAuxClick != null && event.button === 1 && isRowEvent(event)) {
-        onAuxClick(event);
+      if (event.button === 1) {
+        runAfterBubbling(event, () => getHandlers().onAuxClick);
       }
     };
     row.addEventListener('click', handleClick);

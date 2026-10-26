@@ -144,12 +144,10 @@ export interface ForwardSurfaceEventOptions {
    */
   isDisabled?: boolean;
   /**
-   * Whether to stop the surface event from propagating once it is forwarded.
-   * Surfaces that listen natively pass `false` so React handlers inside them
-   * still run.
-   * @default true
+   * The element that received the event as a surface. Defaults to the event's
+   * `currentTarget`; pass it when forwarding after the event left the surface.
    */
-  shouldStopPropagation?: boolean;
+  surface?: HTMLElement;
   /**
    * The mouse event type to redispatch.
    */
@@ -167,10 +165,10 @@ export function forwardSurfaceEvent({
   control,
   event,
   isDisabled = false,
-  shouldStopPropagation = true,
+  surface,
   type = 'click',
 }: ForwardSurfaceEventOptions): void {
-  const root = event.currentTarget;
+  const root = surface ?? event.currentTarget;
   const targetNode = event.target instanceof Node ? event.target : null;
 
   if (
@@ -189,9 +187,7 @@ export function forwardSurfaceEvent({
     return;
   }
 
-  if (shouldStopPropagation) {
-    event.stopPropagation();
-  }
+  event.stopPropagation();
   if (isDisabled) {
     event.preventDefault();
     return;

@@ -1,15 +1,13 @@
 'use client';
 
 import {useMemo} from 'react';
+import {orderColumnWrappers} from 'components/Table/columnWrapperOrder';
 import {assertSingleRowClickPlugin} from 'components/Table/rowClick';
 import type {TablePlugin} from 'components/Table/types';
 
-// `rowLink` wraps its column's content before `expansion` wraps the same column
-// with its indent and chevron, which keeps the chevron button outside the link.
 const CANONICAL_PLUGIN_ORDER = [
   'columnSettings',
   'sort',
-  'rowLink',
   'expansion',
   'selection',
   'filtering',
@@ -38,9 +36,11 @@ export function useBaseTablePlugins<T extends Record<string, unknown>>(
   userPlugins?: Record<string, TablePlugin<T>> | TablePlugin<T>[],
 ): TablePlugin<T>[] {
   return useMemo(() => {
-    const plugins = Array.isArray(userPlugins)
-      ? userPlugins
-      : orderNamedPlugins(userPlugins ?? {});
+    const plugins = orderColumnWrappers(
+      Array.isArray(userPlugins)
+        ? userPlugins
+        : orderNamedPlugins(userPlugins ?? {}),
+    );
     assertSingleRowClickPlugin(plugins);
     return plugins;
   }, [userPlugins]);

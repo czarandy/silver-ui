@@ -1588,6 +1588,48 @@ describe('Table plugins', () => {
     expect(onExpandedKeysChange).toHaveBeenCalledTimes(2);
   });
 
+  it('lets a handler inside the row cancel row-click expansion', async () => {
+    const user = userEvent.setup();
+    const onExpandedKeysChange = vi.fn();
+    function CancellingTable() {
+      const expansion = useTableRowExpansionState<TreeRow>({
+        data: treeData,
+        getChildren: item => item.subRows,
+        getRowKey: item => item.id,
+        onExpandedKeysChange,
+      });
+      const expansionPlugin = useTableRowExpansion<TreeRow>({
+        ...expansion.expansionConfig,
+        hasRowClickExpansion: true,
+      });
+      return (
+        <Table
+          columns={[
+            treeColumns[0],
+            {
+              header: 'Size',
+              key: 'size',
+              renderCell: item => (
+                // eslint-disable-next-line jsx-a11y-x/click-events-have-key-events, jsx-a11y-x/no-static-element-interactions -- cancels the row click from inside the row
+                <span onClick={event => event.preventDefault()}>
+                  {item.size}
+                </span>
+              ),
+            },
+          ]}
+          data={expansion.data}
+          idKey="id"
+          plugins={{expansion: expansionPlugin}}
+        />
+      );
+    }
+    render(<CancellingTable />);
+
+    await user.click(screen.getAllByText('—')[0]);
+    expect(onExpandedKeysChange).not.toHaveBeenCalled();
+    await user.click(screen.getByText('Documents'));
+    expect(onExpandedKeysChange).toHaveBeenCalledOnce();
+  });
   it('updates expansion without re-rendering unaffected row content', async () => {
     const user = userEvent.setup();
     const renderName = vi.fn((row: TreeRow) => row.name);
