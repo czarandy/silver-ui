@@ -88,6 +88,7 @@ function renderMenuItem(item: DropdownMenuItemData): React.JSX.Element {
       label={item.label}
       onClick={item.onClick}
       selectionMode={item.selectionMode}
+      startContent={item.startContent}
       tooltip={item.tooltip}
     />
   );
@@ -111,7 +112,9 @@ export function useMenuKeyboard(
   const handleTypeahead = useTypeahead<HTMLElement>({
     getActiveIndex: listFocus.getActiveIndex,
     getItems: listFocus.getItems,
-    getLabel: item => item.textContent.trim(),
+    // Items publish their label so decorative start content, such as avatar
+    // initials, never shifts what typing matches against.
+    getLabel: item => item.dataset.typeaheadLabel ?? item.textContent.trim(),
     onMatch: item => item.focus(),
   });
 

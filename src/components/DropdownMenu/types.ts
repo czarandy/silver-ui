@@ -15,7 +15,7 @@ export interface DropdownMenuItemData {
    */
   hasCloseOnSelect?: boolean;
   /**
-   * Icon rendered before the label.
+   * Icon rendered before the label. Ignored when `startContent` is set.
    */
   icon?: IconComponent;
   /**
@@ -41,6 +41,11 @@ export interface DropdownMenuItemData {
    * dividers or a section so it is grouped for assistive tech.
    */
   selectionMode?: DropdownMenuItemSelectionMode;
+  /**
+   * Decorative leading content, such as an `Avatar`, rendered in place of
+   * `icon`. See `DropdownMenuItem`'s `startContent`.
+   */
+  startContent?: ReactNode;
   /**
    * Tooltip content shown when the item is hovered or focused.
    */
