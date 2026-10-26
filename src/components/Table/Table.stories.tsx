@@ -13,7 +13,6 @@ import {TableFooter} from 'components/Table/TableFooter';
 import {TableHeader} from 'components/Table/TableHeader';
 import {TableHeaderCell} from 'components/Table/TableHeaderCell';
 import {TableRow} from 'components/Table/TableRow';
-import {TableRowLink} from 'components/Table/TableRowLink';
 import {pixel, proportional} from 'components/Table/columnUtils';
 import {useTableColumnResize} from 'components/Table/plugins/columnResize';
 import {useTableColumnSettings} from 'components/Table/plugins/columnSettings';
@@ -31,6 +30,7 @@ import {
   paginateData,
   useTablePagination,
 } from 'components/Table/plugins/pagination';
+import {useTableRowLink} from 'components/Table/plugins/rowLink';
 import {
   useTableSelection,
   useTableSelectionState,
@@ -678,6 +678,38 @@ function RowExpansionRowClickStory() {
   );
 }
 
+function RowLinksStory() {
+  const rowLink = useTableRowLink<TaskRow>({
+    columnKey: 'task',
+    getRowHref: item => `#task-${item.id}`,
+  });
+  return (
+    <Table
+      columns={[
+        ...columns.slice(0, 3),
+        {
+          align: 'end',
+          header: 'Actions',
+          key: 'actions',
+          renderCell: () => (
+            <Button
+              label="Archive"
+              onClick={() => {}}
+              size="sm"
+              variant="ghost"
+            />
+          ),
+          width: pixel(120),
+        },
+      ]}
+      data={data}
+      hasHover
+      idKey="id"
+      plugins={{rowLink}}
+    />
+  );
+}
+
 function PaginationStory() {
   const [page, setPage] = useState(1);
   const pageSize = 2;
@@ -1188,38 +1220,7 @@ export const RowExpansionRowClick: Story = {
 
 export const RowLinks: Story = {
   name: 'Row links',
-  render: () => (
-    <Table
-      columns={[
-        {
-          header: 'Task',
-          key: 'task',
-          renderCell: item => (
-            <TableRowLink href={`#task-${item.id}`}>{item.task}</TableRowLink>
-          ),
-          width: proportional(2),
-        },
-        columns[1],
-        columns[2],
-        {
-          align: 'end',
-          header: 'Actions',
-          key: 'actions',
-          renderCell: () => (
-            <Button
-              label="Archive"
-              onClick={() => {}}
-              size="sm"
-              variant="ghost"
-            />
-          ),
-          width: pixel(120),
-        },
-      ]}
-      data={data}
-      idKey="id"
-    />
-  ),
+  render: () => <RowLinksStory />,
 };
 
 export const Pagination: Story = {

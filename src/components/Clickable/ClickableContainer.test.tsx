@@ -5,9 +5,11 @@ import type {
   MouseEvent as ReactMouseEvent,
   RefCallback,
 } from 'react';
+import {createPortal} from 'react-dom';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {ClickableContainer} from 'components/Clickable/ClickableContainer';
 import {LinkProvider} from 'components/Link';
+import {Popover} from 'components/Popover';
 
 function RouterLink({
   children,
@@ -283,6 +285,30 @@ describe('ClickableContainer', () => {
     );
 
     await user.click(screen.getByText(label));
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not activate from portalled content or an open popover', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    const onPortalClick = vi.fn();
+    render(
+      <ClickableContainer label="Open item" onClick={onClick}>
+        <Popover content={<p>Popover body</p>} isOpen label="Details">
+          <button type="button">Details</button>
+        </Popover>
+        {createPortal(
+          <button onClick={onPortalClick} type="button">
+            Portalled action
+          </button>,
+          document.body,
+        )}
+      </ClickableContainer>,
+    );
+
+    fireEvent.click(screen.getByText('Popover body'));
+    await user.click(screen.getByRole('button', {name: 'Portalled action'}));
+    expect(onPortalClick).toHaveBeenCalledOnce();
     expect(onClick).not.toHaveBeenCalled();
   });
 

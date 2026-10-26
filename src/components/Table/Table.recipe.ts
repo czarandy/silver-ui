@@ -55,16 +55,6 @@ export const tableRecipe = sva({
       '&[aria-selected="true"]': {
         bg: 'bg.subtle',
       },
-      // Set by TableRow while it contains an enabled TableRowLink, whose link
-      // receives clicks anywhere on the row.
-      '&[data-has-row-link]': {
-        cursor: 'pointer',
-        _hover: {
-          '@media (hover: hover)': {
-            bg: 'bg.subtle',
-          },
-        },
-      },
     },
     cell: {
       maxWidth: 0,
@@ -201,12 +191,6 @@ export const tableRecipe = sva({
           // stripe, so striped tables retain the active selection treatment.
           '&&[aria-selected="true"]': {
             bg: 'bg.selected',
-          },
-          // Even rows already use the subtle fill as their stripe.
-          '&&[data-has-row-link]:hover': {
-            '@media (hover: hover)': {
-              bg: 'bg.hover',
-            },
           },
         },
       },

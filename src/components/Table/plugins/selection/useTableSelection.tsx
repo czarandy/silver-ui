@@ -256,7 +256,7 @@ export function useTableSelection<T extends Record<string, unknown>>(
       ),
       key: SELECTION_COLUMN_KEY,
       renderCell: item => (
-        <div className={styles.control}>
+        <div className={styles.control} data-table-row-control="">
           <SelectionCellContent item={item} />
         </div>
       ),

@@ -1551,7 +1551,7 @@ describe('Table plugins', () => {
 
     const docsRow = findRow('Documents');
     expect(docsRow).toBeDefined();
-    expect(docsRow).toHaveClass('silver-cursor_pointer');
+    expect((docsRow as HTMLElement).className).toContain('cursor_pointer');
 
     await user.click(
       within(docsRow as HTMLElement).getByRole('cell', {name: 'Documents'}),
@@ -1568,9 +1568,20 @@ describe('Table plugins', () => {
     expect(onExpandedKeysChange).toHaveBeenCalledTimes(2);
     expect(screen.queryByText('Report.pdf')).not.toBeInTheDocument();
 
+    // A near miss on the chevron, in its cell padding, belongs to the control
+    // cell rather than the row.
+    const chevronCell = within(docsRow as HTMLElement)
+      .getByRole('button', {name: 'Expand row'})
+      // eslint-disable-next-line testing-library/no-node-access -- targets the padding around the chevron
+      .closest('td');
+    await user.click(chevronCell as HTMLElement);
+    expect(onExpandedKeysChange).toHaveBeenCalledTimes(2);
+
     // Leaf rows are not clickable.
     const readmeRow = findRow('Readme.md');
-    expect(readmeRow).not.toHaveClass('silver-cursor_pointer');
+    expect((readmeRow as HTMLElement).className).not.toContain(
+      'cursor_pointer',
+    );
     await user.click(
       within(readmeRow as HTMLElement).getByRole('cell', {name: 'Readme.md'}),
     );
