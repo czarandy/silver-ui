@@ -1551,7 +1551,7 @@ describe('Table plugins', () => {
 
     const docsRow = findRow('Documents');
     expect(docsRow).toBeDefined();
-    expect((docsRow as HTMLElement).className).toContain('cursor_pointer');
+    expect(docsRow).toHaveClass('silver-cursor_pointer');
 
     await user.click(
       within(docsRow as HTMLElement).getByRole('cell', {name: 'Documents'}),
@@ -1570,9 +1570,7 @@ describe('Table plugins', () => {
 
     // Leaf rows are not clickable.
     const readmeRow = findRow('Readme.md');
-    expect((readmeRow as HTMLElement).className).not.toContain(
-      'cursor_pointer',
-    );
+    expect(readmeRow).not.toHaveClass('silver-cursor_pointer');
     await user.click(
       within(readmeRow as HTMLElement).getByRole('cell', {name: 'Readme.md'}),
     );

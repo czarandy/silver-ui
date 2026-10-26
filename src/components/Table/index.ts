@@ -19,6 +19,10 @@ export {
   type TableHeaderCellProps,
 } from 'components/Table/TableHeaderCell';
 export {TableRow, type TableRowProps} from 'components/Table/TableRow';
+export {
+  TableRowLink,
+  type TableRowLinkProps,
+} from 'components/Table/TableRowLink';
 export * from 'components/Table/plugins/columnResize';
 export * from 'components/Table/plugins/columnSettings';
 export * from 'components/Table/plugins/expansion';

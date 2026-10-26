@@ -13,6 +13,7 @@ import {TableFooter} from 'components/Table/TableFooter';
 import {TableHeader} from 'components/Table/TableHeader';
 import {TableHeaderCell} from 'components/Table/TableHeaderCell';
 import {TableRow} from 'components/Table/TableRow';
+import {TableRowLink} from 'components/Table/TableRowLink';
 import {pixel, proportional} from 'components/Table/columnUtils';
 import {useTableColumnResize} from 'components/Table/plugins/columnResize';
 import {useTableColumnSettings} from 'components/Table/plugins/columnSettings';
@@ -1183,6 +1184,42 @@ export const RowExpansion: Story = {
 export const RowExpansionRowClick: Story = {
   name: 'Row Expansion / Row click',
   render: () => <RowExpansionRowClickStory />,
+};
+
+export const RowLinks: Story = {
+  name: 'Row links',
+  render: () => (
+    <Table
+      columns={[
+        {
+          header: 'Task',
+          key: 'task',
+          renderCell: item => (
+            <TableRowLink href={`#task-${item.id}`}>{item.task}</TableRowLink>
+          ),
+          width: proportional(2),
+        },
+        columns[1],
+        columns[2],
+        {
+          align: 'end',
+          header: 'Actions',
+          key: 'actions',
+          renderCell: () => (
+            <Button
+              label="Archive"
+              onClick={() => {}}
+              size="sm"
+              variant="ghost"
+            />
+          ),
+          width: pixel(120),
+        },
+      ]}
+      data={data}
+      idKey="id"
+    />
+  ),
 };
 
 export const Pagination: Story = {
