@@ -5,9 +5,11 @@ import type {
   MouseEvent as ReactMouseEvent,
   RefCallback,
 } from 'react';
+import {createPortal} from 'react-dom';
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {ClickableContainer} from 'components/Clickable/ClickableContainer';
 import {LinkProvider} from 'components/Link';
+import {Popover} from 'components/Popover';
 
 function RouterLink({
   children,
@@ -182,7 +184,47 @@ describe('ClickableContainer', () => {
     });
   });
 
+  it('opens a new tab for modifier and middle clicks unless a handler takes over', () => {
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    const {rerender} = render(
+      <ClickableContainer href="/items/42" label="Open item">
+        <span>Item content</span>
+      </ClickableContainer>,
+    );
+
+    const modifiedClick = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      metaKey: true,
+    });
+    fireEvent(screen.getByText('Item content'), modifiedClick);
+    fireEvent(
+      screen.getByText('Item content'),
+      new MouseEvent('auxclick', {bubbles: true, button: 1}),
+    );
+    expect(open).toHaveBeenCalledTimes(2);
+    expect(open).toHaveBeenCalledWith(
+      expect.stringMatching(/\/items\/42$/),
+      '_blank',
+      'noopener',
+    );
+
+    rerender(
+      <ClickableContainer
+        href="/items/42"
+        label="Open item"
+        onClick={event => {
+          event.preventDefault();
+        }}>
+        <span>Item content</span>
+      </ClickableContainer>,
+    );
+    fireEvent.click(screen.getByText('Item content'), {ctrlKey: true});
+    expect(open).toHaveBeenCalledTimes(2);
+  });
+
   it('forwards middle-click as auxclick only for links', () => {
+    vi.spyOn(window, 'open').mockReturnValue(null);
     const {rerender} = render(
       <ClickableContainer href="/items/42" label="Open item">
         <span>Item content</span>
@@ -283,6 +325,30 @@ describe('ClickableContainer', () => {
     );
 
     await user.click(screen.getByText(label));
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('does not activate from portalled content or an open popover', async () => {
+    const user = userEvent.setup();
+    const onClick = vi.fn();
+    const onPortalClick = vi.fn();
+    render(
+      <ClickableContainer label="Open item" onClick={onClick}>
+        <Popover content={<p>Popover body</p>} isOpen label="Details">
+          <button type="button">Details</button>
+        </Popover>
+        {createPortal(
+          <button onClick={onPortalClick} type="button">
+            Portalled action
+          </button>,
+          document.body,
+        )}
+      </ClickableContainer>,
+    );
+
+    fireEvent.click(screen.getByText('Popover body'));
+    await user.click(screen.getByRole('button', {name: 'Portalled action'}));
+    expect(onPortalClick).toHaveBeenCalledOnce();
     expect(onClick).not.toHaveBeenCalled();
   });
 

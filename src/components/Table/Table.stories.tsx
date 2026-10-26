@@ -30,6 +30,7 @@ import {
   paginateData,
   useTablePagination,
 } from 'components/Table/plugins/pagination';
+import {useTableRowLink} from 'components/Table/plugins/rowLink';
 import {
   useTableSelection,
   useTableSelectionState,
@@ -677,6 +678,41 @@ function RowExpansionRowClickStory() {
   );
 }
 
+const getTaskHref = (item: TaskRow) => `#task-${item.id}`;
+
+function RowLinksStory() {
+  const rowLink = useTableRowLink<TaskRow>({
+    columnKey: 'task',
+    getRowHref: getTaskHref,
+    ignoredColumnKeys: ['actions'],
+  });
+  return (
+    <Table
+      columns={[
+        ...columns.slice(0, 3),
+        {
+          align: 'end',
+          header: 'Actions',
+          key: 'actions',
+          renderCell: () => (
+            <Button
+              label="Archive"
+              onClick={() => {}}
+              size="sm"
+              variant="ghost"
+            />
+          ),
+          width: pixel(120),
+        },
+      ]}
+      data={data}
+      hasHover
+      idKey="id"
+      plugins={{rowLink}}
+    />
+  );
+}
+
 function PaginationStory() {
   const [page, setPage] = useState(1);
   const pageSize = 2;
@@ -1183,6 +1219,11 @@ export const RowExpansion: Story = {
 export const RowExpansionRowClick: Story = {
   name: 'Row Expansion / Row click',
   render: () => <RowExpansionRowClickStory />,
+};
+
+export const RowLinks: Story = {
+  name: 'Row links',
+  render: () => <RowLinksStory />,
 };
 
 export const Pagination: Story = {

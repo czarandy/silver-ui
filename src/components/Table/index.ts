@@ -24,6 +24,7 @@ export * from 'components/Table/plugins/columnSettings';
 export * from 'components/Table/plugins/expansion';
 export * from 'components/Table/plugins/filtering';
 export * from 'components/Table/plugins/pagination';
+export * from 'components/Table/plugins/rowLink';
 export * from 'components/Table/plugins/selection';
 export * from 'components/Table/plugins/sortable';
 export type {

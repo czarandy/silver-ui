@@ -10,19 +10,25 @@ import {
   useSyncExternalStore,
   type CSSProperties,
   type ReactNode,
-  type RefCallback,
 } from 'react';
 import {Icon} from 'components/Icon';
 import {defaultCellRenderer, pixel} from 'components/Table/columnUtils';
+import {markColumnWrapper} from 'components/Table/columnWrapperOrder';
 import {rowExpansionRecipe} from 'components/Table/plugins/expansion/RowExpansion.recipe';
+import {
+  clickableRowClassName,
+  createRowClickRef,
+  registerRowClickPlugin,
+  rowControlCellClassName,
+} from 'components/Table/rowClick';
 import type {
+  BodyCellRenderProps,
   BodyRowRenderProps,
   TableColumn,
   TablePlugin,
 } from 'components/Table/types';
 import useConstant from 'hooks/useConstant';
 import {LogicalChevronEnd} from 'internal/LogicalChevron';
-import {mergeRefs} from 'internal/mergeRefs';
 import useLatest from 'internal/useLatest';
 import {css} from 'styled-system/css';
 import {cx} from 'utils/cx';
@@ -62,7 +68,8 @@ export interface UseTableRowExpansionConfig<T extends Record<string, unknown>> {
   hasExpandAllToggle?: boolean;
   /**
    * Toggles expansion when an expandable row is clicked, in addition to the
-   * chevron.
+   * chevron. A row has one whole-row click action, so this cannot be combined
+   * with `useTableRowLink`.
    * @default false
    */
   hasRowClickExpansion?: boolean;
@@ -86,9 +93,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   }),
-  clickableRow: css({
-    cursor: 'pointer',
-  }),
 } as const;
 
 const EXPANSION_COLUMN_KEY = '__table_expansion';
@@ -96,42 +100,6 @@ const EXPANSION_COLUMN_KEY = '__table_expansion';
 type ExpansionIndentStyle = CSSProperties & {
   '--table-expansion-indent': number;
 };
-
-// Clicks originating from interactive content (the expander itself, links,
-// selection checkboxes, …) must not toggle the row.
-const INTERACTIVE_TARGET_SELECTOR =
-  'a, button, input, select, textarea, [role="button"], [role="checkbox"]';
-
-// Row transforms run as callback factories, not as React component renders.
-function createExpansionRowRef<T extends Record<string, unknown>>(
-  configRef: {readonly current: UseTableRowExpansionConfig<T>},
-  item: T,
-  ref: BodyRowRenderProps['ref'],
-): RefCallback<HTMLTableRowElement> {
-  let removeClickListener: (() => void) | null = null;
-  const clickRef: RefCallback<HTMLTableRowElement> = element => {
-    removeClickListener?.();
-    removeClickListener = null;
-
-    if (element == null) {
-      return;
-    }
-
-    const handleClick = (event: MouseEvent): void => {
-      const target = event.target as HTMLElement | null;
-      if (target?.closest(INTERACTIVE_TARGET_SELECTOR) != null) {
-        return;
-      }
-      const clickConfig = configRef.current;
-      clickConfig.onToggleRow(clickConfig.getRowKey(item));
-    };
-    element.addEventListener('click', handleClick);
-    removeClickListener = () => {
-      element.removeEventListener('click', handleClick);
-    };
-  };
-  return ref == null ? clickRef : mergeRefs(ref, clickRef);
-}
 
 interface ExpansionStore<T extends Record<string, unknown>> {
   getConfig: () => UseTableRowExpansionConfig<T>;
@@ -453,8 +421,12 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
     output: TableColumn<T>[];
   } | null>(null);
 
-  return useMemo(
-    (): TablePlugin<T> => ({
+  // A plugin with row-click expansion is a different plugin: `Table` validates
+  // it against other whole-row click actions, and memoized rows re-render.
+  const hasRowClickExpansion = config.hasRowClickExpansion === true;
+
+  return useMemo((): TablePlugin<T> => {
+    const plugin: TablePlugin<T> = {
       transformTableContext(children: ReactNode): ReactNode {
         return (
           <ExpansionStoreContext
@@ -499,25 +471,46 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
         wrappedColumnsCacheRef.current = {input: columns, output};
         return output;
       },
+      transformBodyCell(
+        props: BodyCellRenderProps,
+        column: TableColumn<T>,
+      ): BodyCellRenderProps {
+        if (column.key !== EXPANSION_COLUMN_KEY) {
+          return props;
+        }
+
+        return {
+          ...props,
+          className: cx(props.className, rowControlCellClassName),
+        };
+      },
       transformBodyRow(props: BodyRowRenderProps, item: T): BodyRowRenderProps {
-        const currentConfig = configRef.current;
         if (
-          currentConfig.hasRowClickExpansion !== true ||
-          !currentConfig.getIsRowExpandable(item)
+          !hasRowClickExpansion ||
+          !configRef.current.getIsRowExpandable(item)
         ) {
           return props;
         }
 
-        // `TableRow` forwards only className/style/ref to the `<tr>`, so the
-        // click behavior attaches at the DOM level, mirroring how the
-        // selection plugin applies row styling.
         return {
           ...props,
-          className: cx(props.className, styles.clickableRow),
-          ref: createExpansionRowRef(configRef, item, props.ref),
+          className: cx(props.className, clickableRowClassName),
+          ref: createRowClickRef(
+            'row expansion (hasRowClickExpansion)',
+            () => ({
+              onClick: () => {
+                const clickConfig = configRef.current;
+                clickConfig.onToggleRow(clickConfig.getRowKey(item));
+              },
+            }),
+            props.ref,
+          ),
         };
       },
-    }),
-    [configRef, expansionColumn, store],
-  );
+    };
+    markColumnWrapper(plugin, 'expansion');
+    return hasRowClickExpansion
+      ? registerRowClickPlugin(plugin, 'row expansion (hasRowClickExpansion)')
+      : plugin;
+  }, [configRef, expansionColumn, hasRowClickExpansion, store]);
 }

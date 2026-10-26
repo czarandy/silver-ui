@@ -1,6 +1,8 @@
 'use client';
 
 import {useMemo} from 'react';
+import {orderColumnWrappers} from 'components/Table/columnWrapperOrder';
+import {assertSingleRowClickPlugin} from 'components/Table/rowClick';
 import type {TablePlugin} from 'components/Table/types';
 
 const CANONICAL_PLUGIN_ORDER = [
@@ -33,11 +35,13 @@ function orderNamedPlugins<T extends Record<string, unknown>>(
 export function useBaseTablePlugins<T extends Record<string, unknown>>(
   userPlugins?: Record<string, TablePlugin<T>> | TablePlugin<T>[],
 ): TablePlugin<T>[] {
-  return useMemo(
-    () =>
+  return useMemo(() => {
+    const plugins = orderColumnWrappers(
       Array.isArray(userPlugins)
         ? userPlugins
         : orderNamedPlugins(userPlugins ?? {}),
-    [userPlugins],
-  );
+    );
+    assertSingleRowClickPlugin(plugins);
+    return plugins;
+  }, [userPlugins]);
 }
