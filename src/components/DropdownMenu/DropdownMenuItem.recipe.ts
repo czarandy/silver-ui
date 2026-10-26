@@ -7,7 +7,7 @@ const CHECKABLE_MENU_PLAIN_ITEM =
   '[role="menu"]:has([role="menuitemcheckbox"], [role="menuitemradio"]) &[role="menuitem"] > *';
 
 export const dropdownMenuItemRecipe = sva({
-  slots: ['root', 'start', 'indicator', 'radioDot', 'icon'],
+  slots: ['root', 'start', 'indicator', 'radioDot', 'icon', 'startContent'],
   base: {
     root: {
       display: 'block',
@@ -59,6 +59,11 @@ export const dropdownMenuItemRecipe = sva({
       display: 'inline-flex',
       flexShrink: 0,
       color: 'fg.muted',
+    },
+    startContent: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      flexShrink: 0,
     },
   },
   variants: {

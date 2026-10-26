@@ -8,6 +8,7 @@ import {
   ZoomOut,
 } from 'lucide-react';
 import {useState} from 'react';
+import {Avatar} from 'components/Avatar';
 import {Divider} from 'components/Divider';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
 import {DropdownMenuItem} from 'components/DropdownMenu/DropdownMenuItem';
@@ -180,6 +181,59 @@ export const CheckableItemsDataDriven: Story = {
   render: (args): React.JSX.Element => (
     <CheckableItemsDataDrivenStory {...args} />
   ),
+};
+
+const clinicians = ['Ada Lovelace', 'Grace Hopper', 'Katherine Johnson'];
+
+export const WithAvatars: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`startContent` takes leading content an `IconComponent` cannot express, such as an `Avatar`, and renders it in place of `icon`. Use `size="xsmall"` (24px): it matches the content height of every menu size, so rows stay as tall as icon rows. `size="tiny"` (20px) suits a denser look. Start content is decorative, so the item is announced and matched by typeahead using its `label` alone.',
+      },
+    },
+  },
+  args: {
+    button: {label: 'Assign to'},
+    items: clinicians.map(name => ({
+      label: name,
+      startContent: <Avatar name={name} size="xsmall" />,
+    })),
+  },
+};
+
+function WithAvatarsSelectableStory(
+  args: React.ComponentProps<typeof DropdownMenu>,
+): React.JSX.Element {
+  const [clinician, setClinician] = useState(clinicians[0]);
+
+  return (
+    <DropdownMenu {...args} button={{label: clinician}}>
+      {clinicians.map(name => (
+        <DropdownMenuItem
+          isSelected={clinician === name}
+          key={name}
+          label={name}
+          onClick={() => setClinician(name)}
+          selectionMode="radio"
+          startContent={<Avatar name={name} size="xsmall" />}
+        />
+      ))}
+    </DropdownMenu>
+  );
+}
+
+export const WithAvatarsSelectable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'Checkable items keep their selection indicator ahead of the start content.',
+      },
+    },
+  },
+  render: (args): React.JSX.Element => <WithAvatarsSelectableStory {...args} />,
 };
 
 export const EndAligned: Story = {

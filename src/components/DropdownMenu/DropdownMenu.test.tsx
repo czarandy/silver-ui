@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event';
 import {Edit, Trash2} from 'lucide-react';
 import {createRef, useState} from 'react';
 import {beforeAll, describe, expect, it, vi} from 'vitest';
+import {Avatar} from 'components/Avatar';
 import {Divider} from 'components/Divider';
 import {
   DropdownMenu,
@@ -900,6 +901,132 @@ describe('DropdownMenu', () => {
     expect(screen.queryByTestId('ignored-testid')).not.toBeInTheDocument();
     expect(screen.queryByTestId('ignored-end')).not.toBeInTheDocument();
     expect(ref.current).toBeNull();
+  });
+
+  describe('startContent', () => {
+    function precedes(first: Element, second: Element): boolean {
+      return Boolean(
+        first.compareDocumentPosition(second) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      );
+    }
+
+    it('renders compound start content before the label without adding to the accessible name', async () => {
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu button={{label: 'Assign to'}}>
+          <DropdownMenuItem
+            label="Ada Lovelace"
+            startContent={<Avatar data-testid="avatar" name="Ada Lovelace" />}
+          />
+        </DropdownMenu>,
+      );
+      await user.click(screen.getByRole('button', {name: 'Assign to'}));
+
+      const item = screen.getByRole('menuitem', {
+        hidden: true,
+        name: 'Ada Lovelace',
+      });
+      const avatar = within(item).getByTestId('avatar');
+      expect(precedes(avatar, within(item).getByText('Ada Lovelace'))).toBe(
+        true,
+      );
+    });
+
+    it('renders data-driven start content', async () => {
+      const user = userEvent.setup();
+      const onPick = vi.fn();
+      render(
+        <DropdownMenu
+          button={{label: 'Assign to'}}
+          items={[
+            {
+              label: 'Grace Hopper',
+              onClick: onPick,
+              startContent: <Avatar data-testid="avatar" name="Grace Hopper" />,
+            },
+          ]}
+        />,
+      );
+      await user.click(screen.getByRole('button', {name: 'Assign to'}));
+
+      const item = screen.getByRole('menuitem', {
+        hidden: true,
+        name: 'Grace Hopper',
+      });
+      expect(within(item).getByTestId('avatar')).toBeInTheDocument();
+      await user.click(item);
+      expect(onPick).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders start content in place of the icon', async () => {
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu button={{label: 'Actions'}}>
+          <DropdownMenuItem
+            icon={Edit}
+            label="Edit"
+            startContent={<span data-testid="start" />}
+          />
+        </DropdownMenu>,
+      );
+      await user.click(screen.getByRole('button', {name: 'Actions'}));
+
+      const item = screen.getByRole('menuitem', {hidden: true, name: 'Edit'});
+      expect(within(item).getByTestId('start')).toBeInTheDocument();
+      // eslint-disable-next-line testing-library/no-node-access -- the icon is decorative (aria-hidden) and has no accessible handle
+      expect(item.querySelector('svg')).toBeNull();
+    });
+
+    it('keeps the selection indicator ahead of start content', async () => {
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu button={{label: 'Clinician'}}>
+          <DropdownMenuItem
+            isSelected
+            label="Ada Lovelace"
+            selectionMode="checkbox"
+            startContent={<span data-testid="start" />}
+          />
+        </DropdownMenu>,
+      );
+      await user.click(screen.getByRole('button', {name: 'Clinician'}));
+
+      const item = screen.getByRole('menuitemcheckbox', {
+        hidden: true,
+        name: 'Ada Lovelace',
+      });
+      expect(item).toBeChecked();
+      // eslint-disable-next-line testing-library/no-node-access -- the check is decorative (aria-hidden) and has no accessible handle
+      const check = assertNonNull(item.querySelector('svg'), 'check');
+      expect(precedes(check, within(item).getByTestId('start'))).toBe(true);
+    });
+
+    it('matches typeahead against the label, not avatar initials', async () => {
+      const user = userEvent.setup();
+      render(
+        <DropdownMenu
+          button={{label: 'Assign to'}}
+          items={['Ada Lovelace', 'Gail Hart', 'Grace Hopper'].map(name => ({
+            label: name,
+            startContent: <Avatar name={name} />,
+          }))}
+        />,
+      );
+      await user.click(screen.getByRole('button', {name: 'Assign to'}));
+      const ada = screen.getByRole('menuitem', {
+        hidden: true,
+        name: 'Ada Lovelace',
+      });
+      ada.focus();
+
+      // Avatar initials ("GH") precede each label in the item's text, so
+      // matching raw text would stop at Gail Hart instead of reaching "gr".
+      await user.keyboard('gr');
+      expect(
+        screen.getByRole('menuitem', {hidden: true, name: 'Grace Hopper'}),
+      ).toHaveFocus();
+    });
   });
 
   it('throws when both items and children are provided', () => {

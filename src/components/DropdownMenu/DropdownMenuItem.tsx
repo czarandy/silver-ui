@@ -59,7 +59,7 @@ export interface DropdownMenuItemProps {
    */
   hasCloseOnSelect?: boolean;
   /**
-   * Icon rendered before the label.
+   * Icon rendered before the label. Ignored when `startContent` is set.
    */
   icon?: IconComponent;
   /**
@@ -92,6 +92,15 @@ export interface DropdownMenuItemProps {
    */
   selectionMode?: DropdownMenuItemSelectionMode;
   /**
+   * Leading visual content, such as an `Avatar`, rendered before the label in
+   * place of `icon` (when both are set, `startContent` wins). It is decorative:
+   * hidden from assistive tech and from typeahead, so the item's accessible
+   * name stays `label`. Keep it non-interactive. A checkable item still shows
+   * its selection indicator before it. An `xsmall` (24px) `Avatar` fits every
+   * menu size without growing the row.
+   */
+  startContent?: ReactNode;
+  /**
    * Inline styles applied to the item.
    */
   style?: CSSProperties;
@@ -118,6 +127,7 @@ export function DropdownMenuItem({
   onClick,
   ref,
   selectionMode,
+  startContent,
   style,
   tooltip,
 }: DropdownMenuItemProps): React.JSX.Element {
@@ -142,12 +152,15 @@ export function DropdownMenuItem({
       ) : null}
     </span>
   ) : null;
-  const iconNode =
-    icon != null ? (
-      <span className={classes.icon}>
-        <Icon color="secondary" icon={icon} size="sm" />
-      </span>
-    ) : null;
+  const leadingNode = isNonEmptyReactNode(startContent) ? (
+    <span aria-hidden={true} className={classes.startContent}>
+      {startContent}
+    </span>
+  ) : icon != null ? (
+    <span className={classes.icon}>
+      <Icon color="secondary" icon={icon} size="sm" />
+    </span>
+  ) : null;
 
   const item = (
     <button
@@ -156,6 +169,7 @@ export function DropdownMenuItem({
       aria-keyshortcuts={ariaKeyshortcuts}
       className={cx(classes.root, className)}
       data-testid={dataTestId}
+      data-typeahead-label={label}
       disabled={isDisabled && !useAriaDisabled}
       onClick={event => {
         if (isDisabled) {
@@ -177,13 +191,13 @@ export function DropdownMenuItem({
         endContent={endContent}
         label={label}
         startContent={
-          indicator != null && iconNode != null ? (
+          indicator != null && leadingNode != null ? (
             <span className={classes.start}>
               {indicator}
-              {iconNode}
+              {leadingNode}
             </span>
           ) : (
-            (indicator ?? iconNode)
+            (indicator ?? leadingNode)
           )
         }
       />

@@ -2,6 +2,7 @@ import {render, screen} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {Settings} from 'lucide-react';
 import {describe, expect, it} from 'vitest';
+import {Avatar} from 'components/Avatar';
 import type {ButtonSize} from 'components/Button';
 import {Divider} from 'components/Divider';
 import {DropdownMenu} from 'components/DropdownMenu/DropdownMenu';
@@ -79,4 +80,52 @@ describe('DropdownMenu checkable items', () => {
       0,
     );
   });
+});
+
+describe('DropdownMenu start content', () => {
+  it.each<ButtonSize>(['sm', 'md', 'lg'])(
+    'fit an xsmall Avatar in a %s menu row, centered on the label',
+    async size => {
+      render(
+        <DropdownMenu button={{label: 'Assign to', size}}>
+          <DropdownMenuItem icon={Settings} label="Icon action" />
+          <DropdownMenuItem
+            label="Ada Lovelace"
+            startContent={
+              <Avatar data-testid="avatar" name="Ada Lovelace" size="xsmall" />
+            }
+          />
+          <DropdownMenuItem
+            isSelected
+            label="Grace Hopper"
+            selectionMode="radio"
+            startContent={<Avatar name="Grace Hopper" size="xsmall" />}
+          />
+        </DropdownMenu>,
+      );
+      await userEvent
+        .setup()
+        .click(screen.getByRole('button', {name: 'Assign to'}));
+      const avatarItem = await screen.findByRole('menuitem', {
+        name: 'Ada Lovelace',
+      });
+      const iconItem = screen.getByRole('menuitem', {name: 'Icon action'});
+
+      expect(avatarItem.getBoundingClientRect().height).toBeCloseTo(
+        iconItem.getBoundingClientRect().height,
+        0,
+      );
+      const avatar = screen.getByTestId('avatar').getBoundingClientRect();
+      const label = screen.getByText('Ada Lovelace').getBoundingClientRect();
+      expect(avatar.top + avatar.height / 2).toBeCloseTo(
+        label.top + label.height / 2,
+        0,
+      );
+      // A checkable item's indicator gutter keeps both labels in one column.
+      expect(labelLeft('Grace Hopper')).toBeCloseTo(
+        labelLeft('Ada Lovelace'),
+        0,
+      );
+    },
+  );
 });
