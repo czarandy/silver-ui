@@ -1,7 +1,9 @@
 import type {Ref, RefCallback} from 'react';
+import type {TablePlugin} from 'components/Table/types';
 import {isIndependentSurfaceEvent} from 'internal/forwardSurfaceEvent';
 import {mergeRefs} from 'internal/mergeRefs';
 import {css} from 'styled-system/css';
+import {cx} from 'utils/cx';
 
 /**
  * Pointer affordance shared by every plugin that makes whole rows clickable.
@@ -9,15 +11,18 @@ import {css} from 'styled-system/css';
  */
 export const clickableRowClassName = css({cursor: 'pointer'});
 
-/**
- * Marks plugin control content (selection checkbox, expansion chevron) as
- * `data-table-row-control=""`. A click anywhere in a cell containing it,
- * including the cell padding around the control, belongs to that control
- * rather than to the row.
- */
-const ROW_CONTROL_CELL_ATTRIBUTE = 'data-table-row-control';
+const ROW_CONTROL_CELL_MARKER = 'silver-table-row-control-cell';
 
-const ROW_CLICK_OWNER_ATTRIBUTE = 'data-row-click-owner';
+/**
+ * Marks a body cell whose clicks, including on the padding around its content,
+ * belong to that content rather than to a whole-row click action. Plugins apply
+ * it from `transformBodyCell` to their control columns (selection checkbox,
+ * expansion chevron) and to consumer-ignored columns.
+ */
+export const rowControlCellClassName = cx(
+  ROW_CONTROL_CELL_MARKER,
+  css({cursor: 'auto'}),
+);
 
 function isRowControlCellEvent(event: MouseEvent, row: HTMLElement): boolean {
   const target = event.target instanceof Element ? event.target : null;
@@ -25,26 +30,57 @@ function isRowControlCellEvent(event: MouseEvent, row: HTMLElement): boolean {
   return (
     cell != null &&
     row.contains(cell) &&
-    cell.querySelector(`[${ROW_CONTROL_CELL_ATTRIBUTE}]`) != null
+    cell.classList.contains(ROW_CONTROL_CELL_MARKER)
   );
 }
 
+const rowClickPluginOwners = new WeakMap<object, string>();
+
 /**
- * Claims the row's single whole-row click action. A row can do only one thing
- * when clicked, so a second owner (for example a row link combined with
- * `hasRowClickExpansion`) is a usage error: it throws in development, and in
- * production logs and leaves the row with its first owner.
+ * Registers a plugin as installing a whole-row click action, so `Table` can
+ * reject a configuration with more than one.
  */
+export function registerRowClickPlugin<T extends Record<string, unknown>>(
+  plugin: TablePlugin<T>,
+  owner: string,
+): TablePlugin<T> {
+  rowClickPluginOwners.set(plugin, owner);
+  return plugin;
+}
+
+/**
+ * A row can do only one thing when clicked, so combining two whole-row click
+ * actions (for example a row link and `hasRowClickExpansion`) is a usage error:
+ * it throws in development and logs in production, where each row keeps the
+ * first action that claims it.
+ */
+export function assertSingleRowClickPlugin<T extends Record<string, unknown>>(
+  plugins: TablePlugin<T>[],
+): void {
+  const owners = plugins.flatMap(plugin => {
+    const owner = rowClickPluginOwners.get(plugin);
+    return owner == null ? [] : [owner];
+  });
+  if (owners.length < 2) {
+    return;
+  }
+
+  const message =
+    `Table: rows have more than one click action (${owners.join(', ')}). ` +
+    'Enable at most one whole-row click action per table.';
+  if (process.env.NODE_ENV !== 'production') {
+    throw new Error(message);
+  }
+  console.error(message);
+}
+
+const ROW_CLICK_OWNER_ATTRIBUTE = 'data-row-click-owner';
+
+// Production fallback for a configuration `assertSingleRowClickPlugin` has
+// already reported: the first action attached to a row keeps it.
 function claimRowClick(row: HTMLElement, owner: string): (() => void) | null {
   const existingOwner = row.getAttribute(ROW_CLICK_OWNER_ATTRIBUTE);
   if (existingOwner != null && existingOwner !== owner) {
-    const message =
-      `Table: a row has two click actions, ${existingOwner} and ${owner}. ` +
-      'Enable at most one whole-row click action per table.';
-    if (process.env.NODE_ENV !== 'production') {
-      throw new Error(message);
-    }
-    console.error(message);
     return null;
   }
 
@@ -70,8 +106,9 @@ export interface RowClickHandlers {
 /**
  * Creates the row ref through which a plugin makes a whole row clickable.
  * `TableRow` exposes only className/style/ref, so listeners attach at the DOM
- * level. Clicks that belong to nested controls, plugin control cells, layered
- * surfaces, or a text selection are ignored.
+ * level. Clicks that belong to nested controls, control cells, layered
+ * surfaces, or a text selection are ignored. The event keeps propagating so
+ * React handlers inside the row still run.
  *
  * Row transforms run as callback factories, not as React component renders.
  */

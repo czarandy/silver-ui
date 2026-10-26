@@ -184,7 +184,47 @@ describe('ClickableContainer', () => {
     });
   });
 
+  it('opens a new tab for modifier and middle clicks unless a handler takes over', () => {
+    const open = vi.spyOn(window, 'open').mockReturnValue(null);
+    const {rerender} = render(
+      <ClickableContainer href="/items/42" label="Open item">
+        <span>Item content</span>
+      </ClickableContainer>,
+    );
+
+    const modifiedClick = new MouseEvent('click', {
+      bubbles: true,
+      cancelable: true,
+      metaKey: true,
+    });
+    fireEvent(screen.getByText('Item content'), modifiedClick);
+    fireEvent(
+      screen.getByText('Item content'),
+      new MouseEvent('auxclick', {bubbles: true, button: 1}),
+    );
+    expect(open).toHaveBeenCalledTimes(2);
+    expect(open).toHaveBeenCalledWith(
+      expect.stringMatching(/\/items\/42$/),
+      '_blank',
+      'noopener',
+    );
+
+    rerender(
+      <ClickableContainer
+        href="/items/42"
+        label="Open item"
+        onClick={event => {
+          event.preventDefault();
+        }}>
+        <span>Item content</span>
+      </ClickableContainer>,
+    );
+    fireEvent.click(screen.getByText('Item content'), {ctrlKey: true});
+    expect(open).toHaveBeenCalledTimes(2);
+  });
+
   it('forwards middle-click as auxclick only for links', () => {
+    vi.spyOn(window, 'open').mockReturnValue(null);
     const {rerender} = render(
       <ClickableContainer href="/items/42" label="Open item">
         <span>Item content</span>

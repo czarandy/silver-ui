@@ -17,8 +17,11 @@ import {rowExpansionRecipe} from 'components/Table/plugins/expansion/RowExpansio
 import {
   clickableRowClassName,
   createRowClickRef,
+  registerRowClickPlugin,
+  rowControlCellClassName,
 } from 'components/Table/rowClick';
 import type {
+  BodyCellRenderProps,
   BodyRowRenderProps,
   TableColumn,
   TablePlugin,
@@ -399,7 +402,7 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
       ),
       key: EXPANSION_COLUMN_KEY,
       renderCell: item => (
-        <div className={styles.center} data-table-row-control="">
+        <div className={styles.center}>
           <ExpansionColumnCell item={item} />
         </div>
       ),
@@ -417,8 +420,12 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
     output: TableColumn<T>[];
   } | null>(null);
 
-  return useMemo(
-    (): TablePlugin<T> => ({
+  // A plugin with row-click expansion is a different plugin: `Table` validates
+  // it against other whole-row click actions, and memoized rows re-render.
+  const hasRowClickExpansion = config.hasRowClickExpansion === true;
+
+  return useMemo((): TablePlugin<T> => {
+    const plugin: TablePlugin<T> = {
       transformTableContext(children: ReactNode): ReactNode {
         return (
           <ExpansionStoreContext
@@ -463,11 +470,23 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
         wrappedColumnsCacheRef.current = {input: columns, output};
         return output;
       },
+      transformBodyCell(
+        props: BodyCellRenderProps,
+        column: TableColumn<T>,
+      ): BodyCellRenderProps {
+        if (column.key !== EXPANSION_COLUMN_KEY) {
+          return props;
+        }
+
+        return {
+          ...props,
+          className: cx(props.className, rowControlCellClassName),
+        };
+      },
       transformBodyRow(props: BodyRowRenderProps, item: T): BodyRowRenderProps {
-        const currentConfig = configRef.current;
         if (
-          currentConfig.hasRowClickExpansion !== true ||
-          !currentConfig.getIsRowExpandable(item)
+          !hasRowClickExpansion ||
+          !configRef.current.getIsRowExpandable(item)
         ) {
           return props;
         }
@@ -487,7 +506,9 @@ export function useTableRowExpansion<T extends Record<string, unknown>>(
           ),
         };
       },
-    }),
-    [configRef, expansionColumn, store],
-  );
+    };
+    return hasRowClickExpansion
+      ? registerRowClickPlugin(plugin, 'row expansion (hasRowClickExpansion)')
+      : plugin;
+  }, [configRef, expansionColumn, hasRowClickExpansion, store]);
 }

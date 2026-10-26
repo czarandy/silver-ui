@@ -92,6 +92,40 @@ function cloneMouseEvent(
   });
 }
 
+function getNewTabHref(control: HTMLElement, event: MouseEvent): string | null {
+  const isNewTabClick =
+    event.type === 'auxclick' || event.ctrlKey || event.metaKey;
+  return isNewTabClick && control instanceof HTMLAnchorElement && control.href
+    ? control.href
+    : null;
+}
+
+// Browsers do not reliably open a tab for a synthetic ctrl/meta-click, and a
+// synthetic middle-click has no default action at all. So for those clicks on
+// a link, replace the browser's default with opening the tab here, unless a
+// handler such as a router link took over the click by cancelling it.
+function dispatchToControl(control: HTMLElement, event: MouseEvent): void {
+  const view = control.ownerDocument.defaultView;
+  const newTabHref = getNewTabHref(control, event);
+  if (view == null || newTabHref == null) {
+    control.dispatchEvent(event);
+    return;
+  }
+
+  const openInNewTab = (dispatched: Event): void => {
+    if (dispatched === event && !dispatched.defaultPrevented) {
+      dispatched.preventDefault();
+      view.open(newTabHref, '_blank', 'noopener');
+    }
+  };
+  view.addEventListener(event.type, openInNewTab);
+  try {
+    control.dispatchEvent(event);
+  } finally {
+    view.removeEventListener(event.type, openInNewTab);
+  }
+}
+
 export interface ForwardSurfaceEventOptions {
   /**
    * Whether middle-button auxclick should be forwarded to the control.
@@ -110,6 +144,13 @@ export interface ForwardSurfaceEventOptions {
    */
   isDisabled?: boolean;
   /**
+   * Whether to stop the surface event from propagating once it is forwarded.
+   * Surfaces that listen natively pass `false` so React handlers inside them
+   * still run.
+   * @default true
+   */
+  shouldStopPropagation?: boolean;
+  /**
    * The mouse event type to redispatch.
    */
   type?: SurfaceMouseEventType;
@@ -118,13 +159,15 @@ export interface ForwardSurfaceEventOptions {
 /**
  * Routes pointer activation from a composite surface to its real semantic
  * control while leaving nested controls, layered surfaces, and text selection
- * independent.
+ * independent. Modified and middle clicks forwarded to a link open it in a new
+ * tab.
  */
 export function forwardSurfaceEvent({
   allowAuxClick = false,
   control,
   event,
   isDisabled = false,
+  shouldStopPropagation = true,
   type = 'click',
 }: ForwardSurfaceEventOptions): void {
   const root = event.currentTarget;
@@ -146,11 +189,13 @@ export function forwardSurfaceEvent({
     return;
   }
 
-  event.stopPropagation();
+  if (shouldStopPropagation) {
+    event.stopPropagation();
+  }
   if (isDisabled) {
     event.preventDefault();
     return;
   }
 
-  control.dispatchEvent(cloneMouseEvent(event, type));
+  dispatchToControl(control, cloneMouseEvent(event, type));
 }

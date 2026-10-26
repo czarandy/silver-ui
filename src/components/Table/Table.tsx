@@ -18,11 +18,11 @@ import {TableHeader} from 'components/Table/TableHeader';
 import {TableHeaderCell} from 'components/Table/TableHeaderCell';
 import {TableRow} from 'components/Table/TableRow';
 import {
-  defaultCellRenderer,
   generateColumns,
   resolveColumnWidths,
   resolveTableMinWidth,
 } from 'components/Table/columnUtils';
+import {renderDefaultCellContent} from 'components/Table/renderDefaultCellContent';
 import type {
   BodyCellRenderProps,
   BodyRowRenderProps,
@@ -190,21 +190,10 @@ function DataRowInner<T extends Record<string, unknown>>({
       item,
     );
 
-    const isDefaultRenderer = column.renderCell == null;
-    const rawContent = isDefaultRenderer
-      ? defaultCellRenderer(item, column.key)
-      : (column.renderCell?.(item) ?? null);
     const content =
-      isDefaultRenderer &&
-      textOverflow === 'truncate' &&
-      typeof rawContent === 'string' &&
-      rawContent.length > 0 ? (
-        <Text maxLines={1} type="body">
-          {rawContent}
-        </Text>
-      ) : (
-        rawContent
-      );
+      column.renderCell == null
+        ? renderDefaultCellContent(item, column.key, textOverflow)
+        : column.renderCell(item);
 
     return (
       <CellComponent

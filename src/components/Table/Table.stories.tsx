@@ -682,6 +682,7 @@ function RowLinksStory() {
   const rowLink = useTableRowLink<TaskRow>({
     columnKey: 'task',
     getRowHref: item => `#task-${item.id}`,
+    ignoredColumnKeys: ['actions'],
   });
   return (
     <Table

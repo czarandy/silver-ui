@@ -13,6 +13,7 @@ import {
 import {CheckboxInput} from 'components/CheckboxInput';
 import {pixel} from 'components/Table/columnUtils';
 import {tableSelectionRecipe} from 'components/Table/plugins/selection/TableSelection.recipe';
+import {rowControlCellClassName} from 'components/Table/rowClick';
 import type {
   BodyCellRenderProps,
   BodyRowRenderProps,
@@ -256,7 +257,7 @@ export function useTableSelection<T extends Record<string, unknown>>(
       ),
       key: SELECTION_COLUMN_KEY,
       renderCell: item => (
-        <div className={styles.control} data-table-row-control="">
+        <div className={styles.control}>
           <SelectionCellContent item={item} />
         </div>
       ),
@@ -292,7 +293,7 @@ export function useTableSelection<T extends Record<string, unknown>>(
 
         return {
           ...props,
-          className: cx(props.className, styles.cell),
+          className: cx(props.className, styles.cell, rowControlCellClassName),
         };
       },
       transformHeaderCell(
