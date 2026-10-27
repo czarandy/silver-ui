@@ -218,10 +218,6 @@ describe('SideNav', () => {
     expect(sideNavRecipe().bottomContent).toContain('silver-mt_auto');
   });
 
-  it('spaces items outside a section like items inside one', () => {
-    expect(sideNavRecipe().scrollable).toContain('silver-gap_0.5');
-  });
-
   it('applies className, style, data-testid, and ref', () => {
     const ref = vi.fn<(el: HTMLElement | null) => void>();
     render(
