@@ -210,7 +210,7 @@ export function SideNav({
 
   const classes = sideNavRecipe({isCollapsed: resolvedIsCollapsed});
   const bottomContentNode = isNonEmptyReactNode(bottomContent) ? (
-    <div className={classes.bottomContent} data-side-nav-group="">
+    <div className={classes.bottomContent} data-side-nav-group="bottom">
       {bottomContent}
     </div>
   ) : null;
