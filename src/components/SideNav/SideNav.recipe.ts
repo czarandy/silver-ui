@@ -132,7 +132,21 @@ export const sideNavRecipe = sva({
           alignItems: 'center',
         },
       },
-      false: {},
+      false: {
+        scrollable: {
+          // A run of items at the top or bottom of the item list gets the
+          // padding a section puts around its items. Runs next to a section
+          // need none, since the section's own padding already spaces them.
+          // Collapsed sections drop that padding, so this is expanded-only.
+          '& > :not([data-side-nav-group]):first-child': {
+            mt: '1',
+          },
+          '& > :not([data-side-nav-group]):is(:last-child, :has(+ [data-side-nav-group="bottom"]))':
+            {
+              mb: '1',
+            },
+        },
+      },
     },
     mode: {
       default: {},
