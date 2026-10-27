@@ -590,6 +590,112 @@ describe('TagsInput', () => {
     expect(call[1].type).toBe('create');
   });
 
+  describe('when createItem declines the typed text', () => {
+    const maxLength = 5;
+    const createShortItem = (rawValue: string): SearchableItem | null =>
+      rawValue.length > maxLength ? null : {id: rawValue, label: rawValue};
+
+    it('leaves out the create option and keeps the text on Enter', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <TagsInput
+          createItem={createShortItem}
+          debounceMs={0}
+          hasCreate
+          label="Tags"
+          onChange={onChange}
+          searchSource={emptySource}
+          value={[]}
+        />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Tags'});
+      await user.type(input, 'short');
+      await act(async () => {
+        await tick();
+      });
+      expect(screen.getByText('Create "short"')).toBeInTheDocument();
+
+      await user.type(input, 'er');
+      await act(async () => {
+        await tick();
+      });
+      expect(screen.queryByText(/^Create/)).not.toBeInTheDocument();
+      expect(screen.getByText('No results found')).toBeInTheDocument();
+
+      await user.keyboard('{Enter}');
+
+      expect(onChange).not.toHaveBeenCalled();
+      expect(input).toHaveValue('shorter');
+    });
+
+    it('still creates once the text is accepted again', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <TagsInput
+          createItem={createShortItem}
+          debounceMs={0}
+          hasCreate
+          label="Tags"
+          onChange={onChange}
+          searchSource={emptySource}
+          value={[]}
+        />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Tags'});
+      await user.type(input, 'shorter');
+      await user.type(input, '{Backspace}{Backspace}');
+      await act(async () => {
+        await tick();
+      });
+      await user.keyboard('{Enter}');
+
+      expect(onChange).toHaveBeenCalledWith([{id: 'short', label: 'short'}], {
+        item: {id: 'short', label: 'short'},
+        type: 'create',
+      });
+      expect(input).toHaveValue('');
+    });
+
+    it('keeps other results selectable for an item type that requires createItem', async () => {
+      type Person = SearchableItem & {email: string};
+      const people: Person[] = [
+        {email: 'ada@example.com', id: 'ada', label: 'Ada Lovelace'},
+      ];
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <TagsInput<Person>
+          createItem={() => null}
+          debounceMs={0}
+          hasCreate
+          label="People"
+          onChange={onChange}
+          searchSource={createStaticSearchSource(people)}
+          value={[]}
+        />,
+      );
+
+      await user.type(screen.getByRole('combobox', {name: 'People'}), 'Ada');
+      await act(async () => {
+        await tick();
+      });
+      expect(screen.queryByText(/^Create/)).not.toBeInTheDocument();
+      await user.click(screen.getByText('Ada Lovelace'));
+
+      expect(onChange).toHaveBeenCalledWith(people, {
+        item: people[0],
+        type: 'add',
+      });
+    });
+  });
+
   describe('unfocusedInline truncation measurement', () => {
     const TAG_WIDTH = 60;
     const INDICATOR_WIDTH = 40;

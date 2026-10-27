@@ -74,8 +74,10 @@ export interface TagsInputHandle {
  * Props that gate free-text tag creation.
  *
  * Selecting the "Create …" suggestion mints a new item from the typed text via
- * `createItem`. The default builder produces `{id, label}` (both set to the raw
- * text):
+ * `createItem`. `createItem` can return `null` to decline the typed text, for
+ * example when it is too long: the suggestion is then left out of the menu, so
+ * it cannot be selected and the text stays in the input. The default builder
+ * produces `{id, label}` (both set to the raw text):
  *
  * - When that shape satisfies `T` (e.g. the default `SearchableItem`),
  *   `createItem` is optional and `hasCreate` is a plain boolean toggle.
@@ -96,9 +98,11 @@ export type TagsInputCreateProps<T extends SearchableItem> = {
       /**
        * Builds the committed item from the typed text. Optional for this item
        * type because the default builder — `rawValue => ({id: rawValue, label:
-       * rawValue})` — already produces a valid item.
+       * rawValue})` — already produces a valid item. Return `null` to decline
+       * the text: no "Create …" suggestion is offered for it and the typed
+       * text stays in the input. Called as the user types, so keep it pure.
        */
-      createItem?: (rawValue: string) => T;
+      createItem?: (rawValue: string) => T | null;
     }
   : | {
         /**
@@ -116,9 +120,11 @@ export type TagsInputCreateProps<T extends SearchableItem> = {
         /**
          * Builds the committed item from the typed text. Required for this
          * item type because it has fields the default `{id, label}` builder
-         * cannot supply.
+         * cannot supply. Return `null` to decline the text: no "Create …"
+         * suggestion is offered for it and the typed text stays in the input.
+         * Called as the user types, so keep it pure.
          */
-        createItem: (rawValue: string) => T;
+        createItem: (rawValue: string) => T | null;
       };
 
 export type TagsInputProps<T extends SearchableItem = SearchableItem> = {
@@ -426,6 +432,19 @@ export function TagsInput<T extends SearchableItem>({
     [layer.id],
   );
 
+  const createItemRef = useLatest(createItem);
+  // `createItem` is guaranteed present for item types that need it (see
+  // TagsInputCreateProps); the default builder is only reached when `{id,
+  // label}` is a valid `T`, so the assertion is sound.
+  const buildCreatedItem = useCallback(
+    (rawValue: string): T | null =>
+      createItemRef.current == null
+        ? // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          ({id: rawValue, label: rawValue} as T)
+        : createItemRef.current(rawValue),
+    [],
+  );
+
   const filteredSource = useMemo<SearchSource<T>>(
     () => ({
       cancel: () => searchSource.cancel?.(),
@@ -448,7 +467,7 @@ export function TagsInput<T extends SearchableItem>({
         const existing = filteredResults.some(
           item => item.label.toLowerCase() === searchQuery.trim().toLowerCase(),
         );
-        if (existing) {
+        if (existing || buildCreatedItem(searchQuery) == null) {
           return filteredResults;
         }
         return [
@@ -462,7 +481,7 @@ export function TagsInput<T extends SearchableItem>({
         ];
       },
     }),
-    [hasCreate, searchSource],
+    [buildCreatedItem, hasCreate, searchSource],
   );
 
   useImperativeHandle(
@@ -677,13 +696,12 @@ export function TagsInput<T extends SearchableItem>({
               'value' in item.auxiliaryData
                 ? String(item.auxiliaryData.value)
                 : item.label;
-            // `createItem` is guaranteed present for item types that need it
-            // (see TagsInputCreateProps); the default builder is only reached
-            // when `{id, label}` is a valid `T`, so the assertion is sound.
-            const createdItem =
-              createItem?.(rawValue) ??
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              ({id: rawValue, label: rawValue} as T);
+            const createdItem = buildCreatedItem(rawValue);
+            // The search leaves out the suggestion for declined text, so this
+            // only guards a `createItem` that changed its answer since.
+            if (createdItem == null) {
+              return;
+            }
             onChangeRef.current([...valueRef.current, createdItem], {
               item: createdItem,
               type: 'create',
