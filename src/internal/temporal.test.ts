@@ -1,4 +1,6 @@
-import {afterEach, expect, test, vi} from 'vitest';
+import {execFileSync, spawnSync} from 'node:child_process';
+
+import {afterEach, expect, test} from 'vitest';
 
 import {getTemporal, Temporal, TEMPORAL_DOCS_URL} from 'internal/temporal';
 
@@ -34,12 +36,38 @@ test('throws install instructions when Temporal is missing', () => {
 // Apps install a Temporal polyfill in a module with a top-level await, which
 // sibling imports don't wait for — so silver-ui must not touch Temporal at
 // import time (README: "Temporal").
-test.each([
-  ['silver-ui', async () => import('silver-ui')],
-  ['hooks', async () => import('hooks/index')],
-  ['relay', async () => import('relay/index')],
-])('importing %s does not need Temporal', async (_entry, load) => {
-  Reflect.deleteProperty(globalThis, 'Temporal');
-  vi.resetModules();
-  await expect(load()).resolves.toBeDefined();
-});
+//
+// Each entry is bundled with esbuild and imported in a fresh Node process with
+// Temporal deleted. Re-importing the source through vitest instead pushes
+// every library module through the shared transform pipeline, which took 20s+
+// while the rest of the suite was running.
+test.each(['src/index.ts', 'src/hooks/index.ts', 'src/relay/index.ts'])(
+  'importing %s does not need Temporal',
+  entry => {
+    // The esbuild CLI rather than its JS API, which refuses to run under jsdom.
+    const bundle = execFileSync(
+      'node_modules/esbuild/bin/esbuild',
+      [
+        entry,
+        '--bundle',
+        '--format=esm',
+        '--platform=node',
+        '--packages=external',
+        '--log-level=error',
+        // Runs before any bundled module, so their top-level code sees no
+        // Temporal.
+        '--banner:js=delete globalThis.Temporal;',
+      ],
+      // The main entry bundles to several MB, past the 1 MB default.
+      {encoding: 'utf8', maxBuffer: 64 * 1024 * 1024},
+    );
+    // Piped over stdin with the repo as cwd, so the external packages resolve
+    // from its node_modules.
+    const result = spawnSync('node', ['--input-type=module'], {
+      input: bundle,
+      encoding: 'utf8',
+    });
+    expect(result.stderr).toBe('');
+    expect(result.status).toBe(0);
+  },
+);
