@@ -486,6 +486,43 @@ describe('DateInput', () => {
       expect(years).not.toContain(202);
     });
 
+    it('restores the previous date when a finished entry is out of range', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      const previous = plainDateCreate(2026, 5, 1);
+
+      render(
+        <ControlledDateInput
+          initialValue={previous}
+          max={plainDateCreate(2026, 5, 21)}
+          onChange={onChange}
+        />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Due date'});
+      await user.clear(input);
+      // Passes through 12/31/20 (2020), which is allowed and committed.
+      await user.type(input, '12/31/2026');
+      await user.tab();
+
+      expect(onChange).toHaveBeenLastCalledWith(previous);
+      expect(input).toHaveValue(plainDateFormat(previous, DATE_FORMAT_LONG));
+    });
+
+    it('restores an empty value when a finished entry is not a date', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(<ControlledDateInput onChange={onChange} />);
+
+      const input = screen.getByRole('combobox', {name: 'Due date'});
+      await user.click(input);
+      await user.type(input, '12/31/20x{Enter}');
+
+      expect(onChange).toHaveBeenLastCalledWith(null);
+      expect(input).toHaveValue('');
+    });
+
     it('does nothing when Enter is pressed without any typed input', async () => {
       const user = userEvent.setup();
       const onChange = vi.fn();

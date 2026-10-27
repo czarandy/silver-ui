@@ -39,6 +39,7 @@ import {
   plainDateFormatWith,
   plainDateIsAfter,
   plainDateIsBefore,
+  plainDateIsEqual,
   type DateFormat,
   type PlainDate,
 } from 'internal/plainDate';
@@ -234,6 +235,10 @@ export function DateInput({
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [pendingInput, setPendingInput] = useState<string | null>(null);
+  // The value when typing began. Keystrokes commit each allowed date they
+  // pass through (10/28/20 is 2020), so a finished entry that is invalid or
+  // out of range restores this instead of keeping the last partial date.
+  const valueBeforeTypingRef = useRef<PlainDate | null>(null);
   const fieldset = useFieldset();
   const isDisabled = isDisabledFromProps || fieldset?.isDisabled === true;
   const isReadOnly =
@@ -274,6 +279,9 @@ export function DateInput({
         return;
       }
       const text = event.target.value;
+      if (pendingInput == null) {
+        valueBeforeTypingRef.current = value;
+      }
       setPendingInput(text);
 
       const parsed = parseDateInput(text);
@@ -285,7 +293,7 @@ export function DateInput({
         calendarRef.current?.navigateTo(parsed);
       }
     },
-    [isReadOnly, getIsDateDisabled, max, min, onChange],
+    [isReadOnly, getIsDateDisabled, max, min, onChange, pendingInput, value],
   );
 
   const commitPendingInput = useCallback(() => {
@@ -310,6 +318,15 @@ export function DateInput({
       isDateAllowed(parsed, {min, max, getIsDateDisabled})
     ) {
       onChange(parsed);
+    } else {
+      const previous = valueBeforeTypingRef.current;
+      const unchanged =
+        previous == null || value == null
+          ? previous === value
+          : plainDateIsEqual(previous, value);
+      if (!unchanged) {
+        onChange(previous);
+      }
     }
     setPendingInput(null);
   }, [isReadOnly, getIsDateDisabled, max, min, onChange, pendingInput, value]);
