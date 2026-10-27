@@ -465,6 +465,27 @@ describe('DateInput', () => {
       expect(input).toHaveValue('');
     });
 
+    it('never commits a 3-digit year while a US-format date is typed', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+
+      render(
+        <ControlledDateInput
+          max={plainDateCreate(2026, 5, 21)}
+          onChange={onChange}
+        />,
+      );
+
+      const input = screen.getByRole('combobox', {name: 'Due date'});
+      await user.click(input);
+      await user.type(input, '12/31/2026');
+
+      const years = onChange.mock.calls.map(
+        call => (call[0] as PlainDate | null)?.year,
+      );
+      expect(years).not.toContain(202);
+    });
+
     it('does nothing when Enter is pressed without any typed input', async () => {
       const user = userEvent.setup();
       const onChange = vi.fn();

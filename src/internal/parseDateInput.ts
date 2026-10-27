@@ -47,8 +47,9 @@ export function parseDateInput(input: string): PlainDate | null {
     );
   }
 
-  // US format: 05/21/2026, 5/21/2026, or 3/4/25 (2-digit year)
-  const usMatch = /^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2,4})$/.exec(trimmed);
+  // US format: 05/21/2026, 5/21/2026, or 3/4/25 (2-digit year). A 3-digit
+  // year is only ever a 4-digit year mid-typing, never one to commit.
+  const usMatch = /^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{2}|\d{4})$/.exec(trimmed);
   if (usMatch != null) {
     let year = parseInt(usMatch[3], 10);
     if (year < 100) {
