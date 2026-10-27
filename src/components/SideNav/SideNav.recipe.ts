@@ -43,6 +43,9 @@ export const sideNavRecipe = sva({
       overflowY: 'auto',
       overflowX: 'hidden',
       px: '2',
+      // Items placed directly in the nav, without a SideNavSection, keep the
+      // same spacing a section gives its items.
+      gap: '0.5',
       scrollbarColor: 'var(--side-nav-scrollbar-color) transparent',
       scrollbarWidth: 'thin',
       '&::-webkit-scrollbar': {

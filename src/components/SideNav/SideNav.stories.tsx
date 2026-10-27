@@ -321,6 +321,18 @@ export const ButtonItems: Story = {
   ),
 };
 
+export const WithoutSections: Story = {
+  render: () => (
+    <div style={{height: 420}}>
+      <SideNav>
+        <SideNavItem icon={Home} isSelected label="Home" onClick={() => {}} />
+        <SideNavItem icon={Inbox} label="Inbox" onClick={() => {}} />
+        <SideNavItem icon={Settings} label="Settings" onClick={() => {}} />
+      </SideNav>
+    </div>
+  ),
+};
+
 export const MultipleSections: Story = {
   render: () => (
     <div style={{height: 420}}>
