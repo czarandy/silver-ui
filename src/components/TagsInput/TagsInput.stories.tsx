@@ -115,6 +115,17 @@ export const Creatable: Story = {
   args: {hasCreate: true},
 };
 
+export const CreatableWithLimit: Story = {
+  args: {
+    createItem: rawValue =>
+      rawValue.trim().length > 12
+        ? null
+        : {id: rawValue.trim(), label: rawValue.trim()},
+    description: 'New names can be up to 12 characters.',
+    hasCreate: true,
+  },
+};
+
 export const CreateOnBlur: Story = {
   args: {
     createItemOnBlur: rawValue => ({id: rawValue, label: rawValue}),
