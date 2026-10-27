@@ -38,8 +38,14 @@ test.each([
   ['silver-ui', async () => import('silver-ui')],
   ['hooks', async () => import('hooks/index')],
   ['relay', async () => import('relay/index')],
-])('importing %s does not need Temporal', async (_entry, load) => {
-  Reflect.deleteProperty(globalThis, 'Temporal');
-  vi.resetModules();
-  await expect(load()).resolves.toBeDefined();
-});
+])(
+  'importing %s does not need Temporal',
+  async (_entry, load) => {
+    Reflect.deleteProperty(globalThis, 'Temporal');
+    vi.resetModules();
+    await expect(load()).resolves.toBeDefined();
+  },
+  // resetModules makes this re-transform the whole library from scratch, which
+  // can exceed the default 20s while the rest of the suite saturates the CPU.
+  60_000,
+);
