@@ -101,6 +101,8 @@ export function SideNavSection({
         isCollapsed && styles.rootCollapsed,
         className,
       )}
+      // Marks a group the nav spaces on its own; see SideNav's recipe.
+      data-side-nav-group=""
       data-testid={dataTestId}
       ref={ref}
       role="group"
