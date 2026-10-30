@@ -65,6 +65,8 @@ import type {
   ScheduleHeight,
   SchedulePlugin,
   ScheduleView,
+  ScheduleZonedInstant,
+  ScheduleZonedInstantRange,
 } from 'components/Schedule/types';
 import type {DayOfWeek} from 'internal/dateTypes';
 import {Temporal} from 'internal/temporal';
@@ -3143,8 +3145,8 @@ describe('Schedule', () => {
       view: createScheduleWeeklyView(),
     },
     {
-      nextDate: instantUTC(2026, 5, 17, 15, 6),
-      previousDate: instantUTC(2026, 3, 15, 15, 6),
+      nextDate: instantUTC(2026, 5, 13, 15, 6),
+      previousDate: instantUTC(2026, 3, 13, 15, 6),
       range: 'month',
       view: createScheduleMonthlyView(),
     },
@@ -3217,6 +3219,98 @@ describe('Schedule', () => {
     // Friday, November 6, 2026 at 00:30 in Chicago (CST).
     expect(onViewDateChange).toHaveBeenLastCalledWith(
       instantUTC(2026, 10, 6, 6, 30),
+    );
+  });
+
+  it.each([
+    // January's grid starts December 28 and February's starts February 1.
+    {
+      nextDate: instantUTC(2026, 1, 28, 15, 6),
+      viewDate: instantUTC(2026, 0, 31, 15, 6),
+    },
+    // March 6, 2027 is in February's grid but is a March date.
+    {
+      nextDate: instantUTC(2027, 1, 28, 15, 6),
+      viewDate: instantUTC(2027, 0, 30, 15, 6),
+    },
+  ])(
+    'pages a late-month date to the next month, not the one after',
+    ({nextDate, viewDate}) => {
+      const onViewDateChange = vi.fn();
+
+      function Fixture(): React.JSX.Element {
+        const paginationPlugin = useSchedulePaginationPlugin({
+          onViewDateChange,
+        });
+        return (
+          <Schedule
+            events={[]}
+            plugins={[paginationPlugin]}
+            timezoneID="UTC"
+            view={createScheduleMonthlyView()}
+            viewDate={viewDate}
+          />
+        );
+      }
+
+      render(<Fixture />);
+
+      fireEvent.click(screen.getByRole('button', {name: 'Next month'}));
+      expect(onViewDateChange).toHaveBeenLastCalledWith(nextDate);
+    },
+  );
+
+  it('pages a custom view whose range is shorter than a day', () => {
+    const onViewDateChange = vi.fn();
+    const shiftLength = 12 * 60 * 60 * 1000;
+    // Each range is the twelve hours from its date.
+    const shiftRange = (
+      date: ScheduleZonedInstant,
+      offset: number,
+    ): ScheduleZonedInstantRange => [
+      scheduleZonedInstantFromInstant(
+        date.instant + offset * shiftLength,
+        date.timezoneID,
+      ),
+      scheduleZonedInstantFromInstant(
+        date.instant + (offset + 1) * shiftLength,
+        date.timezoneID,
+      ),
+    ];
+    // Day view's component renders the header; only the ranges are custom.
+    const shiftView: ScheduleView = {
+      ...createScheduleDayView(),
+      getDateRange: date => shiftRange(date, 0),
+      getNextDateRange: date => ({
+        label: 'Next shift',
+        range: shiftRange(date, 1),
+      }),
+      getPreviousDateRange: date => ({
+        label: 'Previous shift',
+        range: shiftRange(date, -1),
+      }),
+    };
+
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange,
+      });
+      return (
+        <Schedule
+          events={[]}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={shiftView}
+          viewDate={instantUTC(2026, 4, 13, 3, 6)}
+        />
+      );
+    }
+
+    render(<Fixture />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Next shift'}));
+    expect(onViewDateChange).toHaveBeenLastCalledWith(
+      instantUTC(2026, 4, 13, 15, 6),
     );
   });
 
