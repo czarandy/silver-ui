@@ -3190,6 +3190,36 @@ describe('Schedule', () => {
     },
   );
 
+  it('keeps the weekday and time of day when a week spans a daylight saving change', () => {
+    const onViewDateChange = vi.fn();
+    // Friday, October 30, 2026 at 00:30 in Chicago (CDT). Clocks fall back on
+    // Sunday, November 1, so the next week is 169 hours after this one.
+    const viewDate = instantUTC(2026, 9, 30, 5, 30);
+
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange,
+      });
+      return (
+        <Schedule
+          events={[]}
+          plugins={[paginationPlugin]}
+          timezoneID="America/Chicago"
+          view={createScheduleWeeklyView()}
+          viewDate={viewDate}
+        />
+      );
+    }
+
+    render(<Fixture />);
+
+    fireEvent.click(screen.getByRole('button', {name: /^Next/}));
+    // Friday, November 6, 2026 at 00:30 in Chicago (CST).
+    expect(onViewDateChange).toHaveBeenLastCalledWith(
+      instantUTC(2026, 10, 6, 6, 30),
+    );
+  });
+
   it('leaves arrow hotkeys disabled by default', () => {
     const onViewDateChange = vi.fn();
 

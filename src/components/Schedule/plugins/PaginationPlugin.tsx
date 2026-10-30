@@ -13,6 +13,7 @@ import type {
 } from 'components/Schedule/types';
 import useHotkey from 'hooks/useHotkey';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
+import {Temporal} from 'internal/temporal';
 import {nowEpochMilliseconds} from 'internal/time';
 
 export interface SchedulePaginationPluginOptions {
@@ -45,10 +46,17 @@ function SchedulePaginationControls({
     () => view.getNextDateRange(viewDate),
     [view, viewDate],
   );
+  // Shift by calendar days rather than elapsed time, so a range that spans a
+  // daylight saving change keeps the view date's weekday and time of day.
   const shiftToRange = useCallback(
     (nextRange: ScheduleZonedInstantRange) => {
+      const days = currentRange[0]
+        .toPlainDate()
+        .until(nextRange[0].toPlainDate()).days;
       onViewDateChange(
-        viewDate.instant + nextRange[0].instant - currentRange[0].instant,
+        Temporal.Instant.fromEpochMilliseconds(viewDate.instant)
+          .toZonedDateTimeISO(viewDate.timezoneID)
+          .add({days}).epochMilliseconds,
       );
     },
     [currentRange, onViewDateChange, viewDate],
