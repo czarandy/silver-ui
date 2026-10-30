@@ -7,9 +7,10 @@ import {useScheduleContext} from 'components/Schedule/context';
 import type {
   Instant,
   ScheduleHeaderContent,
+  ScheduleNavigationRange,
   SchedulePlugin,
   SchedulePluginPosition,
-  ScheduleZonedInstantRange,
+  ScheduleZonedInstant,
 } from 'components/Schedule/types';
 import useHotkey from 'hooks/useHotkey';
 import {LogicalChevronEnd, LogicalChevronStart} from 'internal/LogicalChevron';
@@ -24,6 +25,12 @@ export interface SchedulePaginationPluginOptions {
   hasHotkeys?: boolean;
   onViewDateChange: (date: Instant) => void;
   position?: SchedulePluginPosition;
+}
+
+function toZonedDateTime(date: ScheduleZonedInstant): Temporal.ZonedDateTime {
+  return Temporal.Instant.fromEpochMilliseconds(
+    date.instant,
+  ).toZonedDateTimeISO(date.timezoneID);
 }
 
 function SchedulePaginationControls({
@@ -46,30 +53,32 @@ function SchedulePaginationControls({
     () => view.getNextDateRange(viewDate),
     [view, viewDate],
   );
-  // Shift by calendar days rather than elapsed time, so a range that spans a
-  // daylight saving change keeps the view date's weekday and time of day.
-  const shiftToRange = useCallback(
-    (nextRange: ScheduleZonedInstantRange) => {
-      const days = currentRange[0]
-        .toPlainDate()
-        .until(nextRange[0].toPlainDate()).days;
-      onViewDateChange(
-        Temporal.Instant.fromEpochMilliseconds(viewDate.instant)
-          .toZonedDateTimeISO(viewDate.timezoneID)
-          .add({days}).epochMilliseconds,
+  // Keep the view date's position in the range, measured in calendar days and
+  // then time, so a range that spans a daylight saving change keeps the view
+  // date's weekday and time of day.
+  const navigateTo = useCallback(
+    ({range, viewDate: next}: ScheduleNavigationRange) => {
+      if (next != null) {
+        onViewDateChange(next.instant);
+        return;
+      }
+      const shift = toZonedDateTime(currentRange[0]).until(
+        toZonedDateTime(range[0]),
+        {largestUnit: 'days'},
       );
+      onViewDateChange(toZonedDateTime(viewDate).add(shift).epochMilliseconds);
     },
     [currentRange, onViewDateChange, viewDate],
   );
   const onPreviousDate = useCallback(() => {
-    shiftToRange(previousDateRange.range);
-  }, [previousDateRange, shiftToRange]);
+    navigateTo(previousDateRange);
+  }, [navigateTo, previousDateRange]);
   const onToday = useCallback(() => {
     onViewDateChange(nowEpochMilliseconds());
   }, [onViewDateChange]);
   const onNextDate = useCallback(() => {
-    shiftToRange(nextDateRange.range);
-  }, [nextDateRange, shiftToRange]);
+    navigateTo(nextDateRange);
+  }, [navigateTo, nextDateRange]);
   useHotkey(
     'left',
     event => {

@@ -65,6 +65,11 @@ export interface ScheduleViewComponentProps<
 export interface ScheduleNavigationRange {
   label: string;
   range: ScheduleZonedInstantRange;
+  /**
+   * The view date to move to. Without it, pagination keeps the view date's
+   * position in the range: the same time after the range's start.
+   */
+  viewDate?: ScheduleZonedInstant;
 }
 
 export type ScheduleViewComponent<

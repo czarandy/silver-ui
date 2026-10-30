@@ -6,6 +6,7 @@ import {scheduleMonthlyViewRecipe} from 'components/Schedule/MonthlyView.recipe'
 import {scheduleRecipe} from 'components/Schedule/Schedule.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {isDayEvent} from 'components/Schedule/dateMath';
+import {scheduleZonedInstantFromInstant} from 'components/Schedule/scheduleZonedInstant';
 import {
   CalendarMonthEventPill,
   formatMonthTitle,
@@ -38,6 +39,7 @@ import {
   plainDateIsEqual,
   type PlainDate,
 } from 'internal/plainDate';
+import {Temporal} from 'internal/temporal';
 import {cx} from 'utils/cx';
 
 export interface ScheduleMonthlyViewOptions {
@@ -134,6 +136,22 @@ function getVisibleMonthRange(
     date.startOfDay().addDays(currentDate.until(firstVisible).days),
     date.startOfDay().addDays(currentDate.until(end).days),
   ];
+}
+
+/**
+ * The same day and time in another month, clamped to that month's last day, so
+ * paging from January 31 lands in February rather than skipping to March.
+ */
+function addMonths(
+  date: ScheduleZonedInstant,
+  months: number,
+): ScheduleZonedInstant {
+  return scheduleZonedInstantFromInstant(
+    Temporal.Instant.fromEpochMilliseconds(date.instant)
+      .toZonedDateTimeISO(date.timezoneID)
+      .add({months}).epochMilliseconds,
+    date.timezoneID,
+  );
 }
 
 interface MonthEventSegment {
@@ -895,6 +913,7 @@ export function createScheduleMonthlyView({
       return {
         label: 'Next month',
         range: getVisibleMonthRange(date, nextMonth, weekStartsOn, weekCount),
+        viewDate: addMonths(date, 1),
       };
     },
     getPreviousDateRange: date => {
@@ -910,6 +929,7 @@ export function createScheduleMonthlyView({
           weekStartsOn,
           weekCount,
         ),
+        viewDate: addMonths(date, -1),
       };
     },
     options: {monthRowHeight, weekCount, weekStartsOn},
