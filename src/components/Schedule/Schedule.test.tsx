@@ -3260,6 +3260,34 @@ describe('Schedule', () => {
     },
   );
 
+  it('pages an early-month date to the previous month, not the one before', () => {
+    const onViewDateChange = vi.fn();
+
+    // November 2026's grid starts November 1 and October's starts September
+    // 27, so shifting by the grid starts would land on September 28.
+    function Fixture(): React.JSX.Element {
+      const paginationPlugin = useSchedulePaginationPlugin({
+        onViewDateChange,
+      });
+      return (
+        <Schedule
+          events={[]}
+          plugins={[paginationPlugin]}
+          timezoneID="UTC"
+          view={createScheduleMonthlyView()}
+          viewDate={instantUTC(2026, 10, 2, 15, 6)}
+        />
+      );
+    }
+
+    render(<Fixture />);
+
+    fireEvent.click(screen.getByRole('button', {name: 'Previous month'}));
+    expect(onViewDateChange).toHaveBeenLastCalledWith(
+      instantUTC(2026, 9, 2, 15, 6),
+    );
+  });
+
   it('pages a custom view whose range is shorter than a day', () => {
     const onViewDateChange = vi.fn();
     const shiftLength = 12 * 60 * 60 * 1000;
