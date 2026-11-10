@@ -354,3 +354,46 @@ describe('useLayer placement (browser)', () => {
     expect(getGap('right', anchor, layer)).toBe(GAP);
   });
 });
+
+function InheritanceHarness() {
+  const layer = useLayer();
+  const {show} = layer;
+  useEffect(() => {
+    show();
+  }, [show]);
+  return (
+    <div
+      style={{
+        fontStyle: 'italic',
+        fontWeight: 700,
+        textAlign: 'right',
+        textTransform: 'uppercase',
+        whiteSpace: 'nowrap',
+      }}>
+      <span ref={layer.ref}>Trigger</span>
+      {layer.render(<span data-testid="layer-text">Layer text</span>)}
+    </div>
+  );
+}
+
+describe('useLayer inherited text styles', () => {
+  // The popover stays a DOM descendant of its trigger's subtree, so without a
+  // reset it would inherit the trigger context's text styling.
+  it('does not inherit text styling from the trigger context', () => {
+    render(<InheritanceHarness />);
+    const style = getComputedStyle(screen.getByTestId('layer-text'));
+    expect({
+      fontStyle: style.fontStyle,
+      fontWeight: style.fontWeight,
+      textAlign: style.textAlign,
+      textTransform: style.textTransform,
+      whiteSpace: style.whiteSpace,
+    }).toEqual({
+      fontStyle: 'normal',
+      fontWeight: '400',
+      textAlign: 'start',
+      textTransform: 'none',
+      whiteSpace: 'normal',
+    });
+  });
+});
