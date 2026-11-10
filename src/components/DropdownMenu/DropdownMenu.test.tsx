@@ -1014,11 +1014,14 @@ describe('DropdownMenu', () => {
         />,
       );
       await user.click(screen.getByRole('button', {name: 'Assign to'}));
-      const ada = screen.getByRole('menuitem', {
-        hidden: true,
-        name: 'Ada Lovelace',
+      // Opening auto-focuses the first item on the next animation frame. Wait
+      // for it, or under load that frame can land after the typing below and
+      // pull focus back from the typeahead match.
+      await waitFor(() => {
+        expect(
+          screen.getByRole('menuitem', {hidden: true, name: 'Ada Lovelace'}),
+        ).toHaveFocus();
       });
-      ada.focus();
 
       // Avatar initials ("GH") precede each label in the item's text, so
       // matching raw text would stop at Gail Hart instead of reaching "gr".
