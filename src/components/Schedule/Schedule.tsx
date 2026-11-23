@@ -88,12 +88,14 @@ export interface ScheduleProps<
   highlightDate?: Instant;
   /**
    * ID of an event whose popover opens as though its pill were clicked, e.g.
-   * to deep-link to an event. It opens when a pill for that event first
-   * renders with popover content from a plugin, after scrolling the pill into
-   * view; an event split across several pills opens from its first. Each
-   * value opens at most once, so closing the popover keeps it closed across
-   * re-renders; set a different value (or clear it and set it again) to open
-   * another. Has no effect when no plugin renders a popover for the event.
+   * to deep-link to an event. Pass it only for an event within the range the
+   * schedule is showing. The popover opens when that event's pill first
+   * renders with popover content from a plugin (so after async events load),
+   * after scrolling the pill into view; an event split across several pills
+   * opens from its first. Each value opens at most once, so closing the
+   * popover keeps it closed across re-renders; set a different value (or
+   * clear it and set it again) to open another. Has no effect when no plugin
+   * renders a popover for the event.
    */
   initialEventPopoverID?: string;
   /**

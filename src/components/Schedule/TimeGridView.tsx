@@ -635,12 +635,14 @@ export function TimeGridView({
       );
     };
     updateFixedRowsHeight();
-    if (typeof ResizeObserver === 'undefined') {
-      return;
+    const canObserve = typeof ResizeObserver !== 'undefined';
+    if (canObserve) {
+      observeResize(fixedRows, updateFixedRowsHeight);
     }
-    observeResize(fixedRows, updateFixedRowsHeight);
     return () => {
-      unobserveResize(fixedRows, updateFixedRowsHeight);
+      if (canObserve) {
+        unobserveResize(fixedRows, updateFixedRowsHeight);
+      }
       grid.style.removeProperty('--schedule-fixed-rows-height');
     };
   }, [height]);

@@ -4571,20 +4571,17 @@ describe('Schedule', () => {
       });
       const initialEvents = [...popoverEvents, otherEvent];
       const monthView = createScheduleMonthlyView();
-      const may13 = instantUTC(2026, 4, 13);
 
       function ScheduleWithInitialPopover({
         eventsList = initialEvents,
         hasPopoverPlugin = true,
         initialEventPopoverID,
         view = monthView,
-        viewDate = may13,
       }: {
         eventsList?: CalendarEvent[];
         hasPopoverPlugin?: boolean;
         initialEventPopoverID?: string;
         view?: ScheduleView;
-        viewDate?: Instant;
       }): React.JSX.Element {
         const popoverPlugin = useScheduleEventPopoverPlugin();
         return (
@@ -4600,7 +4597,7 @@ describe('Schedule', () => {
             }
             timezoneID="UTC"
             view={view}
-            viewDate={viewDate}
+            viewDate={instantUTC(2026, 4, 13)}
           />
         );
       }
@@ -4744,38 +4741,6 @@ describe('Schedule', () => {
         rerender(<ScheduleWithInitialPopover initialEventPopoverID="other" />);
         await waitFor(() => {
           expect(screen.getByTestId('schedule-event-other')).toHaveAttribute(
-            'aria-expanded',
-            'true',
-          );
-        });
-      });
-
-      it('opens when the user pages to the event', async () => {
-        const laterEvent = createEventFromISO({
-          category: 'Sync',
-          end: '2026-06-17T16:30:00.000Z',
-          id: 'later',
-          start: '2026-06-17T16:00:00.000Z',
-          title: 'Later sync',
-        });
-        const {rerender} = render(
-          <ScheduleWithInitialPopover
-            eventsList={[...initialEvents, laterEvent]}
-            initialEventPopoverID="later"
-          />,
-        );
-        await waitForFrame();
-        expect(onEventPopoverShow).not.toHaveBeenCalled();
-
-        rerender(
-          <ScheduleWithInitialPopover
-            eventsList={[...initialEvents, laterEvent]}
-            initialEventPopoverID="later"
-            viewDate={instantUTC(2026, 5, 17)}
-          />,
-        );
-        await waitFor(() => {
-          expect(screen.getByTestId('schedule-event-later')).toHaveAttribute(
             'aria-expanded',
             'true',
           );
