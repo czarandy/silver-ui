@@ -273,7 +273,7 @@ function WeekOpeningEventPopover({eventID}: {eventID: string}) {
   const handleRef = useRef<ScheduleHandle>(null);
   const popoverPlugin = useScheduleEventPopoverPlugin();
   useEffect(() => {
-    handleRef.current?.openEventPopover(eventID);
+    void handleRef.current?.openEventPopover(eventID);
   }, [eventID]);
   return (
     <div style={{height: 400}}>

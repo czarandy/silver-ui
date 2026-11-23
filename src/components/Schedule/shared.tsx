@@ -33,6 +33,7 @@ import type {
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
@@ -326,10 +327,18 @@ export function hasEventPopoverPlugin(
  * rendered `popover` layer to place as a sibling. Both are `undefined` when no
  * plugin supplies content for the event, in which case the pill stays a static,
  * non-interactive element (unchanged default behavior).
+ *
+ * `dayIndex` is the index, within the view's days, of the first day the pill
+ * covers. Pills with one can be opened by `ScheduleHandle.openEventPopover`;
+ * pills inside a "+N more" overflow popover omit it, since they are hidden
+ * until the overflow opens.
  */
 export function useScheduleEventPopover(
   event: CalendarEvent,
-  {placement = 'end'}: {placement?: LayerPlacement} = {},
+  {
+    dayIndex,
+    placement = 'end',
+  }: {dayIndex?: number; placement?: LayerPlacement} = {},
 ): {
   popover?: ReactNode;
   triggerProps?: ScheduleEventTriggerProps;
@@ -344,7 +353,20 @@ export function useScheduleEventPopover(
   useIsomorphicLayoutEffect(() => {
     latestRef.current = {event, plugins};
   }, [event, plugins]);
+  // Whether the layer is open, and whether plugins were last told it is.
+  // They differ only while effects are disconnected (StrictMode, <Activity>).
+  const isOpenRef = useRef(false);
   const isShownRef = useRef(false);
+  const notifyShow = useCallback(() => {
+    if (isShownRef.current) {
+      return;
+    }
+    isShownRef.current = true;
+    const latest = latestRef.current;
+    latest.plugins.forEach(plugin =>
+      plugin.onEventPopoverShow?.(latest.event, popoverId),
+    );
+  }, [popoverId]);
   const notifyHide = useCallback(() => {
     if (!isShownRef.current) {
       return;
@@ -357,24 +379,36 @@ export function useScheduleEventPopover(
   }, [popoverId]);
   const handleShow = useCallback(() => {
     interactionState.markPopoverShown(interactionTokenRef.current);
-    isShownRef.current = true;
-    const latest = latestRef.current;
-    latest.plugins.forEach(plugin =>
-      plugin.onEventPopoverShow?.(latest.event, popoverId),
-    );
-  }, [interactionState, popoverId]);
+    isOpenRef.current = true;
+    notifyShow();
+  }, [interactionState, notifyShow]);
   const handleHide = useCallback(() => {
     interactionState.markPopoverHidden(interactionTokenRef.current);
+    isOpenRef.current = false;
     notifyHide();
   }, [interactionState, notifyHide]);
-  useEffect(
-    () => () => {
-      interactionState.unregisterPopover(interactionTokenRef.current);
-    },
-    [interactionState],
-  );
-  // An open popover removed with its pill never fires `onHide`.
-  useEffect(() => notifyHide, [notifyHide]);
+  const isConnectedRef = useRef(false);
+  useEffect(() => {
+    const token = interactionTokenRef.current;
+    isConnectedRef.current = true;
+    // Reconnected while open: report it again if a disconnect reported a hide.
+    if (isOpenRef.current) {
+      interactionState.markPopoverShown(token);
+      notifyShow();
+    }
+    return () => {
+      isConnectedRef.current = false;
+      interactionState.unregisterPopover(token);
+      // An open popover removed with its pill never fires `onHide`, so report
+      // one here. Deferred, so effects that disconnect and immediately
+      // reconnect (StrictMode) don't report a hide for a popover still open.
+      queueMicrotask(() => {
+        if (!isConnectedRef.current) {
+          notifyHide();
+        }
+      });
+    };
+  }, [interactionState, notifyHide, notifyShow]);
   const eventPopoverPlugin = plugins.find(
     plugin => plugin.renderEventPopover != null,
   );
@@ -385,15 +419,36 @@ export function useScheduleEventPopover(
     onShow: handleShow,
     role: 'dialog',
   });
-  const {hide, show, triggerRef} = popover;
-  const triggerElementRef = useRef<HTMLElement | null>(null);
-  const handleTriggerRef = useCallback(
+  const {hide, show} = popover;
+  const showRef = useRef(show);
+  useIsomorphicLayoutEffect(() => {
+    showRef.current = show;
+  }, [show]);
+  // Registers the pill for `ScheduleHandle.openEventPopover` for as long as
+  // the trigger is mounted. Opening matches a click: the pill takes focus (so
+  // focus returns to it on close) and is scrolled into view first.
+  const registerRef = useCallback(
     (element: HTMLElement | null) => {
-      triggerElementRef.current = element;
-      triggerRef(element);
+      if (element == null || dayIndex == null) {
+        return;
+      }
+      return interactionState.registerEventPopover(event.id, {
+        dayIndex,
+        open: () => {
+          if (isOpenRef.current) {
+            return;
+          }
+          // Guarded for test environments without layout, such as jsdom.
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- jsdom lacks scrollIntoView
+          element.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
+          element.focus({preventScroll: true});
+          showRef.current();
+        },
+      });
     },
-    [triggerRef],
+    [dayIndex, event.id, interactionState],
   );
+  const triggerRef = useMergeRefs(popover.triggerRef, registerRef);
   const controls = useMemo(
     (): ScheduleEventPopoverControls => ({close: hide, popoverId}),
     [hide, popoverId],
@@ -408,21 +463,6 @@ export function useScheduleEventPopover(
     return null;
   }, [controls, event, plugins]);
   const hasContent = isNonEmptyReactNode(content);
-  // Registered for `ScheduleHandle.openEventPopover`, which opens the pill
-  // exactly as a click would after scrolling it into view.
-  useIsomorphicLayoutEffect(() => {
-    const element = triggerElementRef.current;
-    if (!hasContent || element == null) {
-      return;
-    }
-    return interactionState.registerEventPopover(event.id, {
-      element,
-      open: () => {
-        element.scrollIntoView({block: 'nearest', inline: 'nearest'});
-        show();
-      },
-    });
-  }, [event.id, hasContent, interactionState, show]);
   if (!hasContent) {
     return {};
   }
@@ -436,7 +476,7 @@ export function useScheduleEventPopover(
     triggerProps: {
       ...popover.triggerProps,
       onClick: popover.toggle,
-      ref: handleTriggerRef,
+      ref: triggerRef,
     },
   };
 }
@@ -592,16 +632,21 @@ function EventPillRoot({
  * Renders a colored pill displaying an event's accessible label.
  */
 export function CalendarEventPill({
+  dayIndex,
   event,
   isFullWidth = false,
   isPast = false,
 }: {
+  /**
+   * See `useScheduleEventPopover`; omitted inside "+N more" overflow.
+   */
+  dayIndex?: number;
   event: CalendarEvent;
   isFullWidth?: boolean;
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
-  const {popover, triggerProps} = useScheduleEventPopover(event);
+  const {popover, triggerProps} = useScheduleEventPopover(event, {dayIndex});
   const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});
   const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({
@@ -637,14 +682,19 @@ export function CalendarEventPill({
 }
 
 export function CalendarMonthEventPill({
+  dayIndex,
   event,
   isPast = false,
 }: {
+  /**
+   * See `useScheduleEventPopover`; omitted inside "+N more" overflow.
+   */
+  dayIndex?: number;
   event: CalendarEvent;
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
-  const {popover, triggerProps} = useScheduleEventPopover(event);
+  const {popover, triggerProps} = useScheduleEventPopover(event, {dayIndex});
   const pluginProps = useScheduleEventPluginProps({event, layout: 'month'});
   const category = getCategory(categoryMap, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);

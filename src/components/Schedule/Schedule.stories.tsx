@@ -1,7 +1,7 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {CircleCheck, Repeat2, TriangleAlert} from 'lucide-react';
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {useCallback, useMemo, useRef, useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
@@ -1412,9 +1412,9 @@ const openEventPopoverStoryContainer = css({
 
 /**
  * `handleRef.current.openEventPopover(id)` opens an event's popover as though
- * it were clicked, e.g. for a deep link. This story opens the evening event
- * from a mount effect; it sits below the initially scrolled hours, so the grid
- * scrolls it into view before its popover opens. The button opens it again.
+ * it were clicked, e.g. for a deep link. The evening event sits below the
+ * initially scrolled hours, so the grid scrolls it into view before its
+ * popover opens.
  */
 export const OpenEventPopover: Story = {
   render: () => {
@@ -1424,16 +1424,13 @@ export const OpenEventPopover: Story = {
         <ScheduleEventPopoverContent event={event} onClose={close} />
       ),
     });
-    useEffect(() => {
-      handleRef.current?.openEventPopover('evening-review');
-    }, []);
     return (
       <div className={openEventPopoverStoryContainer}>
         <div>
           <Button
             label="Open evening review"
             onClick={() => {
-              handleRef.current?.openEventPopover('evening-review');
+              void handleRef.current?.openEventPopover('evening-review');
             }}
             size="sm"
           />

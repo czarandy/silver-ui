@@ -228,17 +228,28 @@ export interface SchedulePlugin {
  */
 export interface ScheduleHandle {
   /**
-   * Opens the popover of the event with this ID exactly as clicking its pill
-   * would (plugin `onEventPopoverShow`/`onEventPopoverHide` hooks fire and
-   * focus moves into the popover), after scrolling the pill into view. The
-   * popover opens on the next animation frame. An event split across several
-   * pills opens from its first.
+   * Opens the popover of the event with this ID as clicking its pill would:
+   * the pill is scrolled into view and focused (so focus returns to it when
+   * the popover closes), and plugin `onEventPopoverShow`/`onEventPopoverHide`
+   * hooks fire as usual. An event split across several pills (month weeks,
+   * days of a multi-day event) opens from the piece on its earliest shown
+   * day. Pills collapsed into a "+N more" overflow are not opened.
    *
-   * Acts only on pills rendered when it is called: returns `false`, and does
-   * nothing, when no pill for the event is rendered (for example, the event
-   * is outside the shown range) or no plugin renders popover content for it.
-   * Call it from a parent's mount effect when events come from an array; with
-   * an async event source, call it once the events have rendered.
+   * Resolves `true` once the popover opens, or `false` if it does not:
+   * - When a pill for the event is rendered with popover content from a
+   *   plugin, it opens immediately.
+   * - Otherwise the call waits for the schedule's next render, so changing
+   *   `viewDate` and calling this in the same event handler opens the event
+   *   in the new range. With an async event source still loading that range,
+   *   it also waits for those events to load and render. If the pill is
+   *   rendered by then it opens; if not, or if the range changes first, the
+   *   call resolves `false` and is dropped. It never opens later, for example
+   *   when the user pages to the event.
+   * - Only the most recent call waits: a new call, or unmounting the
+   *   schedule, resolves a waiting call with `false`.
+   *
+   * With an array event source, calling it from a parent's mount effect opens
+   * the event immediately.
    */
-  openEventPopover(eventID: string): boolean;
+  openEventPopover(eventID: string): Promise<boolean>;
 }

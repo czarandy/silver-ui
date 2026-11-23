@@ -14,6 +14,7 @@ import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {eventOccursOnDate, isDayEvent} from 'components/Schedule/dateMath';
+import {useScheduleInteractionState} from 'components/Schedule/interaction';
 import {
   CalendarEventPill,
   formatHour,
@@ -277,6 +278,7 @@ const THREE_LINE_BLOCK_HEIGHT_PX = 51;
  */
 function TimeGridEvent({
   currentTime,
+  dayIndex,
   hourHeight,
   layout,
   maxHour,
@@ -284,6 +286,7 @@ function TimeGridEvent({
   overlapBehavior,
 }: {
   currentTime: number;
+  dayIndex: number;
   hourHeight: number;
   layout: TimedEventLayout;
   maxHour: number;
@@ -293,7 +296,7 @@ function TimeGridEvent({
   const {categoryMap, eventBorderStyle, plugins, timezoneID} =
     useScheduleContext();
   const {event} = layout;
-  const {popover, triggerProps} = useScheduleEventPopover(event);
+  const {popover, triggerProps} = useScheduleEventPopover(event, {dayIndex});
   const eventPluginProps = useScheduleEventPluginProps({
     event,
     layout: 'timeGrid',
@@ -631,7 +634,7 @@ export function TimeGridView({
     const updateFixedRowsHeight = () => {
       grid.style.setProperty(
         '--schedule-fixed-rows-height',
-        `${fixedRows.offsetHeight}px`,
+        `${fixedRows.getBoundingClientRect().height}px`,
       );
     };
     updateFixedRowsHeight();
@@ -650,6 +653,7 @@ export function TimeGridView({
   // Scrolls once, when the grid first has layout. Later renders (paging, the
   // current-time tick, new events) keep wherever the user has scrolled since.
   const hasAppliedInitialScrollRef = useRef(false);
+  const interactionState = useScheduleInteractionState();
   useIsomorphicLayoutEffect(() => {
     if (hasAppliedInitialScrollRef.current) {
       return;
@@ -658,6 +662,7 @@ export function TimeGridView({
     if (grid == null) {
       return;
     }
+    const eventPopoverOpenCount = interactionState.getEventPopoverOpenCount();
     const applyInitialScroll = () => {
       if (hasAppliedInitialScrollRef.current) {
         return true;
@@ -668,6 +673,13 @@ export function TimeGridView({
         return false;
       }
       hasAppliedInitialScrollRef.current = true;
+      // An event popover opened from the handle while the scroll waited for
+      // layout has scrolled to its event; keep that event in view.
+      if (
+        interactionState.getEventPopoverOpenCount() !== eventPopoverOpenCount
+      ) {
+        return true;
+      }
       const target = getInitialScrollTarget(
         initialScrollTime,
         days,
@@ -699,6 +711,7 @@ export function TimeGridView({
   }, [
     days,
     initialScrollTime,
+    interactionState,
     normalizedHourHeight,
     normalizedMinHour,
     timezoneID,
@@ -807,6 +820,7 @@ export function TimeGridView({
                     <div className={styles.allDayEvents}>
                       {visibleDayEvents.map(event => (
                         <CalendarEventPill
+                          dayIndex={index}
                           event={event}
                           isPast={isEventInPast(event, currentTime, timezoneID)}
                           key={event.id}
@@ -938,6 +952,7 @@ export function TimeGridView({
                           {visibleTimedEventLayouts.map(layout => (
                             <TimeGridEvent
                               currentTime={currentTime}
+                              dayIndex={index}
                               hourHeight={normalizedHourHeight}
                               key={layout.event.id}
                               layout={layout}

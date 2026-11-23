@@ -1,10 +1,12 @@
 'use client';
 
 import {
+  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
   useReducer,
+  useRef,
   useState,
   type CSSProperties,
   type PointerEvent,
@@ -197,10 +199,84 @@ function useRange<Options extends ScheduleViewOptions>(
   );
 }
 
+interface PendingEventPopover {
+  eventID: string;
+  /**
+   * The range of the first commit after the call; null until then.
+   */
+  rangeKey: string | null;
+  resolve: (isOpened: boolean) => void;
+}
+
+/**
+ * Implements `ScheduleHandle`. A call opens a rendered pill at once; otherwise
+ * it waits for the schedule's next commit (forcing one), and on the range that
+ * commit shows, for that range's events to load. The most recent call is the
+ * only one waiting.
+ */
+function useEventPopoverHandle({
+  handleRef,
+  interactionState,
+  isLoading,
+  range,
+}: {
+  handleRef: Ref<ScheduleHandle> | undefined;
+  interactionState: ScheduleInteractionState;
+  isLoading: boolean;
+  range: ScheduleRange;
+}): void {
+  const pendingRef = useRef<PendingEventPopover | null>(null);
+  const [commitRequest, requestCommit] = useReducer(
+    (count: number) => count + 1,
+    0,
+  );
+  const settle = useCallback((isOpened: boolean) => {
+    const pending = pendingRef.current;
+    pendingRef.current = null;
+    pending?.resolve(isOpened);
+  }, []);
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      openEventPopover: async eventID => {
+        settle(false);
+        if (interactionState.openEventPopover(eventID)) {
+          return true;
+        }
+        return new Promise<boolean>(resolve => {
+          pendingRef.current = {eventID, rangeKey: null, resolve};
+          requestCommit();
+        });
+      },
+    }),
+    [interactionState, settle],
+  );
+  const rangeKey = `${range.start}:${range.end}`;
+  // Runs after the commit a call requests and after any range or loading
+  // change, once pills have registered from their refs.
+  useEffect(() => {
+    const pending = pendingRef.current;
+    if (pending == null) {
+      return;
+    }
+    pending.rangeKey ??= rangeKey;
+    if (pending.rangeKey !== rangeKey) {
+      // The user paged away before the events loaded.
+      settle(false);
+    } else if (interactionState.openEventPopover(pending.eventID)) {
+      settle(true);
+    } else if (!isLoading) {
+      settle(false);
+    }
+  }, [commitRequest, interactionState, isLoading, rangeKey, settle]);
+  useEffect(() => () => settle(false), [settle]);
+}
+
 function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories,
   eventBorderStyle,
   eventSource,
+  handleRef,
   height,
   highlightDate,
   interactionState,
@@ -211,6 +287,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories: ReadonlyArray<ScheduleCategory>;
   eventBorderStyle: ScheduleEventBorderStyle;
   eventSource: ScheduleEventSource;
+  handleRef: Ref<ScheduleHandle> | undefined;
   height: ScheduleHeight;
   highlightDate: ScheduleZonedInstant;
   interactionState: ScheduleInteractionState;
@@ -221,6 +298,7 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   const Component = view.component;
   const range = useRange(view, viewDate);
   const {events: rangeEvents, isLoading} = useAsyncEvents(eventSource, range);
+  useEventPopoverHandle({handleRef, interactionState, isLoading, range});
   // `events` and `categoryMap` are memoized apart from the context value so
   // their identities survive unrelated context changes (e.g. a plugin updating
   // as its popover opens); the views' expensive layout memos key on them.
@@ -309,13 +387,6 @@ export function Schedule({
   );
   const interactionState = useMemo(() => createScheduleInteractionState(), []);
   useEffect(() => () => interactionState.dispose(), [interactionState]);
-  useImperativeHandle(
-    handleRef,
-    () => ({
-      openEventPopover: eventID => interactionState.openEventPopover(eventID),
-    }),
-    [interactionState],
-  );
   const handlePointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
     interactionState.markPointerDown(event.nativeEvent);
   };
@@ -332,6 +403,7 @@ export function Schedule({
         categories={categories}
         eventBorderStyle={eventBorderStyle}
         eventSource={events}
+        handleRef={handleRef}
         height={height}
         highlightDate={highlightScheduleZonedInstant}
         interactionState={interactionState}

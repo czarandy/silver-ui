@@ -6,21 +6,28 @@ const schedulePopoverDismissPointerEvents = new WeakSet<Event>();
 
 /**
  * A rendered event pill whose popover `ScheduleHandle.openEventPopover` can
- * open.
+ * open. `dayIndex` is the index, within the view's days, of the first day the
+ * pill covers, so an event split across pills opens from its earliest piece.
  */
 export interface ScheduleEventPopoverOpener {
-  element: HTMLElement;
+  dayIndex: number;
   open: () => void;
 }
 
 export interface ScheduleInteractionState {
   dispose: () => void;
+  /**
+   * How many times `openEventPopover` has opened a popover. The time grid
+   * skips a deferred initial scroll once it changes, so it does not scroll an
+   * opened event back out of view.
+   */
+  getEventPopoverOpenCount: () => number;
   markPointerDown: (event: Event) => void;
   markPopoverHidden: (token: symbol) => void;
   markPopoverShown: (token: symbol) => void;
   /**
-   * Opens the popover of the event's first rendered pill on the next frame.
-   * Returns `false` when no pill for the event has popover content.
+   * Opens the popover of the event's earliest registered pill. Returns
+   * `false` when no pill for the event is registered.
    */
   openEventPopover(eventID: string): boolean;
   /**
@@ -34,27 +41,6 @@ export interface ScheduleInteractionState {
 }
 
 /**
- * The pill that comes first in the document, so an event split across several
- * pills (month weeks, multi-day columns) opens from its earliest.
- */
-function getFirstOpener(
-  openers: ReadonlySet<ScheduleEventPopoverOpener> | undefined,
-): ScheduleEventPopoverOpener | undefined {
-  let first: ScheduleEventPopoverOpener | undefined;
-  openers?.forEach(opener => {
-    if (
-      first == null ||
-      (opener.element.compareDocumentPosition(first.element) &
-        Node.DOCUMENT_POSITION_FOLLOWING) !==
-        0
-    ) {
-      first = opener;
-    }
-  });
-  return first;
-}
-
-/**
  * Coordinates pointer gestures between otherwise independent Schedule plugins.
  * Popover light dismiss can happen before the target cell receives the
  * pointerdown, so a hidden popover remains active through the current frame.
@@ -63,10 +49,12 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
   const openPopovers = new Set<symbol>();
   const recentlyHiddenPopovers = new Set<symbol>();
   const hiddenFrames = new Map<symbol, number>();
+  // Pills unregister themselves, so `dispose` leaves these alone.
   const eventPopoverOpeners = new Map<
     string,
     Set<ScheduleEventPopoverOpener>
   >();
+  let eventPopoverOpenCount = 0;
 
   const clearHiddenFrame = (token: symbol): void => {
     const frame = hiddenFrames.get(token);
@@ -90,7 +78,6 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     dispose: () => {
       hiddenFrames.forEach(frame => cancelAnimationFrame(frame));
       hiddenFrames.clear();
-      eventPopoverOpeners.clear();
       openPopovers.clear();
       recentlyHiddenPopovers.clear();
     },
@@ -111,16 +98,19 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       recentlyHiddenPopovers.delete(token);
       openPopovers.add(token);
     },
+    getEventPopoverOpenCount: () => eventPopoverOpenCount,
     openEventPopover: eventID => {
-      if (!eventPopoverOpeners.has(eventID)) {
+      let first: ScheduleEventPopoverOpener | undefined;
+      eventPopoverOpeners.get(eventID)?.forEach(opener => {
+        if (first == null || opener.dayIndex < first.dayIndex) {
+          first = opener;
+        }
+      });
+      if (first == null) {
         return false;
       }
-      // Deferred to the next frame so a caller's mount effect works under
-      // StrictMode: the effects StrictMode discards and re-runs (including
-      // this pill's hide notification on unmount) settle before it opens.
-      requestAnimationFrame(() => {
-        getFirstOpener(eventPopoverOpeners.get(eventID))?.open();
-      });
+      eventPopoverOpenCount += 1;
+      first.open();
       return true;
     },
     registerEventPopover: (eventID, opener) => {
