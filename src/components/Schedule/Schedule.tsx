@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useImperativeHandle,
   useMemo,
   useReducer,
   useState,
@@ -23,16 +24,14 @@ import {
 } from 'components/Schedule/interaction';
 import {defaultSchedulePlugins} from 'components/Schedule/plugins';
 import {createScheduleZonedInstant} from 'components/Schedule/scheduleZonedInstant';
-import {
-  createCategoryMap,
-  type InitialEventPopoverRequest,
-} from 'components/Schedule/shared';
+import {createCategoryMap} from 'components/Schedule/shared';
 import type {
   CalendarEvent,
   Instant,
   ScheduleCategory,
   ScheduleEventBorderStyle,
   ScheduleEventSource,
+  ScheduleHandle,
   ScheduleHeight,
   SchedulePlugin,
   ScheduleRange,
@@ -77,6 +76,10 @@ export interface ScheduleProps<
    */
   events: ScheduleEventSource;
   /**
+   * Imperative handle for opening an event's popover from code.
+   */
+  handleRef?: Ref<ScheduleHandle>;
+  /**
    * Height behavior. `auto` grows with the active view; `fill` occupies a
    * finite-height parent and scrolls the view below the fixed toolbar.
    * @default 'auto'
@@ -86,18 +89,6 @@ export interface ScheduleProps<
    * Instant highlighted as the current date. Defaults to mount time.
    */
   highlightDate?: Instant;
-  /**
-   * ID of an event whose popover opens as though its pill were clicked, e.g.
-   * to deep-link to an event. Pass it only for an event within the range the
-   * schedule is showing. The popover opens when that event's pill first
-   * renders with popover content from a plugin (so after async events load),
-   * after scrolling the pill into view; an event split across several pills
-   * opens from its first. Each value opens at most once, so closing the
-   * popover keeps it closed across re-renders; set a different value (or
-   * clear it and set it again) to open another. Has no effect when no plugin
-   * renders a popover for the event.
-   */
-  initialEventPopoverID?: string;
   /**
    * Header/rendering plugins.
    */
@@ -196,12 +187,6 @@ function useAsyncEvents(
   return {events: record.value, isLoading: false};
 }
 
-function createInitialEventPopoverRequest(
-  eventID: string | undefined,
-): InitialEventPopoverRequest | null {
-  return eventID == null ? null : {eventID};
-}
-
 function useRange<Options extends ScheduleViewOptions>(
   view: ScheduleView<Options>,
   date: ScheduleZonedInstant,
@@ -218,7 +203,6 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   eventSource,
   height,
   highlightDate,
-  initialEventPopoverRequest,
   interactionState,
   plugins,
   view,
@@ -229,7 +213,6 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   eventSource: ScheduleEventSource;
   height: ScheduleHeight;
   highlightDate: ScheduleZonedInstant;
-  initialEventPopoverRequest: InitialEventPopoverRequest | null;
   interactionState: ScheduleInteractionState;
   plugins: ReadonlyArray<SchedulePlugin>;
   view: ScheduleView<Options>;
@@ -262,7 +245,6 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
       eventBorderStyle,
       events,
       highlightDate,
-      initialEventPopoverRequest,
       isLoading,
       plugins,
       range,
@@ -276,7 +258,6 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
       eventBorderStyle,
       events,
       highlightDate,
-      initialEventPopoverRequest,
       isLoading,
       plugins,
       range,
@@ -303,9 +284,9 @@ export function Schedule({
   'data-testid': dataTestId,
   eventBorderStyle = 'border',
   events,
+  handleRef,
   height = 'auto',
   highlightDate: highlightDateFromProps,
-  initialEventPopoverID,
   plugins = defaultSchedulePlugins,
   ref,
   style,
@@ -326,17 +307,15 @@ export function Schedule({
     () => createScheduleZonedInstant(highlightDate, timezoneID),
     [highlightDate, timezoneID],
   );
-  // A new request per distinct value, so each value opens its popover once.
-  const [initialEventPopoverRequest, setInitialEventPopoverRequest] = useState(
-    () => createInitialEventPopoverRequest(initialEventPopoverID),
-  );
-  if (initialEventPopoverRequest?.eventID !== initialEventPopoverID) {
-    setInitialEventPopoverRequest(
-      createInitialEventPopoverRequest(initialEventPopoverID),
-    );
-  }
   const interactionState = useMemo(() => createScheduleInteractionState(), []);
   useEffect(() => () => interactionState.dispose(), [interactionState]);
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      openEventPopover: eventID => interactionState.openEventPopover(eventID),
+    }),
+    [interactionState],
+  );
   const handlePointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
     interactionState.markPointerDown(event.nativeEvent);
   };
@@ -355,7 +334,6 @@ export function Schedule({
         eventSource={events}
         height={height}
         highlightDate={highlightScheduleZonedInstant}
-        initialEventPopoverRequest={initialEventPopoverRequest}
         interactionState={interactionState}
         plugins={plugins}
         view={view}

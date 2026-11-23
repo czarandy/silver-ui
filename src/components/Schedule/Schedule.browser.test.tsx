@@ -1,5 +1,6 @@
 import {render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import {useEffect, useRef} from 'react';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {Dialog} from 'components/Dialog/Dialog';
 import {createEventFromISO} from 'components/Schedule/CalendarEvent';
@@ -9,6 +10,7 @@ import {useScheduleEventCreatePlugin} from 'components/Schedule/plugins/EventCre
 import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import type {
   Instant,
+  ScheduleHandle,
   ScheduleInitialScrollTime,
 } from 'components/Schedule/types';
 import {Temporal} from 'internal/temporal';
@@ -240,7 +242,7 @@ describe('Schedule initial scroll time (browser)', () => {
   });
 });
 
-const initialPopoverEvents = [
+const openPopoverEvents = [
   createEventFromISO({
     end: '2026-10-07T07:00:00Z',
     id: 'early',
@@ -267,18 +269,18 @@ const initialPopoverEvents = [
   }),
 ];
 
-function WeekWithInitialPopover({
-  initialEventPopoverID,
-}: {
-  initialEventPopoverID: string;
-}) {
+function WeekOpeningEventPopover({eventID}: {eventID: string}) {
+  const handleRef = useRef<ScheduleHandle>(null);
   const popoverPlugin = useScheduleEventPopoverPlugin();
+  useEffect(() => {
+    handleRef.current?.openEventPopover(eventID);
+  }, [eventID]);
   return (
     <div style={{height: 400}}>
       <Schedule
-        events={initialPopoverEvents}
+        events={openPopoverEvents}
+        handleRef={handleRef}
         height="fill"
-        initialEventPopoverID={initialEventPopoverID}
         plugins={[popoverPlugin]}
         timezoneID="UTC"
         view={createScheduleWeeklyView({
@@ -299,11 +301,11 @@ async function openedPill(eventID: string): Promise<DOMRect> {
   return pill.getBoundingClientRect();
 }
 
-describe('Schedule initial event popover (browser)', () => {
+describe('Schedule openEventPopover (browser)', () => {
   it.each(['early', 'late'])(
     'scrolls the %s event below the day headers and beside its popover',
     async eventID => {
-      render(<WeekWithInitialPopover initialEventPopoverID={eventID} />);
+      render(<WeekOpeningEventPopover eventID={eventID} />);
 
       const pill = await openedPill(eventID);
       expect(pill.top).toBeGreaterThanOrEqual(visibleHoursTop());
@@ -321,7 +323,7 @@ describe('Schedule initial event popover (browser)', () => {
   it.each(['midday', 'all-day'])(
     'keeps the initial scroll time when the %s event is already visible',
     async eventID => {
-      render(<WeekWithInitialPopover initialEventPopoverID={eventID} />);
+      render(<WeekOpeningEventPopover eventID={eventID} />);
 
       await openedPill(eventID);
       expect(timeGrid().scrollTop).toBe(12 * 48);

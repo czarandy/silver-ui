@@ -321,31 +321,6 @@ export function hasEventPopoverPlugin(
 }
 
 /**
- * One `initialEventPopoverID` value. Its identity is the claim: a new value
- * makes a new request, which opens one popover.
- */
-export interface InitialEventPopoverRequest {
-  eventID: string;
-}
-
-const claimedInitialEventPopoverRequests =
-  new WeakSet<InitialEventPopoverRequest>();
-
-/**
- * Claims the request for one pill. Later claims, from other pills of the same
- * event or the same pill re-rendering, are refused.
- */
-function claimInitialEventPopover(
-  request: InitialEventPopoverRequest,
-): boolean {
-  if (claimedInitialEventPopoverRequests.has(request)) {
-    return false;
-  }
-  claimedInitialEventPopoverRequests.add(request);
-  return true;
-}
-
-/**
  * Wires an event pill to its popover when an event popover plugin is active.
  * Returns `triggerProps` to spread onto the pill's `<button>` root and the
  * rendered `popover` layer to place as a sibling. Both are `undefined` when no
@@ -359,8 +334,7 @@ export function useScheduleEventPopover(
   popover?: ReactNode;
   triggerProps?: ScheduleEventTriggerProps;
 } {
-  const {categoryMap, initialEventPopoverRequest, plugins, timezoneID} =
-    useScheduleContext();
+  const {categoryMap, plugins, timezoneID} = useScheduleContext();
   const interactionState = useScheduleInteractionState();
   const interactionTokenRef = useRef(Symbol('schedule-event-popover'));
   const popoverId = useId();
@@ -434,29 +408,21 @@ export function useScheduleEventPopover(
     return null;
   }, [controls, event, plugins]);
   const hasContent = isNonEmptyReactNode(content);
-  const isInitialEventPopover =
-    hasContent && initialEventPopoverRequest?.eventID === event.id;
-  useEffect(() => {
-    if (!isInitialEventPopover) {
+  // Registered for `ScheduleHandle.openEventPopover`, which opens the pill
+  // exactly as a click would after scrolling it into view.
+  useIsomorphicLayoutEffect(() => {
+    const element = triggerElementRef.current;
+    if (!hasContent || element == null) {
       return;
     }
-    // Claimed on the next frame, so an effect run that StrictMode discards
-    // never claims the request. Frames run in the order they were requested,
-    // so an event's first pill claims first. The time grid has already applied
-    // `initialScrollTime` in a layout effect, so scrolling the pill into view
-    // only adjusts that scroll when the pill is outside it.
-    const frame = requestAnimationFrame(() => {
-      if (!claimInitialEventPopover(initialEventPopoverRequest)) {
-        return;
-      }
-      triggerElementRef.current?.scrollIntoView({
-        block: 'nearest',
-        inline: 'nearest',
-      });
-      show();
+    return interactionState.registerEventPopover(event.id, {
+      element,
+      open: () => {
+        element.scrollIntoView({block: 'nearest', inline: 'nearest'});
+        show();
+      },
     });
-    return () => cancelAnimationFrame(frame);
-  }, [initialEventPopoverRequest, isInitialEventPopover, show]);
+  }, [event.id, hasContent, interactionState, show]);
   if (!hasContent) {
     return {};
   }

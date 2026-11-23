@@ -222,3 +222,23 @@ export interface SchedulePlugin {
     props: ScheduleTimeGridEventRenderProps,
   ) => ReactNode;
 }
+
+/**
+ * Imperative handle for `Schedule`, passed through its `handleRef` prop.
+ */
+export interface ScheduleHandle {
+  /**
+   * Opens the popover of the event with this ID exactly as clicking its pill
+   * would (plugin `onEventPopoverShow`/`onEventPopoverHide` hooks fire and
+   * focus moves into the popover), after scrolling the pill into view. The
+   * popover opens on the next animation frame. An event split across several
+   * pills opens from its first.
+   *
+   * Acts only on pills rendered when it is called: returns `false`, and does
+   * nothing, when no pill for the event is rendered (for example, the event
+   * is outside the shown range) or no plugin renders popover content for it.
+   * Call it from a parent's mount effect when events come from an array; with
+   * an async event source, call it once the events have rendered.
+   */
+  openEventPopover(eventID: string): boolean;
+}

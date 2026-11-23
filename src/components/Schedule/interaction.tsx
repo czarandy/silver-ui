@@ -4,12 +4,54 @@ import {createContext, use} from 'react';
 
 const schedulePopoverDismissPointerEvents = new WeakSet<Event>();
 
+/**
+ * A rendered event pill whose popover `ScheduleHandle.openEventPopover` can
+ * open.
+ */
+export interface ScheduleEventPopoverOpener {
+  element: HTMLElement;
+  open: () => void;
+}
+
 export interface ScheduleInteractionState {
   dispose: () => void;
   markPointerDown: (event: Event) => void;
   markPopoverHidden: (token: symbol) => void;
   markPopoverShown: (token: symbol) => void;
+  /**
+   * Opens the popover of the event's first rendered pill on the next frame.
+   * Returns `false` when no pill for the event has popover content.
+   */
+  openEventPopover(eventID: string): boolean;
+  /**
+   * Registers a rendered pill with popover content; returns the unregister.
+   */
+  registerEventPopover: (
+    eventID: string,
+    opener: ScheduleEventPopoverOpener,
+  ) => () => void;
   unregisterPopover: (token: symbol) => void;
+}
+
+/**
+ * The pill that comes first in the document, so an event split across several
+ * pills (month weeks, multi-day columns) opens from its earliest.
+ */
+function getFirstOpener(
+  openers: ReadonlySet<ScheduleEventPopoverOpener> | undefined,
+): ScheduleEventPopoverOpener | undefined {
+  let first: ScheduleEventPopoverOpener | undefined;
+  openers?.forEach(opener => {
+    if (
+      first == null ||
+      (opener.element.compareDocumentPosition(first.element) &
+        Node.DOCUMENT_POSITION_FOLLOWING) !==
+        0
+    ) {
+      first = opener;
+    }
+  });
+  return first;
 }
 
 /**
@@ -21,6 +63,10 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
   const openPopovers = new Set<symbol>();
   const recentlyHiddenPopovers = new Set<symbol>();
   const hiddenFrames = new Map<symbol, number>();
+  const eventPopoverOpeners = new Map<
+    string,
+    Set<ScheduleEventPopoverOpener>
+  >();
 
   const clearHiddenFrame = (token: symbol): void => {
     const frame = hiddenFrames.get(token);
@@ -44,6 +90,7 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     dispose: () => {
       hiddenFrames.forEach(frame => cancelAnimationFrame(frame));
       hiddenFrames.clear();
+      eventPopoverOpeners.clear();
       openPopovers.clear();
       recentlyHiddenPopovers.clear();
     },
@@ -63,6 +110,35 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       clearHiddenFrame(token);
       recentlyHiddenPopovers.delete(token);
       openPopovers.add(token);
+    },
+    openEventPopover: eventID => {
+      if (!eventPopoverOpeners.has(eventID)) {
+        return false;
+      }
+      // Deferred to the next frame so a caller's mount effect works under
+      // StrictMode: the effects StrictMode discards and re-runs (including
+      // this pill's hide notification on unmount) settle before it opens.
+      requestAnimationFrame(() => {
+        getFirstOpener(eventPopoverOpeners.get(eventID))?.open();
+      });
+      return true;
+    },
+    registerEventPopover: (eventID, opener) => {
+      let openers = eventPopoverOpeners.get(eventID);
+      if (openers == null) {
+        openers = new Set();
+        eventPopoverOpeners.set(eventID, openers);
+      }
+      openers.add(opener);
+      return () => {
+        openers.delete(opener);
+        if (
+          openers.size === 0 &&
+          eventPopoverOpeners.get(eventID) === openers
+        ) {
+          eventPopoverOpeners.delete(eventID);
+        }
+      };
     },
     markPointerDown: event => {
       if (openPopovers.size > 0 || recentlyHiddenPopovers.size > 0) {

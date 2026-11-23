@@ -1,7 +1,6 @@
 'use client';
 
 import {createContext, use} from 'react';
-import type {InitialEventPopoverRequest} from 'components/Schedule/shared';
 import type {
   CalendarEvent,
   ScheduleCategory,
@@ -19,7 +18,6 @@ export interface ScheduleContextValue {
   eventBorderStyle: ScheduleEventBorderStyle;
   events: ReadonlyArray<CalendarEvent>;
   highlightDate: ScheduleZonedInstant;
-  initialEventPopoverRequest: InitialEventPopoverRequest | null;
   isLoading: boolean;
   plugins: ReadonlyArray<SchedulePlugin>;
   range: ScheduleRange;

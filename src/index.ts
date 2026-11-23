@@ -321,6 +321,7 @@ export {
   type ScheduleEventResizeChange,
   type ScheduleEventResizePluginOptions,
   type ScheduleEventSource,
+  type ScheduleHandle,
   type ScheduleHeaderContent,
   type ScheduleHeight,
   type ScheduleInitialScrollTime,
