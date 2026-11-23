@@ -1391,6 +1391,47 @@ export const EventPopover: Story = {
   render: () => <EventPopoverStory />,
 };
 
+const initialEventPopoverEvents = [
+  ...eventPopoverEvents,
+  createEventFromISO({
+    category: 'Planning',
+    end: timedISO(0, 21),
+    id: 'evening-review',
+    start: timedISO(0, 20),
+    title: 'Evening review',
+  }),
+];
+
+/**
+ * `initialEventPopoverID` opens an event's popover as though it were clicked,
+ * e.g. for a deep link. The evening event sits below the initially scrolled
+ * hours, so the grid scrolls it into view before its popover opens.
+ */
+export const InitialEventPopover: Story = {
+  render: () => {
+    const eventPopoverPlugin = useScheduleEventPopoverPlugin({
+      renderContent: ({event, close}) => (
+        <ScheduleEventPopoverContent event={event} onClose={close} />
+      ),
+    });
+    return (
+      <div className={fillHeightStoryContainer}>
+        <Schedule
+          categories={categories}
+          events={initialEventPopoverEvents}
+          height="fill"
+          highlightDate={defaultHighlightDate}
+          initialEventPopoverID="evening-review"
+          plugins={[eventPopoverPlugin]}
+          timezoneID={localTimezoneID}
+          view={createScheduleWeeklyView({initialScrollTime: {hour: 8}})}
+          viewDate={defaultViewDate}
+        />
+      </div>
+    );
+  },
+};
+
 export const EventPopoverCustomContent: Story = {
   render: () => {
     const [viewDate, setViewDate] = useState<Instant>(() => defaultViewDate);

@@ -619,6 +619,32 @@ export function TimeGridView({
     };
   }, [days.length, normalizedDayMinWidth]);
 
+  // In fill mode the day headers stick over the top of the scrolling grid.
+  // Timed events keep this much scroll margin (see `ScheduleEvent.recipe.ts`)
+  // so scrolling one into view leaves it below the headers.
+  useIsomorphicLayoutEffect(() => {
+    const grid = gridRef.current;
+    const fixedRows = fixedRowsRef.current;
+    if (height !== 'fill' || grid == null || fixedRows == null) {
+      return;
+    }
+    const updateFixedRowsHeight = () => {
+      grid.style.setProperty(
+        '--schedule-fixed-rows-height',
+        `${fixedRows.offsetHeight}px`,
+      );
+    };
+    updateFixedRowsHeight();
+    if (typeof ResizeObserver === 'undefined') {
+      return;
+    }
+    observeResize(fixedRows, updateFixedRowsHeight);
+    return () => {
+      unobserveResize(fixedRows, updateFixedRowsHeight);
+      grid.style.removeProperty('--schedule-fixed-rows-height');
+    };
+  }, [height]);
+
   // Scrolls once, when the grid first has layout. Later renders (paging, the
   // current-time tick, new events) keep wherever the user has scrolled since.
   const hasAppliedInitialScrollRef = useRef(false);

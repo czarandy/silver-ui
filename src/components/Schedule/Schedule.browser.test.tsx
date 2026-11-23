@@ -2,9 +2,11 @@ import {render, screen, waitFor} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {Dialog} from 'components/Dialog/Dialog';
+import {createEventFromISO} from 'components/Schedule/CalendarEvent';
 import {Schedule} from 'components/Schedule/Schedule';
 import {createScheduleWeeklyView} from 'components/Schedule/WeeklyView';
 import {useScheduleEventCreatePlugin} from 'components/Schedule/plugins/EventCreatePlugin';
+import {useScheduleEventPopoverPlugin} from 'components/Schedule/plugins/EventPopoverPlugin';
 import type {
   Instant,
   ScheduleInitialScrollTime,
@@ -236,4 +238,93 @@ describe('Schedule initial scroll time (browser)', () => {
 
     expect(timeGrid().scrollTop).toBe(100);
   });
+});
+
+const initialPopoverEvents = [
+  createEventFromISO({
+    end: '2026-10-07T07:00:00Z',
+    id: 'early',
+    start: '2026-10-07T06:00:00Z',
+    title: 'Early',
+  }),
+  createEventFromISO({
+    end: '2026-10-07T13:00:00Z',
+    id: 'midday',
+    start: '2026-10-07T12:30:00Z',
+    title: 'Midday',
+  }),
+  createEventFromISO({
+    end: '2026-10-07T21:00:00Z',
+    id: 'late',
+    start: '2026-10-07T20:00:00Z',
+    title: 'Late',
+  }),
+  createEventFromISO({
+    end: '2026-10-08',
+    id: 'all-day',
+    start: '2026-10-08',
+    title: 'All day',
+  }),
+];
+
+function WeekWithInitialPopover({
+  initialEventPopoverID,
+}: {
+  initialEventPopoverID: string;
+}) {
+  const popoverPlugin = useScheduleEventPopoverPlugin();
+  return (
+    <div style={{height: 400}}>
+      <Schedule
+        events={initialPopoverEvents}
+        height="fill"
+        initialEventPopoverID={initialEventPopoverID}
+        plugins={[popoverPlugin]}
+        timezoneID="UTC"
+        view={createScheduleWeeklyView({
+          hourHeight: 48,
+          initialScrollTime: {hour: 12},
+        })}
+        viewDate={OCT_7}
+      />
+    </div>
+  );
+}
+
+async function openedPill(eventID: string): Promise<DOMRect> {
+  const pill = screen.getByTestId(`schedule-event-${eventID}`);
+  await waitFor(() => {
+    expect(pill).toHaveAttribute('aria-expanded', 'true');
+  });
+  return pill.getBoundingClientRect();
+}
+
+describe('Schedule initial event popover (browser)', () => {
+  it.each(['early', 'late'])(
+    'scrolls the %s event below the day headers and beside its popover',
+    async eventID => {
+      render(<WeekWithInitialPopover initialEventPopoverID={eventID} />);
+
+      const pill = await openedPill(eventID);
+      expect(pill.top).toBeGreaterThanOrEqual(visibleHoursTop());
+      expect(pill.bottom).toBeLessThanOrEqual(
+        timeGrid().getBoundingClientRect().bottom,
+      );
+      const popover = screen.getByTestId('schedule-event-popover');
+      await waitFor(() => {
+        expect(popover.getBoundingClientRect().height).toBeGreaterThan(0);
+      });
+      expect(overlaps(pill, popover.getBoundingClientRect())).toBe(false);
+    },
+  );
+
+  it.each(['midday', 'all-day'])(
+    'keeps the initial scroll time when the %s event is already visible',
+    async eventID => {
+      render(<WeekWithInitialPopover initialEventPopoverID={eventID} />);
+
+      await openedPill(eventID);
+      expect(timeGrid().scrollTop).toBe(12 * 48);
+    },
+  );
 });

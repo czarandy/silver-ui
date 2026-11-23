@@ -7,7 +7,13 @@ import {
   waitFor,
   within,
 } from '@testing-library/react';
-import {Component, useState, type ErrorInfo, type ReactNode} from 'react';
+import {
+  Component,
+  StrictMode,
+  useState,
+  type ErrorInfo,
+  type ReactNode,
+} from 'react';
 import {
   afterEach,
   beforeAll,
@@ -4544,6 +4550,294 @@ describe('Schedule', () => {
         const ids = onEventPopoverShow.mock.calls.map(call => call[1]);
         expect(ids).toHaveLength(2);
         expect(ids[0]).not.toBe(ids[1]);
+      });
+    });
+
+    describe('initialEventPopoverID', () => {
+      const onEventPopoverHide =
+        vi.fn<NonNullable<SchedulePlugin['onEventPopoverHide']>>();
+      const onEventPopoverShow =
+        vi.fn<NonNullable<SchedulePlugin['onEventPopoverShow']>>();
+      const lifecyclePlugin: SchedulePlugin = {
+        onEventPopoverHide,
+        onEventPopoverShow,
+      };
+      const otherEvent = createEventFromISO({
+        category: 'Sync',
+        end: '2026-05-14T16:30:00.000Z',
+        id: 'other',
+        start: '2026-05-14T16:00:00.000Z',
+        title: 'Other sync',
+      });
+      const initialEvents = [...popoverEvents, otherEvent];
+      const monthView = createScheduleMonthlyView();
+      const may13 = instantUTC(2026, 4, 13);
+
+      function ScheduleWithInitialPopover({
+        eventsList = initialEvents,
+        hasPopoverPlugin = true,
+        initialEventPopoverID,
+        view = monthView,
+        viewDate = may13,
+      }: {
+        eventsList?: CalendarEvent[];
+        hasPopoverPlugin?: boolean;
+        initialEventPopoverID?: string;
+        view?: ScheduleView;
+        viewDate?: Instant;
+      }): React.JSX.Element {
+        const popoverPlugin = useScheduleEventPopoverPlugin();
+        return (
+          <Schedule
+            categories={categories}
+            events={eventsList}
+            highlightDate={instantUTC(2026, 4, 13)}
+            initialEventPopoverID={initialEventPopoverID}
+            plugins={
+              hasPopoverPlugin
+                ? [popoverPlugin, lifecyclePlugin]
+                : [lifecyclePlugin]
+            }
+            timezoneID="UTC"
+            view={view}
+            viewDate={viewDate}
+          />
+        );
+      }
+
+      // The popover opens on the frame after its pill mounts.
+      async function waitForFrame(): Promise<void> {
+        await act(
+          async () =>
+            new Promise<void>(resolve => {
+              requestAnimationFrame(() => resolve());
+            }),
+        );
+      }
+
+      beforeEach(() => {
+        onEventPopoverHide.mockReset();
+        onEventPopoverShow.mockReset();
+      });
+
+      it('opens the event popover as though its pill were clicked', async () => {
+        const scrollIntoView = vi.spyOn(
+          HTMLElement.prototype,
+          'scrollIntoView',
+        );
+        render(<ScheduleWithInitialPopover initialEventPopoverID="other" />);
+
+        const pill = screen.getByTestId('schedule-event-other');
+        await waitFor(() => {
+          expect(pill).toHaveAttribute('aria-expanded', 'true');
+        });
+        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+          'aria-expanded',
+          'false',
+        );
+        expect(onEventPopoverShow).toHaveBeenCalledExactlyOnceWith(
+          otherEvent,
+          expect.any(String),
+        );
+        expect(scrollIntoView).toHaveBeenCalledExactlyOnceWith({
+          block: 'nearest',
+          inline: 'nearest',
+        });
+        expect(scrollIntoView.mock.contexts[0]).toBe(pill);
+        scrollIntoView.mockRestore();
+      });
+
+      it('opens in the time grid and list views', async () => {
+        const {unmount} = render(
+          <ScheduleWithInitialPopover
+            initialEventPopoverID="visible"
+            view={createScheduleWeeklyView()}
+          />,
+        );
+        await waitFor(() => {
+          expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+        });
+        unmount();
+
+        render(
+          <ScheduleWithInitialPopover
+            initialEventPopoverID="visible"
+            view={createScheduleListView({days: 7})}
+          />,
+        );
+        await waitFor(() => {
+          expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+        });
+      });
+
+      it('keeps the popover closed across re-renders once dismissed', async () => {
+        const {rerender} = render(
+          <ScheduleWithInitialPopover initialEventPopoverID="visible" />,
+        );
+        const pill = screen.getByTestId('schedule-event-visible');
+        await waitFor(() => {
+          expect(pill).toHaveAttribute('aria-expanded', 'true');
+        });
+
+        fireEvent.keyDown(document, {key: 'Escape'});
+        expect(pill).toHaveAttribute('aria-expanded', 'false');
+        expect(onEventPopoverHide).toHaveBeenCalledOnce();
+
+        rerender(
+          <ScheduleWithInitialPopover
+            eventsList={[...initialEvents]}
+            initialEventPopoverID="visible"
+          />,
+        );
+        await waitForFrame();
+        expect(pill).toHaveAttribute('aria-expanded', 'false');
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+      });
+
+      it('opens the popover for each new value', async () => {
+        const {rerender} = render(
+          <ScheduleWithInitialPopover initialEventPopoverID="visible" />,
+        );
+        await waitFor(() => {
+          expect(onEventPopoverShow).toHaveBeenCalledOnce();
+        });
+        // jsdom does not close one auto popover when another opens.
+        fireEvent.keyDown(document, {key: 'Escape'});
+
+        rerender(<ScheduleWithInitialPopover initialEventPopoverID="other" />);
+        await waitFor(() => {
+          expect(screen.getByTestId('schedule-event-other')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+        });
+
+        // Clearing the value and setting it again opens it again.
+        fireEvent.keyDown(document, {key: 'Escape'});
+        rerender(<ScheduleWithInitialPopover />);
+        await waitForFrame();
+        rerender(<ScheduleWithInitialPopover initialEventPopoverID="other" />);
+        await waitFor(() => {
+          expect(onEventPopoverShow).toHaveBeenCalledTimes(3);
+        });
+        expect(
+          onEventPopoverShow.mock.calls.map(([event]) => event.id),
+        ).toEqual(['visible', 'other', 'other']);
+      });
+
+      it('opens when the event first renders', async () => {
+        const {rerender} = render(
+          <ScheduleWithInitialPopover
+            eventsList={popoverEvents}
+            initialEventPopoverID="other"
+          />,
+        );
+        await waitForFrame();
+        expect(onEventPopoverShow).not.toHaveBeenCalled();
+
+        rerender(<ScheduleWithInitialPopover initialEventPopoverID="other" />);
+        await waitFor(() => {
+          expect(screen.getByTestId('schedule-event-other')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+        });
+      });
+
+      it('opens when the user pages to the event', async () => {
+        const laterEvent = createEventFromISO({
+          category: 'Sync',
+          end: '2026-06-17T16:30:00.000Z',
+          id: 'later',
+          start: '2026-06-17T16:00:00.000Z',
+          title: 'Later sync',
+        });
+        const {rerender} = render(
+          <ScheduleWithInitialPopover
+            eventsList={[...initialEvents, laterEvent]}
+            initialEventPopoverID="later"
+          />,
+        );
+        await waitForFrame();
+        expect(onEventPopoverShow).not.toHaveBeenCalled();
+
+        rerender(
+          <ScheduleWithInitialPopover
+            eventsList={[...initialEvents, laterEvent]}
+            initialEventPopoverID="later"
+            viewDate={instantUTC(2026, 5, 17)}
+          />,
+        );
+        await waitFor(() => {
+          expect(screen.getByTestId('schedule-event-later')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+        });
+      });
+
+      it('opens once under StrictMode', async () => {
+        render(
+          <StrictMode>
+            <ScheduleWithInitialPopover initialEventPopoverID="visible" />
+          </StrictMode>,
+        );
+
+        await waitFor(() => {
+          expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+        });
+        await waitForFrame();
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+        expect(onEventPopoverHide).not.toHaveBeenCalled();
+      });
+
+      it('opens only the first segment of a split event', async () => {
+        const spanningEvent = createEventFromISO({
+          category: 'Sync',
+          end: '2026-05-19T16:00:00.000Z',
+          id: 'spanning',
+          start: '2026-05-15T16:00:00.000Z',
+          title: 'Spanning',
+        });
+        render(
+          <ScheduleWithInitialPopover
+            eventsList={[spanningEvent]}
+            initialEventPopoverID="spanning"
+          />,
+        );
+        const segments = screen.getAllByTestId('schedule-event-spanning');
+        expect(segments).toHaveLength(2);
+
+        await waitFor(() => {
+          expect(segments[0]).toHaveAttribute('aria-expanded', 'true');
+        });
+        await waitForFrame();
+        expect(segments[1]).toHaveAttribute('aria-expanded', 'false');
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+      });
+
+      it('does nothing without popover content for the event', async () => {
+        render(
+          <ScheduleWithInitialPopover
+            hasPopoverPlugin={false}
+            initialEventPopoverID="visible"
+          />,
+        );
+        await waitForFrame();
+
+        expect(screen.getByTestId('schedule-event-visible').tagName).toBe(
+          'SPAN',
+        );
+        expect(onEventPopoverShow).not.toHaveBeenCalled();
       });
     });
 

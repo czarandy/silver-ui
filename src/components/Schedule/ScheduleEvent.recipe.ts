@@ -103,6 +103,9 @@ export const scheduleEventRecipe = sva({
       block: {
         event: {
           position: 'absolute',
+          // Set by a fill-height time grid to the height of its sticky day
+          // headers, so an event scrolled into view is not hidden under them.
+          scrollMarginBlockStart: 'var(--schedule-fixed-rows-height, 0px)',
           display: 'flex',
           flexDirection: 'column',
           gap: 0,
