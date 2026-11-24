@@ -11,6 +11,7 @@ import {
   Activity,
   Component,
   createRef,
+  startTransition,
   StrictMode,
   useEffect,
   useRef,
@@ -3806,29 +3807,54 @@ describe('Schedule', () => {
     });
 
     it.each([
-      {isOpened: false, scrollTop: 12 * 48},
-      {isOpened: true, scrollTop: 0},
+      {
+        isClosedAgain: false,
+        isOpened: false,
+        scrolledPills: [],
+        scrollTop: 576,
+      },
+      {
+        isClosedAgain: false,
+        isOpened: true,
+        scrolledPills: ['schedule-event-early'],
+        scrollTop: 0,
+      },
+      {isClosedAgain: true, isOpened: true, scrolledPills: [], scrollTop: 576},
     ])(
-      'skips a deferred initial scroll once the handle opens an event: $isOpened',
-      ({isOpened, scrollTop}) => {
+      'once the grid has layout, scrolls to a pill the handle opened without it (opened: $isOpened, closed again: $isClosedAgain)',
+      async ({isClosedAgain, isOpened, scrolledPills, scrollTop}) => {
         vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
+        const scrollIntoView = vi.spyOn(
+          HTMLElement.prototype,
+          'scrollIntoView',
+        );
         // No layout at mount, as in a closed dialog.
         gridClientHeight = 0;
         const handleRef = createRef<ScheduleHandle>();
         render(<FillWeek handleRef={handleRef} />);
-        expect(grid().scrollTop).toBe(0);
-
-        if (isOpened) {
-          act(() => {
+        await act(async () => {
+          if (isOpened) {
             void handleRef.current?.openEventPopover('early');
-          });
+          }
+          await Promise.resolve();
+        });
+        if (isClosedAgain) {
+          fireEvent.keyDown(document, {key: 'Escape'});
         }
+        expect(grid().scrollTop).toBe(0);
+        scrollIntoView.mockClear();
+
         gridClientHeight = 400;
         act(() => {
           resizeObserver.resize(grid());
         });
 
         expect(grid().scrollTop).toBe(scrollTop);
+        expect(
+          scrollIntoView.mock.contexts.map(
+            element => (element as HTMLElement).dataset.testid,
+          ),
+        ).toEqual(scrolledPills);
       },
     );
   });
@@ -4672,31 +4698,65 @@ describe('Schedule', () => {
         );
       });
 
-      it('keeps show and hide paired when <Activity> hides an open popover', async () => {
-        const {rerender} = render(
-          <Activity mode="visible">
-            <ScheduleWithLifecycle />
-          </Activity>,
-        );
-        fireEvent.click(screen.getByTestId('schedule-event-visible'));
+      describe('under <Activity>', () => {
+        // jsdom has no popover top layer; answer `:popover-open` from here.
+        let isLayerOpen = true;
+        beforeEach(() => {
+          isLayerOpen = true;
+          const matches = vi
+            .spyOn(HTMLElement.prototype, 'matches')
+            .mockImplementation(function (this: HTMLElement, selector) {
+              return selector === ':popover-open'
+                ? isLayerOpen
+                : Element.prototype.matches.call(this, selector);
+            });
+          return () => {
+            matches.mockRestore();
+          };
+        });
 
-        rerender(
-          <Activity mode="hidden">
-            <ScheduleWithLifecycle />
-          </Activity>,
-        );
-        await flushPromises();
-        expect(onEventPopoverHide).toHaveBeenCalledOnce();
+        function renderInActivity(mode: 'hidden' | 'visible') {
+          return (
+            <Activity mode={mode}>
+              <ScheduleWithLifecycle />
+            </Activity>
+          );
+        }
 
-        rerender(
-          <Activity mode="visible">
-            <ScheduleWithLifecycle />
-          </Activity>,
-        );
-        expect(onEventPopoverShow).toHaveBeenCalledTimes(2);
-        expect(onEventPopoverShow.mock.calls[1]?.[1]).toBe(
-          onEventPopoverShow.mock.calls[0]?.[1],
-        );
+        it('keeps show and hide paired when it hides an open popover', async () => {
+          const {rerender} = render(renderInActivity('visible'));
+          fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+          rerender(renderInActivity('hidden'));
+          await flushPromises();
+          expect(onEventPopoverHide).toHaveBeenCalledOnce();
+
+          rerender(renderInActivity('visible'));
+          expect(onEventPopoverShow).toHaveBeenCalledTimes(2);
+          expect(onEventPopoverShow.mock.calls[1]?.[1]).toBe(
+            onEventPopoverShow.mock.calls[0]?.[1],
+          );
+          expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+        });
+
+        it('syncs the pill closed when the browser closed it while hidden', async () => {
+          const {rerender} = render(renderInActivity('visible'));
+          const pill = screen.getByTestId('schedule-event-visible');
+          fireEvent.click(pill);
+
+          rerender(renderInActivity('hidden'));
+          await flushPromises();
+          // Another auto popover closed it while its toggle listener was gone.
+          isLayerOpen = false;
+          rerender(renderInActivity('visible'));
+
+          expect(pill).toHaveAttribute('aria-expanded', 'false');
+          expect(onEventPopoverShow).toHaveBeenCalledOnce();
+          expect(onEventPopoverHide).toHaveBeenCalledOnce();
+        });
       });
 
       it('does not report a close when a closed pill unmounts', () => {
@@ -4818,6 +4878,46 @@ describe('Schedule', () => {
         scrollIntoView.mockRestore();
       });
 
+      // Calls the handle and lets the render it waits for run, without
+      // waiting for the result.
+      async function startOpening(
+        handleRef: RefObject<ScheduleHandle | null>,
+        eventID: string,
+      ): Promise<{opened: Promise<boolean> | undefined}> {
+        let opened: Promise<boolean> | undefined;
+        await act(async () => {
+          opened = handleRef.current?.openEventPopover(eventID);
+          await Promise.resolve();
+        });
+        return {opened};
+      }
+
+      async function openWithHandle(
+        handleRef: RefObject<ScheduleHandle | null>,
+        eventID: string,
+      ): Promise<boolean | undefined> {
+        return (await startOpening(handleRef, eventID)).opened;
+      }
+
+      function deferredEvents(): {
+        load: () => Promise<CalendarEvent[]>;
+        resolve: (events: CalendarEvent[]) => Promise<void>;
+      } {
+        let resolveEvents: (events: CalendarEvent[]) => void = () => {};
+        const eventsPromise = new Promise<CalendarEvent[]>(resolve => {
+          resolveEvents = resolve;
+        });
+        return {
+          load: async () => eventsPromise,
+          resolve: async events => {
+            await act(async () => {
+              resolveEvents(events);
+              await eventsPromise;
+            });
+          },
+        };
+      }
+
       it('opens from a mount effect as though the pill were clicked', async () => {
         const onOpenResult = vi.fn<(isOpened: boolean) => void>();
         render(
@@ -4827,6 +4927,9 @@ describe('Schedule', () => {
           />,
         );
 
+        await waitFor(() => {
+          expect(onOpenResult).toHaveBeenCalledExactlyOnceWith(true);
+        });
         const pill = screen.getByTestId('schedule-event-other');
         expect(pill).toHaveAttribute('aria-expanded', 'true');
         expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
@@ -4843,9 +4946,6 @@ describe('Schedule', () => {
           inline: 'nearest',
         });
         expect(scrollIntoView.mock.contexts[0]).toBe(pill);
-        await waitFor(() => {
-          expect(onOpenResult).toHaveBeenCalledExactlyOnceWith(true);
-        });
 
         fireEvent.keyDown(document, {key: 'Escape'});
         expect(pill).toHaveAttribute('aria-expanded', 'false');
@@ -4853,52 +4953,77 @@ describe('Schedule', () => {
         expect(pill).toHaveFocus();
       });
 
-      it('opens once from a mount effect under StrictMode', async () => {
-        const onOpenResult = vi.fn<(isOpened: boolean) => void>();
-        render(
-          <StrictMode>
-            <ScheduleWithHandle
-              onOpenResult={onOpenResult}
-              openOnMount="visible"
-            />
-          </StrictMode>,
-        );
+      it.each([
+        {eventsList: handleEvents, source: 'an array'},
+        {
+          eventsList: async () => Promise.resolve(handleEvents),
+          source: 'a loader',
+        },
+      ])(
+        'opens once from a mount effect under StrictMode with $source',
+        async ({eventsList}) => {
+          const onOpenResult = vi.fn<(isOpened: boolean) => void>();
+          render(
+            <StrictMode>
+              <ScheduleWithHandle
+                eventsList={eventsList}
+                onOpenResult={onOpenResult}
+                openOnMount="visible"
+              />
+            </StrictMode>,
+          );
 
+          await waitFor(() => {
+            expect(onOpenResult.mock.calls).toEqual([[true], [true]]);
+          });
+          expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+            'aria-expanded',
+            'true',
+          );
+          expect(onEventPopoverShow).toHaveBeenCalledOnce();
+          expect(onEventPopoverHide).not.toHaveBeenCalled();
+          expect(scrollIntoView).toHaveBeenCalledOnce();
+        },
+      );
+
+      it.each([
+        {name: 'time grid', view: createScheduleWeeklyView()},
+        {name: 'list', view: createScheduleListView({days: 7})},
+      ])('opens in the $name view', async ({view}) => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(<ScheduleWithHandle handleRef={handleRef} view={view} />);
+
+        await expect(openWithHandle(handleRef, 'visible')).resolves.toBe(true);
         expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
           'aria-expanded',
           'true',
         );
-        await waitFor(() => {
-          expect(onOpenResult.mock.calls).toEqual([[true], [true]]);
-        });
-        expect(onEventPopoverShow).toHaveBeenCalledOnce();
-        expect(onEventPopoverHide).not.toHaveBeenCalled();
-        expect(scrollIntoView).toHaveBeenCalledOnce();
       });
 
-      it('opens in the time grid and list views', () => {
-        const {unmount} = render(
-          <ScheduleWithHandle
-            openOnMount="visible"
-            view={createScheduleWeeklyView()}
-          />,
-        );
-        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
-          'aria-expanded',
-          'true',
-        );
-        unmount();
+      it('resolves true without scrolling again when already open', async () => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(<ScheduleWithHandle handleRef={handleRef} />);
+        await expect(openWithHandle(handleRef, 'visible')).resolves.toBe(true);
 
-        render(
-          <ScheduleWithHandle
-            openOnMount="visible"
-            view={createScheduleListView({days: 7})}
-          />,
-        );
+        await expect(openWithHandle(handleRef, 'visible')).resolves.toBe(true);
         expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
           'aria-expanded',
           'true',
         );
+        expect(scrollIntoView).toHaveBeenCalledOnce();
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+      });
+
+      it('resolves false while the popover is being dismissed', async () => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(<ScheduleWithHandle handleRef={handleRef} />);
+        const pill = screen.getByTestId('schedule-event-visible');
+        fireEvent.click(pill);
+        fireEvent.keyDown(document, {key: 'Escape'});
+
+        await expect(openWithHandle(handleRef, 'visible')).resolves.toBe(false);
+        expect(pill).toHaveAttribute('aria-expanded', 'false');
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
       });
 
       it('resolves false, and never opens later, for an event not rendered', async () => {
@@ -4928,54 +5053,125 @@ describe('Schedule', () => {
         expect(onEventPopoverShow).not.toHaveBeenCalled();
       });
 
-      it('opens an event in the range set in the same handler', async () => {
-        function NavigateAndOpen(): React.JSX.Element {
+      describe('with navigation in the same handler', () => {
+        // In the month grid of both May (to June 6) and June.
+        const june3Event = createEventFromISO({
+          category: 'Sync',
+          end: '2026-06-03T16:30:00.000Z',
+          id: 'june3',
+          start: '2026-06-03T16:00:00.000Z',
+          title: 'June 3 sync',
+        });
+
+        function NavigateAndOpen({
+          eventID,
+          isTransition,
+          onOpenResult,
+        }: {
+          eventID: string;
+          isTransition: boolean;
+          onOpenResult: (isOpened: boolean) => void;
+        }): React.JSX.Element {
           const handleRef = useRef<ScheduleHandle>(null);
           const [viewDate, setViewDate] = useState(may13);
           return (
             <>
               <button
                 onClick={() => {
-                  setViewDate(june17);
-                  void handleRef.current?.openEventPopover('later');
+                  if (isTransition) {
+                    startTransition(() => {
+                      setViewDate(june17);
+                    });
+                  } else {
+                    setViewDate(june17);
+                  }
+                  void handleRef.current
+                    ?.openEventPopover(eventID)
+                    .then(onOpenResult);
                 }}
                 type="button">
                 Go
               </button>
-              <ScheduleWithHandle handleRef={handleRef} viewDate={viewDate} />
+              <ScheduleWithHandle
+                eventsList={[...handleEvents, june3Event]}
+                handleRef={handleRef}
+                viewDate={viewDate}
+              />
             </>
           );
         }
-        render(<NavigateAndOpen />);
 
-        fireEvent.click(screen.getByRole('button', {name: 'Go'}));
+        it.each([
+          {eventID: 'later', isTransition: false},
+          {eventID: 'later', isTransition: true},
+          // Its pill in the old range is replaced, so that one must not open.
+          {eventID: 'june3', isTransition: false},
+          {eventID: 'june3', isTransition: true},
+        ])(
+          'opens $eventID in the new range (transition: $isTransition)',
+          async ({eventID, isTransition}) => {
+            const onOpenResult = vi.fn<(isOpened: boolean) => void>();
+            render(
+              <NavigateAndOpen
+                eventID={eventID}
+                isTransition={isTransition}
+                onOpenResult={onOpenResult}
+              />,
+            );
 
-        await waitFor(() => {
-          expect(screen.getByTestId('schedule-event-later')).toHaveAttribute(
-            'aria-expanded',
-            'true',
+            fireEvent.click(screen.getByRole('button', {name: 'Go'}));
+
+            await waitFor(() => {
+              expect(onOpenResult).toHaveBeenCalledExactlyOnceWith(true);
+            });
+            const pill = screen.getByTestId(`schedule-event-${eventID}`);
+            expect(pill).toHaveAttribute('aria-expanded', 'true');
+            expect(pill).toHaveFocus();
+            expect(onEventPopoverShow).toHaveBeenCalledOnce();
+            expect(onEventPopoverHide).not.toHaveBeenCalled();
+          },
+        );
+
+        it('reports the hide of a popover the navigation removes first', async () => {
+          const onOpenResult = vi.fn<(isOpened: boolean) => void>();
+          render(
+            <NavigateAndOpen
+              eventID="later"
+              isTransition={false}
+              onOpenResult={onOpenResult}
+            />,
+          );
+          fireEvent.click(screen.getByTestId('schedule-event-visible'));
+
+          fireEvent.click(screen.getByRole('button', {name: 'Go'}));
+
+          await waitFor(() => {
+            expect(onOpenResult).toHaveBeenCalledExactlyOnceWith(true);
+          });
+          expect(
+            onEventPopoverShow.mock.calls.map(([event]) => event.id),
+          ).toEqual(['visible', 'later']);
+          expect(onEventPopoverHide).toHaveBeenCalledExactlyOnceWith(
+            popoverEvents[0],
+            onEventPopoverShow.mock.calls[0]?.[1],
+          );
+          expect(onEventPopoverHide.mock.invocationCallOrder[0]).toBeLessThan(
+            onEventPopoverShow.mock.invocationCallOrder[1] ?? 0,
           );
         });
       });
 
       it('waits for async events to load', async () => {
         const handleRef = createRef<ScheduleHandle>();
-        let resolveEvents: (events: CalendarEvent[]) => void = () => {};
-        const eventsPromise = new Promise<CalendarEvent[]>(resolve => {
-          resolveEvents = resolve;
-        });
-        const loadEvents = vi.fn(async () => eventsPromise);
+        const events = deferredEvents();
+        const loadEvents = vi.fn(events.load);
         render(
           <ScheduleWithHandle eventsList={loadEvents} handleRef={handleRef} />,
         );
 
-        const opened = handleRef.current?.openEventPopover('other');
-        await flushPromises();
+        const {opened} = await startOpening(handleRef, 'other');
         expect(loadEvents).toHaveBeenCalledOnce();
-        await act(async () => {
-          resolveEvents(handleEvents);
-          await eventsPromise;
-        });
+        await events.resolve(handleEvents);
 
         await expect(opened).resolves.toBe(true);
         expect(screen.getByTestId('schedule-event-other')).toHaveAttribute(
@@ -4986,25 +5182,42 @@ describe('Schedule', () => {
 
       it('resolves false when async events load without the event', async () => {
         const handleRef = createRef<ScheduleHandle>();
-        let resolveEvents: (events: CalendarEvent[]) => void = () => {};
-        const eventsPromise = new Promise<CalendarEvent[]>(resolve => {
-          resolveEvents = resolve;
-        });
+        const events = deferredEvents();
         render(
-          <ScheduleWithHandle
-            eventsList={async () => eventsPromise}
-            handleRef={handleRef}
-          />,
+          <ScheduleWithHandle eventsList={events.load} handleRef={handleRef} />,
         );
 
-        const opened = handleRef.current?.openEventPopover('other');
-        await flushPromises();
-        await act(async () => {
-          resolveEvents(popoverEvents);
-          await eventsPromise;
-        });
+        const {opened} = await startOpening(handleRef, 'other');
+        await events.resolve(popoverEvents);
 
         await expect(opened).resolves.toBe(false);
+      });
+
+      it('resolves false, without taking focus, once focus moved on while waiting', async () => {
+        const handleRef = createRef<ScheduleHandle>();
+        const events = deferredEvents();
+        render(
+          <>
+            <input aria-label="Search" />
+            <ScheduleWithHandle
+              eventsList={events.load}
+              handleRef={handleRef}
+            />
+          </>,
+        );
+
+        const {opened} = await startOpening(handleRef, 'other');
+        const search = screen.getByRole('textbox', {name: 'Search'});
+        search.focus();
+        await events.resolve(handleEvents);
+
+        await expect(opened).resolves.toBe(false);
+        expect(search).toHaveFocus();
+        expect(screen.getByTestId('schedule-event-other')).toHaveAttribute(
+          'aria-expanded',
+          'false',
+        );
+        expect(scrollIntoView).not.toHaveBeenCalled();
       });
 
       it('resolves false when the range changes while waiting', async () => {
@@ -5015,8 +5228,7 @@ describe('Schedule', () => {
           <ScheduleWithHandle eventsList={loadEvents} handleRef={handleRef} />,
         );
 
-        const opened = handleRef.current?.openEventPopover('other');
-        await flushPromises();
+        const {opened} = await startOpening(handleRef, 'other');
         rerender(
           <ScheduleWithHandle
             eventsList={loadEvents}
@@ -5028,7 +5240,40 @@ describe('Schedule', () => {
         await expect(opened).resolves.toBe(false);
       });
 
-      it('resolves a waiting call false when replaced or unmounted', async () => {
+      it('resolves a waiting call false when a call for another event replaces it', async () => {
+        const handleRef = createRef<ScheduleHandle>();
+        const events = deferredEvents();
+        render(
+          <ScheduleWithHandle eventsList={events.load} handleRef={handleRef} />,
+        );
+
+        const {opened: first} = await startOpening(handleRef, 'visible');
+        const {opened: second} = await startOpening(handleRef, 'other');
+        await expect(first).resolves.toBe(false);
+        await events.resolve(handleEvents);
+
+        await expect(second).resolves.toBe(true);
+      });
+
+      it('gives calls for the same event its one result', async () => {
+        const handleRef = createRef<ScheduleHandle>();
+        const events = deferredEvents();
+        render(
+          <ScheduleWithHandle eventsList={events.load} handleRef={handleRef} />,
+        );
+
+        const {opened: first} = await startOpening(handleRef, 'other');
+        const {opened: second} = await startOpening(handleRef, 'other');
+        await events.resolve(handleEvents);
+
+        await expect(Promise.all([first, second])).resolves.toEqual([
+          true,
+          true,
+        ]);
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+      });
+
+      it('resolves false when unmounted while waiting, or called after', async () => {
         const handleRef = createRef<ScheduleHandle>();
         const pendingEvents = new Promise<CalendarEvent[]>(() => {});
         const {unmount} = render(
@@ -5037,14 +5282,41 @@ describe('Schedule', () => {
             handleRef={handleRef}
           />,
         );
+        const handle = handleRef.current;
 
-        const first = handleRef.current?.openEventPopover('visible');
-        const second = handleRef.current?.openEventPopover('other');
-        await expect(first).resolves.toBe(false);
-
-        // Unmounting the schedule resolves the waiting call.
+        const {opened: waiting} = await startOpening(handleRef, 'other');
         unmount();
-        await expect(second).resolves.toBe(false);
+        await expect(waiting).resolves.toBe(false);
+
+        await expect(handle?.openEventPopover('other')).resolves.toBe(false);
+      });
+
+      it('resolves false while hidden by <Activity>, and never opens later', async () => {
+        const handleRef = createRef<ScheduleHandle>();
+        function ScheduleInActivity({
+          mode,
+        }: {
+          mode: 'hidden' | 'visible';
+        }): React.JSX.Element {
+          return (
+            <Activity mode={mode}>
+              <ScheduleWithHandle handleRef={handleRef} />
+            </Activity>
+          );
+        }
+        const {rerender} = render(<ScheduleInActivity mode="visible" />);
+        const handle = handleRef.current;
+
+        rerender(<ScheduleInActivity mode="hidden" />);
+        await expect(handle?.openEventPopover('visible')).resolves.toBe(false);
+
+        rerender(<ScheduleInActivity mode="visible" />);
+        await flushPromises();
+        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+          'aria-expanded',
+          'false',
+        );
+        expect(onEventPopoverShow).not.toHaveBeenCalled();
       });
 
       it('resolves false without popover content for the event', async () => {
@@ -5066,7 +5338,8 @@ describe('Schedule', () => {
         expect(onEventPopoverShow).not.toHaveBeenCalled();
       });
 
-      it('opens the first week of a multi-week month event', () => {
+      it('opens the first week of a multi-week month event', async () => {
+        const handleRef = createRef<ScheduleHandle>();
         const spanningEvent = createEventFromISO({
           category: 'Sync',
           end: '2026-05-19T16:00:00.000Z',
@@ -5077,10 +5350,11 @@ describe('Schedule', () => {
         render(
           <ScheduleWithHandle
             eventsList={[spanningEvent]}
-            openOnMount="spanning"
+            handleRef={handleRef}
           />,
         );
 
+        await expect(openWithHandle(handleRef, 'spanning')).resolves.toBe(true);
         const segments = screen.getAllByTestId('schedule-event-spanning');
         expect(segments).toHaveLength(2);
         expect(segments[0]).toHaveAttribute('aria-expanded', 'true');
@@ -5088,7 +5362,8 @@ describe('Schedule', () => {
         expect(onEventPopoverShow).toHaveBeenCalledOnce();
       });
 
-      it('opens the starting piece of a timed event split at midnight', () => {
+      it('opens the starting piece of a timed event split at midnight', async () => {
+        const handleRef = createRef<ScheduleHandle>();
         const overnightEvent = createEventFromISO({
           category: 'Sync',
           end: '2026-05-13T02:00:00.000Z',
@@ -5099,11 +5374,14 @@ describe('Schedule', () => {
         render(
           <ScheduleWithHandle
             eventsList={[overnightEvent]}
-            openOnMount="overnight"
+            handleRef={handleRef}
             view={createScheduleWeeklyView()}
           />,
         );
 
+        await expect(openWithHandle(handleRef, 'overnight')).resolves.toBe(
+          true,
+        );
         const start = within(
           screen.getByTestId('schedule-time-grid-cell-2026-05-12-22'),
         ).getByTestId('schedule-event-overnight');
@@ -5112,6 +5390,42 @@ describe('Schedule', () => {
         ).getByTestId('schedule-event-overnight');
         expect(start).toHaveAttribute('aria-expanded', 'true');
         expect(end).toHaveAttribute('aria-expanded', 'false');
+      });
+
+      it('keeps list pills registered when an earlier empty day gains an event', () => {
+        const event = createEventFromISO({
+          category: 'Sync',
+          end: '2026-05-16T16:30:00.000Z',
+          id: 'saturday',
+          start: '2026-05-16T16:00:00.000Z',
+          title: 'Saturday sync',
+        });
+        const earlierEvent = createEventFromISO({
+          category: 'Sync',
+          end: '2026-05-15T16:30:00.000Z',
+          id: 'friday',
+          start: '2026-05-15T16:00:00.000Z',
+          title: 'Friday sync',
+        });
+        const listView = createScheduleListView({days: 7});
+        const {rerender} = render(
+          <ScheduleWithHandle eventsList={[event]} view={listView} />,
+        );
+        // Re-registering would remove and re-add the pill's anchor name.
+        const observer = new MutationObserver(() => {});
+        observer.observe(screen.getByTestId('schedule-event-saturday'), {
+          attributeFilter: ['style'],
+        });
+
+        rerender(
+          <ScheduleWithHandle
+            eventsList={[earlierEvent, event]}
+            view={listView}
+          />,
+        );
+
+        expect(observer.takeRecords()).toEqual([]);
+        observer.disconnect();
       });
 
       describe('with "+N more" all-day overflow', () => {
@@ -5135,7 +5449,7 @@ describe('Schedule', () => {
           allDayEventLimit: 1,
         });
 
-        it('never opens a pill inside a closed overflow popover', () => {
+        it('never opens a pill inside a closed overflow popover', async () => {
           const handleRef = createRef<ScheduleHandle>();
           const hiddenEvent = createEventFromISO({
             category: 'Sync',
@@ -5162,10 +5476,9 @@ describe('Schedule', () => {
           ).toContainElement(screen.getByTestId('schedule-event-hidden'));
           fireEvent.click(seeMore);
 
-          act(() => {
-            void handleRef.current?.openEventPopover('hidden');
-          });
-
+          await expect(openWithHandle(handleRef, 'hidden')).resolves.toBe(
+            false,
+          );
           expect(screen.getByTestId('schedule-event-hidden')).toHaveAttribute(
             'aria-expanded',
             'false',
@@ -5173,7 +5486,7 @@ describe('Schedule', () => {
           expect(onEventPopoverShow).not.toHaveBeenCalled();
         });
 
-        it('opens the shown piece of an event hidden on its first day', () => {
+        it('opens the shown piece of an event hidden on its first day', async () => {
           const handleRef = createRef<ScheduleHandle>();
           render(
             <ScheduleWithHandle
@@ -5192,9 +5505,9 @@ describe('Schedule', () => {
             'schedule-event-monday-tuesday',
           );
 
-          act(() => {
-            void handleRef.current?.openEventPopover('monday-tuesday');
-          });
+          await expect(
+            openWithHandle(handleRef, 'monday-tuesday'),
+          ).resolves.toBe(true);
 
           expect(
             screen.getByTestId('schedule-all-day-see-more-2026-05-11'),

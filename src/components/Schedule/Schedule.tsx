@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  startTransition,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -42,6 +43,7 @@ import type {
   ScheduleZonedInstant,
 } from 'components/Schedule/types';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
+import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
 
 const EMPTY_CATEGORIES: ReadonlyArray<ScheduleCategory> = [];
@@ -202,19 +204,26 @@ function useRange<Options extends ScheduleViewOptions>(
 interface PendingEventPopover {
   eventID: string;
   /**
+   * `document.activeElement` when the call was made.
+   */
+  focusedElement: Element | null;
+  /**
    * The range of the first commit after the call; null until then.
    */
   rangeKey: string | null;
-  resolve: (isOpened: boolean) => void;
+  /**
+   * Calls waiting for this event, which all get its result.
+   */
+  resolvers: ((isOpened: boolean) => void)[];
 }
 
 /**
- * Implements `ScheduleHandle`. A call opens a rendered pill at once; otherwise
- * it waits for the schedule's next commit (forcing one), and on the range that
- * commit shows, for that range's events to load. The most recent call is the
- * only one waiting.
+ * Implements `ScheduleHandle`. A call waits for a commit it requests (in a
+ * transition, so it commits with navigation the caller started in the same
+ * event) and, on the range that commit shows, for that range's events to load.
+ * Rendered beside the view so the requested commit re-renders only this.
  */
-function useEventPopoverHandle({
+function ScheduleEventPopoverHandle({
   handleRef,
   interactionState,
   isLoading,
@@ -224,8 +233,9 @@ function useEventPopoverHandle({
   interactionState: ScheduleInteractionState;
   isLoading: boolean;
   range: ScheduleRange;
-}): void {
+}): null {
   const pendingRef = useRef<PendingEventPopover | null>(null);
+  const isConnectedRef = useRef(false);
   const [commitRequest, requestCommit] = useReducer(
     (count: number) => count + 1,
     0,
@@ -233,24 +243,53 @@ function useEventPopoverHandle({
   const settle = useCallback((isOpened: boolean) => {
     const pending = pendingRef.current;
     pendingRef.current = null;
-    pending?.resolve(isOpened);
+    pending?.resolvers.forEach(resolve => {
+      resolve(isOpened);
+    });
   }, []);
   useImperativeHandle(
     handleRef,
     () => ({
-      openEventPopover: async eventID => {
-        settle(false);
-        if (interactionState.openEventPopover(eventID)) {
-          return true;
-        }
-        return new Promise<boolean>(resolve => {
-          pendingRef.current = {eventID, rangeKey: null, resolve};
-          requestCommit();
-        });
-      },
+      openEventPopover: async eventID =>
+        new Promise<boolean>(resolve => {
+          // Unmounted, or hidden by <Activity>.
+          if (!isConnectedRef.current) {
+            resolve(false);
+            return;
+          }
+          const resolvers: PendingEventPopover['resolvers'] = [resolve];
+          const waiting = pendingRef.current;
+          if (waiting?.eventID === eventID) {
+            resolvers.push(...waiting.resolvers);
+          } else {
+            settle(false);
+          }
+          pendingRef.current = {
+            eventID,
+            focusedElement: document.activeElement,
+            rangeKey: null,
+            resolvers,
+          };
+          startTransition(() => {
+            requestCommit();
+          });
+        }),
     }),
-    [interactionState, settle],
+    [settle],
   );
+  useIsomorphicLayoutEffect(() => {
+    isConnectedRef.current = true;
+    return () => {
+      isConnectedRef.current = false;
+      // Deferred, so StrictMode's simulated unmount and remount doesn't
+      // settle a waiting call.
+      queueMicrotask(() => {
+        if (!isConnectedRef.current) {
+          settle(false);
+        }
+      });
+    };
+  }, [settle]);
   const rangeKey = `${range.start}:${range.end}`;
   // Runs after the commit a call requests and after any range or loading
   // change, once pills have registered from their refs.
@@ -263,13 +302,31 @@ function useEventPopoverHandle({
     if (pending.rangeKey !== rangeKey) {
       // The user paged away before the events loaded.
       settle(false);
-    } else if (interactionState.openEventPopover(pending.eventID)) {
-      settle(true);
-    } else if (!isLoading) {
-      settle(false);
+      return;
     }
+    // Opens after the hide reports that pills removed in this commit defer to
+    // a microtask, so plugins see the old popover hide before this one shows.
+    queueMicrotask(() => {
+      if (pendingRef.current !== pending || !isConnectedRef.current) {
+        return;
+      }
+      const focusedElement = document.activeElement;
+      if (
+        focusedElement !== pending.focusedElement &&
+        focusedElement != null &&
+        focusedElement !== document.body
+      ) {
+        // Focus moved on while the call waited; don't take it back.
+        settle(false);
+        return;
+      }
+      const isOpened = interactionState.openEventPopover(pending.eventID);
+      if (isOpened != null || !isLoading) {
+        settle(isOpened ?? false);
+      }
+    });
   }, [commitRequest, interactionState, isLoading, rangeKey, settle]);
-  useEffect(() => () => settle(false), [settle]);
+  return null;
 }
 
 function ScheduleViewContent<Options extends ScheduleViewOptions>({
@@ -298,7 +355,6 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   const Component = view.component;
   const range = useRange(view, viewDate);
   const {events: rangeEvents, isLoading} = useAsyncEvents(eventSource, range);
-  useEventPopoverHandle({handleRef, interactionState, isLoading, range});
   // `events` and `categoryMap` are memoized apart from the context value so
   // their identities survive unrelated context changes (e.g. a plugin updating
   // as its popover opens); the views' expensive layout memos key on them.
@@ -349,6 +405,12 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
       <ScheduleContext value={contextValue}>
         <Component height={height} options={view.options} />
       </ScheduleContext>
+      <ScheduleEventPopoverHandle
+        handleRef={handleRef}
+        interactionState={interactionState}
+        isLoading={isLoading}
+        range={range}
+      />
     </ScheduleInteractionContext>
   );
 }

@@ -235,21 +235,21 @@ export interface ScheduleHandle {
    * days of a multi-day event) opens from the piece on its earliest shown
    * day. Pills collapsed into a "+N more" overflow are not opened.
    *
-   * Resolves `true` once the popover opens, or `false` if it does not:
-   * - When a pill for the event is rendered with popover content from a
-   *   plugin, it opens immediately.
-   * - Otherwise the call waits for the schedule's next render, so changing
-   *   `viewDate` and calling this in the same event handler opens the event
-   *   in the new range. With an async event source still loading that range,
-   *   it also waits for those events to load and render. If the pill is
-   *   rendered by then it opens; if not, or if the range changes first, the
-   *   call resolves `false` and is dropped. It never opens later, for example
-   *   when the user pages to the event.
-   * - Only the most recent call waits: a new call, or unmounting the
-   *   schedule, resolves a waiting call with `false`.
-   *
-   * With an array event source, calling it from a parent's mount effect opens
-   * the event immediately.
+   * Resolves `true` once the popover is open (including when it already
+   * was), or `false` if it does not open:
+   * - The call waits for the schedule's next render, so changing `viewDate`
+   *   or `view` in the same event handler, directly or in `startTransition`,
+   *   opens the event in the new range. With an async event source still
+   *   loading that range, it also waits for those events to load and render.
+   *   If the pill is rendered by then it opens; if not, or if the range
+   *   changes first, the call resolves `false` and never opens later.
+   * - If focus has moved to another element while the call waited, it
+   *   resolves `false` rather than take focus back.
+   * - Only the most recent event waits: a call for another event resolves a
+   *   waiting call with `false`, while calls for the same event share its
+   *   result. A call while the schedule is unmounted or hidden by
+   *   `<Activity>`, or a waiting call when it unmounts or hides, resolves
+   *   `false`.
    */
   openEventPopover(eventID: string): Promise<boolean>;
 }

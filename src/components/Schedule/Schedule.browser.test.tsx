@@ -269,14 +269,20 @@ const openPopoverEvents = [
   }),
 ];
 
-function WeekOpeningEventPopover({eventID}: {eventID: string}) {
+function WeekOpeningEventPopover({
+  eventID,
+  isHidden = false,
+}: {
+  eventID: string;
+  isHidden?: boolean;
+}) {
   const handleRef = useRef<ScheduleHandle>(null);
   const popoverPlugin = useScheduleEventPopoverPlugin();
   useEffect(() => {
     void handleRef.current?.openEventPopover(eventID);
   }, [eventID]);
   return (
-    <div style={{height: 400}}>
+    <div style={{display: isHidden ? 'none' : 'block', height: 400}}>
       <Schedule
         events={openPopoverEvents}
         handleRef={handleRef}
@@ -329,4 +335,24 @@ describe('Schedule openEventPopover (browser)', () => {
       expect(timeGrid().scrollTop).toBe(12 * 48);
     },
   );
+
+  it('scrolls an event opened while the grid had no layout into view once it does', async () => {
+    // As in a hidden tab: the late event opens before the grid has layout.
+    const {rerender} = render(
+      <WeekOpeningEventPopover eventID="late" isHidden />,
+    );
+    await openedPill('late');
+
+    rerender(<WeekOpeningEventPopover eventID="late" />);
+
+    await waitFor(() => {
+      const pill = screen
+        .getByTestId('schedule-event-late')
+        .getBoundingClientRect();
+      expect(pill.top).toBeGreaterThanOrEqual(visibleHoursTop());
+      expect(pill.bottom).toBeLessThanOrEqual(
+        timeGrid().getBoundingClientRect().bottom,
+      );
+    });
+  });
 });

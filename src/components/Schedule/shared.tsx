@@ -47,6 +47,7 @@ import {
 } from 'internal/plainDate';
 import {Temporal} from 'internal/temporal';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
+import useLatest from 'internal/useLatest';
 import {cva} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -387,14 +388,32 @@ export function useScheduleEventPopover(
     isOpenRef.current = false;
     notifyHide();
   }, [interactionState, notifyHide]);
+  const eventPopoverPlugin = plugins.find(
+    plugin => plugin.renderEventPopover != null,
+  );
+  const popover = usePopover({
+    hasCloseButton: eventPopoverPlugin?.eventPopoverHasCloseButton ?? false,
+    label: getEventAccessibleLabel(event, categoryMap, timezoneID),
+    onHide: handleHide,
+    onShow: handleShow,
+    role: 'dialog',
+  });
+  const {hide, id: layerId, show} = popover;
+  const showRef = useLatest(show);
   const isConnectedRef = useRef(false);
   useEffect(() => {
     const token = interactionTokenRef.current;
     isConnectedRef.current = true;
-    // Reconnected while open: report it again if a disconnect reported a hide.
+    // Reconnected while open (<Activity>): report it again, since the
+    // disconnect reported a hide. The browser may have closed the popover
+    // while its toggle listener was detached; if so, sync the layer closed.
     if (isOpenRef.current) {
-      interactionState.markPopoverShown(token);
-      notifyShow();
+      if (document.getElementById(layerId)?.matches(':popover-open') === true) {
+        interactionState.markPopoverShown(token);
+        notifyShow();
+      } else {
+        hide();
+      }
     }
     return () => {
       isConnectedRef.current = false;
@@ -408,22 +427,7 @@ export function useScheduleEventPopover(
         }
       });
     };
-  }, [interactionState, notifyHide, notifyShow]);
-  const eventPopoverPlugin = plugins.find(
-    plugin => plugin.renderEventPopover != null,
-  );
-  const popover = usePopover({
-    hasCloseButton: eventPopoverPlugin?.eventPopoverHasCloseButton ?? false,
-    label: getEventAccessibleLabel(event, categoryMap, timezoneID),
-    onHide: handleHide,
-    onShow: handleShow,
-    role: 'dialog',
-  });
-  const {hide, show} = popover;
-  const showRef = useRef(show);
-  useIsomorphicLayoutEffect(() => {
-    showRef.current = show;
-  }, [show]);
+  }, [hide, interactionState, layerId, notifyHide, notifyShow]);
   // Registers the pill for `ScheduleHandle.openEventPopover` for as long as
   // the trigger is mounted. Opening matches a click: the pill takes focus (so
   // focus returns to it on close) and is scrolled into view first.
@@ -434,6 +438,8 @@ export function useScheduleEventPopover(
       }
       return interactionState.registerEventPopover(event.id, {
         dayIndex,
+        element,
+        getIsOpen: () => isOpenRef.current,
         open: () => {
           if (isOpenRef.current) {
             return;
@@ -446,7 +452,7 @@ export function useScheduleEventPopover(
         },
       });
     },
-    [dayIndex, event.id, interactionState],
+    [dayIndex, event.id, interactionState, showRef],
   );
   const triggerRef = useMergeRefs(popover.triggerRef, registerRef);
   const controls = useMemo(

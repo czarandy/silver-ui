@@ -11,25 +11,31 @@ const schedulePopoverDismissPointerEvents = new WeakSet<Event>();
  */
 export interface ScheduleEventPopoverOpener {
   dayIndex: number;
+  element: HTMLElement;
+  getIsOpen: () => boolean;
+  /**
+   * Opens the popover unless it is already open. Opening does nothing while
+   * the popover is being dismissed.
+   */
   open: () => void;
 }
 
 export interface ScheduleInteractionState {
   dispose: () => void;
   /**
-   * How many times `openEventPopover` has opened a popover. The time grid
-   * skips a deferred initial scroll once it changes, so it does not scroll an
-   * opened event back out of view.
+   * The pill `openEventPopover` last opened, while its popover stays open. The
+   * time grid scrolls it into view, rather than to its initial scroll time,
+   * when the grid gets layout after the open.
    */
-  getEventPopoverOpenCount: () => number;
+  getOpenedEventPill: () => HTMLElement | null;
   markPointerDown: (event: Event) => void;
   markPopoverHidden: (token: symbol) => void;
   markPopoverShown: (token: symbol) => void;
   /**
-   * Opens the popover of the event's earliest registered pill. Returns
-   * `false` when no pill for the event is registered.
+   * Opens the popover of the event's earliest registered pill and returns
+   * whether it is open, or `null` when no pill for the event is registered.
    */
-  openEventPopover(eventID: string): boolean;
+  openEventPopover(eventID: string): boolean | null;
   /**
    * Registers a rendered pill with popover content; returns the unregister.
    */
@@ -54,7 +60,7 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     string,
     Set<ScheduleEventPopoverOpener>
   >();
-  let eventPopoverOpenCount = 0;
+  let openedEventPill: ScheduleEventPopoverOpener | null = null;
 
   const clearHiddenFrame = (token: symbol): void => {
     const frame = hiddenFrames.get(token);
@@ -98,7 +104,8 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       recentlyHiddenPopovers.delete(token);
       openPopovers.add(token);
     },
-    getEventPopoverOpenCount: () => eventPopoverOpenCount,
+    getOpenedEventPill: () =>
+      openedEventPill?.getIsOpen() === true ? openedEventPill.element : null,
     openEventPopover: eventID => {
       let first: ScheduleEventPopoverOpener | undefined;
       eventPopoverOpeners.get(eventID)?.forEach(opener => {
@@ -107,11 +114,14 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
         }
       });
       if (first == null) {
-        return false;
+        return null;
       }
-      eventPopoverOpenCount += 1;
       first.open();
-      return true;
+      const isOpen = first.getIsOpen();
+      if (isOpen) {
+        openedEventPill = first;
+      }
+      return isOpen;
     },
     registerEventPopover: (eventID, opener) => {
       let openers = eventPopoverOpeners.get(eventID);
@@ -122,6 +132,9 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       openers.add(opener);
       return () => {
         openers.delete(opener);
+        if (openedEventPill === opener) {
+          openedEventPill = null;
+        }
         if (
           openers.size === 0 &&
           eventPopoverOpeners.get(eventID) === openers

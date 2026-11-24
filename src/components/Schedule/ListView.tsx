@@ -140,7 +140,7 @@ function ScheduleListView({
   const endDate = range.endDate.add({days: -1});
   const title = formatListRangeTitle(range.startDate, endDate);
   const visibleDays = days
-    .map(day => {
+    .map((day, dayIndex) => {
       const dayEvents = events.filter(event =>
         eventOccursOnDate(event, day, timezoneID),
       );
@@ -150,6 +150,7 @@ function ScheduleListView({
       return {
         day,
         dayEvents,
+        dayIndex,
         isCurrentDay,
         isHighlightedDay,
         isVisible: dayEvents.length > 0 || isCurrentDay || isBaseDay,
@@ -166,7 +167,10 @@ function ScheduleListView({
         role="region"
         tabIndex={0}>
         {visibleDays.map(
-          ({day, dayEvents, isCurrentDay, isHighlightedDay}, index) => {
+          (
+            {day, dayEvents, dayIndex, isCurrentDay, isHighlightedDay},
+            index,
+          ) => {
             const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
             const dayClasses = scheduleListViewRecipe({
               isHighlightedDay,
@@ -186,7 +190,7 @@ function ScheduleListView({
                 <div className={dayClasses.events}>
                   {renderListRows({
                     currentTime,
-                    dayIndex: index,
+                    dayIndex,
                     events: dayEvents,
                     isShowingCurrentTime: isCurrentDay && !isLoading,
                     timezoneID,

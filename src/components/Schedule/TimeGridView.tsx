@@ -662,7 +662,6 @@ export function TimeGridView({
     if (grid == null) {
       return;
     }
-    const eventPopoverOpenCount = interactionState.getEventPopoverOpenCount();
     const applyInitialScroll = () => {
       if (hasAppliedInitialScrollRef.current) {
         return true;
@@ -673,11 +672,11 @@ export function TimeGridView({
         return false;
       }
       hasAppliedInitialScrollRef.current = true;
-      // An event popover opened from the handle while the scroll waited for
-      // layout has scrolled to its event; keep that event in view.
-      if (
-        interactionState.getEventPopoverOpenCount() !== eventPopoverOpenCount
-      ) {
+      // An event the handle opened while the grid had no layout could not be
+      // scrolled to then; bring it into view instead of the initial time.
+      const openedPill = interactionState.getOpenedEventPill();
+      if (openedPill != null && grid.contains(openedPill)) {
+        openedPill.scrollIntoView({block: 'nearest', inline: 'nearest'});
         return true;
       }
       const target = getInitialScrollTarget(
