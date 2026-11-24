@@ -878,6 +878,7 @@ function ScheduleMonthlyView({
                     renderEvent={event => (
                       <CalendarMonthEventPill
                         event={event}
+                        isOpenableFromHandle={false}
                         isPast={isEventInPast(event, currentTime, timezoneID)}
                       />
                     )}

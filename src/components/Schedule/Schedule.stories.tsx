@@ -1,7 +1,7 @@
 /* eslint-disable @eslint-react/rules-of-hooks -- Storybook render functions support hooks */
 import type {Meta, StoryObj} from '@storybook/react-vite';
 import {CircleCheck, Repeat2, TriangleAlert} from 'lucide-react';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useMemo, useRef, useState} from 'react';
 import {Badge} from 'components/Badge';
 import {Button} from 'components/Button';
 import {Icon} from 'components/Icon';
@@ -40,6 +40,7 @@ import type {
   ScheduleCategory,
   ScheduleEventBorderStyle,
   ScheduleEventSource,
+  ScheduleHandle,
   ScheduleHeight,
   SchedulePlugin,
   ScheduleTimeGridCellPropsRenderProps,
@@ -1389,6 +1390,65 @@ function EventPopoverStory(): React.JSX.Element {
 
 export const EventPopover: Story = {
   render: () => <EventPopoverStory />,
+};
+
+const openEventPopoverEvents = [
+  ...eventPopoverEvents,
+  createEventFromISO({
+    category: 'Planning',
+    end: timedISO(0, 21),
+    id: 'evening-review',
+    start: timedISO(0, 20),
+    title: 'Evening review',
+  }),
+];
+
+const openEventPopoverStoryContainer = css({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '3',
+  h: '600px',
+});
+
+/**
+ * `handleRef.current.openEventPopover(id)` opens an event's popover as though
+ * it were clicked, e.g. for a deep link. The evening event sits below the
+ * initially scrolled hours, so the grid scrolls it into view before its
+ * popover opens.
+ */
+export const OpenEventPopover: Story = {
+  render: () => {
+    const handleRef = useRef<ScheduleHandle>(null);
+    const eventPopoverPlugin = useScheduleEventPopoverPlugin({
+      renderContent: ({event, close}) => (
+        <ScheduleEventPopoverContent event={event} onClose={close} />
+      ),
+    });
+    return (
+      <div className={openEventPopoverStoryContainer}>
+        <div>
+          <Button
+            label="Open evening review"
+            onClick={() => {
+              handleRef.current?.openEventPopover('evening-review');
+            }}
+            size="sm"
+          />
+        </div>
+        <Schedule
+          categories={categories}
+          events={openEventPopoverEvents}
+          handleRef={handleRef}
+          height="fill"
+          highlightDate={defaultHighlightDate}
+          plugins={[eventPopoverPlugin]}
+          timezoneID={localTimezoneID}
+          view={createScheduleWeeklyView({initialScrollTime: {hour: 8}})}
+          viewDate={defaultViewDate}
+        />
+      </div>
+    );
+  },
 };
 
 export const EventPopoverCustomContent: Story = {

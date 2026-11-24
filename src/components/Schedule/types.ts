@@ -166,13 +166,14 @@ export interface SchedulePlugin {
   ) => SchedulePluginElementProps;
   /**
    * Called when an event popover closes, however it was dismissed, including
-   * when its event pill unmounts while open. `popoverId` matches the one passed
-   * to `onEventPopoverShow`.
+   * when its event pill unmounts while open. Also called when an open pill's
+   * effects disconnect (StrictMode, a hidden `<Activity>`). `popoverId`
+   * matches the one passed to `onEventPopoverShow`.
    */
   onEventPopoverHide?: (event: CalendarEvent, popoverId: string) => void;
   /**
-   * Called when an event popover opens, in the same update that opens it.
-   * `popoverId` identifies the popover; an event split across several pills
+   * Called when an event popover opens, in the same update that opens it,
+   * and again when an open pill's effects reconnect. `popoverId` identifies the popover; an event split across several pills
    * (e.g. month-view week segments) has one popover per pill.
    */
   onEventPopoverShow?: (event: CalendarEvent, popoverId: string) => void;
@@ -221,4 +222,18 @@ export interface SchedulePlugin {
   renderTimeGridEventContent?: (
     props: ScheduleTimeGridEventRenderProps,
   ) => ReactNode;
+}
+
+/**
+ * Imperative handle for `Schedule`, passed through its `handleRef` prop.
+ */
+export interface ScheduleHandle {
+  /**
+   * Opens the popover of the event with this ID as clicking its pill would:
+   * the pill is scrolled into view and focused, and plugin popover hooks fire.
+   * Call it once the pill is rendered, e.g. from a mount effect, or after
+   * `flushSync` when changing `viewDate` or `view`. Returns whether the
+   * popover is open; `false` when no pill with popover content is rendered.
+   */
+  openEventPopover(eventID: string): boolean;
 }

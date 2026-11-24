@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useImperativeHandle,
   useMemo,
   useReducer,
   useState,
@@ -30,6 +31,7 @@ import type {
   ScheduleCategory,
   ScheduleEventBorderStyle,
   ScheduleEventSource,
+  ScheduleHandle,
   ScheduleHeight,
   SchedulePlugin,
   ScheduleRange,
@@ -73,6 +75,10 @@ export interface ScheduleProps<
    * Static events or an async event loader.
    */
   events: ScheduleEventSource;
+  /**
+   * Receives a `ScheduleHandle` for opening an event's popover from code.
+   */
+  handleRef?: Ref<ScheduleHandle>;
   /**
    * Height behavior. `auto` grows with the active view; `fill` occupies a
    * finite-height parent and scrolls the view below the fixed toolbar.
@@ -278,6 +284,7 @@ export function Schedule({
   'data-testid': dataTestId,
   eventBorderStyle = 'border',
   events,
+  handleRef,
   height = 'auto',
   highlightDate: highlightDateFromProps,
   plugins = defaultSchedulePlugins,
@@ -302,6 +309,13 @@ export function Schedule({
   );
   const interactionState = useMemo(() => createScheduleInteractionState(), []);
   useEffect(() => () => interactionState.dispose(), [interactionState]);
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      openEventPopover: eventID => interactionState.openEventPopover(eventID),
+    }),
+    [interactionState],
+  );
   const handlePointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
     interactionState.markPointerDown(event.nativeEvent);
   };

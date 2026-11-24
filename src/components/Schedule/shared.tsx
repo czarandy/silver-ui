@@ -33,6 +33,7 @@ import type {
 } from 'components/Schedule/types';
 import {Spinner} from 'components/Spinner';
 import {Heading} from 'components/Text';
+import useMergeRefs from 'hooks/useMergeRefs';
 import {getCachedDateTimeFormat} from 'internal/dateTimeFormat';
 import isNonEmptyReactNode from 'internal/isNonEmptyReactNode';
 import {
@@ -46,6 +47,7 @@ import {
 } from 'internal/plainDate';
 import {Temporal} from 'internal/temporal';
 import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
+import useLatest from 'internal/useLatest';
 import {cva} from 'styled-system/css';
 import {cx} from 'utils/cx';
 
@@ -326,10 +328,15 @@ export function hasEventPopoverPlugin(
  * rendered `popover` layer to place as a sibling. Both are `undefined` when no
  * plugin supplies content for the event, in which case the pill stays a static,
  * non-interactive element (unchanged default behavior).
+ *
+ * `isOpenableFromHandle` (default `true`) is off inside "+N more" overflow.
  */
 export function useScheduleEventPopover(
   event: CalendarEvent,
-  {placement = 'end'}: {placement?: LayerPlacement} = {},
+  {
+    isOpenableFromHandle = true,
+    placement = 'end',
+  }: {isOpenableFromHandle?: boolean; placement?: LayerPlacement} = {},
 ): {
   popover?: ReactNode;
   triggerProps?: ScheduleEventTriggerProps;
@@ -344,6 +351,7 @@ export function useScheduleEventPopover(
   useIsomorphicLayoutEffect(() => {
     latestRef.current = {event, plugins};
   }, [event, plugins]);
+  const isOpenRef = useRef(false);
   const isShownRef = useRef(false);
   const notifyHide = useCallback(() => {
     if (!isShownRef.current) {
@@ -357,6 +365,7 @@ export function useScheduleEventPopover(
   }, [popoverId]);
   const handleShow = useCallback(() => {
     interactionState.markPopoverShown(interactionTokenRef.current);
+    isOpenRef.current = true;
     isShownRef.current = true;
     const latest = latestRef.current;
     latest.plugins.forEach(plugin =>
@@ -365,6 +374,7 @@ export function useScheduleEventPopover(
   }, [interactionState, popoverId]);
   const handleHide = useCallback(() => {
     interactionState.markPopoverHidden(interactionTokenRef.current);
+    isOpenRef.current = false;
     notifyHide();
   }, [interactionState, notifyHide]);
   useEffect(
@@ -373,8 +383,15 @@ export function useScheduleEventPopover(
     },
     [interactionState],
   );
-  // An open popover removed with its pill never fires `onHide`.
-  useEffect(() => notifyHide, [notifyHide]);
+  useEffect(() => {
+    // Effects that reconnect while open (StrictMode, <Activity>) report the
+    // show again, after the disconnect reported a hide.
+    if (isOpenRef.current) {
+      handleShow();
+    }
+    // An open popover removed with its pill never fires `onHide`.
+    return notifyHide;
+  }, [handleShow, notifyHide]);
   const eventPopoverPlugin = plugins.find(
     plugin => plugin.renderEventPopover != null,
   );
@@ -385,7 +402,37 @@ export function useScheduleEventPopover(
     onShow: handleShow,
     role: 'dialog',
   });
-  const {hide} = popover;
+  const {hide, show} = popover;
+  const showRef = useLatest(show);
+  // Registers the pill for `ScheduleHandle.openEventPopover` for as long as
+  // the trigger is mounted.
+  const registerRef = useCallback(
+    (element: HTMLElement | null) => {
+      if (element == null || !isOpenableFromHandle) {
+        return;
+      }
+      const getIsOpen = (): boolean => isOpenRef.current;
+      return interactionState.registerEventPopover(event.id, {
+        element,
+        getIsOpen,
+        open: () => {
+          showRef.current();
+          // `show` does nothing while the popover is being dismissed.
+          if (!getIsOpen()) {
+            return;
+          }
+          // As after a click: the pill holds focus, so focus returns to it on
+          // close. Focused before the popover's autofocus runs, which records
+          // the element to return to.
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- jsdom, including apps' tests, lacks scrollIntoView
+          element.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
+          element.focus({preventScroll: true});
+        },
+      });
+    },
+    [event.id, interactionState, isOpenableFromHandle, showRef],
+  );
+  const triggerRef = useMergeRefs(popover.triggerRef, registerRef);
   const controls = useMemo(
     (): ScheduleEventPopoverControls => ({close: hide, popoverId}),
     [hide, popoverId],
@@ -412,7 +459,7 @@ export function useScheduleEventPopover(
     triggerProps: {
       ...popover.triggerProps,
       onClick: popover.toggle,
-      ref: popover.triggerRef,
+      ref: triggerRef,
     },
   };
 }
@@ -570,14 +617,21 @@ function EventPillRoot({
 export function CalendarEventPill({
   event,
   isFullWidth = false,
+  isOpenableFromHandle,
   isPast = false,
 }: {
   event: CalendarEvent;
   isFullWidth?: boolean;
+  /**
+   * `false` inside "+N more" overflow.
+   */
+  isOpenableFromHandle?: boolean;
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
-  const {popover, triggerProps} = useScheduleEventPopover(event);
+  const {popover, triggerProps} = useScheduleEventPopover(event, {
+    isOpenableFromHandle,
+  });
   const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});
   const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({
@@ -614,13 +668,20 @@ export function CalendarEventPill({
 
 export function CalendarMonthEventPill({
   event,
+  isOpenableFromHandle,
   isPast = false,
 }: {
   event: CalendarEvent;
+  /**
+   * `false` inside "+N more" overflow.
+   */
+  isOpenableFromHandle?: boolean;
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
-  const {popover, triggerProps} = useScheduleEventPopover(event);
+  const {popover, triggerProps} = useScheduleEventPopover(event, {
+    isOpenableFromHandle,
+  });
   const pluginProps = useScheduleEventPluginProps({event, layout: 'month'});
   const category = getCategory(categoryMap, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);

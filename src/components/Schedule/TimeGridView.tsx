@@ -582,6 +582,7 @@ export function TimeGridView({
     if (grid == null) {
       return;
     }
+    const fixedRows = fixedRowsRef.current;
 
     const updateInlineOverflow = () => {
       const maxScrollOffset = Math.max(0, grid.scrollWidth - grid.clientWidth);
@@ -590,7 +591,6 @@ export function TimeGridView({
         hasEnd: maxScrollOffset > 1 && scrollOffset < maxScrollOffset - 1,
         hasStart: maxScrollOffset > 1 && scrollOffset > 1,
       };
-      // eslint-disable-next-line @eslint-react/set-state-in-effect -- scroll cues reflect measured DOM overflow
       setInlineOverflow(currentOverflow =>
         currentOverflow.hasEnd === nextOverflow.hasEnd &&
         currentOverflow.hasStart === nextOverflow.hasStart
@@ -598,26 +598,37 @@ export function TimeGridView({
           : nextOverflow,
       );
     };
+    // In fill mode the day headers stick over the top of the scrolling grid.
+    // Timed events keep this much scroll margin (see `ScheduleEvent.recipe.ts`)
+    // so scrolling one into view leaves it below the headers. (Scroll padding
+    // on the grid would also push the sticky all-day pills, which sit in that
+    // padding, out of place when they scroll into view.)
+    const updateLayout = () => {
+      updateInlineOverflow();
+      if (height === 'fill' && fixedRows != null) {
+        grid.style.setProperty(
+          '--schedule-fixed-rows-height',
+          `${fixedRows.offsetHeight}px`,
+        );
+      }
+    };
 
-    updateInlineOverflow();
+    updateLayout();
     grid.addEventListener('scroll', updateInlineOverflow, {passive: true});
-    const resizeTargets = [grid, fixedRowsRef.current].filter(
+    const resizeTargets = [grid, fixedRows].filter(
       (target): target is HTMLDivElement => target != null,
     );
     if (typeof ResizeObserver !== 'undefined') {
-      resizeTargets.forEach(target =>
-        observeResize(target, updateInlineOverflow),
-      );
+      resizeTargets.forEach(target => observeResize(target, updateLayout));
     }
     return () => {
       grid.removeEventListener('scroll', updateInlineOverflow);
       if (typeof ResizeObserver !== 'undefined') {
-        resizeTargets.forEach(target =>
-          unobserveResize(target, updateInlineOverflow),
-        );
+        resizeTargets.forEach(target => unobserveResize(target, updateLayout));
       }
+      grid.style.removeProperty('--schedule-fixed-rows-height');
     };
-  }, [days.length, normalizedDayMinWidth]);
+  }, [days.length, height, normalizedDayMinWidth]);
 
   // Scrolls once, when the grid first has layout. Later renders (paging, the
   // current-time tick, new events) keep wherever the user has scrolled since.
@@ -796,6 +807,7 @@ export function TimeGridView({
                             <CalendarEventPill
                               event={event}
                               isFullWidth
+                              isOpenableFromHandle={false}
                               isPast={isEventInPast(
                                 event,
                                 currentTime,

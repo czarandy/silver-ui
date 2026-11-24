@@ -74,6 +74,7 @@ export type {
   ScheduleInitialScrollTime,
   ScheduleEventPropsRenderProps,
   ScheduleEventSource,
+  ScheduleHandle,
   ScheduleHeaderContent,
   ScheduleMonthCellPropsRenderProps,
   ScheduleTimeGridEventRenderProps,

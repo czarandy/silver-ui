@@ -7,7 +7,18 @@ import {
   waitFor,
   within,
 } from '@testing-library/react';
-import {Component, useState, type ErrorInfo, type ReactNode} from 'react';
+import {
+  Component,
+  createRef,
+  StrictMode,
+  useEffect,
+  useRef,
+  useState,
+  type ErrorInfo,
+  type ReactNode,
+  type RefObject,
+} from 'react';
+import {flushSync} from 'react-dom';
 import {
   afterEach,
   beforeAll,
@@ -16,6 +27,7 @@ import {
   expect,
   it,
   vi,
+  type MockInstance,
 } from 'vitest';
 import {buttonRecipe} from 'components/Button/Button.recipe';
 import {Layout, LayoutContent, LayoutHeader} from 'components/Layout';
@@ -62,6 +74,7 @@ import type {
   Instant,
   ScheduleCategory,
   ScheduleEventBorderStyle,
+  ScheduleHandle,
   ScheduleHeight,
   SchedulePlugin,
   ScheduleView,
@@ -70,6 +83,7 @@ import type {
 } from 'components/Schedule/types';
 import type {DayOfWeek} from 'internal/dateTypes';
 import {Temporal} from 'internal/temporal';
+import {createResizeObserverStub} from 'internal/testHelpers';
 import {token, type Token} from 'styled-system/tokens';
 
 class ErrorBoundary extends Component<
@@ -3681,6 +3695,91 @@ describe('Schedule', () => {
     ).not.toBeInTheDocument();
   });
 
+  describe('fill time grid', () => {
+    const resizeObserver = createResizeObserverStub();
+    let fixedRowsHeight = 64;
+    let gridClientHeight = 400;
+
+    function fixedRows(): HTMLElement {
+      return screen.getByTestId('schedule-time-grid-fixed-rows');
+    }
+
+    function grid(): HTMLElement {
+      return screen.getByRole('grid', {name: 'Schedule time grid'});
+    }
+
+    function FillWeek({
+      height = 'fill',
+    }: {
+      height?: ScheduleHeight;
+    }): React.JSX.Element {
+      const popoverPlugin = useScheduleEventPopoverPlugin();
+      return (
+        <Schedule
+          events={[
+            createEventFromISO({
+              end: '2026-05-13T07:00:00.000Z',
+              id: 'early',
+              start: '2026-05-13T06:00:00.000Z',
+              title: 'Early',
+            }),
+          ]}
+          height={height}
+          plugins={[popoverPlugin]}
+          timezoneID="UTC"
+          view={createScheduleWeeklyView({
+            hourHeight: 48,
+            initialScrollTime: {hour: 12},
+          })}
+          viewDate={instantUTC(2026, 4, 13)}
+        />
+      );
+    }
+
+    beforeEach(() => {
+      fixedRowsHeight = 64;
+      gridClientHeight = 400;
+      vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(
+        function (this: HTMLElement) {
+          return this.dataset.testid === 'schedule-time-grid-fixed-rows'
+            ? fixedRowsHeight
+            : 0;
+        },
+      );
+      vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(
+        function (this: HTMLElement) {
+          return this.getAttribute('role') === 'grid' ? gridClientHeight : 0;
+        },
+      );
+      return () => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+        resizeObserver.reset();
+      };
+    });
+
+    it('tracks the sticky header height for timed events to scroll below', () => {
+      vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
+      const {rerender} = render(<FillWeek />);
+      expect(
+        grid().style.getPropertyValue('--schedule-fixed-rows-height'),
+      ).toBe('64px');
+
+      fixedRowsHeight = 90;
+      act(() => {
+        resizeObserver.resize(fixedRows());
+      });
+      expect(
+        grid().style.getPropertyValue('--schedule-fixed-rows-height'),
+      ).toBe('90px');
+
+      rerender(<FillWeek height="auto" />);
+      expect(
+        grid().style.getPropertyValue('--schedule-fixed-rows-height'),
+      ).toBe('');
+    });
+  });
+
   describe('event resize plugin', () => {
     function ScheduleWithEventResize({
       onResize,
@@ -4544,6 +4643,377 @@ describe('Schedule', () => {
         const ids = onEventPopoverShow.mock.calls.map(call => call[1]);
         expect(ids).toHaveLength(2);
         expect(ids[0]).not.toBe(ids[1]);
+      });
+    });
+
+    describe('handleRef openEventPopover', () => {
+      const onEventPopoverHide =
+        vi.fn<NonNullable<SchedulePlugin['onEventPopoverHide']>>();
+      const onEventPopoverShow =
+        vi.fn<NonNullable<SchedulePlugin['onEventPopoverShow']>>();
+      const lifecyclePlugin: SchedulePlugin = {
+        onEventPopoverHide,
+        onEventPopoverShow,
+      };
+      const otherEvent = createEventFromISO({
+        category: 'Sync',
+        end: '2026-05-14T16:30:00.000Z',
+        id: 'other',
+        start: '2026-05-14T16:00:00.000Z',
+        title: 'Other sync',
+      });
+      const laterEvent = createEventFromISO({
+        category: 'Sync',
+        end: '2026-06-17T16:30:00.000Z',
+        id: 'later',
+        start: '2026-06-17T16:00:00.000Z',
+        title: 'Later sync',
+      });
+      const handleEvents = [...popoverEvents, otherEvent, laterEvent];
+      const monthView = createScheduleMonthlyView();
+      const may13 = instantUTC(2026, 4, 13);
+      const june17 = instantUTC(2026, 5, 17);
+
+      function ScheduleWithHandle({
+        eventsList = handleEvents,
+        handleRef,
+        hasPopoverPlugin = true,
+        onOpenResult,
+        openOnMount,
+        view = monthView,
+        viewDate = may13,
+      }: {
+        eventsList?: CalendarEvent[];
+        handleRef?: RefObject<ScheduleHandle | null>;
+        hasPopoverPlugin?: boolean;
+        onOpenResult?: (isOpened: boolean | undefined) => void;
+        openOnMount?: string;
+        view?: ScheduleView;
+        viewDate?: Instant;
+      }): React.JSX.Element {
+        const popoverPlugin = useScheduleEventPopoverPlugin();
+        const ownHandleRef = useRef<ScheduleHandle>(null);
+        const scheduleHandleRef = handleRef ?? ownHandleRef;
+        // How an app deep-links to an event: open it from a mount effect.
+        useEffect(() => {
+          if (openOnMount != null) {
+            onOpenResult?.(
+              scheduleHandleRef.current?.openEventPopover(openOnMount),
+            );
+          }
+        }, [onOpenResult, openOnMount, scheduleHandleRef]);
+        return (
+          <Schedule
+            categories={categories}
+            events={eventsList}
+            handleRef={scheduleHandleRef}
+            highlightDate={may13}
+            plugins={
+              hasPopoverPlugin
+                ? [popoverPlugin, lifecyclePlugin]
+                : [lifecyclePlugin]
+            }
+            timezoneID="UTC"
+            view={view}
+            viewDate={viewDate}
+          />
+        );
+      }
+
+      function openWithHandle(
+        handleRef: RefObject<ScheduleHandle | null>,
+        eventID: string,
+      ): boolean | undefined {
+        let isOpened: boolean | undefined;
+        act(() => {
+          isOpened = handleRef.current?.openEventPopover(eventID);
+        });
+        return isOpened;
+      }
+
+      let scrollIntoView: MockInstance<HTMLElement['scrollIntoView']>;
+      beforeEach(() => {
+        onEventPopoverHide.mockReset();
+        onEventPopoverShow.mockReset();
+        // test-setup stubs scrollIntoView with a shared mock, which this spy
+        // reuses; clear calls left by earlier tests.
+        scrollIntoView = vi.spyOn(HTMLElement.prototype, 'scrollIntoView');
+        scrollIntoView.mockClear();
+      });
+      afterEach(() => {
+        scrollIntoView.mockRestore();
+      });
+
+      it('opens from a mount effect as though the pill were clicked', async () => {
+        const onOpenResult = vi.fn<(isOpened: boolean | undefined) => void>();
+        render(
+          <ScheduleWithHandle
+            onOpenResult={onOpenResult}
+            openOnMount="other"
+          />,
+        );
+
+        expect(onOpenResult).toHaveBeenCalledExactlyOnceWith(true);
+        const pill = screen.getByTestId('schedule-event-other');
+        expect(pill).toHaveAttribute('aria-expanded', 'true');
+        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+          'aria-expanded',
+          'false',
+        );
+        expect(pill).toHaveFocus();
+        expect(onEventPopoverShow).toHaveBeenCalledExactlyOnceWith(
+          otherEvent,
+          expect.any(String),
+        );
+        expect(scrollIntoView).toHaveBeenCalledExactlyOnceWith({
+          block: 'nearest',
+          inline: 'nearest',
+        });
+        expect(scrollIntoView.mock.contexts[0]).toBe(pill);
+
+        // Autofocus moves into the popover; closing returns focus to the pill.
+        await waitFor(() => {
+          expect(pill).not.toHaveFocus();
+        });
+        fireEvent.keyDown(document, {key: 'Escape'});
+        expect(pill).toHaveAttribute('aria-expanded', 'false');
+        expect(onEventPopoverHide).toHaveBeenCalledOnce();
+        expect(pill).toHaveFocus();
+      });
+
+      it('opens once from a mount effect under StrictMode, with plugins told show, hide, show', () => {
+        const onOpenResult = vi.fn<(isOpened: boolean | undefined) => void>();
+        render(
+          <StrictMode>
+            <ScheduleWithHandle
+              onOpenResult={onOpenResult}
+              openOnMount="visible"
+            />
+          </StrictMode>,
+        );
+
+        expect(onOpenResult.mock.calls).toEqual([[true], [true]]);
+        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+          'aria-expanded',
+          'true',
+        );
+        // The simulated unmount reports a hide; the remount reports the show
+        // again.
+        expect(onEventPopoverShow).toHaveBeenCalledTimes(2);
+        expect(onEventPopoverHide).toHaveBeenCalledOnce();
+        expect(onEventPopoverHide.mock.invocationCallOrder[0]).toBeGreaterThan(
+          onEventPopoverShow.mock.invocationCallOrder[0] ?? 0,
+        );
+        expect(onEventPopoverHide.mock.invocationCallOrder[0]).toBeLessThan(
+          onEventPopoverShow.mock.invocationCallOrder[1] ?? 0,
+        );
+        expect(scrollIntoView).toHaveBeenCalledOnce();
+      });
+
+      it.each([
+        {name: 'time grid', view: createScheduleWeeklyView()},
+        {name: 'list', view: createScheduleListView({days: 7})},
+      ])('opens in the $name view', ({view}) => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(<ScheduleWithHandle handleRef={handleRef} view={view} />);
+
+        expect(openWithHandle(handleRef, 'visible')).toBe(true);
+        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+          'aria-expanded',
+          'true',
+        );
+      });
+
+      it('returns true without scrolling again when already open', () => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(<ScheduleWithHandle handleRef={handleRef} />);
+        expect(openWithHandle(handleRef, 'visible')).toBe(true);
+
+        expect(openWithHandle(handleRef, 'visible')).toBe(true);
+        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+          'aria-expanded',
+          'true',
+        );
+        expect(scrollIntoView).toHaveBeenCalledOnce();
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+      });
+
+      it('returns false for an event outside the shown range', () => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(<ScheduleWithHandle handleRef={handleRef} />);
+
+        expect(openWithHandle(handleRef, 'later')).toBe(false);
+      });
+
+      it('returns false without popover content for the event', () => {
+        const onOpenResult = vi.fn<(isOpened: boolean | undefined) => void>();
+        render(
+          <ScheduleWithHandle
+            hasPopoverPlugin={false}
+            onOpenResult={onOpenResult}
+            openOnMount="visible"
+          />,
+        );
+
+        expect(onOpenResult).toHaveBeenCalledExactlyOnceWith(false);
+        expect(screen.getByTestId('schedule-event-visible').tagName).toBe(
+          'SPAN',
+        );
+        expect(onEventPopoverShow).not.toHaveBeenCalled();
+      });
+
+      describe('after navigating with flushSync', () => {
+        // In the month grid of both May (to June 6) and June.
+        const june3Event = createEventFromISO({
+          category: 'Sync',
+          end: '2026-06-03T16:30:00.000Z',
+          id: 'june3',
+          start: '2026-06-03T16:00:00.000Z',
+          title: 'June 3 sync',
+        });
+
+        function NavigateAndOpen({
+          onOpenResult,
+        }: {
+          onOpenResult: (isOpened: boolean | undefined) => void;
+        }): React.JSX.Element {
+          const handleRef = useRef<ScheduleHandle>(null);
+          const [viewDate, setViewDate] = useState(may13);
+          return (
+            <>
+              <button
+                onClick={() => {
+                  // eslint-disable-next-line @eslint-react/dom-no-flush-sync -- the documented way to open an event in a new range
+                  flushSync(() => {
+                    setViewDate(june17);
+                  });
+                  onOpenResult(handleRef.current?.openEventPopover('june3'));
+                }}
+                type="button">
+                Go
+              </button>
+              <ScheduleWithHandle
+                eventsList={[...handleEvents, june3Event]}
+                handleRef={handleRef}
+                viewDate={viewDate}
+              />
+            </>
+          );
+        }
+
+        it('opens an event in the new range', () => {
+          const onOpenResult = vi.fn<(isOpened: boolean | undefined) => void>();
+          render(<NavigateAndOpen onOpenResult={onOpenResult} />);
+
+          fireEvent.click(screen.getByRole('button', {name: 'Go'}));
+
+          expect(onOpenResult).toHaveBeenCalledExactlyOnceWith(true);
+          const pill = screen.getByTestId('schedule-event-june3');
+          expect(pill).toHaveAttribute('aria-expanded', 'true');
+          expect(pill).toHaveFocus();
+          expect(onEventPopoverShow).toHaveBeenCalledOnce();
+          expect(onEventPopoverHide).not.toHaveBeenCalled();
+        });
+      });
+
+      it('returns true without opening another piece when any piece is open', () => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(
+          <ScheduleWithHandle
+            eventsList={[
+              createEventFromISO({
+                category: 'Sync',
+                end: '2026-05-19T16:00:00.000Z',
+                id: 'spanning',
+                start: '2026-05-15T16:00:00.000Z',
+                title: 'Spanning',
+              }),
+            ]}
+            handleRef={handleRef}
+          />,
+        );
+        const [firstWeek, secondWeek] = screen.getAllByTestId(
+          'schedule-event-spanning',
+        );
+        fireEvent.click(secondWeek);
+
+        expect(openWithHandle(handleRef, 'spanning')).toBe(true);
+        expect(firstWeek).toHaveAttribute('aria-expanded', 'false');
+        expect(secondWeek).toHaveAttribute('aria-expanded', 'true');
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
+      it('opens the first week of a multi-week month event', () => {
+        const handleRef = createRef<ScheduleHandle>();
+        const spanningEvent = createEventFromISO({
+          category: 'Sync',
+          end: '2026-05-19T16:00:00.000Z',
+          id: 'spanning',
+          start: '2026-05-15T16:00:00.000Z',
+          title: 'Spanning',
+        });
+        render(
+          <ScheduleWithHandle
+            eventsList={[spanningEvent]}
+            handleRef={handleRef}
+          />,
+        );
+
+        expect(openWithHandle(handleRef, 'spanning')).toBe(true);
+        const segments = screen.getAllByTestId('schedule-event-spanning');
+        expect(segments).toHaveLength(2);
+        expect(segments[0]).toHaveAttribute('aria-expanded', 'true');
+        expect(segments[1]).toHaveAttribute('aria-expanded', 'false');
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+      });
+
+      describe('with "+N more" all-day overflow', () => {
+        const sundayMonday = createEventFromISO({
+          category: 'Sync',
+          end: '2026-05-11',
+          id: 'sunday-monday',
+          start: '2026-05-10',
+          title: 'Sunday-Monday',
+        });
+        const singleAllDayWeek = createScheduleWeeklyView({
+          allDayEventLimit: 1,
+        });
+
+        it('never opens a pill inside a closed overflow popover', () => {
+          const handleRef = createRef<ScheduleHandle>();
+          const hiddenEvent = createEventFromISO({
+            category: 'Sync',
+            end: '2026-05-10',
+            id: 'hidden',
+            start: '2026-05-10',
+            // Sorts after Sunday-Monday, so it is the one hidden.
+            title: 'Zulu',
+          });
+          render(
+            <ScheduleWithHandle
+              eventsList={[sundayMonday, hiddenEvent]}
+              handleRef={handleRef}
+              view={singleAllDayWeek}
+            />,
+          );
+          const seeMore = screen.getByRole('button', {
+            name: /Show 1 more all-day events for Sunday/,
+          });
+          // Opening it once keeps its pills mounted after it closes.
+          fireEvent.click(seeMore);
+          expect(
+            screen.getByTestId('schedule-all-day-see-more-2026-05-10'),
+          ).toContainElement(screen.getByTestId('schedule-event-hidden'));
+          fireEvent.click(seeMore);
+
+          expect(openWithHandle(handleRef, 'hidden')).toBe(false);
+          expect(screen.getByTestId('schedule-event-hidden')).toHaveAttribute(
+            'aria-expanded',
+            'false',
+          );
+          expect(onEventPopoverShow).not.toHaveBeenCalled();
+        });
       });
     });
 
