@@ -6,20 +6,14 @@ const schedulePopoverDismissPointerEvents = new WeakSet<Event>();
 
 /**
  * A rendered event pill with popover content. `ScheduleHandle.openEventPopover`
- * opens the first of an event's openable pills in document order.
+ * opens the first of an event's pills in document order.
  */
 export interface ScheduleEventPopoverOpener {
   element: HTMLElement;
   getIsOpen: () => boolean;
   /**
-   * Whether `openEventPopover` may open this pill; off for pills in a "+N
-   * more" overflow and for the later pieces of a split time-grid event.
-   */
-  isOpenable: boolean;
-  /**
    * Opens the popover (a no-op while it is being dismissed), then scrolls the
-   * pill into view and focuses it. If the popover is already open, only
-   * reports it shown again to plugins that were last told it hid.
+   * pill into view and focuses it.
    */
   open: () => void;
 }
@@ -30,9 +24,7 @@ export interface ScheduleInteractionState {
   markPopoverHidden: (token: symbol) => void;
   markPopoverShown: (token: symbol) => void;
   /**
-   * Opens the popover of the event's first openable pill and returns whether
-   * it is open; `false` when no openable pill is registered. When any pill
-   * for the event is already open, it calls that pill's `open` instead.
+   * Opens the event's first pill unless one is open; returns whether one is.
    */
   openEventPopover(eventID: string): boolean;
   /**
@@ -104,16 +96,11 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     },
     openEventPopover: eventID => {
       const openers = [...(eventPopoverOpeners.get(eventID) ?? [])];
-      const openOpener = openers.find(opener => opener.getIsOpen());
-      if (openOpener != null) {
-        openOpener.open();
+      if (openers.some(opener => opener.getIsOpen())) {
         return true;
       }
       let first: ScheduleEventPopoverOpener | undefined;
       openers.forEach(opener => {
-        if (!opener.isOpenable) {
-          return;
-        }
         if (
           first == null ||
           (first.element.compareDocumentPosition(opener.element) &

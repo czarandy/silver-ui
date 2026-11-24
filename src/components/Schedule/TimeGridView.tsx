@@ -278,7 +278,6 @@ const THREE_LINE_BLOCK_HEIGHT_PX = 51;
 function TimeGridEvent({
   currentTime,
   hourHeight,
-  isOpenableFromHandle,
   layout,
   maxHour,
   minHour,
@@ -286,11 +285,6 @@ function TimeGridEvent({
 }: {
   currentTime: number;
   hourHeight: number;
-  /**
-   * Whether this is the event's first shown piece; see
-   * `useScheduleEventPopover`.
-   */
-  isOpenableFromHandle: boolean;
   layout: TimedEventLayout;
   maxHour: number;
   minHour: number;
@@ -299,9 +293,7 @@ function TimeGridEvent({
   const {categoryMap, eventBorderStyle, plugins, timezoneID} =
     useScheduleContext();
   const {event} = layout;
-  const {popover, triggerProps} = useScheduleEventPopover(event, {
-    isOpenableFromHandle,
-  });
+  const {popover, triggerProps} = useScheduleEventPopover(event);
   const eventPluginProps = useScheduleEventPluginProps({
     event,
     layout: 'timeGrid',
@@ -557,18 +549,6 @@ export function TimeGridView({
       timedEventSpansByDay,
     ],
   );
-  // The grid's DOM runs hour by hour, so of an event split across days only
-  // its first shown piece opens from `ScheduleHandle.openEventPopover`.
-  const firstTimedEventLayouts = useMemo(() => {
-    const eventIDs = new Set<string>();
-    return new Set(
-      timedEventLayoutsByDay.flat().filter(layout => {
-        const isFirst = !eventIDs.has(layout.event.id);
-        eventIDs.add(layout.event.id);
-        return isFirst;
-      }),
-    );
-  }, [timedEventLayoutsByDay]);
   const currentTimePosition = useMemo(
     () => ({
       date: plainDateFromInstant(currentTime, timezoneID),
@@ -943,9 +923,6 @@ export function TimeGridView({
                             <TimeGridEvent
                               currentTime={currentTime}
                               hourHeight={normalizedHourHeight}
-                              isOpenableFromHandle={firstTimedEventLayouts.has(
-                                layout,
-                              )}
                               key={layout.event.id}
                               layout={layout}
                               maxHour={normalizedMaxHour}

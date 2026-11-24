@@ -167,13 +167,13 @@ export interface SchedulePlugin {
   /**
    * Called when an event popover closes, however it was dismissed, including
    * when its event pill unmounts while open. Also called when an open pill's
-   * effects disconnect (StrictMode, a hidden `<Activity>`), though the popover
-   * may stay open. `popoverId` matches the one passed to `onEventPopoverShow`.
+   * effects disconnect (StrictMode, a hidden `<Activity>`). `popoverId`
+   * matches the one passed to `onEventPopoverShow`.
    */
   onEventPopoverHide?: (event: CalendarEvent, popoverId: string) => void;
   /**
-   * Called when an event popover opens, in the same update that opens it.
-   * `popoverId` identifies the popover; an event split across several pills
+   * Called when an event popover opens, in the same update that opens it,
+   * and again when an open pill's effects reconnect. `popoverId` identifies the popover; an event split across several pills
    * (e.g. month-view week segments) has one popover per pill.
    */
   onEventPopoverShow?: (event: CalendarEvent, popoverId: string) => void;
@@ -230,26 +230,10 @@ export interface SchedulePlugin {
 export interface ScheduleHandle {
   /**
    * Opens the popover of the event with this ID as clicking its pill would:
-   * the pill is scrolled into view and focused, and plugin
-   * `onEventPopoverShow`/`onEventPopoverHide` hooks fire as usual. An event
-   * split across several pills (month weeks, days of a multi-day event) opens
-   * from the piece on its earliest shown day.
-   *
-   * It acts on what the schedule has rendered, so call it once the event is
-   * shown: from an effect (a parent's mount effect works, since pills
-   * register before parent effects run), or after `flushSync` when changing
-   * `viewDate` or `view` in the same handler. Under StrictMode, call it from
-   * the effect without a run-once guard: the re-run's call reports the
-   * still-open popover shown again after the simulated unmount reported it
-   * hidden, so plugins with effect-scoped state reload.
-   *
-   * Returns whether the popover is open, including when one of the event's
-   * pills already was (nothing is scrolled again). Returns `false` while the
-   * popover is being dismissed, or when no pill for the event is rendered
-   * with popover content, such as an event outside the shown range, not yet
-   * loaded, or only inside a "+N more" overflow. A call made while the
-   * browser is light-dismissing that same popover, such as from a click
-   * outside it, can return `true` just before it closes.
+   * the pill is scrolled into view and focused, and plugin popover hooks fire.
+   * Call it once the pill is rendered, e.g. from a mount effect, or after
+   * `flushSync` when changing `viewDate` or `view`. Returns whether the
+   * popover is open; `false` when no pill with popover content is rendered.
    */
   openEventPopover(eventID: string): boolean;
 }

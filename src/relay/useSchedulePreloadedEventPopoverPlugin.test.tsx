@@ -187,10 +187,13 @@ function PopoverSlotsHarness({
  */
 function DeepLinkFixture({
   entryPoint,
+  isOpenedOnce,
 }: {
   entryPoint: TestEntryPoint;
+  isOpenedOnce: boolean;
 }): ReactElement {
   const handleRef = useRef<ScheduleHandle>(null);
+  const hasOpenedRef = useRef(false);
   const resolve = useCallback(
     (event: CalendarEvent) =>
       scheduleEventEntryPoint(entryPoint, {id: event.id}, {label: 'linked'}),
@@ -198,8 +201,12 @@ function DeepLinkFixture({
   );
   const plugin = useSchedulePreloadedEventPopoverPlugin({resolve});
   useEffect(() => {
+    if (isOpenedOnce && hasOpenedRef.current) {
+      return;
+    }
+    hasOpenedRef.current = true;
     handleRef.current?.openEventPopover('appointment');
-  }, []);
+  }, [isOpenedOnce]);
   return (
     <Schedule
       events={events}
@@ -278,26 +285,32 @@ describe('useSchedulePreloadedEventPopoverPlugin', () => {
     expect(meeting.getPreloadProps).not.toHaveBeenCalled();
   });
 
-  it('renders a popover opened from a mount effect under StrictMode', async () => {
-    const {appointment} = await createLoadedEntryPoints();
-    render(
-      <StrictMode>
-        <RelayEnvironmentProvider environment={createEnvironment()}>
-          <DeepLinkFixture entryPoint={appointment.entryPoint} />
-        </RelayEnvironmentProvider>
-      </StrictMode>,
-    );
+  it.each([false, true])(
+    'renders a popover opened from a mount effect under StrictMode (run once: %s)',
+    async isOpenedOnce => {
+      const {appointment} = await createLoadedEntryPoints();
+      render(
+        <StrictMode>
+          <RelayEnvironmentProvider environment={createEnvironment()}>
+            <DeepLinkFixture
+              entryPoint={appointment.entryPoint}
+              isOpenedOnce={isOpenedOnce}
+            />
+          </RelayEnvironmentProvider>
+        </StrictMode>,
+      );
 
-    expect(screen.getByTestId('schedule-event-appointment')).toHaveAttribute(
-      'aria-expanded',
-      'true',
-    );
-    // StrictMode's simulated unmount disposes the store; the remount's show
-    // loads the EntryPoint again.
-    expect(
-      await screen.findByText('appointment:appointment:linked'),
-    ).toBeInTheDocument();
-  });
+      expect(screen.getByTestId('schedule-event-appointment')).toHaveAttribute(
+        'aria-expanded',
+        'true',
+      );
+      // StrictMode's simulated unmount disposes the store; the remount's show
+      // loads the EntryPoint again.
+      expect(
+        await screen.findByText('appointment:appointment:linked'),
+      ).toBeInTheDocument();
+    },
+  );
 
   it('chooses the EntryPoint per event', async () => {
     const {appointment, meeting} = await createLoadedEntryPoints();

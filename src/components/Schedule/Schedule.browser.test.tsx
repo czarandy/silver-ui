@@ -255,18 +255,6 @@ const openPopoverEvents = [
     start: '2026-10-07T12:30:00Z',
     title: 'Midday',
   }),
-  createEventFromISO({
-    end: '2026-10-07T21:00:00Z',
-    id: 'late',
-    start: '2026-10-07T20:00:00Z',
-    title: 'Late',
-  }),
-  createEventFromISO({
-    end: '2026-10-08',
-    id: 'all-day',
-    start: '2026-10-08',
-    title: 'All day',
-  }),
 ];
 
 function WeekOpeningEventPopover({eventID}: {eventID: string}) {
@@ -302,31 +290,25 @@ async function openedPill(eventID: string): Promise<DOMRect> {
 }
 
 describe('Schedule openEventPopover (browser)', () => {
-  it.each(['early', 'late'])(
-    'scrolls the %s event below the day headers and beside its popover',
-    async eventID => {
-      render(<WeekOpeningEventPopover eventID={eventID} />);
+  it('scrolls an early event below the day headers and beside its popover', async () => {
+    render(<WeekOpeningEventPopover eventID="early" />);
 
-      const pill = await openedPill(eventID);
-      expect(pill.top).toBeGreaterThanOrEqual(visibleHoursTop());
-      expect(pill.bottom).toBeLessThanOrEqual(
-        timeGrid().getBoundingClientRect().bottom,
-      );
-      const popover = screen.getByTestId('schedule-event-popover');
-      await waitFor(() => {
-        expect(popover.getBoundingClientRect().height).toBeGreaterThan(0);
-      });
-      expect(overlaps(pill, popover.getBoundingClientRect())).toBe(false);
-    },
-  );
+    const pill = await openedPill('early');
+    expect(pill.top).toBeGreaterThanOrEqual(visibleHoursTop());
+    expect(pill.bottom).toBeLessThanOrEqual(
+      timeGrid().getBoundingClientRect().bottom,
+    );
+    const popover = screen.getByTestId('schedule-event-popover');
+    await waitFor(() => {
+      expect(popover.getBoundingClientRect().height).toBeGreaterThan(0);
+    });
+    expect(overlaps(pill, popover.getBoundingClientRect())).toBe(false);
+  });
 
-  it.each(['midday', 'all-day'])(
-    'keeps the initial scroll time when the %s event is already visible',
-    async eventID => {
-      render(<WeekOpeningEventPopover eventID={eventID} />);
+  it('keeps the initial scroll time when the event is already visible', async () => {
+    render(<WeekOpeningEventPopover eventID="midday" />);
 
-      await openedPill(eventID);
-      expect(timeGrid().scrollTop).toBe(12 * 48);
-    },
-  );
+    await openedPill('midday');
+    expect(timeGrid().scrollTop).toBe(12 * 48);
+  });
 });

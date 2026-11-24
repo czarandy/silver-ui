@@ -329,10 +329,7 @@ export function hasEventPopoverPlugin(
  * plugin supplies content for the event, in which case the pill stays a static,
  * non-interactive element (unchanged default behavior).
  *
- * `isOpenableFromHandle` (default `true`) lets
- * `ScheduleHandle.openEventPopover` open the pill. It is off for pills inside
- * a "+N more" overflow popover, hidden until the overflow opens, and for the
- * later pieces of an event split across time-grid days.
+ * `isOpenableFromHandle` (default `true`) is off inside "+N more" overflow.
  */
 export function useScheduleEventPopover(
   event: CalendarEvent,
@@ -354,9 +351,6 @@ export function useScheduleEventPopover(
   useIsomorphicLayoutEffect(() => {
     latestRef.current = {event, plugins};
   }, [event, plugins]);
-  // Whether the layer is open, and whether plugins were last told it is.
-  // They differ after effects disconnect (StrictMode, <Activity>) and report
-  // a hide for a popover still open.
   const isOpenRef = useRef(false);
   const isShownRef = useRef(false);
   const notifyHide = useCallback(() => {
@@ -372,9 +366,6 @@ export function useScheduleEventPopover(
   const handleShow = useCallback(() => {
     interactionState.markPopoverShown(interactionTokenRef.current);
     isOpenRef.current = true;
-    if (isShownRef.current) {
-      return;
-    }
     isShownRef.current = true;
     const latest = latestRef.current;
     latest.plugins.forEach(plugin =>
@@ -392,8 +383,15 @@ export function useScheduleEventPopover(
     },
     [interactionState],
   );
-  // An open popover removed with its pill never fires `onHide`.
-  useEffect(() => notifyHide, [notifyHide]);
+  useEffect(() => {
+    // Effects that reconnect while open (StrictMode, <Activity>) report the
+    // show again, after the disconnect reported a hide.
+    if (isOpenRef.current) {
+      handleShow();
+    }
+    // An open popover removed with its pill never fires `onHide`.
+    return notifyHide;
+  }, [handleShow, notifyHide]);
   const eventPopoverPlugin = plugins.find(
     plugin => plugin.renderEventPopover != null,
   );
@@ -410,21 +408,14 @@ export function useScheduleEventPopover(
   // the trigger is mounted.
   const registerRef = useCallback(
     (element: HTMLElement | null) => {
-      if (element == null) {
+      if (element == null || !isOpenableFromHandle) {
         return;
       }
       const getIsOpen = (): boolean => isOpenRef.current;
       return interactionState.registerEventPopover(event.id, {
         element,
         getIsOpen,
-        isOpenable: isOpenableFromHandle,
         open: () => {
-          if (getIsOpen()) {
-            // Report it shown again to plugins told it hid when effects
-            // disconnected (StrictMode), so they reload what they released.
-            handleShow();
-            return;
-          }
           showRef.current();
           // `show` does nothing while the popover is being dismissed.
           if (!getIsOpen()) {
@@ -439,7 +430,7 @@ export function useScheduleEventPopover(
         },
       });
     },
-    [event.id, handleShow, interactionState, isOpenableFromHandle, showRef],
+    [event.id, interactionState, isOpenableFromHandle, showRef],
   );
   const triggerRef = useMergeRefs(popover.triggerRef, registerRef);
   const controls = useMemo(
@@ -632,7 +623,7 @@ export function CalendarEventPill({
   event: CalendarEvent;
   isFullWidth?: boolean;
   /**
-   * See `useScheduleEventPopover`; `false` inside "+N more" overflow.
+   * `false` inside "+N more" overflow.
    */
   isOpenableFromHandle?: boolean;
   isPast?: boolean;
@@ -682,7 +673,7 @@ export function CalendarMonthEventPill({
 }: {
   event: CalendarEvent;
   /**
-   * See `useScheduleEventPopover`; `false` inside "+N more" overflow.
+   * `false` inside "+N more" overflow.
    */
   isOpenableFromHandle?: boolean;
   isPast?: boolean;
