@@ -3717,8 +3717,10 @@ describe('Schedule', () => {
     }
 
     function FillWeek({
+      handleRef,
       height = 'fill',
     }: {
+      handleRef?: RefObject<ScheduleHandle | null>;
       height?: ScheduleHeight;
     }): React.JSX.Element {
       const popoverPlugin = useScheduleEventPopoverPlugin();
@@ -3732,6 +3734,7 @@ describe('Schedule', () => {
               title: 'Early',
             }),
           ]}
+          handleRef={handleRef}
           height={height}
           plugins={[popoverPlugin]}
           timezoneID="UTC"
@@ -3800,6 +3803,32 @@ describe('Schedule', () => {
         grid().style.getPropertyValue('--schedule-fixed-rows-height'),
       ).toBe('');
     });
+
+    it.each([
+      {isOpened: false, scrollTop: 12 * 48},
+      {isOpened: true, scrollTop: 0},
+    ])(
+      'skips a deferred initial scroll once the handle opens an event (opened: $isOpened)',
+      ({isOpened, scrollTop}) => {
+        vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
+        // No layout at mount, as in a closed dialog.
+        gridClientHeight = 0;
+        const handleRef = createRef<ScheduleHandle>();
+        render(<FillWeek handleRef={handleRef} />);
+        act(() => {
+          if (isOpened) {
+            handleRef.current?.openEventPopover('early');
+          }
+        });
+
+        gridClientHeight = 400;
+        act(() => {
+          resizeObserver.resize(grid());
+        });
+
+        expect(grid().scrollTop).toBe(scrollTop);
+      },
+    );
   });
 
   describe('event resize plugin', () => {
@@ -4627,13 +4656,11 @@ describe('Schedule', () => {
         expect(onEventPopoverHide).toHaveBeenCalledOnce();
       });
 
-      it('reports a close when the open pill unmounts', async () => {
+      it('reports a close when the open pill unmounts', () => {
         const {rerender} = render(<ScheduleWithLifecycle />);
 
         fireEvent.click(screen.getByTestId('schedule-event-visible'));
         rerender(<ScheduleWithLifecycle eventsList={[]} />);
-        // Reported once the unmount is known not to be a StrictMode remount.
-        await flushPromises();
 
         expect(onEventPopoverHide).toHaveBeenCalledExactlyOnceWith(
           popoverEvents[0],
@@ -4668,12 +4695,11 @@ describe('Schedule', () => {
           );
         }
 
-        it('keeps show and hide paired when it hides an open popover', async () => {
+        it('keeps show and hide paired when it hides an open popover', () => {
           const {rerender} = render(renderInActivity('visible'));
           fireEvent.click(screen.getByTestId('schedule-event-visible'));
 
           rerender(renderInActivity('hidden'));
-          await flushPromises();
           expect(onEventPopoverHide).toHaveBeenCalledOnce();
 
           rerender(renderInActivity('visible'));
@@ -4687,13 +4713,12 @@ describe('Schedule', () => {
           );
         });
 
-        it('syncs the pill closed when the browser closed it while hidden', async () => {
+        it('syncs the pill closed when the browser closed it while hidden', () => {
           const {rerender} = render(renderInActivity('visible'));
           const pill = screen.getByTestId('schedule-event-visible');
           fireEvent.click(pill);
 
           rerender(renderInActivity('hidden'));
-          await flushPromises();
           // Another auto popover closed it while its toggle listener was gone.
           isLayerOpen = false;
           rerender(renderInActivity('visible'));
@@ -4864,7 +4889,7 @@ describe('Schedule', () => {
         expect(pill).toHaveFocus();
       });
 
-      it('opens once from a mount effect under StrictMode', async () => {
+      it('opens once from a mount effect under StrictMode, with plugins told show, hide, show', () => {
         const onOpenResult = vi.fn<(isOpened: boolean | undefined) => void>();
         render(
           <StrictMode>
@@ -4874,15 +4899,22 @@ describe('Schedule', () => {
             />
           </StrictMode>,
         );
-        await flushPromises();
 
         expect(onOpenResult.mock.calls).toEqual([[true], [true]]);
         expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
           'aria-expanded',
           'true',
         );
-        expect(onEventPopoverShow).toHaveBeenCalledOnce();
-        expect(onEventPopoverHide).not.toHaveBeenCalled();
+        // The simulated unmount reports a hide, so plugins that release
+        // state in effect cleanups get a fresh show for the remount.
+        expect(onEventPopoverShow).toHaveBeenCalledTimes(2);
+        expect(onEventPopoverHide).toHaveBeenCalledOnce();
+        expect(onEventPopoverHide.mock.invocationCallOrder[0]).toBeGreaterThan(
+          onEventPopoverShow.mock.invocationCallOrder[0] ?? 0,
+        );
+        expect(onEventPopoverHide.mock.invocationCallOrder[0]).toBeLessThan(
+          onEventPopoverShow.mock.invocationCallOrder[1] ?? 0,
+        );
         expect(scrollIntoView).toHaveBeenCalledOnce();
       });
 
@@ -5040,6 +5072,34 @@ describe('Schedule', () => {
         });
       });
 
+      it('returns true without opening another piece when any piece is open', () => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(
+          <ScheduleWithHandle
+            eventsList={[
+              createEventFromISO({
+                category: 'Sync',
+                end: '2026-05-19T16:00:00.000Z',
+                id: 'spanning',
+                start: '2026-05-15T16:00:00.000Z',
+                title: 'Spanning',
+              }),
+            ]}
+            handleRef={handleRef}
+          />,
+        );
+        const [firstWeek, secondWeek] = screen.getAllByTestId(
+          'schedule-event-spanning',
+        );
+        fireEvent.click(secondWeek);
+
+        expect(openWithHandle(handleRef, 'spanning')).toBe(true);
+        expect(firstWeek).toHaveAttribute('aria-expanded', 'false');
+        expect(secondWeek).toHaveAttribute('aria-expanded', 'true');
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
       it('opens the first week of a multi-week month event', () => {
         const handleRef = createRef<ScheduleHandle>();
         const spanningEvent = createEventFromISO({
@@ -5078,9 +5138,23 @@ describe('Schedule', () => {
           openedCell: 'schedule-time-grid-cell-2026-05-10-0',
           start: '2026-05-09T22:00:00.000Z',
         },
+        {
+          // Spans three days: the piece on its first day.
+          end: '2026-05-13T02:00:00.000Z',
+          openedCell: 'schedule-time-grid-cell-2026-05-11-22',
+          start: '2026-05-11T22:00:00.000Z',
+        },
+        {
+          // Its first day's piece falls outside the shown hours.
+          end: '2026-05-12T10:00:00.000Z',
+          maxHour: 20,
+          minHour: 8,
+          openedCell: 'schedule-time-grid-cell-2026-05-12-8',
+          start: '2026-05-11T22:00:00.000Z',
+        },
       ])(
-        'opens the first shown piece of a timed event split at midnight ($start)',
-        ({end, openedCell, start}) => {
+        'opens the first shown piece of a timed event split at midnight ($start to $end)',
+        ({end, maxHour, minHour, openedCell, start}) => {
           const handleRef = createRef<ScheduleHandle>();
           const overnightEvent = createEventFromISO({
             category: 'Sync',
@@ -5093,7 +5167,7 @@ describe('Schedule', () => {
             <ScheduleWithHandle
               eventsList={[overnightEvent]}
               handleRef={handleRef}
-              view={createScheduleWeeklyView()}
+              view={createScheduleWeeklyView({maxHour, minHour})}
             />,
           );
 

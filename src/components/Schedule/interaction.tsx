@@ -13,23 +13,21 @@ export interface ScheduleEventPopoverOpener {
   element: HTMLElement;
   getIsOpen: () => boolean;
   /**
-   * Opens the popover unless it is already open. Opening does nothing while
-   * the popover is being dismissed.
+   * Opens the popover; does nothing while it is being dismissed.
    */
   open: () => void;
 }
 
 export interface ScheduleInteractionState {
-  /**
-   * Queues a pill's report that its popover hid with it, for a microtask
-   * later (so StrictMode's simulated remount can cancel it), or for before
-   * the next `openEventPopover`, so plugins see that hide before its show.
-   */
-  deferHideReport: (report: () => void) => void;
   dispose: () => void;
   markPointerDown: (event: Event) => void;
   markPopoverHidden: (token: symbol) => void;
   markPopoverShown: (token: symbol) => void;
+  /**
+   * Calls `listener` whenever `openEventPopover` opens a popover; returns the
+   * unsubscribe.
+   */
+  onEventPopoverOpen: (listener: () => void) => () => void;
   /**
    * Opens the popover of the event's first registered pill and returns
    * whether it is open; `false` when no pill for the event is registered.
@@ -59,14 +57,7 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     string,
     Set<ScheduleEventPopoverOpener>
   >();
-  const hideReports = new Set<() => void>();
-  const flushHideReports = (): void => {
-    const reports = [...hideReports];
-    hideReports.clear();
-    reports.forEach(report => {
-      report();
-    });
-  };
+  const openListeners = new Set<() => void>();
 
   const clearHiddenFrame = (token: symbol): void => {
     const frame = hiddenFrames.get(token);
@@ -110,16 +101,13 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       recentlyHiddenPopovers.delete(token);
       openPopovers.add(token);
     },
-    deferHideReport: report => {
-      if (hideReports.size === 0) {
-        queueMicrotask(flushHideReports);
-      }
-      hideReports.add(report);
-    },
     openEventPopover: eventID => {
-      flushHideReports();
+      const openers = [...(eventPopoverOpeners.get(eventID) ?? [])];
+      if (openers.some(opener => opener.getIsOpen())) {
+        return true;
+      }
       let first: ScheduleEventPopoverOpener | undefined;
-      eventPopoverOpeners.get(eventID)?.forEach(opener => {
+      openers.forEach(opener => {
         if (
           first == null ||
           (first.element.compareDocumentPosition(opener.element) &
@@ -133,7 +121,19 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
         return false;
       }
       first.open();
-      return first.getIsOpen();
+      if (!first.getIsOpen()) {
+        return false;
+      }
+      openListeners.forEach(listener => {
+        listener();
+      });
+      return true;
+    },
+    onEventPopoverOpen: listener => {
+      openListeners.add(listener);
+      return () => {
+        openListeners.delete(listener);
+      };
     },
     registerEventPopover: (eventID, opener) => {
       let openers = eventPopoverOpeners.get(eventID);

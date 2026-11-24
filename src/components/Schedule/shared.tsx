@@ -328,6 +328,7 @@ export function hasEventPopoverPlugin(
  */
 function isLayerClosedByBrowser(layerId: string): boolean {
   if (
+    typeof CSS === 'undefined' ||
     // jsdom lacks CSS.supports.
     typeof CSS.supports !== 'function' ||
     !CSS.supports('selector(:popover-open)')
@@ -414,12 +415,10 @@ export function useScheduleEventPopover(
   });
   const {hide, id: layerId, show} = popover;
   const showRef = useLatest(show);
-  const isConnectedRef = useRef(false);
   useEffect(() => {
     const token = interactionTokenRef.current;
-    isConnectedRef.current = true;
-    // Reconnected while open (<Activity>): report it again, since the
-    // disconnect reported a hide. The browser may have closed the popover
+    // Reconnected while open (StrictMode, <Activity>): report it again, since
+    // the disconnect reported a hide. The browser may have closed the popover
     // while its toggle listener was detached; if so, sync the layer closed.
     if (isOpenRef.current) {
       if (isLayerClosedByBrowser(layerId)) {
@@ -430,16 +429,10 @@ export function useScheduleEventPopover(
       }
     }
     return () => {
-      isConnectedRef.current = false;
       interactionState.unregisterPopover(token);
-      // An open popover removed with its pill never fires `onHide`, so report
-      // one here. Deferred, so effects that disconnect and immediately
-      // reconnect (StrictMode) don't report a hide for a popover still open.
-      interactionState.deferHideReport(() => {
-        if (!isConnectedRef.current) {
-          notifyHide();
-        }
-      });
+      // An open popover removed or hidden with its pill never fires `onHide`,
+      // so report one here.
+      notifyHide();
     };
   }, [hide, interactionState, layerId, notifyHide, notifyShow]);
   // Registers the pill for `ScheduleHandle.openEventPopover` for as long as
@@ -454,9 +447,6 @@ export function useScheduleEventPopover(
         element,
         getIsOpen: () => isOpenRef.current,
         open: () => {
-          if (isOpenRef.current) {
-            return;
-          }
           // Guarded for test environments without layout, such as jsdom.
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- jsdom lacks scrollIntoView
           element.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
@@ -481,8 +471,7 @@ export function useScheduleEventPopover(
     }
     return null;
   }, [controls, event, plugins]);
-  const hasContent = isNonEmptyReactNode(content);
-  if (!hasContent) {
+  if (!isNonEmptyReactNode(content)) {
     return {};
   }
   return {

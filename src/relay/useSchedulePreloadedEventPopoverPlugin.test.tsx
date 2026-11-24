@@ -1,5 +1,11 @@
 import {act, fireEvent, render, screen, within} from '@testing-library/react';
-import {useCallback, useEffect, type ReactElement} from 'react';
+import {
+  StrictMode,
+  useCallback,
+  useEffect,
+  useRef,
+  type ReactElement,
+} from 'react';
 import {RelayEnvironmentProvider, type EntryPointProps} from 'react-relay';
 import {Environment, Network, RecordSource, Store} from 'relay-runtime';
 import {afterEach, describe, expect, it, vi} from 'vitest';
@@ -9,7 +15,7 @@ import {
 } from 'components/Schedule/CalendarEvent';
 import {createScheduleMonthlyView} from 'components/Schedule/MonthlyView';
 import {Schedule} from 'components/Schedule/Schedule';
-import type {SchedulePlugin} from 'components/Schedule/types';
+import type {ScheduleHandle, SchedulePlugin} from 'components/Schedule/types';
 import {Temporal} from 'internal/temporal';
 import {createJSResourceReference} from 'relay/createJSResourceReference';
 import {
@@ -176,6 +182,36 @@ function PopoverSlotsHarness({
   );
 }
 
+/**
+ * Opens the appointment's popover from a mount effect, as a deep link does.
+ */
+function DeepLinkFixture({
+  entryPoint,
+}: {
+  entryPoint: TestEntryPoint;
+}): ReactElement {
+  const handleRef = useRef<ScheduleHandle>(null);
+  const resolve = useCallback(
+    (event: CalendarEvent) =>
+      scheduleEventEntryPoint(entryPoint, {id: event.id}, {label: 'linked'}),
+    [entryPoint],
+  );
+  const plugin = useSchedulePreloadedEventPopoverPlugin({resolve});
+  useEffect(() => {
+    handleRef.current?.openEventPopover('appointment');
+  }, []);
+  return (
+    <Schedule
+      events={events}
+      handleRef={handleRef}
+      plugins={[plugin]}
+      timezoneID="UTC"
+      view={createScheduleMonthlyView()}
+      viewDate={viewDate}
+    />
+  );
+}
+
 async function createLoadedEntryPoints() {
   const appointment = createTestEntryPoint('appointment');
   const meeting = createTestEntryPoint('meeting');
@@ -240,6 +276,27 @@ describe('useSchedulePreloadedEventPopoverPlugin', () => {
     ).toBeInTheDocument();
     expect(appointment.getPreloadProps).toHaveBeenCalledOnce();
     expect(meeting.getPreloadProps).not.toHaveBeenCalled();
+  });
+
+  it('renders a popover opened from a mount effect under StrictMode', async () => {
+    const {appointment} = await createLoadedEntryPoints();
+    render(
+      <StrictMode>
+        <RelayEnvironmentProvider environment={createEnvironment()}>
+          <DeepLinkFixture entryPoint={appointment.entryPoint} />
+        </RelayEnvironmentProvider>
+      </StrictMode>,
+    );
+
+    expect(screen.getByTestId('schedule-event-appointment')).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    // StrictMode's simulated unmount disposes the store; the remount's show
+    // loads the EntryPoint again.
+    expect(
+      await screen.findByText('appointment:appointment:linked'),
+    ).toBeInTheDocument();
   });
 
   it('chooses the EntryPoint per event', async () => {
