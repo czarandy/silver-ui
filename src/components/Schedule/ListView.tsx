@@ -63,7 +63,6 @@ function ListEvent({
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
   const {popover, triggerProps} = useScheduleEventPopover(event, {
-    isOpenableFromHandle: true,
     placement: 'end',
   });
   const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});

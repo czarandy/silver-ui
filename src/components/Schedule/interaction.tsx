@@ -5,13 +5,17 @@ import {createContext, use} from 'react';
 const schedulePopoverDismissPointerEvents = new WeakSet<Event>();
 
 /**
- * A rendered event pill whose popover `ScheduleHandle.openEventPopover` can
- * open. Of an event's registered pills, the first in document order opens;
- * views register only the pieces that may open.
+ * A rendered event pill with popover content. `ScheduleHandle.openEventPopover`
+ * opens the first of an event's openable pills in document order.
  */
 export interface ScheduleEventPopoverOpener {
   element: HTMLElement;
   getIsOpen: () => boolean;
+  /**
+   * Whether `openEventPopover` may open this pill; off for pills in a "+N
+   * more" overflow and for the later pieces of a split time-grid event.
+   */
+  isOpenable: boolean;
   /**
    * Opens the popover; does nothing while it is being dismissed.
    */
@@ -24,13 +28,9 @@ export interface ScheduleInteractionState {
   markPopoverHidden: (token: symbol) => void;
   markPopoverShown: (token: symbol) => void;
   /**
-   * Calls `listener` whenever `openEventPopover` opens a popover; returns the
-   * unsubscribe.
-   */
-  onEventPopoverOpen: (listener: () => void) => () => void;
-  /**
-   * Opens the popover of the event's first registered pill and returns
-   * whether it is open; `false` when no pill for the event is registered.
+   * Opens the popover of the event's first openable pill and returns whether
+   * it is open. Does nothing, returning `true`, when any pill for the event is
+   * already open; returns `false` when no openable pill is registered.
    */
   openEventPopover(eventID: string): boolean;
   /**
@@ -57,7 +57,6 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     string,
     Set<ScheduleEventPopoverOpener>
   >();
-  const openListeners = new Set<() => void>();
 
   const clearHiddenFrame = (token: symbol): void => {
     const frame = hiddenFrames.get(token);
@@ -108,6 +107,9 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       }
       let first: ScheduleEventPopoverOpener | undefined;
       openers.forEach(opener => {
+        if (!opener.isOpenable) {
+          return;
+        }
         if (
           first == null ||
           (first.element.compareDocumentPosition(opener.element) &
@@ -121,19 +123,7 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
         return false;
       }
       first.open();
-      if (!first.getIsOpen()) {
-        return false;
-      }
-      openListeners.forEach(listener => {
-        listener();
-      });
-      return true;
-    },
-    onEventPopoverOpen: listener => {
-      openListeners.add(listener);
-      return () => {
-        openListeners.delete(listener);
-      };
+      return first.getIsOpen();
     },
     registerEventPopover: (eventID, opener) => {
       let openers = eventPopoverOpeners.get(eventID);

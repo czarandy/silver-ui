@@ -3717,10 +3717,8 @@ describe('Schedule', () => {
     }
 
     function FillWeek({
-      handleRef,
       height = 'fill',
     }: {
-      handleRef?: RefObject<ScheduleHandle | null>;
       height?: ScheduleHeight;
     }): React.JSX.Element {
       const popoverPlugin = useScheduleEventPopoverPlugin();
@@ -3734,7 +3732,6 @@ describe('Schedule', () => {
               title: 'Early',
             }),
           ]}
-          handleRef={handleRef}
           height={height}
           plugins={[popoverPlugin]}
           timezoneID="UTC"
@@ -3803,32 +3800,6 @@ describe('Schedule', () => {
         grid().style.getPropertyValue('--schedule-fixed-rows-height'),
       ).toBe('');
     });
-
-    it.each([
-      {isOpened: false, scrollTop: 12 * 48},
-      {isOpened: true, scrollTop: 0},
-    ])(
-      'skips a deferred initial scroll once the handle opens an event (opened: $isOpened)',
-      ({isOpened, scrollTop}) => {
-        vi.stubGlobal('ResizeObserver', resizeObserver.ResizeObserverStub);
-        // No layout at mount, as in a closed dialog.
-        gridClientHeight = 0;
-        const handleRef = createRef<ScheduleHandle>();
-        render(<FillWeek handleRef={handleRef} />);
-        act(() => {
-          if (isOpened) {
-            handleRef.current?.openEventPopover('early');
-          }
-        });
-
-        gridClientHeight = 400;
-        act(() => {
-          resizeObserver.resize(grid());
-        });
-
-        expect(grid().scrollTop).toBe(scrollTop);
-      },
-    );
   });
 
   describe('event resize plugin', () => {
@@ -4727,6 +4698,33 @@ describe('Schedule', () => {
           expect(onEventPopoverShow).toHaveBeenCalledOnce();
           expect(onEventPopoverHide).toHaveBeenCalledOnce();
         });
+
+        it('leaves focus where the user moved it when syncing closed', async () => {
+          const renderWithSearch = (mode: 'hidden' | 'visible') => (
+            <>
+              <input aria-label="Search" />
+              {renderInActivity(mode)}
+            </>
+          );
+          const {rerender} = render(renderWithSearch('visible'));
+          const pill = screen.getByTestId('schedule-event-visible');
+          pill.focus();
+          fireEvent.click(pill);
+          // Autofocus moves into the popover, which would return focus to the
+          // pill on close.
+          await waitFor(() => {
+            expect(pill).not.toHaveFocus();
+          });
+
+          rerender(renderWithSearch('hidden'));
+          isLayerOpen = false;
+          const search = screen.getByRole('textbox', {name: 'Search'});
+          search.focus();
+          rerender(renderWithSearch('visible'));
+
+          expect(pill).toHaveAttribute('aria-expanded', 'false');
+          expect(search).toHaveFocus();
+        });
       });
 
       it('does not report a close when a closed pill unmounts', () => {
@@ -5072,6 +5070,38 @@ describe('Schedule', () => {
         });
       });
 
+      it('returns true without opening the first piece of an overnight event when a later one is open', () => {
+        const handleRef = createRef<ScheduleHandle>();
+        render(
+          <ScheduleWithHandle
+            eventsList={[
+              createEventFromISO({
+                category: 'Sync',
+                end: '2026-05-13T02:00:00.000Z',
+                id: 'overnight',
+                start: '2026-05-12T22:00:00.000Z',
+                title: 'Overnight',
+              }),
+            ]}
+            handleRef={handleRef}
+            view={createScheduleWeeklyView()}
+          />,
+        );
+        const start = within(
+          screen.getByTestId('schedule-time-grid-cell-2026-05-12-22'),
+        ).getByTestId('schedule-event-overnight');
+        const end = within(
+          screen.getByTestId('schedule-time-grid-cell-2026-05-13-0'),
+        ).getByTestId('schedule-event-overnight');
+        fireEvent.click(end);
+
+        expect(openWithHandle(handleRef, 'overnight')).toBe(true);
+        expect(start).toHaveAttribute('aria-expanded', 'false');
+        expect(end).toHaveAttribute('aria-expanded', 'true');
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      });
+
       it('returns true without opening another piece when any piece is open', () => {
         const handleRef = createRef<ScheduleHandle>();
         render(
@@ -5238,6 +5268,32 @@ describe('Schedule', () => {
             'false',
           );
           expect(onEventPopoverShow).not.toHaveBeenCalled();
+        });
+
+        it('returns true when the event is open from an overflow popover', () => {
+          const handleRef = createRef<ScheduleHandle>();
+          render(
+            <ScheduleWithHandle
+              eventsList={[sundayMonday, mondayTuesday]}
+              handleRef={handleRef}
+              view={singleAllDayWeek}
+            />,
+          );
+          fireEvent.click(
+            screen.getByRole('button', {
+              name: /Show 1 more all-day events for Monday/,
+            }),
+          );
+          const [mondayPill, tuesdayPill] = screen.getAllByTestId(
+            'schedule-event-monday-tuesday',
+          );
+          fireEvent.click(mondayPill);
+          expect(mondayPill).toHaveAttribute('aria-expanded', 'true');
+
+          expect(openWithHandle(handleRef, 'monday-tuesday')).toBe(true);
+          expect(tuesdayPill).toHaveAttribute('aria-expanded', 'false');
+          expect(onEventPopoverShow).toHaveBeenCalledOnce();
+          expect(scrollIntoView).not.toHaveBeenCalled();
         });
 
         it('opens the shown piece of an event hidden on its first day', () => {

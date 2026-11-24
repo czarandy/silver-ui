@@ -849,7 +849,6 @@ function ScheduleMonthlyView({
                 style={getMonthEventSegmentStyle(segment)}>
                 <CalendarMonthEventPill
                   event={segment.event}
-                  isOpenableFromHandle
                   isPast={isEventInPast(segment.event, currentTime, timezoneID)}
                 />
               </div>
@@ -879,6 +878,7 @@ function ScheduleMonthlyView({
                     renderEvent={event => (
                       <CalendarMonthEventPill
                         event={event}
+                        isOpenableFromHandle={false}
                         isPast={isEventInPast(event, currentTime, timezoneID)}
                       />
                     )}

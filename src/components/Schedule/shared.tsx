@@ -323,8 +323,9 @@ export function hasEventPopoverPlugin(
 }
 
 /**
- * Whether the browser has closed the popover layer with this id. Environments
- * that cannot match `:popover-open`, such as jsdom, answer `false`.
+ * Whether the browser has closed the popover layer with this id. Answers
+ * `false` where `:popover-open` is unsupported: jsdom matches it as `false`
+ * rather than throwing, so a capability check stands in for try/catch.
  */
 function isLayerClosedByBrowser(layerId: string): boolean {
   if (
@@ -345,14 +346,15 @@ function isLayerClosedByBrowser(layerId: string): boolean {
  * plugin supplies content for the event, in which case the pill stays a static,
  * non-interactive element (unchanged default behavior).
  *
- * `isOpenableFromHandle` lets `ScheduleHandle.openEventPopover` open the pill.
- * Pills inside a "+N more" overflow popover leave it off, since they are
- * hidden until the overflow opens.
+ * `isOpenableFromHandle` (default `true`) lets
+ * `ScheduleHandle.openEventPopover` open the pill. Pills inside a "+N more"
+ * overflow popover turn it off, since they are hidden until the overflow
+ * opens.
  */
 export function useScheduleEventPopover(
   event: CalendarEvent,
   {
-    isOpenableFromHandle = false,
+    isOpenableFromHandle = true,
     placement = 'end',
   }: {isOpenableFromHandle?: boolean; placement?: LayerPlacement} = {},
 ): {
@@ -422,7 +424,8 @@ export function useScheduleEventPopover(
     // while its toggle listener was detached; if so, sync the layer closed.
     if (isOpenRef.current) {
       if (isLayerClosedByBrowser(layerId)) {
-        hide();
+        // Focus has moved on since; leave it there.
+        hide({isFocusRestoreSkipped: true});
       } else {
         interactionState.markPopoverShown(token);
         notifyShow();
@@ -440,12 +443,13 @@ export function useScheduleEventPopover(
   // focus returns to it on close) and is scrolled into view first.
   const registerRef = useCallback(
     (element: HTMLElement | null) => {
-      if (element == null || !isOpenableFromHandle) {
+      if (element == null) {
         return;
       }
       return interactionState.registerEventPopover(event.id, {
         element,
         getIsOpen: () => isOpenRef.current,
+        isOpenable: isOpenableFromHandle,
         open: () => {
           // Guarded for test environments without layout, such as jsdom.
           // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- jsdom lacks scrollIntoView
@@ -648,7 +652,7 @@ export function CalendarEventPill({
   event: CalendarEvent;
   isFullWidth?: boolean;
   /**
-   * See `useScheduleEventPopover`; off inside "+N more" overflow.
+   * See `useScheduleEventPopover`; `false` inside "+N more" overflow.
    */
   isOpenableFromHandle?: boolean;
   isPast?: boolean;
@@ -698,7 +702,7 @@ export function CalendarMonthEventPill({
 }: {
   event: CalendarEvent;
   /**
-   * See `useScheduleEventPopover`; off inside "+N more" overflow.
+   * See `useScheduleEventPopover`; `false` inside "+N more" overflow.
    */
   isOpenableFromHandle?: boolean;
   isPast?: boolean;

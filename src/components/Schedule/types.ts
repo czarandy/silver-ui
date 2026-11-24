@@ -238,11 +238,15 @@ export interface ScheduleHandle {
    * It acts on what the schedule has rendered, so call it once the event is
    * shown: from an effect (a parent's mount effect works, since pills
    * register before parent effects run), or after `flushSync` when changing
-   * `viewDate` or `view` in the same handler. Returns whether the popover is
-   * open, including when it already was (it is not scrolled again); `false`
-   * when no pill for the event is rendered with popover content, such as an
-   * event outside the shown range, not yet loaded, or only inside a "+N more"
-   * overflow.
+   * `viewDate` or `view` in the same handler.
+   *
+   * Returns whether the popover is open, including when one of the event's
+   * pills already was (nothing is scrolled again). Returns `false` while the
+   * popover is being dismissed, or when no pill for the event is rendered
+   * with popover content, such as an event outside the shown range, not yet
+   * loaded, or only inside a "+N more" overflow. A call made while the
+   * browser is light-dismissing that same popover, such as from a click
+   * outside it, can return `true` just before it closes.
    */
   openEventPopover(eventID: string): boolean;
 }

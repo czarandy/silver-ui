@@ -14,7 +14,6 @@ import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {eventOccursOnDate, isDayEvent} from 'components/Schedule/dateMath';
-import {useScheduleInteractionState} from 'components/Schedule/interaction';
 import {
   CalendarEventPill,
   formatHour,
@@ -621,7 +620,9 @@ export function TimeGridView({
     };
     // In fill mode the day headers stick over the top of the scrolling grid.
     // Timed events keep this much scroll margin (see `ScheduleEvent.recipe.ts`)
-    // so scrolling one into view leaves it below the headers.
+    // so scrolling one into view leaves it below the headers. (Scroll padding
+    // on the grid would also push the sticky all-day pills, which sit in that
+    // padding, out of place when they scroll into view.)
     const updateLayout = () => {
       updateInlineOverflow();
       if (height === 'fill' && fixedRows != null) {
@@ -652,7 +653,6 @@ export function TimeGridView({
   // Scrolls once, when the grid first has layout. Later renders (paging, the
   // current-time tick, new events) keep wherever the user has scrolled since.
   const hasAppliedInitialScrollRef = useRef(false);
-  const interactionState = useScheduleInteractionState();
   useIsomorphicLayoutEffect(() => {
     if (hasAppliedInitialScrollRef.current) {
       return;
@@ -698,19 +698,10 @@ export function TimeGridView({
       }
     };
     observeResize(grid, onResize);
-    // An event the handle opens meanwhile stays where it is rather than be
-    // scrolled away once the grid has layout.
-    const stopSkippingOnOpen = interactionState.onEventPopoverOpen(() => {
-      hasAppliedInitialScrollRef.current = true;
-    });
-    return () => {
-      unobserveResize(grid, onResize);
-      stopSkippingOnOpen();
-    };
+    return () => unobserveResize(grid, onResize);
   }, [
     days,
     initialScrollTime,
-    interactionState,
     normalizedHourHeight,
     normalizedMinHour,
     timezoneID,
@@ -820,7 +811,6 @@ export function TimeGridView({
                       {visibleDayEvents.map(event => (
                         <CalendarEventPill
                           event={event}
-                          isOpenableFromHandle
                           isPast={isEventInPast(event, currentTime, timezoneID)}
                           key={event.id}
                         />
@@ -837,6 +827,7 @@ export function TimeGridView({
                             <CalendarEventPill
                               event={event}
                               isFullWidth
+                              isOpenableFromHandle={false}
                               isPast={isEventInPast(
                                 event,
                                 currentTime,
