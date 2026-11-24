@@ -233,23 +233,16 @@ export interface ScheduleHandle {
    * the popover closes), and plugin `onEventPopoverShow`/`onEventPopoverHide`
    * hooks fire as usual. An event split across several pills (month weeks,
    * days of a multi-day event) opens from the piece on its earliest shown
-   * day. Pills collapsed into a "+N more" overflow are not opened.
+   * day.
    *
-   * Resolves `true` once the popover is open (including when it already
-   * was), or `false` if it does not open:
-   * - The call waits for the schedule's next render, so changing `viewDate`
-   *   or `view` in the same event handler, directly or in `startTransition`,
-   *   opens the event in the new range. With an async event source still
-   *   loading that range, it also waits for those events to load and render.
-   *   If the pill is rendered by then it opens; if not, or if the range
-   *   changes first, the call resolves `false` and never opens later.
-   * - If focus has moved to another element while the call waited, it
-   *   resolves `false` rather than take focus back.
-   * - Only the most recent event waits: a call for another event resolves a
-   *   waiting call with `false`, while calls for the same event share its
-   *   result. A call while the schedule is unmounted or hidden by
-   *   `<Activity>`, or a waiting call when it unmounts or hides, resolves
-   *   `false`.
+   * It acts on what the schedule has rendered, so call it once the event is
+   * shown: from an effect (a parent's mount effect works, since pills
+   * register before parent effects run), or after `flushSync` when changing
+   * `viewDate` or `view` in the same handler. Returns whether the popover is
+   * open, including when it already was (it is not scrolled again); `false`
+   * when no pill for the event is rendered with popover content, such as an
+   * event outside the shown range, not yet loaded, or only inside a "+N more"
+   * overflow.
    */
-  openEventPopover(eventID: string): Promise<boolean>;
+  openEventPopover(eventID: string): boolean;
 }

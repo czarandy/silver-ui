@@ -848,8 +848,8 @@ function ScheduleMonthlyView({
                 key={`${segment.event.id}:${segment.week}:${segment.columnStart}`}
                 style={getMonthEventSegmentStyle(segment)}>
                 <CalendarMonthEventPill
-                  dayIndex={segment.week * 7 + segment.columnStart}
                   event={segment.event}
+                  isOpenableFromHandle
                   isPast={isEventInPast(segment.event, currentTime, timezoneID)}
                 />
               </div>

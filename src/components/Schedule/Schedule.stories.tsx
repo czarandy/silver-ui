@@ -1430,7 +1430,7 @@ export const OpenEventPopover: Story = {
           <Button
             label="Open evening review"
             onClick={() => {
-              void handleRef.current?.openEventPopover('evening-review');
+              handleRef.current?.openEventPopover('evening-review');
             }}
             size="sm"
           />

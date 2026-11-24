@@ -14,7 +14,6 @@ import {scheduleEventRecipe} from 'components/Schedule/ScheduleEvent.recipe';
 import {scheduleTimeGridViewRecipe} from 'components/Schedule/TimeGridView.recipe';
 import {useScheduleContext} from 'components/Schedule/context';
 import {eventOccursOnDate, isDayEvent} from 'components/Schedule/dateMath';
-import {useScheduleInteractionState} from 'components/Schedule/interaction';
 import {
   CalendarEventPill,
   formatHour,
@@ -99,6 +98,10 @@ interface TimedEventExtent {
 interface TimedEventDaySpan {
   endMinute: number;
   event: CalendarInstantEvent;
+  /**
+   * Whether the event started on an earlier day.
+   */
+  isContinuation: boolean;
   startMinute: number;
 }
 
@@ -106,6 +109,7 @@ interface TimedEventLayout {
   columnCount: number;
   event: CalendarInstantEvent;
   height: number;
+  isContinuation: boolean;
   level: number;
   startHour: number;
   top: number;
@@ -157,6 +161,7 @@ function getTimedEventDaySpans(
         ? extent.endMinute
         : MINUTES_PER_DAY,
       event: extent.event,
+      isContinuation: !plainDateIsEqual(extent.startDate, day),
       startMinute: plainDateIsEqual(extent.startDate, day)
         ? extent.startMinute
         : 0,
@@ -192,7 +197,7 @@ function getTimedEventLayouts({
   const minMinute = minHour * 60;
   const maxMinute = maxHour * 60;
   const visibleSpans = spans
-    .map(({event, endMinute, startMinute}) => {
+    .map(({event, endMinute, isContinuation, startMinute}) => {
       if (endMinute <= minMinute || startMinute >= maxMinute) {
         return null;
       }
@@ -201,13 +206,14 @@ function getTimedEventLayouts({
         maxMinute,
         Math.max(visibleStart + 15, endMinute),
       );
-      return {event, visibleEnd, visibleStart};
+      return {event, isContinuation, visibleEnd, visibleStart};
     })
     .filter(
       (
         layout,
       ): layout is {
         event: CalendarInstantEvent;
+        isContinuation: boolean;
         visibleEnd: number;
         visibleStart: number;
       } => layout != null && layout.visibleEnd > layout.visibleStart,
@@ -232,7 +238,7 @@ function getTimedEventLayouts({
     }
   };
 
-  visibleSpans.forEach(({event, visibleEnd, visibleStart}) => {
+  visibleSpans.forEach(({event, isContinuation, visibleEnd, visibleStart}) => {
     // Events that connect through any overlap share a collision group and use
     // its maximum simultaneous column count. Reset at the half-open boundary
     // so an event beginning exactly when the previous group ends can use the
@@ -255,6 +261,7 @@ function getTimedEventLayouts({
       columnCount: 1,
       event,
       height: ((visibleEnd - visibleStart) / 60) * hourHeight,
+      isContinuation,
       level,
       startHour,
       top: ((visibleStart - startHour * 60) / 60) * hourHeight,
@@ -278,16 +285,20 @@ const THREE_LINE_BLOCK_HEIGHT_PX = 51;
  */
 function TimeGridEvent({
   currentTime,
-  dayIndex,
   hourHeight,
+  isOpenableFromHandle,
   layout,
   maxHour,
   minHour,
   overlapBehavior,
 }: {
   currentTime: number;
-  dayIndex: number;
   hourHeight: number;
+  /**
+   * Whether this is the event's first shown piece; see
+   * `useScheduleEventPopover`.
+   */
+  isOpenableFromHandle: boolean;
   layout: TimedEventLayout;
   maxHour: number;
   minHour: number;
@@ -296,7 +307,9 @@ function TimeGridEvent({
   const {categoryMap, eventBorderStyle, plugins, timezoneID} =
     useScheduleContext();
   const {event} = layout;
-  const {popover, triggerProps} = useScheduleEventPopover(event, {dayIndex});
+  const {popover, triggerProps} = useScheduleEventPopover(event, {
+    isOpenableFromHandle,
+  });
   const eventPluginProps = useScheduleEventPluginProps({
     event,
     layout: 'timeGrid',
@@ -653,7 +666,6 @@ export function TimeGridView({
   // Scrolls once, when the grid first has layout. Later renders (paging, the
   // current-time tick, new events) keep wherever the user has scrolled since.
   const hasAppliedInitialScrollRef = useRef(false);
-  const interactionState = useScheduleInteractionState();
   useIsomorphicLayoutEffect(() => {
     if (hasAppliedInitialScrollRef.current) {
       return;
@@ -672,13 +684,6 @@ export function TimeGridView({
         return false;
       }
       hasAppliedInitialScrollRef.current = true;
-      // An event the handle opened while the grid had no layout could not be
-      // scrolled to then; bring it into view instead of the initial time.
-      const openedPill = interactionState.getOpenedEventPill();
-      if (openedPill != null && grid.contains(openedPill)) {
-        openedPill.scrollIntoView({block: 'nearest', inline: 'nearest'});
-        return true;
-      }
       const target = getInitialScrollTarget(
         initialScrollTime,
         days,
@@ -710,7 +715,6 @@ export function TimeGridView({
   }, [
     days,
     initialScrollTime,
-    interactionState,
     normalizedHourHeight,
     normalizedMinHour,
     timezoneID,
@@ -819,8 +823,8 @@ export function TimeGridView({
                     <div className={styles.allDayEvents}>
                       {visibleDayEvents.map(event => (
                         <CalendarEventPill
-                          dayIndex={index}
                           event={event}
+                          isOpenableFromHandle
                           isPast={isEventInPast(event, currentTime, timezoneID)}
                           key={event.id}
                         />
@@ -951,8 +955,13 @@ export function TimeGridView({
                           {visibleTimedEventLayouts.map(layout => (
                             <TimeGridEvent
                               currentTime={currentTime}
-                              dayIndex={index}
                               hourHeight={normalizedHourHeight}
+                              // The grid's DOM runs hour by hour, so a timed
+                              // event split at midnight opens from the piece
+                              // on its first shown day, not document order.
+                              isOpenableFromHandle={
+                                index === 0 || !layout.isContinuation
+                              }
                               key={layout.event.id}
                               layout={layout}
                               maxHour={normalizedMaxHour}

@@ -6,11 +6,10 @@ const schedulePopoverDismissPointerEvents = new WeakSet<Event>();
 
 /**
  * A rendered event pill whose popover `ScheduleHandle.openEventPopover` can
- * open. `dayIndex` is the index, within the view's days, of the first day the
- * pill covers, so an event split across pills opens from its earliest piece.
+ * open. Of an event's registered pills, the first in document order opens;
+ * views register only the pieces that may open.
  */
 export interface ScheduleEventPopoverOpener {
-  dayIndex: number;
   element: HTMLElement;
   getIsOpen: () => boolean;
   /**
@@ -21,21 +20,21 @@ export interface ScheduleEventPopoverOpener {
 }
 
 export interface ScheduleInteractionState {
-  dispose: () => void;
   /**
-   * The pill `openEventPopover` last opened, while its popover stays open. The
-   * time grid scrolls it into view, rather than to its initial scroll time,
-   * when the grid gets layout after the open.
+   * Queues a pill's report that its popover hid with it, for a microtask
+   * later (so StrictMode's simulated remount can cancel it), or for before
+   * the next `openEventPopover`, so plugins see that hide before its show.
    */
-  getOpenedEventPill: () => HTMLElement | null;
+  deferHideReport: (report: () => void) => void;
+  dispose: () => void;
   markPointerDown: (event: Event) => void;
   markPopoverHidden: (token: symbol) => void;
   markPopoverShown: (token: symbol) => void;
   /**
-   * Opens the popover of the event's earliest registered pill and returns
-   * whether it is open, or `null` when no pill for the event is registered.
+   * Opens the popover of the event's first registered pill and returns
+   * whether it is open; `false` when no pill for the event is registered.
    */
-  openEventPopover(eventID: string): boolean | null;
+  openEventPopover(eventID: string): boolean;
   /**
    * Registers a rendered pill with popover content; returns the unregister.
    */
@@ -60,7 +59,14 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     string,
     Set<ScheduleEventPopoverOpener>
   >();
-  let openedEventPill: ScheduleEventPopoverOpener | null = null;
+  const hideReports = new Set<() => void>();
+  const flushHideReports = (): void => {
+    const reports = [...hideReports];
+    hideReports.clear();
+    reports.forEach(report => {
+      report();
+    });
+  };
 
   const clearHiddenFrame = (token: symbol): void => {
     const frame = hiddenFrames.get(token);
@@ -104,24 +110,30 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       recentlyHiddenPopovers.delete(token);
       openPopovers.add(token);
     },
-    getOpenedEventPill: () =>
-      openedEventPill?.getIsOpen() === true ? openedEventPill.element : null,
+    deferHideReport: report => {
+      if (hideReports.size === 0) {
+        queueMicrotask(flushHideReports);
+      }
+      hideReports.add(report);
+    },
     openEventPopover: eventID => {
+      flushHideReports();
       let first: ScheduleEventPopoverOpener | undefined;
       eventPopoverOpeners.get(eventID)?.forEach(opener => {
-        if (first == null || opener.dayIndex < first.dayIndex) {
+        if (
+          first == null ||
+          (first.element.compareDocumentPosition(opener.element) &
+            Node.DOCUMENT_POSITION_PRECEDING) !==
+            0
+        ) {
           first = opener;
         }
       });
       if (first == null) {
-        return null;
+        return false;
       }
       first.open();
-      const isOpen = first.getIsOpen();
-      if (isOpen) {
-        openedEventPill = first;
-      }
-      return isOpen;
+      return first.getIsOpen();
     },
     registerEventPopover: (eventID, opener) => {
       let openers = eventPopoverOpeners.get(eventID);
@@ -132,9 +144,6 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
       openers.add(opener);
       return () => {
         openers.delete(opener);
-        if (openedEventPill === opener) {
-          openedEventPill = null;
-        }
         if (
           openers.size === 0 &&
           eventPopoverOpeners.get(eventID) === openers

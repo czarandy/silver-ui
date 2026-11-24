@@ -1,13 +1,10 @@
 'use client';
 
 import {
-  startTransition,
-  useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
   useReducer,
-  useRef,
   useState,
   type CSSProperties,
   type PointerEvent,
@@ -43,7 +40,6 @@ import type {
   ScheduleZonedInstant,
 } from 'components/Schedule/types';
 import {getBrowserTimezoneID, nowEpochMilliseconds} from 'internal/time';
-import {useIsomorphicLayoutEffect} from 'internal/useIsomorphicLayoutEffect';
 import {cx} from 'utils/cx';
 
 const EMPTY_CATEGORIES: ReadonlyArray<ScheduleCategory> = [];
@@ -80,7 +76,7 @@ export interface ScheduleProps<
    */
   events: ScheduleEventSource;
   /**
-   * Imperative handle for opening an event's popover from code.
+   * Receives a `ScheduleHandle` for opening an event's popover from code.
    */
   handleRef?: Ref<ScheduleHandle>;
   /**
@@ -201,139 +197,10 @@ function useRange<Options extends ScheduleViewOptions>(
   );
 }
 
-interface PendingEventPopover {
-  eventID: string;
-  /**
-   * `document.activeElement` when the call was made.
-   */
-  focusedElement: Element | null;
-  /**
-   * The range of the first commit after the call; null until then.
-   */
-  rangeKey: string | null;
-  /**
-   * Calls waiting for this event, which all get its result.
-   */
-  resolvers: ((isOpened: boolean) => void)[];
-}
-
-/**
- * Implements `ScheduleHandle`. A call waits for a commit it requests (in a
- * transition, so it commits with navigation the caller started in the same
- * event) and, on the range that commit shows, for that range's events to load.
- * Rendered beside the view so the requested commit re-renders only this.
- */
-function ScheduleEventPopoverHandle({
-  handleRef,
-  interactionState,
-  isLoading,
-  range,
-}: {
-  handleRef: Ref<ScheduleHandle> | undefined;
-  interactionState: ScheduleInteractionState;
-  isLoading: boolean;
-  range: ScheduleRange;
-}): null {
-  const pendingRef = useRef<PendingEventPopover | null>(null);
-  const isConnectedRef = useRef(false);
-  const [commitRequest, requestCommit] = useReducer(
-    (count: number) => count + 1,
-    0,
-  );
-  const settle = useCallback((isOpened: boolean) => {
-    const pending = pendingRef.current;
-    pendingRef.current = null;
-    pending?.resolvers.forEach(resolve => {
-      resolve(isOpened);
-    });
-  }, []);
-  useImperativeHandle(
-    handleRef,
-    () => ({
-      openEventPopover: async eventID =>
-        new Promise<boolean>(resolve => {
-          // Unmounted, or hidden by <Activity>.
-          if (!isConnectedRef.current) {
-            resolve(false);
-            return;
-          }
-          const resolvers: PendingEventPopover['resolvers'] = [resolve];
-          const waiting = pendingRef.current;
-          if (waiting?.eventID === eventID) {
-            resolvers.push(...waiting.resolvers);
-          } else {
-            settle(false);
-          }
-          pendingRef.current = {
-            eventID,
-            focusedElement: document.activeElement,
-            rangeKey: null,
-            resolvers,
-          };
-          startTransition(() => {
-            requestCommit();
-          });
-        }),
-    }),
-    [settle],
-  );
-  useIsomorphicLayoutEffect(() => {
-    isConnectedRef.current = true;
-    return () => {
-      isConnectedRef.current = false;
-      // Deferred, so StrictMode's simulated unmount and remount doesn't
-      // settle a waiting call.
-      queueMicrotask(() => {
-        if (!isConnectedRef.current) {
-          settle(false);
-        }
-      });
-    };
-  }, [settle]);
-  const rangeKey = `${range.start}:${range.end}`;
-  // Runs after the commit a call requests and after any range or loading
-  // change, once pills have registered from their refs.
-  useEffect(() => {
-    const pending = pendingRef.current;
-    if (pending == null) {
-      return;
-    }
-    pending.rangeKey ??= rangeKey;
-    if (pending.rangeKey !== rangeKey) {
-      // The user paged away before the events loaded.
-      settle(false);
-      return;
-    }
-    // Opens after the hide reports that pills removed in this commit defer to
-    // a microtask, so plugins see the old popover hide before this one shows.
-    queueMicrotask(() => {
-      if (pendingRef.current !== pending || !isConnectedRef.current) {
-        return;
-      }
-      const focusedElement = document.activeElement;
-      if (
-        focusedElement !== pending.focusedElement &&
-        focusedElement != null &&
-        focusedElement !== document.body
-      ) {
-        // Focus moved on while the call waited; don't take it back.
-        settle(false);
-        return;
-      }
-      const isOpened = interactionState.openEventPopover(pending.eventID);
-      if (isOpened != null || !isLoading) {
-        settle(isOpened ?? false);
-      }
-    });
-  }, [commitRequest, interactionState, isLoading, rangeKey, settle]);
-  return null;
-}
-
 function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories,
   eventBorderStyle,
   eventSource,
-  handleRef,
   height,
   highlightDate,
   interactionState,
@@ -344,7 +211,6 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
   categories: ReadonlyArray<ScheduleCategory>;
   eventBorderStyle: ScheduleEventBorderStyle;
   eventSource: ScheduleEventSource;
-  handleRef: Ref<ScheduleHandle> | undefined;
   height: ScheduleHeight;
   highlightDate: ScheduleZonedInstant;
   interactionState: ScheduleInteractionState;
@@ -405,12 +271,6 @@ function ScheduleViewContent<Options extends ScheduleViewOptions>({
       <ScheduleContext value={contextValue}>
         <Component height={height} options={view.options} />
       </ScheduleContext>
-      <ScheduleEventPopoverHandle
-        handleRef={handleRef}
-        interactionState={interactionState}
-        isLoading={isLoading}
-        range={range}
-      />
     </ScheduleInteractionContext>
   );
 }
@@ -449,6 +309,13 @@ export function Schedule({
   );
   const interactionState = useMemo(() => createScheduleInteractionState(), []);
   useEffect(() => () => interactionState.dispose(), [interactionState]);
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      openEventPopover: eventID => interactionState.openEventPopover(eventID),
+    }),
+    [interactionState],
+  );
   const handlePointerDownCapture = (event: PointerEvent<HTMLDivElement>) => {
     interactionState.markPointerDown(event.nativeEvent);
   };
@@ -465,7 +332,6 @@ export function Schedule({
         categories={categories}
         eventBorderStyle={eventBorderStyle}
         eventSource={events}
-        handleRef={handleRef}
         height={height}
         highlightDate={highlightScheduleZonedInstant}
         interactionState={interactionState}

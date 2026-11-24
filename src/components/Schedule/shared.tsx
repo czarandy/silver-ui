@@ -323,23 +323,37 @@ export function hasEventPopoverPlugin(
 }
 
 /**
+ * Whether the browser has closed the popover layer with this id. Environments
+ * that cannot match `:popover-open`, such as jsdom, answer `false`.
+ */
+function isLayerClosedByBrowser(layerId: string): boolean {
+  if (
+    // jsdom lacks CSS.supports.
+    typeof CSS.supports !== 'function' ||
+    !CSS.supports('selector(:popover-open)')
+  ) {
+    return false;
+  }
+  return document.getElementById(layerId)?.matches(':popover-open') === false;
+}
+
+/**
  * Wires an event pill to its popover when an event popover plugin is active.
  * Returns `triggerProps` to spread onto the pill's `<button>` root and the
  * rendered `popover` layer to place as a sibling. Both are `undefined` when no
  * plugin supplies content for the event, in which case the pill stays a static,
  * non-interactive element (unchanged default behavior).
  *
- * `dayIndex` is the index, within the view's days, of the first day the pill
- * covers. Pills with one can be opened by `ScheduleHandle.openEventPopover`;
- * pills inside a "+N more" overflow popover omit it, since they are hidden
- * until the overflow opens.
+ * `isOpenableFromHandle` lets `ScheduleHandle.openEventPopover` open the pill.
+ * Pills inside a "+N more" overflow popover leave it off, since they are
+ * hidden until the overflow opens.
  */
 export function useScheduleEventPopover(
   event: CalendarEvent,
   {
-    dayIndex,
+    isOpenableFromHandle = false,
     placement = 'end',
-  }: {dayIndex?: number; placement?: LayerPlacement} = {},
+  }: {isOpenableFromHandle?: boolean; placement?: LayerPlacement} = {},
 ): {
   popover?: ReactNode;
   triggerProps?: ScheduleEventTriggerProps;
@@ -408,11 +422,11 @@ export function useScheduleEventPopover(
     // disconnect reported a hide. The browser may have closed the popover
     // while its toggle listener was detached; if so, sync the layer closed.
     if (isOpenRef.current) {
-      if (document.getElementById(layerId)?.matches(':popover-open') === true) {
+      if (isLayerClosedByBrowser(layerId)) {
+        hide();
+      } else {
         interactionState.markPopoverShown(token);
         notifyShow();
-      } else {
-        hide();
       }
     }
     return () => {
@@ -421,7 +435,7 @@ export function useScheduleEventPopover(
       // An open popover removed with its pill never fires `onHide`, so report
       // one here. Deferred, so effects that disconnect and immediately
       // reconnect (StrictMode) don't report a hide for a popover still open.
-      queueMicrotask(() => {
+      interactionState.deferHideReport(() => {
         if (!isConnectedRef.current) {
           notifyHide();
         }
@@ -433,11 +447,10 @@ export function useScheduleEventPopover(
   // focus returns to it on close) and is scrolled into view first.
   const registerRef = useCallback(
     (element: HTMLElement | null) => {
-      if (element == null || dayIndex == null) {
+      if (element == null || !isOpenableFromHandle) {
         return;
       }
       return interactionState.registerEventPopover(event.id, {
-        dayIndex,
         element,
         getIsOpen: () => isOpenRef.current,
         open: () => {
@@ -452,7 +465,7 @@ export function useScheduleEventPopover(
         },
       });
     },
-    [dayIndex, event.id, interactionState, showRef],
+    [event.id, interactionState, isOpenableFromHandle, showRef],
   );
   const triggerRef = useMergeRefs(popover.triggerRef, registerRef);
   const controls = useMemo(
@@ -638,21 +651,23 @@ function EventPillRoot({
  * Renders a colored pill displaying an event's accessible label.
  */
 export function CalendarEventPill({
-  dayIndex,
   event,
   isFullWidth = false,
+  isOpenableFromHandle,
   isPast = false,
 }: {
-  /**
-   * See `useScheduleEventPopover`; omitted inside "+N more" overflow.
-   */
-  dayIndex?: number;
   event: CalendarEvent;
   isFullWidth?: boolean;
+  /**
+   * See `useScheduleEventPopover`; off inside "+N more" overflow.
+   */
+  isOpenableFromHandle?: boolean;
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
-  const {popover, triggerProps} = useScheduleEventPopover(event, {dayIndex});
+  const {popover, triggerProps} = useScheduleEventPopover(event, {
+    isOpenableFromHandle,
+  });
   const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});
   const category = getCategory(categoryMap, event);
   const classes = scheduleEventRecipe({
@@ -688,19 +703,21 @@ export function CalendarEventPill({
 }
 
 export function CalendarMonthEventPill({
-  dayIndex,
   event,
+  isOpenableFromHandle,
   isPast = false,
 }: {
-  /**
-   * See `useScheduleEventPopover`; omitted inside "+N more" overflow.
-   */
-  dayIndex?: number;
   event: CalendarEvent;
+  /**
+   * See `useScheduleEventPopover`; off inside "+N more" overflow.
+   */
+  isOpenableFromHandle?: boolean;
   isPast?: boolean;
 }): React.JSX.Element {
   const {categoryMap, eventBorderStyle, timezoneID} = useScheduleContext();
-  const {popover, triggerProps} = useScheduleEventPopover(event, {dayIndex});
+  const {popover, triggerProps} = useScheduleEventPopover(event, {
+    isOpenableFromHandle,
+  });
   const pluginProps = useScheduleEventPluginProps({event, layout: 'month'});
   const category = getCategory(categoryMap, event);
   const startTimeLabel = getEventStartTimeLabel(event, timezoneID);

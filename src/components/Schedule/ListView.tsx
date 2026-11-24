@@ -55,17 +55,15 @@ const styles = scheduleListViewRecipe();
  * Renders a single event row in the list view.
  */
 function ListEvent({
-  dayIndex,
   event,
   isPast,
 }: {
-  dayIndex: number;
   event: CalendarEvent;
   isPast: boolean;
 }): React.JSX.Element {
   const {categoryMap, timezoneID} = useScheduleContext();
   const {popover, triggerProps} = useScheduleEventPopover(event, {
-    dayIndex,
+    isOpenableFromHandle: true,
     placement: 'end',
   });
   const pluginProps = useScheduleEventPluginProps({event, layout: 'inline'});
@@ -140,7 +138,7 @@ function ScheduleListView({
   const endDate = range.endDate.add({days: -1});
   const title = formatListRangeTitle(range.startDate, endDate);
   const visibleDays = days
-    .map((day, dayIndex) => {
+    .map(day => {
       const dayEvents = events.filter(event =>
         eventOccursOnDate(event, day, timezoneID),
       );
@@ -150,7 +148,6 @@ function ScheduleListView({
       return {
         day,
         dayEvents,
-        dayIndex,
         isCurrentDay,
         isHighlightedDay,
         isVisible: dayEvents.length > 0 || isCurrentDay || isBaseDay,
@@ -167,10 +164,7 @@ function ScheduleListView({
         role="region"
         tabIndex={0}>
         {visibleDays.map(
-          (
-            {day, dayEvents, dayIndex, isCurrentDay, isHighlightedDay},
-            index,
-          ) => {
+          ({day, dayEvents, isCurrentDay, isHighlightedDay}, index) => {
             const fullDate = plainDateFormat(day, DATE_FORMAT_WITH_WEEKDAY);
             const dayClasses = scheduleListViewRecipe({
               isHighlightedDay,
@@ -190,7 +184,6 @@ function ScheduleListView({
                 <div className={dayClasses.events}>
                   {renderListRows({
                     currentTime,
-                    dayIndex,
                     events: dayEvents,
                     isShowingCurrentTime: isCurrentDay && !isLoading,
                     timezoneID,
@@ -207,20 +200,17 @@ function ScheduleListView({
 
 function renderListRows({
   currentTime,
-  dayIndex,
   events,
   isShowingCurrentTime,
   timezoneID,
 }: {
   currentTime: Instant;
-  dayIndex: number;
   events: ReadonlyArray<CalendarEvent>;
   isShowingCurrentTime: boolean;
   timezoneID: string;
 }): React.JSX.Element[] {
   const rows = events.map(event => (
     <ListEvent
-      dayIndex={dayIndex}
       event={event}
       isPast={isEventInPast(event, currentTime, timezoneID)}
       key={event.id}
