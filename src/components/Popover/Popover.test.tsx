@@ -839,58 +839,6 @@ describe('usePopover isLazy', () => {
   });
 });
 
-describe('usePopover hide', () => {
-  function Fixture({
-    isFocusRestoreSkipped,
-  }: {
-    isFocusRestoreSkipped: boolean;
-  }): React.JSX.Element {
-    const popover = usePopover({isLazy: false, label: 'Actions'});
-    return (
-      <>
-        <button
-          onClick={() => popover.show()}
-          ref={popover.triggerRef}
-          type="button"
-          {...popover.triggerProps}>
-          Show
-        </button>
-        <button
-          onClick={() => popover.hide({isFocusRestoreSkipped})}
-          type="button">
-          Hide
-        </button>
-        {popover.render(<button type="button">Inside</button>)}
-      </>
-    );
-  }
-
-  it.each([
-    {focused: 'Show', isFocusRestoreSkipped: false},
-    {focused: 'Hide', isFocusRestoreSkipped: true},
-  ])(
-    'restores focus on hide unless isFocusRestoreSkipped=$isFocusRestoreSkipped',
-    async ({focused, isFocusRestoreSkipped}) => {
-      render(<Fixture isFocusRestoreSkipped={isFocusRestoreSkipped} />);
-      const trigger = screen.getByRole('button', {name: 'Show'});
-      trigger.focus();
-      fireEvent.click(trigger);
-      await waitFor(() =>
-        expect(
-          screen.getByRole('button', {hidden: true, name: 'Inside'}),
-        ).toHaveFocus(),
-      );
-
-      const hideButton = screen.getByRole('button', {name: 'Hide'});
-      hideButton.focus();
-      fireEvent.click(hideButton);
-
-      expect(trigger).toHaveAttribute('aria-expanded', 'false');
-      expect(screen.getByRole('button', {name: focused})).toHaveFocus();
-    },
-  );
-});
-
 describe('usePopover dismissal protection', () => {
   function ContextOpener() {
     const dialog = useDialogContext();

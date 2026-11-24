@@ -628,7 +628,7 @@ export function TimeGridView({
       if (height === 'fill' && fixedRows != null) {
         grid.style.setProperty(
           '--schedule-fixed-rows-height',
-          `${fixedRows.getBoundingClientRect().height}px`,
+          `${fixedRows.offsetHeight}px`,
         );
       }
     };

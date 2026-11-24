@@ -17,7 +17,9 @@ export interface ScheduleEventPopoverOpener {
    */
   isOpenable: boolean;
   /**
-   * Opens the popover; does nothing while it is being dismissed.
+   * Opens the popover (a no-op while it is being dismissed), then scrolls the
+   * pill into view and focuses it. If the popover is already open, only
+   * reports it shown again to plugins that were last told it hid.
    */
   open: () => void;
 }
@@ -29,8 +31,8 @@ export interface ScheduleInteractionState {
   markPopoverShown: (token: symbol) => void;
   /**
    * Opens the popover of the event's first openable pill and returns whether
-   * it is open. Does nothing, returning `true`, when any pill for the event is
-   * already open; returns `false` when no openable pill is registered.
+   * it is open; `false` when no openable pill is registered. When any pill
+   * for the event is already open, it calls that pill's `open` instead.
    */
   openEventPopover(eventID: string): boolean;
   /**
@@ -102,7 +104,9 @@ export function createScheduleInteractionState(): ScheduleInteractionState {
     },
     openEventPopover: eventID => {
       const openers = [...(eventPopoverOpeners.get(eventID) ?? [])];
-      if (openers.some(opener => opener.getIsOpen())) {
+      const openOpener = openers.find(opener => opener.getIsOpen());
+      if (openOpener != null) {
+        openOpener.open();
         return true;
       }
       let first: ScheduleEventPopoverOpener | undefined;

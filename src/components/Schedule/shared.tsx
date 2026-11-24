@@ -323,23 +323,6 @@ export function hasEventPopoverPlugin(
 }
 
 /**
- * Whether the browser has closed the popover layer with this id. Answers
- * `false` where `:popover-open` is unsupported: jsdom matches it as `false`
- * rather than throwing, so a capability check stands in for try/catch.
- */
-function isLayerClosedByBrowser(layerId: string): boolean {
-  if (
-    typeof CSS === 'undefined' ||
-    // jsdom lacks CSS.supports.
-    typeof CSS.supports !== 'function' ||
-    !CSS.supports('selector(:popover-open)')
-  ) {
-    return false;
-  }
-  return document.getElementById(layerId)?.matches(':popover-open') === false;
-}
-
-/**
  * Wires an event pill to its popover when an event popover plugin is active.
  * Returns `triggerProps` to spread onto the pill's `<button>` root and the
  * rendered `popover` layer to place as a sibling. Both are `undefined` when no
@@ -347,9 +330,9 @@ function isLayerClosedByBrowser(layerId: string): boolean {
  * non-interactive element (unchanged default behavior).
  *
  * `isOpenableFromHandle` (default `true`) lets
- * `ScheduleHandle.openEventPopover` open the pill. Pills inside a "+N more"
- * overflow popover turn it off, since they are hidden until the overflow
- * opens.
+ * `ScheduleHandle.openEventPopover` open the pill. It is off for pills inside
+ * a "+N more" overflow popover, hidden until the overflow opens, and for the
+ * later pieces of an event split across time-grid days.
  */
 export function useScheduleEventPopover(
   event: CalendarEvent,
@@ -372,19 +355,10 @@ export function useScheduleEventPopover(
     latestRef.current = {event, plugins};
   }, [event, plugins]);
   // Whether the layer is open, and whether plugins were last told it is.
-  // They differ only while effects are disconnected (StrictMode, <Activity>).
+  // They differ after effects disconnect (StrictMode, <Activity>) and report
+  // a hide for a popover still open.
   const isOpenRef = useRef(false);
   const isShownRef = useRef(false);
-  const notifyShow = useCallback(() => {
-    if (isShownRef.current) {
-      return;
-    }
-    isShownRef.current = true;
-    const latest = latestRef.current;
-    latest.plugins.forEach(plugin =>
-      plugin.onEventPopoverShow?.(latest.event, popoverId),
-    );
-  }, [popoverId]);
   const notifyHide = useCallback(() => {
     if (!isShownRef.current) {
       return;
@@ -398,13 +372,28 @@ export function useScheduleEventPopover(
   const handleShow = useCallback(() => {
     interactionState.markPopoverShown(interactionTokenRef.current);
     isOpenRef.current = true;
-    notifyShow();
-  }, [interactionState, notifyShow]);
+    if (isShownRef.current) {
+      return;
+    }
+    isShownRef.current = true;
+    const latest = latestRef.current;
+    latest.plugins.forEach(plugin =>
+      plugin.onEventPopoverShow?.(latest.event, popoverId),
+    );
+  }, [interactionState, popoverId]);
   const handleHide = useCallback(() => {
     interactionState.markPopoverHidden(interactionTokenRef.current);
     isOpenRef.current = false;
     notifyHide();
   }, [interactionState, notifyHide]);
+  useEffect(
+    () => () => {
+      interactionState.unregisterPopover(interactionTokenRef.current);
+    },
+    [interactionState],
+  );
+  // An open popover removed with its pill never fires `onHide`.
+  useEffect(() => notifyHide, [notifyHide]);
   const eventPopoverPlugin = plugins.find(
     plugin => plugin.renderEventPopover != null,
   );
@@ -415,51 +404,42 @@ export function useScheduleEventPopover(
     onShow: handleShow,
     role: 'dialog',
   });
-  const {hide, id: layerId, show} = popover;
+  const {hide, show} = popover;
   const showRef = useLatest(show);
-  useEffect(() => {
-    const token = interactionTokenRef.current;
-    // Reconnected while open (StrictMode, <Activity>): report it again, since
-    // the disconnect reported a hide. The browser may have closed the popover
-    // while its toggle listener was detached; if so, sync the layer closed.
-    if (isOpenRef.current) {
-      if (isLayerClosedByBrowser(layerId)) {
-        // Focus has moved on since; leave it there.
-        hide({isFocusRestoreSkipped: true});
-      } else {
-        interactionState.markPopoverShown(token);
-        notifyShow();
-      }
-    }
-    return () => {
-      interactionState.unregisterPopover(token);
-      // An open popover removed or hidden with its pill never fires `onHide`,
-      // so report one here.
-      notifyHide();
-    };
-  }, [hide, interactionState, layerId, notifyHide, notifyShow]);
   // Registers the pill for `ScheduleHandle.openEventPopover` for as long as
-  // the trigger is mounted. Opening matches a click: the pill takes focus (so
-  // focus returns to it on close) and is scrolled into view first.
+  // the trigger is mounted.
   const registerRef = useCallback(
     (element: HTMLElement | null) => {
       if (element == null) {
         return;
       }
+      const getIsOpen = (): boolean => isOpenRef.current;
       return interactionState.registerEventPopover(event.id, {
         element,
-        getIsOpen: () => isOpenRef.current,
+        getIsOpen,
         isOpenable: isOpenableFromHandle,
         open: () => {
-          // Guarded for test environments without layout, such as jsdom.
-          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- jsdom lacks scrollIntoView
+          if (getIsOpen()) {
+            // Report it shown again to plugins told it hid when effects
+            // disconnected (StrictMode), so they reload what they released.
+            handleShow();
+            return;
+          }
+          showRef.current();
+          // `show` does nothing while the popover is being dismissed.
+          if (!getIsOpen()) {
+            return;
+          }
+          // As after a click: the pill holds focus, so focus returns to it on
+          // close. Focused before the popover's autofocus runs, which records
+          // the element to return to.
+          // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- jsdom, including apps' tests, lacks scrollIntoView
           element.scrollIntoView?.({block: 'nearest', inline: 'nearest'});
           element.focus({preventScroll: true});
-          showRef.current();
         },
       });
     },
-    [event.id, interactionState, isOpenableFromHandle, showRef],
+    [event.id, handleShow, interactionState, isOpenableFromHandle, showRef],
   );
   const triggerRef = useMergeRefs(popover.triggerRef, registerRef);
   const controls = useMemo(

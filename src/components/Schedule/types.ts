@@ -166,8 +166,9 @@ export interface SchedulePlugin {
   ) => SchedulePluginElementProps;
   /**
    * Called when an event popover closes, however it was dismissed, including
-   * when its event pill unmounts while open. `popoverId` matches the one passed
-   * to `onEventPopoverShow`.
+   * when its event pill unmounts while open. Also called when an open pill's
+   * effects disconnect (StrictMode, a hidden `<Activity>`), though the popover
+   * may stay open. `popoverId` matches the one passed to `onEventPopoverShow`.
    */
   onEventPopoverHide?: (event: CalendarEvent, popoverId: string) => void;
   /**
@@ -229,16 +230,18 @@ export interface SchedulePlugin {
 export interface ScheduleHandle {
   /**
    * Opens the popover of the event with this ID as clicking its pill would:
-   * the pill is scrolled into view and focused (so focus returns to it when
-   * the popover closes), and plugin `onEventPopoverShow`/`onEventPopoverHide`
-   * hooks fire as usual. An event split across several pills (month weeks,
-   * days of a multi-day event) opens from the piece on its earliest shown
-   * day.
+   * the pill is scrolled into view and focused, and plugin
+   * `onEventPopoverShow`/`onEventPopoverHide` hooks fire as usual. An event
+   * split across several pills (month weeks, days of a multi-day event) opens
+   * from the piece on its earliest shown day.
    *
    * It acts on what the schedule has rendered, so call it once the event is
    * shown: from an effect (a parent's mount effect works, since pills
    * register before parent effects run), or after `flushSync` when changing
-   * `viewDate` or `view` in the same handler.
+   * `viewDate` or `view` in the same handler. Under StrictMode, call it from
+   * the effect without a run-once guard: the re-run's call reports the
+   * still-open popover shown again after the simulated unmount reported it
+   * hidden, so plugins with effect-scoped state reload.
    *
    * Returns whether the popover is open, including when one of the event's
    * pills already was (nothing is scrolled again). Returns `false` while the

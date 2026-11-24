@@ -8,7 +8,6 @@ import {
   within,
 } from '@testing-library/react';
 import {
-  Activity,
   Component,
   createRef,
   StrictMode,
@@ -3705,7 +3704,7 @@ describe('Schedule', () => {
 
   describe('fill time grid', () => {
     const resizeObserver = createResizeObserverStub();
-    let fixedRowsHeight = 64.4;
+    let fixedRowsHeight = 64;
     let gridClientHeight = 400;
 
     function fixedRows(): HTMLElement {
@@ -3745,16 +3744,15 @@ describe('Schedule', () => {
     }
 
     beforeEach(() => {
-      fixedRowsHeight = 64.4;
+      fixedRowsHeight = 64;
       gridClientHeight = 400;
-      vi.spyOn(
-        HTMLElement.prototype,
-        'getBoundingClientRect',
-      ).mockImplementation(function (this: HTMLElement) {
-        return this.dataset.testid === 'schedule-time-grid-fixed-rows'
-          ? new DOMRect(0, 0, 800, fixedRowsHeight)
-          : new DOMRect();
-      });
+      vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(
+        function (this: HTMLElement) {
+          return this.dataset.testid === 'schedule-time-grid-fixed-rows'
+            ? fixedRowsHeight
+            : 0;
+        },
+      );
       vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(
         function (this: HTMLElement) {
           return this.getAttribute('role') === 'grid' ? gridClientHeight : 0;
@@ -3772,7 +3770,7 @@ describe('Schedule', () => {
       const {rerender} = render(<FillWeek />);
       expect(
         grid().style.getPropertyValue('--schedule-fixed-rows-height'),
-      ).toBe('64.4px');
+      ).toBe('64px');
 
       fixedRowsHeight = 90;
       act(() => {
@@ -3793,7 +3791,7 @@ describe('Schedule', () => {
       const {rerender} = render(<FillWeek />);
       expect(
         grid().style.getPropertyValue('--schedule-fixed-rows-height'),
-      ).toBe('64.4px');
+      ).toBe('64px');
 
       rerender(<FillWeek height="auto" />);
       expect(
@@ -4639,94 +4637,6 @@ describe('Schedule', () => {
         );
       });
 
-      describe('under <Activity>', () => {
-        // jsdom has no popover top layer; answer `:popover-open` from here.
-        let isLayerOpen = true;
-        beforeEach(() => {
-          isLayerOpen = true;
-          vi.stubGlobal('CSS', {...globalThis.CSS, supports: () => true});
-          const matches = vi
-            .spyOn(HTMLElement.prototype, 'matches')
-            .mockImplementation(function (this: HTMLElement, selector) {
-              return selector === ':popover-open'
-                ? isLayerOpen
-                : Element.prototype.matches.call(this, selector);
-            });
-          return () => {
-            matches.mockRestore();
-            vi.unstubAllGlobals();
-          };
-        });
-
-        function renderInActivity(mode: 'hidden' | 'visible') {
-          return (
-            <Activity mode={mode}>
-              <ScheduleWithLifecycle />
-            </Activity>
-          );
-        }
-
-        it('keeps show and hide paired when it hides an open popover', () => {
-          const {rerender} = render(renderInActivity('visible'));
-          fireEvent.click(screen.getByTestId('schedule-event-visible'));
-
-          rerender(renderInActivity('hidden'));
-          expect(onEventPopoverHide).toHaveBeenCalledOnce();
-
-          rerender(renderInActivity('visible'));
-          expect(onEventPopoverShow).toHaveBeenCalledTimes(2);
-          expect(onEventPopoverShow.mock.calls[1]?.[1]).toBe(
-            onEventPopoverShow.mock.calls[0]?.[1],
-          );
-          expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
-            'aria-expanded',
-            'true',
-          );
-        });
-
-        it('syncs the pill closed when the browser closed it while hidden', () => {
-          const {rerender} = render(renderInActivity('visible'));
-          const pill = screen.getByTestId('schedule-event-visible');
-          fireEvent.click(pill);
-
-          rerender(renderInActivity('hidden'));
-          // Another auto popover closed it while its toggle listener was gone.
-          isLayerOpen = false;
-          rerender(renderInActivity('visible'));
-
-          expect(pill).toHaveAttribute('aria-expanded', 'false');
-          expect(onEventPopoverShow).toHaveBeenCalledOnce();
-          expect(onEventPopoverHide).toHaveBeenCalledOnce();
-        });
-
-        it('leaves focus where the user moved it when syncing closed', async () => {
-          const renderWithSearch = (mode: 'hidden' | 'visible') => (
-            <>
-              <input aria-label="Search" />
-              {renderInActivity(mode)}
-            </>
-          );
-          const {rerender} = render(renderWithSearch('visible'));
-          const pill = screen.getByTestId('schedule-event-visible');
-          pill.focus();
-          fireEvent.click(pill);
-          // Autofocus moves into the popover, which would return focus to the
-          // pill on close.
-          await waitFor(() => {
-            expect(pill).not.toHaveFocus();
-          });
-
-          rerender(renderWithSearch('hidden'));
-          isLayerOpen = false;
-          const search = screen.getByRole('textbox', {name: 'Search'});
-          search.focus();
-          rerender(renderWithSearch('visible'));
-
-          expect(pill).toHaveAttribute('aria-expanded', 'false');
-          expect(search).toHaveFocus();
-        });
-      });
-
       it('does not report a close when a closed pill unmounts', () => {
         const {rerender} = render(<ScheduleWithLifecycle />);
 
@@ -4854,7 +4764,7 @@ describe('Schedule', () => {
         scrollIntoView.mockRestore();
       });
 
-      it('opens from a mount effect as though the pill were clicked', () => {
+      it('opens from a mount effect as though the pill were clicked', async () => {
         const onOpenResult = vi.fn<(isOpened: boolean | undefined) => void>();
         render(
           <ScheduleWithHandle
@@ -4881,6 +4791,10 @@ describe('Schedule', () => {
         });
         expect(scrollIntoView.mock.contexts[0]).toBe(pill);
 
+        // Autofocus moves into the popover; closing returns focus to the pill.
+        await waitFor(() => {
+          expect(pill).not.toHaveFocus();
+        });
         fireEvent.keyDown(document, {key: 'Escape'});
         expect(pill).toHaveAttribute('aria-expanded', 'false');
         expect(onEventPopoverHide).toHaveBeenCalledOnce();
@@ -4916,6 +4830,32 @@ describe('Schedule', () => {
         expect(scrollIntoView).toHaveBeenCalledOnce();
       });
 
+      it('leaves plugins told the popover hid under StrictMode when the effect runs once', () => {
+        function OpenOnce(): React.JSX.Element {
+          const handleRef = useRef<ScheduleHandle>(null);
+          const hasOpenedRef = useRef(false);
+          useEffect(() => {
+            if (!hasOpenedRef.current) {
+              hasOpenedRef.current = true;
+              handleRef.current?.openEventPopover('visible');
+            }
+          }, []);
+          return <ScheduleWithHandle handleRef={handleRef} />;
+        }
+        render(
+          <StrictMode>
+            <OpenOnce />
+          </StrictMode>,
+        );
+
+        expect(screen.getByTestId('schedule-event-visible')).toHaveAttribute(
+          'aria-expanded',
+          'true',
+        );
+        expect(onEventPopoverShow).toHaveBeenCalledOnce();
+        expect(onEventPopoverHide).toHaveBeenCalledOnce();
+      });
+
       it.each([
         {name: 'time grid', view: createScheduleWeeklyView()},
         {name: 'list', view: createScheduleListView({days: 7})},
@@ -4946,14 +4886,23 @@ describe('Schedule', () => {
 
       it('returns false while the popover is being dismissed', () => {
         const handleRef = createRef<ScheduleHandle>();
-        render(<ScheduleWithHandle handleRef={handleRef} />);
+        render(
+          <>
+            <button type="button">Elsewhere</button>
+            <ScheduleWithHandle handleRef={handleRef} />
+          </>,
+        );
         const pill = screen.getByTestId('schedule-event-visible');
         fireEvent.click(pill);
         fireEvent.keyDown(document, {key: 'Escape'});
+        const elsewhere = screen.getByRole('button', {name: 'Elsewhere'});
+        elsewhere.focus();
 
         expect(openWithHandle(handleRef, 'visible')).toBe(false);
         expect(pill).toHaveAttribute('aria-expanded', 'false');
         expect(onEventPopoverShow).toHaveBeenCalledOnce();
+        expect(scrollIntoView).not.toHaveBeenCalled();
+        expect(elsewhere).toHaveFocus();
       });
 
       it('returns false, and never opens later, for an event not rendered', async () => {

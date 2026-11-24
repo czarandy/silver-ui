@@ -89,10 +89,9 @@ export interface UsePopoverReturn {
    */
   contentRef: React.RefObject<HTMLDivElement | null>;
   /**
-   * Hides the popover. Pass `isFocusRestoreSkipped` to leave focus where it
-   * is rather than return it to where it was before the popover opened.
+   * Hides the popover.
    */
-  hide: (options?: {isFocusRestoreSkipped?: boolean}) => void;
+  hide: () => void;
   /**
    * Id of the underlying layer element, matching `triggerProps['aria-controls']`.
    */
@@ -258,18 +257,6 @@ export function usePopover({
     [layer, show],
   );
 
-  // Keyed on `layer.hide` alone, so `hide` stays stable as the layer opens.
-  const {hide: layerHide} = layer;
-  const hide = useCallback(
-    (options?: {isFocusRestoreSkipped?: boolean}) => {
-      if (options?.isFocusRestoreSkipped === true) {
-        restoreFocusTargetRef.current = null;
-      }
-      layerHide();
-    },
-    [layerHide],
-  );
-
   const toggle = useCallback(() => {
     if (layer.isOpen) {
       layer.hide();
@@ -340,7 +327,7 @@ export function usePopover({
     () => ({
       anchorId: layer.anchorId,
       contentRef,
-      hide,
+      hide: layer.hide,
       id: layer.id,
       isOpen: layer.isOpen,
       render,
@@ -351,8 +338,8 @@ export function usePopover({
     }),
     [
       contentRef,
-      hide,
       layer.anchorId,
+      layer.hide,
       layer.id,
       layer.isOpen,
       layer.ref,
