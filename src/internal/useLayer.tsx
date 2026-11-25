@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -232,6 +233,10 @@ function getOffsetStyle(
   return style;
 }
 
+function isInvalidStateError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === 'InvalidStateError';
+}
+
 export function useLayer({
   onShow,
   onHide,
@@ -249,22 +254,57 @@ export function useLayer({
   const popoverRef = useRef<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const isOpenRef = useRef(false);
+  const showRetryRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const show = useCallback(() => {
-    if (popoverRef.current == null || isOpenRef.current) {
-      return;
+  const cancelShowRetry = useCallback(() => {
+    if (showRetryRef.current != null) {
+      clearTimeout(showRetryRef.current);
+      showRetryRef.current = null;
     }
+  }, []);
 
-    popoverRef.current.showPopover({source: triggerRef.current ?? undefined});
-    isOpenRef.current = true;
-    // Batched with `isOpen`, so lazy children mount in the same commit that
-    // opens the layer and open-effects (autofocus) find them mounted.
-    setHasEverOpened(true);
-    setIsOpen(true);
-    onShow?.();
-  }, [onShow]);
+  const showLayer = useCallback(
+    (isRetryAllowed: boolean) => {
+      cancelShowRetry();
+      if (popoverRef.current == null || isOpenRef.current) {
+        return;
+      }
+
+      try {
+        popoverRef.current.showPopover({
+          source: triggerRef.current ?? undefined,
+        });
+      } catch (error) {
+        // Chromium 150+ refuses a show while another popover is still showing
+        // or hiding. A hide that returns focus to a trigger wakes exactly that:
+        // the trigger's tooltip asks to show from its focus handler, inside the
+        // hide. Retry once the operation has ended; a hide before then cancels
+        // the retry, and a second refusal throws.
+        if (!isRetryAllowed || !isInvalidStateError(error)) {
+          throw error;
+        }
+        showRetryRef.current = setTimeout(() => {
+          showRetryRef.current = null;
+          showLayer(false);
+        }, 0);
+        return;
+      }
+      isOpenRef.current = true;
+      // Batched with `isOpen`, so lazy children mount in the same commit that
+      // opens the layer and open-effects (autofocus) find them mounted.
+      setHasEverOpened(true);
+      setIsOpen(true);
+      onShow?.();
+    },
+    [cancelShowRetry, onShow],
+  );
+
+  const show = useCallback(() => showLayer(true), [showLayer]);
+
+  useEffect(() => cancelShowRetry, [cancelShowRetry]);
 
   const hide = useCallback(() => {
+    cancelShowRetry();
     if (!isOpenRef.current) {
       return;
     }
@@ -273,7 +313,7 @@ export function useLayer({
     isOpenRef.current = false;
     setIsOpen(false);
     onHide?.();
-  }, [onHide]);
+  }, [cancelShowRetry, onHide]);
 
   const ref: RefCallback<HTMLElement> = useCallback(
     element => {
